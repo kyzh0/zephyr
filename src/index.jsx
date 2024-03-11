@@ -2,12 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import './index.css';
-import Map from './components/Map';
+import Map, { loader as mapLoader } from './routes/Map';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    // loader: homeLoader,
+    loader: mapLoader,
     element: <Map />
   }
 ]);

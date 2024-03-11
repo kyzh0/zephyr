@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useLoaderData, useNavigate } from 'react-router-dom';
+import { list } from '../firebase';
 
 import Box from '@mui/material/Box';
 
@@ -8,37 +9,31 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 export default function Map() {
-  // const { sites, landings } = useLoaderData();
+  const sites = useLoaderData();
 
-  // const [sitesGeoJson, setSitesGeoJson] = useState(null);
-  // useEffect(() => {
-  //   if (!sites) return;
-  //   const geoJson = {
-  //     type: 'FeatureCollection',
-  //     features: []
-  //   };
-  //   sites.forEach((site) => {
-  //     const feature = {
-  //       type: 'Feature',
-  //       properties: {
-  //         name: site.name,
-  //         dbId: site.id,
-  //         type: site.type,
-  //         status: site.status,
-  //         ratings: site.ratings,
-  //         windDirections: site.windDirections,
-  //         tags: site.tags,
-  //         elevation: site.elevation
-  //       },
-  //       geometry: {
-  //         type: 'Point',
-  //         coordinates: [site.coordinates._long, site.coordinates._lat]
-  //       }
-  //     };
-  //     geoJson.features.push(feature);
-  //   });
-  //   setSitesGeoJson(geoJson);
-  // }, [sites]);
+  const [sitesGeoJson, setSitesGeoJson] = useState(null);
+  useEffect(() => {
+    if (!sites) return;
+    const geoJson = {
+      type: 'FeatureCollection',
+      features: []
+    };
+    sites.forEach((site) => {
+      const feature = {
+        type: 'Feature',
+        properties: {
+          name: site.name,
+          dbId: site.id
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [site.coordinates._long, site.coordinates._lat]
+        }
+      };
+      geoJson.features.push(feature);
+    });
+    setSitesGeoJson(geoJson);
+  }, [sites]);
 
   const map = useRef(null);
   const mapContainer = useRef(null);
@@ -76,21 +71,30 @@ export default function Map() {
     });
 
     m.on('style.load', () => {
-      // m.addSource('sites', {
-      //   type: 'geojson',
-      //   data: sitesGeoJson,
-      //   generateId: true
-      // });
-      // m.addLayer({
-      //   id: 'sites-layer',
-      //   type: 'symbol',
-      //   source: 'sites',
-      //   layout: {
-      //     'icon-image': ['case', ['==', ['get', 'status'], 'Open'], 'pin-green', 'pin-red'],
-      //     'icon-size': 0.04,
-      //     'icon-allow-overlap': true
-      //   }
-      // });
+      m.loadImage('https://docs.mapbox.com/mapbox-gl-js/assets/cat.png', (error, image) => {
+        if (error) throw error;
+
+        // Add the image to the map style.
+        m.addImage('cat', image);
+      });
+
+      m.addSource('sites', {
+        type: 'geojson',
+        data: sitesGeoJson,
+        generateId: true
+      });
+      m.addLayer({
+        id: 'sites-layer',
+        type: 'symbol',
+        source: 'sites',
+        layout: {
+          'icon-image': 'cat', // reference the image
+          'icon-size': 0.25
+          // 'icon-image': ['case', ['==', ['get', 'status'], 'Open'], 'pin-green', 'pin-red'],
+          // 'icon-size': 0.04,
+          // 'icon-allow-overlap': true
+        }
+      });
     });
   });
 
@@ -143,4 +147,8 @@ export default function Map() {
       />
     </>
   );
+}
+
+export async function loader() {
+  return await list('sites');
 }
