@@ -10,6 +10,7 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: "Create env file"
         run: |
           touch .env
@@ -17,7 +18,6 @@ jobs:
           echo -ne "\n${{ secrets.REACT_APP_FIREBASE_KEY }}" >> .env
           cat .env
         working-directory: client
-      - uses: actions/checkout@v4
       - run: npm ci && npm run build
         working-directory: client
       - uses: FirebaseExtended/action-hosting-deploy@v0
