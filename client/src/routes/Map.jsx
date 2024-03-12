@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
 import { list } from '../firebase';
 
 import Box from '@mui/material/Box';
@@ -14,8 +14,8 @@ import arrowRed from '../images/arrow-red.png';
 
 export default function Map() {
   const sites = useLoaderData();
-
   const [sitesGeoJson, setSitesGeoJson] = useState(null);
+
   useEffect(() => {
     if (!sites) return;
     const geoJson = {
@@ -124,55 +124,40 @@ export default function Map() {
         }
       });
     });
-  });
 
-  // ----------------- EVENT HANDLERS -----------------------
-  useEffect(() => {
-    if (!map.current) return;
-
+    // ----------------- EVENT HANDLERS -----------------------
     const handleSitesClick = (e) => {
       if (e.features.length) {
         navigate(`/sites/${e.features[0].properties.dbId}`);
       }
     };
 
-    map.current.on('click', 'sites-layer', handleSitesClick);
+    m.on('click', 'sites-layer', handleSitesClick);
 
-    return () => {
-      map.current.off('click', 'sites-layer', handleSitesClick);
-    };
-  }, [map.current]);
-
-  useEffect(() => {
-    if (!map.current) return;
-
-    // ------------------- SITE HOVER HANDLER ---------------------
     const handleSitesHoverOn = () => {
-      map.current.getCanvas().style.cursor = 'pointer';
+      m.getCanvas().style.cursor = 'pointer';
     };
     const handleSitesHoverOff = () => {
-      map.current.getCanvas().style.cursor = '';
+      m.getCanvas().style.cursor = '';
     };
-    map.current.on('mouseenter', 'sites-layer', handleSitesHoverOn);
-    map.current.on('mousemove', 'sites-layer', handleSitesHoverOn);
-    map.current.on('mouseleave', 'sites-layer', handleSitesHoverOff);
-
-    return () => {
-      map.current.off('mouseenter', 'sites-layer', handleSitesHoverOn);
-      map.current.off('mousemove', 'sites-layer', handleSitesHoverOn);
-      map.current.off('mouseleave', 'sites-layer', handleSitesHoverOff);
-    };
-  }, [map.current]);
+    m.on('mouseenter', 'sites-layer', handleSitesHoverOn);
+    m.on('mousemove', 'sites-layer', handleSitesHoverOn);
+    m.on('mouseleave', 'sites-layer', handleSitesHoverOff);
+  });
 
   return (
     <>
       <Box
         ref={mapContainer}
         sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
           width: '100vw',
           height: '100vh'
         }}
       />
+      <Outlet />
     </>
   );
 }
