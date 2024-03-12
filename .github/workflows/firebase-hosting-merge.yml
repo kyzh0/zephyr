@@ -14,8 +14,8 @@ jobs:
       - name: "Create env file"
         run: |
           touch .env
-          echo "${{ secrets.REACT_APP_MAPBOX_GL_KEY }}" > .env
-          echo -ne "\n${{ secrets.REACT_APP_FIREBASE_KEY }}" >> .env
+          echo -e REACT_APP_MAPBOX_GL_KEY=${{ secrets.REACT_APP_MAPBOX_GL_KEY }} > .env
+          echo -e REACT_APP_FIREBASE_KEY=${{ secrets.REACT_APP_FIREBASE_KEY }} >> .env
           cat .env
         working-directory: client
       - run: npm ci && npm run build
