@@ -14,10 +14,11 @@ jobs:
     steps:
         - name: "Create env file"
         run: |
-          touch ./client/.env
-          echo "${{ secrets.REACT_APP_MAPBOX_GL_KEY }}" > ./client/.env
-          echo -ne "\n${{ secrets.REACT_APP_FIREBASE_KEY }}" >> ./client/.env
-          cat ./client/.env
+          touch .env
+          echo "${{ secrets.REACT_APP_MAPBOX_GL_KEY }}" > .env
+          echo -ne "\n${{ secrets.REACT_APP_FIREBASE_KEY }}" >> .env
+          cat .env
+        working-directory: client
       - uses: actions/checkout@v4
       - run: npm ci && npm run build
         working-directory: client
