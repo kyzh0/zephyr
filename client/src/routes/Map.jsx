@@ -8,6 +8,10 @@ import MapTerrainControl from './MapTerrainControl';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
+import arrowGreen from '../images/arrow-green.png';
+import arrowYellow from '../images/arrow-yellow.png';
+import arrowRed from '../images/arrow-red.png';
+
 export default function Map() {
   const sites = useLoaderData();
 
@@ -23,7 +27,10 @@ export default function Map() {
         type: 'Feature',
         properties: {
           name: site.name,
-          dbId: site.id
+          dbId: site.id,
+          currentAverage: site.currentAverage,
+          currentGust: site.currentGust,
+          rotation: site.currentBearing
         },
         geometry: {
           type: 'Point',
@@ -71,11 +78,17 @@ export default function Map() {
     });
 
     m.on('style.load', () => {
-      m.loadImage('https://docs.mapbox.com/mapbox-gl-js/assets/cat.png', (error, image) => {
+      m.loadImage(arrowGreen, (error, image) => {
         if (error) throw error;
-
-        // Add the image to the map style.
-        m.addImage('cat', image);
+        m.addImage('arrow-green', image);
+      });
+      m.loadImage(arrowYellow, (error, image) => {
+        if (error) throw error;
+        m.addImage('arrow-yellow', image);
+      });
+      m.loadImage(arrowRed, (error, image) => {
+        if (error) throw error;
+        m.addImage('arrow-red', image);
       });
 
       m.addSource('sites', {
@@ -88,11 +101,20 @@ export default function Map() {
         type: 'symbol',
         source: 'sites',
         layout: {
-          'icon-image': 'cat', // reference the image
-          'icon-size': 0.25
-          // 'icon-image': ['case', ['==', ['get', 'status'], 'Open'], 'pin-green', 'pin-red'],
-          // 'icon-size': 0.04,
-          // 'icon-allow-overlap': true
+          'icon-image': [
+            'case',
+            ['<', ['get', 'currentAverage'], 20],
+            'arrow-green',
+            [
+              'case',
+              ['all', ['>=', ['get', 'currentAverage'], 20], ['<', ['get', 'currentAverage'], 30]],
+              'arrow-yellow',
+              'arrow-red'
+            ]
+          ],
+          'icon-size': 0.05,
+          'icon-allow-overlap': true,
+          'icon-rotate': ['get', 'rotation']
         }
       });
     });

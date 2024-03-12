@@ -9,7 +9,7 @@ initializeApp();
 async function getMetserviceData(siteId) {
   let windAverage = 0;
   let windGust = 0;
-  let windDirection = 0;
+  let windBearing = 0;
   try {
     const response = await axios.get(
       `https://www.metservice.com/publicData/webdata/weather-station-location/${siteId}/`
@@ -20,7 +20,32 @@ async function getMetserviceData(siteId) {
       if (wind && wind.length) {
         windAverage = wind[0].averageSpeed;
         windGust = wind[0].gustSpeed;
-        windDirection = wind[0].direction;
+        switch (wind[0].direction) {
+          case 'N':
+            windBearing = 0;
+            break;
+          case 'NE':
+            windBearing = 45;
+            break;
+          case 'E':
+            windBearing = 90;
+            break;
+          case 'SE':
+            windBearing = 135;
+            break;
+          case 'S':
+            windBearing = 180;
+            break;
+          case 'SW':
+            windBearing = 225;
+            break;
+          case 'W':
+            windBearing = 270;
+            break;
+          case 'NW':
+            windBearing = 325;
+            break;
+        }
       }
     }
   } catch (error) {
@@ -29,7 +54,7 @@ async function getMetserviceData(siteId) {
   return {
     windAverage,
     windGust,
-    windDirection
+    windBearing
   };
 }
 
@@ -43,11 +68,16 @@ exports.updateMetserviceData = functions
     if (!snapshot.empty) {
       snapshot.forEach(async (doc) => {
         const data = await getMetserviceData(doc.data().externalId);
+        await db.doc(`sites/${doc.id}`).update({
+          currentAverage: data.windAverage,
+          currentGust: data.windGust,
+          currentBearing: data.windBearing
+        });
         await db.collection(`sites/${doc.id}/data`).add({
           time: new Date(),
           windAverage: data.windAverage,
           windGust: data.windGust,
-          windDirection: data.windDirection
+          windBearing: data.windBearing
         });
       });
     }
