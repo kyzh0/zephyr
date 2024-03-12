@@ -63,12 +63,12 @@ export default function Map() {
     m.touchZoomRotate.disableRotation();
 
     // -------------- CONTROLS -----------------------
-    m.addControl(new MapTerrainControl(), 'bottom-left');
+    m.addControl(new MapTerrainControl(), 'top-right');
     m.addControl(
       new mapboxgl.NavigationControl({
         showCompass: false
       }),
-      'bottom-left'
+      'top-right'
     );
 
     // --------------- LIFECYCLE -----------------------
@@ -101,6 +101,12 @@ export default function Map() {
         type: 'symbol',
         source: 'sites',
         layout: {
+          'text-font': ['Lato Black'],
+          'text-padding': 0,
+          'text-anchor': 'center',
+          'text-size': 10,
+          'text-allow-overlap': true,
+          'text-field': '{currentAverage}',
           'icon-image': [
             'case',
             ['<', ['get', 'currentAverage'], 20],
@@ -112,7 +118,7 @@ export default function Map() {
               'arrow-red'
             ]
           ],
-          'icon-size': 0.05,
+          'icon-size': 0.07,
           'icon-allow-overlap': true,
           'icon-rotate': ['get', 'rotation']
         }
