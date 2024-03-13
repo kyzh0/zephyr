@@ -1,5 +1,14 @@
 import { initializeApp } from 'firebase/app';
-import { collection, doc, getDoc, getDocs, getFirestore } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  limit,
+  orderBy,
+  query
+} from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_KEY,
@@ -26,6 +35,15 @@ export async function getById(collectionName, id) {
 
 export async function list(collectionName) {
   const snap = await getDocs(collection(db, collectionName));
+  return snap.docs.map((doc) => {
+    return { id: doc.id, ...doc.data() };
+  });
+}
+
+export async function loadSiteData(siteId) {
+  const sitesRef = collection(db, `sites/${siteId}/data`);
+  const q = query(sitesRef, orderBy('time'), limit(100));
+  const snap = await getDocs(q);
   return snap.docs.map((doc) => {
     return { id: doc.id, ...doc.data() };
   });

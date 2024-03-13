@@ -1,33 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getById } from '../firebase';
+import { getById, loadSiteData as loadSiteData } from '../firebase';
 
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Modal from '@mui/material/Modal';
 import Container from '@mui/material/Container';
-import TextField from '@mui/material/TextField';
+
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 export default function Site() {
   const { id } = useParams();
   const [site, setSite] = useState(null);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     if (!id) return;
 
-    const fetchSite = async () => {
+    const fetchData = async () => {
       if (!site || site.id !== id) {
         const s = await getById('sites', id);
         if (!s) return;
         setSite(s);
+
+        setData(await loadSiteData(id));
       }
     };
 
     try {
-      fetchSite();
+      fetchData();
     } catch (error) {
       console.log(error);
     }
@@ -56,25 +64,46 @@ export default function Site() {
               {site?.name}
             </Typography>
             <Typography variant="subtitle1">Source: {site?.type}</Typography>
-            <Box component="form" noValidate sx={{ mt: 1 }}>
-              <TextField
-                margin="normal"
-                fullWidth
-                id="email"
-                label="Email"
-                name="email"
-                autoComplete="email"
-              />
-              <TextField
-                margin="normal"
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-              />
-            </Box>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+                <TableBody>
+                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell variant="head">Time</TableCell>
+                    {data.map((d) => (
+                      <TableCell key={d.time.seconds} align="center">
+                        {d.time.toDate().getHours().toString().padStart(2, '0') +
+                          ':' +
+                          d.time.toDate().getMinutes().toString().padStart(2, '0')}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell variant="head">Average</TableCell>
+                    {data.map((d) => (
+                      <TableCell key={d.time.seconds} align="center">
+                        {d.windAverage}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell variant="head">Gust</TableCell>
+                    {data.map((d) => (
+                      <TableCell key={d.time.seconds} align="center">
+                        {d.windGust}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell variant="head">Direction</TableCell>
+                    {data.map((d) => (
+                      <TableCell key={d.time.seconds} align="center">
+                        {d.windBearing.toString().padStart(3, '0')}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Stack>
         </Stack>
       </Container>
