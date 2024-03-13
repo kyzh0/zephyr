@@ -16,6 +16,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
+import Skeleton from '@mui/material/Skeleton';
+import styled from '@emotion/styled';
+import { alpha } from '@mui/material';
 
 import arrow from '../images/arrow.png';
 
@@ -154,6 +157,10 @@ export default function Site() {
     navigate('/');
   }
 
+  const StyledSkeleton = styled(Skeleton)(() => ({
+    backgroundColor: alpha('#a8a8a8', 0.1)
+  }));
+
   return (
     <Modal open onClose={handleClose}>
       <Container component="main" maxWidth="xl" sx={{ height: '100%' }}>
@@ -168,185 +175,210 @@ export default function Site() {
                 <CloseIcon />
               </IconButton>
             </Stack>
-            <Typography component="h1" variant="h5">
-              {site?.name}
-            </Typography>
-            <Typography variant="body2">Elevation {site?.elevation}m</Typography>
-            <Stack
-              direction="row"
-              justifyContent="center"
-              sx={{ width: '100%', p: '8px', pb: '18px' }}
-            >
-              <Stack direction="column" justifyContent="center" alignItems="center">
-                <Box
-                  component="img"
-                  sx={{
-                    width: '48px',
-                    height: '48px',
-                    transform: `rotate(${site?.currentBearing}deg)`
-                  }}
-                  src={arrow}
-                />
-              </Stack>
-              <Stack direction="column" justifyContent="center" alignItems="center">
-                <Typography variant="h5" sx={{ fontSize: '16px' }}>
-                  {getWindDirection(site?.currentBearing)}
-                </Typography>
-                <Stack direction="row" justifyContent="center" sx={{ pl: '12px' }}>
-                  <Stack direction="column" justifyContent="space-evenly" alignItems="end">
-                    <Typography variant="h5" sx={{ fontSize: '10px' }}>
-                      Avg
-                    </Typography>
-                    <Typography variant="h5" sx={{ fontSize: '10px' }}>
-                      Gust
-                    </Typography>
-                    <Typography variant="h5" sx={{ fontSize: '10px' }}>
-                      Temp
-                    </Typography>
-                  </Stack>
-                  <Stack
-                    direction="column"
-                    justifyContent="center"
-                    alignItems="start"
-                    sx={{ pl: '8px' }}
-                  >
-                    <Typography
-                      variant="h5"
-                      sx={{ fontSize: '16px', backgroundColor: getWindColor(site?.currentAverage) }}
+            {site ? (
+              <Typography component="h1" variant="h5">
+                {site.name}
+              </Typography>
+            ) : (
+              <StyledSkeleton width={180} height={40} />
+            )}
+            {site ? (
+              <Typography variant="body2">Elevation {site.elevation}m</Typography>
+            ) : (
+              <StyledSkeleton width={120} height={20} />
+            )}
+            {site ? (
+              <Stack
+                direction="row"
+                justifyContent="center"
+                sx={{ width: '100%', p: '8px', pb: '18px' }}
+              >
+                <Stack direction="column" justifyContent="center" alignItems="center">
+                  <Box
+                    component="img"
+                    sx={{
+                      width: '48px',
+                      height: '48px',
+                      transform: `rotate(${site.currentBearing}deg)`
+                    }}
+                    src={arrow}
+                  />
+                </Stack>
+                <Stack direction="column" justifyContent="center" alignItems="center">
+                  <Typography variant="h5" sx={{ fontSize: '16px' }}>
+                    {getWindDirection(site.currentBearing)}
+                  </Typography>
+                  <Stack direction="row" justifyContent="center" sx={{ pl: '12px' }}>
+                    <Stack direction="column" justifyContent="space-evenly" alignItems="end">
+                      <Typography variant="h5" sx={{ fontSize: '10px' }}>
+                        Avg
+                      </Typography>
+                      <Typography variant="h5" sx={{ fontSize: '10px' }}>
+                        Gust
+                      </Typography>
+                      <Typography variant="h5" sx={{ fontSize: '10px' }}>
+                        Temp
+                      </Typography>
+                    </Stack>
+                    <Stack
+                      direction="column"
+                      justifyContent="center"
+                      alignItems="start"
+                      sx={{ pl: '8px' }}
                     >
-                      {site?.currentAverage} km/h
-                    </Typography>
-                    <Typography
-                      variant="h5"
-                      sx={{ fontSize: '16px', backgroundColor: getWindColor(site?.currentGust) }}
-                    >
-                      {site?.currentGust} km/h
-                    </Typography>
-                    <Typography variant="h5" sx={{ fontSize: '16px' }}>
-                      {`${site?.currentTemperature ?? 0}°C`}
-                    </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontSize: '16px',
+                          backgroundColor: getWindColor(site.currentAverage)
+                        }}
+                      >
+                        {site.currentAverage} km/h
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{ fontSize: '16px', backgroundColor: getWindColor(site.currentGust) }}
+                      >
+                        {site.currentGust} km/h
+                      </Typography>
+                      <Typography variant="h5" sx={{ fontSize: '16px' }}>
+                        {`${site.currentTemperature ?? 0}°C`}
+                      </Typography>
+                    </Stack>
                   </Stack>
                 </Stack>
               </Stack>
-            </Stack>
-            <TableContainer component={Paper}>
-              <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
-                <TableBody>
-                  <TableRow
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                    ref={tableRef}
-                  >
-                    <TableCell variant="head"></TableCell>
-                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                      <TableCell
-                        key={d.time.seconds}
-                        align="center"
-                        sx={{
-                          padding: '2px',
-                          fontSize: '12px',
-                          backgroundColor: d.time.toDate().getMinutes() == 0 ? '#e6e6e6' : ''
-                        }}
-                      >
-                        {`${d.time.toDate().getHours().toString().padStart(2, '0')}:${d.time.toDate().getMinutes().toString().padStart(2, '0')}`}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell variant="head">Avg</TableCell>
-                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                      <TableCell
-                        key={d.time.seconds}
-                        align="center"
-                        sx={{
-                          padding: '2px',
-                          backgroundColor: getWindColor(d.windAverage)
-                        }}
-                      >
-                        {d.windAverage}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell variant="head">Gust</TableCell>
-                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                      <TableCell
-                        key={d.time.seconds}
-                        align="center"
-                        sx={{
-                          padding: '2px',
-                          backgroundColor: getWindColor(d.windGust)
-                        }}
-                      >
-                        {d.windGust}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
-                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                      <TableCell
-                        key={d.time.seconds}
-                        align="center"
-                        sx={{ padding: '2px', borderBottom: 'none' }}
-                      >
-                        {getWindDirection(d.windBearing)}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
-                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                      <TableCell
-                        key={d.time.seconds}
-                        align="center"
-                        sx={{ padding: 0, borderBottom: 'none' }}
-                      >
-                        <Stack direction="column" justifyContent="center" alignItems="center">
-                          <Box
-                            component="img"
-                            sx={{
-                              width: '16px',
-                              height: '16px',
-                              transform: `rotate(${d.windBearing}deg)`
-                            }}
-                            src={arrow}
-                          />
-                        </Stack>
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell variant="head"></TableCell>
-                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                      <TableCell
-                        key={d.time.seconds}
-                        align="center"
-                        sx={{ padding: '2px', fontSize: '10px' }}
-                      >
-                        {`${d.windBearing.toString().padStart(3, '0')}°`}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell variant="head"></TableCell>
-                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                      <TableCell
-                        key={d.time.seconds}
-                        align="center"
-                        sx={{
-                          padding: '2px',
-                          fontSize: '10px'
-                        }}
-                      >
-                        {`${d.temperature ?? 0}°C`}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
+            ) : (
+              <StyledSkeleton width={180} height={180} />
+            )}
+
+            {data && data.length ? (
+              <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 650 }} size="small">
+                  <TableBody>
+                    <TableRow
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                      ref={tableRef}
+                    >
+                      <TableCell variant="head"></TableCell>
+                      {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                        <TableCell
+                          key={d.time.seconds}
+                          align="center"
+                          sx={{
+                            padding: '2px',
+                            fontSize: '12px',
+                            backgroundColor: d.time.toDate().getMinutes() == 0 ? '#e6e6e6' : ''
+                          }}
+                        >
+                          {`${d.time.toDate().getHours().toString().padStart(2, '0')}:${d.time.toDate().getMinutes().toString().padStart(2, '0')}`}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell variant="head">Avg</TableCell>
+                      {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                        <TableCell
+                          key={d.time.seconds}
+                          align="center"
+                          sx={{
+                            padding: '2px',
+                            backgroundColor: getWindColor(d.windAverage)
+                          }}
+                        >
+                          {d.windAverage}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell variant="head">Gust</TableCell>
+                      {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                        <TableCell
+                          key={d.time.seconds}
+                          align="center"
+                          sx={{
+                            padding: '2px',
+                            backgroundColor: getWindColor(d.windGust)
+                          }}
+                        >
+                          {d.windGust}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
+                      {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                        <TableCell
+                          key={d.time.seconds}
+                          align="center"
+                          sx={{ padding: '2px', borderBottom: 'none' }}
+                        >
+                          {getWindDirection(d.windBearing)}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
+                      {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                        <TableCell
+                          key={d.time.seconds}
+                          align="center"
+                          sx={{ padding: 0, borderBottom: 'none' }}
+                        >
+                          <Stack direction="column" justifyContent="center" alignItems="center">
+                            <Box
+                              component="img"
+                              sx={{
+                                width: '16px',
+                                height: '16px',
+                                transform: `rotate(${d.windBearing}deg)`
+                              }}
+                              src={arrow}
+                            />
+                          </Stack>
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell variant="head"></TableCell>
+                      {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                        <TableCell
+                          key={d.time.seconds}
+                          align="center"
+                          sx={{ padding: '2px', fontSize: '10px' }}
+                        >
+                          {`${d.windBearing.toString().padStart(3, '0')}°`}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell variant="head"></TableCell>
+                      {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                        <TableCell
+                          key={d.time.seconds}
+                          align="center"
+                          sx={{
+                            padding: '2px',
+                            fontSize: '10px'
+                          }}
+                        >
+                          {`${d.temperature ?? 0}°C`}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <StyledSkeleton width={'100%'} height={240} />
+            )}
+
             <Stack direction="row" justifyContent="end" sx={{ width: '100%', pt: '4px' }}>
-              <Typography variant="subtitle2">Source: {site?.type.toUpperCase()}</Typography>
+              {site ? (
+                <Typography variant="subtitle2">Source: {site.type.toUpperCase()}</Typography>
+              ) : (
+                <></>
+              )}
             </Stack>
           </Stack>
         </Stack>
