@@ -10,6 +10,7 @@ async function getMetserviceData(siteId) {
   let windAverage = 0;
   let windGust = 0;
   let windBearing = 0;
+  let temperature = 0;
   try {
     const response = await axios.get(
       `https://www.metservice.com/publicData/webdata/weather-station-location/${siteId}/`
@@ -50,6 +51,10 @@ async function getMetserviceData(siteId) {
             break;
         }
       }
+      const temp = modules[0].observations.temperature;
+      if (temp && temp.length) {
+        temperature = temp[0].current ?? 0;
+      }
     }
   } catch (error) {
     functions.logger.log(error);
@@ -57,7 +62,8 @@ async function getMetserviceData(siteId) {
   return {
     windAverage,
     windGust,
-    windBearing
+    windBearing,
+    temperature
   };
 }
 
@@ -75,13 +81,15 @@ exports.updateMetserviceData = functions
         await db.doc(`sites/${doc.id}`).update({
           currentAverage: data.windAverage,
           currentGust: data.windGust,
-          currentBearing: data.windBearing
+          currentBearing: data.windBearing,
+          currentTemperature: data.temperature
         });
         await db.collection(`sites/${doc.id}/data`).add({
           time: new Date(),
           windAverage: data.windAverage,
           windGust: data.windGust,
-          windBearing: data.windBearing
+          windBearing: data.windBearing,
+          temperature: data.temperature
         });
       });
     }

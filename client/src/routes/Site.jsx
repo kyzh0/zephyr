@@ -200,6 +200,9 @@ export default function Site() {
                     <Typography variant="h5" sx={{ fontSize: '10px' }}>
                       Gust
                     </Typography>
+                    <Typography variant="h5" sx={{ fontSize: '10px' }}>
+                      Temp
+                    </Typography>
                   </Stack>
                   <Stack
                     direction="column"
@@ -218,6 +221,9 @@ export default function Site() {
                       sx={{ fontSize: '16px', backgroundColor: getWindColor(site?.currentGust) }}
                     >
                       {site?.currentGust} km/h
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontSize: '16px' }}>
+                      {`${site?.currentTemperature ?? 0}°C`}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -318,6 +324,21 @@ export default function Site() {
                         sx={{ padding: '2px', fontSize: '10px' }}
                       >
                         {`${d.windBearing.toString().padStart(3, '0')}°`}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell variant="head"></TableCell>
+                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                      <TableCell
+                        key={d.time.seconds}
+                        align="center"
+                        sx={{
+                          padding: '2px',
+                          fontSize: '10px'
+                        }}
+                      >
+                        {`${d.temperature ?? 0}°C`}
                       </TableCell>
                     ))}
                   </TableRow>
