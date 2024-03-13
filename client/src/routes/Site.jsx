@@ -171,9 +171,58 @@ export default function Site() {
             <Typography component="h1" variant="h5">
               {site?.name}
             </Typography>
-            <Typography variant="body2" gutterBottom>
-              Elevation {site?.elevation}m
-            </Typography>
+            <Typography variant="body2">Elevation {site?.elevation}m</Typography>
+            <Stack
+              direction="row"
+              justifyContent="center"
+              sx={{ width: '100%', p: '8px', pb: '18px' }}
+            >
+              <Stack direction="column" justifyContent="center" alignItems="center">
+                <Box
+                  component="img"
+                  sx={{
+                    width: '48px',
+                    height: '48px',
+                    transform: `rotate(${site?.currentBearing}deg)`
+                  }}
+                  src={arrow}
+                />
+              </Stack>
+              <Stack direction="column" justifyContent="center" alignItems="center">
+                <Typography variant="h5" sx={{ fontSize: '16px' }}>
+                  {getWindDirection(site?.currentBearing)}
+                </Typography>
+                <Stack direction="row" justifyContent="center" sx={{ pl: '12px' }}>
+                  <Stack direction="column" justifyContent="space-evenly" alignItems="end">
+                    <Typography variant="h5" sx={{ fontSize: '10px' }}>
+                      Avg
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontSize: '10px' }}>
+                      Gust
+                    </Typography>
+                  </Stack>
+                  <Stack
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="start"
+                    sx={{ pl: '8px' }}
+                  >
+                    <Typography
+                      variant="h5"
+                      sx={{ fontSize: '16px', backgroundColor: getWindColor(site?.currentAverage) }}
+                    >
+                      {site?.currentAverage} km/h
+                    </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{ fontSize: '16px', backgroundColor: getWindColor(site?.currentGust) }}
+                    >
+                      {site?.currentGust} km/h
+                    </Typography>
+                  </Stack>
+                </Stack>
+              </Stack>
+            </Stack>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
                 <TableBody>
