@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getById, loadSiteData as loadSiteData } from '../firebase';
 
@@ -121,6 +121,7 @@ export default function Site() {
   const { id } = useParams();
   const [site, setSite] = useState(null);
   const [data, setData] = useState([]);
+  const tableRef = useRef(null);
 
   useEffect(() => {
     if (!id) return;
@@ -142,6 +143,12 @@ export default function Site() {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (tableRef.current) {
+      tableRef.current.querySelector('tbody td:last-child').scrollIntoView();
+    }
+  }, [data]);
+
   const navigate = useNavigate();
   function handleClose() {
     navigate('/');
@@ -149,7 +156,7 @@ export default function Site() {
 
   return (
     <Modal open onClose={handleClose}>
-      <Container component="main" maxWidth="xs" sx={{ height: '100%' }}>
+      <Container component="main" maxWidth="xl" sx={{ height: '100%' }}>
         <Stack direction="column" justifyContent="center" sx={{ height: '100%' }}>
           <Stack
             direction="column"
@@ -161,16 +168,21 @@ export default function Site() {
                 <CloseIcon />
               </IconButton>
             </Stack>
-            <Typography component="h1" variant="h5" gutterBottom>
+            <Typography component="h1" variant="h5">
               {site?.name}
             </Typography>
-            <Typography variant="subtitle1">Source: {site?.type}</Typography>
+            <Typography variant="body2" gutterBottom>
+              Elevation {site?.elevation}m
+            </Typography>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
                 <TableBody>
-                  <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell variant="head">Time</TableCell>
-                    {data.map((d) => (
+                  <TableRow
+                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    ref={tableRef}
+                  >
+                    <TableCell variant="head"></TableCell>
+                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                       <TableCell
                         key={d.time.seconds}
                         align="center"
@@ -185,8 +197,8 @@ export default function Site() {
                     ))}
                   </TableRow>
                   <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell variant="head">Average</TableCell>
-                    {data.map((d) => (
+                    <TableCell variant="head">Avg</TableCell>
+                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                       <TableCell
                         key={d.time.seconds}
                         align="center"
@@ -201,7 +213,7 @@ export default function Site() {
                   </TableRow>
                   <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell variant="head">Gust</TableCell>
-                    {data.map((d) => (
+                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                       <TableCell
                         key={d.time.seconds}
                         align="center"
@@ -216,7 +228,7 @@ export default function Site() {
                   </TableRow>
                   <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
-                    {data.map((d) => (
+                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                       <TableCell
                         key={d.time.seconds}
                         align="center"
@@ -227,10 +239,8 @@ export default function Site() {
                     ))}
                   </TableRow>
                   <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell variant="head" sx={{ borderBottom: 'none' }}>
-                      Direction
-                    </TableCell>
-                    {data.map((d) => (
+                    <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
+                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                       <TableCell
                         key={d.time.seconds}
                         align="center"
@@ -252,7 +262,7 @@ export default function Site() {
                   </TableRow>
                   <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell variant="head"></TableCell>
-                    {data.map((d) => (
+                    {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                       <TableCell
                         key={d.time.seconds}
                         align="center"
@@ -265,6 +275,9 @@ export default function Site() {
                 </TableBody>
               </Table>
             </TableContainer>
+            <Stack direction="row" justifyContent="end" sx={{ width: '100%', pt: '4px' }}>
+              <Typography variant="subtitle2">Source: {site?.type.toUpperCase()}</Typography>
+            </Stack>
           </Stack>
         </Stack>
       </Container>
