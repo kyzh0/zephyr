@@ -61,7 +61,8 @@ async function getMetserviceData(siteId) {
 exports.updateMetserviceData = functions
   .runWith({ timeoutSeconds: 30, memory: '1GB' })
   .region('australia-southeast1')
-  .https.onRequest(async (req, res) => {
+  .pubsub.schedule('*/15 * * * *') // at every 15th minute
+  .onRun(async (req, res) => {
     const db = getFirestore();
 
     const snapshot = await db.collection('sites').where('type', '==', 'metservice').get();
