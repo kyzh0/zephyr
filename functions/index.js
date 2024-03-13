@@ -18,8 +18,8 @@ async function getMetserviceData(siteId) {
     if (modules && modules.length) {
       const wind = modules[0].observations.wind;
       if (wind && wind.length) {
-        windAverage = wind[0].averageSpeed;
-        windGust = wind[0].gustSpeed;
+        windAverage = wind[0].averageSpeed ?? 0;
+        windGust = wind[0].gustSpeed ?? 0;
         switch (wind[0].direction) {
           case 'N':
             windBearing = 0;
@@ -44,6 +44,9 @@ async function getMetserviceData(siteId) {
             break;
           case 'NW':
             windBearing = 325;
+            break;
+          default:
+            windBearing = 0;
             break;
         }
       }

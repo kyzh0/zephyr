@@ -4,7 +4,7 @@ module.exports = {
     node: true
   },
   parserOptions: {
-    ecmaVersion: 2018
+    ecmaVersion: 'latest'
   },
   extends: ['eslint:recommended', 'google', 'plugin:prettier/recommended'],
   rules: {
