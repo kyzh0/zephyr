@@ -5,6 +5,7 @@ import './index.css';
 
 import Map, { loader as mapLoader } from './routes/Map';
 import Site from './routes/Site';
+import Help from './routes/Help';
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
       {
         path: 'sites/:id',
         element: <Site />
+      },
+      {
+        path: 'help',
+        element: <Help />
       }
     ]
   }

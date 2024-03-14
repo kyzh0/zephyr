@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getById, loadSiteData as loadSiteData } from '../firebase';
 
@@ -374,10 +374,8 @@ export default function Site() {
             )}
 
             <Stack direction="row" justifyContent="end" sx={{ width: '100%', pt: '4px' }}>
-              {site ? (
+              {site && (
                 <Typography variant="subtitle2">Source: {site.type.toUpperCase()}</Typography>
-              ) : (
-                <></>
               )}
             </Stack>
           </Stack>

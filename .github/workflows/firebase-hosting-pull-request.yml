@@ -18,6 +18,9 @@ jobs:
           touch .env
           echo -e REACT_APP_MAPBOX_GL_KEY=${{ secrets.REACT_APP_MAPBOX_GL_KEY }} > .env
           echo -e REACT_APP_FIREBASE_KEY=${{ secrets.REACT_APP_FIREBASE_KEY }} >> .env
+          echo -e REACT_APP_EMAILJS_SERVICE_ID=${{ secrets.REACT_APP_EMAILJS_SERVICE_ID }} >> .env
+          echo -e REACT_APP_EMAILJS_TEMPLATE_ID=${{ secrets.REACT_APP_EMAILJS_TEMPLATE_ID }} >> .env
+          echo -e REACT_APP_EMAILJS_PUBLIC_KEY=${{ secrets.REACT_APP_EMAILJS_PUBLIC_KEY }} >> .env
           cat .env
         working-directory: client
       - run: npm ci && npm run build

@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
 import { list } from '../firebase';
 
+import { createTheme, ThemeProvider } from '@mui/material';
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import IconButton from '@mui/material/IconButton';
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 
 import MapTerrainControl from './MapTerrainControl';
 import mapboxgl from 'mapbox-gl';
@@ -13,6 +17,16 @@ import arrowYellow from '../images/arrow-yellow.png';
 import arrowRed from '../images/arrow-red.png';
 
 export default function Map() {
+  let theme = createTheme({
+    palette: {
+      primary: {
+        main: '#1a1a1a'
+      },
+      contrastThreshold: 4.5,
+      tonalOffset: 0.2
+    }
+  });
+
   const sites = useLoaderData();
   const [sitesGeoJson, setSitesGeoJson] = useState(null);
 
@@ -63,6 +77,13 @@ export default function Map() {
     m.touchZoomRotate.disableRotation();
 
     // -------------- CONTROLS -----------------------
+    m.addControl(
+      new mapboxgl.GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true
+        }
+      })
+    );
     m.addControl(new MapTerrainControl(), 'top-right');
     m.addControl(
       new mapboxgl.NavigationControl({
@@ -146,19 +167,51 @@ export default function Map() {
   });
 
   return (
-    <>
-      <Box
-        ref={mapContainer}
+    <ThemeProvider theme={theme}>
+      <Stack
+        direction="column"
         sx={{
           position: 'absolute',
           top: 0,
           left: 0,
-          width: '100vw',
-          height: '100vh'
+          height: '100vh',
+          width: '100vw'
         }}
-      />
-      <Outlet />
-    </>
+      >
+        <IconButton
+          color="primary"
+          sx={{
+            backgroundColor: 'white',
+            color: '#333333',
+            borderRadius: '4px',
+            boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            m: '10px',
+            width: '29px',
+            height: '29px',
+            zIndex: 5,
+            '&:hover': {
+              backgroundColor: '#f2f2f2'
+            }
+          }}
+          onClick={() => {
+            navigate('/help');
+          }}
+        >
+          <QuestionMarkIcon sx={{ mb: '1px' }} />
+        </IconButton>
+        <Box
+          ref={mapContainer}
+          sx={{
+            width: '100%',
+            height: '100%'
+          }}
+        />
+        <Outlet />
+      </Stack>
+    </ThemeProvider>
   );
 }
 
