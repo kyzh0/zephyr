@@ -28,7 +28,6 @@ export default function Site() {
     if (user) {
       navigate('/admin/add-site');
     }
-    console.log(user);
   }, [user]);
 
   async function handleSubmit(e) {

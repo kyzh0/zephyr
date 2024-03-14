@@ -81,7 +81,7 @@ function getWindColor(wind) {
 }
 
 function getWindDirection(bearing) {
-  if (bearing <= 0) {
+  if (bearing < 0) {
     return '';
   } else if (bearing <= 11.25) {
     return 'N';
@@ -130,19 +130,23 @@ export default function Site() {
     if (!id) return;
 
     const fetchData = async () => {
-      if (!site || site.id !== id) {
-        const s = await getById('sites', id);
-        if (!s) return;
-        setSite(s);
+      try {
+        if (!site || site.id !== id) {
+          const s = await getById('sites', id);
+          if (!s) return;
+          setSite(s);
 
-        setData(await loadSiteData(id));
+          setData(await loadSiteData(id));
+        }
+      } catch (error) {
+        console.error(error);
       }
     };
 
     try {
       fetchData();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }, [id]);
 

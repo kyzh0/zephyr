@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../firebase';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { auth, db } from '../firebase';
+import { signOut } from 'firebase/auth';
+import axios from 'axios';
 
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -11,8 +12,10 @@ import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
+import MenuItem from '@mui/material/MenuItem';
 import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
+import { addDoc, collection, GeoPoint } from 'firebase/firestore';
 
 export default function Site() {
   const navigate = useNavigate();
@@ -24,12 +27,13 @@ export default function Site() {
       await signOut(auth);
       navigate('/');
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
+  const [type, setType] = useState('');
   const [loading, setLoading] = useState(false);
-  const [passwordError, setPasswordError] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   async function handleSubmit(e) {
@@ -41,26 +45,76 @@ export default function Site() {
     setLoading(true);
 
     setErrorMsg('');
-    setPasswordError(false);
+    setIsError(false);
 
     const data = new FormData(e.currentTarget);
-    const email = data.get('email').trim();
-    const password = data.get('password').trim();
+    const name = data.get('name').trim();
+    const external = data.get('external').trim();
+    const latitude = data.get('lat').trim();
+    const longitude = data.get('lon').trim();
 
     // input validation
-    if (!email || !password) {
+    if (!name || !external || !latitude || !longitude || !type) {
       setLoading(false);
+      setErrorMsg('Complete all fields');
+      setIsError(true);
+      return;
+    }
+
+    const lat = Number(latitude);
+    const lon = Number(longitude);
+    if (isNaN(lat)) {
+      setLoading(false);
+      setErrorMsg('Latitude is invalid');
+      setIsError(true);
+      return;
+    }
+    if (isNaN(lon)) {
+      setLoading(false);
+      setErrorMsg('Longitude is invalid');
+      setIsError(true);
+      return;
+    }
+
+    if (lat < -90 || lat > 90) {
+      setLoading(false);
+      setErrorMsg('Latitude must be between -90 and 90');
+      setIsError(true);
+      return;
+    }
+    if (lon < -180 || lon > 180) {
+      setLoading(false);
+      setErrorMsg('Longitude must be between -180 and 180');
+      setIsError(true);
       return;
     }
 
     try {
-      const { user } = await signInWithEmailAndPassword(auth, email, password);
-      console.log(user);
+      let elevation = 0;
+      const response = await axios.get(
+        `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`
+      );
+      if (response.data.elevation && response.data.elevation.length) {
+        elevation = response.data.elevation[0];
+      }
+
+      const site = {
+        name: name,
+        externalId: external,
+        type: type,
+        coordinates: new GeoPoint(lat, lon),
+        currentAverage: 0,
+        currentGust: 0,
+        currentBearing: 0,
+        currentTemperature: 0,
+        elevation: elevation
+      };
+      await addDoc(collection(db, 'sites'), site);
 
       setLoading(false);
-    } catch {
-      setPasswordError(true);
-      setErrorMsg('Email or password is incorrect.');
+      handleClose();
+    } catch (error) {
+      console.error(error);
       setLoading(false);
     }
   }
@@ -94,22 +148,37 @@ export default function Site() {
               <TextField
                 margin="normal"
                 fullWidth
-                id="email"
-                label="Email"
-                name="email"
-                autoComplete="email"
+                id="name"
+                label="Site Name"
+                name="name"
+                error={isError}
+                helperText={isError && errorMsg}
               />
               <TextField
                 margin="normal"
                 fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                error={passwordError}
-                helperText={passwordError && errorMsg}
+                id="external"
+                label="External Id"
+                name="external"
               />
+              <TextField
+                sx={{ mb: 0 }}
+                select
+                margin="normal"
+                fullWidth
+                id="type"
+                label="Type"
+                value={type}
+                onChange={(e) => {
+                  setType(e.target.value);
+                }}
+              >
+                <MenuItem value="harvest">Harvest</MenuItem>
+                <MenuItem value="holfuy">Holfuy</MenuItem>
+                <MenuItem value="metservice">Metservice</MenuItem>
+              </TextField>
+              <TextField margin="normal" fullWidth id="lat" label="Latitude" name="lat" />
+              <TextField margin="normal" fullWidth id="lon" label="Longitude" name="lon" />
               <LoadingButton
                 loading={loading}
                 type="submit"
@@ -122,7 +191,7 @@ export default function Site() {
                   boxShadow: 'none'
                 }}
               >
-                Sign In
+                Add
               </LoadingButton>
             </Box>
           </Stack>

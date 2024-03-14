@@ -35,27 +35,39 @@ export function getUser() {
 
 export async function getById(collectionName, id) {
   const docRef = doc(db, collectionName, id);
-  const docSnap = await getDoc(docRef);
+  try {
+    const docSnap = await getDoc(docRef);
 
-  const data = docSnap.exists() ? docSnap.data() : null;
+    const data = docSnap.exists() ? docSnap.data() : null;
 
-  if (data === null || data === undefined) return null;
+    if (data === null || data === undefined) return null;
 
-  return { id, ...data };
+    return { id, ...data };
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export async function list(collectionName) {
-  const snap = await getDocs(collection(db, collectionName));
-  return snap.docs.map((doc) => {
-    return { id: doc.id, ...doc.data() };
-  });
+  try {
+    const snap = await getDocs(collection(db, collectionName));
+    return snap.docs.map((doc) => {
+      return { id: doc.id, ...doc.data() };
+    });
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export async function loadSiteData(siteId) {
-  const sitesRef = collection(db, `sites/${siteId}/data`);
-  const q = query(sitesRef, orderBy('time'), limit(100));
-  const snap = await getDocs(q);
-  return snap.docs.map((doc) => {
-    return { id: doc.id, ...doc.data() };
-  });
+  try {
+    const sitesRef = collection(db, `sites/${siteId}/data`);
+    const q = query(sitesRef, orderBy('time'), limit(100));
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => {
+      return { id: doc.id, ...doc.data() };
+    });
+  } catch (error) {
+    console.error(error);
+  }
 }

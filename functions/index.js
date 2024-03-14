@@ -74,24 +74,28 @@ exports.updateMetserviceData = functions
   .onRun(async (req, res) => {
     const db = getFirestore();
 
-    const snapshot = await db.collection('sites').where('type', '==', 'metservice').get();
-    if (!snapshot.empty) {
-      snapshot.forEach(async (doc) => {
-        const data = await getMetserviceData(doc.data().externalId);
-        await db.doc(`sites/${doc.id}`).update({
-          currentAverage: data.windAverage,
-          currentGust: data.windGust,
-          currentBearing: data.windBearing,
-          currentTemperature: data.temperature
+    try {
+      const snapshot = await db.collection('sites').where('type', '==', 'metservice').get();
+      if (!snapshot.empty) {
+        snapshot.forEach(async (doc) => {
+          const data = await getMetserviceData(doc.data().externalId);
+          await db.doc(`sites/${doc.id}`).update({
+            currentAverage: data.windAverage,
+            currentGust: data.windGust,
+            currentBearing: data.windBearing,
+            currentTemperature: data.temperature
+          });
+          await db.collection(`sites/${doc.id}/data`).add({
+            time: new Date(),
+            windAverage: data.windAverage,
+            windGust: data.windGust,
+            windBearing: data.windBearing,
+            temperature: data.temperature
+          });
         });
-        await db.collection(`sites/${doc.id}/data`).add({
-          time: new Date(),
-          windAverage: data.windAverage,
-          windGust: data.windGust,
-          windBearing: data.windBearing,
-          temperature: data.temperature
-        });
-      });
+      }
+    } catch (error) {
+      res.json({ result: 'An error occured.', error });
     }
 
     res.json({ result: 'Metservice data updated.' });

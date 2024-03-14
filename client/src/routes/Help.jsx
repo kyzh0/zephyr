@@ -83,6 +83,7 @@ export default function Site() {
       setLoading(false);
       setMessageError(true);
       setErrorMsg('Something went wrong, please try again.');
+      console.error(error);
     }
   }
 
