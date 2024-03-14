@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { initializeApp } from 'firebase/app';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
   doc,
@@ -20,7 +22,16 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+export function getUser() {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    return onAuthStateChanged(auth, (u) => setUser(u));
+  }, []);
+  return user;
+}
 
 export async function getById(collectionName, id) {
   const docRef = doc(db, collectionName, id);

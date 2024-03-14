@@ -6,6 +6,9 @@ import './index.css';
 import Map, { loader as mapLoader } from './routes/Map';
 import Site from './routes/Site';
 import Help from './routes/Help';
+import AdminSignIn from './routes/AdminSignIn';
+import AdminAddSite from './routes/AdminAddSite';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 const router = createBrowserRouter([
   {
@@ -20,6 +23,19 @@ const router = createBrowserRouter([
       {
         path: 'help',
         element: <Help />
+      },
+      {
+        path: 'admin/sign-in',
+        element: <AdminSignIn />
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: 'admin/add-site',
+            element: <AdminAddSite />
+          }
+        ]
       }
     ]
   }

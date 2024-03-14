@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -8,6 +8,7 @@ import Modal from '@mui/material/Modal';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
 import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
@@ -94,7 +95,17 @@ export default function Site() {
             alignItems="center"
             sx={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px' }}
           >
-            <Stack direction="row-reverse" sx={{ width: '100%' }}>
+            <Stack direction="row" justifyContent="space-between" sx={{ width: '100%' }}>
+              <Link
+                component={RouterLink}
+                variant="body2"
+                underline="hover"
+                color="white"
+                to="/admin/sign-in"
+                sx={{ cursor: 'default' }}
+              >
+                admin
+              </Link>
               <IconButton sx={{ p: 0 }} onClick={handleClose}>
                 <CloseIcon />
               </IconButton>
