@@ -21,6 +21,7 @@ import styled from '@emotion/styled';
 import { alpha } from '@mui/material';
 
 import arrow from '../images/arrow.png';
+import { Timestamp } from 'firebase/firestore';
 
 function getWindColor(wind) {
   if (wind <= 2) {
@@ -136,7 +137,28 @@ export default function Site() {
           if (!s) return;
           setSite(s);
 
-          setData(await loadSiteData(id));
+          const d = await loadSiteData(id);
+          d.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds));
+
+          const d1 = [];
+          let j = 0;
+          for (let i = 0; i < d.length; i++) {
+            // fill in missed data with placeholder
+            if (i == 0 || d[i].time.seconds - d1[j - 1].time.seconds <= 660) {
+              d1.push(d[i]);
+            } else {
+              d1.push({
+                time: new Timestamp(d1[j - 1].time.seconds + 600, 0),
+                windAverage: 0,
+                windGust: 0,
+                windBearing: 0,
+                temperature: 0
+              });
+              i--;
+            }
+            j++;
+          }
+          setData(d1.slice(Math.max(d1.length - 100, 0)));
         }
       } catch (error) {
         console.error(error);
@@ -290,7 +312,13 @@ export default function Site() {
                             backgroundColor: getWindColor(d.windAverage)
                           }}
                         >
-                          {d.windAverage}
+                          {d.time.nanoseconds == 0 &&
+                          d.windAverage == 0 &&
+                          d.windGust == 0 &&
+                          d.windBearing == 0 &&
+                          d.temperature == 0
+                            ? '-'
+                            : d.windAverage}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -305,7 +333,13 @@ export default function Site() {
                             backgroundColor: getWindColor(d.windGust)
                           }}
                         >
-                          {d.windGust}
+                          {d.time.nanoseconds == 0 &&
+                          d.windAverage == 0 &&
+                          d.windGust == 0 &&
+                          d.windBearing == 0 &&
+                          d.temperature == 0
+                            ? '-'
+                            : d.windGust}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -317,7 +351,13 @@ export default function Site() {
                           align="center"
                           sx={{ padding: '2px', borderBottom: 'none' }}
                         >
-                          {getWindDirection(d.windBearing)}
+                          {d.time.nanoseconds == 0 &&
+                          d.windAverage == 0 &&
+                          d.windGust == 0 &&
+                          d.windBearing == 0 &&
+                          d.temperature == 0
+                            ? ''
+                            : getWindDirection(d.windBearing)}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -329,17 +369,25 @@ export default function Site() {
                           align="center"
                           sx={{ padding: 0, borderBottom: 'none' }}
                         >
-                          <Stack direction="column" justifyContent="center" alignItems="center">
-                            <Box
-                              component="img"
-                              sx={{
-                                width: '16px',
-                                height: '16px',
-                                transform: `rotate(${d.windBearing}deg)`
-                              }}
-                              src={arrow}
-                            />
-                          </Stack>
+                          {d.time.nanoseconds == 0 &&
+                          d.windAverage == 0 &&
+                          d.windGust == 0 &&
+                          d.windBearing == 0 &&
+                          d.temperature == 0 ? (
+                            '-'
+                          ) : (
+                            <Stack direction="column" justifyContent="center" alignItems="center">
+                              <Box
+                                component="img"
+                                sx={{
+                                  width: '16px',
+                                  height: '16px',
+                                  transform: `rotate(${d.windBearing}deg)`
+                                }}
+                                src={arrow}
+                              />
+                            </Stack>
+                          )}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -351,7 +399,13 @@ export default function Site() {
                           align="center"
                           sx={{ padding: '2px', fontSize: '10px' }}
                         >
-                          {`${d.windBearing.toString().padStart(3, '0')}°`}
+                          {d.time.nanoseconds == 0 &&
+                          d.windAverage == 0 &&
+                          d.windGust == 0 &&
+                          d.windBearing == 0 &&
+                          d.temperature == 0
+                            ? ''
+                            : `${d.windBearing.toString().padStart(3, '0')}°`}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -366,7 +420,13 @@ export default function Site() {
                             fontSize: '10px'
                           }}
                         >
-                          {`${d.temperature ?? 0}°C`}
+                          {d.time.nanoseconds == 0 &&
+                          d.windAverage == 0 &&
+                          d.windGust == 0 &&
+                          d.windBearing == 0 &&
+                          d.temperature == 0
+                            ? '-'
+                            : `${d.temperature ?? 0}°C`}
                         </TableCell>
                       ))}
                     </TableRow>
