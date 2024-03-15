@@ -318,7 +318,7 @@ export default function Site() {
                           d.windBearing == 0 &&
                           d.temperature == 0
                             ? '-'
-                            : d.windAverage}
+                            : Math.round(d.windAverage)}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -339,7 +339,7 @@ export default function Site() {
                           d.windBearing == 0 &&
                           d.temperature == 0
                             ? '-'
-                            : d.windGust}
+                            : Math.round(d.windGust)}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -405,7 +405,7 @@ export default function Site() {
                           d.windBearing == 0 &&
                           d.temperature == 0
                             ? ''
-                            : `${d.windBearing.toString().padStart(3, '0')}°`}
+                            : `${Math.round(d.windBearing).toString().padStart(3, '0')}°`}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -426,7 +426,7 @@ export default function Site() {
                           d.windBearing == 0 &&
                           d.temperature == 0
                             ? '-'
-                            : `${d.temperature ?? 0}°C`}
+                            : `${Math.round(d.temperature * 10) / 10}°C`}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -439,7 +439,9 @@ export default function Site() {
 
             <Stack direction="row" justifyContent="end" sx={{ width: '100%', pt: '4px' }}>
               {site && (
-                <Typography variant="subtitle2">Source: {site.type.toUpperCase()}</Typography>
+                <Typography variant="subtitle2">
+                  Source: {site.type.charAt(0).toUpperCase() + site.type.slice(1)}
+                </Typography>
               )}
             </Stack>
           </Stack>

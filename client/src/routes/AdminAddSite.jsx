@@ -91,11 +91,11 @@ export default function Site() {
 
     try {
       let elevation = 0;
-      const response = await axios.get(
+      const { data } = await axios.get(
         `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`
       );
-      if (response.data.elevation && response.data.elevation.length) {
-        elevation = response.data.elevation[0];
+      if (data.elevation && data.elevation.length) {
+        elevation = data.elevation[0];
       }
 
       const site = {
