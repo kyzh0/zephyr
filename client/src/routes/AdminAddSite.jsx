@@ -133,7 +133,11 @@ export default function Site() {
         currentGust: 0,
         currentBearing: 0,
         currentTemperature: 0,
-        elevation: elevation
+        elevation: elevation,
+        harvestWindAverageId: harvestWindAvgId,
+        harvestWindGustId: harvestWindGustId,
+        harvestWindDirectionId: harvestWindDirId,
+        harvestTemperatureId: harvestTempId
       };
       await addDoc(collection(db, 'sites'), site);
 
