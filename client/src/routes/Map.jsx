@@ -42,8 +42,7 @@ export default function Map() {
         properties: {
           name: site.name,
           dbId: site.id,
-          currentAverage: site.currentAverage,
-          currentGust: site.currentGust,
+          currentAverage: Math.round(site.currentAverage),
           rotation: site.currentBearing
         },
         geometry: {

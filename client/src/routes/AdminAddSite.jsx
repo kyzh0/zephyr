@@ -52,6 +52,10 @@ export default function Site() {
     const external = data.get('external').trim();
     const latitude = data.get('lat').trim();
     const longitude = data.get('lon').trim();
+    const harvestWindAvgId = data.get('harvestWindAvgId').trim();
+    const harvestWindGustId = data.get('harvestWindGustId').trim();
+    const harvestWindDirId = data.get('harvestWindDirId').trim();
+    const harvestTempId = data.get('harvestTempId').trim();
 
     // input validation
     if (!name || !external || !latitude || !longitude || !type) {
@@ -87,6 +91,28 @@ export default function Site() {
       setErrorMsg('Longitude must be between -180 and 180');
       setIsError(true);
       return;
+    }
+
+    if (type === 'harvest') {
+      if (!harvestWindAvgId || !harvestWindGustId || !harvestWindDirId || !harvestTempId) {
+        setLoading(false);
+        setErrorMsg('Complete all Harvest fields');
+        setIsError(true);
+        return;
+      }
+      const regex = /[0-9]+_[0-9]+/g;
+      if (
+        !external.match(regex) ||
+        !harvestWindAvgId.match(regex) ||
+        !harvestWindGustId.match(regex) ||
+        !harvestWindDirId.match(regex) ||
+        !harvestTempId.match(regex)
+      ) {
+        setLoading(false);
+        setErrorMsg('Invalid Harvest ID');
+        setIsError(true);
+        return;
+      }
     }
 
     try {
@@ -146,7 +172,7 @@ export default function Site() {
             </Typography>
             <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
               <TextField
-                margin="normal"
+                margin="dense"
                 fullWidth
                 id="name"
                 label="Site Name"
@@ -155,7 +181,7 @@ export default function Site() {
                 helperText={isError && errorMsg}
               />
               <TextField
-                margin="normal"
+                margin="dense"
                 fullWidth
                 id="external"
                 label="External Id"
@@ -164,7 +190,7 @@ export default function Site() {
               <TextField
                 sx={{ mb: 0 }}
                 select
-                margin="normal"
+                margin="dense"
                 fullWidth
                 id="type"
                 label="Type"
@@ -177,8 +203,40 @@ export default function Site() {
                 <MenuItem value="holfuy">Holfuy</MenuItem>
                 <MenuItem value="metservice">Metservice</MenuItem>
               </TextField>
-              <TextField margin="normal" fullWidth id="lat" label="Latitude" name="lat" />
-              <TextField margin="normal" fullWidth id="lon" label="Longitude" name="lon" />
+              <TextField margin="dense" fullWidth id="lat" label="Latitude" name="lat" />
+              <TextField margin="dense" fullWidth id="lon" label="Longitude" name="lon" />
+              {type === 'harvest' && (
+                <>
+                  <TextField
+                    margin="dense"
+                    fullWidth
+                    id="harvestWindAvgId"
+                    label="Harvest Wind Avg GraphID_TraceID"
+                    name="harvestWindAvgId"
+                  />
+                  <TextField
+                    margin="dense"
+                    fullWidth
+                    id="harvestWindGustId"
+                    label="Harvest Wind Gust GraphID_TraceID"
+                    name="harvestWindGustId"
+                  />
+                  <TextField
+                    margin="dense"
+                    fullWidth
+                    id="harvestWindDirId"
+                    label="Harvest Wind Direction GraphID_TraceID"
+                    name="harvestWindDirId"
+                  />
+                  <TextField
+                    margin="normal"
+                    fullWidth
+                    id="harvestTempId"
+                    label="Harvest Temperature GraphID_TraceID"
+                    name="harvestTempId"
+                  />
+                </>
+              )}
               <LoadingButton
                 loading={loading}
                 type="submit"
