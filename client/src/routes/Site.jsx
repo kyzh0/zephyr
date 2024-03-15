@@ -220,6 +220,9 @@ export default function Site() {
                 sx={{ width: '100%', p: '8px', pb: '18px' }}
               >
                 <Stack direction="column" justifyContent="center" alignItems="center">
+                  <Typography variant="h5" sx={{ fontSize: '16px', mb: 1 }}>
+                    {getWindDirection(site.currentBearing)}
+                  </Typography>
                   <Box
                     component="img"
                     sx={{
@@ -230,49 +233,78 @@ export default function Site() {
                     src={arrow}
                   />
                 </Stack>
-                <Stack direction="column" justifyContent="center" alignItems="center">
-                  <Typography variant="h5" sx={{ fontSize: '16px' }}>
-                    {getWindDirection(site.currentBearing)}
-                  </Typography>
-                  <Stack direction="row" justifyContent="center" sx={{ pl: '12px' }}>
-                    <Stack direction="column" justifyContent="space-evenly" alignItems="end">
-                      <Typography variant="h5" sx={{ fontSize: '10px' }}>
-                        Avg
-                      </Typography>
-                      <Typography variant="h5" sx={{ fontSize: '10px' }}>
-                        Gust
-                      </Typography>
-                      <Typography variant="h5" sx={{ fontSize: '10px' }}>
-                        Temp
-                      </Typography>
-                    </Stack>
-                    <Stack
-                      direction="column"
-                      justifyContent="center"
-                      alignItems="start"
-                      sx={{ pl: '8px' }}
+                <Table sx={{ width: '180px', ml: 3 }}>
+                  <TableBody>
+                    <TableRow
+                      sx={{
+                        '&:last-child td, &:last-child th': { border: 0 }
+                      }}
                     >
-                      <Typography
-                        variant="h5"
+                      <TableCell
+                        align="center"
+                        sx={{ fontSize: '10px', borderBottom: 'none', p: 0 }}
+                      >
+                        Avg
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{ fontSize: '10px', borderBottom: 'none', p: 0 }}
+                      >
+                        Gust
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{ fontSize: '10px', borderBottom: 'none', p: 0 }}
+                      ></TableCell>
+                    </TableRow>
+                    <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell
+                        align="center"
                         sx={{
-                          fontSize: '16px',
-                          backgroundColor: getWindColor(site.currentAverage)
+                          fontSize: '24px',
+                          backgroundColor: getWindColor(site.currentAverage),
+                          borderBottom: 'none',
+                          p: 1
                         }}
                       >
-                        {site.currentAverage} km/h
-                      </Typography>
-                      <Typography
-                        variant="h5"
-                        sx={{ fontSize: '16px', backgroundColor: getWindColor(site.currentGust) }}
+                        {Math.round(site.currentAverage)}
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          fontSize: '24px',
+                          backgroundColor: getWindColor(site.currentGust),
+                          borderBottom: 'none',
+                          p: 1
+                        }}
                       >
-                        {site.currentGust} km/h
-                      </Typography>
-                      <Typography variant="h5" sx={{ fontSize: '16px' }}>
-                        {`${site.currentTemperature ?? 0}°C`}
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                </Stack>
+                        {Math.round(site.currentGust)}
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          fontSize: '16px',
+                          borderBottom: 'none',
+                          p: 0
+                        }}
+                      >
+                        {`${Math.round(site.currentTemperature * 10) / 10}°C`}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0, p: 0 } }}>
+                      <TableCell
+                        colSpan={2}
+                        align="center"
+                        sx={{
+                          fontSize: '10px'
+                        }}
+                      >
+                        km/h
+                      </TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </Stack>
             ) : (
               <StyledSkeleton width={180} height={180} />
