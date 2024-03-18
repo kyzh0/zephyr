@@ -16,6 +16,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
 import Skeleton from '@mui/material/Skeleton';
 import styled from '@emotion/styled';
 import { alpha } from '@mui/material';
@@ -471,9 +472,9 @@ export default function Site() {
 
             <Stack direction="row" justifyContent="end" sx={{ width: '100%', pt: '4px' }}>
               {site && (
-                <Typography variant="subtitle2">
+                <Link href={site.externalLink} target="_blank" rel="noreferrer" variant="subtitle2">
                   Source: {site.type.charAt(0).toUpperCase() + site.type.slice(1)}
-                </Typography>
+                </Link>
               )}
             </Stack>
           </Stack>

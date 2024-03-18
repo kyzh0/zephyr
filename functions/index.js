@@ -63,6 +63,19 @@ async function getMetserviceData(siteId) {
   };
 }
 
+async function getHolfuyData(siteId) {
+  const { data } = await axios.get(
+    `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=${siteId}`
+  );
+
+  return {
+    windAverage: data.wind.speed ?? 0,
+    windGust: data.wind.gust ?? 0,
+    windBearing: data.wind.direction ?? 0,
+    temperature: data.temperature ?? 0
+  };
+}
+
 async function processHarvestResponse(sid, configId, graphId, traceId, format) {
   let date = new Date();
   let utcYear = date.getUTCFullYear();
@@ -88,11 +101,7 @@ async function processHarvestResponse(sid, configId, graphId, traceId, format) {
       graph_id: graphId,
       start_date: dateFrom,
       start_date_stats: dateFrom,
-      end_date: dateTo,
-      resolution: 205,
-      max_interp_seconds: 8640,
-      interpolate: true,
-      trace_type: 'Line'
+      end_date: dateTo
     },
     {
       headers: {
@@ -201,6 +210,10 @@ async function wrapper() {
           data = await getMetserviceData(docData.externalId);
           functions.logger.log(`metservice data updated - ${docData.externalId}`);
           functions.logger.log(data);
+        } else if (docData.type === 'holfuy') {
+          data = await getHolfuyData(docData.externalId);
+          functions.logger.log(`holfuy data updated - ${docData.externalId}`);
+          functions.logger.log(data);
         }
         if (data) {
           // update site data
@@ -217,6 +230,17 @@ async function wrapper() {
             windGust: data.windGust,
             windBearing: data.windBearing,
             temperature: data.temperature
+          });
+        }
+
+        // remove old data > 3 days
+        const date = new Date();
+        date.setDate(date.getDate() - 3);
+        const query = db.collection(`sites/${doc.id}/data`).where('time', '<', date);
+        const snap = await query.get();
+        if (!snap.empty) {
+          snap.forEach(async (doc) => {
+            await doc.ref.delete();
           });
         }
       });

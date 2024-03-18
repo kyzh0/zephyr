@@ -49,16 +49,13 @@ export default function Site() {
 
     const data = new FormData(e.currentTarget);
     const name = data.get('name').trim();
-    const external = data.get('external').trim();
+    const externalId = data.get('externalId').trim();
+    const externalLink = data.get('externalLink').trim();
     const latitude = data.get('lat').trim();
     const longitude = data.get('lon').trim();
-    const harvestWindAvgId = data.get('harvestWindAvgId').trim();
-    const harvestWindGustId = data.get('harvestWindGustId').trim();
-    const harvestWindDirId = data.get('harvestWindDirId').trim();
-    const harvestTempId = data.get('harvestTempId').trim();
 
     // input validation
-    if (!name || !external || !latitude || !longitude || !type) {
+    if (!name || !externalId || !externalLink || !latitude || !longitude || !type) {
       setLoading(false);
       setErrorMsg('Complete all fields');
       setIsError(true);
@@ -93,7 +90,15 @@ export default function Site() {
       return;
     }
 
+    let harvestWindAvgId = '';
+    let harvestWindGustId = '';
+    let harvestWindDirId = '';
+    let harvestTempId = '';
     if (type === 'harvest') {
+      harvestWindAvgId = data.get('harvestWindAvgId').trim();
+      harvestWindGustId = data.get('harvestWindGustId').trim();
+      harvestWindDirId = data.get('harvestWindDirId').trim();
+      harvestTempId = data.get('harvestTempId').trim();
       if (!harvestWindAvgId || !harvestWindGustId || !harvestWindDirId || !harvestTempId) {
         setLoading(false);
         setErrorMsg('Complete all Harvest fields');
@@ -102,7 +107,7 @@ export default function Site() {
       }
       const regex = /[0-9]+_[0-9]+/g;
       if (
-        !external.match(regex) ||
+        !externalId.match(regex) ||
         !harvestWindAvgId.match(regex) ||
         !harvestWindGustId.match(regex) ||
         !harvestWindDirId.match(regex) ||
@@ -126,19 +131,23 @@ export default function Site() {
 
       const site = {
         name: name,
-        externalId: external,
+        externalId: externalId,
+        externalLink: externalLink,
         type: type,
         coordinates: new GeoPoint(lat, lon),
         currentAverage: 0,
         currentGust: 0,
         currentBearing: 0,
         currentTemperature: 0,
-        elevation: elevation,
-        harvestWindAverageId: harvestWindAvgId,
-        harvestWindGustId: harvestWindGustId,
-        harvestWindDirectionId: harvestWindDirId,
-        harvestTemperatureId: harvestTempId
+        elevation: elevation
       };
+      if (type === 'harvest') {
+        site.harvestWindAverageId = harvestWindAvgId;
+        site.harvestWindGustId = harvestWindGustId;
+        site.harvestWindDirectionId = harvestWindDirId;
+        site.harvestTemperatureId = harvestTempId;
+      }
+
       await addDoc(collection(db, 'sites'), site);
 
       setLoading(false);
@@ -187,9 +196,16 @@ export default function Site() {
               <TextField
                 margin="dense"
                 fullWidth
-                id="external"
+                id="externalId"
                 label="External Id"
-                name="external"
+                name="externalId"
+              />
+              <TextField
+                margin="dense"
+                fullWidth
+                id="externalLink"
+                label="External Link"
+                name="externalLink"
               />
               <TextField
                 sx={{ mb: 0 }}
