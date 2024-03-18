@@ -64,15 +64,41 @@ async function getMetserviceData(siteId) {
 }
 
 async function getHolfuyData(siteId) {
-  const { data } = await axios.get(
-    `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=${siteId}`
-  );
+  // const { data } = await axios.get(
+  //   `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=${siteId}`
+  // );
+
+  // return {
+  //   windAverage: data.wind.speed ?? 0,
+  //   windGust: data.wind.gust ?? 0,
+  //   windBearing: data.wind.direction ?? 0,
+  //   temperature: data.temperature ?? 0
+  // };
+
+  let windAverage = 0;
+  let windGust = 0;
+  let windBearing = 0;
+  let temperature = 0;
+
+  const { headers } = await axios.get(`https://holfuy.com/en/weather/${siteId}`);
+  const cookies = headers['set-cookie'];
+  if (cookies && cookies.length && cookies[0].length) {
+    const { data } = await axios.get(`https://holfuy.com/puget/mjso.php?k=${siteId}`, {
+      headers: {
+        Cookie: cookies[0]
+      }
+    });
+    windAverage = data.speed ?? 0;
+    windGust = data.gust ?? 0;
+    windBearing = data.dir ?? 0;
+    temperature = data.temperature ?? 0;
+  }
 
   return {
-    windAverage: data.wind.speed ?? 0,
-    windGust: data.wind.gust ?? 0,
-    windBearing: data.wind.direction ?? 0,
-    temperature: data.temperature ?? 0
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
   };
 }
 
