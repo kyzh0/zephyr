@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
 import { list } from '../firebase';
+import { useCookies } from 'react-cookie';
 
 import { createTheme, ThemeProvider } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -27,6 +28,7 @@ export default function Map() {
     }
   });
 
+  const navigate = useNavigate();
   const sites = useLoaderData();
   const [sitesGeoJson, setSitesGeoJson] = useState(null);
 
@@ -57,7 +59,36 @@ export default function Map() {
 
   const map = useRef(null);
   const mapContainer = useRef(null);
-  const navigate = useNavigate();
+
+  const [lon, setLon] = useState(172.5);
+  const [lat, setLat] = useState(-41);
+  const z = window.innerWidth > 1000 ? 5.1 : 4.3;
+  const [zoom, setZoom] = useState(z);
+
+  const cookiesOptions = {
+    maxAge: 2592000, // 30 days
+    secure: true,
+    sameSite: 'strict'
+  };
+  const [cookies, setCookies] = useCookies(['map']);
+
+  useEffect(() => {
+    if (cookies.lon) {
+      setLon(cookies.lon);
+    } else {
+      setCookies('lon', 172.5, cookiesOptions);
+    }
+    if (cookies.lat) {
+      setLat(cookies.lat);
+    } else {
+      setCookies('lat', -41, cookiesOptions);
+    }
+    if (cookies.zoom) {
+      setZoom(cookies.zoom);
+    } else {
+      setCookies('zoom', z, cookiesOptions);
+    }
+  }, [cookies]);
 
   useEffect(() => {
     mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_GL_KEY;
@@ -66,8 +97,8 @@ export default function Map() {
     const m = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/outdoors-v11',
-      center: [172.5, -41],
-      zoom: 4.3,
+      center: [lon, lat],
+      zoom: zoom,
       pitchWithRotate: false,
       touchPitch: false
     });
@@ -77,18 +108,18 @@ export default function Map() {
 
     // -------------- CONTROLS -----------------------
     m.addControl(
+      new mapboxgl.NavigationControl({
+        showCompass: false
+      }),
+      'top-right'
+    );
+    m.addControl(new MapTerrainControl(), 'top-right');
+    m.addControl(
       new mapboxgl.GeolocateControl({
         positionOptions: {
           enableHighAccuracy: true
         }
       })
-    );
-    m.addControl(new MapTerrainControl(), 'top-right');
-    m.addControl(
-      new mapboxgl.NavigationControl({
-        showCompass: false
-      }),
-      'top-right'
     );
 
     // --------------- LIFECYCLE -----------------------
@@ -163,6 +194,19 @@ export default function Map() {
     m.on('mouseenter', 'sites-layer', handleSitesHoverOn);
     m.on('mousemove', 'sites-layer', handleSitesHoverOn);
     m.on('mouseleave', 'sites-layer', handleSitesHoverOff);
+
+    // save position cookie
+    m.on('move', () => {
+      const lo = m.getCenter().lng.toFixed(4);
+      const la = m.getCenter().lat.toFixed(4);
+      const zo = m.getZoom().toFixed(2);
+      setLon(lo);
+      setCookies('lon', lo, cookiesOptions);
+      setLat(la);
+      setCookies('lat', la, cookiesOptions);
+      setZoom(zo);
+      setCookies('zoom', zo, cookiesOptions);
+    });
   });
 
   return (
