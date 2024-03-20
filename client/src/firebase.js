@@ -62,7 +62,7 @@ export async function list(collectionName) {
 export async function loadSiteData(siteId) {
   try {
     const sitesRef = collection(db, `sites/${siteId}/data`);
-    const q = query(sitesRef, orderBy('time', 'desc'), limit(100));
+    const q = query(sitesRef, orderBy('time', 'desc'), limit(145)); // data for last 24h
     const snap = await getDocs(q);
     return snap.docs.map((doc) => {
       return { id: doc.id, ...doc.data() };

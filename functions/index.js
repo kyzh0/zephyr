@@ -102,6 +102,33 @@ async function getHolfuyData(siteId) {
   };
 }
 
+async function getAttentisData(siteId) {
+  let windAverage = 0;
+  let windGust = 0;
+  let windBearing = 0;
+  let temperature = 0;
+
+  const { data } = await axios.get('https://api.attentistechnology.com/sensor-overview', {
+    headers: { Authorization: `Bearer ${process.env.ATTENTIS_KEY}` }
+  });
+  if (data.data && data.data.weather_readings) {
+    const d = data.data.weather_readings[siteId];
+    if (d) {
+      windAverage = d.wind_speed ?? 0;
+      windGust = d.wind_gust_speed ?? 0;
+      windBearing = d.wind_direction ?? 0;
+      temperature = d.air_temp ?? 0;
+    }
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function processHarvestResponse(sid, configId, graphId, traceId, format) {
   let date = new Date();
   let utcYear = date.getUTCFullYear();
@@ -239,6 +266,10 @@ async function wrapper() {
         } else if (docData.type === 'holfuy') {
           data = await getHolfuyData(docData.externalId);
           functions.logger.log(`holfuy data updated - ${docData.externalId}`);
+          functions.logger.log(data);
+        } else if (docData.type === 'attentis') {
+          data = await getAttentisData(docData.externalId);
+          functions.logger.log(`attentis data updated - ${docData.externalId}`);
           functions.logger.log(data);
         }
         if (data) {

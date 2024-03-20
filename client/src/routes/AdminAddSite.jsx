@@ -222,6 +222,7 @@ export default function Site() {
                 <MenuItem value="harvest">Harvest</MenuItem>
                 <MenuItem value="holfuy">Holfuy</MenuItem>
                 <MenuItem value="metservice">Metservice</MenuItem>
+                <MenuItem value="attentis">Attentis</MenuItem>
               </TextField>
               <TextField margin="dense" fullWidth id="lat" label="Latitude" name="lat" />
               <TextField margin="dense" fullWidth id="lon" label="Longitude" name="lon" />

@@ -2,6 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getById, loadSiteData as loadSiteData } from '../firebase';
 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
+
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
@@ -146,10 +157,15 @@ export default function Site() {
           for (let i = 0; i < d.length; i++) {
             // fill in missed data with placeholder
             if (i == 0 || d[i].time.seconds - d1[j - 1].time.seconds <= 660) {
-              d1.push(d[i]);
-            } else {
               d1.push({
-                time: new Timestamp(d1[j - 1].time.seconds + 600, 0),
+                ...d[i],
+                timeLabel: `${d[i].time.toDate().getHours().toString().padStart(2, '0')}:${d[i].time.toDate().getMinutes().toString().padStart(2, '0')}`
+              });
+            } else {
+              const newTime = new Timestamp(d1[j - 1].time.seconds + 600, 0);
+              d1.push({
+                time: newTime,
+                timeLabel: `${newTime.toDate().getHours().toString().padStart(2, '0')}:${newTime.toDate().getMinutes().toString().padStart(2, '0')}`,
                 windAverage: 0,
                 windGust: 0,
                 windBearing: 0,
@@ -159,7 +175,7 @@ export default function Site() {
             }
             j++;
           }
-          setData(d1.slice(Math.max(d1.length - 100, 0)));
+          setData(d1.slice(Math.max(d1.length - 145, 0))); // last 24h data
         }
       } catch (error) {
         console.error(error);
@@ -469,7 +485,36 @@ export default function Site() {
             ) : (
               <StyledSkeleton width={'100%'} height={240} />
             )}
-
+            <Box
+              sx={{
+                width: '100%',
+                height: '30%',
+                mt: 2
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart width="100%" height="100%" data={data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="timeLabel" />
+                  <YAxis width={20} interval={0} tickCount={6} />
+                  <Tooltip formatter={(value) => Math.round(value)} />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="windAverage"
+                    stroke="#8884d8"
+                    dot={{ r: 0 }}
+                    activeDot={{ r: 4 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="windGust"
+                    stroke="none"
+                    dot={{ stroke: '#ffa894', strokeWidth: 4, r: 1 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
             <Stack direction="row" justifyContent="end" sx={{ width: '100%', pt: '4px' }}>
               {site && (
                 <Link href={site.externalLink} target="_blank" rel="noreferrer" variant="subtitle2">
