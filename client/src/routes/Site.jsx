@@ -32,7 +32,6 @@ import Skeleton from '@mui/material/Skeleton';
 import styled from '@emotion/styled';
 import { alpha } from '@mui/material';
 
-import arrow from '../images/arrow.png';
 import { Timestamp } from 'firebase/firestore';
 
 function getWindColor(wind) {
@@ -240,14 +239,13 @@ export default function Site() {
                   <Typography variant="h5" sx={{ fontSize: '16px', mb: 1 }}>
                     {getWindDirection(site.currentBearing)}
                   </Typography>
-                  <Box
-                    component="img"
-                    sx={{
+                  <img
+                    src="/arrow.png"
+                    style={{
                       width: '48px',
                       height: '48px',
-                      transform: `rotate(${site.currentBearing}deg)`
+                      transform: `rotate(${Math.round(site.currentBearing)}deg)`
                     }}
-                    src={arrow}
                   />
                 </Stack>
                 <Table sx={{ width: '180px', ml: 3 }}>
@@ -426,14 +424,13 @@ export default function Site() {
                             '-'
                           ) : (
                             <Stack direction="column" justifyContent="center" alignItems="center">
-                              <Box
-                                component="img"
-                                sx={{
+                              <img
+                                src="/arrow.png"
+                                style={{
                                   width: '16px',
                                   height: '16px',
-                                  transform: `rotate(${d.windBearing}deg)`
+                                  transform: `rotate(${Math.round(d.windBearing)}deg)`
                                 }}
-                                src={arrow}
                               />
                             </Stack>
                           )}

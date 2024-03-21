@@ -145,24 +145,45 @@ export default function Map() {
   useEffect(() => {
     if (!sitesGeoJson || !map.current) return;
     sitesGeoJson.features.forEach((f) => {
-      const child = document.createElement('div');
-      child.className = 'marker-image';
-      child.style.transform = `rotate(${Math.round(f.properties.rotation)}deg)`;
-      child.addEventListener('click', () => {
+      const childArrow = document.createElement('div');
+      childArrow.className = 'marker-arrow';
+      childArrow.style.transform = `rotate(${Math.round(f.properties.rotation)}deg)`;
+      childArrow.addEventListener('click', () => {
         navigate(`/sites/${f.properties.dbId}`);
       });
 
-      const childSpan = document.createElement('span');
-      childSpan.className = 'marker-text';
-      childSpan.innerHTML = f.properties.currentAverage;
-      childSpan.addEventListener('click', () => {
+      let color = 'black';
+      if (f.properties.currentAverage < 15) {
+        childArrow.style.backgroundImage = `url('/arrow-light-green.png')`;
+      } else if (f.properties.currentAverage < 23) {
+        childArrow.style.backgroundImage = `url('/arrow-green.png')`;
+      } else if (f.properties.currentAverage < 28) {
+        childArrow.style.backgroundImage = `url('/arrow-yellow.png')`;
+      } else if (f.properties.currentAverage < 33) {
+        childArrow.style.backgroundImage = `url('/arrow-orange.png')`;
+      } else if (f.properties.currentAverage < 45) {
+        childArrow.style.backgroundImage = `url('/arrow-red.png')`;
+        color = 'white';
+      } else if (f.properties.currentAverage < 60) {
+        childArrow.style.backgroundImage = `url('/arrow-purple.png')`;
+        color = 'white';
+      } else {
+        childArrow.style.backgroundImage = `url('/arrow-black.png')`;
+        color = 'white';
+      }
+
+      const childText = document.createElement('span');
+      childText.className = 'marker-text';
+      childText.style.color = color;
+      childText.innerHTML = f.properties.currentAverage;
+      childText.addEventListener('click', () => {
         navigate(`/sites/${f.properties.dbId}`);
       });
 
       const el = document.createElement('div');
       el.className = 'marker';
-      el.appendChild(child);
-      el.appendChild(childSpan);
+      el.appendChild(childArrow);
+      el.appendChild(childText);
 
       new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
     });
