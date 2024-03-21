@@ -70,6 +70,7 @@ export default function Map() {
   };
   const [cookies, setCookies] = useCookies();
 
+  // read cookies
   useEffect(() => {
     if (cookies.lon) {
       setLon(cookies.lon);
@@ -91,6 +92,7 @@ export default function Map() {
   useEffect(() => {
     mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_GL_KEY;
 
+    // map init
     if (map.current) return;
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -104,7 +106,7 @@ export default function Map() {
     map.current.dragRotate.disable();
     map.current.touchZoomRotate.disableRotation();
 
-    // -------------- CONTROLS -----------------------
+    // map controls
     map.current.addControl(
       new mapboxgl.NavigationControl({
         showCompass: false
@@ -139,14 +141,28 @@ export default function Map() {
     setPosInit(true);
   }, [lon, lat, zoom, map.current]);
 
+  // markers
   useEffect(() => {
     if (!sitesGeoJson || !map.current) return;
     sitesGeoJson.features.forEach((f) => {
-      const el = document.createElement('div');
-      el.className = 'marker';
-      el.addEventListener('click', () => {
+      const child = document.createElement('div');
+      child.className = 'marker-image';
+      child.style.transform = `rotate(${Math.round(f.properties.rotation)}deg)`;
+      child.addEventListener('click', () => {
         navigate(`/sites/${f.properties.dbId}`);
       });
+
+      const childSpan = document.createElement('span');
+      childSpan.className = 'marker-text';
+      childSpan.innerHTML = f.properties.currentAverage;
+      childSpan.addEventListener('click', () => {
+        navigate(`/sites/${f.properties.dbId}`);
+      });
+
+      const el = document.createElement('div');
+      el.className = 'marker';
+      el.appendChild(child);
+      el.appendChild(childSpan);
 
       new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
     });
