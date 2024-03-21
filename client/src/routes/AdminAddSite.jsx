@@ -223,6 +223,8 @@ export default function Site() {
                 <MenuItem value="holfuy">Holfuy</MenuItem>
                 <MenuItem value="metservice">Metservice</MenuItem>
                 <MenuItem value="attentis">Attentis</MenuItem>
+                <MenuItem value="cwu">Canterbury Weather Updates</MenuItem>
+                <MenuItem value="lpc">Lyttelton Port Company</MenuItem>
               </TextField>
               <TextField margin="dense" fullWidth id="lat" label="Latitude" name="lat" />
               <TextField margin="dense" fullWidth id="lon" label="Longitude" name="lon" />
