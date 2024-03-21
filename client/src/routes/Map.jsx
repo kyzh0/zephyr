@@ -13,9 +13,7 @@ import MapTerrainControl from './MapTerrainControl';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import arrowGreen from '../images/arrow-green.png';
-import arrowYellow from '../images/arrow-yellow.png';
-import arrowRed from '../images/arrow-red.png';
+import './Map.css';
 
 export default function Map() {
   let theme = createTheme({
@@ -60,17 +58,17 @@ export default function Map() {
   const map = useRef(null);
   const mapContainer = useRef(null);
 
-  const [lon, setLon] = useState(172.5);
-  const [lat, setLat] = useState(-41);
-  const z = window.innerWidth > 1000 ? 5.1 : 4.3;
-  const [zoom, setZoom] = useState(z);
+  const [posInit, setPosInit] = useState(false);
+  const [lon, setLon] = useState(0);
+  const [lat, setLat] = useState(0);
+  const [zoom, setZoom] = useState(0);
 
   const cookiesOptions = {
-    maxAge: 2592000, // 30 days
+    maxAge: 31536000, // 365 days
     secure: true,
     sameSite: 'strict'
   };
-  const [cookies, setCookies] = useCookies(['map']);
+  const [cookies, setCookies] = useCookies();
 
   useEffect(() => {
     if (cookies.lon) {
@@ -86,7 +84,7 @@ export default function Map() {
     if (cookies.zoom) {
       setZoom(cookies.zoom);
     } else {
-      setCookies('zoom', z, cookiesOptions);
+      setCookies('zoom', window.innerWidth > 1000 ? 5.1 : 4.3, cookiesOptions);
     }
   }, [cookies]);
 
@@ -94,7 +92,7 @@ export default function Map() {
     mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_GL_KEY;
 
     if (map.current) return;
-    const m = new mapboxgl.Map({
+    map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/outdoors-v11',
       center: [lon, lat],
@@ -103,18 +101,18 @@ export default function Map() {
       touchPitch: false
     });
 
-    m.dragRotate.disable();
-    m.touchZoomRotate.disableRotation();
+    map.current.dragRotate.disable();
+    map.current.touchZoomRotate.disableRotation();
 
     // -------------- CONTROLS -----------------------
-    m.addControl(
+    map.current.addControl(
       new mapboxgl.NavigationControl({
         showCompass: false
       }),
       'top-right'
     );
-    m.addControl(new MapTerrainControl(), 'top-right');
-    m.addControl(
+    map.current.addControl(new MapTerrainControl(), 'top-right');
+    map.current.addControl(
       new mapboxgl.GeolocateControl({
         positionOptions: {
           enableHighAccuracy: true
@@ -122,92 +120,37 @@ export default function Map() {
       })
     );
 
-    // --------------- LIFECYCLE -----------------------
-    m.on('load', () => {
-      map.current = m;
-      m.resize();
-    });
-
-    m.on('style.load', () => {
-      m.loadImage(arrowGreen, (error, image) => {
-        if (error) throw error;
-        m.addImage('arrow-green', image);
-      });
-      m.loadImage(arrowYellow, (error, image) => {
-        if (error) throw error;
-        m.addImage('arrow-yellow', image);
-      });
-      m.loadImage(arrowRed, (error, image) => {
-        if (error) throw error;
-        m.addImage('arrow-red', image);
-      });
-
-      m.addSource('sites', {
-        type: 'geojson',
-        data: sitesGeoJson,
-        generateId: true
-      });
-      m.addLayer({
-        id: 'sites-layer',
-        type: 'symbol',
-        source: 'sites',
-        layout: {
-          'text-font': ['Lato Black'],
-          'text-padding': 0,
-          'text-anchor': 'center',
-          'text-size': 10,
-          'text-allow-overlap': true,
-          'text-field': '{currentAverage}',
-          'icon-image': [
-            'case',
-            ['<', ['get', 'currentAverage'], 20],
-            'arrow-green',
-            [
-              'case',
-              ['all', ['>=', ['get', 'currentAverage'], 20], ['<', ['get', 'currentAverage'], 30]],
-              'arrow-yellow',
-              'arrow-red'
-            ]
-          ],
-          'icon-size': 0.07,
-          'icon-allow-overlap': true,
-          'icon-rotate': ['get', 'rotation']
-        }
-      });
-    });
-
-    // ----------------- EVENT HANDLERS -----------------------
-    const handleSitesClick = (e) => {
-      if (e.features.length) {
-        navigate(`/sites/${e.features[0].properties.dbId}`);
-      }
-    };
-
-    m.on('click', 'sites-layer', handleSitesClick);
-
-    const handleSitesHoverOn = () => {
-      m.getCanvas().style.cursor = 'pointer';
-    };
-    const handleSitesHoverOff = () => {
-      m.getCanvas().style.cursor = '';
-    };
-    m.on('mouseenter', 'sites-layer', handleSitesHoverOn);
-    m.on('mousemove', 'sites-layer', handleSitesHoverOn);
-    m.on('mouseleave', 'sites-layer', handleSitesHoverOff);
-
     // save position cookie
-    m.on('move', () => {
-      const lo = m.getCenter().lng.toFixed(4);
-      const la = m.getCenter().lat.toFixed(4);
-      const zo = m.getZoom().toFixed(2);
-      setLon(lo);
+    map.current.on('move', () => {
+      const lo = map.current.getCenter().lng.toFixed(4);
+      const la = map.current.getCenter().lat.toFixed(4);
+      const zo = map.current.getZoom().toFixed(2);
       setCookies('lon', lo, cookiesOptions);
-      setLat(la);
       setCookies('lat', la, cookiesOptions);
-      setZoom(zo);
       setCookies('zoom', zo, cookiesOptions);
     });
   });
+
+  // fly to saved position after load
+  useEffect(() => {
+    if (lon == 0 && lat == 0 && zoom == 0) return;
+    if (posInit || !map.current) return;
+    map.current.flyTo({ center: [lon, lat], zoom: zoom });
+    setPosInit(true);
+  }, [lon, lat, zoom, map.current]);
+
+  useEffect(() => {
+    if (!sitesGeoJson || !map.current) return;
+    sitesGeoJson.features.forEach((f) => {
+      const el = document.createElement('div');
+      el.className = 'marker';
+      el.addEventListener('click', () => {
+        navigate(`/sites/${f.properties.dbId}`);
+      });
+
+      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
+    });
+  }, [sitesGeoJson, map.current]);
 
   return (
     <ThemeProvider theme={theme}>
