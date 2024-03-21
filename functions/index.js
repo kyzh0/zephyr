@@ -418,7 +418,7 @@ async function getLpcData() {
   };
 }
 
-async function wrapper() {
+async function wrapper(source) {
   try {
     const db = getFirestore();
     const snapshot = await db.collection('sites').get();
@@ -426,37 +426,47 @@ async function wrapper() {
       snapshot.forEach(async (doc) => {
         let data = null;
         const docData = doc.data();
-        if (docData.type === 'harvest') {
-          data = await getHarvestData(
-            docData.externalId,
-            docData.harvestWindAverageId,
-            docData.harvestWindGustId,
-            docData.harvestWindDirectionId,
-            docData.harvestTemperatureId
-          );
-          functions.logger.log(`harvest data updated - ${docData.externalId}`);
-          functions.logger.log(data);
-        } else if (docData.type === 'metservice') {
-          data = await getMetserviceData(docData.externalId);
-          functions.logger.log(`metservice data updated - ${docData.externalId}`);
-          functions.logger.log(data);
-        } else if (docData.type === 'holfuy') {
-          data = await getHolfuyData(docData.externalId);
-          functions.logger.log(`holfuy data updated - ${docData.externalId}`);
-          functions.logger.log(data);
-        } else if (docData.type === 'attentis') {
-          data = await getAttentisData(docData.externalId);
-          functions.logger.log(`attentis data updated - ${docData.externalId}`);
-          functions.logger.log(data);
-        } else if (docData.type === 'cwu') {
-          data = await getCwuData(docData.externalId);
-          functions.logger.log(`cwu data updated - ${docData.externalId}`);
-          functions.logger.log(data);
-        } else if (docData.type === 'lpc') {
-          data = await getLpcData();
-          functions.logger.log('lpc data updated');
-          functions.logger.log(data);
+
+        if (source === 'harvest') {
+          if (docData.type === 'harvest') {
+            data = await getHarvestData(
+              docData.externalId,
+              docData.harvestWindAverageId,
+              docData.harvestWindGustId,
+              docData.harvestWindDirectionId,
+              docData.harvestTemperatureId
+            );
+            functions.logger.log(`harvest data updated - ${docData.externalId}`);
+            functions.logger.log(data);
+          }
+        } else if (source === 'holfuy') {
+          if (docData.type === 'holfuy') {
+            data = await getHolfuyData(docData.externalId);
+            functions.logger.log(`holfuy data updated - ${docData.externalId}`);
+            functions.logger.log(data);
+          }
+        } else if (source === 'metservice') {
+          if (docData.type === 'metservice') {
+            data = await getMetserviceData(docData.externalId);
+            functions.logger.log(`metservice data updated - ${docData.externalId}`);
+            functions.logger.log(data);
+          }
+        } else {
+          if (docData.type === 'attentis') {
+            data = await getAttentisData(docData.externalId);
+            functions.logger.log(`attentis data updated - ${docData.externalId}`);
+            functions.logger.log(data);
+          } else if (docData.type === 'cwu') {
+            data = await getCwuData(docData.externalId);
+            functions.logger.log(`cwu data updated - ${docData.externalId}`);
+            functions.logger.log(data);
+          } else if (docData.type === 'lpc') {
+            data = await getLpcData();
+            functions.logger.log('lpc data updated');
+            functions.logger.log(data);
+          }
         }
+
         if (data) {
           // update site data
           await db.doc(`sites/${doc.id}`).update({
@@ -479,8 +489,22 @@ async function wrapper() {
             temperature: data.temperature
           });
         }
+      });
+    }
+    functions.logger.log('Weather station data updated.');
+  } catch (error) {
+    functions.logger.log('An error occured.');
+    functions.logger.log(error);
+    return null;
+  }
+}
 
-        // remove old data > 3 days
+async function removeOldData() {
+  try {
+    const db = getFirestore();
+    const snapshot = await db.collection('sites').get();
+    if (!snapshot.empty) {
+      snapshot.forEach(async (doc) => {
         const date = new Date();
         date.setDate(date.getDate() - 3);
         const query = db.collection(`sites/${doc.id}/data`).where('time', '<', date);
@@ -492,7 +516,7 @@ async function wrapper() {
         }
       });
     }
-    functions.logger.log('Weather station data updated.');
+    functions.logger.log('Old data removed.');
   } catch (error) {
     functions.logger.log('An error occured.');
     functions.logger.log(error);
@@ -504,8 +528,40 @@ exports.updateWeatherStationData = functions
   .runWith({ timeoutSeconds: 120, memory: '2GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *') // at every 10th minute
-  .onRun(async (data, context) => {
+  .onRun((data, context) => {
     return wrapper();
+  });
+
+exports.updateHarvestStationData = functions
+  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('*/10 * * * *')
+  .onRun((data, context) => {
+    return wrapper('harvest');
+  });
+
+exports.updateHolfuyStationData = functions
+  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('*/10 * * * *')
+  .onRun((data, context) => {
+    return wrapper('holfuy');
+  });
+
+exports.updateMetserviceStationData = functions
+  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('*/10 * * * *')
+  .onRun((data, context) => {
+    return wrapper('metservice');
+  });
+
+exports.removeOldData = functions
+  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('*/10 * * * *')
+  .onRun((data, context) => {
+    return removeOldData();
   });
 
 // exports.test = functions
