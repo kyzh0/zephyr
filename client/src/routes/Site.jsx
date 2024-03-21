@@ -488,21 +488,41 @@ export default function Site() {
             <Box
               sx={{
                 width: '100%',
-                height: '30%',
+                height: '20vh',
                 mt: 2
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart width="100%" height="100%" data={data}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="timeLabel" />
-                  <YAxis width={20} interval={0} tickCount={6} />
+                  <XAxis
+                    dataKey="timeLabel"
+                    tick={{ fill: 'black' }}
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 400,
+                      fontFamily: 'Arial'
+                    }}
+                  />
+                  <YAxis
+                    width={20}
+                    interval={0}
+                    tickCount={6}
+                    tick={{ fill: 'black' }}
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 400,
+                      fontFamily: 'Arial'
+                    }}
+                  />
                   <Tooltip formatter={(value) => Math.round(value)} />
-                  <Legend />
+                  <Legend
+                    wrapperStyle={{ fontSize: '12px', fontWeight: 400, fontFamily: 'Arial' }}
+                  />
                   <Line
                     type="monotone"
                     dataKey="windAverage"
-                    name="Avg"
+                    name="Avg (km/h)"
                     stroke="#8884d8"
                     dot={{ r: 0 }}
                     activeDot={{ r: 4 }}
@@ -510,10 +530,76 @@ export default function Site() {
                   <Line
                     type="monotone"
                     dataKey="windGust"
-                    name="Gust"
+                    name="Gust (km/h)"
                     stroke="#ffa894"
                     dot={{ r: 0 }}
                     activeDot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
+            <Box
+              sx={{
+                width: '100%',
+                height: '20vh',
+                mt: 2
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart width="100%" height="100%" data={data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="timeLabel"
+                    tick={{ fill: 'black' }}
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 400,
+                      fontFamily: 'Arial'
+                    }}
+                  />
+                  <YAxis
+                    width={20}
+                    interval={0}
+                    ticks={[0, 90, 180, 270, 360]}
+                    tickFormatter={(value) => {
+                      switch (value) {
+                        case 0:
+                          return 'N';
+                        case 90:
+                          return 'E';
+                        case 180:
+                          return 'S';
+                        case 270:
+                          return 'W';
+                        case 360:
+                          return 'N';
+                        default:
+                          return '';
+                      }
+                    }}
+                    tick={{ fill: 'black' }}
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 400,
+                      fontFamily: 'Arial'
+                    }}
+                  />
+                  <Tooltip
+                    formatter={(value) => [
+                      Math.round(value).toString().padStart(3, '0'),
+                      'Bearing'
+                    ]}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: '12px', fontWeight: 400, fontFamily: 'Arial' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="windBearing"
+                    name="Direction"
+                    stroke="#8884d8"
+                    strokeWidth={0}
+                    dot={{ r: 1, strokeWidth: 2 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
