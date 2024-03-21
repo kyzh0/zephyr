@@ -465,9 +465,14 @@ async function wrapper() {
             currentBearing: data.windBearing,
             currentTemperature: data.temperature
           });
-          // add data
+          // add data - floor time to nearest 10 min
+          let date = new Date();
+          const rem = date.getMinutes() % 10;
+          if (rem > 0) {
+            date = new Date(date.getTime() - rem * 60 * 1000);
+          }
           await db.collection(`sites/${doc.id}/data`).add({
-            time: new Date(),
+            time: date,
             windAverage: data.windAverage,
             windGust: data.windGust,
             windBearing: data.windBearing,
@@ -496,7 +501,7 @@ async function wrapper() {
 }
 
 exports.updateWeatherStationData = functions
-  .runWith({ timeoutSeconds: 30, memory: '1GB' })
+  .runWith({ timeoutSeconds: 120, memory: '2GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *') // at every 10th minute
   .onRun(async (data, context) => {

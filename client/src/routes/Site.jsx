@@ -166,10 +166,10 @@ export default function Site() {
               d1.push({
                 time: newTime,
                 timeLabel: `${newTime.toDate().getHours().toString().padStart(2, '0')}:${newTime.toDate().getMinutes().toString().padStart(2, '0')}`,
-                windAverage: 0,
-                windGust: 0,
-                windBearing: 0,
-                temperature: 0
+                windAverage: null,
+                windGust: null,
+                windBearing: null,
+                temperature: null
               });
               i--;
             }
@@ -362,10 +362,10 @@ export default function Site() {
                           }}
                         >
                           {d.time.nanoseconds == 0 &&
-                          d.windAverage == 0 &&
-                          d.windGust == 0 &&
-                          d.windBearing == 0 &&
-                          d.temperature == 0
+                          d.windAverage == null &&
+                          d.windGust == null &&
+                          d.windBearing == null &&
+                          d.temperature == null
                             ? '-'
                             : Math.round(d.windAverage)}
                         </TableCell>
@@ -383,10 +383,10 @@ export default function Site() {
                           }}
                         >
                           {d.time.nanoseconds == 0 &&
-                          d.windAverage == 0 &&
-                          d.windGust == 0 &&
-                          d.windBearing == 0 &&
-                          d.temperature == 0
+                          d.windAverage == null &&
+                          d.windGust == null &&
+                          d.windBearing == null &&
+                          d.temperature == null
                             ? '-'
                             : Math.round(d.windGust)}
                         </TableCell>
@@ -401,10 +401,10 @@ export default function Site() {
                           sx={{ padding: '2px', borderBottom: 'none' }}
                         >
                           {d.time.nanoseconds == 0 &&
-                          d.windAverage == 0 &&
-                          d.windGust == 0 &&
-                          d.windBearing == 0 &&
-                          d.temperature == 0
+                          d.windAverage == null &&
+                          d.windGust == null &&
+                          d.windBearing == null &&
+                          d.temperature == null
                             ? ''
                             : getWindDirection(d.windBearing)}
                         </TableCell>
@@ -419,10 +419,10 @@ export default function Site() {
                           sx={{ padding: 0, borderBottom: 'none' }}
                         >
                           {d.time.nanoseconds == 0 &&
-                          d.windAverage == 0 &&
-                          d.windGust == 0 &&
-                          d.windBearing == 0 &&
-                          d.temperature == 0 ? (
+                          d.windAverage == null &&
+                          d.windGust == null &&
+                          d.windBearing == null &&
+                          d.temperature == null ? (
                             '-'
                           ) : (
                             <Stack direction="column" justifyContent="center" alignItems="center">
@@ -449,10 +449,10 @@ export default function Site() {
                           sx={{ padding: '2px', fontSize: '10px' }}
                         >
                           {d.time.nanoseconds == 0 &&
-                          d.windAverage == 0 &&
-                          d.windGust == 0 &&
-                          d.windBearing == 0 &&
-                          d.temperature == 0
+                          d.windAverage == null &&
+                          d.windGust == null &&
+                          d.windBearing == null &&
+                          d.temperature == null
                             ? ''
                             : `${Math.round(d.windBearing).toString().padStart(3, '0')}°`}
                         </TableCell>
@@ -470,10 +470,10 @@ export default function Site() {
                           }}
                         >
                           {d.time.nanoseconds == 0 &&
-                          d.windAverage == 0 &&
-                          d.windGust == 0 &&
-                          d.windBearing == 0 &&
-                          d.temperature == 0
+                          d.windAverage == null &&
+                          d.windGust == null &&
+                          d.windBearing == null &&
+                          d.temperature == null
                             ? '-'
                             : `${Math.round(d.temperature * 10) / 10}°C`}
                         </TableCell>
@@ -502,6 +502,7 @@ export default function Site() {
                   <Line
                     type="monotone"
                     dataKey="windAverage"
+                    name="Avg"
                     stroke="#8884d8"
                     dot={{ r: 0 }}
                     activeDot={{ r: 4 }}
@@ -509,8 +510,10 @@ export default function Site() {
                   <Line
                     type="monotone"
                     dataKey="windGust"
-                    stroke="none"
-                    dot={{ stroke: '#ffa894', strokeWidth: 4, r: 1 }}
+                    name="Gust"
+                    stroke="#ffa894"
+                    dot={{ r: 0 }}
+                    activeDot={{ r: 4 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
