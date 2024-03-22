@@ -35,7 +35,8 @@ async function processHarvestResponse(sid, configId, graphId, traceId, format) {
     },
     {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Connection: 'keep-alive'
       }
     }
   );
@@ -124,7 +125,12 @@ async function getMetserviceData(siteId) {
   let windBearing = 0;
   let temperature = 0;
   const { data } = await axios.get(
-    `https://www.metservice.com/publicData/webdata/weather-station-location/${siteId}/`
+    `https://www.metservice.com/publicData/webdata/weather-station-location/${siteId}/`,
+    {
+      headers: {
+        Connection: 'keep-alive'
+      }
+    }
   );
   const modules = data.layout.primary.slots.main.modules;
   if (modules && modules.length) {
@@ -197,7 +203,8 @@ async function getHolfuyData(siteId) {
   if (cookies && cookies.length && cookies[0].length) {
     const { data } = await axios.get(`https://holfuy.com/puget/mjso.php?k=${siteId}`, {
       headers: {
-        Cookie: cookies[0]
+        Cookie: cookies[0],
+        Connection: 'keep-alive'
       }
     });
     windAverage = data.speed ?? 0;
@@ -221,7 +228,7 @@ async function getAttentisData(siteId) {
   let temperature = 0;
 
   const { data } = await axios.get('https://api.attentistechnology.com/sensor-overview', {
-    headers: { Authorization: `Bearer ${process.env.ATTENTIS_KEY}` }
+    headers: { Authorization: `Bearer ${process.env.ATTENTIS_KEY}`, Connection: 'keep-alive' }
   });
   if (data.data && data.data.weather_readings) {
     const d = data.data.weather_readings[siteId];
@@ -248,7 +255,10 @@ async function getCwuData(siteId) {
   let temperature = 0;
 
   const { data } = await axios.get(`https://cwu.co.nz/forecast/${siteId}/`, {
-    responseType: 'text'
+    responseType: 'text',
+    headers: {
+      Connection: 'keep-alive'
+    }
   });
   if (data.length) {
     // wind avg + direction
@@ -378,7 +388,7 @@ async function getLpcData() {
       `&toDate_Utc=${encodeURIComponent(dateTo)}` +
       '&qaStatusesString=*',
     {
-      headers: { 'x-grafana-org-id': 338 }
+      headers: { 'x-grafana-org-id': 338, Connection: 'keep-alive' }
     }
   );
   if (data.length && data[0]) {
@@ -387,19 +397,27 @@ async function getLpcData() {
     windBearing = data[0].winddir_01mnavg ?? 0;
   }
 
-  ({ data } = await axios.post('https://portweather-public.omcinternational.com/api/ds/query', {
-    from: dateFrom,
-    queries: [
-      {
-        datasourceId: 391,
-        sourcePath: 'NZ/Lyttelton/Meteo/Measured/Lyttelton IHJ3',
-        sourceProperty: 'airtemp_01mnavg',
-        transformerType: 'LatestMeasuredGenericPlot',
-        type: 'timeseries'
+  ({ data } = await axios.post(
+    'https://portweather-public.omcinternational.com/api/ds/query',
+    {
+      from: dateFrom,
+      queries: [
+        {
+          datasourceId: 391,
+          sourcePath: 'NZ/Lyttelton/Meteo/Measured/Lyttelton IHJ3',
+          sourceProperty: 'airtemp_01mnavg',
+          transformerType: 'LatestMeasuredGenericPlot',
+          type: 'timeseries'
+        }
+      ],
+      to: dateTo
+    },
+    {
+      headers: {
+        Connection: 'keep-alive'
       }
-    ],
-    to: dateTo
-  }));
+    }
+  ));
   const frames = data.results[''].frames;
   if (frames && frames.length) {
     const vals = frames[0].data.values;
@@ -423,7 +441,11 @@ async function wrapper(source) {
     const db = getFirestore();
     const snapshot = await db.collection('sites').get();
     if (!snapshot.empty) {
-      snapshot.forEach(async (doc) => {
+      const tempArray = [];
+      snapshot.forEach((doc) => {
+        tempArray.push(doc);
+      });
+      for (const doc of tempArray) {
         let data = null;
         const docData = doc.data();
 
@@ -489,7 +511,7 @@ async function wrapper(source) {
             temperature: data.temperature
           });
         }
-      });
+      }
     }
     functions.logger.log('Weather station data updated.');
   } catch (error) {
@@ -504,17 +526,25 @@ async function removeOldData() {
     const db = getFirestore();
     const snapshot = await db.collection('sites').get();
     if (!snapshot.empty) {
-      snapshot.forEach(async (doc) => {
+      const tempArray = [];
+      snapshot.forEach((doc) => {
+        tempArray.push(doc);
+      });
+      for (const doc of tempArray) {
         const date = new Date();
         date.setDate(date.getDate() - 3);
         const query = db.collection(`sites/${doc.id}/data`).where('time', '<', date);
         const snap = await query.get();
         if (!snap.empty) {
-          snap.forEach(async (doc) => {
-            await doc.ref.delete();
+          const tempArray1 = [];
+          snap.forEach((doc) => {
+            tempArray1.push(doc);
           });
+          for (const doc1 of tempArray1) {
+            await doc1.ref.delete();
+          }
         }
-      });
+      }
     }
     functions.logger.log('Old data removed.');
   } catch (error) {
@@ -569,7 +599,7 @@ exports.removeOldData = functions
 //   .region('australia-southeast1')
 //   .https.onRequest(async (req, res) => {
 //     try {
-//       functions.logger.log(await getLpcData());
+
 //     } catch (e) {
 //       functions.logger.log(e);
 //     }
