@@ -191,7 +191,7 @@ export default function Map() {
             }
           }
         },
-        1 * 60 * 1000
+        50 * 1000 // check for time every 50s
       );
     });
 
