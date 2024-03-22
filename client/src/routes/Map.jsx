@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { list } from '../firebase';
 import { useCookies } from 'react-cookie';
 
@@ -27,16 +27,16 @@ export default function Map() {
   });
 
   const navigate = useNavigate();
-  const sites = useLoaderData();
   const [sitesGeoJson, setSitesGeoJson] = useState(null);
+  const [markers] = useState([]);
 
-  useEffect(() => {
-    if (!sites) return;
+  async function getGeoJson() {
+    const s = await list('sites');
     const geoJson = {
       type: 'FeatureCollection',
       features: []
     };
-    sites.forEach((site) => {
+    s.forEach((site) => {
       const feature = {
         type: 'Feature',
         properties: {
@@ -50,10 +50,42 @@ export default function Map() {
           coordinates: [site.coordinates._long, site.coordinates._lat]
         }
       };
+      // cwu stations sometimes show avg=0 even when gust is high
+      if (
+        site.type === 'cwu' &&
+        site.currentAverage == 0 &&
+        site.currentGust - site.currentAverage > 5
+      ) {
+        feature.properties.currentAverage = site.currentGust;
+      }
       geoJson.features.push(feature);
     });
-    setSitesGeoJson(geoJson);
-  }, [sites]);
+    return geoJson;
+  }
+
+  function getArrowStyle(avgWind) {
+    let textColor = 'black';
+    let img = '';
+    if (avgWind < 15) {
+      img = `url('/arrow-light-green.png')`;
+    } else if (avgWind < 23) {
+      img = `url('/arrow-green.png')`;
+    } else if (avgWind < 28) {
+      img = `url('/arrow-yellow.png')`;
+    } else if (avgWind < 33) {
+      img = `url('/arrow-orange.png')`;
+    } else if (avgWind < 45) {
+      img = `url('/arrow-red.png')`;
+      textColor = 'white';
+    } else if (avgWind < 60) {
+      img = `url('/arrow-purple.png')`;
+      textColor = 'white';
+    } else {
+      img = `url('/arrow-black.png')`;
+      textColor = 'white';
+    }
+    return [img, textColor];
+  }
 
   const map = useRef(null);
   const mapContainer = useRef(null);
@@ -122,6 +154,47 @@ export default function Map() {
       })
     );
 
+    // refresh data every 10 min
+    map.current.on('load', async () => {
+      setSitesGeoJson(await getGeoJson());
+      const interval = setInterval(
+        async () => {
+          try {
+            // data updates on every 10th min, but it
+            // takes a while to write, so wait a few min
+            const min = new Date().getMinutes();
+            if (min % 10 > 3 && min % 10 < 9) {
+              // update marker styling
+              const json = await getGeoJson();
+              for (const marker of markers) {
+                const matches = json.features.filter((entry) => {
+                  return entry.properties.dbId === marker.id;
+                });
+                if (matches && matches.length == 1) {
+                  const f = matches[0];
+                  for (const child of marker.children) {
+                    const [img, color] = getArrowStyle(f.properties.currentAverage);
+                    if (child.className === 'marker-text') {
+                      child.style.color = color;
+                      child.innerHTML = f.properties.currentAverage;
+                    } else if (child.className === 'marker-arrow') {
+                      child.style.backgroundImage = img;
+                      child.style.transform = `rotate(${Math.round(f.properties.rotation)}deg)`;
+                    }
+                  }
+                }
+              }
+            }
+          } catch {
+            if (interval) {
+              clearInterval(interval);
+            }
+          }
+        },
+        5 * 60 * 1000
+      );
+    });
+
     // save position cookie
     map.current.on('move', () => {
       const lo = map.current.getCenter().lng.toFixed(4);
@@ -143,7 +216,8 @@ export default function Map() {
 
   // markers
   useEffect(() => {
-    if (!sitesGeoJson || !map.current) return;
+    if (!map.current || !sitesGeoJson) return;
+
     sitesGeoJson.features.forEach((f) => {
       const childArrow = document.createElement('div');
       childArrow.className = 'marker-arrow';
@@ -152,25 +226,8 @@ export default function Map() {
         navigate(`/sites/${f.properties.dbId}`);
       });
 
-      let color = 'black';
-      if (f.properties.currentAverage < 15) {
-        childArrow.style.backgroundImage = `url('/arrow-light-green.png')`;
-      } else if (f.properties.currentAverage < 23) {
-        childArrow.style.backgroundImage = `url('/arrow-green.png')`;
-      } else if (f.properties.currentAverage < 28) {
-        childArrow.style.backgroundImage = `url('/arrow-yellow.png')`;
-      } else if (f.properties.currentAverage < 33) {
-        childArrow.style.backgroundImage = `url('/arrow-orange.png')`;
-      } else if (f.properties.currentAverage < 45) {
-        childArrow.style.backgroundImage = `url('/arrow-red.png')`;
-        color = 'white';
-      } else if (f.properties.currentAverage < 60) {
-        childArrow.style.backgroundImage = `url('/arrow-purple.png')`;
-        color = 'white';
-      } else {
-        childArrow.style.backgroundImage = `url('/arrow-black.png')`;
-        color = 'white';
-      }
+      const [img, color] = getArrowStyle(f.properties.currentAverage);
+      childArrow.style.backgroundImage = img;
 
       const childText = document.createElement('span');
       childText.className = 'marker-text';
@@ -181,13 +238,15 @@ export default function Map() {
       });
 
       const el = document.createElement('div');
+      el.id = f.properties.dbId;
       el.className = 'marker';
       el.appendChild(childArrow);
       el.appendChild(childText);
+      markers.push(el);
 
       new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
     });
-  }, [sitesGeoJson, map.current]);
+  }, [map.current, sitesGeoJson]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -236,8 +295,4 @@ export default function Map() {
       </Stack>
     </ThemeProvider>
   );
-}
-
-export async function loader() {
-  return await list('sites');
 }
