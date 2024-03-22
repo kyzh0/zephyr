@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { getById, list } from '../firebase';
+import { getLastUpdatedSite as getLastUpdatedSite, list } from '../firebase';
+import { AppContext } from '../context/AppContext';
 import { useCookies } from 'react-cookie';
 
 import { createTheme, ThemeProvider } from '@mui/material';
@@ -29,6 +30,7 @@ export default function Map() {
   const navigate = useNavigate();
   const [sitesGeoJson, setSitesGeoJson] = useState(null);
   const [markers] = useState([]);
+  const { refresh, setRefresh } = useContext(AppContext);
 
   async function getGeoJson() {
     const s = await list('sites');
@@ -160,8 +162,9 @@ export default function Map() {
       const interval = setInterval(
         async () => {
           try {
-            // use pub corner station to check if sites updated
-            const s = await getById('sites', '3kyQppTbsmdMEXXRlab5');
+            // check oldest lastUpdated value to see if all stations updated
+            const s = await getLastUpdatedSite();
+            if (!s) return;
             if (markers.length && markers[0].dataset.timeStamp < s.lastUpdate.seconds) {
               // update marker styling
               const timestamp = Math.floor(Date.now() / 1000);
@@ -185,6 +188,8 @@ export default function Map() {
                   }
                 }
               }
+              // trigger refresh in site
+              setRefresh(refresh + 1);
             }
           } catch {
             if (interval) {

@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getById, loadSiteData as loadSiteData } from '../firebase';
+import { AppContext } from '../context/AppContext';
 
 import {
   LineChart,
@@ -137,68 +138,69 @@ export default function Site() {
   const [site, setSite] = useState(null);
   const [data, setData] = useState([]);
   const tableRef = useRef(null);
+  const { refresh, setRefresh } = useContext(AppContext);
+
+  async function fetchData() {
+    try {
+      const s = await getById('sites', id);
+      if (!s) return;
+      setSite(s);
+
+      const d = await loadSiteData(id);
+      d.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds));
+
+      const d1 = [];
+      let j = 0;
+      for (let i = 0; i < d.length; i++) {
+        // process data, enforcing 10 min interval
+        if (i == 0 || d[i].time.seconds - d1[j - 1].time.seconds <= 660) {
+          if (
+            d[i].windAverage == 0 &&
+            d[i].windGust == 0 &&
+            d[i].windBearing == 0 &&
+            d[i].temperature == 0
+          ) {
+            // probably something wrong with data
+            d1.push({
+              time: d[i].time,
+              timeLabel: `${d[i].time.toDate().getHours().toString().padStart(2, '0')}:${d[i].time.toDate().getMinutes().toString().padStart(2, '0')}`,
+              windAverage: null,
+              windGust: null,
+              windBearing: null,
+              temperature: null
+            });
+          } else {
+            d1.push({
+              ...d[i],
+              timeLabel: `${d[i].time.toDate().getHours().toString().padStart(2, '0')}:${d[i].time.toDate().getMinutes().toString().padStart(2, '0')}`
+            });
+          }
+        } else {
+          // fill in any missed data with placeholder
+          const newTime = new Timestamp(d1[j - 1].time.seconds + 600, 0);
+          d1.push({
+            time: newTime,
+            timeLabel: `${newTime.toDate().getHours().toString().padStart(2, '0')}:${newTime.toDate().getMinutes().toString().padStart(2, '0')}`,
+            windAverage: null,
+            windGust: null,
+            windBearing: null,
+            temperature: null
+          });
+          i--;
+        }
+        j++;
+      }
+      setData(d1.slice(Math.max(d1.length - 145, 0))); // only keep last 24h data
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   useEffect(() => {
     if (!id) return;
 
-    const fetchData = async () => {
-      try {
-        if (!site || site.id !== id) {
-          const s = await getById('sites', id);
-          if (!s) return;
-          setSite(s);
-
-          const d = await loadSiteData(id);
-          d.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds));
-
-          const d1 = [];
-          let j = 0;
-          for (let i = 0; i < d.length; i++) {
-            // fill in missed data with placeholder
-            if (i == 0 || d[i].time.seconds - d1[j - 1].time.seconds <= 660) {
-              if (
-                d[i].windAverage == 0 &&
-                d[i].windGust == 0 &&
-                d[i].windBearing == 0 &&
-                d[i].temperature == 0
-              ) {
-                // probably something wrong with data
-                d1.push({
-                  time: d[i].time,
-                  timeLabel: `${d[i].time.toDate().getHours().toString().padStart(2, '0')}:${d[i].time.toDate().getMinutes().toString().padStart(2, '0')}`,
-                  windAverage: null,
-                  windGust: null,
-                  windBearing: null,
-                  temperature: null
-                });
-              } else {
-                d1.push({
-                  ...d[i],
-                  timeLabel: `${d[i].time.toDate().getHours().toString().padStart(2, '0')}:${d[i].time.toDate().getMinutes().toString().padStart(2, '0')}`
-                });
-              }
-            } else {
-              const newTime = new Timestamp(d1[j - 1].time.seconds + 600, 0);
-              d1.push({
-                time: newTime,
-                timeLabel: `${newTime.toDate().getHours().toString().padStart(2, '0')}:${newTime.toDate().getMinutes().toString().padStart(2, '0')}`,
-                windAverage: null,
-                windGust: null,
-                windBearing: null,
-                temperature: null
-              });
-              i--;
-            }
-            j++;
-          }
-          setData(d1.slice(Math.max(d1.length - 145, 0))); // last 24h data
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
     try {
+      setRefresh(0);
       fetchData();
     } catch (error) {
       console.error(error);
@@ -206,9 +208,18 @@ export default function Site() {
   }, [id]);
 
   useEffect(() => {
-    if (tableRef.current) {
-      tableRef.current.querySelector('tbody td:last-child').scrollIntoView();
+    if (!refresh || refresh == 0) return;
+
+    try {
+      fetchData();
+    } catch (error) {
+      console.error(error);
     }
+  }, [refresh]);
+
+  useEffect(() => {
+    if (!tableRef.current) return;
+    tableRef.current.querySelector('tbody td:last-child').scrollIntoView();
   }, [data]);
 
   const navigate = useNavigate();

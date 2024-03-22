@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { AppProvider } from './context/AppContext';
 import { CookiesProvider } from 'react-cookie';
 import './index.css';
 
@@ -14,7 +15,11 @@ import ProtectedRoute from './routes/ProtectedRoute';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Map />,
+    element: (
+      <AppProvider>
+        <Map />
+      </AppProvider>
+    ),
     children: [
       {
         path: 'sites/:id',

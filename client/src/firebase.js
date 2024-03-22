@@ -71,3 +71,17 @@ export async function loadSiteData(siteId) {
     console.error(error);
   }
 }
+
+export async function getLastUpdatedSite() {
+  try {
+    const sitesRef = collection(db, 'sites');
+    const q = query(sitesRef, orderBy('lastUpdate', 'desc'), limit(1));
+    const snap = await getDocs(q);
+    if (snap.docs.length == 1) {
+      return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    }
+    return null;
+  } catch (error) {
+    console.error(error);
+  }
+}
