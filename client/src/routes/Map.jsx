@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { list } from '../firebase';
+import { getById, list } from '../firebase';
 import { useCookies } from 'react-cookie';
 
 import { createTheme, ThemeProvider } from '@mui/material';
@@ -160,17 +160,18 @@ export default function Map() {
       const interval = setInterval(
         async () => {
           try {
-            // data updates on every 10th min, but it
-            // takes a while to write, so wait a min
-            const min = new Date().getMinutes();
-            if (min % 10 == 1) {
+            // use pub corner station to check if sites updated
+            const s = await getById('sites', '3kyQppTbsmdMEXXRlab5');
+            if (markers.length && markers[0].dataset.timeStamp < s.lastUpdate.seconds) {
               // update marker styling
+              const timestamp = Math.floor(Date.now() / 1000);
               const json = await getGeoJson();
               for (const marker of markers) {
                 const matches = json.features.filter((entry) => {
                   return entry.properties.dbId === marker.id;
                 });
                 if (matches && matches.length == 1) {
+                  marker.dataset.timeStamp = timestamp;
                   const f = matches[0];
                   for (const child of marker.children) {
                     const [img, color] = getArrowStyle(f.properties.currentAverage);
@@ -191,7 +192,7 @@ export default function Map() {
             }
           }
         },
-        50 * 1000 // check for time every 50s
+        60 * 1000 // check for time every 1 min
       );
     });
 
@@ -214,10 +215,11 @@ export default function Map() {
     setPosInit(true);
   }, [lon, lat, zoom, map.current]);
 
-  // markers
+  // initialise markers
   useEffect(() => {
     if (!map.current || !sitesGeoJson) return;
 
+    const timestamp = Math.floor(Date.now() / 1000);
     sitesGeoJson.features.forEach((f) => {
       const childArrow = document.createElement('div');
       childArrow.className = 'marker-arrow';
@@ -240,6 +242,7 @@ export default function Map() {
       const el = document.createElement('div');
       el.id = f.properties.dbId;
       el.className = 'marker';
+      el.dataset.timeStamp = timestamp;
       el.appendChild(childArrow);
       el.appendChild(childText);
       markers.push(el);

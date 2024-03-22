@@ -490,19 +490,23 @@ async function wrapper(source) {
         }
 
         if (data) {
-          // update site data
-          await db.doc(`sites/${doc.id}`).update({
-            currentAverage: data.windAverage,
-            currentGust: data.windGust,
-            currentBearing: data.windBearing,
-            currentTemperature: data.temperature
-          });
-          // add data - floor time to nearest 10 min
+          // floor timestamp to 10 min
           let date = new Date();
           const rem = date.getMinutes() % 10;
           if (rem > 0) {
             date = new Date(date.getTime() - rem * 60 * 1000);
           }
+
+          // update site data
+          await db.doc(`sites/${doc.id}`).update({
+            lastUpdate: date,
+            currentAverage: data.windAverage,
+            currentGust: data.windGust,
+            currentBearing: data.windBearing,
+            currentTemperature: data.temperature
+          });
+
+          // add data
           await db.collection(`sites/${doc.id}/data`).add({
             time: date,
             windAverage: data.windAverage,
