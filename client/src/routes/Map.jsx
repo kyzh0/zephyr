@@ -161,9 +161,9 @@ export default function Map() {
         async () => {
           try {
             // data updates on every 10th min, but it
-            // takes a while to write, so wait a few min
+            // takes a while to write, so wait a min
             const min = new Date().getMinutes();
-            if (min % 10 > 3 && min % 10 < 9) {
+            if (min % 10 == 1) {
               // update marker styling
               const json = await getGeoJson();
               for (const marker of markers) {
@@ -191,7 +191,7 @@ export default function Map() {
             }
           }
         },
-        5 * 60 * 1000
+        1 * 60 * 1000
       );
     });
 
