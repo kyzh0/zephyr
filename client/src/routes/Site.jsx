@@ -11,7 +11,9 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
+  ComposedChart,
+  Area
 } from 'recharts';
 
 import Typography from '@mui/material/Typography';
@@ -103,7 +105,6 @@ function getDirectionColor(bearing, validBearings) {
         const bearing2 = Number(bearings[1]);
         if (bearing1 <= bearing2) {
           if (bearing >= bearing1 && bearing <= bearing2) {
-            console.log('returning green');
             return 'rgba(192, 255, 191, 0.5)';
           }
         } else {
@@ -113,7 +114,6 @@ function getDirectionColor(bearing, validBearings) {
         }
       }
     }
-    console.log('returning red');
     return 'rgba(255, 171, 171, 0.5)';
   } else {
     return '';
@@ -164,6 +164,7 @@ export default function Site() {
   const { id } = useParams();
   const [site, setSite] = useState(null);
   const [data, setData] = useState([]);
+  const [bearingPairCount, setBearingPairCount] = useState(0);
   const tableRef = useRef(null);
   const { refresh, setRefresh } = useContext(AppContext);
 
@@ -173,10 +174,23 @@ export default function Site() {
       if (!s) return;
       setSite(s);
 
+      const validBearings = [];
+      const pairs = s.validBearings ? s.validBearings.split(',') : [];
+      for (const p of pairs) {
+        const temp = p.split('-');
+        validBearings.push([Number(temp[0]), Number(temp[1])]);
+      }
+
       const data = await loadSiteData(id);
       data.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds)); // time asc
       data.forEach((d) => {
         d.timeLabel = `${d.time.toDate().getHours().toString().padStart(2, '0')}:${d.time.toDate().getMinutes().toString().padStart(2, '0')}`;
+        if (validBearings.length) {
+          setBearingPairCount(validBearings.length);
+          for (let i = 0; i < validBearings.length; i++) {
+            d[`validBearings${i}`] = validBearings[i];
+          }
+        }
       });
       setData(data);
     } catch (error) {
@@ -561,7 +575,7 @@ export default function Site() {
                   }}
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart width="100%" height="100%" data={data}>
+                    <ComposedChart width="100%" height="100%" data={data}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="timeLabel"
@@ -600,9 +614,9 @@ export default function Site() {
                         }}
                       />
                       <Tooltip
-                        formatter={(value) => [
-                          Math.round(value).toString().padStart(3, '0'),
-                          'Bearing'
+                        formatter={(value, name) => [
+                          name === 'vb' ? null : Math.round(value).toString().padStart(3, '0'),
+                          name === 'vb' ? null : 'Bearing'
                         ]}
                       />
                       <Legend
@@ -616,7 +630,18 @@ export default function Site() {
                         strokeWidth={0}
                         dot={{ r: 1, strokeWidth: 2 }}
                       />
-                    </LineChart>
+                      {[...Array(bearingPairCount).keys()].map((i) => (
+                        <Area
+                          key={i}
+                          type="monotone"
+                          dataKey={`validBearings${i}`}
+                          fill="rgba(192, 255, 191, 0.5)"
+                          stroke="none"
+                          legendType="none"
+                          name="vb"
+                        />
+                      ))}
+                    </ComposedChart>
                   </ResponsiveContainer>
                 </Box>
               </>
