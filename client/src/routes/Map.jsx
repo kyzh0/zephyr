@@ -65,6 +65,51 @@ export default function Map() {
     return geoJson;
   }
 
+  async function refreshMarkers() {
+    if (document.visibilityState !== 'visible') return;
+    if (!markers.length) return;
+
+    // find next 10-minute mark where data should be updated
+    const date = new Date(markers[0].dataset.timeStamp * 1000);
+    const minsToAdd = 10 - (date.getMinutes() % 10);
+    const bufferSec = 30; // buffer to allow data to write to db
+    const nextCheck = new Date(
+      date.getTime() + 1000 * (minsToAdd * 60 - date.getSeconds() + bufferSec)
+    );
+    if (new Date() < nextCheck) return;
+
+    // check newest lastUpdated value to see if all stations updated
+    const s = await getLastUpdatedSite();
+    if (!s) return;
+    if (markers[0].dataset.timeStamp < s.lastUpdate.seconds) {
+      // update marker styling
+      const timestamp = Math.floor(Date.now() / 1000);
+      const json = await getGeoJson();
+      for (const marker of markers) {
+        const matches = json.features.filter((entry) => {
+          return entry.properties.dbId === marker.id;
+        });
+        if (matches && matches.length == 1) {
+          marker.dataset.timeStamp = timestamp;
+          const f = matches[0];
+          for (const child of marker.children) {
+            const [img, color] = getArrowStyle(f.properties.currentAverage);
+            if (child.className === 'marker-text') {
+              child.style.color = color;
+              child.innerHTML = f.properties.currentAverage;
+            } else if (child.className === 'marker-arrow') {
+              child.style.backgroundImage = img;
+              child.style.transform = `rotate(${Math.round(f.properties.rotation)}deg)`;
+            }
+          }
+        }
+      }
+
+      // trigger refresh in site component
+      setRefresh(refresh + 1);
+    }
+  }
+
   function getArrowStyle(avgWind) {
     let textColor = 'black';
     let img = '';
@@ -162,42 +207,14 @@ export default function Map() {
       const interval = setInterval(
         async () => {
           try {
-            // check oldest lastUpdated value to see if all stations updated
-            const s = await getLastUpdatedSite();
-            if (!s) return;
-            if (markers.length && markers[0].dataset.timeStamp < s.lastUpdate.seconds) {
-              // update marker styling
-              const timestamp = Math.floor(Date.now() / 1000);
-              const json = await getGeoJson();
-              for (const marker of markers) {
-                const matches = json.features.filter((entry) => {
-                  return entry.properties.dbId === marker.id;
-                });
-                if (matches && matches.length == 1) {
-                  marker.dataset.timeStamp = timestamp;
-                  const f = matches[0];
-                  for (const child of marker.children) {
-                    const [img, color] = getArrowStyle(f.properties.currentAverage);
-                    if (child.className === 'marker-text') {
-                      child.style.color = color;
-                      child.innerHTML = f.properties.currentAverage;
-                    } else if (child.className === 'marker-arrow') {
-                      child.style.backgroundImage = img;
-                      child.style.transform = `rotate(${Math.round(f.properties.rotation)}deg)`;
-                    }
-                  }
-                }
-              }
-              // trigger refresh in site
-              setRefresh(refresh + 1);
-            }
+            await refreshMarkers();
           } catch {
             if (interval) {
               clearInterval(interval);
             }
           }
         },
-        60 * 1000 // check for time every 1 min
+        20 * 1000 // check if data needs to be updated every 20s
       );
     });
 
@@ -255,6 +272,13 @@ export default function Map() {
       new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
     });
   }, [map.current, sitesGeoJson]);
+
+  useEffect(() => {
+    document.addEventListener('visibilitychange', refreshMarkers);
+    return () => {
+      document.removeEventListener('visibilitychange', refreshMarkers);
+    };
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>

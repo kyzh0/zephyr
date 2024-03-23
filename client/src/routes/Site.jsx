@@ -33,8 +33,6 @@ import Skeleton from '@mui/material/Skeleton';
 import styled from '@emotion/styled';
 import { alpha } from '@mui/material';
 
-import { Timestamp } from 'firebase/firestore';
-
 function getWindColor(wind) {
   if (wind <= 2) {
     return '';
@@ -146,51 +144,12 @@ export default function Site() {
       if (!s) return;
       setSite(s);
 
-      const d = await loadSiteData(id);
-      d.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds));
-
-      const d1 = [];
-      let j = 0;
-      for (let i = 0; i < d.length; i++) {
-        // process data, enforcing 10 min interval
-        if (i == 0 || d[i].time.seconds - d1[j - 1].time.seconds <= 660) {
-          if (
-            d[i].windAverage == 0 &&
-            d[i].windGust == 0 &&
-            d[i].windBearing == 0 &&
-            d[i].temperature == 0
-          ) {
-            // probably something wrong with data
-            d1.push({
-              time: d[i].time,
-              timeLabel: `${d[i].time.toDate().getHours().toString().padStart(2, '0')}:${d[i].time.toDate().getMinutes().toString().padStart(2, '0')}`,
-              windAverage: null,
-              windGust: null,
-              windBearing: null,
-              temperature: null
-            });
-          } else {
-            d1.push({
-              ...d[i],
-              timeLabel: `${d[i].time.toDate().getHours().toString().padStart(2, '0')}:${d[i].time.toDate().getMinutes().toString().padStart(2, '0')}`
-            });
-          }
-        } else {
-          // fill in any missed data with placeholder
-          const newTime = new Timestamp(d1[j - 1].time.seconds + 600, 0);
-          d1.push({
-            time: newTime,
-            timeLabel: `${newTime.toDate().getHours().toString().padStart(2, '0')}:${newTime.toDate().getMinutes().toString().padStart(2, '0')}`,
-            windAverage: null,
-            windGust: null,
-            windBearing: null,
-            temperature: null
-          });
-          i--;
-        }
-        j++;
-      }
-      setData(d1.slice(Math.max(d1.length - 145, 0))); // only keep last 24h data
+      const data = await loadSiteData(id);
+      data.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds)); // time asc
+      data.forEach((d) => {
+        d.timeLabel = `${d.time.toDate().getHours().toString().padStart(2, '0')}:${d.time.toDate().getMinutes().toString().padStart(2, '0')}`;
+      });
+      setData(data);
     } catch (error) {
       console.error(error);
     }
@@ -388,12 +347,7 @@ export default function Site() {
                               backgroundColor: getWindColor(d.windAverage)
                             }}
                           >
-                            {d.windAverage == null &&
-                            d.windGust == null &&
-                            d.windBearing == null &&
-                            d.temperature == null
-                              ? '-'
-                              : Math.round(d.windAverage)}
+                            {d.windAverage == null ? '-' : Math.round(d.windAverage)}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -408,12 +362,7 @@ export default function Site() {
                               backgroundColor: getWindColor(d.windGust)
                             }}
                           >
-                            {d.windAverage == null &&
-                            d.windGust == null &&
-                            d.windBearing == null &&
-                            d.temperature == null
-                              ? '-'
-                              : Math.round(d.windGust)}
+                            {d.windGust == null ? '-' : Math.round(d.windGust)}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -425,12 +374,7 @@ export default function Site() {
                             align="center"
                             sx={{ padding: '2px', borderBottom: 'none' }}
                           >
-                            {d.windAverage == null &&
-                            d.windGust == null &&
-                            d.windBearing == null &&
-                            d.temperature == null
-                              ? ''
-                              : getWindDirection(d.windBearing)}
+                            {d.windBearing == null ? '' : getWindDirection(d.windBearing)}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -442,10 +386,7 @@ export default function Site() {
                             align="center"
                             sx={{ padding: 0, borderBottom: 'none' }}
                           >
-                            {d.windAverage == null &&
-                            d.windGust == null &&
-                            d.windBearing == null &&
-                            d.temperature == null ? (
+                            {d.windBearing == null ? (
                               '-'
                             ) : (
                               <Stack direction="column" justifyContent="center" alignItems="center">
@@ -470,10 +411,7 @@ export default function Site() {
                             align="center"
                             sx={{ padding: '2px', fontSize: '10px' }}
                           >
-                            {d.windAverage == null &&
-                            d.windGust == null &&
-                            d.windBearing == null &&
-                            d.temperature == null
+                            {d.windBearing == null
                               ? ''
                               : `${Math.round(d.windBearing).toString().padStart(3, '0')}°`}
                           </TableCell>
@@ -490,10 +428,7 @@ export default function Site() {
                               fontSize: '10px'
                             }}
                           >
-                            {d.windAverage == null &&
-                            d.windGust == null &&
-                            d.windBearing == null &&
-                            d.temperature == null
+                            {d.temperature == null
                               ? '-'
                               : `${Math.round(d.temperature * 10) / 10}°C`}
                           </TableCell>
