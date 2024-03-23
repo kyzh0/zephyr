@@ -548,19 +548,19 @@ async function wrapper(source) {
           // update site data
           await db.doc(`sites/${doc.id}`).update({
             lastUpdate: date,
-            currentAverage: avg,
-            currentGust: gust,
-            currentBearing: bearing,
-            currentTemperature: temperature
+            currentAverage: avg ?? null,
+            currentGust: gust ?? null,
+            currentBearing: bearing ?? null,
+            currentTemperature: temperature ?? null
           });
 
           // add data
           await db.collection(`sites/${doc.id}/data`).add({
             time: date,
-            windAverage: avg,
-            windGust: gust,
-            windBearing: bearing,
-            temperature: temperature
+            windAverage: avg ?? null,
+            windGust: gust ?? null,
+            windBearing: bearing ?? null,
+            temperature: temperature ?? null
           });
         }
       }
@@ -606,6 +606,55 @@ async function removeOldData() {
   }
 }
 
+async function checkForErrors() {
+  try {
+    let errors = 0;
+    const timeNow = Math.round(Date.now() / 1000);
+    const db = getFirestore();
+    const snapshot = await db.collection('sites').get();
+    if (!snapshot.empty) {
+      const tempArray = [];
+      snapshot.forEach((doc) => {
+        tempArray.push(doc);
+      });
+      for (const doc of tempArray) {
+        // check if last 6h data is all null
+        let isError = true;
+        const query = db.collection(`sites/${doc.id}/data`).orderBy('time', 'desc').limit(36);
+        const snap = await query.get();
+        if (!snap.empty) {
+          const tempArray1 = [];
+          snap.forEach((doc) => {
+            tempArray1.push(doc);
+          });
+          for (const doc1 of tempArray1) {
+            const data = doc1.data();
+            if (timeNow - data.time.seconds > 20 * 60) break; // check that data exists up to 20min before current time
+            if (
+              data.windAverage != null &&
+              data.windGust != null &&
+              data.windBearing != null &&
+              data.temperature != null
+            ) {
+              isError = false;
+              break;
+            }
+          }
+        }
+        if (isError) {
+          errors++;
+          // send email?
+        }
+      }
+    }
+    functions.logger.log(`Checked for errors - ${errors} found.`);
+  } catch (error) {
+    functions.logger.log('An error occured.');
+    functions.logger.log(error);
+    return null;
+  }
+}
+
 exports.updateWeatherStationData = functions
   .runWith({ timeoutSeconds: 120, memory: '2GB' })
   .region('australia-southeast1')
@@ -639,11 +688,19 @@ exports.updateMetserviceStationData = functions
   });
 
 exports.removeOldData = functions
-  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .runWith({ timeoutSeconds: 10, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
   .onRun((data, context) => {
     return removeOldData();
+  });
+
+exports.checkForErrors = functions
+  .runWith({ timeoutSeconds: 10, memory: '1GB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('0 */6 * * *')
+  .onRun((data, context) => {
+    return checkForErrors();
   });
 
 // exports.test = functions
