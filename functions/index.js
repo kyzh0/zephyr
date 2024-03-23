@@ -167,6 +167,16 @@ async function getMetserviceData(siteId) {
     if (wind && wind.length) {
       windAverage = wind[0].averageSpeed;
       windGust = wind[0].gustSpeed;
+
+      if (wind[0].strength === 'Calm') {
+        if (windAverage == null) {
+          windAverage = 0;
+        }
+        if (windGust == null) {
+          windGust = 0;
+        }
+      }
+
       switch (wind[0].direction.toUpperCase()) {
         case 'N':
           windBearing = 0;

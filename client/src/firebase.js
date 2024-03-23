@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { initializeApp } from 'firebase/app';
+import { getAnalytics } from 'firebase/analytics';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
@@ -18,10 +19,13 @@ const firebaseConfig = {
   projectId: 'zephyr-3fb26',
   storageBucket: 'zephyr-3fb26.appspot.com',
   messagingSenderId: '300612603796',
-  appId: '1:300612603796:web:ecd19c646ac1f246bd4981'
+  appId: '1:300612603796:web:ecd19c646ac1f246bd4981',
+  measurementId: 'G-ZH821HP63J'
 };
 
 const app = initializeApp(firebaseConfig);
+getAnalytics(app);
+
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
