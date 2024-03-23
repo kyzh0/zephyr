@@ -34,7 +34,9 @@ import styled from '@emotion/styled';
 import { alpha } from '@mui/material';
 
 function getWindColor(wind) {
-  if (wind <= 2) {
+  if (wind == null) {
+    return '';
+  } else if (wind <= 2) {
     return '';
   } else if (wind <= 4) {
     return '#d1f9ff';
@@ -222,19 +224,22 @@ export default function Site() {
                 justifyContent="center"
                 sx={{ width: '100%', p: '8px', pb: '18px' }}
               >
-                <Stack direction="column" justifyContent="center" alignItems="center">
-                  <Typography variant="h5" sx={{ fontSize: '16px', mb: 1 }}>
-                    {getWindDirection(site.currentBearing)}
-                  </Typography>
-                  <img
-                    src="/arrow.png"
-                    style={{
-                      width: '48px',
-                      height: '48px',
-                      transform: `rotate(${Math.round(site.currentBearing)}deg)`
-                    }}
-                  />
-                </Stack>
+                {site.currentBearing != null &&
+                  (site.currentAverage != null || site.currentGust != null) && (
+                    <Stack direction="column" justifyContent="center" alignItems="center">
+                      <Typography variant="h5" sx={{ fontSize: '16px', mb: 1 }}>
+                        {getWindDirection(site.currentBearing)}
+                      </Typography>
+                      <img
+                        src="/arrow.png"
+                        style={{
+                          width: '48px',
+                          height: '48px',
+                          transform: `rotate(${Math.round(site.currentBearing)}deg)`
+                        }}
+                      />
+                    </Stack>
+                  )}
                 <Table sx={{ width: '180px', ml: 3 }}>
                   <TableBody>
                     <TableRow
@@ -269,7 +274,7 @@ export default function Site() {
                           p: 1
                         }}
                       >
-                        {Math.round(site.currentAverage)}
+                        {site.currentAverage == null ? '-' : Math.round(site.currentAverage)}
                       </TableCell>
                       <TableCell
                         align="center"
@@ -280,7 +285,7 @@ export default function Site() {
                           p: 1
                         }}
                       >
-                        {Math.round(site.currentGust)}
+                        {site.currentGust == null ? '-' : Math.round(site.currentGust)}
                       </TableCell>
                       <TableCell
                         align="center"
@@ -290,7 +295,9 @@ export default function Site() {
                           p: 0
                         }}
                       >
-                        {`${Math.round(site.currentTemperature * 10) / 10}°C`}
+                        {site.currentTemperature == null
+                          ? ''
+                          : `${Math.round(site.currentTemperature * 10) / 10}°C`}
                       </TableCell>
                     </TableRow>
                     <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0, p: 0 } }}>
@@ -374,7 +381,9 @@ export default function Site() {
                             align="center"
                             sx={{ padding: '2px', borderBottom: 'none' }}
                           >
-                            {d.windBearing == null ? '' : getWindDirection(d.windBearing)}
+                            {d.windBearing == null || (d.windAverage == null && d.windGust == null)
+                              ? ''
+                              : getWindDirection(d.windBearing)}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -386,7 +395,8 @@ export default function Site() {
                             align="center"
                             sx={{ padding: 0, borderBottom: 'none' }}
                           >
-                            {d.windBearing == null ? (
+                            {d.windBearing == null ||
+                            (d.windAverage == null && d.windGust == null) ? (
                               '-'
                             ) : (
                               <Stack direction="column" justifyContent="center" alignItems="center">
@@ -411,7 +421,7 @@ export default function Site() {
                             align="center"
                             sx={{ padding: '2px', fontSize: '10px' }}
                           >
-                            {d.windBearing == null
+                            {d.windBearing == null || (d.windAverage == null && d.windGust == null)
                               ? ''
                               : `${Math.round(d.windBearing).toString().padStart(3, '0')}°`}
                           </TableCell>

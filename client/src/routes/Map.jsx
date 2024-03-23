@@ -44,7 +44,7 @@ export default function Map() {
         properties: {
           name: site.name,
           dbId: site.id,
-          currentAverage: Math.round(site.currentAverage),
+          currentAverage: site.currentAverage == null ? null : Math.round(site.currentAverage),
           rotation: site.currentBearing
         },
         geometry: {
@@ -63,6 +63,35 @@ export default function Map() {
       geoJson.features.push(feature);
     });
     return geoJson;
+  }
+
+  function getArrowStyle(avgWind, hasDirection) {
+    let textColor = 'black';
+    let img = '';
+    const prefix = hasDirection ? 'arrow' : 'circle';
+    if (avgWind == null) {
+      img = `url('/circle-white.png')`;
+    } else if (avgWind < 5) {
+      img = `url('/${prefix}-white.png')`;
+    } else if (avgWind < 15) {
+      img = `url('/${prefix}-light-green.png')`;
+    } else if (avgWind < 23) {
+      img = `url('/${prefix}-green.png')`;
+    } else if (avgWind < 28) {
+      img = `url('/${prefix}-yellow.png')`;
+    } else if (avgWind < 33) {
+      img = `url('/${prefix}-orange.png')`;
+    } else if (avgWind < 45) {
+      img = `url('/${prefix}-red.png')`;
+      textColor = 'white';
+    } else if (avgWind < 60) {
+      img = `url('/${prefix}-purple.png')`;
+      textColor = 'white';
+    } else {
+      img = `url('/${prefix}-black.png')`;
+      textColor = 'white';
+    }
+    return [img, textColor];
   }
 
   async function refreshMarkers() {
@@ -93,13 +122,20 @@ export default function Map() {
           marker.dataset.timeStamp = timestamp;
           const f = matches[0];
           for (const child of marker.children) {
-            const [img, color] = getArrowStyle(f.properties.currentAverage);
+            const [img, color] = getArrowStyle(
+              f.properties.currentAverage,
+              f.properties.rotation != null
+            );
             if (child.className === 'marker-text') {
               child.style.color = color;
-              child.innerHTML = f.properties.currentAverage;
+              child.innerHTML =
+                f.properties.currentAverage == null ? '-' : f.properties.currentAverage;
             } else if (child.className === 'marker-arrow') {
               child.style.backgroundImage = img;
-              child.style.transform = `rotate(${Math.round(f.properties.rotation)}deg)`;
+              child.style.transform =
+                f.properties.rotation == null
+                  ? ''
+                  : `rotate(${Math.round(f.properties.rotation)}deg)`;
             }
           }
         }
@@ -108,30 +144,6 @@ export default function Map() {
       // trigger refresh in site component
       setRefresh(refresh + 1);
     }
-  }
-
-  function getArrowStyle(avgWind) {
-    let textColor = 'black';
-    let img = '';
-    if (avgWind < 15) {
-      img = `url('/arrow-light-green.png')`;
-    } else if (avgWind < 23) {
-      img = `url('/arrow-green.png')`;
-    } else if (avgWind < 28) {
-      img = `url('/arrow-yellow.png')`;
-    } else if (avgWind < 33) {
-      img = `url('/arrow-orange.png')`;
-    } else if (avgWind < 45) {
-      img = `url('/arrow-red.png')`;
-      textColor = 'white';
-    } else if (avgWind < 60) {
-      img = `url('/arrow-purple.png')`;
-      textColor = 'white';
-    } else {
-      img = `url('/arrow-black.png')`;
-      textColor = 'white';
-    }
-    return [img, textColor];
   }
 
   const map = useRef(null);
@@ -214,7 +226,7 @@ export default function Map() {
             }
           }
         },
-        20 * 1000 // check if data needs to be updated every 20s
+        10 * 1000 // check if data needs to be updated every 10s
       );
     });
 
@@ -245,18 +257,22 @@ export default function Map() {
     sitesGeoJson.features.forEach((f) => {
       const childArrow = document.createElement('div');
       childArrow.className = 'marker-arrow';
-      childArrow.style.transform = `rotate(${Math.round(f.properties.rotation)}deg)`;
+      childArrow.style.transform =
+        f.properties.rotation == null ? '' : `rotate(${Math.round(f.properties.rotation)}deg)`;
       childArrow.addEventListener('click', () => {
         navigate(`/sites/${f.properties.dbId}`);
       });
 
-      const [img, color] = getArrowStyle(f.properties.currentAverage);
+      const [img, color] = getArrowStyle(
+        f.properties.currentAverage,
+        f.properties.rotation != null
+      );
       childArrow.style.backgroundImage = img;
 
       const childText = document.createElement('span');
       childText.className = 'marker-text';
       childText.style.color = color;
-      childText.innerHTML = f.properties.currentAverage;
+      childText.innerHTML = f.properties.currentAverage == null ? '-' : f.properties.currentAverage;
       childText.addEventListener('click', () => {
         navigate(`/sites/${f.properties.dbId}`);
       });
