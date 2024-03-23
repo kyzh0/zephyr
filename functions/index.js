@@ -6,7 +6,7 @@ const axios = require('axios');
 
 initializeApp();
 
-async function processHarvestResponse(sid, configId, graphId, traceId, format) {
+async function processHarvestResponse(sid, configId, graphId, traceId, longInterval, format) {
   let date = new Date();
   let utcYear = date.getUTCFullYear();
   let utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
@@ -15,7 +15,8 @@ async function processHarvestResponse(sid, configId, graphId, traceId, format) {
   let utcMins = date.getUTCMinutes().toString().padStart(2, '0');
   const dateTo = `${utcYear}-${utcMonth}-${utcDay}T${utcHours}:${utcMins}:00.000`;
 
-  date = new Date(date.getTime() - 20 * 60 * 1000); // get data for last 20 min
+  const intervalMins = longInterval ? 40 : 20; // get data for last 20 min, with some exceptions
+  date = new Date(date.getTime() - intervalMins * 60 * 1000);
   utcYear = date.getUTCFullYear();
   utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
   utcDay = date.getUTCDate().toString().padStart(2, '0');
@@ -62,7 +63,7 @@ async function processHarvestResponse(sid, configId, graphId, traceId, format) {
   return null;
 }
 
-async function getHarvestData(siteId, windAvgId, windGustId, windDirId, tempId) {
+async function getHarvestData(siteId, windAvgId, windGustId, windDirId, tempId, longInterval) {
   let ids = siteId.split('_');
   if (ids.length != 2) {
     return;
@@ -70,15 +71,22 @@ async function getHarvestData(siteId, windAvgId, windGustId, windDirId, tempId) 
   const sid = ids[0];
   const configId = ids[1];
 
-  let windAverage = 0;
-  let windGust = 0;
-  let windBearing = 0;
-  let temperature = 0;
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
 
   // wind avg
   ids = windAvgId.split('_');
   if (ids.length == 2) {
-    const result = await processHarvestResponse(sid, configId, ids[0], ids[1], 'object');
+    const result = await processHarvestResponse(
+      sid,
+      configId,
+      ids[0],
+      ids[1],
+      longInterval,
+      'object'
+    );
     if (result) {
       windAverage = result;
     }
@@ -87,7 +95,14 @@ async function getHarvestData(siteId, windAvgId, windGustId, windDirId, tempId) 
   // wind gust
   ids = windGustId.split('_');
   if (ids.length == 2) {
-    const result = await processHarvestResponse(sid, configId, ids[0], ids[1], 'array');
+    const result = await processHarvestResponse(
+      sid,
+      configId,
+      ids[0],
+      ids[1],
+      longInterval,
+      'array'
+    );
     if (result) {
       windGust = result;
     }
@@ -96,7 +111,14 @@ async function getHarvestData(siteId, windAvgId, windGustId, windDirId, tempId) 
   // wind direction
   ids = windDirId.split('_');
   if (ids.length == 2) {
-    const result = await processHarvestResponse(sid, configId, ids[0], ids[1], 'array');
+    const result = await processHarvestResponse(
+      sid,
+      configId,
+      ids[0],
+      ids[1],
+      longInterval,
+      'array'
+    );
     if (result) {
       windBearing = result;
     }
@@ -105,7 +127,14 @@ async function getHarvestData(siteId, windAvgId, windGustId, windDirId, tempId) 
   // temperature
   ids = tempId.split('_');
   if (ids.length == 2) {
-    const result = await processHarvestResponse(sid, configId, ids[0], ids[1], 'array');
+    const result = await processHarvestResponse(
+      sid,
+      configId,
+      ids[0],
+      ids[1],
+      longInterval,
+      'array'
+    );
     if (result) {
       temperature = result;
     }
@@ -120,10 +149,10 @@ async function getHarvestData(siteId, windAvgId, windGustId, windDirId, tempId) 
 }
 
 async function getMetserviceData(siteId) {
-  let windAverage = 0;
-  let windGust = 0;
-  let windBearing = 0;
-  let temperature = 0;
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
   const { data } = await axios.get(
     `https://www.metservice.com/publicData/webdata/weather-station-location/${siteId}/`,
     {
@@ -136,8 +165,8 @@ async function getMetserviceData(siteId) {
   if (modules && modules.length) {
     const wind = modules[0].observations.wind;
     if (wind && wind.length) {
-      windAverage = wind[0].averageSpeed ?? 0;
-      windGust = wind[0].gustSpeed ?? 0;
+      windAverage = wind[0].averageSpeed;
+      windGust = wind[0].gustSpeed;
       switch (wind[0].direction.toUpperCase()) {
         case 'N':
           windBearing = 0;
@@ -170,7 +199,7 @@ async function getMetserviceData(siteId) {
     }
     const temp = modules[0].observations.temperature;
     if (temp && temp.length) {
-      temperature = temp[0].current ?? 0;
+      temperature = temp[0].current;
     }
   }
   return {
@@ -187,16 +216,16 @@ async function getHolfuyData(siteId) {
   // );
 
   // return {
-  //   windAverage: data.wind.speed ?? 0,
-  //   windGust: data.wind.gust ?? 0,
-  //   windBearing: data.wind.direction ?? 0,
-  //   temperature: data.temperature ?? 0
+  //   windAverage: data.wind.speed,
+  //   windGust: data.wind.gust,
+  //   windBearing: data.wind.direction,
+  //   temperature: data.temperature
   // };
 
-  let windAverage = 0;
-  let windGust = 0;
-  let windBearing = 0;
-  let temperature = 0;
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
 
   const { headers } = await axios.get(`https://holfuy.com/en/weather/${siteId}`);
   const cookies = headers['set-cookie'];
@@ -207,10 +236,10 @@ async function getHolfuyData(siteId) {
         Connection: 'keep-alive'
       }
     });
-    windAverage = data.speed ?? 0;
-    windGust = data.gust ?? 0;
-    windBearing = data.dir ?? 0;
-    temperature = data.temperature ?? 0;
+    windAverage = data.speed;
+    windGust = data.gust;
+    windBearing = data.dir;
+    temperature = data.temperature;
   }
 
   return {
@@ -222,10 +251,10 @@ async function getHolfuyData(siteId) {
 }
 
 async function getAttentisData(siteId) {
-  let windAverage = 0;
-  let windGust = 0;
-  let windBearing = 0;
-  let temperature = 0;
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
 
   const { data } = await axios.get('https://api.attentistechnology.com/sensor-overview', {
     headers: { Authorization: `Bearer ${process.env.ATTENTIS_KEY}`, Connection: 'keep-alive' }
@@ -233,10 +262,10 @@ async function getAttentisData(siteId) {
   if (data.data && data.data.weather_readings) {
     const d = data.data.weather_readings[siteId];
     if (d) {
-      windAverage = d.wind_speed ?? 0;
-      windGust = d.wind_gust_speed ?? 0;
-      windBearing = d.wind_direction ?? 0;
-      temperature = d.air_temp ?? 0;
+      windAverage = d.wind_speed;
+      windGust = d.wind_gust_speed;
+      windBearing = d.wind_direction;
+      temperature = d.air_temp;
     }
   }
 
@@ -249,10 +278,10 @@ async function getAttentisData(siteId) {
 }
 
 async function getCwuData(siteId) {
-  let windAverage = 0;
-  let windGust = 0;
-  let windBearing = 0;
-  let temperature = 0;
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
 
   const { data } = await axios.get(`https://cwu.co.nz/forecast/${siteId}/`, {
     responseType: 'text',
@@ -371,10 +400,10 @@ async function getCwuData(siteId) {
 }
 
 async function getLpcData() {
-  let windAverage = 0;
-  let windGust = 0;
-  let windBearing = 0;
-  let temperature = 0;
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
 
   let date = new Date();
   const dateTo = date.toISOString();
@@ -392,9 +421,9 @@ async function getLpcData() {
     }
   );
   if (data.length && data[0]) {
-    windAverage = data[0].windspd_01mnavg * 1.852 ?? 0; // data is in kt
-    windGust = data[0].windgst_01mnmax * 1.852 ?? 0;
-    windBearing = data[0].winddir_01mnavg ?? 0;
+    windAverage = data[0].windspd_01mnavg * 1.852; // data is in kt
+    windGust = data[0].windgst_01mnmax * 1.852;
+    windBearing = data[0].winddir_01mnavg;
   }
 
   ({ data } = await axios.post(
@@ -423,7 +452,7 @@ async function getLpcData() {
     const vals = frames[0].data.values;
     if (vals && vals.length == 2) {
       if (vals[1] && vals[1].length) {
-        temperature = vals[1][0] ?? 0;
+        temperature = vals[1][0];
       }
     }
   }
@@ -456,7 +485,8 @@ async function wrapper(source) {
               docData.harvestWindAverageId,
               docData.harvestWindGustId,
               docData.harvestWindDirectionId,
-              docData.harvestTemperatureId
+              docData.harvestTemperatureId,
+              docData.harvestLongInterval
             );
             functions.logger.log(`harvest data updated - ${docData.externalId}`);
             functions.logger.log(data);
@@ -497,22 +527,40 @@ async function wrapper(source) {
             date = new Date(date.getTime() - rem * 60 * 1000);
           }
 
+          // handle likely erroneous values
+          let avg = data.windAverage;
+          if (avg < 0 || avg > 500) {
+            avg = null;
+          }
+          let gust = data.windGust;
+          if (gust < 0 || gust > 500) {
+            gust = null;
+          }
+          let bearing = data.windBearing;
+          if (bearing < 0 || bearing > 360) {
+            bearing = null;
+          }
+          let temperature = data.temperature;
+          if (temperature < -40 || temperature > 60) {
+            temperature = null;
+          }
+
           // update site data
           await db.doc(`sites/${doc.id}`).update({
             lastUpdate: date,
-            currentAverage: data.windAverage,
-            currentGust: data.windGust,
-            currentBearing: data.windBearing,
-            currentTemperature: data.temperature
+            currentAverage: avg,
+            currentGust: gust,
+            currentBearing: bearing,
+            currentTemperature: temperature
           });
 
           // add data
           await db.collection(`sites/${doc.id}/data`).add({
             time: date,
-            windAverage: data.windAverage,
-            windGust: data.windGust,
-            windBearing: data.windBearing,
-            temperature: data.temperature
+            windAverage: avg,
+            windGust: gust,
+            windBearing: bearing,
+            temperature: temperature
           });
         }
       }
