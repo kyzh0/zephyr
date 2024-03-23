@@ -93,6 +93,33 @@ function getWindColor(wind) {
   }
 }
 
+function getDirectionColor(bearing, validBearings) {
+  if (validBearings) {
+    const pairs = validBearings.split(',');
+    for (const p of pairs) {
+      const bearings = p.split('-');
+      if (bearings.length == 2) {
+        const bearing1 = Number(bearings[0]);
+        const bearing2 = Number(bearings[1]);
+        if (bearing1 <= bearing2) {
+          if (bearing >= bearing1 && bearing <= bearing2) {
+            console.log('returning green');
+            return 'rgba(192, 255, 191, 0.5)';
+          }
+        } else {
+          if (bearing <= bearing1 || bearing >= bearing2) {
+            return 'rgba(192, 255, 191, 0.5)';
+          }
+        }
+      }
+    }
+    console.log('returning red');
+    return 'rgba(255, 171, 171, 0.5)';
+  } else {
+    return '';
+  }
+}
+
 function getWindDirection(bearing) {
   if (bearing < 0) {
     return '';
@@ -227,17 +254,33 @@ export default function Site() {
                 {site.currentBearing != null &&
                   (site.currentAverage != null || site.currentGust != null) && (
                     <Stack direction="column" justifyContent="center" alignItems="center">
-                      <Typography variant="h5" sx={{ fontSize: '16px', mb: 1 }}>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontSize: '16px',
+                          mb: 1
+                        }}
+                      >
                         {getWindDirection(site.currentBearing)}
                       </Typography>
-                      <img
-                        src="/arrow.png"
-                        style={{
-                          width: '48px',
-                          height: '48px',
-                          transform: `rotate(${Math.round(site.currentBearing)}deg)`
+                      <Stack
+                        direction="row"
+                        justifyContent="center"
+                        alignItems="center"
+                        sx={{
+                          p: 1,
+                          background: getDirectionColor(site.currentBearing, site.validBearings)
                         }}
-                      />
+                      >
+                        <img
+                          src="/arrow.png"
+                          style={{
+                            width: '48px',
+                            height: '48px',
+                            transform: `rotate(${Math.round(site.currentBearing)}deg)`
+                          }}
+                        />
+                      </Stack>
                     </Stack>
                   )}
                 <Table sx={{ width: '180px', ml: 3 }}>
@@ -379,7 +422,10 @@ export default function Site() {
                           <TableCell
                             key={d.time.seconds}
                             align="center"
-                            sx={{ padding: '2px', borderBottom: 'none' }}
+                            sx={{
+                              padding: '2px',
+                              borderBottom: 'none'
+                            }}
                           >
                             {d.windBearing == null || (d.windAverage == null && d.windGust == null)
                               ? ''
@@ -393,7 +439,11 @@ export default function Site() {
                           <TableCell
                             key={d.time.seconds}
                             align="center"
-                            sx={{ padding: 0, borderBottom: 'none' }}
+                            sx={{
+                              padding: 0,
+                              borderBottom: 'none',
+                              background: getDirectionColor(d.windBearing, site.validBearings)
+                            }}
                           >
                             {d.windBearing == null ||
                             (d.windAverage == null && d.windGust == null) ? (
@@ -419,7 +469,10 @@ export default function Site() {
                           <TableCell
                             key={d.time.seconds}
                             align="center"
-                            sx={{ padding: '2px', fontSize: '10px' }}
+                            sx={{
+                              padding: '2px',
+                              fontSize: '10px'
+                            }}
                           >
                             {d.windBearing == null || (d.windAverage == null && d.windGust == null)
                               ? ''

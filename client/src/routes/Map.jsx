@@ -45,7 +45,8 @@ export default function Map() {
           name: site.name,
           dbId: site.id,
           currentAverage: site.currentAverage == null ? null : Math.round(site.currentAverage),
-          rotation: site.currentBearing
+          currentBearing: site.currentBearing,
+          validBearings: site.validBearings
         },
         geometry: {
           type: 'Point',
@@ -65,12 +66,43 @@ export default function Map() {
     return geoJson;
   }
 
-  function getArrowStyle(avgWind, hasDirection) {
+  function getArrowStyle(avgWind, currentBearing, validBearings) {
     let textColor = 'black';
     let img = '';
-    const prefix = hasDirection ? 'arrow' : 'circle';
+
+    let prefix = '';
+    if (currentBearing != null && avgWind != null) {
+      // site has bearings, check if within bounds
+      if (validBearings) {
+        prefix = 'gold-invalid-arrow';
+        const pairs = validBearings.split(',');
+        pairs.forEach((p) => {
+          const bearings = p.split('-');
+          if (bearings.length == 2) {
+            const bearing1 = Number(bearings[0]);
+            const bearing2 = Number(bearings[1]);
+            if (bearing1 <= bearing2) {
+              if (currentBearing >= bearing1 && currentBearing <= bearing2) {
+                prefix = 'gold-valid-arrow';
+              }
+            } else {
+              if (currentBearing <= bearing1 || currentBearing >= bearing2) {
+                prefix = 'gold-valid-arrow';
+              }
+            }
+          }
+        });
+      } else {
+        // site has no bearings
+        prefix = 'arrow';
+      }
+    } else {
+      // wind has no direction
+      prefix = validBearings ? 'gold-circle' : 'circle';
+    }
+
     if (avgWind == null) {
-      img = `url('/circle-white.png')`;
+      img = `url('/${prefix}-white.png')`;
     } else if (avgWind < 5) {
       img = `url('/${prefix}-white.png')`;
     } else if (avgWind < 15) {
@@ -124,7 +156,8 @@ export default function Map() {
           for (const child of marker.children) {
             const [img, color] = getArrowStyle(
               f.properties.currentAverage,
-              f.properties.rotation != null
+              f.properties.currentBearing,
+              f.properties.validBearings
             );
             if (child.className === 'marker-text') {
               child.style.color = color;
@@ -133,9 +166,9 @@ export default function Map() {
             } else if (child.className === 'marker-arrow') {
               child.style.backgroundImage = img;
               child.style.transform =
-                f.properties.rotation == null
+                f.properties.currentBearing == null
                   ? ''
-                  : `rotate(${Math.round(f.properties.rotation)}deg)`;
+                  : `rotate(${Math.round(f.properties.currentBearing)}deg)`;
             }
           }
         }
@@ -258,14 +291,17 @@ export default function Map() {
       const childArrow = document.createElement('div');
       childArrow.className = 'marker-arrow';
       childArrow.style.transform =
-        f.properties.rotation == null ? '' : `rotate(${Math.round(f.properties.rotation)}deg)`;
+        f.properties.currentBearing == null
+          ? ''
+          : `rotate(${Math.round(f.properties.currentBearing)}deg)`;
       childArrow.addEventListener('click', () => {
         navigate(`/sites/${f.properties.dbId}`);
       });
 
       const [img, color] = getArrowStyle(
         f.properties.currentAverage,
-        f.properties.rotation != null
+        f.properties.currentBearing,
+        f.properties.validBearings
       );
       childArrow.style.backgroundImage = img;
 

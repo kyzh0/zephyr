@@ -53,6 +53,7 @@ export default function Site() {
     const externalLink = data.get('externalLink').trim();
     const latitude = data.get('lat').trim();
     const longitude = data.get('lon').trim();
+    const bearings = data.get('bearings').trim();
 
     // input validation
     if (!name || !externalId || !externalLink || !latitude || !longitude || !type) {
@@ -90,6 +91,14 @@ export default function Site() {
       return;
     }
 
+    const regex = /^[0-9]{3}-[0-9]{3}(,[0-9]{3}-[0-9]{3})*$/g;
+    if (bearings && !bearings.match(regex)) {
+      setLoading(false);
+      setErrorMsg('Directions is invalid');
+      setIsError(true);
+      return;
+    }
+
     let harvestWindAvgId = '';
     let harvestWindGustId = '';
     let harvestWindDirId = '';
@@ -105,13 +114,13 @@ export default function Site() {
         setIsError(true);
         return;
       }
-      const regex = /[0-9]+_[0-9]+/g;
+      const regex1 = /[0-9]+_[0-9]+/g;
       if (
-        !externalId.match(regex) ||
-        !harvestWindAvgId.match(regex) ||
-        !harvestWindGustId.match(regex) ||
-        !harvestWindDirId.match(regex) ||
-        !harvestTempId.match(regex)
+        !externalId.match(regex1) ||
+        !harvestWindAvgId.match(regex1) ||
+        !harvestWindGustId.match(regex1) ||
+        !harvestWindDirId.match(regex1) ||
+        !harvestTempId.match(regex1)
       ) {
         setLoading(false);
         setErrorMsg('Invalid Harvest ID');
@@ -139,7 +148,8 @@ export default function Site() {
         currentGust: 0,
         currentBearing: 0,
         currentTemperature: 0,
-        elevation: elevation
+        elevation: elevation,
+        validBearings: bearings
       };
       if (type === 'harvest') {
         site.harvestWindAverageId = harvestWindAvgId;
@@ -190,6 +200,7 @@ export default function Site() {
                 id="name"
                 label="Site Name"
                 name="name"
+                required
                 error={isError}
                 helperText={isError && errorMsg}
               />
@@ -199,6 +210,7 @@ export default function Site() {
                 id="externalId"
                 label="External Id"
                 name="externalId"
+                required
               />
               <TextField
                 margin="dense"
@@ -206,14 +218,15 @@ export default function Site() {
                 id="externalLink"
                 label="External Link"
                 name="externalLink"
+                required
               />
               <TextField
-                sx={{ mb: 0 }}
                 select
                 margin="dense"
                 fullWidth
                 id="type"
                 label="Type"
+                required
                 value={type}
                 onChange={(e) => {
                   setType(e.target.value);
@@ -226,8 +239,30 @@ export default function Site() {
                 <MenuItem value="cwu">Canterbury Weather Updates</MenuItem>
                 <MenuItem value="lpc">Lyttelton Port Company</MenuItem>
               </TextField>
-              <TextField margin="dense" fullWidth id="lat" label="Latitude" name="lat" />
-              <TextField margin="dense" fullWidth id="lon" label="Longitude" name="lon" />
+              <TextField
+                margin="dense"
+                id="lat"
+                label="Latitude"
+                name="lat"
+                required
+                sx={{ width: '49%' }}
+              />
+              <TextField
+                margin="dense"
+                id="lon"
+                label="Longitude"
+                name="lon"
+                required
+                sx={{ width: '49%', ml: '2%' }}
+              />
+              <TextField
+                margin="normal"
+                fullWidth
+                id="bearings"
+                label="Bearings CW 000-090,180-270"
+                name="bearings"
+                sx={{ mt: 1 }}
+              />
               {type === 'harvest' && (
                 <>
                   <TextField
