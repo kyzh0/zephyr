@@ -1,70 +1,107 @@
-# Getting Started with Create React App
+# Zephyr
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<p align="center">
+<a href="https://zephyr-3fb26.web.app/">
+  <img src="https://github.com/kyzh0/zephyr/blob/main/client/public/logo192.png?raw=true" />
+  </a>
+</p>
 
-## Available Scripts
+<p align="center">
+ <a href="https://zephyr-3fb26.web.app/">https://zephyr-app.nz/</a> 
+</p>
 
-In the project directory, you can run:
+## Table of Contents
 
-### `npm start`
+- [Introduction](#introduction)
+- [Features](#features)
+- [Technologies](#technologies)
+- [Setup](#setup)
+- [Contribute](#contribute)
+- [Acknowledgements](#acknowledgements)
+- [License](#license)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Introduction
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Zephyr is an interactive weather map aimed towards paraglider pilots in New Zealand, scraping real-time data from various stations across the country.
 
-### `npm test`
+## Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Real-time data - average wind speed, gust, direction, and temperature.
+- Interactive map - easy to use with intuitive colours and icons.
+- Charts and tables - a tidy representation of each station's data over time.
+- Mobile-first design - scalable across different screen sizes.
+- Help tab - provides a way for users to contact the developer.
+- Admin-only area - for adding new weather stations.
 
-### `npm run build`
+<p align="center">
+  <img src = "https://i.imgur.com/CGOYE31.png" width=700>
+</p>
+<p align="center">
+  <img src = "https://i.imgur.com/QdaaxCb.png" width=700>
+</p>
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Technologies
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Frontend
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- React
+- Mapbox GL
+- MUI
+- Recharts
 
-### `npm run eject`
+### Backend
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- Cloud Firestore
+- Google Cloud Functions
+- Firebase Authentication
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Setup
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Clone the Repository
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+`git clone https://github.com/kyzh0/zephyr.git`
 
-## Learn More
+### Initialise Environment Variables
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Follow the instructions in `client/.env.example` and `functions/.env.example` to set up your own environment variables.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Client
 
-### Code Splitting
+```
+# go to directory
+$ cd ./client
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+# install dependencies
+$ npm install
 
-### Analyzing the Bundle Size
+# run the web app
+$ npm run start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Functions
 
-### Making a Progressive Web App
+```
+# go to directory
+$ cd ./functions
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+# install dependencies
+$ npm install
 
-### Advanced Configuration
+# run emulators
+$ firebase emulators:start
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+# deploy functions
+$ firebase deploy --only functions
+```
 
-### Deployment
+## Contribute
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Spotted a bug, or got a new feature in mind? Open a new [issue](https://github.com/kyzh0/zephyr/issues), or even better, fork the repo and submit your own pull request! Any help on open issues is appreciated.
 
-### `npm run build` fails to minify
+## Acknowledgements
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Thanks to Jonas Yang for providing the icons and logo design.
+
+## License
+
+[MIT © 2024 Kyle Zhou](https://github.com/kyzh0/zephyr/blob/main/LICENSE.md)
