@@ -46,7 +46,8 @@ export default function Map() {
           dbId: site.id,
           currentAverage: site.currentAverage == null ? null : Math.round(site.currentAverage),
           currentBearing: site.currentBearing,
-          validBearings: site.validBearings
+          validBearings: site.validBearings,
+          isError: site.isError
         },
         geometry: {
           type: 'Point',
@@ -66,9 +67,15 @@ export default function Map() {
     return geoJson;
   }
 
-  function getArrowStyle(avgWind, currentBearing, validBearings) {
+  function getArrowStyle(avgWind, currentBearing, validBearings, isError) {
     let textColor = 'black';
     let img = '';
+
+    if (isError) {
+      textColor = 'red';
+      img = `url('/circle-white.png')`;
+      return [img, textColor];
+    }
 
     let prefix = '';
     if (currentBearing != null && avgWind != null) {
@@ -158,12 +165,14 @@ export default function Map() {
             const [img, color] = getArrowStyle(
               f.properties.currentAverage,
               f.properties.currentBearing,
-              f.properties.validBearings
+              f.properties.validBearings,
+              f.properties.isError
             );
             if (child.className === 'marker-text') {
               child.style.color = color;
               child.innerHTML =
                 f.properties.currentAverage == null ? '-' : f.properties.currentAverage;
+              if (f.properties.isError) child.innerHTML = 'X';
             } else if (child.className === 'marker-arrow') {
               child.style.backgroundImage = img;
               child.style.transform =
@@ -302,7 +311,8 @@ export default function Map() {
       const [img, color] = getArrowStyle(
         f.properties.currentAverage,
         f.properties.currentBearing,
-        f.properties.validBearings
+        f.properties.validBearings,
+        f.properties.isError
       );
       childArrow.style.backgroundImage = img;
 
@@ -310,6 +320,7 @@ export default function Map() {
       childText.className = 'marker-text';
       childText.style.color = color;
       childText.innerHTML = f.properties.currentAverage == null ? '-' : f.properties.currentAverage;
+      if (f.properties.isError) childText.innerHTML = 'X';
       childText.addEventListener('click', () => {
         navigate(`/sites/${f.properties.dbId}`);
       });

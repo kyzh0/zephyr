@@ -496,7 +496,7 @@ async function wrapper(source) {
               docData.harvestWindGustId,
               docData.harvestWindDirectionId,
               docData.harvestTemperatureId,
-              docData.harvestLongInterval
+              docData.harvestLongInterval // some harvest stations only update every 30 min
             );
             functions.logger.log(`harvest data updated - ${docData.externalId}`);
             functions.logger.log(data);
@@ -561,7 +561,8 @@ async function wrapper(source) {
             currentAverage: avg ?? null,
             currentGust: gust ?? null,
             currentBearing: bearing ?? null,
-            currentTemperature: temperature ?? null
+            currentTemperature: temperature ?? null,
+            isError: (avg == null || gust == null) && bearing == null && temperature == null
           });
 
           // add data
@@ -653,7 +654,9 @@ async function checkForErrors() {
         }
         if (isError) {
           errors++;
-          // send email?
+          await db.doc(`sites/${doc.id}`).update({
+            isError: true
+          });
         }
       }
     }

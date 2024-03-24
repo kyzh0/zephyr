@@ -265,395 +265,410 @@ export default function Site() {
               <StyledSkeleton width={120} height={20} />
             )}
             {site ? (
-              <Stack
-                direction="row"
-                justifyContent="center"
-                sx={{ width: '100%', p: '8px', pb: '18px' }}
-              >
-                {site.currentBearing != null &&
-                  (site.currentAverage != null || site.currentGust != null) && (
-                    <Stack direction="column" justifyContent="center" alignItems="center">
-                      <Typography
-                        variant="h5"
-                        sx={{
-                          fontSize: '16px',
-                          mb: 1
-                        }}
-                      >
-                        {getWindDirection(site.currentBearing)}
-                      </Typography>
-                      <Stack
-                        direction="row"
-                        justifyContent="center"
-                        alignItems="center"
-                        sx={{
-                          p: 1,
-                          background: getDirectionColor(site.currentBearing, site.validBearings)
-                        }}
-                      >
-                        <img
-                          src="/arrow.png"
-                          style={{
-                            width: '48px',
-                            height: '48px',
-                            transform: `rotate(${Math.round(site.currentBearing)}deg)`
+              site.isError ? (
+                <Typography component="h1" variant="h5" sx={{ mt: 2, color: 'red' }}>
+                  Station is offline.
+                </Typography>
+              ) : (
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  sx={{ width: '100%', p: '8px', pb: '18px' }}
+                >
+                  {site.currentBearing != null &&
+                    (site.currentAverage != null || site.currentGust != null) && (
+                      <Stack direction="column" justifyContent="center" alignItems="center">
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            fontSize: '16px',
+                            mb: 1
                           }}
-                        />
+                        >
+                          {getWindDirection(site.currentBearing)}
+                        </Typography>
+                        <Stack
+                          direction="row"
+                          justifyContent="center"
+                          alignItems="center"
+                          sx={{
+                            p: 1,
+                            background: getDirectionColor(site.currentBearing, site.validBearings)
+                          }}
+                        >
+                          <img
+                            src="/arrow.png"
+                            style={{
+                              width: '48px',
+                              height: '48px',
+                              transform: `rotate(${Math.round(site.currentBearing)}deg)`
+                            }}
+                          />
+                        </Stack>
                       </Stack>
-                    </Stack>
-                  )}
-                <Table sx={{ width: '180px', ml: 3 }}>
-                  <TableBody>
-                    <TableRow
-                      sx={{
-                        '&:last-child td, &:last-child th': { border: 0 }
-                      }}
-                    >
-                      <TableCell
-                        align="center"
-                        sx={{ fontSize: '10px', borderBottom: 'none', p: 0 }}
-                      >
-                        Avg
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{ fontSize: '10px', borderBottom: 'none', p: 0 }}
-                      >
-                        Gust
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{ fontSize: '10px', borderBottom: 'none', p: 0 }}
-                      ></TableCell>
-                    </TableRow>
-                    <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell
-                        align="center"
+                    )}
+                  <Table sx={{ width: '180px', ml: 3 }}>
+                    <TableBody>
+                      <TableRow
                         sx={{
-                          fontSize: '24px',
-                          backgroundColor: getWindColor(site.currentAverage),
-                          borderBottom: 'none',
-                          p: 1
+                          '&:last-child td, &:last-child th': { border: 0 }
                         }}
                       >
-                        {site.currentAverage == null ? '-' : Math.round(site.currentAverage)}
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          fontSize: '24px',
-                          backgroundColor: getWindColor(site.currentGust),
-                          borderBottom: 'none',
-                          p: 1
-                        }}
-                      >
-                        {site.currentGust == null ? '-' : Math.round(site.currentGust)}
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          fontSize: '16px',
-                          borderBottom: 'none',
-                          p: 0
-                        }}
-                      >
-                        {site.currentTemperature == null
-                          ? ''
-                          : `${Math.round(site.currentTemperature * 10) / 10}°C`}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0, p: 0 } }}>
-                      <TableCell
-                        colSpan={2}
-                        align="center"
-                        sx={{
-                          fontSize: '10px'
-                        }}
-                      >
-                        km/h
-                      </TableCell>
-                      <TableCell></TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </Stack>
+                        <TableCell
+                          align="center"
+                          sx={{ fontSize: '10px', borderBottom: 'none', p: 0 }}
+                        >
+                          Avg
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ fontSize: '10px', borderBottom: 'none', p: 0 }}
+                        >
+                          Gust
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ fontSize: '10px', borderBottom: 'none', p: 0 }}
+                        ></TableCell>
+                      </TableRow>
+                      <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontSize: '24px',
+                            backgroundColor: getWindColor(site.currentAverage),
+                            borderBottom: 'none',
+                            p: 1
+                          }}
+                        >
+                          {site.currentAverage == null ? '-' : Math.round(site.currentAverage)}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontSize: '24px',
+                            backgroundColor: getWindColor(site.currentGust),
+                            borderBottom: 'none',
+                            p: 1
+                          }}
+                        >
+                          {site.currentGust == null ? '-' : Math.round(site.currentGust)}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontSize: '16px',
+                            borderBottom: 'none',
+                            p: 0
+                          }}
+                        >
+                          {site.currentTemperature == null
+                            ? ''
+                            : `${Math.round(site.currentTemperature * 10) / 10}°C`}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0, p: 0 } }}>
+                        <TableCell
+                          colSpan={2}
+                          align="center"
+                          sx={{
+                            fontSize: '10px'
+                          }}
+                        >
+                          km/h
+                        </TableCell>
+                        <TableCell></TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </Stack>
+              )
             ) : (
               <StyledSkeleton width={180} height={180} />
             )}
 
-            {data && data.length ? (
-              <>
-                <TableContainer component={Paper}>
-                  <Table sx={{ minWidth: 650 }} size="small">
-                    <TableBody>
-                      <TableRow
-                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                        ref={tableRef}
-                      >
-                        <TableCell variant="head"></TableCell>
-                        {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                          <TableCell
-                            key={d.time.seconds}
-                            align="center"
-                            sx={{
-                              padding: '2px',
-                              fontSize: '12px',
-                              backgroundColor: d.time.toDate().getMinutes() == 0 ? '#e6e6e6' : ''
-                            }}
-                          >
-                            {`${d.time.toDate().getHours().toString().padStart(2, '0')}:${d.time.toDate().getMinutes().toString().padStart(2, '0')}`}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                        <TableCell variant="head">Avg</TableCell>
-                        {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                          <TableCell
-                            key={d.time.seconds}
-                            align="center"
-                            sx={{
-                              padding: '2px',
-                              backgroundColor: getWindColor(d.windAverage)
-                            }}
-                          >
-                            {d.windAverage == null ? '-' : Math.round(d.windAverage)}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                        <TableCell variant="head">Gust</TableCell>
-                        {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                          <TableCell
-                            key={d.time.seconds}
-                            align="center"
-                            sx={{
-                              padding: '2px',
-                              backgroundColor: getWindColor(d.windGust)
-                            }}
-                          >
-                            {d.windGust == null ? '-' : Math.round(d.windGust)}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                        <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
-                        {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                          <TableCell
-                            key={d.time.seconds}
-                            align="center"
-                            sx={{
-                              padding: '2px',
-                              borderBottom: 'none'
-                            }}
-                          >
-                            {d.windBearing == null || (d.windAverage == null && d.windGust == null)
-                              ? ''
-                              : getWindDirection(d.windBearing)}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                        <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
-                        {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                          <TableCell
-                            key={d.time.seconds}
-                            align="center"
-                            sx={{
-                              padding: 0,
-                              borderBottom: 'none',
-                              background: getDirectionColor(d.windBearing, site.validBearings)
-                            }}
-                          >
-                            {d.windBearing == null ||
-                            (d.windAverage == null && d.windGust == null) ? (
-                              '-'
-                            ) : (
-                              <Stack direction="column" justifyContent="center" alignItems="center">
-                                <img
-                                  src="/arrow.png"
-                                  style={{
-                                    width: '16px',
-                                    height: '16px',
-                                    transform: `rotate(${Math.round(d.windBearing)}deg)`
-                                  }}
-                                />
-                              </Stack>
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                        <TableCell variant="head"></TableCell>
-                        {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                          <TableCell
-                            key={d.time.seconds}
-                            align="center"
-                            sx={{
-                              padding: '2px',
-                              fontSize: '10px'
-                            }}
-                          >
-                            {d.windBearing == null || (d.windAverage == null && d.windGust == null)
-                              ? ''
-                              : `${Math.round(d.windBearing).toString().padStart(3, '0')}°`}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                        <TableCell variant="head"></TableCell>
-                        {data.slice(Math.max(data.length - 37, 0)).map((d) => (
-                          <TableCell
-                            key={d.time.seconds}
-                            align="center"
-                            sx={{
-                              padding: '2px',
-                              fontSize: '10px'
-                            }}
-                          >
-                            {d.temperature == null
-                              ? '-'
-                              : `${Math.round(d.temperature * 10) / 10}°C`}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '20vh',
-                    mt: 2
-                  }}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart width="100%" height="100%" data={data}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="timeLabel"
-                        tick={{ fill: 'black' }}
-                        style={{
-                          fontSize: '12px',
-                          fontWeight: 400,
-                          fontFamily: 'Arial'
-                        }}
-                      />
-                      <YAxis
-                        width={20}
-                        interval={0}
-                        tickCount={6}
-                        tick={{ fill: 'black' }}
-                        style={{
-                          fontSize: '12px',
-                          fontWeight: 400,
-                          fontFamily: 'Arial'
-                        }}
-                      />
-                      <Tooltip formatter={(value) => Math.round(value)} />
-                      <Legend
-                        wrapperStyle={{ fontSize: '12px', fontWeight: 400, fontFamily: 'Arial' }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="windAverage"
-                        name="Avg (km/h)"
-                        stroke="#8884d8"
-                        dot={{ r: 0 }}
-                        activeDot={{ r: 4 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="windGust"
-                        name="Gust (km/h)"
-                        stroke="#ffa894"
-                        dot={{ r: 0 }}
-                        activeDot={{ r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </Box>
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '20vh',
-                    mt: 2
-                  }}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart width="100%" height="100%" data={data}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="timeLabel"
-                        tick={{ fill: 'black' }}
-                        style={{
-                          fontSize: '12px',
-                          fontWeight: 400,
-                          fontFamily: 'Arial'
-                        }}
-                      />
-                      <YAxis
-                        width={20}
-                        interval={0}
-                        ticks={[0, 90, 180, 270, 360]}
-                        tickFormatter={(value) => {
-                          switch (value) {
-                            case 0:
-                              return 'N';
-                            case 90:
-                              return 'E';
-                            case 180:
-                              return 'S';
-                            case 270:
-                              return 'W';
-                            case 360:
-                              return 'N';
-                            default:
-                              return '';
-                          }
-                        }}
-                        tick={{ fill: 'black' }}
-                        style={{
-                          fontSize: '12px',
-                          fontWeight: 400,
-                          fontFamily: 'Arial'
-                        }}
-                      />
-                      <Tooltip
-                        formatter={(value, name) => [
-                          name === 'vb' ? null : Math.round(value).toString().padStart(3, '0'),
-                          name === 'vb' ? null : 'Bearing'
-                        ]}
-                      />
-                      <Legend
-                        wrapperStyle={{ fontSize: '12px', fontWeight: 400, fontFamily: 'Arial' }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="windBearing"
-                        name="Direction"
-                        stroke="#8884d8"
-                        strokeWidth={0}
-                        dot={{ r: 1, strokeWidth: 2 }}
-                      />
-                      {[...Array(bearingPairCount).keys()].map((i) => (
-                        <Area
-                          key={i}
-                          type="monotone"
-                          dataKey={`validBearings${i}`}
-                          fill="rgba(192, 255, 191, 0.5)"
-                          stroke="none"
-                          activeDot={{ r: 0, stroke: 'none' }}
-                          legendType="none"
-                          name="vb"
+            {site && data && data.length ? (
+              !site.isError && (
+                <>
+                  <TableContainer component={Paper}>
+                    <Table sx={{ minWidth: 650 }} size="small">
+                      <TableBody>
+                        <TableRow
+                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                          ref={tableRef}
+                        >
+                          <TableCell variant="head"></TableCell>
+                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                            <TableCell
+                              key={d.time.seconds}
+                              align="center"
+                              sx={{
+                                padding: '2px',
+                                fontSize: '12px',
+                                backgroundColor: d.time.toDate().getMinutes() == 0 ? '#e6e6e6' : ''
+                              }}
+                            >
+                              {`${d.time.toDate().getHours().toString().padStart(2, '0')}:${d.time.toDate().getMinutes().toString().padStart(2, '0')}`}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                        <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                          <TableCell variant="head">Avg</TableCell>
+                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                            <TableCell
+                              key={d.time.seconds}
+                              align="center"
+                              sx={{
+                                padding: '2px',
+                                backgroundColor: getWindColor(d.windAverage)
+                              }}
+                            >
+                              {d.windAverage == null ? '-' : Math.round(d.windAverage)}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                        <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                          <TableCell variant="head">Gust</TableCell>
+                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                            <TableCell
+                              key={d.time.seconds}
+                              align="center"
+                              sx={{
+                                padding: '2px',
+                                backgroundColor: getWindColor(d.windGust)
+                              }}
+                            >
+                              {d.windGust == null ? '-' : Math.round(d.windGust)}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                        <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                          <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
+                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                            <TableCell
+                              key={d.time.seconds}
+                              align="center"
+                              sx={{
+                                padding: '2px',
+                                borderBottom: 'none'
+                              }}
+                            >
+                              {d.windBearing == null ||
+                              (d.windAverage == null && d.windGust == null)
+                                ? ''
+                                : getWindDirection(d.windBearing)}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                        <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                          <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
+                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                            <TableCell
+                              key={d.time.seconds}
+                              align="center"
+                              sx={{
+                                padding: 0,
+                                borderBottom: 'none',
+                                background: getDirectionColor(d.windBearing, site.validBearings)
+                              }}
+                            >
+                              {d.windBearing == null ||
+                              (d.windAverage == null && d.windGust == null) ? (
+                                '-'
+                              ) : (
+                                <Stack
+                                  direction="column"
+                                  justifyContent="center"
+                                  alignItems="center"
+                                >
+                                  <img
+                                    src="/arrow.png"
+                                    style={{
+                                      width: '16px',
+                                      height: '16px',
+                                      transform: `rotate(${Math.round(d.windBearing)}deg)`
+                                    }}
+                                  />
+                                </Stack>
+                              )}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                        <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                          <TableCell variant="head"></TableCell>
+                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                            <TableCell
+                              key={d.time.seconds}
+                              align="center"
+                              sx={{
+                                padding: '2px',
+                                fontSize: '10px'
+                              }}
+                            >
+                              {d.windBearing == null ||
+                              (d.windAverage == null && d.windGust == null)
+                                ? ''
+                                : `${Math.round(d.windBearing).toString().padStart(3, '0')}°`}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                        <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                          <TableCell variant="head"></TableCell>
+                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                            <TableCell
+                              key={d.time.seconds}
+                              align="center"
+                              sx={{
+                                padding: '2px',
+                                fontSize: '10px'
+                              }}
+                            >
+                              {d.temperature == null
+                                ? '-'
+                                : `${Math.round(d.temperature * 10) / 10}°C`}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: '20vh',
+                      mt: 2
+                    }}
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart width="100%" height="100%" data={data}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="timeLabel"
+                          tick={{ fill: 'black' }}
+                          style={{
+                            fontSize: '12px',
+                            fontWeight: 400,
+                            fontFamily: 'Arial'
+                          }}
                         />
-                      ))}
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </Box>
-              </>
+                        <YAxis
+                          width={20}
+                          interval={0}
+                          tickCount={6}
+                          tick={{ fill: 'black' }}
+                          style={{
+                            fontSize: '12px',
+                            fontWeight: 400,
+                            fontFamily: 'Arial'
+                          }}
+                        />
+                        <Tooltip formatter={(value) => Math.round(value)} />
+                        <Legend
+                          wrapperStyle={{ fontSize: '12px', fontWeight: 400, fontFamily: 'Arial' }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="windAverage"
+                          name="Avg (km/h)"
+                          stroke="#8884d8"
+                          dot={{ r: 0 }}
+                          activeDot={{ r: 4 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="windGust"
+                          name="Gust (km/h)"
+                          stroke="#ffa894"
+                          dot={{ r: 0 }}
+                          activeDot={{ r: 4 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </Box>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: '20vh',
+                      mt: 2
+                    }}
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart width="100%" height="100%" data={data}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="timeLabel"
+                          tick={{ fill: 'black' }}
+                          style={{
+                            fontSize: '12px',
+                            fontWeight: 400,
+                            fontFamily: 'Arial'
+                          }}
+                        />
+                        <YAxis
+                          width={20}
+                          interval={0}
+                          ticks={[0, 90, 180, 270, 360]}
+                          tickFormatter={(value) => {
+                            switch (value) {
+                              case 0:
+                                return 'N';
+                              case 90:
+                                return 'E';
+                              case 180:
+                                return 'S';
+                              case 270:
+                                return 'W';
+                              case 360:
+                                return 'N';
+                              default:
+                                return '';
+                            }
+                          }}
+                          tick={{ fill: 'black' }}
+                          style={{
+                            fontSize: '12px',
+                            fontWeight: 400,
+                            fontFamily: 'Arial'
+                          }}
+                        />
+                        <Tooltip
+                          formatter={(value, name) => [
+                            name === 'vb' ? null : Math.round(value).toString().padStart(3, '0'),
+                            name === 'vb' ? null : 'Bearing'
+                          ]}
+                        />
+                        <Legend
+                          wrapperStyle={{ fontSize: '12px', fontWeight: 400, fontFamily: 'Arial' }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="windBearing"
+                          name="Direction"
+                          stroke="#8884d8"
+                          strokeWidth={0}
+                          dot={{ r: 1, strokeWidth: 2 }}
+                        />
+                        {[...Array(bearingPairCount).keys()].map((i) => (
+                          <Area
+                            key={i}
+                            type="monotone"
+                            dataKey={`validBearings${i}`}
+                            fill="rgba(192, 255, 191, 0.5)"
+                            stroke="none"
+                            activeDot={{ r: 0, stroke: 'none' }}
+                            legendType="none"
+                            name="vb"
+                          />
+                        ))}
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </>
+              )
             ) : (
               <StyledSkeleton width={'100%'} height={600} />
             )}
+
             <Stack direction="row" justifyContent="end" sx={{ width: '100%', pt: '4px' }}>
               {site && (
                 <Link href={site.externalLink} target="_blank" rel="noreferrer" variant="subtitle2">
