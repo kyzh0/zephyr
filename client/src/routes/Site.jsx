@@ -188,7 +188,7 @@ export default function Site() {
 
       const data = await loadSiteData(id);
       data.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds)); // time asc
-      data.forEach((d) => {
+      for (const d of data) {
         d.timeLabel = `${d.time.toDate().getHours().toString().padStart(2, '0')}:${d.time.toDate().getMinutes().toString().padStart(2, '0')}`;
         if (validBearings.length) {
           setBearingPairCount(validBearings.length);
@@ -196,7 +196,7 @@ export default function Site() {
             d[`validBearings${i}`] = validBearings[i];
           }
         }
-      });
+      }
       setData(data);
     } catch (error) {
       console.error(error);

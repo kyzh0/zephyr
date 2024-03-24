@@ -33,12 +33,12 @@ export default function Map() {
   const { refresh, setRefresh } = useContext(AppContext);
 
   async function getGeoJson() {
-    const s = await list('sites');
+    const sites = await list('sites');
     const geoJson = {
       type: 'FeatureCollection',
       features: []
     };
-    s.forEach((site) => {
+    for (const site of sites) {
       const feature = {
         type: 'Feature',
         properties: {
@@ -63,7 +63,7 @@ export default function Map() {
         feature.properties.currentAverage = site.currentGust;
       }
       geoJson.features.push(feature);
-    });
+    }
     return geoJson;
   }
 
@@ -83,7 +83,7 @@ export default function Map() {
       if (validBearings) {
         prefix = 'gold-arrow';
         const pairs = validBearings.split(',');
-        pairs.forEach((p) => {
+        for (const p of pairs) {
           const bearings = p.split('-');
           if (bearings.length == 2) {
             const bearing1 = Number(bearings[0]);
@@ -98,7 +98,7 @@ export default function Map() {
               }
             }
           }
-        });
+        }
       } else {
         // site has no bearings
         prefix = 'arrow';
@@ -297,7 +297,7 @@ export default function Map() {
     if (!map.current || !sitesGeoJson) return;
 
     const timestamp = Math.floor(Date.now() / 1000);
-    sitesGeoJson.features.forEach((f) => {
+    for (const f of sitesGeoJson.features) {
       const childArrow = document.createElement('div');
       childArrow.className = 'marker-arrow';
       childArrow.style.transform =
@@ -334,7 +334,7 @@ export default function Map() {
       markers.push(el);
 
       new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
-    });
+    }
   }, [map.current, sitesGeoJson]);
 
   // refresh on visibility change
