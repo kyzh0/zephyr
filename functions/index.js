@@ -556,14 +556,17 @@ async function wrapper(source) {
           }
 
           // update site data
-          await db.doc(`sites/${doc.id}`).update({
+          const s = {
             lastUpdate: date,
             currentAverage: avg ?? null,
             currentGust: gust ?? null,
             currentBearing: bearing ?? null,
-            currentTemperature: temperature ?? null,
-            isError: (avg == null || gust == null) && bearing == null && temperature == null
-          });
+            currentTemperature: temperature ?? null
+          };
+          if (avg != null && gust != null && bearing != null && temperature != null) {
+            s.isError = false;
+          }
+          await db.doc(`sites/${doc.id}`).update(s);
 
           // add data
           await db.collection(`sites/${doc.id}/data`).add({
@@ -631,24 +634,28 @@ async function checkForErrors() {
       for (const doc of tempArray) {
         // check if last 6h data is all null
         let isError = true;
-        const query = db.collection(`sites/${doc.id}/data`).orderBy('time', 'desc').limit(36);
+        const query = db.collection(`sites/${doc.id}/data`).orderBy('time', 'desc').limit(36); // 36 records in 6h
         const snap = await query.get();
         if (!snap.empty) {
           const tempArray1 = [];
           snap.forEach((doc) => {
             tempArray1.push(doc);
           });
-          for (const doc1 of tempArray1) {
-            const data = doc1.data();
-            if (timeNow - data.time.seconds > 20 * 60) break; // check that data exists up to 20min before current time
-            if (
-              data.windAverage != null &&
-              data.windGust != null &&
-              data.windBearing != null &&
-              data.temperature != null
-            ) {
-              isError = false;
-              break;
+          if (tempArray1.length) {
+            // check that data exists up to 20min before current time
+            if (timeNow - tempArray1[0].data().time.seconds <= 20 * 60) {
+              for (const doc1 of tempArray1) {
+                const data = doc1.data();
+                if (
+                  data.windAverage != null &&
+                  data.windGust != null &&
+                  data.windBearing != null &&
+                  data.temperature != null
+                ) {
+                  isError = false;
+                  break;
+                }
+              }
             }
           }
         }
