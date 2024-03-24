@@ -622,7 +622,7 @@ async function removeOldData() {
 
 async function checkForErrors() {
   try {
-    let errors = 0;
+    const errors = [];
     const timeNow = Math.round(Date.now() / 1000);
     const db = getFirestore();
     const snapshot = await db.collection('sites').get();
@@ -660,14 +660,30 @@ async function checkForErrors() {
           }
         }
         if (isError) {
-          errors++;
+          errors.push(
+            `Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
+          );
           await db.doc(`sites/${doc.id}`).update({
             isError: true
           });
         }
       }
     }
-    functions.logger.log(`Checked for errors - ${errors} found.`);
+
+    if (errors.length) {
+      // send email
+      await axios.post(`https://api.emailjs.com/api/v1.0/email/send`, {
+        service_id: process.env.EMAILJS_SERVICE_ID,
+        template_id: process.env.EMAILJS_TEMPLATE_ID,
+        user_id: process.env.EMAILJS_PUBLIC_KEY,
+        template_params: {
+          message: errors.join('\n')
+        },
+        accessToken: process.env.EMAILJS_PRIVATE_KEY
+      });
+    }
+
+    functions.logger.log(`Checked for errors - ${errors.length} found.`);
   } catch (error) {
     functions.logger.log('An error occured.');
     functions.logger.log(error);
