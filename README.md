@@ -32,6 +32,7 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 - Mobile-first design - scalable across different screen sizes.
 - Help tab - provides a way for users to contact the developer.
 - Admin-only area - for adding new weather stations.
+- Error checker - scheduled function to identify issues with stations or the scraper.
 
 <p align="center">
   <img src = "https://i.imgur.com/CGOYE31.png" width=700>

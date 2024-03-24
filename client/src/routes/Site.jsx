@@ -265,7 +265,7 @@ export default function Site() {
               <StyledSkeleton width={120} height={20} />
             )}
             {site ? (
-              site.isError ? (
+              site.isOffline ? (
                 <Typography component="h1" variant="h5" sx={{ mt: 2, color: 'red' }}>
                   Station is offline.
                 </Typography>
@@ -388,7 +388,7 @@ export default function Site() {
             )}
 
             {site && data && data.length ? (
-              !site.isError && (
+              !site.isOffline && (
                 <>
                   <TableContainer component={Paper}>
                     <Table sx={{ minWidth: 650 }} size="small">

@@ -47,7 +47,7 @@ export default function Map() {
           currentAverage: site.currentAverage == null ? null : Math.round(site.currentAverage),
           currentBearing: site.currentBearing,
           validBearings: site.validBearings,
-          isError: site.isError
+          isOffline: site.isOffline
         },
         geometry: {
           type: 'Point',
@@ -67,11 +67,11 @@ export default function Map() {
     return geoJson;
   }
 
-  function getArrowStyle(avgWind, currentBearing, validBearings, isError) {
+  function getArrowStyle(avgWind, currentBearing, validBearings, isOffline) {
     let textColor = 'black';
     let img = '';
 
-    if (isError) {
+    if (isOffline) {
       textColor = 'red';
       img = `url('/circle-white.png')`;
       return [img, textColor];
@@ -166,13 +166,13 @@ export default function Map() {
               f.properties.currentAverage,
               f.properties.currentBearing,
               f.properties.validBearings,
-              f.properties.isError
+              f.properties.isOffline
             );
             if (child.className === 'marker-text') {
               child.style.color = color;
               child.innerHTML =
                 f.properties.currentAverage == null ? '-' : f.properties.currentAverage;
-              if (f.properties.isError) child.innerHTML = 'X';
+              if (f.properties.isOffline) child.innerHTML = 'X';
             } else if (child.className === 'marker-arrow') {
               child.style.backgroundImage = img;
               child.style.transform =
@@ -312,7 +312,7 @@ export default function Map() {
         f.properties.currentAverage,
         f.properties.currentBearing,
         f.properties.validBearings,
-        f.properties.isError
+        f.properties.isOffline
       );
       childArrow.style.backgroundImage = img;
 
@@ -320,7 +320,7 @@ export default function Map() {
       childText.className = 'marker-text';
       childText.style.color = color;
       childText.innerHTML = f.properties.currentAverage == null ? '-' : f.properties.currentAverage;
-      if (f.properties.isError) childText.innerHTML = 'X';
+      if (f.properties.isOffline) childText.innerHTML = 'X';
       childText.addEventListener('click', () => {
         navigate(`/sites/${f.properties.dbId}`);
       });

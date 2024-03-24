@@ -564,6 +564,9 @@ async function wrapper(source) {
             currentTemperature: temperature ?? null
           };
           if (avg != null || gust != null) {
+            s.isOffline = false;
+          }
+          if (avg != null && gust != null && bearing != null && temperature != null) {
             s.isError = false;
           }
           await db.doc(`sites/${doc.id}`).update(s);
@@ -664,24 +667,37 @@ async function checkForErrors() {
           }
         }
 
-        const siteDetails = `Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`;
+        let errorMsg = '';
         if (isDataError) {
-          errors.push(`Error: Data scraper has stopped.\n${siteDetails}`);
+          errorMsg = 'ERROR: Data scraper has stopped.\n';
           await db.doc(`sites/${doc.id}`).update({
-            isError: true
+            isOffline: true
           });
         } else {
           if (isWindError) {
-            errors.push(`Error: No wind avg/gust data.\n${siteDetails}`);
+            errorMsg += 'ERROR: No wind avg/gust data.\n';
             await db.doc(`sites/${doc.id}`).update({
-              isError: true
+              isOffline: true
             });
           }
           if (isBearingError) {
-            errors.push(`Error: No wind bearing data.\n${siteDetails}`);
+            errorMsg += 'ERROR: No wind bearing data.\n';
           }
           if (isTempError) {
-            errors.push(`Error: No temperature data.\n${siteDetails}`);
+            errorMsg += 'ERROR: No temperature data.\n';
+          }
+        }
+
+        if (errorMsg) {
+          // skip error email if already sent)
+          const err = doc.data().isError;
+          if (err == null || !err) {
+            await db.doc(`sites/${doc.id}`).update({
+              isError: true
+            });
+            errors.push(
+              `${errorMsg}Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
+            );
           }
         }
       }
@@ -694,7 +710,7 @@ async function checkForErrors() {
         template_id: process.env.EMAILJS_TEMPLATE_ID,
         user_id: process.env.EMAILJS_PUBLIC_KEY,
         template_params: {
-          message: errors.join('\n')
+          message: `Scheduled check ran successfully at ${new Date().toISOString()} with ${errors.length} station(s) flagged.\n\n${errors.join('\n')}`
         },
         accessToken: process.env.EMAILJS_PRIVATE_KEY
       });
