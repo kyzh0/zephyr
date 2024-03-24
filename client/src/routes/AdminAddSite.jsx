@@ -144,10 +144,10 @@ export default function Site() {
         externalLink: externalLink,
         type: type,
         coordinates: new GeoPoint(lat, lon),
-        currentAverage: 0,
-        currentGust: 0,
-        currentBearing: 0,
-        currentTemperature: 0,
+        currentAverage: null,
+        currentGust: null,
+        currentBearing: null,
+        currentTemperature: null,
         elevation: elevation,
         validBearings: bearings
       };

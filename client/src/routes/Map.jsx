@@ -74,7 +74,7 @@ export default function Map() {
     if (currentBearing != null && avgWind != null) {
       // site has bearings, check if within bounds
       if (validBearings) {
-        prefix = 'gold-invalid-arrow';
+        prefix = 'gold-arrow';
         const pairs = validBearings.split(',');
         pairs.forEach((p) => {
           const bearings = p.split('-');
@@ -97,7 +97,7 @@ export default function Map() {
         prefix = 'arrow';
       }
     } else {
-      // wind has no direction
+      // wind has no direction or avg is null
       prefix = validBearings ? 'gold-circle' : 'circle';
     }
 
@@ -126,6 +126,7 @@ export default function Map() {
     return [img, textColor];
   }
 
+  // this function does NOT read db unnecessarily, so it may be executed frequently
   async function refreshMarkers() {
     if (document.visibilityState !== 'visible') return;
     if (!markers.length) return;
@@ -174,7 +175,7 @@ export default function Map() {
         }
       }
 
-      // trigger refresh in site component
+      // trigger refresh in Site component
       setRefresh(refresh + 1);
     }
   }
@@ -259,7 +260,7 @@ export default function Map() {
             }
           }
         },
-        10 * 1000 // check if data needs to be updated every 10s
+        10 * 1000 // check every 10s
       );
     });
 
@@ -325,6 +326,7 @@ export default function Map() {
     });
   }, [map.current, sitesGeoJson]);
 
+  // refresh on visibility change
   useEffect(() => {
     document.addEventListener('visibilitychange', refreshMarkers);
     return () => {

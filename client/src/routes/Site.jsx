@@ -108,16 +108,14 @@ function getDirectionColor(bearing, validBearings) {
             return 'rgba(192, 255, 191, 0.5)';
           }
         } else {
-          if (bearing <= bearing1 || bearing >= bearing2) {
+          if (bearing >= bearing1 || bearing <= bearing2) {
             return 'rgba(192, 255, 191, 0.5)';
           }
         }
       }
     }
-    return 'rgba(255, 171, 171, 0.5)';
-  } else {
-    return '';
   }
+  return '';
 }
 
 function getWindDirection(bearing) {
@@ -178,7 +176,14 @@ export default function Site() {
       const pairs = s.validBearings ? s.validBearings.split(',') : [];
       for (const p of pairs) {
         const temp = p.split('-');
-        validBearings.push([Number(temp[0]), Number(temp[1])]);
+        const b1 = Number(temp[0]);
+        const b2 = Number(temp[1]);
+        if (b1 <= b2) {
+          validBearings.push([b1, b2]);
+        } else {
+          validBearings.push([b1, 360]);
+          validBearings.push([0, b2]);
+        }
       }
 
       const data = await loadSiteData(id);
@@ -637,6 +642,7 @@ export default function Site() {
                           dataKey={`validBearings${i}`}
                           fill="rgba(192, 255, 191, 0.5)"
                           stroke="none"
+                          activeDot={{ r: 0, stroke: 'none' }}
                           legendType="none"
                           name="vb"
                         />
