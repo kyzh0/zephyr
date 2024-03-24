@@ -141,7 +141,7 @@ export default function Map() {
     // find next 10-minute mark where data should be updated
     const date = new Date(markers[0].dataset.timeStamp * 1000);
     const minsToAdd = 10 - (date.getMinutes() % 10);
-    const bufferSec = 30; // buffer to allow data to write to db
+    const bufferSec = 60; // buffer to allow data to write to db
     const nextCheck = new Date(
       date.getTime() + 1000 * (minsToAdd * 60 - date.getSeconds() + bufferSec)
     );

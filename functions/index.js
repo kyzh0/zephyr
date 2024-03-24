@@ -563,7 +563,7 @@ async function wrapper(source) {
             currentBearing: bearing ?? null,
             currentTemperature: temperature ?? null
           };
-          if (avg != null && gust != null && bearing != null && temperature != null) {
+          if ((avg != null || gust != null) && bearing != null && temperature != null) {
             s.isError = false;
           }
           await db.doc(`sites/${doc.id}`).update(s);
@@ -692,7 +692,7 @@ async function checkForErrors() {
 }
 
 exports.updateWeatherStationData = functions
-  .runWith({ timeoutSeconds: 120, memory: '2GB' })
+  .runWith({ timeoutSeconds: 60, memory: '2GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *') // at every 10th minute
   .onRun((data, context) => {
