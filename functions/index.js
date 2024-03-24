@@ -563,7 +563,7 @@ async function wrapper(source) {
             currentBearing: bearing ?? null,
             currentTemperature: temperature ?? null
           };
-          if ((avg != null || gust != null) && bearing != null && temperature != null) {
+          if (avg != null || gust != null) {
             s.isError = false;
           }
           await db.doc(`sites/${doc.id}`).update(s);
@@ -633,7 +633,10 @@ async function checkForErrors() {
       });
       for (const doc of tempArray) {
         // check if last 6h data is all null
-        let isError = true;
+        let isDataError = true;
+        let isWindError = true;
+        let isBearingError = true;
+        let isTempError = true;
         const query = db.collection(`sites/${doc.id}/data`).orderBy('time', 'desc').limit(36); // 36 records in 6h
         const snap = await query.get();
         if (!snap.empty) {
@@ -644,28 +647,42 @@ async function checkForErrors() {
           if (tempArray1.length) {
             // check that data exists up to 20min before current time
             if (timeNow - tempArray1[0].data().time.seconds <= 20 * 60) {
+              isDataError = false;
               for (const doc1 of tempArray1) {
                 const data = doc1.data();
-                if (
-                  data.windAverage != null &&
-                  data.windGust != null &&
-                  data.windBearing != null &&
-                  data.temperature != null
-                ) {
-                  isError = false;
-                  break;
+                if (data.windAverage != null || data.windGust != null) {
+                  isWindError = false;
+                }
+                if (data.windBearing != null) {
+                  isBearingError = false;
+                }
+                if (data.temperature != null) {
+                  isTempError = false;
                 }
               }
             }
           }
         }
-        if (isError) {
-          errors.push(
-            `Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
-          );
+
+        const siteDetails = `Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`;
+        if (isDataError) {
+          errors.push(`Error: Data scraper has stopped.\n${siteDetails}`);
           await db.doc(`sites/${doc.id}`).update({
             isError: true
           });
+        } else {
+          if (isWindError) {
+            errors.push(`Error: No wind avg/gust data.\n${siteDetails}`);
+            await db.doc(`sites/${doc.id}`).update({
+              isError: true
+            });
+          }
+          if (isBearingError) {
+            errors.push(`Error: No wind bearing data.\n${siteDetails}`);
+          }
+          if (isTempError) {
+            errors.push(`Error: No temperature data.\n${siteDetails}`);
+          }
         }
       }
     }
