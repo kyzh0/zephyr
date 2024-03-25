@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { getLastUpdatedSite as getLastUpdatedSite, list } from '../firebase';
 import { AppContext } from '../context/AppContext';
 import { useCookies } from 'react-cookie';
+import { getWindDirectionFromBearing } from '../helpers/utils';
 
 import { createTheme, ThemeProvider } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -45,7 +46,8 @@ export default function Map() {
           name: site.name,
           dbId: site.id,
           currentAverage: site.currentAverage == null ? null : Math.round(site.currentAverage),
-          currentBearing: site.currentBearing,
+          currentGust: site.currentGust == null ? null : Math.round(site.currentGust),
+          currentBearing: site.currentBearing == null ? null : Math.round(site.currentBearing),
           validBearings: site.validBearings,
           isOffline: site.isOffline
         },
@@ -139,7 +141,7 @@ export default function Map() {
     if (!markers.length) return;
 
     // find next 10-minute mark where data should be updated
-    const date = new Date(markers[0].dataset.timeStamp * 1000);
+    const date = new Date(markers[0].marker.dataset.timeStamp * 1000);
     const minsToAdd = 10 - (date.getMinutes() % 10);
     const bufferSec = 60; // buffer to allow data to write to db
     const nextCheck = new Date(
@@ -150,36 +152,57 @@ export default function Map() {
     // check newest lastUpdated value to see if all stations updated
     const s = await getLastUpdatedSite();
     if (!s) return;
-    if (markers[0].dataset.timeStamp < s.lastUpdate.seconds) {
+    if (markers[0].marker.dataset.timeStamp < s.lastUpdate.seconds) {
       // update marker styling
       const timestamp = Math.floor(Date.now() / 1000);
       const json = await getGeoJson();
-      for (const marker of markers) {
+      for (const item of markers) {
         const matches = json.features.filter((entry) => {
-          return entry.properties.dbId === marker.id;
+          return entry.properties.dbId === item.marker.id;
         });
         if (matches && matches.length == 1) {
-          marker.dataset.timeStamp = timestamp;
           const f = matches[0];
-          for (const child of marker.children) {
+          const name = f.properties.name;
+          const currentAvg = f.properties.currentAverage;
+          const currentGust = f.properties.currentGust;
+          const currentBearing = f.properties.currentBearing;
+          const validBearings = f.properties.validBearings;
+          const isOffline = f.properties.isOffline;
+
+          item.marker.dataset.timeStamp = timestamp;
+          for (const child of item.marker.children) {
             const [img, color] = getArrowStyle(
-              f.properties.currentAverage,
-              f.properties.currentBearing,
-              f.properties.validBearings,
-              f.properties.isOffline
+              currentAvg,
+              currentBearing,
+              validBearings,
+              isOffline
             );
             if (child.className === 'marker-text') {
               child.style.color = color;
-              child.innerHTML =
-                f.properties.currentAverage == null ? '-' : f.properties.currentAverage;
-              if (f.properties.isOffline) child.innerHTML = 'X';
+              child.innerHTML = currentAvg == null ? '-' : currentAvg;
+              if (isOffline) child.innerHTML = 'X';
             } else if (child.className === 'marker-arrow') {
               child.style.backgroundImage = img;
               child.style.transform =
-                f.properties.currentBearing == null
-                  ? ''
-                  : `rotate(${Math.round(f.properties.currentBearing)}deg)`;
+                currentBearing == null ? '' : `rotate(${Math.round(currentBearing)}deg)`;
             }
+
+            // update popup
+            let html = `<p align="center"><strong>${name}</strong></p>`;
+            if (isOffline) {
+              html += '<p style="color: red;" align="center">Offline</p>';
+            } else {
+              let temp = '';
+              if (currentAvg == null) {
+                temp = `Gust ${currentGust}`;
+              } else if (currentGust == null) {
+                temp = `${currentAvg}`;
+              } else {
+                temp = `${currentAvg} - ${currentGust}`;
+              }
+              html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
+            }
+            item.popup.setHTML(html);
           }
         }
       }
@@ -301,42 +324,71 @@ export default function Map() {
 
     const timestamp = Math.floor(Date.now() / 1000);
     for (const f of sitesGeoJson.features) {
+      const name = f.properties.name;
+      const dbId = f.properties.dbId;
+      const currentAvg = f.properties.currentAverage;
+      const currentGust = f.properties.currentGust;
+      const currentBearing = f.properties.currentBearing;
+      const validBearings = f.properties.validBearings;
+      const isOffline = f.properties.isOffline;
+
+      // popup
+      let html = `<p align="center"><strong>${name}</strong></p>`;
+      if (isOffline) {
+        html += '<p style="color: red;" align="center">Offline</p>';
+      } else {
+        let temp = '';
+        if (currentAvg == null) {
+          temp = `Gust ${currentGust}`;
+        } else if (currentGust == null) {
+          temp = `${currentAvg}`;
+        } else {
+          temp = `${currentAvg} - ${currentGust}`;
+        }
+        html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
+      }
+
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+      }).setHTML(html);
+
+      // arrow icon
       const childArrow = document.createElement('div');
       childArrow.className = 'marker-arrow';
       childArrow.style.transform =
-        f.properties.currentBearing == null
-          ? ''
-          : `rotate(${Math.round(f.properties.currentBearing)}deg)`;
+        currentBearing == null ? '' : `rotate(${Math.round(currentBearing)}deg)`;
       childArrow.addEventListener('click', () => {
-        navigate(`/sites/${f.properties.dbId}`);
+        navigate(`/sites/${dbId}`);
       });
+      childArrow.addEventListener('mouseenter', () => popup.addTo(map.current));
+      childArrow.addEventListener('mouseleave', () => popup.remove());
 
-      const [img, color] = getArrowStyle(
-        f.properties.currentAverage,
-        f.properties.currentBearing,
-        f.properties.validBearings,
-        f.properties.isOffline
-      );
+      const [img, color] = getArrowStyle(currentAvg, currentBearing, validBearings, isOffline);
       childArrow.style.backgroundImage = img;
 
+      // avg wind text
       const childText = document.createElement('span');
       childText.className = 'marker-text';
       childText.style.color = color;
-      childText.innerHTML = f.properties.currentAverage == null ? '-' : f.properties.currentAverage;
-      if (f.properties.isOffline) childText.innerHTML = 'X';
+      childText.innerHTML = currentAvg == null ? '-' : currentAvg;
+      if (isOffline) childText.innerHTML = 'X';
       childText.addEventListener('click', () => {
-        navigate(`/sites/${f.properties.dbId}`);
+        navigate(`/sites/${dbId}`);
       });
+      childText.addEventListener('mouseenter', () => popup.addTo(map.current));
+      childText.addEventListener('mouseleave', () => popup.remove());
 
+      // parent element
       const el = document.createElement('div');
-      el.id = f.properties.dbId;
+      el.id = dbId;
       el.className = 'marker';
       el.dataset.timeStamp = timestamp;
       el.appendChild(childArrow);
       el.appendChild(childText);
-      markers.push(el);
 
-      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
+      markers.push({ marker: el, popup: popup });
+      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).setPopup(popup).addTo(map.current);
     }
   }, [map.current, sitesGeoJson]);
 
