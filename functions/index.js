@@ -24,40 +24,44 @@ async function processHarvestResponse(sid, configId, graphId, traceId, longInter
   utcMins = date.getUTCMinutes().toString().padStart(2, '0');
   const dateFrom = `${utcYear}-${utcMonth}-${utcDay}T${utcHours}:${utcMins}:00.000`;
 
-  const { data } = await axios.post(
-    `https://data1.harvest.com//php/site_graph_functions.php?retrieve_trace=&req_ref=${sid}_${configId}_${graphId}}`,
-    {
-      config_id: configId,
-      trace_id: traceId,
-      graph_id: graphId,
-      start_date: dateFrom,
-      start_date_stats: dateFrom,
-      end_date: dateTo
-    },
-    {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Connection: 'keep-alive'
+  try {
+    const { data } = await axios.post(
+      `https://data1.harvest.com//php/site_graph_functions.php?retrieve_trace=&req_ref=${sid}_${configId}_${graphId}}`,
+      {
+        config_id: configId,
+        trace_id: traceId,
+        graph_id: graphId,
+        start_date: dateFrom,
+        start_date_stats: dateFrom,
+        end_date: dateTo
+      },
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Connection: 'keep-alive'
+        }
       }
-    }
-  );
+    );
 
-  if (format === 'array') {
-    if (data && data.length) {
-      const d = data[0].data;
-      if (d && d.length) {
-        const d1 = d[d.length - 1];
-        return d1.data_value;
+    if (format === 'array') {
+      if (data && data.length) {
+        const d = data[0].data;
+        if (d && d.length) {
+          const d1 = d[d.length - 1];
+          return d1.data_value;
+        }
+      }
+    } else if (format === 'object') {
+      if (data && data['1']) {
+        const d = data['1'].data;
+        if (d && d.length) {
+          const d1 = d[d.length - 1];
+          return d1.data_value;
+        }
       }
     }
-  } else if (format === 'object') {
-    if (data && data['1']) {
-      const d = data['1'].data;
-      if (d && d.length) {
-        const d1 = d[d.length - 1];
-        return d1.data_value;
-      }
-    }
+  } catch (e) {
+    functions.logger.error(e);
   }
 
   return null;
@@ -153,65 +157,71 @@ async function getMetserviceData(siteId) {
   let windGust = null;
   let windBearing = null;
   let temperature = null;
-  const { data } = await axios.get(
-    `https://www.metservice.com/publicData/webdata/weather-station-location/${siteId}/`,
-    {
-      headers: {
-        Connection: 'keep-alive'
-      }
-    }
-  );
-  const modules = data.layout.primary.slots.main.modules;
-  if (modules && modules.length) {
-    const wind = modules[0].observations.wind;
-    if (wind && wind.length) {
-      windAverage = wind[0].averageSpeed;
-      windGust = wind[0].gustSpeed;
 
-      if (wind[0].strength === 'Calm') {
-        if (windAverage == null) {
-          windAverage = 0;
-        }
-        if (windGust == null) {
-          windGust = 0;
+  try {
+    const { data } = await axios.get(
+      `https://www.metservice.com/publicData/webdata/weather-station-location/${siteId}/`,
+      {
+        headers: {
+          Connection: 'keep-alive'
         }
       }
+    );
+    const modules = data.layout.primary.slots.main.modules;
+    if (modules && modules.length) {
+      const wind = modules[0].observations.wind;
+      if (wind && wind.length) {
+        windAverage = wind[0].averageSpeed;
+        windGust = wind[0].gustSpeed;
 
-      switch (wind[0].direction.toUpperCase()) {
-        case 'N':
-          windBearing = 0;
-          break;
-        case 'NE':
-          windBearing = 45;
-          break;
-        case 'E':
-          windBearing = 90;
-          break;
-        case 'SE':
-          windBearing = 135;
-          break;
-        case 'S':
-          windBearing = 180;
-          break;
-        case 'SW':
-          windBearing = 225;
-          break;
-        case 'W':
-          windBearing = 270;
-          break;
-        case 'NW':
-          windBearing = 325;
-          break;
-        default:
-          windBearing = 0;
-          break;
+        if (wind[0].strength === 'Calm') {
+          if (windAverage == null) {
+            windAverage = 0;
+          }
+          if (windGust == null) {
+            windGust = 0;
+          }
+        }
+
+        switch (wind[0].direction.toUpperCase()) {
+          case 'N':
+            windBearing = 0;
+            break;
+          case 'NE':
+            windBearing = 45;
+            break;
+          case 'E':
+            windBearing = 90;
+            break;
+          case 'SE':
+            windBearing = 135;
+            break;
+          case 'S':
+            windBearing = 180;
+            break;
+          case 'SW':
+            windBearing = 225;
+            break;
+          case 'W':
+            windBearing = 270;
+            break;
+          case 'NW':
+            windBearing = 325;
+            break;
+          default:
+            windBearing = 0;
+            break;
+        }
+      }
+      const temp = modules[0].observations.temperature;
+      if (temp && temp.length) {
+        temperature = temp[0].current;
       }
     }
-    const temp = modules[0].observations.temperature;
-    if (temp && temp.length) {
-      temperature = temp[0].current;
-    }
+  } catch (e) {
+    functions.logger.error(e);
   }
+
   return {
     windAverage,
     windGust,
@@ -237,19 +247,23 @@ async function getHolfuyData(siteId) {
   let windBearing = null;
   let temperature = null;
 
-  const { headers } = await axios.get(`https://holfuy.com/en/weather/${siteId}`);
-  const cookies = headers['set-cookie'];
-  if (cookies && cookies.length && cookies[0].length) {
-    const { data } = await axios.get(`https://holfuy.com/puget/mjso.php?k=${siteId}`, {
-      headers: {
-        Cookie: cookies[0],
-        Connection: 'keep-alive'
-      }
-    });
-    windAverage = data.speed;
-    windGust = data.gust;
-    windBearing = data.dir;
-    temperature = data.temperature;
+  try {
+    const { headers } = await axios.get(`https://holfuy.com/en/weather/${siteId}`);
+    const cookies = headers['set-cookie'];
+    if (cookies && cookies.length && cookies[0].length) {
+      const { data } = await axios.get(`https://holfuy.com/puget/mjso.php?k=${siteId}`, {
+        headers: {
+          Cookie: cookies[0],
+          Connection: 'keep-alive'
+        }
+      });
+      windAverage = data.speed;
+      windGust = data.gust;
+      windBearing = data.dir;
+      temperature = data.temperature;
+    }
+  } catch (e) {
+    functions.logger.error(e);
   }
 
   return {
@@ -266,17 +280,21 @@ async function getAttentisData(siteId) {
   let windBearing = null;
   let temperature = null;
 
-  const { data } = await axios.get('https://api.attentistechnology.com/sensor-overview', {
-    headers: { Authorization: `Bearer ${process.env.ATTENTIS_KEY}`, Connection: 'keep-alive' }
-  });
-  if (data.data && data.data.weather_readings) {
-    const d = data.data.weather_readings[siteId];
-    if (d) {
-      windAverage = d.wind_speed;
-      windGust = d.wind_gust_speed;
-      windBearing = d.wind_direction;
-      temperature = d.air_temp;
+  try {
+    const { data } = await axios.get('https://api.attentistechnology.com/sensor-overview', {
+      headers: { Authorization: `Bearer ${process.env.ATTENTIS_KEY}`, Connection: 'keep-alive' }
+    });
+    if (data.data && data.data.weather_readings) {
+      const d = data.data.weather_readings[siteId];
+      if (d) {
+        windAverage = d.wind_speed;
+        windGust = d.wind_gust_speed;
+        windBearing = d.wind_direction;
+        temperature = d.air_temp;
+      }
     }
+  } catch (e) {
+    functions.logger.error(e);
   }
 
   return {
@@ -293,112 +311,116 @@ async function getCwuData(siteId) {
   let windBearing = null;
   let temperature = null;
 
-  const { data } = await axios.get(`https://cwu.co.nz/forecast/${siteId}/`, {
-    responseType: 'text',
-    headers: {
-      Connection: 'keep-alive'
-    }
-  });
-  if (data.length) {
-    // wind avg + direction
-    let startStr = 'Current Windspeed:&nbsp;</label><span>&nbsp;';
-    let i = data.indexOf(startStr);
-    if (i >= 0) {
-      const j = data.indexOf('km/h.</span>', i);
-      if (j > i) {
-        const tempArray = data
-          .slice(i + startStr.length, j)
-          .trim()
-          .split(' ');
-        if (tempArray.length == 2) {
-          const temp = tempArray[0];
-          switch (temp.toUpperCase()) {
-            case 'N':
-              windBearing = 0;
-              break;
-            case 'NNE':
-              windBearing = 22.5;
-              break;
-            case 'NE':
-              windBearing = 45;
-              break;
-            case 'ENE':
-              windBearing = 67.5;
-              break;
-            case 'E':
-              windBearing = 90;
-              break;
-            case 'ESE':
-              windBearing = 112.5;
-              break;
-            case 'SE':
-              windBearing = 135;
-              break;
-            case 'SSE':
-              windBearing = 157.5;
-              break;
-            case 'S':
-              windBearing = 180;
-              break;
-            case 'SSW':
-              windBearing = 202.5;
-              break;
-            case 'SW':
-              windBearing = 225;
-              break;
-            case 'WSW':
-              windBearing = 247.5;
-              break;
-            case 'W':
-              windBearing = 270;
-              break;
-            case 'WNW':
-              windBearing = 292.5;
-              break;
-            case 'NW':
-              windBearing = 325;
-              break;
-            case 'NNW':
-              windBearing = 337.5;
-              break;
-            default:
-              windBearing = 0;
-              break;
+  try {
+    const { data } = await axios.get(`https://cwu.co.nz/forecast/${siteId}/`, {
+      responseType: 'text',
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    if (data.length) {
+      // wind avg + direction
+      let startStr = 'Current Windspeed:&nbsp;</label><span>&nbsp;';
+      let i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('km/h.</span>', i);
+        if (j > i) {
+          const tempArray = data
+            .slice(i + startStr.length, j)
+            .trim()
+            .split(' ');
+          if (tempArray.length == 2) {
+            const temp = tempArray[0];
+            switch (temp.toUpperCase()) {
+              case 'N':
+                windBearing = 0;
+                break;
+              case 'NNE':
+                windBearing = 22.5;
+                break;
+              case 'NE':
+                windBearing = 45;
+                break;
+              case 'ENE':
+                windBearing = 67.5;
+                break;
+              case 'E':
+                windBearing = 90;
+                break;
+              case 'ESE':
+                windBearing = 112.5;
+                break;
+              case 'SE':
+                windBearing = 135;
+                break;
+              case 'SSE':
+                windBearing = 157.5;
+                break;
+              case 'S':
+                windBearing = 180;
+                break;
+              case 'SSW':
+                windBearing = 202.5;
+                break;
+              case 'SW':
+                windBearing = 225;
+                break;
+              case 'WSW':
+                windBearing = 247.5;
+                break;
+              case 'W':
+                windBearing = 270;
+                break;
+              case 'WNW':
+                windBearing = 292.5;
+                break;
+              case 'NW':
+                windBearing = 325;
+                break;
+              case 'NNW':
+                windBearing = 337.5;
+                break;
+              default:
+                windBearing = 0;
+                break;
+            }
+
+            const temp1 = Number(tempArray[1]);
+            if (!isNaN(temp1)) {
+              windAverage = temp1;
+            }
           }
+        }
+      }
 
-          const temp1 = Number(tempArray[1]);
-          if (!isNaN(temp1)) {
-            windAverage = temp1;
+      // wind gust
+      startStr = 'Wind Gusting To:&nbsp;</label><span>&nbsp;';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('km/h.</span>', i);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) {
+            windGust = temp;
+          }
+        }
+      }
+
+      // temperature
+      startStr = 'Now</span><br/>';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('°C</p>', i);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) {
+            temperature = temp;
           }
         }
       }
     }
-
-    // wind gust
-    startStr = 'Wind Gusting To:&nbsp;</label><span>&nbsp;';
-    i = data.indexOf(startStr);
-    if (i >= 0) {
-      const j = data.indexOf('km/h.</span>', i);
-      if (j > i) {
-        const temp = Number(data.slice(i + startStr.length, j).trim());
-        if (!isNaN(temp)) {
-          windGust = temp;
-        }
-      }
-    }
-
-    // temperature
-    startStr = 'Now</span><br/>';
-    i = data.indexOf(startStr);
-    if (i >= 0) {
-      const j = data.indexOf('°C</p>', i);
-      if (j > i) {
-        const temp = Number(data.slice(i + startStr.length, j).trim());
-        if (!isNaN(temp)) {
-          temperature = temp;
-        }
-      }
-    }
+  } catch (e) {
+    functions.logger.error(e);
   }
 
   return {
@@ -415,56 +437,60 @@ async function getLpcData() {
   let windBearing = null;
   let temperature = null;
 
-  let date = new Date();
-  const dateTo = date.toISOString();
-  date = new Date(date.getTime() - 1441 * 60 * 1000); // date from is current time - (1 day + 1 min)
-  const dateFrom = date.toISOString();
-  let { data } = await axios.get(
-    'https://portweather-public.omcinternational.com/api/datasources/proxy/391//api/data/transformRecordsFromPackets' +
-      `?sourcePath=${encodeURIComponent('NZ/Lyttelton/Meteo/Measured/Lyttelton TABW')}` +
-      '&transformer=LatestNoTransform' +
-      `&fromDate_Utc=${encodeURIComponent(dateFrom)}` +
-      `&toDate_Utc=${encodeURIComponent(dateTo)}` +
-      '&qaStatusesString=*',
-    {
-      headers: { 'x-grafana-org-id': 338, Connection: 'keep-alive' }
+  try {
+    let date = new Date();
+    const dateTo = date.toISOString();
+    date = new Date(date.getTime() - 1441 * 60 * 1000); // date from is current time - (1 day + 1 min)
+    const dateFrom = date.toISOString();
+    let { data } = await axios.get(
+      'https://portweather-public.omcinternational.com/api/datasources/proxy/391//api/data/transformRecordsFromPackets' +
+        `?sourcePath=${encodeURIComponent('NZ/Lyttelton/Meteo/Measured/Lyttelton TABW')}` +
+        '&transformer=LatestNoTransform' +
+        `&fromDate_Utc=${encodeURIComponent(dateFrom)}` +
+        `&toDate_Utc=${encodeURIComponent(dateTo)}` +
+        '&qaStatusesString=*',
+      {
+        headers: { 'x-grafana-org-id': 338, Connection: 'keep-alive' }
+      }
+    );
+    if (data.length && data[0]) {
+      windAverage = data[0].windspd_01mnavg * 1.852; // data is in kt
+      windGust = data[0].windgst_01mnmax * 1.852;
+      windBearing = data[0].winddir_01mnavg;
     }
-  );
-  if (data.length && data[0]) {
-    windAverage = data[0].windspd_01mnavg * 1.852; // data is in kt
-    windGust = data[0].windgst_01mnmax * 1.852;
-    windBearing = data[0].winddir_01mnavg;
-  }
 
-  ({ data } = await axios.post(
-    'https://portweather-public.omcinternational.com/api/ds/query',
-    {
-      from: dateFrom,
-      queries: [
-        {
-          datasourceId: 391,
-          sourcePath: 'NZ/Lyttelton/Meteo/Measured/Lyttelton IHJ3',
-          sourceProperty: 'airtemp_01mnavg',
-          transformerType: 'LatestMeasuredGenericPlot',
-          type: 'timeseries'
+    ({ data } = await axios.post(
+      'https://portweather-public.omcinternational.com/api/ds/query',
+      {
+        from: dateFrom,
+        queries: [
+          {
+            datasourceId: 391,
+            sourcePath: 'NZ/Lyttelton/Meteo/Measured/Lyttelton IHJ3',
+            sourceProperty: 'airtemp_01mnavg',
+            transformerType: 'LatestMeasuredGenericPlot',
+            type: 'timeseries'
+          }
+        ],
+        to: dateTo
+      },
+      {
+        headers: {
+          Connection: 'keep-alive'
         }
-      ],
-      to: dateTo
-    },
-    {
-      headers: {
-        Connection: 'keep-alive'
+      }
+    ));
+    const frames = data.results[''].frames;
+    if (frames && frames.length) {
+      const vals = frames[0].data.values;
+      if (vals && vals.length == 2) {
+        if (vals[1] && vals[1].length) {
+          temperature = vals[1][0];
+        }
       }
     }
-  ));
-  const frames = data.results[''].frames;
-  if (frames && frames.length) {
-    const vals = frames[0].data.values;
-    if (vals && vals.length == 2) {
-      if (vals[1] && vals[1].length) {
-        temperature = vals[1][0];
-      }
-    }
+  } catch (e) {
+    functions.logger.error(e);
   }
 
   return {
@@ -583,9 +609,8 @@ async function wrapper(source) {
       }
     }
     functions.logger.log('Weather station data updated.');
-  } catch (error) {
-    functions.logger.log('An error occured.');
-    functions.logger.log(error);
+  } catch (e) {
+    functions.logger.error(e);
     return null;
   }
 }
@@ -616,9 +641,8 @@ async function removeOldData() {
       }
     }
     functions.logger.log('Old data removed.');
-  } catch (error) {
-    functions.logger.log('An error occured.');
-    functions.logger.log(error);
+  } catch (e) {
+    functions.logger.error(e);
     return null;
   }
 }
@@ -717,9 +741,8 @@ async function checkForErrors() {
     }
 
     functions.logger.log(`Checked for errors - ${errors.length} found.`);
-  } catch (error) {
-    functions.logger.log('An error occured.');
-    functions.logger.log(error);
+  } catch (e) {
+    functions.logger.error(e);
     return null;
   }
 }
