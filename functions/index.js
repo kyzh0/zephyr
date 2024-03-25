@@ -725,7 +725,7 @@ async function checkForErrors() {
 }
 
 exports.updateWeatherStationData = functions
-  .runWith({ timeoutSeconds: 60, memory: '2GB' })
+  .runWith({ timeoutSeconds: 30, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *') // at every 10th minute
   .onRun((data, context) => {
@@ -733,7 +733,7 @@ exports.updateWeatherStationData = functions
   });
 
 exports.updateHarvestStationData = functions
-  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .runWith({ timeoutSeconds: 60, memory: '2GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
   .onRun((data, context) => {
@@ -741,7 +741,7 @@ exports.updateHarvestStationData = functions
   });
 
 exports.updateHolfuyStationData = functions
-  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .runWith({ timeoutSeconds: 30, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
   .onRun((data, context) => {
@@ -749,7 +749,7 @@ exports.updateHolfuyStationData = functions
   });
 
 exports.updateMetserviceStationData = functions
-  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .runWith({ timeoutSeconds: 60, memory: '2GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
   .onRun((data, context) => {
@@ -757,7 +757,7 @@ exports.updateMetserviceStationData = functions
   });
 
 exports.removeOldData = functions
-  .runWith({ timeoutSeconds: 10, memory: '1GB' })
+  .runWith({ timeoutSeconds: 20, memory: '256MB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
   .onRun((data, context) => {
@@ -765,9 +765,9 @@ exports.removeOldData = functions
   });
 
 exports.checkForErrors = functions
-  .runWith({ timeoutSeconds: 10, memory: '1GB' })
+  .runWith({ timeoutSeconds: 60, memory: '1GB' })
   .region('australia-southeast1')
-  .pubsub.schedule('0 */6 * * *')
+  .pubsub.schedule('0 */6 * * *') // every 6h
   .onRun((data, context) => {
     return checkForErrors();
   });
