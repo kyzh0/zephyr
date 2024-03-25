@@ -15,6 +15,7 @@ jobs:
         run: |
           touch .env
           echo -e REACT_APP_MAPBOX_GL_KEY=${{ secrets.REACT_APP_MAPBOX_GL_KEY }} > .env
+          echo -e REACT_APP_MAPBOX_GL_KEY_BACKUP=${{ secrets.REACT_APP_MAPBOX_GL_KEY_BACKUP }} >> .env
           echo -e REACT_APP_FIREBASE_KEY=${{ secrets.REACT_APP_FIREBASE_KEY }} >> .env
           echo -e REACT_APP_EMAILJS_SERVICE_ID=${{ secrets.REACT_APP_EMAILJS_SERVICE_ID }} >> .env
           echo -e REACT_APP_EMAILJS_TEMPLATE_ID=${{ secrets.REACT_APP_EMAILJS_TEMPLATE_ID }} >> .env
