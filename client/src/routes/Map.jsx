@@ -224,7 +224,10 @@ export default function Map() {
   }, [cookies]);
 
   useEffect(() => {
-    mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_GL_KEY;
+    const evenDay = new Date().getDate() % 2 == 0;
+    mapboxgl.accessToken = evenDay
+      ? process.env.REACT_APP_MAPBOX_GL_KEY
+      : process.env.REACT_APP_MAPBOX_GL_KEY_BACKUP;
 
     // map init
     if (map.current) return;
