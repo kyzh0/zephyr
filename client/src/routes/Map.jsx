@@ -192,15 +192,19 @@ export default function Map() {
             if (isOffline) {
               html += '<p style="color: red;" align="center">Offline</p>';
             } else {
-              let temp = '';
-              if (currentAvg == null) {
-                temp = `Gust ${currentGust}`;
-              } else if (currentGust == null) {
-                temp = `${currentAvg}`;
+              if (currentAvg == null && currentGust == null) {
+                html += `<p align="center">-</p>`;
               } else {
-                temp = `${currentAvg} - ${currentGust}`;
+                let temp = '';
+                if (currentAvg == null) {
+                  temp = `Gust ${currentGust}`;
+                } else if (currentGust == null) {
+                  temp = `${currentAvg}`;
+                } else {
+                  temp = `${currentAvg} - ${currentGust}`;
+                }
+                html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
               }
-              html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
             }
             item.popup.setHTML(html);
           }
@@ -337,15 +341,19 @@ export default function Map() {
       if (isOffline) {
         html += '<p style="color: red;" align="center">Offline</p>';
       } else {
-        let temp = '';
-        if (currentAvg == null) {
-          temp = `Gust ${currentGust}`;
-        } else if (currentGust == null) {
-          temp = `${currentAvg}`;
+        if (currentAvg == null && currentGust == null) {
+          html += `<p align="center">-</p>`;
         } else {
-          temp = `${currentAvg} - ${currentGust}`;
+          let temp = '';
+          if (currentAvg == null) {
+            temp = `Gust ${currentGust}`;
+          } else if (currentGust == null) {
+            temp = `${currentAvg}`;
+          } else {
+            temp = `${currentAvg} - ${currentGust}`;
+          }
+          html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
         }
-        html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
       }
 
       const popup = new mapboxgl.Popup({
