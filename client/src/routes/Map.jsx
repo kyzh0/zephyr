@@ -32,7 +32,7 @@ export default function Map() {
   const [markers] = useState([]);
 
   const REFRESH_INTERVAL = 60;
-  const { refresh, setRefresh } = useContext(AppContext);
+  const { setRefreshedIds } = useContext(AppContext);
 
   function getArrowStyle(avgWind, currentBearing, validBearings, isOffline) {
     let textColor = 'black';
@@ -270,6 +270,7 @@ export default function Map() {
       if (!geoJson || !geoJson.features.length) return;
     }
 
+    const updatedIds = [];
     for (const item of markers) {
       const matches = geoJson.features.filter((f) => {
         return f.properties.dbId === item.marker.id;
@@ -318,9 +319,11 @@ export default function Map() {
         }
         item.popup.setHTML(html);
       }
+
+      updatedIds.push(item.marker.id);
     }
     // trigger refresh in Site component
-    setRefresh(refresh + 1);
+    setRefreshedIds(updatedIds);
   }
 
   const map = useRef(null);

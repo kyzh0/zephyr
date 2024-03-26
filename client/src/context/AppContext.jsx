@@ -4,13 +4,13 @@ import PropTypes from 'prop-types';
 export const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
-  const [refresh, setRefresh] = useState(0);
+  const [refreshedIds, setRefreshedIds] = useState([]);
 
   return (
     <AppContext.Provider
       value={{
-        refresh,
-        setRefresh
+        refreshedIds,
+        setRefreshedIds
       }}
     >
       {children}

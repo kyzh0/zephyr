@@ -125,7 +125,8 @@ export default function Site() {
   const [data, setData] = useState([]);
   const [bearingPairCount, setBearingPairCount] = useState(0);
   const tableRef = useRef(null);
-  const { refresh, setRefresh } = useContext(AppContext);
+  const { refreshedIds } = useContext(AppContext);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   async function fetchData() {
     try {
@@ -164,26 +165,28 @@ export default function Site() {
     }
   }
 
+  // initial load
   useEffect(() => {
     if (!id) return;
 
     try {
-      setRefresh(0);
+      setInitialLoad(false);
       fetchData();
     } catch (error) {
       console.error(error);
     }
   }, [id]);
 
+  // on refresh trigger (ignore initial load)
   useEffect(() => {
-    if (!refresh || refresh == 0) return;
+    if (!id || initialLoad || !refreshedIds || !refreshedIds.includes(id)) return;
 
     try {
       fetchData();
     } catch (error) {
       console.error(error);
     }
-  }, [refresh]);
+  }, [id, refreshedIds]);
 
   useEffect(() => {
     if (!tableRef.current) return;
