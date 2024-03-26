@@ -171,7 +171,7 @@ export default function Site() {
 
       const site = {
         name: name,
-        externalId: externalId,
+        externalId: harvestConfigId ? `${externalId}_${harvestConfigId}` : externalId,
         externalLink: externalLink,
         type: type,
         coordinates: new GeoPoint(
