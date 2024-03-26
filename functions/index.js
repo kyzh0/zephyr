@@ -501,6 +501,50 @@ async function getLpcData() {
   };
 }
 
+async function getMpycData() {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get('https://mpyc.nz/weather/json/weewx_data.json');
+    if (data.current) {
+      const avg = data.current.windspeed
+        ? Number(data.current.windspeed.replace(' knots', ''))
+        : null;
+      if (avg != null && !isNaN(avg)) {
+        windAverage = avg * 1.852; // data is in kt
+      }
+      const gust = data.current.windGust
+        ? Number(data.current.windspeed.replace(' knots', ''))
+        : null;
+      if (gust != null && !isNaN(gust)) {
+        windGust = gust * 1.852;
+      }
+      const bearing = data.current.winddir_formatted
+        ? Number(data.current.winddir_formatted)
+        : null;
+      if (bearing != null && !isNaN(bearing)) {
+        windBearing = bearing;
+      }
+      const temp = data.current.outTemp_formatted ? Number(data.current.outTemp_formatted) : null;
+      if (temp != null && !isNaN(temp)) {
+        temperature = temp;
+      }
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function wrapper(source) {
   try {
     const db = getFirestore();
@@ -551,6 +595,10 @@ async function wrapper(source) {
           } else if (docData.type === 'lpc') {
             data = await getLpcData();
             functions.logger.log('lpc data updated');
+            functions.logger.log(data);
+          } else if (docData.type === 'mpyc') {
+            data = await getMpycData();
+            functions.logger.log('mpyc data updated');
             functions.logger.log(data);
           }
         }

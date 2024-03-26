@@ -237,7 +237,6 @@ export default function Site() {
                 <MenuItem value="metservice">Metservice</MenuItem>
                 <MenuItem value="attentis">Attentis</MenuItem>
                 <MenuItem value="cwu">Canterbury Weather Updates</MenuItem>
-                <MenuItem value="lpc">Lyttelton Port Company</MenuItem>
               </TextField>
               <TextField
                 margin="dense"
