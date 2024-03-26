@@ -10,7 +10,8 @@ import {
   getFirestore,
   limit,
   orderBy,
-  query
+  query,
+  where
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -37,24 +38,33 @@ export function getUser() {
   return user;
 }
 
-export async function getById(collectionName, id) {
-  const docRef = doc(db, collectionName, id);
+export async function getSiteById(id) {
+  const docRef = doc(db, 'sites', id);
   try {
     const docSnap = await getDoc(docRef);
-
     const data = docSnap.exists() ? docSnap.data() : null;
-
     if (data === null || data === undefined) return null;
-
     return { id, ...data };
   } catch (error) {
     console.error(error);
   }
 }
 
-export async function list(collectionName) {
+export async function listSites() {
   try {
-    const snap = await getDocs(collection(db, collectionName));
+    const snap = await getDocs(collection(db, 'sites'));
+    return snap.docs.map((doc) => {
+      return { id: doc.id, ...doc.data() };
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function listSitesUpdatedSince(time) {
+  try {
+    const q = query(collection(db, 'sites'), where('lastUpdate', '>=', time));
+    const snap = await getDocs(q);
     return snap.docs.map((doc) => {
       return { id: doc.id, ...doc.data() };
     });
@@ -71,20 +81,6 @@ export async function loadSiteData(siteId) {
     return snap.docs.map((doc) => {
       return { id: doc.id, ...doc.data() };
     });
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-export async function getLastUpdatedSite() {
-  try {
-    const sitesRef = collection(db, 'sites');
-    const q = query(sitesRef, orderBy('lastUpdate', 'desc'), limit(1));
-    const snap = await getDocs(q);
-    if (snap.docs.length == 1) {
-      return { id: snap.docs[0].id, ...snap.docs[0].data() };
-    }
-    return null;
   } catch (error) {
     console.error(error);
   }

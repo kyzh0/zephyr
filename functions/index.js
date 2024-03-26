@@ -60,8 +60,8 @@ async function processHarvestResponse(sid, configId, graphId, traceId, longInter
         }
       }
     }
-  } catch (e) {
-    functions.logger.error(e);
+  } catch (error) {
+    functions.logger.error(error);
   }
 
   return null;
@@ -218,8 +218,8 @@ async function getMetserviceData(siteId) {
         temperature = temp[0].current;
       }
     }
-  } catch (e) {
-    functions.logger.error(e);
+  } catch (error) {
+    functions.logger.error(error);
   }
 
   return {
@@ -262,8 +262,8 @@ async function getHolfuyData(siteId) {
       windBearing = data.dir;
       temperature = data.temperature;
     }
-  } catch (e) {
-    functions.logger.error(e);
+  } catch (error) {
+    functions.logger.error(error);
   }
 
   return {
@@ -293,8 +293,8 @@ async function getAttentisData(siteId) {
         temperature = d.air_temp;
       }
     }
-  } catch (e) {
-    functions.logger.error(e);
+  } catch (error) {
+    functions.logger.error(error);
   }
 
   return {
@@ -419,8 +419,8 @@ async function getCwuData(siteId) {
         }
       }
     }
-  } catch (e) {
-    functions.logger.error(e);
+  } catch (error) {
+    functions.logger.error(error);
   }
 
   return {
@@ -489,8 +489,8 @@ async function getLpcData() {
         }
       }
     }
-  } catch (e) {
-    functions.logger.error(e);
+  } catch (error) {
+    functions.logger.error(error);
   }
 
   return {
@@ -556,13 +556,6 @@ async function wrapper(source) {
         }
 
         if (data) {
-          // floor timestamp to 10 min
-          let date = new Date();
-          const rem = date.getMinutes() % 10;
-          if (rem > 0) {
-            date = new Date(date.getTime() - rem * 60 * 1000);
-          }
-
           // handle likely erroneous values
           let avg = data.windAverage;
           if (avg < 0 || avg > 500) {
@@ -582,6 +575,7 @@ async function wrapper(source) {
           }
 
           // update site data
+          let date = new Date();
           const s = {
             lastUpdate: date,
             currentAverage: avg ?? null,
@@ -598,6 +592,11 @@ async function wrapper(source) {
           await db.doc(`sites/${doc.id}`).update(s);
 
           // add data
+          // floor timestamp to 10 min
+          const rem = date.getMinutes() % 10;
+          if (rem > 0) {
+            date = new Date(date.getTime() - rem * 60 * 1000);
+          }
           await db.collection(`sites/${doc.id}/data`).add({
             time: date,
             windAverage: avg ?? null,
@@ -609,8 +608,8 @@ async function wrapper(source) {
       }
     }
     functions.logger.log('Weather station data updated.');
-  } catch (e) {
-    functions.logger.error(e);
+  } catch (error) {
+    functions.logger.error(error);
     return null;
   }
 }
@@ -641,8 +640,8 @@ async function removeOldData() {
       }
     }
     functions.logger.log('Old data removed.');
-  } catch (e) {
-    functions.logger.error(e);
+  } catch (error) {
+    functions.logger.error(error);
     return null;
   }
 }
@@ -741,8 +740,8 @@ async function checkForErrors() {
     }
 
     functions.logger.log(`Checked for errors - ${errors.length} found.`);
-  } catch (e) {
-    functions.logger.error(e);
+  } catch (error) {
+    functions.logger.error(error);
     return null;
   }
 }

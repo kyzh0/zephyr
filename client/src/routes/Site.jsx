@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getById, loadSiteData as loadSiteData } from '../firebase';
+import { getSiteById, loadSiteData as loadSiteData } from '../firebase';
 import { AppContext } from '../context/AppContext';
 import { getWindDirectionFromBearing } from '../helpers/utils';
 
@@ -129,7 +129,7 @@ export default function Site() {
 
   async function fetchData() {
     try {
-      const s = await getById('sites', id);
+      const s = await getSiteById(id);
       if (!s) return;
       setSite(s);
 

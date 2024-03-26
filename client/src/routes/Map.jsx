@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { getLastUpdatedSite as getLastUpdatedSite, list } from '../firebase';
+import { getSiteById, listSites, listSitesUpdatedSince } from '../firebase';
 import { AppContext } from '../context/AppContext';
 import { useCookies } from 'react-cookie';
 import { getWindDirectionFromBearing } from '../helpers/utils';
@@ -29,45 +29,10 @@ export default function Map() {
   });
 
   const navigate = useNavigate();
-  const [sitesGeoJson, setSitesGeoJson] = useState(null);
   const [markers] = useState([]);
-  const { refresh, setRefresh } = useContext(AppContext);
 
-  async function getGeoJson() {
-    const sites = await list('sites');
-    const geoJson = {
-      type: 'FeatureCollection',
-      features: []
-    };
-    for (const site of sites) {
-      const feature = {
-        type: 'Feature',
-        properties: {
-          name: site.name,
-          dbId: site.id,
-          currentAverage: site.currentAverage == null ? null : Math.round(site.currentAverage),
-          currentGust: site.currentGust == null ? null : Math.round(site.currentGust),
-          currentBearing: site.currentBearing == null ? null : Math.round(site.currentBearing),
-          validBearings: site.validBearings,
-          isOffline: site.isOffline
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: [site.coordinates._long, site.coordinates._lat]
-        }
-      };
-      // cwu stations sometimes show avg=0 even when gust is high
-      if (
-        site.type === 'cwu' &&
-        site.currentAverage == 0 &&
-        site.currentGust - site.currentAverage > 5
-      ) {
-        feature.properties.currentAverage = site.currentGust;
-      }
-      geoJson.features.push(feature);
-    }
-    return geoJson;
-  }
+  const REFRESH_INTERVAL = 60;
+  const { refresh, setRefresh } = useContext(AppContext);
 
   function getArrowStyle(avgWind, currentBearing, validBearings, isOffline) {
     let textColor = 'black';
@@ -135,85 +100,227 @@ export default function Map() {
     return [img, textColor];
   }
 
-  // this function does NOT read db unnecessarily, so it may be executed frequently
+  function getGeoJson(sites) {
+    if (!sites || !sites.length) return null;
+
+    const geoJson = {
+      type: 'FeatureCollection',
+      features: []
+    };
+    for (const site of sites) {
+      const feature = {
+        type: 'Feature',
+        properties: {
+          name: site.name,
+          dbId: site.id,
+          currentAverage: site.currentAverage == null ? null : Math.round(site.currentAverage),
+          currentGust: site.currentGust == null ? null : Math.round(site.currentGust),
+          currentBearing: site.currentBearing == null ? null : Math.round(site.currentBearing),
+          validBearings: site.validBearings,
+          isOffline: site.isOffline
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [site.coordinates._long, site.coordinates._lat]
+        }
+      };
+      // cwu stations sometimes show avg=0 even when gust is high
+      if (
+        site.type === 'cwu' &&
+        site.currentAverage == 0 &&
+        site.currentGust - site.currentAverage > 5
+      ) {
+        feature.properties.currentAverage = site.currentGust;
+      }
+      geoJson.features.push(feature);
+    }
+    return geoJson;
+  }
+
+  let lastRefresh = 0;
+  function initialiseMarkers(geoJson) {
+    if (!map.current || !geoJson || !geoJson.features.length) return;
+
+    const timestamp = Date.now();
+    lastRefresh = timestamp;
+
+    for (const f of geoJson.features) {
+      const name = f.properties.name;
+      const dbId = f.properties.dbId;
+      const currentAvg = f.properties.currentAverage;
+      const currentGust = f.properties.currentGust;
+      const currentBearing = f.properties.currentBearing;
+      const validBearings = f.properties.validBearings;
+      const isOffline = f.properties.isOffline;
+
+      // popup
+      let html = `<p align="center"><strong>${name}</strong></p>`;
+      if (isOffline) {
+        html += '<p style="color: red;" align="center">Offline</p>';
+      } else {
+        if (currentAvg == null && currentGust == null) {
+          html += `<p align="center">-</p>`;
+        } else {
+          let temp = '';
+          if (currentAvg == null) {
+            temp = `Gust ${currentGust}`;
+          } else if (currentGust == null) {
+            temp = `${currentAvg}`;
+          } else {
+            temp = `${currentAvg} - ${currentGust}`;
+          }
+          html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
+        }
+      }
+
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+      }).setHTML(html);
+
+      // arrow icon
+      const childArrow = document.createElement('div');
+      childArrow.className = 'marker-arrow';
+      childArrow.style.transform =
+        currentBearing == null ? '' : `rotate(${Math.round(currentBearing)}deg)`;
+      childArrow.addEventListener('click', () => {
+        navigate(`/sites/${dbId}`);
+      });
+      childArrow.addEventListener('mouseenter', () => popup.addTo(map.current));
+      childArrow.addEventListener('mouseleave', () => popup.remove());
+
+      const [img, color] = getArrowStyle(currentAvg, currentBearing, validBearings, isOffline);
+      childArrow.style.backgroundImage = img;
+
+      // avg wind text
+      const childText = document.createElement('span');
+      childText.className = 'marker-text';
+      childText.style.color = color;
+      childText.innerHTML = currentAvg == null ? '-' : currentAvg;
+      if (isOffline) childText.innerHTML = 'X';
+      childText.addEventListener('click', () => {
+        navigate(`/sites/${dbId}`);
+      });
+      childText.addEventListener('mouseenter', () => popup.addTo(map.current));
+      childText.addEventListener('mouseleave', () => popup.remove());
+
+      // parent element
+      const el = document.createElement('div');
+      el.id = dbId;
+      el.className = 'marker';
+      el.dataset.timestamp = timestamp;
+      el.appendChild(childArrow);
+      el.appendChild(childText);
+
+      markers.push({ marker: el, popup: popup });
+      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).setPopup(popup).addTo(map.current);
+    }
+  }
+
   async function refreshMarkers() {
     if (document.visibilityState !== 'visible') return;
     if (!markers.length) return;
 
-    // find next 10-minute mark where data should be updated
-    const date = new Date(markers[0].marker.dataset.timeStamp * 1000);
-    const minsToAdd = 10 - (date.getMinutes() % 10);
-    const bufferSec = 60; // buffer to allow data to write to db
-    const nextCheck = new Date(
-      date.getTime() + 1000 * (minsToAdd * 60 - date.getSeconds() + bufferSec)
+    let timestamp = Date.now();
+    if (timestamp - lastRefresh < REFRESH_INTERVAL * 1000) return; // enforce refresh interval
+    lastRefresh = timestamp;
+
+    // update marker styling
+    const newestMarker = markers.reduce((prev, current) => {
+      return prev && prev.marker.dataset.timestamp > current.marker.dataset.timestamp
+        ? prev
+        : current;
+    });
+    const sites = await listSitesUpdatedSince(
+      new Date(Number(newestMarker.marker.dataset.timestamp))
     );
-    if (new Date() < nextCheck) return;
+    let geoJson = getGeoJson(sites);
+    if (!geoJson || !geoJson.features.length) {
+      // due to a small difference between js Date.now() and Firestore date, a few records
+      // which update around the refresh time will be missed, so now we check for missed updates
+      let distinctTimestamps = [...new Set(markers.map((m) => m.marker.dataset.timestamp))];
+      if (distinctTimestamps.length < 2) return;
 
-    // check newest lastUpdated value to see if all stations updated
-    const s = await getLastUpdatedSite();
-    if (!s) return;
-    if (markers[0].marker.dataset.timeStamp < s.lastUpdate.seconds) {
-      // update marker styling
-      const timestamp = Math.floor(Date.now() / 1000);
-      const json = await getGeoJson();
-      for (const item of markers) {
-        const matches = json.features.filter((entry) => {
-          return entry.properties.dbId === item.marker.id;
-        });
-        if (matches && matches.length == 1) {
-          const f = matches[0];
-          const name = f.properties.name;
-          const currentAvg = f.properties.currentAverage;
-          const currentGust = f.properties.currentGust;
-          const currentBearing = f.properties.currentBearing;
-          const validBearings = f.properties.validBearings;
-          const isOffline = f.properties.isOffline;
-
-          item.marker.dataset.timeStamp = timestamp;
-          for (const child of item.marker.children) {
-            const [img, color] = getArrowStyle(
-              currentAvg,
-              currentBearing,
-              validBearings,
-              isOffline
-            );
-            if (child.className === 'marker-text') {
-              child.style.color = color;
-              child.innerHTML = currentAvg == null ? '-' : currentAvg;
-              if (isOffline) child.innerHTML = 'X';
-            } else if (child.className === 'marker-arrow') {
-              child.style.backgroundImage = img;
-              child.style.transform =
-                currentBearing == null ? '' : `rotate(${Math.round(currentBearing)}deg)`;
-            }
-
-            // update popup
-            let html = `<p align="center"><strong>${name}</strong></p>`;
-            if (isOffline) {
-              html += '<p style="color: red;" align="center">Offline</p>';
-            } else {
-              if (currentAvg == null && currentGust == null) {
-                html += `<p align="center">-</p>`;
-              } else {
-                let temp = '';
-                if (currentAvg == null) {
-                  temp = `Gust ${currentGust}`;
-                } else if (currentGust == null) {
-                  temp = `${currentAvg}`;
-                } else {
-                  temp = `${currentAvg} - ${currentGust}`;
-                }
-                html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
-              }
-            }
-            item.popup.setHTML(html);
-          }
+      // find oldest and next oldest timestamp
+      let min = Infinity;
+      let secondMin = Infinity;
+      for (const t of distinctTimestamps) {
+        if (t < min) {
+          secondMin = min;
+          min = t;
+        } else if (t < secondMin) {
+          secondMin = t;
         }
       }
 
-      // trigger refresh in Site component
-      setRefresh(refresh + 1);
+      // if oldest timestamp is greater than 1 interval (+10% buffer) than
+      // the next oldest timestamp, then we missed some records
+      if (secondMin - min > 1.1 * REFRESH_INTERVAL * 1000) {
+        const sites = [];
+        const oldestMarkers = markers.filter((m) => {
+          return m.marker.dataset.timestamp === min;
+        });
+        for (const m of oldestMarkers) {
+          const site = await getSiteById(m.marker.id);
+          if (site) sites.push(site);
+        }
+        geoJson = getGeoJson(sites);
+        timestamp = secondMin; // update missed records with the oldest valid timestamp
+      }
+      if (!geoJson || !geoJson.features.length) return;
     }
+
+    for (const item of markers) {
+      const matches = geoJson.features.filter((f) => {
+        return f.properties.dbId === item.marker.id;
+      });
+      if (!matches || !matches.length) continue;
+
+      const f = matches[0];
+      const name = f.properties.name;
+      const currentAvg = f.properties.currentAverage;
+      const currentGust = f.properties.currentGust;
+      const currentBearing = f.properties.currentBearing;
+      const validBearings = f.properties.validBearings;
+      const isOffline = f.properties.isOffline;
+
+      item.marker.dataset.timestamp = timestamp;
+      for (const child of item.marker.children) {
+        const [img, color] = getArrowStyle(currentAvg, currentBearing, validBearings, isOffline);
+        if (child.className === 'marker-text') {
+          child.style.color = color;
+          child.innerHTML = currentAvg == null ? '-' : currentAvg;
+          if (isOffline) child.innerHTML = 'X';
+        } else if (child.className === 'marker-arrow') {
+          child.style.backgroundImage = img;
+          child.style.transform =
+            currentBearing == null ? '' : `rotate(${Math.round(currentBearing)}deg)`;
+        }
+
+        // update popup
+        let html = `<p align="center"><strong>${name}</strong></p>`;
+        if (isOffline) {
+          html += '<p style="color: red;" align="center">Offline</p>';
+        } else {
+          if (currentAvg == null && currentGust == null) {
+            html += `<p align="center">-</p>`;
+          } else {
+            let temp = '';
+            if (currentAvg == null) {
+              temp = `Gust ${currentGust}`;
+            } else if (currentGust == null) {
+              temp = `${currentAvg}`;
+            } else {
+              temp = `${currentAvg} - ${currentGust}`;
+            }
+            html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
+          }
+        }
+        item.popup.setHTML(html);
+      }
+    }
+    // trigger refresh in Site component
+    setRefresh(refresh + 1);
   }
 
   const map = useRef(null);
@@ -286,9 +393,10 @@ export default function Map() {
       })
     );
 
-    // refresh data every 10 min
     map.current.on('load', async () => {
-      setSitesGeoJson(await getGeoJson());
+      initialiseMarkers(getGeoJson(await listSites()));
+
+      // poll for new data
       const interval = setInterval(
         async () => {
           try {
@@ -299,7 +407,7 @@ export default function Map() {
             }
           }
         },
-        10 * 1000 // check every 10s
+        REFRESH_INTERVAL * 1000 // every REFRESH_INTERVAL seconds
       );
     });
 
@@ -321,84 +429,6 @@ export default function Map() {
     map.current.flyTo({ center: [lon, lat], zoom: zoom });
     setPosInit(true);
   }, [lon, lat, zoom, map.current]);
-
-  // initialise markers
-  useEffect(() => {
-    if (!map.current || !sitesGeoJson) return;
-
-    const timestamp = Math.floor(Date.now() / 1000);
-    for (const f of sitesGeoJson.features) {
-      const name = f.properties.name;
-      const dbId = f.properties.dbId;
-      const currentAvg = f.properties.currentAverage;
-      const currentGust = f.properties.currentGust;
-      const currentBearing = f.properties.currentBearing;
-      const validBearings = f.properties.validBearings;
-      const isOffline = f.properties.isOffline;
-
-      // popup
-      let html = `<p align="center"><strong>${name}</strong></p>`;
-      if (isOffline) {
-        html += '<p style="color: red;" align="center">Offline</p>';
-      } else {
-        if (currentAvg == null && currentGust == null) {
-          html += `<p align="center">-</p>`;
-        } else {
-          let temp = '';
-          if (currentAvg == null) {
-            temp = `Gust ${currentGust}`;
-          } else if (currentGust == null) {
-            temp = `${currentAvg}`;
-          } else {
-            temp = `${currentAvg} - ${currentGust}`;
-          }
-          html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
-        }
-      }
-
-      const popup = new mapboxgl.Popup({
-        closeButton: false,
-        closeOnClick: false
-      }).setHTML(html);
-
-      // arrow icon
-      const childArrow = document.createElement('div');
-      childArrow.className = 'marker-arrow';
-      childArrow.style.transform =
-        currentBearing == null ? '' : `rotate(${Math.round(currentBearing)}deg)`;
-      childArrow.addEventListener('click', () => {
-        navigate(`/sites/${dbId}`);
-      });
-      childArrow.addEventListener('mouseenter', () => popup.addTo(map.current));
-      childArrow.addEventListener('mouseleave', () => popup.remove());
-
-      const [img, color] = getArrowStyle(currentAvg, currentBearing, validBearings, isOffline);
-      childArrow.style.backgroundImage = img;
-
-      // avg wind text
-      const childText = document.createElement('span');
-      childText.className = 'marker-text';
-      childText.style.color = color;
-      childText.innerHTML = currentAvg == null ? '-' : currentAvg;
-      if (isOffline) childText.innerHTML = 'X';
-      childText.addEventListener('click', () => {
-        navigate(`/sites/${dbId}`);
-      });
-      childText.addEventListener('mouseenter', () => popup.addTo(map.current));
-      childText.addEventListener('mouseleave', () => popup.remove());
-
-      // parent element
-      const el = document.createElement('div');
-      el.id = dbId;
-      el.className = 'marker';
-      el.dataset.timeStamp = timestamp;
-      el.appendChild(childArrow);
-      el.appendChild(childText);
-
-      markers.push({ marker: el, popup: popup });
-      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).setPopup(popup).addTo(map.current);
-    }
-  }, [map.current, sitesGeoJson]);
 
   // refresh on visibility change
   useEffect(() => {
