@@ -51,20 +51,26 @@ export default function Site() {
     const name = data.get('name').trim();
     const externalId = data.get('externalId').trim();
     const externalLink = data.get('externalLink').trim();
-    const latitude = data.get('lat').trim();
-    const longitude = data.get('lon').trim();
+    const coordinates = data.get('coordinates').trim();
     const bearings = data.get('bearings').trim();
 
     // input validation
-    if (!name || !externalId || !externalLink || !latitude || !longitude || !type) {
+    if (!name || !externalId || !externalLink || !coordinates || !type) {
       setLoading(false);
       setErrorMsg('Complete all fields');
       setIsError(true);
       return;
     }
 
-    const lat = Number(latitude);
-    const lon = Number(longitude);
+    const coords = coordinates.replace(' ', '').split(',');
+    if (coords.length != 2) {
+      setLoading(false);
+      setErrorMsg('Coordinates are invalid');
+      setIsError(true);
+      return;
+    }
+    const lat = Number(coords[0]);
+    const lon = Number(coords[1]);
     if (isNaN(lat)) {
       setLoading(false);
       setErrorMsg('Latitude is invalid');
@@ -99,28 +105,53 @@ export default function Site() {
       return;
     }
 
-    let harvestWindAvgId = '';
-    let harvestWindGustId = '';
-    let harvestWindDirId = '';
-    let harvestTempId = '';
+    let harvestConfigId = '';
+    let harvestWindAvgGraphId = '';
+    let harvestWindAvgTraceId = '';
+    let harvestWindGustGraphId = '';
+    let harvestWindGustTraceId = '';
+    let harvestWindDirGraphId = '';
+    let harvestWindDirTraceId = '';
+    let harvestTempGraphId = '';
+    let harvestTempTraceId = '';
     if (type === 'harvest') {
-      harvestWindAvgId = data.get('harvestWindAvgId').trim();
-      harvestWindGustId = data.get('harvestWindGustId').trim();
-      harvestWindDirId = data.get('harvestWindDirId').trim();
-      harvestTempId = data.get('harvestTempId').trim();
-      if (!harvestWindAvgId || !harvestWindGustId || !harvestWindDirId || !harvestTempId) {
+      harvestConfigId = data.get('harvestConfigId').trim();
+      harvestWindAvgGraphId = data.get('harvestWindAvgGraphId').trim();
+      harvestWindAvgTraceId = data.get('harvestWindAvgTraceId').trim();
+      harvestWindGustGraphId = data.get('harvestWindGustGraphId').trim();
+      harvestWindGustTraceId = data.get('harvestWindGustTraceId').trim();
+      harvestWindDirGraphId = data.get('harvestWindDirGraphId').trim();
+      harvestWindDirTraceId = data.get('harvestWindDirTraceId').trim();
+      harvestTempGraphId = data.get('harvestTempGraphId').trim();
+      harvestTempTraceId = data.get('harvestTempTraceId').trim();
+      if (
+        !harvestConfigId ||
+        !harvestWindAvgGraphId ||
+        !harvestWindAvgTraceId ||
+        !harvestWindGustGraphId ||
+        !harvestWindGustTraceId ||
+        !harvestWindDirGraphId ||
+        !harvestWindDirTraceId ||
+        !harvestTempGraphId ||
+        !harvestTempTraceId
+      ) {
         setLoading(false);
         setErrorMsg('Complete all Harvest fields');
         setIsError(true);
         return;
       }
-      const regex1 = /[0-9]+_[0-9]+/g;
+      const regex1 = /^[0-9]+$/g;
       if (
         !externalId.match(regex1) ||
-        !harvestWindAvgId.match(regex1) ||
-        !harvestWindGustId.match(regex1) ||
-        !harvestWindDirId.match(regex1) ||
-        !harvestTempId.match(regex1)
+        !harvestConfigId.match(regex1) ||
+        !harvestWindAvgGraphId.match(regex1) ||
+        !harvestWindAvgTraceId.match(regex1) ||
+        !harvestWindGustGraphId.match(regex1) ||
+        !harvestWindGustTraceId.match(regex1) ||
+        !harvestWindDirGraphId.match(regex1) ||
+        !harvestWindDirTraceId.match(regex1) ||
+        !harvestTempGraphId.match(regex1) ||
+        !harvestTempTraceId.match(regex1)
       ) {
         setLoading(false);
         setErrorMsg('Invalid Harvest ID');
@@ -143,7 +174,10 @@ export default function Site() {
         externalId: externalId,
         externalLink: externalLink,
         type: type,
-        coordinates: new GeoPoint(lat, lon),
+        coordinates: new GeoPoint(
+          Math.round(lat * 1000000) / 1000000, // round to 6dp
+          Math.round(lon * 1000000) / 1000000
+        ),
         currentAverage: null,
         currentGust: null,
         currentBearing: null,
@@ -152,10 +186,10 @@ export default function Site() {
         validBearings: bearings
       };
       if (type === 'harvest') {
-        site.harvestWindAverageId = harvestWindAvgId;
-        site.harvestWindGustId = harvestWindGustId;
-        site.harvestWindDirectionId = harvestWindDirId;
-        site.harvestTemperatureId = harvestTempId;
+        site.harvestWindAverageId = `${harvestWindAvgGraphId}_${harvestWindAvgTraceId}`;
+        site.harvestWindGustId = `${harvestWindGustGraphId}_${harvestWindGustTraceId}`;
+        site.harvestWindDirectionId = `${harvestWindDirGraphId}_${harvestWindDirTraceId}`;
+        site.harvestTemperatureId = `${harvestTempGraphId}_${harvestTempTraceId}`;
       }
 
       await addDoc(collection(db, 'sites'), site);
@@ -204,14 +238,35 @@ export default function Site() {
                 error={isError}
                 helperText={isError && errorMsg}
               />
-              <TextField
-                margin="dense"
-                fullWidth
-                id="externalId"
-                label="External Id"
-                name="externalId"
-                required
-              />
+              {type === 'harvest' ? (
+                <>
+                  <TextField
+                    margin="dense"
+                    id="externalId"
+                    label="External ID"
+                    name="externalId"
+                    required
+                    sx={{ width: '49%' }}
+                  />
+                  <TextField
+                    margin="dense"
+                    id="harvestConfigId"
+                    label="Config ID"
+                    name="harvestConfigId"
+                    required
+                    sx={{ width: '49%', ml: '2%' }}
+                  />
+                </>
+              ) : (
+                <TextField
+                  margin="dense"
+                  fullWidth
+                  id="externalId"
+                  label="External ID"
+                  name="externalId"
+                  required
+                />
+              )}
               <TextField
                 margin="dense"
                 fullWidth
@@ -240,57 +295,84 @@ export default function Site() {
               </TextField>
               <TextField
                 margin="dense"
-                id="lat"
-                label="Latitude"
-                name="lat"
+                fullWidth
+                id="coordinates"
+                label="Latitude, Longitude"
+                name="coordinates"
                 required
-                sx={{ width: '49%' }}
               />
               <TextField
                 margin="dense"
-                id="lon"
-                label="Longitude"
-                name="lon"
-                required
-                sx={{ width: '49%', ml: '2%' }}
-              />
-              <TextField
-                margin="normal"
                 fullWidth
                 id="bearings"
                 label="Bearings CW 000-090,180-270"
                 name="bearings"
-                sx={{ mt: 1 }}
               />
               {type === 'harvest' && (
                 <>
                   <TextField
                     margin="dense"
-                    fullWidth
-                    id="harvestWindAvgId"
-                    label="Harvest Wind Avg GraphID_TraceID"
-                    name="harvestWindAvgId"
+                    id="harvestWindAvgGraphId"
+                    label="Wind Avg GraphID"
+                    name="harvestWindAvgGraphId"
+                    required
+                    sx={{ width: '49%' }}
                   />
                   <TextField
                     margin="dense"
-                    fullWidth
-                    id="harvestWindGustId"
-                    label="Harvest Wind Gust GraphID_TraceID"
-                    name="harvestWindGustId"
+                    id="harvestWindAvgTraceId"
+                    label="Trace ID"
+                    name="harvestWindAvgTraceId"
+                    required
+                    sx={{ width: '49%', ml: '2%' }}
                   />
                   <TextField
                     margin="dense"
-                    fullWidth
-                    id="harvestWindDirId"
-                    label="Harvest Wind Direction GraphID_TraceID"
-                    name="harvestWindDirId"
+                    id="harvestWindGustGraphId"
+                    label="Wind Gust GraphID"
+                    name="harvestWindGustGraphId"
+                    required
+                    sx={{ width: '49%' }}
                   />
                   <TextField
-                    margin="normal"
-                    fullWidth
-                    id="harvestTempId"
-                    label="Harvest Temperature GraphID_TraceID"
-                    name="harvestTempId"
+                    margin="dense"
+                    id="harvestWindGustTraceId"
+                    label="Trace ID"
+                    name="harvestWindGustTraceId"
+                    required
+                    sx={{ width: '49%', ml: '2%' }}
+                  />
+                  <TextField
+                    margin="dense"
+                    id="harvestWindDirGraphId"
+                    label="Wind Dir GraphID"
+                    name="harvestWindDirGraphId"
+                    required
+                    sx={{ width: '49%' }}
+                  />
+                  <TextField
+                    margin="dense"
+                    id="harvestWindDirTraceId"
+                    label="Trace ID"
+                    name="harvestWindDirTraceId"
+                    required
+                    sx={{ width: '49%', ml: '2%' }}
+                  />
+                  <TextField
+                    margin="dense"
+                    id="harvestTempGraphId"
+                    label="Temp GraphID"
+                    name="harvestTempGraphId"
+                    required
+                    sx={{ width: '49%' }}
+                  />
+                  <TextField
+                    margin="dense"
+                    id="harvestTempTraceId"
+                    label="Trace ID"
+                    name="harvestTempTraceId"
+                    required
+                    sx={{ width: '49%', ml: '2%' }}
                   />
                 </>
               )}
