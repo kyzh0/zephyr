@@ -146,6 +146,24 @@ export default function Map() {
     const timestamp = Date.now();
     lastRefresh = timestamp;
 
+    geoJson.features.sort((a, b) => {
+      // render sites with valid bearings first (on top)
+      if (!a.properties.validBearings) {
+        if (!b.properties.validBearings) {
+          return 0;
+        } else {
+          return -1;
+        }
+      }
+      if (!b.properties.validBearings) {
+        if (!a.properties.validBearings) {
+          return 0;
+        } else {
+          return 1;
+        }
+      }
+      return 0;
+    });
     for (const f of geoJson.features) {
       const name = f.properties.name;
       const dbId = f.properties.dbId;
