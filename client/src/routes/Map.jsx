@@ -58,10 +58,12 @@ export default function Map() {
             if (bearing1 <= bearing2) {
               if (currentBearing >= bearing1 && currentBearing <= bearing2) {
                 prefix = 'gold-valid-arrow';
+                break;
               }
             } else {
-              if (currentBearing <= bearing1 || currentBearing >= bearing2) {
+              if (currentBearing >= bearing1 || currentBearing <= bearing2) {
                 prefix = 'gold-valid-arrow';
+                break;
               }
             }
           }
