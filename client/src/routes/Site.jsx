@@ -351,9 +351,10 @@ export default function Site() {
             ) : (
               <StyledSkeleton width={180} height={180} />
             )}
-
-            {site && data && data.length ? (
-              !site.isOffline && (
+            {site ? (
+              site.isOffline ? (
+                <></>
+              ) : data && data.length ? (
                 <>
                   <TableContainer component={Paper}>
                     <Table sx={{ minWidth: 650 }} size="small">
@@ -629,6 +630,8 @@ export default function Site() {
                     </ResponsiveContainer>
                   </Box>
                 </>
+              ) : (
+                <StyledSkeleton width={'100%'} height={600} />
               )
             ) : (
               <StyledSkeleton width={'100%'} height={600} />
