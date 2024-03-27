@@ -641,7 +641,7 @@ export default function Site() {
               {site && (
                 <Link href={site.externalLink} target="_blank" rel="noreferrer" variant="subtitle2">
                   Source:{' '}
-                  {site.type.length == 3
+                  {site.type.length <= 4
                     ? site.type.toUpperCase()
                     : site.type.charAt(0).toUpperCase() + site.type.slice(1)}
                 </Link>

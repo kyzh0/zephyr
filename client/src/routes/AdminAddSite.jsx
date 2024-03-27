@@ -62,6 +62,29 @@ export default function Site() {
       return;
     }
 
+    if (type === 'harvest') {
+      if (!externalLink.toUpperCase().includes('HARVEST')) {
+        setLoading(false);
+        setErrorMsg('URL is not a valid Harvest link');
+        setIsError(true);
+        return;
+      }
+    } else if (type === 'metservice') {
+      if (!externalLink.toUpperCase().includes('METSERVICE')) {
+        setLoading(false);
+        setErrorMsg('URL is not a valid Metservice link');
+        setIsError(true);
+        return;
+      }
+    } else if (type === 'holfuy') {
+      if (!externalLink.toUpperCase().includes('HOLFUY')) {
+        setLoading(false);
+        setErrorMsg('URL is not a valid Holfuy link');
+        setIsError(true);
+        return;
+      }
+    }
+
     const coords = coordinates.replace(' ', '').split(',');
     if (coords.length != 2) {
       setLoading(false);
@@ -290,8 +313,6 @@ export default function Site() {
                 <MenuItem value="harvest">Harvest</MenuItem>
                 <MenuItem value="holfuy">Holfuy</MenuItem>
                 <MenuItem value="metservice">Metservice</MenuItem>
-                <MenuItem value="attentis">Attentis</MenuItem>
-                <MenuItem value="cwu">Canterbury Weather Updates</MenuItem>
               </TextField>
               <TextField
                 margin="dense"
