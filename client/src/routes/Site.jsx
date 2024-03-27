@@ -133,6 +133,7 @@ export default function Site() {
       const s = await getSiteById(id);
       if (!s) return;
       setSite(s);
+      if (s.isOffline) return;
 
       const validBearings = [];
       const pairs = s.validBearings ? s.validBearings.split(',') : [];

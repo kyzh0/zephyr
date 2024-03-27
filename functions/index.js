@@ -647,6 +647,7 @@ async function wrapper(source) {
           }
           await db.collection(`sites/${doc.id}/data`).add({
             time: date,
+            expiry: new Date(date.getTime() + 2 * 24 * 60 * 60 * 1000), // 2 day expiry to be deleted by TTL policy
             windAverage: avg ?? null,
             windGust: gust ?? null,
             windBearing: bearing ?? null,
@@ -656,38 +657,6 @@ async function wrapper(source) {
       }
     }
     functions.logger.log('Weather station data updated.');
-  } catch (error) {
-    functions.logger.error(error);
-    return null;
-  }
-}
-
-async function removeOldData() {
-  try {
-    const db = getFirestore();
-    const snapshot = await db.collection('sites').get();
-    if (!snapshot.empty) {
-      const tempArray = [];
-      snapshot.forEach((doc) => {
-        tempArray.push(doc);
-      });
-      for (const doc of tempArray) {
-        const date = new Date();
-        date.setDate(date.getDate() - 3);
-        const query = db.collection(`sites/${doc.id}/data`).where('time', '<', date);
-        const snap = await query.get();
-        if (!snap.empty) {
-          const tempArray1 = [];
-          snap.forEach((doc) => {
-            tempArray1.push(doc);
-          });
-          for (const doc1 of tempArray1) {
-            await doc1.ref.delete();
-          }
-        }
-      }
-    }
-    functions.logger.log('Old data removed.');
   } catch (error) {
     functions.logger.error(error);
     return null;
@@ -824,14 +793,6 @@ exports.updateMetserviceStationData = functions
   .pubsub.schedule('*/10 * * * *')
   .onRun((data, context) => {
     return wrapper('metservice');
-  });
-
-exports.removeOldData = functions
-  .runWith({ timeoutSeconds: 20, memory: '256MB' })
-  .region('australia-southeast1')
-  .pubsub.schedule('*/10 * * * *')
-  .onRun((data, context) => {
-    return removeOldData();
   });
 
 exports.checkForErrors = functions
