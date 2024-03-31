@@ -67,8 +67,8 @@ async function processHarvestResponse(sid, configId, graphId, traceId, longInter
   return null;
 }
 
-async function getHarvestData(siteId, windAvgId, windGustId, windDirId, tempId, longInterval) {
-  let ids = siteId.split('_');
+async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempId, longInterval) {
+  let ids = stationId.split('_');
   if (ids.length != 2) {
     return;
   }
@@ -152,7 +152,7 @@ async function getHarvestData(siteId, windAvgId, windGustId, windDirId, tempId, 
   };
 }
 
-async function getMetserviceData(siteId) {
+async function getMetserviceData(stationId) {
   let windAverage = null;
   let windGust = null;
   let windBearing = null;
@@ -160,7 +160,7 @@ async function getMetserviceData(siteId) {
 
   try {
     const { data } = await axios.get(
-      `https://www.metservice.com/publicData/webdata/weather-station-location/${siteId}/`,
+      `https://www.metservice.com/publicData/webdata/weather-station-location/${stationId}/`,
       {
         headers: {
           Connection: 'keep-alive'
@@ -214,7 +214,7 @@ async function getMetserviceData(siteId) {
         }
       }
       const temp = modules[0].observations.temperature;
-      if (temp && temp.length) {
+      if (temp && temp.length && temp[0]) {
         temperature = temp[0].current;
       }
     }
@@ -230,9 +230,9 @@ async function getMetserviceData(siteId) {
   };
 }
 
-async function getHolfuyData(siteId) {
+async function getHolfuyData(stationId) {
   // const { data } = await axios.get(
-  //   `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=${siteId}`
+  //   `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=${stationId}`
   // );
 
   // return {
@@ -248,10 +248,10 @@ async function getHolfuyData(siteId) {
   let temperature = null;
 
   try {
-    const { headers } = await axios.get(`https://holfuy.com/en/weather/${siteId}`);
+    const { headers } = await axios.get(`https://holfuy.com/en/weather/${stationId}`);
     const cookies = headers['set-cookie'];
     if (cookies && cookies.length && cookies[0].length) {
-      const { data } = await axios.get(`https://holfuy.com/puget/mjso.php?k=${siteId}`, {
+      const { data } = await axios.get(`https://holfuy.com/puget/mjso.php?k=${stationId}`, {
         headers: {
           Cookie: cookies[0],
           Connection: 'keep-alive'
@@ -274,7 +274,7 @@ async function getHolfuyData(siteId) {
   };
 }
 
-async function getAttentisData(siteId) {
+async function getAttentisData(stationId) {
   let windAverage = null;
   let windGust = null;
   let windBearing = null;
@@ -285,7 +285,7 @@ async function getAttentisData(siteId) {
       headers: { Authorization: `Bearer ${process.env.ATTENTIS_KEY}`, Connection: 'keep-alive' }
     });
     if (data.data && data.data.weather_readings) {
-      const d = data.data.weather_readings[siteId];
+      const d = data.data.weather_readings[stationId];
       if (d) {
         windAverage = d.wind_speed;
         windGust = d.wind_gust_speed;
@@ -305,14 +305,14 @@ async function getAttentisData(siteId) {
   };
 }
 
-async function getCwuData(siteId) {
+async function getCwuData(stationId) {
   let windAverage = null;
   let windGust = null;
   let windBearing = null;
   let temperature = null;
 
   try {
-    const { data } = await axios.get(`https://cwu.co.nz/forecast/${siteId}/`, {
+    const { data } = await axios.get(`https://cwu.co.nz/forecast/${stationId}/`, {
       responseType: 'text',
       headers: {
         Connection: 'keep-alive'
@@ -548,7 +548,7 @@ async function getMpycData() {
 async function wrapper(source) {
   try {
     const db = getFirestore();
-    const snapshot = await db.collection('sites').get();
+    const snapshot = await db.collection('stations').get();
     if (!snapshot.empty) {
       const tempArray = [];
       snapshot.forEach((doc) => {
@@ -622,7 +622,7 @@ async function wrapper(source) {
             temperature = null;
           }
 
-          // update site data
+          // update station data
           let date = new Date();
           const s = {
             lastUpdate: date,
@@ -637,7 +637,7 @@ async function wrapper(source) {
           if (avg != null && gust != null && bearing != null && temperature != null) {
             s.isError = false;
           }
-          await db.doc(`sites/${doc.id}`).update(s);
+          await db.doc(`stations/${doc.id}`).update(s);
 
           // add data
           // floor timestamp to 10 min
@@ -645,9 +645,9 @@ async function wrapper(source) {
           if (rem > 0) {
             date = new Date(date.getTime() - rem * 60 * 1000);
           }
-          await db.collection(`sites/${doc.id}/data`).add({
+          await db.collection(`stations/${doc.id}/data`).add({
             time: date,
-            expiry: new Date(date.getTime() + 2 * 24 * 60 * 60 * 1000), // 2 day expiry to be deleted by TTL policy
+            expiry: new Date(date.getTime() + 24 * 60 * 60 * 1000), // 1 day expiry to be deleted by TTL policy
             windAverage: avg ?? null,
             windGust: gust ?? null,
             windBearing: bearing ?? null,
@@ -668,7 +668,7 @@ async function checkForErrors() {
     const errors = [];
     const timeNow = Math.round(Date.now() / 1000);
     const db = getFirestore();
-    const snapshot = await db.collection('sites').get();
+    const snapshot = await db.collection('stations').get();
     if (!snapshot.empty) {
       const tempArray = [];
       snapshot.forEach((doc) => {
@@ -680,7 +680,7 @@ async function checkForErrors() {
         let isWindError = true;
         let isBearingError = true;
         let isTempError = true;
-        const query = db.collection(`sites/${doc.id}/data`).orderBy('time', 'desc').limit(36); // 36 records in 6h
+        const query = db.collection(`stations/${doc.id}/data`).orderBy('time', 'desc').limit(36); // 36 records in 6h
         const snap = await query.get();
         if (!snap.empty) {
           const tempArray1 = [];
@@ -710,13 +710,13 @@ async function checkForErrors() {
         let errorMsg = '';
         if (isDataError) {
           errorMsg = 'ERROR: Data scraper has stopped.\n';
-          await db.doc(`sites/${doc.id}`).update({
+          await db.doc(`stations/${doc.id}`).update({
             isOffline: true
           });
         } else {
           if (isWindError) {
             errorMsg += 'ERROR: No wind avg/gust data.\n';
-            await db.doc(`sites/${doc.id}`).update({
+            await db.doc(`stations/${doc.id}`).update({
               isOffline: true
             });
           }
@@ -732,7 +732,7 @@ async function checkForErrors() {
           // skip error email if already sent)
           const err = doc.data().isError;
           if (err == null || !err) {
-            await db.doc(`sites/${doc.id}`).update({
+            await db.doc(`stations/${doc.id}`).update({
               isError: true
             });
             errors.push(
@@ -803,14 +803,13 @@ exports.checkForErrors = functions
     return checkForErrors();
   });
 
-// exports.test = functions
-//   .runWith({ timeoutSeconds: 30, memory: '1GB' })
-//   .region('australia-southeast1')
-//   .https.onRequest(async (req, res) => {
-//     try {
-
-//     } catch (e) {
-//       functions.logger.log(e);
-//     }
-//     res.send('ok');
-//   });
+exports.test = functions
+  .runWith({ timeoutSeconds: 30, memory: '1GB' })
+  .region('australia-southeast1')
+  .https.onRequest(async (req, res) => {
+    try {
+    } catch (e) {
+      functions.logger.log(e);
+    }
+    res.send('ok');
+  });

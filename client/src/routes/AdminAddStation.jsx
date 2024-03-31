@@ -17,7 +17,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { addDoc, collection, GeoPoint } from 'firebase/firestore';
 
-export default function Site() {
+export default function AdminAddStation() {
   const navigate = useNavigate();
   function handleClose() {
     navigate('/');
@@ -192,7 +192,7 @@ export default function Site() {
         elevation = data.elevation[0];
       }
 
-      const site = {
+      const station = {
         name: name,
         externalId: harvestConfigId ? `${externalId}_${harvestConfigId}` : externalId,
         externalLink: externalLink,
@@ -209,13 +209,13 @@ export default function Site() {
         validBearings: bearings
       };
       if (type === 'harvest') {
-        site.harvestWindAverageId = `${harvestWindAvgGraphId}_${harvestWindAvgTraceId}`;
-        site.harvestWindGustId = `${harvestWindGustGraphId}_${harvestWindGustTraceId}`;
-        site.harvestWindDirectionId = `${harvestWindDirGraphId}_${harvestWindDirTraceId}`;
-        site.harvestTemperatureId = `${harvestTempGraphId}_${harvestTempTraceId}`;
+        station.harvestWindAverageId = `${harvestWindAvgGraphId}_${harvestWindAvgTraceId}`;
+        station.harvestWindGustId = `${harvestWindGustGraphId}_${harvestWindGustTraceId}`;
+        station.harvestWindDirectionId = `${harvestWindDirGraphId}_${harvestWindDirTraceId}`;
+        station.harvestTemperatureId = `${harvestTempGraphId}_${harvestTempTraceId}`;
       }
 
-      await addDoc(collection(db, 'sites'), site);
+      await addDoc(collection(db, 'stations'), station);
 
       setLoading(false);
       handleClose();
@@ -248,14 +248,14 @@ export default function Site() {
               </IconButton>
             </Stack>
             <Typography component="h1" variant="h5" gutterBottom>
-              Add New Site
+              Add New Station
             </Typography>
             <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
               <TextField
                 margin="dense"
                 fullWidth
                 id="name"
-                label="Site Name"
+                label="Station Name"
                 name="name"
                 required
                 error={isError}

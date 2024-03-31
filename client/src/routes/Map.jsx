@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { getSiteById, listSites, listSitesUpdatedSince } from '../firebase';
+import { getStationById, listStations, listStationsUpdatedSince } from '../firebase';
 import { AppContext } from '../context/AppContext';
 import { useCookies } from 'react-cookie';
 import { getWindDirectionFromBearing } from '../helpers/utils';
@@ -46,7 +46,7 @@ export default function Map() {
 
     let prefix = '';
     if (currentBearing != null && avgWind != null) {
-      // site has bearings, check if within bounds
+      // station has bearings, check if within bounds
       if (validBearings) {
         prefix = 'gold-arrow';
         const pairs = validBearings.split(',');
@@ -69,7 +69,7 @@ export default function Map() {
           }
         }
       } else {
-        // site has no bearings
+        // station has no bearings
         prefix = 'arrow';
       }
     } else {
@@ -102,37 +102,39 @@ export default function Map() {
     return [img, textColor];
   }
 
-  function getGeoJson(sites) {
-    if (!sites || !sites.length) return null;
+  function getGeoJson(stations) {
+    if (!stations || !stations.length) return null;
 
     const geoJson = {
       type: 'FeatureCollection',
       features: []
     };
-    for (const site of sites) {
+    for (const station of stations) {
       const feature = {
         type: 'Feature',
         properties: {
-          name: site.name,
-          dbId: site.id,
-          currentAverage: site.currentAverage == null ? null : Math.round(site.currentAverage),
-          currentGust: site.currentGust == null ? null : Math.round(site.currentGust),
-          currentBearing: site.currentBearing == null ? null : Math.round(site.currentBearing),
-          validBearings: site.validBearings,
-          isOffline: site.isOffline
+          name: station.name,
+          dbId: station.id,
+          currentAverage:
+            station.currentAverage == null ? null : Math.round(station.currentAverage),
+          currentGust: station.currentGust == null ? null : Math.round(station.currentGust),
+          currentBearing:
+            station.currentBearing == null ? null : Math.round(station.currentBearing),
+          validBearings: station.validBearings,
+          isOffline: station.isOffline
         },
         geometry: {
           type: 'Point',
-          coordinates: [site.coordinates._long, site.coordinates._lat]
+          coordinates: [station.coordinates._long, station.coordinates._lat]
         }
       };
       // cwu stations sometimes show avg=0 even when gust is high
       if (
-        site.type === 'cwu' &&
-        site.currentAverage == 0 &&
-        site.currentGust - site.currentAverage > 5
+        station.type === 'cwu' &&
+        station.currentAverage == 0 &&
+        station.currentGust - station.currentAverage > 5
       ) {
-        feature.properties.currentAverage = site.currentGust;
+        feature.properties.currentAverage = station.currentGust;
       }
       geoJson.features.push(feature);
     }
@@ -147,7 +149,7 @@ export default function Map() {
     lastRefresh = timestamp;
 
     geoJson.features.sort((a, b) => {
-      // render sites with valid bearings first (on top)
+      // render stations with valid bearings first (on top)
       if (!a.properties.validBearings) {
         if (!b.properties.validBearings) {
           return 0;
@@ -204,7 +206,7 @@ export default function Map() {
       childArrow.style.transform =
         currentBearing == null ? '' : `rotate(${Math.round(currentBearing)}deg)`;
       childArrow.addEventListener('click', () => {
-        navigate(`/sites/${dbId}`);
+        navigate(`/stations/${dbId}`);
       });
       childArrow.addEventListener('mouseenter', () => popup.addTo(map.current));
       childArrow.addEventListener('mouseleave', () => popup.remove());
@@ -219,7 +221,7 @@ export default function Map() {
       childText.innerHTML = currentAvg == null ? '-' : currentAvg;
       if (isOffline) childText.innerHTML = 'X';
       childText.addEventListener('click', () => {
-        navigate(`/sites/${dbId}`);
+        navigate(`/stations/${dbId}`);
       });
       childText.addEventListener('mouseenter', () => popup.addTo(map.current));
       childText.addEventListener('mouseleave', () => popup.remove());
@@ -251,10 +253,10 @@ export default function Map() {
         ? prev
         : current;
     });
-    const sites = await listSitesUpdatedSince(
+    const stations = await listStationsUpdatedSince(
       new Date(Number(newestMarker.marker.dataset.timestamp))
     );
-    let geoJson = getGeoJson(sites);
+    let geoJson = getGeoJson(stations);
     if (!geoJson || !geoJson.features.length) {
       // due to a small difference between js Date.now() and Firestore date, a few records
       // which update around the refresh time will be missed, so now we check for missed updates
@@ -276,15 +278,15 @@ export default function Map() {
       // if oldest timestamp is greater than 1 interval (+10% buffer) than
       // the next oldest timestamp, then we missed some records
       if (secondMin - min > 1.1 * REFRESH_INTERVAL * 1000) {
-        const sites = [];
+        const stations = [];
         const oldestMarkers = markers.filter((m) => {
           return m.marker.dataset.timestamp === min;
         });
         for (const m of oldestMarkers) {
-          const site = await getSiteById(m.marker.id);
-          if (site) sites.push(site);
+          const station = await getStationById(m.marker.id);
+          if (station) stations.push(station);
         }
-        geoJson = getGeoJson(sites);
+        geoJson = getGeoJson(stations);
         timestamp = secondMin; // update missed records with the oldest valid timestamp
       }
       if (!geoJson || !geoJson.features.length) return;
@@ -342,7 +344,7 @@ export default function Map() {
 
       updatedIds.push(item.marker.id);
     }
-    // trigger refresh in Site component
+    // trigger refresh in Station component
     setRefreshedIds(updatedIds);
   }
 
@@ -417,7 +419,7 @@ export default function Map() {
     );
 
     map.current.on('load', async () => {
-      initialiseMarkers(getGeoJson(await listSites()));
+      initialiseMarkers(getGeoJson(await listStations()));
 
       // poll for new data
       const interval = setInterval(

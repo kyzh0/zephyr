@@ -38,8 +38,8 @@ export function getUser() {
   return user;
 }
 
-export async function getSiteById(id) {
-  const docRef = doc(db, 'sites', id);
+export async function getStationById(id) {
+  const docRef = doc(db, 'stations', id);
   try {
     const docSnap = await getDoc(docRef);
     const data = docSnap.exists() ? docSnap.data() : null;
@@ -50,9 +50,9 @@ export async function getSiteById(id) {
   }
 }
 
-export async function listSites() {
+export async function listStations() {
   try {
-    const snap = await getDocs(collection(db, 'sites'));
+    const snap = await getDocs(collection(db, 'stations'));
     return snap.docs.map((doc) => {
       return { id: doc.id, ...doc.data() };
     });
@@ -61,9 +61,9 @@ export async function listSites() {
   }
 }
 
-export async function listSitesUpdatedSince(time) {
+export async function listStationsUpdatedSince(time) {
   try {
-    const q = query(collection(db, 'sites'), where('lastUpdate', '>=', time));
+    const q = query(collection(db, 'stations'), where('lastUpdate', '>=', time));
     const snap = await getDocs(q);
     return snap.docs.map((doc) => {
       return { id: doc.id, ...doc.data() };
@@ -73,9 +73,13 @@ export async function listSitesUpdatedSince(time) {
   }
 }
 
-export async function loadSiteData(siteId) {
+export async function loadStationData(stationId) {
   try {
-    const q = query(collection(db, `sites/${siteId}/data`), orderBy('time', 'desc'), limit(145)); // data for last 24h
+    const q = query(
+      collection(db, `stations/${stationId}/data`),
+      orderBy('time', 'desc'),
+      limit(145)
+    ); // data for last 24h
     const snap = await getDocs(q);
     return snap.docs.map((doc) => {
       return { id: doc.id, ...doc.data() };

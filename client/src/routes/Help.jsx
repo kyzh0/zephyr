@@ -15,7 +15,7 @@ import CheckIcon from '@mui/icons-material/Check';
 
 import emailjs from '@emailjs/browser';
 
-export default function Site() {
+export default function Help() {
   const navigate = useNavigate();
   function handleClose() {
     navigate('/');

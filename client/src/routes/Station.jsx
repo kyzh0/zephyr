@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getSiteById, loadSiteData as loadSiteData } from '../firebase';
+import { getStationById, loadStationData as loadStationData } from '../firebase';
 import { AppContext } from '../context/AppContext';
 import { getWindDirectionFromBearing } from '../helpers/utils';
 
@@ -119,9 +119,9 @@ function getDirectionColor(bearing, validBearings) {
   return '';
 }
 
-export default function Site() {
+export default function Station() {
   const { id } = useParams();
-  const [site, setSite] = useState(null);
+  const [station, setStation] = useState(null);
   const [data, setData] = useState([]);
   const [bearingPairCount, setBearingPairCount] = useState(0);
   const tableRef = useRef(null);
@@ -130,9 +130,9 @@ export default function Site() {
 
   async function fetchData() {
     try {
-      const s = await getSiteById(id);
+      const s = await getStationById(id);
       if (!s) return;
-      setSite(s);
+      setStation(s);
       if (s.isOffline) return;
 
       const validBearings = [];
@@ -149,7 +149,7 @@ export default function Site() {
         }
       }
 
-      const data = await loadSiteData(id);
+      const data = await loadStationData(id);
       data.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds)); // time asc
       for (const d of data) {
         d.timeLabel = `${d.time.toDate().getHours().toString().padStart(2, '0')}:${d.time.toDate().getMinutes().toString().padStart(2, '0')}`;
@@ -217,20 +217,20 @@ export default function Site() {
                 <CloseIcon />
               </IconButton>
             </Stack>
-            {site ? (
+            {station ? (
               <Typography component="h1" variant="h5">
-                {site.name}
+                {station.name}
               </Typography>
             ) : (
               <StyledSkeleton width={180} height={40} />
             )}
-            {site ? (
-              <Typography variant="body2">Elevation {site.elevation}m</Typography>
+            {station ? (
+              <Typography variant="body2">Elevation {station.elevation}m</Typography>
             ) : (
               <StyledSkeleton width={120} height={20} />
             )}
-            {site ? (
-              site.isOffline ? (
+            {station ? (
+              station.isOffline ? (
                 <Typography component="h1" variant="h5" sx={{ mt: 2, color: 'red' }}>
                   Station is offline.
                 </Typography>
@@ -240,8 +240,8 @@ export default function Site() {
                   justifyContent="center"
                   sx={{ width: '100%', p: '8px', pb: '18px' }}
                 >
-                  {site.currentBearing != null &&
-                    (site.currentAverage != null || site.currentGust != null) && (
+                  {station.currentBearing != null &&
+                    (station.currentAverage != null || station.currentGust != null) && (
                       <Stack direction="column" justifyContent="center" alignItems="center">
                         <Typography
                           variant="h5"
@@ -250,7 +250,7 @@ export default function Site() {
                             mb: 1
                           }}
                         >
-                          {getWindDirectionFromBearing(site.currentBearing)}
+                          {getWindDirectionFromBearing(station.currentBearing)}
                         </Typography>
                         <Stack
                           direction="row"
@@ -258,7 +258,10 @@ export default function Site() {
                           alignItems="center"
                           sx={{
                             p: 1,
-                            background: getDirectionColor(site.currentBearing, site.validBearings)
+                            background: getDirectionColor(
+                              station.currentBearing,
+                              station.validBearings
+                            )
                           }}
                         >
                           <img
@@ -266,7 +269,7 @@ export default function Site() {
                             style={{
                               width: '48px',
                               height: '48px',
-                              transform: `rotate(${Math.round(site.currentBearing)}deg)`
+                              transform: `rotate(${Math.round(station.currentBearing)}deg)`
                             }}
                           />
                         </Stack>
@@ -301,23 +304,25 @@ export default function Site() {
                           align="center"
                           sx={{
                             fontSize: '24px',
-                            backgroundColor: getWindColor(site.currentAverage),
+                            backgroundColor: getWindColor(station.currentAverage),
                             borderBottom: 'none',
                             p: 1
                           }}
                         >
-                          {site.currentAverage == null ? '-' : Math.round(site.currentAverage)}
+                          {station.currentAverage == null
+                            ? '-'
+                            : Math.round(station.currentAverage)}
                         </TableCell>
                         <TableCell
                           align="center"
                           sx={{
                             fontSize: '24px',
-                            backgroundColor: getWindColor(site.currentGust),
+                            backgroundColor: getWindColor(station.currentGust),
                             borderBottom: 'none',
                             p: 1
                           }}
                         >
-                          {site.currentGust == null ? '-' : Math.round(site.currentGust)}
+                          {station.currentGust == null ? '-' : Math.round(station.currentGust)}
                         </TableCell>
                         <TableCell
                           align="center"
@@ -327,9 +332,9 @@ export default function Site() {
                             p: 0
                           }}
                         >
-                          {site.currentTemperature == null
+                          {station.currentTemperature == null
                             ? ''
-                            : `${Math.round(site.currentTemperature * 10) / 10}°C`}
+                            : `${Math.round(station.currentTemperature * 10) / 10}°C`}
                         </TableCell>
                       </TableRow>
                       <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0, p: 0 } }}>
@@ -351,8 +356,8 @@ export default function Site() {
             ) : (
               <StyledSkeleton width={180} height={180} />
             )}
-            {site ? (
-              site.isOffline ? (
+            {station ? (
+              station.isOffline ? (
                 <></>
               ) : data && data.length ? (
                 <>
@@ -435,7 +440,7 @@ export default function Site() {
                               sx={{
                                 padding: 0,
                                 borderBottom: 'none',
-                                background: getDirectionColor(d.windBearing, site.validBearings)
+                                background: getDirectionColor(d.windBearing, station.validBearings)
                               }}
                             >
                               {d.windBearing == null ||
@@ -638,12 +643,17 @@ export default function Site() {
             )}
 
             <Stack direction="row" justifyContent="end" sx={{ width: '100%', pt: '4px' }}>
-              {site && (
-                <Link href={site.externalLink} target="_blank" rel="noreferrer" variant="subtitle2">
+              {station && (
+                <Link
+                  href={station.externalLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  variant="subtitle2"
+                >
                   Source:{' '}
-                  {site.type.length <= 4
-                    ? site.type.toUpperCase()
-                    : site.type.charAt(0).toUpperCase() + site.type.slice(1)}
+                  {station.type.length <= 4
+                    ? station.type.toUpperCase()
+                    : station.type.charAt(0).toUpperCase() + station.type.slice(1)}
                 </Link>
               )}
             </Stack>

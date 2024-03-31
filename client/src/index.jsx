@@ -6,10 +6,10 @@ import { CookiesProvider } from 'react-cookie';
 import './index.css';
 
 import Map from './routes/Map';
-import Site from './routes/Site';
+import Station from './routes/Station';
 import Help from './routes/Help';
 import AdminSignIn from './routes/AdminSignIn';
-import AdminAddSite from './routes/AdminAddSite';
+import AdminAddStation from './routes/AdminAddStation';
 import ProtectedRoute from './routes/ProtectedRoute';
 
 const router = createBrowserRouter([
@@ -22,8 +22,8 @@ const router = createBrowserRouter([
     ),
     children: [
       {
-        path: 'sites/:id',
-        element: <Site />
+        path: 'stations/:id',
+        element: <Station />
       },
       {
         path: 'help',
@@ -37,8 +37,8 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           {
-            path: 'admin/add-site',
-            element: <AdminAddSite />
+            path: 'admin/add-station',
+            element: <AdminAddStation />
           }
         ]
       }
