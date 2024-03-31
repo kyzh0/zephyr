@@ -431,6 +431,43 @@ async function getCwuData(stationId) {
   };
 }
 
+async function getWUndergroundData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      `https://api.weather.com/v2/pws/observations/current?apiKey=${process.env.WUNDERGROUND_KEY}&stationId=${stationId}&numericPrecision=decimal&format=json&units=m`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    const observations = data.observations;
+    if (observations && observations.length) {
+      windBearing = observations[0].winddir;
+      const d = observations[0].metric;
+      if (d) {
+        windAverage = d.windSpeed;
+        windGust = d.windGust;
+        temperature = d.temp;
+      }
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getLpcData() {
   let windAverage = null;
   let windGust = null;
@@ -587,6 +624,10 @@ async function wrapper(source) {
           if (docData.type === 'attentis') {
             data = await getAttentisData(docData.externalId);
             functions.logger.log(`attentis data updated - ${docData.externalId}`);
+            functions.logger.log(data);
+          } else if (docData.type === 'wu') {
+            data = await getWUndergroundData(docData.externalId);
+            functions.logger.log('wu data updated');
             functions.logger.log(data);
           } else if (docData.type === 'cwu') {
             data = await getCwuData(docData.externalId);

@@ -315,6 +315,7 @@ export default function AdminAddStation() {
                 <MenuItem value="harvest">Harvest</MenuItem>
                 <MenuItem value="holfuy">Holfuy</MenuItem>
                 <MenuItem value="metservice">Metservice</MenuItem>
+                <MenuItem value="wu">Weather Underground</MenuItem>
               </TextField>
               <TextField
                 margin="dense"
