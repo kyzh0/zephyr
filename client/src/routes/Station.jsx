@@ -131,7 +131,7 @@ export default function Station() {
   async function fetchData() {
     try {
       const s = await getStationById(id);
-      if (!s) return;
+      if (!s) navigate('/');
       setStation(s);
       if (s.isOffline) return;
 

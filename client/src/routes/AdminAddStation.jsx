@@ -205,14 +205,16 @@ export default function AdminAddStation() {
         currentGust: null,
         currentBearing: null,
         currentTemperature: null,
-        elevation: elevation,
-        validBearings: bearings
+        elevation: elevation
       };
       if (type === 'harvest') {
         station.harvestWindAverageId = `${harvestWindAvgGraphId}_${harvestWindAvgTraceId}`;
         station.harvestWindGustId = `${harvestWindGustGraphId}_${harvestWindGustTraceId}`;
         station.harvestWindDirectionId = `${harvestWindDirGraphId}_${harvestWindDirTraceId}`;
         station.harvestTemperatureId = `${harvestTempGraphId}_${harvestTempTraceId}`;
+      }
+      if (bearings) {
+        station.validBearings = bearings;
       }
 
       await addDoc(collection(db, 'stations'), station);

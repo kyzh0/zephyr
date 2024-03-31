@@ -803,13 +803,14 @@ exports.checkForErrors = functions
     return checkForErrors();
   });
 
-exports.test = functions
-  .runWith({ timeoutSeconds: 30, memory: '1GB' })
-  .region('australia-southeast1')
-  .https.onRequest(async (req, res) => {
-    try {
-    } catch (e) {
-      functions.logger.log(e);
-    }
-    res.send('ok');
-  });
+// exports.test = functions
+//   .runWith({ timeoutSeconds: 30, memory: '1GB' })
+//   .region('australia-southeast1')
+//   .https.onRequest(async (req, res) => {
+//     try {
+
+//     } catch (e) {
+//       functions.logger.log(e);
+//     }
+//     res.send('ok');
+//   });
