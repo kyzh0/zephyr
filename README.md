@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
- <a href="https://zephyr-3fb26.web.app/">https://zephyr-app.nz/</a> 
+ <a href="https://www.zephyrapp.nz/">https://www.zephyrapp.nz/</a> 
 </p>
 
 ## Table of Contents
@@ -31,7 +31,7 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 - Charts and tables - a tidy representation of each station's data over time.
 - Mobile-first design - scalable across different screen sizes.
 - Help tab - provides a way for users to contact the developer.
-- Admin-only area - for adding new weather stations.
+- Admin-only area - for adding new weather stations and viewing errors.
 - Error checker - scheduled function to identify issues with stations or the scraper.
 
 <p align="center">

@@ -73,6 +73,23 @@ export async function listStationsUpdatedSince(time) {
   }
 }
 
+export async function listStationsWithErrors() {
+  try {
+    const q = query(
+      collection(db, 'stations'),
+      where('isError', '==', true),
+      orderBy('isOffline', 'desc'),
+      orderBy('name')
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => {
+      return { id: doc.id, ...doc.data() };
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 export async function loadStationData(stationId) {
   try {
     const q = query(

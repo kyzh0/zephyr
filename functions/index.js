@@ -476,7 +476,7 @@ async function getTempestData(stationId) {
 
   try {
     const { data } = await axios.get(
-      `https://swd.weatherflow.com/swd/rest/better_forecast?api_key=${process.env.TEMPES_KEY}&station_id=${stationId}&units_temp=c&units_wind=kph`,
+      `https://swd.weatherflow.com/swd/rest/better_forecast?api_key=${process.env.TEMPEST_KEY}&station_id=${stationId}&units_temp=c&units_wind=kph`,
       {
         headers: {
           Connection: 'keep-alive'
@@ -661,11 +661,11 @@ async function wrapper(source) {
             functions.logger.log(data);
           } else if (docData.type === 'wu') {
             data = await getWUndergroundData(docData.externalId);
-            functions.logger.log('wu data updated');
+            functions.logger.log(`wu data updated - ${docData.externalId}`);
             functions.logger.log(data);
           } else if (docData.type === 'tempest') {
             data = await getTempestData(docData.externalId);
-            functions.logger.log('wu data updated');
+            functions.logger.log(`tempest data updated - ${docData.externalId}`);
             functions.logger.log(data);
           } else if (docData.type === 'cwu') {
             data = await getCwuData(docData.externalId);
@@ -792,11 +792,19 @@ async function checkForErrors() {
           await db.doc(`stations/${doc.id}`).update({
             isOffline: true
           });
+          errors.push({
+            type: doc.data().type,
+            msg: `${errorMsg}Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
+          });
         } else {
           if (isWindError) {
             errorMsg += 'ERROR: No wind avg/gust data.\n';
             await db.doc(`stations/${doc.id}`).update({
               isOffline: true
+            });
+            errors.push({
+              type: doc.data().type,
+              msg: `${errorMsg}Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
             });
           }
           if (isBearingError) {
@@ -814,9 +822,10 @@ async function checkForErrors() {
             await db.doc(`stations/${doc.id}`).update({
               isError: true
             });
-            errors.push(
-              `${errorMsg}Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
-            );
+            // errors.push({
+            //   type: doc.data().type,
+            //   msg: `${errorMsg}Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
+            // });
           }
         }
       }
@@ -824,12 +833,30 @@ async function checkForErrors() {
 
     if (errors.length) {
       // send email
+      // await axios.post(`https://api.emailjs.com/api/v1.0/email/send`, {
+      //   service_id: process.env.EMAILJS_SERVICE_ID,
+      //   template_id: process.env.EMAILJS_TEMPLATE_ID,
+      //   user_id: process.env.EMAILJS_PUBLIC_KEY,
+      //   template_params: {
+      //     message: `Scheduled check ran successfully at ${new Date().toISOString()} with ${errors.length} station(s) flagged.\n\n${errors.map((x) => x.msg).join('\n')}`
+      //   },
+      //   accessToken: process.env.EMAILJS_PRIVATE_KEY
+      // });
+
+      let msg = `Scheduled check ran successfully at ${new Date().toISOString()}\n`;
+      const g = Object.groupBy(errors, ({ type }) => type);
+      for (const [key, value] of Object.entries(g)) {
+        if (value.length > 3) {
+          msg += `\n${key.toUpperCase()}\n\n`;
+          msg += value.map((x) => x.msg).join('\n');
+        }
+      }
       await axios.post(`https://api.emailjs.com/api/v1.0/email/send`, {
         service_id: process.env.EMAILJS_SERVICE_ID,
         template_id: process.env.EMAILJS_TEMPLATE_ID,
         user_id: process.env.EMAILJS_PUBLIC_KEY,
         template_params: {
-          message: `Scheduled check ran successfully at ${new Date().toISOString()} with ${errors.length} station(s) flagged.\n\n${errors.join('\n')}`
+          message: msg
         },
         accessToken: process.env.EMAILJS_PRIVATE_KEY
       });

@@ -13,7 +13,7 @@ import Box from '@mui/material/Box';
 import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
 
-export default function Station() {
+export default function AdminSignIn() {
   const navigate = useNavigate();
   function handleClose() {
     navigate('/');
@@ -26,7 +26,7 @@ export default function Station() {
 
   useEffect(() => {
     if (user) {
-      navigate('/admin/add-station');
+      navigate('/admin/dashboard');
     }
   }, [user]);
 

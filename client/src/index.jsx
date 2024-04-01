@@ -7,11 +7,13 @@ import './index.css';
 
 import Map from './routes/Map';
 import Station from './routes/Station';
+import Welcome from './routes/Welcome';
 import Help from './routes/Help';
 import AdminSignIn from './routes/AdminSignIn';
+import AdminDashboard from './routes/AdminDashboard';
 import AdminAddStation from './routes/AdminAddStation';
+import AdminErrors from './routes/AdminErrors';
 import ProtectedRoute from './routes/ProtectedRoute';
-import Welcome from './routes/Welcome';
 
 const router = createBrowserRouter([
   {
@@ -42,8 +44,16 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           {
+            path: 'admin/dashboard',
+            element: <AdminDashboard />
+          },
+          {
             path: 'admin/add-station',
             element: <AdminAddStation />
+          },
+          {
+            path: 'admin/errors',
+            element: <AdminErrors />
           }
         ]
       }
