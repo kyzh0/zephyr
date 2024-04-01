@@ -11,6 +11,7 @@ import Help from './routes/Help';
 import AdminSignIn from './routes/AdminSignIn';
 import AdminAddStation from './routes/AdminAddStation';
 import ProtectedRoute from './routes/ProtectedRoute';
+import Welcome from './routes/Welcome';
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       {
         path: 'stations/:id',
         element: <Station />
+      },
+      {
+        path: 'welcome',
+        element: <Welcome />
       },
       {
         path: 'help',

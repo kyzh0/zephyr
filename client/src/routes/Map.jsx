@@ -357,6 +357,7 @@ export default function Map() {
   const [zoom, setZoom] = useState(0);
 
   const cookiesOptions = {
+    path: '/',
     maxAge: 31536000, // 365 days
     secure: true,
     sameSite: 'strict'
@@ -379,6 +380,10 @@ export default function Map() {
       setZoom(cookies.zoom);
     } else {
       setCookies('zoom', window.innerWidth > 1000 ? 5.1 : 4.3, cookiesOptions);
+    }
+
+    if (!cookies.visited) {
+      navigate('welcome');
     }
   }, [cookies]);
 
