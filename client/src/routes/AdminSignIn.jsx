@@ -62,7 +62,7 @@ export default function Station() {
   }
 
   return (
-    <Modal open onClose={handleClose}>
+    <Modal open onClose={handleClose} disableAutoFocus={true}>
       <Container component="main" maxWidth="xs" sx={{ height: '100%' }}>
         <Stack direction="column" justifyContent="center" sx={{ height: '100%' }}>
           <Stack

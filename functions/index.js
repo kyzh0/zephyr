@@ -468,6 +468,40 @@ async function getWUndergroundData(stationId) {
   };
 }
 
+async function getTempestData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      `https://swd.weatherflow.com/swd/rest/better_forecast?api_key=${process.env.TEMPES_KEY}&station_id=${stationId}&units_temp=c&units_wind=kph`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    const cc = data.current_conditions;
+    if (cc) {
+      windAverage = cc.wind_avg;
+      windGust = cc.wind_gust;
+      windBearing = cc.wind_direction;
+      temperature = cc.air_temperature;
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getLpcData() {
   let windAverage = null;
   let windGust = null;
@@ -627,6 +661,10 @@ async function wrapper(source) {
             functions.logger.log(data);
           } else if (docData.type === 'wu') {
             data = await getWUndergroundData(docData.externalId);
+            functions.logger.log('wu data updated');
+            functions.logger.log(data);
+          } else if (docData.type === 'tempest') {
+            data = await getTempestData(docData.externalId);
             functions.logger.log('wu data updated');
             functions.logger.log(data);
           } else if (docData.type === 'cwu') {

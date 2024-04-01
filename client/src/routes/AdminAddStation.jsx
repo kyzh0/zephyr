@@ -228,7 +228,7 @@ export default function AdminAddStation() {
   }
 
   return (
-    <Modal open onClose={handleClose}>
+    <Modal open onClose={handleClose} disableAutoFocus={true}>
       <Container component="main" maxWidth="xs" sx={{ height: '100%' }}>
         <Stack direction="column" justifyContent="center" sx={{ height: '100%' }}>
           <Stack
@@ -316,6 +316,7 @@ export default function AdminAddStation() {
                 <MenuItem value="holfuy">Holfuy</MenuItem>
                 <MenuItem value="metservice">Metservice</MenuItem>
                 <MenuItem value="wu">Weather Underground</MenuItem>
+                <MenuItem value="tempest">Tempest</MenuItem>
               </TextField>
               <TextField
                 margin="dense"

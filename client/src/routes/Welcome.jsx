@@ -27,7 +27,7 @@ export default function Welcome() {
   }
 
   return (
-    <Modal open>
+    <Modal open disableAutoFocus={true}>
       <Container component="main" maxWidth="xs" sx={{ height: '100%' }}>
         <Stack direction="column" justifyContent="center" sx={{ height: '100%' }}>
           <Stack
