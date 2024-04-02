@@ -206,6 +206,7 @@ export default function Map() {
       childArrow.style.transform =
         currentBearing == null ? '' : `rotate(${Math.round(currentBearing)}deg)`;
       childArrow.addEventListener('click', () => {
+        popup.remove();
         navigate(`/stations/${dbId}`);
       });
       childArrow.addEventListener('mouseenter', () => popup.addTo(map.current));
@@ -221,6 +222,7 @@ export default function Map() {
       childText.innerHTML = currentAvg == null ? '-' : currentAvg;
       if (isOffline) childText.innerHTML = 'X';
       childText.addEventListener('click', () => {
+        popup.remove();
         navigate(`/stations/${dbId}`);
       });
       childText.addEventListener('mouseenter', () => popup.addTo(map.current));

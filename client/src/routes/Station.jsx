@@ -33,7 +33,6 @@ import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Skeleton from '@mui/material/Skeleton';
-import styled from '@emotion/styled';
 import { alpha } from '@mui/material';
 
 function getWindColor(wind) {
@@ -199,10 +198,6 @@ export default function Station() {
     navigate('/');
   }
 
-  const StyledSkeleton = styled(Skeleton)(() => ({
-    backgroundColor: alpha('#a8a8a8', 0.1)
-  }));
-
   return (
     <Modal open onClose={handleClose} disableAutoFocus={true}>
       <Container component="main" maxWidth="xl" sx={{ height: '100%' }}>
@@ -212,23 +207,27 @@ export default function Station() {
             alignItems="center"
             sx={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px' }}
           >
-            <Stack direction="row-reverse" sx={{ width: '100%' }}>
-              <IconButton sx={{ p: 0 }} onClick={handleClose}>
+            <Stack direction="row" sx={{ width: '100%' }}>
+              <Stack direction="column" alignItems="center" sx={{ width: '100%', ml: 3 }}>
+                {station ? (
+                  <>
+                    <Typography component="h1" variant="h5">
+                      {station.name}
+                    </Typography>
+                    <Typography variant="body2">Elevation {station.elevation}m</Typography>
+                  </>
+                ) : (
+                  <Skeleton
+                    width="180px"
+                    height="50px"
+                    sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none' }}
+                  />
+                )}
+              </Stack>
+              <IconButton sx={{ p: 0, width: '24px', height: '24px' }} onClick={handleClose}>
                 <CloseIcon />
               </IconButton>
             </Stack>
-            {station ? (
-              <Typography component="h1" variant="h5">
-                {station.name}
-              </Typography>
-            ) : (
-              <StyledSkeleton width={180} height={40} />
-            )}
-            {station ? (
-              <Typography variant="body2">Elevation {station.elevation}m</Typography>
-            ) : (
-              <StyledSkeleton width={120} height={20} />
-            )}
             {station ? (
               station.isOffline ? (
                 <Typography component="h1" variant="h5" sx={{ mt: 2, color: 'red' }}>
@@ -238,7 +237,7 @@ export default function Station() {
                 <Stack
                   direction="row"
                   justifyContent="center"
-                  sx={{ width: '100%', p: '8px', pb: '18px' }}
+                  sx={{ width: '100%', p: '6px', pb: '10px' }}
                 >
                   {station.currentBearing != null &&
                     (station.currentAverage != null || station.currentGust != null) && (
@@ -354,7 +353,11 @@ export default function Station() {
                 </Stack>
               )
             ) : (
-              <StyledSkeleton width={180} height={180} />
+              <Skeleton
+                width={300}
+                height={'100px'}
+                sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2, mt: 2 }}
+              />
             )}
             {station ? (
               station.isOffline ? (
@@ -559,8 +562,7 @@ export default function Station() {
                   <Box
                     sx={{
                       width: '100%',
-                      height: '20vh',
-                      mt: 2
+                      height: '20vh'
                     }}
                   >
                     <ResponsiveContainer width="100%" height="100%">
@@ -636,13 +638,21 @@ export default function Station() {
                   </Box>
                 </>
               ) : (
-                <StyledSkeleton width={'100%'} height={600} />
+                <Skeleton
+                  width={300}
+                  height={'500px'}
+                  sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2 }}
+                />
               )
             ) : (
-              <StyledSkeleton width={'100%'} height={600} />
+              <Skeleton
+                width={300}
+                height={'500px'}
+                sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2 }}
+              />
             )}
 
-            <Stack direction="row" justifyContent="end" sx={{ width: '100%', pt: '4px' }}>
+            <Stack direction="row" justifyContent="end" sx={{ width: '100%' }}>
               {station && (
                 <Link
                   href={station.externalLink}
