@@ -1,4 +1,4 @@
-import './MapTerrainControl.css';
+import './MapControl.css';
 
 export default class MapTerrainControl {
   onAdd(map) {

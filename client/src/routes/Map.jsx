@@ -12,6 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 
 import MapTerrainControl from './MapTerrainControl';
+import MapUnitControl from './MapUnitControl';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -29,6 +30,7 @@ export default function Map() {
   });
 
   const navigate = useNavigate();
+  const [cookies, setCookies] = useCookies();
   const [markers] = useState([]);
 
   const REFRESH_INTERVAL = 60;
@@ -102,6 +104,7 @@ export default function Map() {
     return [img, textColor];
   }
 
+  const [geoJson, setGeoJson] = useState(null);
   function getGeoJson(stations) {
     if (!stations || !stations.length) return null;
 
@@ -110,14 +113,19 @@ export default function Map() {
       features: []
     };
     for (const station of stations) {
+      let avg = station.currentAverage == null ? null : Math.round(station.currentAverage);
+      const gust = station.currentGust == null ? null : Math.round(station.currentGust);
+      if (avg == null && gust != null) {
+        avg = gust;
+      }
+
       const feature = {
         type: 'Feature',
         properties: {
           name: station.name,
           dbId: station.id,
-          currentAverage:
-            station.currentAverage == null ? null : Math.round(station.currentAverage),
-          currentGust: station.currentGust == null ? null : Math.round(station.currentGust),
+          currentAverage: avg,
+          currentGust: gust,
           currentBearing:
             station.currentBearing == null ? null : Math.round(station.currentBearing),
           validBearings: station.validBearings,
@@ -129,15 +137,12 @@ export default function Map() {
         }
       };
       // cwu stations sometimes show avg=0 even when gust is high
-      if (
-        station.type === 'cwu' &&
-        station.currentAverage == 0 &&
-        station.currentGust - station.currentAverage > 5
-      ) {
-        feature.properties.currentAverage = station.currentGust;
+      if (station.type === 'cwu' && avg == 0 && gust - avg > 5) {
+        feature.properties.currentAverage = gust;
       }
       geoJson.features.push(feature);
     }
+    setGeoJson(geoJson);
     return geoJson;
   }
 
@@ -184,14 +189,13 @@ export default function Map() {
           html += `<p align="center">-</p>`;
         } else {
           let temp = '';
-          if (currentAvg == null) {
-            temp = `Gust ${currentGust}`;
+          if (currentAvg != null && currentGust != null) {
+            temp = `${currentAvg} - ${currentGust}`;
           } else if (currentGust == null) {
             temp = `${currentAvg}`;
-          } else {
-            temp = `${currentAvg} - ${currentGust}`;
           }
-          html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
+          const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
+          html += `<p align="center">${temp} ${unit} ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
         }
       }
 
@@ -219,8 +223,16 @@ export default function Map() {
       const childText = document.createElement('span');
       childText.className = 'marker-text';
       childText.style.color = color;
-      childText.innerHTML = currentAvg == null ? '-' : currentAvg;
-      if (isOffline) childText.innerHTML = 'X';
+      if (isOffline) {
+        childText.innerHTML = 'X';
+      } else {
+        childText.innerHTML =
+          currentAvg == null
+            ? '-'
+            : cookies.unit === 'kt'
+              ? Math.round(currentAvg / 1.852)
+              : currentAvg;
+      }
       childText.addEventListener('click', () => {
         popup.remove();
         navigate(`/stations/${dbId}`);
@@ -314,8 +326,16 @@ export default function Map() {
         const [img, color] = getArrowStyle(currentAvg, currentBearing, validBearings, isOffline);
         if (child.className === 'marker-text') {
           child.style.color = color;
-          child.innerHTML = currentAvg == null ? '-' : currentAvg;
-          if (isOffline) child.innerHTML = 'X';
+          if (isOffline) {
+            child.innerHTML = 'X';
+          } else {
+            child.innerHTML =
+              currentAvg == null
+                ? '-'
+                : cookies.unit === 'kt'
+                  ? Math.round(currentAvg / 1.852)
+                  : currentAvg;
+          }
         } else if (child.className === 'marker-arrow') {
           child.style.backgroundImage = img;
           child.style.transform =
@@ -331,14 +351,13 @@ export default function Map() {
             html += `<p align="center">-</p>`;
           } else {
             let temp = '';
-            if (currentAvg == null) {
-              temp = `Gust ${currentGust}`;
+            if (currentAvg != null && currentGust != null) {
+              temp = `${currentAvg} - ${currentGust}`;
             } else if (currentGust == null) {
               temp = `${currentAvg}`;
-            } else {
-              temp = `${currentAvg} - ${currentGust}`;
             }
-            html += `<p align="center">${temp} km/h ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
+            const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
+            html += `<p align="center">${temp} ${unit} ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
           }
         }
         item.popup.setHTML(html);
@@ -364,7 +383,6 @@ export default function Map() {
     secure: true,
     sameSite: 'strict'
   };
-  const [cookies, setCookies] = useCookies();
 
   // read cookies
   useEffect(() => {
@@ -388,6 +406,53 @@ export default function Map() {
       navigate('welcome');
     }
   }, [cookies]);
+
+  // change unit
+  useEffect(() => {
+    for (const item of markers) {
+      for (const child of item.marker.children) {
+        const matches = geoJson.features.filter((f) => {
+          return f.properties.dbId === item.marker.id;
+        });
+        if (!matches || !matches.length) continue;
+
+        const f = matches[0];
+        const currentAvg = f.properties.currentAverage;
+        const currentGust = f.properties.currentGust;
+        const isOffline = f.properties.isOffline;
+
+        if (child.className === 'marker-text') {
+          if (currentAvg != null) {
+            child.innerHTML = Math.round(
+              cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg * 1.852
+            );
+          }
+        }
+
+        // update popup
+        if (!isOffline) {
+          const avg =
+            currentAvg == null
+              ? null
+              : Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg * 1.852);
+          const gust =
+            currentGust == null
+              ? null
+              : Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust * 1.852);
+          const regex = /(\d+\s-\s\d+\s|\d+\s)(km\/h|kt)/g;
+          let temp = '';
+          if (avg != null && gust != null) {
+            temp = `${avg} - ${gust}`;
+          } else if (gust == null) {
+            temp = `${avg}`;
+          }
+          temp += ` ${cookies.unit === 'kt' ? 'kt' : 'km/h'}`;
+          const html = item.popup._content.innerHTML.replace(regex, temp);
+          item.popup.setHTML(html);
+        }
+      }
+    }
+  }, [cookies.unit]);
 
   useEffect(() => {
     const evenDay = new Date().getDate() % 2 == 0;
@@ -417,6 +482,7 @@ export default function Map() {
       'top-right'
     );
     map.current.addControl(new MapTerrainControl(), 'top-right');
+    map.current.addControl(new MapUnitControl(), 'top-right');
     map.current.addControl(
       new mapboxgl.GeolocateControl({
         positionOptions: {
