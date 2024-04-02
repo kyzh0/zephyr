@@ -431,6 +431,85 @@ async function getCwuData(stationId) {
   };
 }
 
+async function getPortOtagoData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  const temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      `https://dvp.portotago.co.nz/dvp/graphs/htmx/get-graph/${stationId}`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    if (data.length) {
+      // wind avg
+      let startStr = '<p class="seriesName">Wind Speed Avg:</p>';
+      let i = data.indexOf(startStr);
+      if (i >= 0) {
+        startStr = '<p class="seriesValue">';
+        const j = data.indexOf(startStr, i);
+        if (j > i) {
+          const k = data.indexOf('</p>', j);
+          if (k > i) {
+            const temp = Number(data.slice(j + startStr.length, k).trim());
+            if (!isNaN(temp)) {
+              windAverage = temp * 1.852;
+            }
+          }
+        }
+      }
+
+      // wind gust
+      startStr = '<p class="seriesName">Wind Gust Max:</p>';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        startStr = '<p class="seriesValue">';
+        const j = data.indexOf(startStr, i);
+        if (j > i) {
+          const k = data.indexOf('</p>', j);
+          if (k > i) {
+            const temp = Number(data.slice(j + startStr.length, k).trim());
+            if (!isNaN(temp)) {
+              windGust = temp * 1.852;
+            }
+          }
+        }
+      }
+
+      // wind direction
+      startStr = '<p class="seriesName">Wind Dir Avg:</p>';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        startStr = '<p class="seriesValue">';
+        const j = data.indexOf(startStr, i);
+        if (j > i) {
+          const k = data.indexOf('</p>', j);
+          if (k > i) {
+            const temp = Number(data.slice(j + startStr.length, k).trim());
+            if (!isNaN(temp)) {
+              windBearing = temp;
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getWUndergroundData(stationId) {
   let windAverage = null;
   let windGust = null;
@@ -671,6 +750,10 @@ async function wrapper(source) {
             data = await getCwuData(docData.externalId);
             functions.logger.log(`cwu data updated - ${docData.externalId}`);
             functions.logger.log(data);
+          } else if (docData.type === 'po') {
+            data = await getPortOtagoData(docData.externalId);
+            functions.logger.log(`po data updated - ${docData.externalId}`);
+            functions.logger.log(data);
           } else if (docData.type === 'lpc') {
             data = await getLpcData();
             functions.logger.log('lpc data updated');
@@ -816,11 +899,11 @@ async function checkForErrors() {
     }
 
     if (errors.length) {
-      // send email if >3 stations of 1 type went offline at the same time
+      // send email if >2 stations of 1 type went offline at the same time
       let msg = `Scheduled check ran successfully at ${new Date().toISOString()}\n`;
       const g = Object.groupBy(errors, ({ type }) => type);
       for (const [key, value] of Object.entries(g)) {
-        if (value.length > 3) {
+        if (value.length > 2) {
           msg += `\n${key.toUpperCase()}\n\n`;
           msg += value.map((x) => x.msg).join('\n');
         }

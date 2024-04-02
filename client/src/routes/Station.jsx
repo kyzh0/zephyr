@@ -198,7 +198,7 @@ export default function Station() {
     navigate('/');
   }
 
-  const bigScreen = window.matchMedia('(min-height: 800px)').matches;
+  const bigScreen = window.matchMedia('(min-height: 740px)').matches;
   return (
     <Modal open onClose={handleClose} disableAutoFocus={true}>
       <Container component="main" maxWidth="xl" sx={{ height: '100%' }}>
@@ -365,7 +365,7 @@ export default function Station() {
               )
             ) : (
               <Skeleton
-                width="300px"
+                width="100%"
                 height={bigScreen ? '100px' : '90px'}
                 sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2, mt: 2 }}
               />
@@ -650,14 +650,14 @@ export default function Station() {
                 </>
               ) : (
                 <Skeleton
-                  width="300px"
+                  width="100%"
                   height={bigScreen ? '500px' : '470px'}
                   sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2 }}
                 />
               )
             ) : (
               <Skeleton
-                width="300px"
+                width="100%"
                 height={bigScreen ? '500px' : '470px'}
                 sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2 }}
               />
@@ -672,9 +672,13 @@ export default function Station() {
                   variant="subtitle2"
                 >
                   Source:{' '}
-                  {station.type.length <= 4
-                    ? station.type.toUpperCase()
-                    : station.type.charAt(0).toUpperCase() + station.type.slice(1)}
+                  {station.type === 'wu'
+                    ? 'Weather Underground'
+                    : station.type === 'po'
+                      ? 'Port Otago'
+                      : station.type.length <= 4
+                        ? station.type.toUpperCase()
+                        : station.type.charAt(0).toUpperCase() + station.type.slice(1)}
                 </Link>
               )}
             </Stack>
