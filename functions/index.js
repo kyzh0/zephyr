@@ -789,16 +789,12 @@ async function checkForErrors() {
         let errorMsg = '';
         if (isDataError) {
           errorMsg = 'ERROR: Data scraper has stopped.\n';
-          await db.doc(`stations/${doc.id}`).update({
-            isOffline: true
-          });
-          errors.push({
-            type: doc.data().type,
-            msg: `${errorMsg}Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
-          });
-        } else {
-          if (isWindError) {
-            errorMsg += 'ERROR: No wind avg/gust data.\n';
+        } else if (isWindError) {
+          errorMsg += 'ERROR: No wind avg/gust data.\n';
+        }
+
+        if (isDataError || isWindError) {
+          if (!doc.data().isOffline) {
             await db.doc(`stations/${doc.id}`).update({
               isOffline: true
             });
@@ -807,42 +803,20 @@ async function checkForErrors() {
               msg: `${errorMsg}Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
             });
           }
-          if (isBearingError) {
-            errorMsg += 'ERROR: No wind bearing data.\n';
-          }
-          if (isTempError) {
-            errorMsg += 'ERROR: No temperature data.\n';
-          }
         }
 
-        if (errorMsg) {
-          // skip error email if already sent)
-          const err = doc.data().isError;
-          if (err == null || !err) {
+        if (isDataError || isWindError || isBearingError || isTempError) {
+          if (!doc.data().isError) {
             await db.doc(`stations/${doc.id}`).update({
               isError: true
             });
-            // errors.push({
-            //   type: doc.data().type,
-            //   msg: `${errorMsg}Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
-            // });
           }
         }
       }
     }
 
     if (errors.length) {
-      // send email
-      // await axios.post(`https://api.emailjs.com/api/v1.0/email/send`, {
-      //   service_id: process.env.EMAILJS_SERVICE_ID,
-      //   template_id: process.env.EMAILJS_TEMPLATE_ID,
-      //   user_id: process.env.EMAILJS_PUBLIC_KEY,
-      //   template_params: {
-      //     message: `Scheduled check ran successfully at ${new Date().toISOString()} with ${errors.length} station(s) flagged.\n\n${errors.map((x) => x.msg).join('\n')}`
-      //   },
-      //   accessToken: process.env.EMAILJS_PRIVATE_KEY
-      // });
-
+      // send email if >3 stations of 1 type went offline at the same time
       let msg = `Scheduled check ran successfully at ${new Date().toISOString()}\n`;
       const g = Object.groupBy(errors, ({ type }) => type);
       for (const [key, value] of Object.entries(g)) {
@@ -862,7 +836,7 @@ async function checkForErrors() {
       });
     }
 
-    functions.logger.log(`Checked for errors - ${errors.length} found.`);
+    functions.logger.log(`Checked for errors - ${errors.length} stations newly offline.`);
   } catch (error) {
     functions.logger.error(error);
     return null;
@@ -873,7 +847,7 @@ exports.updateWeatherStationData = functions
   .runWith({ timeoutSeconds: 30, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *') // at every 10th minute
-  .onRun((data, context) => {
+  .onRun(() => {
     return wrapper();
   });
 
@@ -881,7 +855,7 @@ exports.updateHarvestStationData = functions
   .runWith({ timeoutSeconds: 120, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
-  .onRun((data, context) => {
+  .onRun(() => {
     return wrapper('harvest');
   });
 
@@ -889,7 +863,7 @@ exports.updateHolfuyStationData = functions
   .runWith({ timeoutSeconds: 60, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
-  .onRun((data, context) => {
+  .onRun(() => {
     return wrapper('holfuy');
   });
 
@@ -897,7 +871,7 @@ exports.updateMetserviceStationData = functions
   .runWith({ timeoutSeconds: 120, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
-  .onRun((data, context) => {
+  .onRun(() => {
     return wrapper('metservice');
   });
 
@@ -905,8 +879,100 @@ exports.checkForErrors = functions
   .runWith({ timeoutSeconds: 120, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('0 */6 * * *') // every 6h
-  .onRun((data, context) => {
+  .onRun(() => {
     return checkForErrors();
+  });
+
+exports.data = functions
+  .runWith({ timeoutSeconds: 10, memory: '256MB' })
+  .region('australia-southeast1')
+  .https.onRequest(async (req, res) => {
+    if (req.method !== 'GET') {
+      res.status(405).send('');
+      return;
+    }
+
+    const geoJson = {
+      type: 'FeatureCollection',
+      features: []
+    };
+
+    try {
+      const db = getFirestore();
+
+      const apiKey = req.query.key;
+      if (!apiKey) {
+        res.status(401).json({ error: 'API key is required.' });
+        return;
+      }
+      let snapshot = await db.collection('clients').where('apiKey', '==', apiKey).get();
+      if (snapshot.empty) {
+        res.status(401).json({ error: 'Invalid API key.' });
+        return;
+      }
+
+      const client = snapshot.docs[0];
+      const date = new Date();
+      const currentMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+      snapshot = await db
+        .collection(`clients/${client.id}/usage`)
+        .where('month', '==', currentMonth)
+        .get();
+      if (!snapshot.empty) {
+        const usage = snapshot.docs[0];
+        const calls = usage.data().apiCalls;
+        const limit = client.data().monthlyLimit;
+        if (calls >= limit) {
+          res.status(403).json({ error: `Monthly limit of ${limit} API calls exceeded.` });
+          return;
+        }
+
+        await db.doc(`clients/${client.id}/usage/${usage.id}`).update({
+          apiCalls: calls + 1
+        });
+      } else {
+        await db.collection(`clients/${client.id}/usage`).add({
+          month: currentMonth,
+          apiCalls: 1
+        });
+      }
+
+      snapshot = await db.collection('stations').orderBy('type').orderBy('name').get();
+      if (!snapshot.empty) {
+        const tempArray = [];
+        snapshot.forEach((doc) => {
+          tempArray.push(doc);
+        });
+        for (const doc of tempArray) {
+          const station = doc.data();
+          const feature = {
+            type: 'Feature',
+            properties: {
+              name: station.name,
+              type: station.type,
+              link: station.externalLink,
+              lastUpdateUnix: station.lastUpdate._seconds,
+              currentAverage:
+                station.currentAverage == null ? null : Math.round(station.currentAverage),
+              currentGust: station.currentGust == null ? null : Math.round(station.currentGust),
+              currentBearing:
+                station.currentBearing == null ? null : Math.round(station.currentBearing),
+              currentTemperature:
+                station.currentTemperature == null ? null : Math.round(station.currentTemperature)
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [station.coordinates._longitude, station.coordinates._latitude]
+            }
+          };
+          geoJson.features.push(feature);
+        }
+      }
+    } catch (e) {
+      functions.logger.log(e);
+    }
+
+    res.json(geoJson);
   });
 
 // exports.test = functions
