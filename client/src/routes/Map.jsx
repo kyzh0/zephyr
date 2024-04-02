@@ -190,9 +190,9 @@ export default function Map() {
         } else {
           let temp = '';
           if (currentAvg != null && currentGust != null) {
-            temp = `${currentAvg} - ${currentGust}`;
+            temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg} - ${cookies.unit === 'kt' ? Math.round(currentGust / 1.852) : currentGust}`;
           } else if (currentGust == null) {
-            temp = `${currentAvg}`;
+            temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg}`;
           }
           const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
           html += `<p align="center">${temp} ${unit} ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
@@ -352,9 +352,9 @@ export default function Map() {
           } else {
             let temp = '';
             if (currentAvg != null && currentGust != null) {
-              temp = `${currentAvg} - ${currentGust}`;
+              temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg} - ${cookies.unit === 'kt' ? Math.round(currentGust / 1.852) : currentGust}`;
             } else if (currentGust == null) {
-              temp = `${currentAvg}`;
+              temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg}`;
             }
             const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
             html += `<p align="center">${temp} ${unit} ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
@@ -423,30 +423,22 @@ export default function Map() {
 
         if (child.className === 'marker-text') {
           if (currentAvg != null) {
-            child.innerHTML = Math.round(
-              cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg * 1.852
-            );
+            child.innerHTML = Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg);
           }
         }
 
         // update popup
         if (!isOffline) {
-          const avg =
-            currentAvg == null
-              ? null
-              : Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg * 1.852);
-          const gust =
-            currentGust == null
-              ? null
-              : Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust * 1.852);
-          const regex = /(\d+\s-\s\d+\s|\d+\s)(km\/h|kt)/g;
           let temp = '';
-          if (avg != null && gust != null) {
-            temp = `${avg} - ${gust}`;
-          } else if (gust == null) {
-            temp = `${avg}`;
+          if (currentAvg != null && currentGust != null) {
+            temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg} - ${cookies.unit === 'kt' ? Math.round(currentGust / 1.852) : currentGust}`;
+          } else if (currentGust == null) {
+            temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg}`;
           }
-          temp += ` ${cookies.unit === 'kt' ? 'kt' : 'km/h'}`;
+          const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
+          temp += ` ${unit}`;
+
+          const regex = /(\d+\s-\s\d+\s|\d+\s)(km\/h|kt)/g;
           const html = item.popup._content.innerHTML.replace(regex, temp);
           item.popup.setHTML(html);
         }

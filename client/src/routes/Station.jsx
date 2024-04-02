@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 import { getStationById, loadStationData as loadStationData } from '../firebase';
 import { AppContext } from '../context/AppContext';
 import { getWindDirectionFromBearing } from '../helpers/utils';
@@ -126,6 +127,7 @@ export default function Station() {
   const tableRef = useRef(null);
   const { refreshedIds } = useContext(AppContext);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [cookies] = useCookies();
 
   async function fetchData() {
     try {
@@ -152,6 +154,8 @@ export default function Station() {
       data.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds)); // time asc
       for (const d of data) {
         d.timeLabel = `${d.time.toDate().getHours().toString().padStart(2, '0')}:${d.time.toDate().getMinutes().toString().padStart(2, '0')}`;
+        d.windAverageKt = d.windAverage == null ? null : Math.round(d.windAverage / 1.852);
+        d.windGustKt = d.windGust == null ? null : Math.round(d.windGust / 1.852);
         if (validBearings.length) {
           setBearingPairCount(validBearings.length);
           for (let i = 0; i < validBearings.length; i++) {
@@ -321,7 +325,11 @@ export default function Station() {
                         >
                           {station.currentAverage == null
                             ? '-'
-                            : Math.round(station.currentAverage)}
+                            : Math.round(
+                                cookies.unit === 'kt'
+                                  ? station.currentAverage / 1.852
+                                  : station.currentAverage
+                              )}
                         </TableCell>
                         <TableCell
                           align="center"
@@ -332,7 +340,13 @@ export default function Station() {
                             p: bigScreen ? 1 : 0
                           }}
                         >
-                          {station.currentGust == null ? '-' : Math.round(station.currentGust)}
+                          {station.currentGust == null
+                            ? '-'
+                            : Math.round(
+                                cookies.unit === 'kt'
+                                  ? station.currentGust / 1.852
+                                  : station.currentGust
+                              )}
                         </TableCell>
                         <TableCell
                           align="center"
@@ -355,7 +369,7 @@ export default function Station() {
                             fontSize: '10px'
                           }}
                         >
-                          km/h
+                          {cookies.unit === 'kt' ? 'kt' : 'km/h'}
                         </TableCell>
                         <TableCell></TableCell>
                       </TableRow>
@@ -408,7 +422,11 @@ export default function Station() {
                                 backgroundColor: getWindColor(d.windAverage)
                               }}
                             >
-                              {d.windAverage == null ? '-' : Math.round(d.windAverage)}
+                              {d.windAverage == null
+                                ? '-'
+                                : Math.round(
+                                    cookies.unit === 'kt' ? d.windAverage / 1.852 : d.windAverage
+                                  )}
                             </TableCell>
                           ))}
                         </TableRow>
@@ -423,7 +441,11 @@ export default function Station() {
                                 backgroundColor: getWindColor(d.windGust)
                               }}
                             >
-                              {d.windGust == null ? '-' : Math.round(d.windGust)}
+                              {d.windGust == null
+                                ? '-'
+                                : Math.round(
+                                    cookies.unit === 'kt' ? d.windGust / 1.852 : d.windGust
+                                  )}
                             </TableCell>
                           ))}
                         </TableRow>
@@ -553,16 +575,16 @@ export default function Station() {
                         />
                         <Line
                           type="monotone"
-                          dataKey="windAverage"
-                          name="Avg (km/h)"
+                          dataKey={cookies.unit === 'kt' ? 'windAverageKt' : 'windAverage'}
+                          name={`Avg (${cookies.unit === 'kt' ? 'kt' : 'km/h'})`}
                           stroke="#8884d8"
                           dot={{ r: 0 }}
                           activeDot={{ r: 4 }}
                         />
                         <Line
                           type="monotone"
-                          dataKey="windGust"
-                          name="Gust (km/h)"
+                          dataKey={cookies.unit === 'kt' ? 'windGustKt' : 'windGust'}
+                          name={`Gust (${cookies.unit === 'kt' ? 'kt' : 'km/h'})`}
                           stroke="#ffa894"
                           dot={{ r: 0 }}
                           activeDot={{ r: 4 }}
