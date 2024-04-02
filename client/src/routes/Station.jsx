@@ -198,7 +198,7 @@ export default function Station() {
     navigate('/');
   }
 
-  const bigScreen = window.matchMedia('(min-height: 740px)').matches;
+  const bigScreen = window.matchMedia('(min-height: 720px)').matches;
   return (
     <Modal open onClose={handleClose} disableAutoFocus={true}>
       <Container component="main" maxWidth="xl" sx={{ height: '100%' }}>
@@ -248,7 +248,7 @@ export default function Station() {
                 <Stack
                   direction="row"
                   justifyContent="center"
-                  sx={{ width: '100%', p: '6px', pb: '10px' }}
+                  sx={{ width: '100%', p: bigScreen ? '6px' : '2px', pb: '10px' }}
                 >
                   {station.currentBearing != null &&
                     (station.currentAverage != null || station.currentGust != null) && (
@@ -256,7 +256,7 @@ export default function Station() {
                         <Typography
                           variant="h5"
                           sx={{
-                            fontSize: '16px',
+                            fontSize: bigScreen ? '16px' : '12px',
                             mb: 1
                           }}
                         >
@@ -277,8 +277,8 @@ export default function Station() {
                           <img
                             src="/arrow.png"
                             style={{
-                              width: '48px',
-                              height: '48px',
+                              width: bigScreen ? '48px' : '32px',
+                              height: bigScreen ? '48px' : '32px',
                               transform: `rotate(${Math.round(station.currentBearing)}deg)`
                             }}
                           />
@@ -316,7 +316,7 @@ export default function Station() {
                             fontSize: '24px',
                             backgroundColor: getWindColor(station.currentAverage),
                             borderBottom: 'none',
-                            p: 1
+                            p: bigScreen ? 1 : 0
                           }}
                         >
                           {station.currentAverage == null
@@ -329,7 +329,7 @@ export default function Station() {
                             fontSize: '24px',
                             backgroundColor: getWindColor(station.currentGust),
                             borderBottom: 'none',
-                            p: 1
+                            p: bigScreen ? 1 : 0
                           }}
                         >
                           {station.currentGust == null ? '-' : Math.round(station.currentGust)}
@@ -366,7 +366,7 @@ export default function Station() {
             ) : (
               <Skeleton
                 width="100%"
-                height={bigScreen ? '100px' : '90px'}
+                height={bigScreen ? '110px' : '80px'}
                 sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2, mt: 2 }}
               />
             )}
@@ -388,7 +388,7 @@ export default function Station() {
                               key={d.time.seconds}
                               align="center"
                               sx={{
-                                padding: '2px',
+                                padding: bigScreen ? '2px' : '0px 2px 0px 2px',
                                 fontSize: '12px',
                                 backgroundColor: d.time.toDate().getMinutes() == 0 ? '#e6e6e6' : ''
                               }}
@@ -404,7 +404,7 @@ export default function Station() {
                               key={d.time.seconds}
                               align="center"
                               sx={{
-                                padding: '2px',
+                                padding: bigScreen ? '2px' : '0px',
                                 backgroundColor: getWindColor(d.windAverage)
                               }}
                             >
@@ -419,7 +419,7 @@ export default function Station() {
                               key={d.time.seconds}
                               align="center"
                               sx={{
-                                padding: '2px',
+                                padding: bigScreen ? '2px' : '0px',
                                 backgroundColor: getWindColor(d.windGust)
                               }}
                             >
@@ -434,7 +434,7 @@ export default function Station() {
                               key={d.time.seconds}
                               align="center"
                               sx={{
-                                padding: '2px',
+                                padding: bigScreen ? '2px' : '0px',
                                 borderBottom: 'none'
                               }}
                             >
@@ -486,7 +486,7 @@ export default function Station() {
                               key={d.time.seconds}
                               align="center"
                               sx={{
-                                padding: '2px',
+                                padding: bigScreen ? '2px' : '0px',
                                 fontSize: '10px'
                               }}
                             >
@@ -504,7 +504,7 @@ export default function Station() {
                               key={d.time.seconds}
                               align="center"
                               sx={{
-                                padding: '2px',
+                                padding: bigScreen ? '2px' : '0px',
                                 fontSize: '10px'
                               }}
                             >
@@ -651,14 +651,14 @@ export default function Station() {
               ) : (
                 <Skeleton
                   width="100%"
-                  height={bigScreen ? '500px' : '470px'}
+                  height={bigScreen ? '540px' : '400px'}
                   sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2 }}
                 />
               )
             ) : (
               <Skeleton
                 width="100%"
-                height={bigScreen ? '500px' : '470px'}
+                height={bigScreen ? '540px' : '400px'}
                 sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2 }}
               />
             )}
