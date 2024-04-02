@@ -198,6 +198,7 @@ export default function Station() {
     navigate('/');
   }
 
+  const bigScreen = window.matchMedia('(min-height: 800px)').matches;
   return (
     <Modal open onClose={handleClose} disableAutoFocus={true}>
       <Container component="main" maxWidth="xl" sx={{ height: '100%' }}>
@@ -205,21 +206,31 @@ export default function Station() {
           <Stack
             direction="column"
             alignItems="center"
-            sx={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px' }}
+            sx={{
+              backgroundColor: 'white',
+              padding: bigScreen ? '24px' : '12px',
+              borderRadius: '8px'
+            }}
           >
             <Stack direction="row" sx={{ width: '100%' }}>
               <Stack direction="column" alignItems="center" sx={{ width: '100%', ml: 3 }}>
                 {station ? (
                   <>
-                    <Typography component="h1" variant="h5">
+                    <Typography
+                      component="h1"
+                      variant="h5"
+                      sx={{ ...(!bigScreen && { fontSize: '18px' }) }}
+                    >
                       {station.name}
                     </Typography>
-                    <Typography variant="body2">Elevation {station.elevation}m</Typography>
+                    <Typography variant="body2" sx={{ ...(!bigScreen && { fontSize: '12px' }) }}>
+                      Elevation {station.elevation}m
+                    </Typography>
                   </>
                 ) : (
                   <Skeleton
                     width="180px"
-                    height="50px"
+                    height={bigScreen ? '50px' : '40px'}
                     sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none' }}
                   />
                 )}
@@ -354,8 +365,8 @@ export default function Station() {
               )
             ) : (
               <Skeleton
-                width={300}
-                height={'100px'}
+                width="300px"
+                height={bigScreen ? '100px' : '90px'}
                 sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2, mt: 2 }}
               />
             )}
@@ -639,15 +650,15 @@ export default function Station() {
                 </>
               ) : (
                 <Skeleton
-                  width={300}
-                  height={'500px'}
+                  width="300px"
+                  height={bigScreen ? '500px' : '470px'}
                   sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2 }}
                 />
               )
             ) : (
               <Skeleton
-                width={300}
-                height={'500px'}
+                width="300px"
+                height={bigScreen ? '500px' : '470px'}
                 sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2 }}
               />
             )}
