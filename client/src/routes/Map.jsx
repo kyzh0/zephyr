@@ -32,7 +32,47 @@ export default function Map() {
   const [cookies, setCookies] = useCookies();
   const [markers] = useState([]);
 
-  const REFRESH_INTERVAL = 60;
+  const unitRef = useRef('kmh');
+  const [posInit, setPosInit] = useState(false);
+  const [lon, setLon] = useState(0);
+  const [lat, setLat] = useState(0);
+  const [zoom, setZoom] = useState(0);
+
+  const cookiesOptions = {
+    path: '/',
+    maxAge: 31536000, // 365 days
+    secure: true,
+    sameSite: 'strict'
+  };
+
+  // read cookies
+  useEffect(() => {
+    if (cookies.lon) {
+      setLon(cookies.lon);
+    } else {
+      setCookies('lon', 172.5, cookiesOptions);
+    }
+    if (cookies.lat) {
+      setLat(cookies.lat);
+    } else {
+      setCookies('lat', -41, cookiesOptions);
+    }
+    if (cookies.zoom) {
+      setZoom(cookies.zoom);
+    } else {
+      setCookies('zoom', window.innerWidth > 1000 ? 5.1 : 4.3, cookiesOptions);
+    }
+
+    if (!cookies.visited) {
+      navigate('welcome');
+    }
+
+    if (cookies.unit) {
+      unitRef.current = cookies.unit;
+    }
+  }, [cookies]);
+
+  const REFRESH_INTERVAL_SECONDS = 60;
   const { setRefreshedIds } = useContext(AppContext);
 
   function getArrowStyle(avgWind, currentBearing, validBearings, isOffline) {
@@ -189,12 +229,12 @@ export default function Map() {
           let temp = '';
           if (currentAvg != null) {
             if (currentGust != null) {
-              temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
+              temp = `${Math.round(unitRef.current === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(unitRef.current === 'kt' ? currentGust / 1.852 : currentGust)}`;
             } else {
-              temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
+              temp = `${Math.round(unitRef.current === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
             }
           }
-          const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
+          const unit = unitRef.current === 'kt' ? 'kt' : 'km/h';
           html += `<p align="center">${temp} ${unit} ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
         }
       }
@@ -229,7 +269,7 @@ export default function Map() {
         childText.innerHTML =
           currentAvg == null
             ? '-'
-            : Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg);
+            : Math.round(unitRef.current === 'kt' ? currentAvg / 1.852 : currentAvg);
       }
       childText.addEventListener('click', () => {
         popup.remove();
@@ -258,7 +298,7 @@ export default function Map() {
     if (!markers.length) return;
 
     let timestamp = Date.now();
-    if (timestamp - lastRefresh < REFRESH_INTERVAL * 1000) return; // enforce refresh interval
+    if (timestamp - lastRefresh < REFRESH_INTERVAL_SECONDS * 1000) return; // enforce refresh interval
     lastRefresh = timestamp;
 
     // update marker styling
@@ -291,7 +331,7 @@ export default function Map() {
 
       // if oldest timestamp is greater than 1 interval (+10% buffer) than
       // the next oldest timestamp, then we missed some records
-      if (secondMin - min > 1.1 * REFRESH_INTERVAL * 1000) {
+      if (secondMin - min > 1.1 * REFRESH_INTERVAL_SECONDS * 1000) {
         const stations = [];
         const oldestMarkers = markers.filter((m) => {
           return m.marker.dataset.timestamp === min;
@@ -334,7 +374,7 @@ export default function Map() {
             child.innerHTML =
               currentAvg == null
                 ? '-'
-                : Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg);
+                : Math.round(unitRef.current === 'kt' ? currentAvg / 1.852 : currentAvg);
           }
         } else if (child.className === 'marker-arrow') {
           child.style.backgroundImage = img;
@@ -353,12 +393,12 @@ export default function Map() {
             let temp = '';
             if (currentAvg != null) {
               if (currentGust != null) {
-                temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
+                temp = `${Math.round(unitRef.current === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(unitRef.current === 'kt' ? currentGust / 1.852 : currentGust)}`;
               } else {
-                temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
+                temp = `${Math.round(unitRef.current === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
               }
             }
-            const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
+            const unit = unitRef.current === 'kt' ? 'kt' : 'km/h';
             html += `<p align="center">${temp} ${unit} ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
           }
         }
@@ -371,46 +411,9 @@ export default function Map() {
     setRefreshedIds(updatedIds);
   }
 
-  const map = useRef(null);
-  const mapContainer = useRef(null);
-
-  const [posInit, setPosInit] = useState(false);
-  const [lon, setLon] = useState(0);
-  const [lat, setLat] = useState(0);
-  const [zoom, setZoom] = useState(0);
-
-  const cookiesOptions = {
-    path: '/',
-    maxAge: 31536000, // 365 days
-    secure: true,
-    sameSite: 'strict'
-  };
-
-  // read cookies
-  useEffect(() => {
-    if (cookies.lon) {
-      setLon(cookies.lon);
-    } else {
-      setCookies('lon', 172.5, cookiesOptions);
-    }
-    if (cookies.lat) {
-      setLat(cookies.lat);
-    } else {
-      setCookies('lat', -41, cookiesOptions);
-    }
-    if (cookies.zoom) {
-      setZoom(cookies.zoom);
-    } else {
-      setCookies('zoom', window.innerWidth > 1000 ? 5.1 : 4.3, cookiesOptions);
-    }
-
-    if (!cookies.visited) {
-      navigate('welcome');
-    }
-  }, [cookies]);
-
   // change unit
   useEffect(() => {
+    unitRef.current = cookies.unit;
     for (const item of markers) {
       const currentAvg = item.marker.dataset.avg === '' ? null : Number(item.marker.dataset.avg);
       const currentGust = item.marker.dataset.gust === '' ? null : Number(item.marker.dataset.gust);
@@ -418,7 +421,9 @@ export default function Map() {
       for (const child of item.marker.children) {
         if (child.className === 'marker-text') {
           if (currentAvg != null) {
-            child.innerHTML = Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg);
+            child.innerHTML = Math.round(
+              unitRef.current === 'kt' ? currentAvg / 1.852 : currentAvg
+            );
           }
         }
       }
@@ -427,12 +432,12 @@ export default function Map() {
       let temp = '';
       if (currentAvg != null) {
         if (currentGust != null) {
-          temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
+          temp = `${Math.round(unitRef.current === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(unitRef.current === 'kt' ? currentGust / 1.852 : currentGust)}`;
         } else {
-          temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
+          temp = `${Math.round(unitRef.current === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
         }
       }
-      const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
+      const unit = unitRef.current === 'kt' ? 'kt' : 'km/h';
       temp += ` ${unit}`;
 
       const regex = /(\d+\s-\s\d+\s|\d+\s)(km\/h|kt)/g;
@@ -440,6 +445,9 @@ export default function Map() {
       item.popup.setHTML(html);
     }
   }, [cookies.unit]);
+
+  const map = useRef(null);
+  const mapContainer = useRef(null);
 
   useEffect(() => {
     const evenDay = new Date().getDate() % 2 == 0;
@@ -492,7 +500,7 @@ export default function Map() {
             }
           }
         },
-        REFRESH_INTERVAL * 1000 // every REFRESH_INTERVAL seconds
+        REFRESH_INTERVAL_SECONDS * 1000 // every REFRESH_INTERVAL seconds
       );
     });
 
