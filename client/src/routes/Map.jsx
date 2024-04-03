@@ -9,7 +9,6 @@ import { createTheme, ThemeProvider } from '@mui/material';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
-import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 
 import MapTerrainControl from './MapTerrainControl';
 import MapUnitControl from './MapUnitControl';
@@ -142,13 +141,15 @@ export default function Map() {
       }
       geoJson.features.push(feature);
     }
-    setGeoJson(geoJson);
     return geoJson;
   }
 
   let lastRefresh = 0;
-  function initialiseMarkers(geoJson) {
+  async function initialiseMarkers() {
+    const geoJson = getGeoJson(await listStations());
+
     if (!map.current || !geoJson || !geoJson.features.length) return;
+    setGeoJson(geoJson); // keep track of base set of all stations
 
     const timestamp = Date.now();
     lastRefresh = timestamp;
@@ -268,7 +269,7 @@ export default function Map() {
     const stations = await listStationsUpdatedSince(
       new Date(Number(newestMarker.marker.dataset.timestamp))
     );
-    let geoJson = getGeoJson(stations);
+    let geoJson = getGeoJson(stations); // subset of only updated stations
     if (!geoJson || !geoJson.features.length) {
       // due to a small difference between js Date.now() and Firestore date, a few records
       // which update around the refresh time will be missed, so now we check for missed updates
@@ -480,7 +481,7 @@ export default function Map() {
     );
 
     map.current.on('load', async () => {
-      initialiseMarkers(getGeoJson(await listStations()));
+      await initialiseMarkers();
 
       // poll for new data
       const interval = setInterval(
@@ -558,7 +559,13 @@ export default function Map() {
             navigate('/help');
           }}
         >
-          <QuestionMarkIcon sx={{ mb: '1px' }} />
+          <img
+            src="/question-mark.png"
+            style={{
+              width: '26px',
+              height: '26px'
+            }}
+          />
         </IconButton>
         <Box
           ref={mapContainer}

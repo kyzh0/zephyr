@@ -695,6 +695,92 @@ async function getMpycData() {
   };
 }
 
+async function getNavigatusData() {
+  let windAverage = null;
+  const windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(`https://nzqnwx.navigatus.aero/frontend/kelvin_iframe`, {
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    if (data.length) {
+      // wind direction
+      let dirStr = '';
+      let startStr = '<div class="wind-data">';
+      let i = data.indexOf(startStr);
+      if (i >= 0) {
+        startStr = '<p>';
+        const j = data.indexOf(startStr, i);
+        if (j > i) {
+          const k = data.indexOf('</p>', j);
+          if (k > i) {
+            dirStr = data.slice(j + startStr.length, k).trim();
+            switch (dirStr.toUpperCase()) {
+              case 'NORTHERLY':
+                windBearing = 0;
+                break;
+              case 'EASTERLY':
+                windBearing = 90;
+                break;
+              case 'SOUTHERLY':
+                windBearing = 180;
+                break;
+              case 'WESTERLY':
+                windBearing = 270;
+                break;
+              default:
+                break;
+            }
+          }
+        }
+      }
+
+      // wind avg
+      startStr = `<p>${dirStr}</p>`;
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const startStr1 = '<p>';
+        const j = data.indexOf(startStr1, i + startStr.length);
+        if (j > i) {
+          const k = data.indexOf('km/h</p>', j);
+          if (k > i) {
+            const temp = Number(data.slice(j + startStr1.length, k).trim());
+            if (!isNaN(temp)) {
+              windAverage = temp;
+            }
+          }
+        }
+      }
+
+      // temperature
+      startStr = '<p>Temperature:';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('&deg;</p>', i);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) {
+            temperature = temp;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function wrapper(source) {
   try {
     const db = getFirestore();
@@ -761,6 +847,10 @@ async function wrapper(source) {
           } else if (docData.type === 'mpyc') {
             data = await getMpycData();
             functions.logger.log('mpyc data updated');
+            functions.logger.log(data);
+          } else if (docData.type === 'navigatus') {
+            data = await getNavigatusData();
+            functions.logger.log('navigatus data updated');
             functions.logger.log(data);
           }
         }
@@ -902,8 +992,9 @@ async function checkForErrors() {
       // send email if >2 stations of 1 type went offline at the same time
       let msg = `Scheduled check ran successfully at ${new Date().toISOString()}\n`;
       const g = Object.groupBy(errors, ({ type }) => type);
+      const singleStations = ['lpc', 'mpyc', 'navigatus'];
       for (const [key, value] of Object.entries(g)) {
-        if (value.length > 2) {
+        if (singleStations.includes(key) || value.length > 2) {
           msg += `\n${key.toUpperCase()}\n\n`;
           msg += value.map((x) => x.msg).join('\n');
         }
