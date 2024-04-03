@@ -698,9 +698,11 @@ export default function Station() {
                     ? 'Weather Underground'
                     : station.type === 'po'
                       ? 'Port Otago'
-                      : station.type.length <= 4
-                        ? station.type.toUpperCase()
-                        : station.type.charAt(0).toUpperCase() + station.type.slice(1)}
+                      : station.type === 'wp'
+                        ? 'Weather Pro'
+                        : station.type.length <= 4
+                          ? station.type.toUpperCase()
+                          : station.type.charAt(0).toUpperCase() + station.type.slice(1)}
                 </Link>
               )}
             </Stack>

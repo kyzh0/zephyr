@@ -431,6 +431,73 @@ async function getCwuData(stationId) {
   };
 }
 
+async function getWeatherProData(stationId) {
+  let windAverage = null;
+  const windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      `https://www.weather-pro.com/reports/Realtime.php?SN=${stationId}`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    if (data.length) {
+      // wind avg
+      let startStr = 'Wind Speed</td><td style="font-size:120%;">:';
+      let i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('kph</td></tr>', i);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) {
+            windAverage = temp;
+          }
+        }
+      }
+
+      // wind direction
+      startStr = 'Wind Direction</td><td style="font-size:120%;">:';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('°</td></tr>', i);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) {
+            windBearing = temp;
+          }
+        }
+      }
+
+      // temperature
+      startStr = 'Air Temperature</td><td style="font-size:120%;">:';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('°C</td></tr>', i);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) {
+            temperature = temp;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getPortOtagoData(stationId) {
   let windAverage = null;
   let windGust = null;
@@ -723,14 +790,26 @@ async function getNavigatusData() {
               case 'NORTHERLY':
                 windBearing = 0;
                 break;
+              case 'NORTH-EASTERLY':
+                windBearing = 45;
+                break;
               case 'EASTERLY':
                 windBearing = 90;
+                break;
+              case 'SOUTH-EASTERLY':
+                windBearing = 135;
                 break;
               case 'SOUTHERLY':
                 windBearing = 180;
                 break;
+              case 'SOUTH-WESTERLY':
+                windBearing = 225;
+                break;
               case 'WESTERLY':
                 windBearing = 270;
+                break;
+              case 'NORTH-WESTERLY':
+                windBearing = 315;
                 break;
               default:
                 break;
@@ -835,6 +914,10 @@ async function wrapper(source) {
           } else if (docData.type === 'cwu') {
             data = await getCwuData(docData.externalId);
             functions.logger.log(`cwu data updated - ${docData.externalId}`);
+            functions.logger.log(data);
+          } else if (docData.type === 'wp') {
+            data = await getWeatherProData(docData.externalId);
+            functions.logger.log(`wp data updated - ${docData.externalId}`);
             functions.logger.log(data);
           } else if (docData.type === 'po') {
             data = await getPortOtagoData(docData.externalId);
