@@ -87,14 +87,14 @@ export default function Map() {
       img = `url('/${prefix}-light-green.png')`;
     } else if (avgWind < 23) {
       img = `url('/${prefix}-green.png')`;
-    } else if (avgWind < 28) {
+    } else if (avgWind < 30) {
       img = `url('/${prefix}-yellow.png')`;
-    } else if (avgWind < 33) {
+    } else if (avgWind < 35) {
       img = `url('/${prefix}-orange.png')`;
-    } else if (avgWind < 45) {
+    } else if (avgWind < 60) {
       img = `url('/${prefix}-red.png')`;
       textColor = 'white';
-    } else if (avgWind < 60) {
+    } else if (avgWind < 80) {
       img = `url('/${prefix}-purple.png')`;
       textColor = 'white';
     } else {
@@ -113,8 +113,8 @@ export default function Map() {
       features: []
     };
     for (const station of stations) {
-      let avg = station.currentAverage == null ? null : Math.round(station.currentAverage);
-      const gust = station.currentGust == null ? null : Math.round(station.currentGust);
+      let avg = station.currentAverage == null ? null : station.currentAverage;
+      const gust = station.currentGust == null ? null : station.currentGust;
       if (avg == null && gust != null) {
         avg = gust;
       }
@@ -190,9 +190,9 @@ export default function Map() {
         } else {
           let temp = '';
           if (currentAvg != null && currentGust != null) {
-            temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg} - ${cookies.unit === 'kt' ? Math.round(currentGust / 1.852) : currentGust}`;
-          } else if (currentGust == null) {
-            temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg}`;
+            temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
+          } else if (currentAvg != null && currentGust == null) {
+            temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
           }
           const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
           html += `<p align="center">${temp} ${unit} ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
@@ -229,9 +229,7 @@ export default function Map() {
         childText.innerHTML =
           currentAvg == null
             ? '-'
-            : cookies.unit === 'kt'
-              ? Math.round(currentAvg / 1.852)
-              : currentAvg;
+            : Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg);
       }
       childText.addEventListener('click', () => {
         popup.remove();
@@ -332,9 +330,7 @@ export default function Map() {
             child.innerHTML =
               currentAvg == null
                 ? '-'
-                : cookies.unit === 'kt'
-                  ? Math.round(currentAvg / 1.852)
-                  : currentAvg;
+                : Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg);
           }
         } else if (child.className === 'marker-arrow') {
           child.style.backgroundImage = img;
@@ -352,9 +348,9 @@ export default function Map() {
           } else {
             let temp = '';
             if (currentAvg != null && currentGust != null) {
-              temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg} - ${cookies.unit === 'kt' ? Math.round(currentGust / 1.852) : currentGust}`;
-            } else if (currentGust == null) {
-              temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg}`;
+              temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
+            } else if (currentAvg != null && currentGust == null) {
+              temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
             }
             const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
             html += `<p align="center">${temp} ${unit} ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
@@ -431,9 +427,9 @@ export default function Map() {
         if (!isOffline) {
           let temp = '';
           if (currentAvg != null && currentGust != null) {
-            temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg} - ${cookies.unit === 'kt' ? Math.round(currentGust / 1.852) : currentGust}`;
-          } else if (currentGust == null) {
-            temp = `${cookies.unit === 'kt' ? Math.round(currentAvg / 1.852) : currentAvg}`;
+            temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
+          } else if (currentAvg != null && currentGust == null) {
+            temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
           }
           const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
           temp += ` ${unit}`;

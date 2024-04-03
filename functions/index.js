@@ -927,7 +927,7 @@ async function checkForErrors() {
 }
 
 exports.updateWeatherStationData = functions
-  .runWith({ timeoutSeconds: 30, memory: '1GB' })
+  .runWith({ timeoutSeconds: 60, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *') // at every 10th minute
   .onRun(() => {
