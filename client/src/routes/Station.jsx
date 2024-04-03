@@ -223,6 +223,7 @@ export default function Station() {
                     <Typography
                       component="h1"
                       variant="h5"
+                      align="center"
                       sx={{ ...(!bigScreen && { fontSize: '18px' }) }}
                     >
                       {station.name}

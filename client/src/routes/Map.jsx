@@ -103,7 +103,6 @@ export default function Map() {
     return [img, textColor];
   }
 
-  const [geoJson, setGeoJson] = useState(null);
   function getGeoJson(stations) {
     if (!stations || !stations.length) return null;
 
@@ -147,9 +146,7 @@ export default function Map() {
   let lastRefresh = 0;
   async function initialiseMarkers() {
     const geoJson = getGeoJson(await listStations());
-
     if (!map.current || !geoJson || !geoJson.features.length) return;
-    setGeoJson(geoJson); // keep track of base set of all stations
 
     const timestamp = Date.now();
     lastRefresh = timestamp;
@@ -190,10 +187,12 @@ export default function Map() {
           html += `<p align="center">-</p>`;
         } else {
           let temp = '';
-          if (currentAvg != null && currentGust != null) {
-            temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
-          } else if (currentAvg != null && currentGust == null) {
-            temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
+          if (currentAvg != null) {
+            if (currentGust != null) {
+              temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
+            } else {
+              temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
+            }
           }
           const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
           html += `<p align="center">${temp} ${unit} ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
@@ -244,6 +243,8 @@ export default function Map() {
       el.id = dbId;
       el.className = 'marker';
       el.dataset.timestamp = timestamp;
+      el.dataset.avg = currentAvg == null ? '' : currentAvg;
+      el.dataset.gust = currentGust == null ? '' : currentGust;
       el.appendChild(childArrow);
       el.appendChild(childText);
 
@@ -269,7 +270,7 @@ export default function Map() {
     const stations = await listStationsUpdatedSince(
       new Date(Number(newestMarker.marker.dataset.timestamp))
     );
-    let geoJson = getGeoJson(stations); // subset of only updated stations
+    let geoJson = getGeoJson(stations);
     if (!geoJson || !geoJson.features.length) {
       // due to a small difference between js Date.now() and Firestore date, a few records
       // which update around the refresh time will be missed, so now we check for missed updates
@@ -321,6 +322,8 @@ export default function Map() {
       const isOffline = f.properties.isOffline;
 
       item.marker.dataset.timestamp = timestamp;
+      item.marker.dataset.avg = currentAvg == null ? '' : currentAvg;
+      item.marker.dataset.gust = currentGust == null ? '' : currentGust;
       for (const child of item.marker.children) {
         const [img, color] = getArrowStyle(currentAvg, currentBearing, validBearings, isOffline);
         if (child.className === 'marker-text') {
@@ -348,10 +351,12 @@ export default function Map() {
             html += `<p align="center">-</p>`;
           } else {
             let temp = '';
-            if (currentAvg != null && currentGust != null) {
-              temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
-            } else if (currentAvg != null && currentGust == null) {
-              temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
+            if (currentAvg != null) {
+              if (currentGust != null) {
+                temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
+              } else {
+                temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
+              }
             }
             const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
             html += `<p align="center">${temp} ${unit} ${currentBearing == null ? '' : getWindDirectionFromBearing(currentBearing)}</p>`;
@@ -407,39 +412,32 @@ export default function Map() {
   // change unit
   useEffect(() => {
     for (const item of markers) {
+      const currentAvg = item.marker.dataset.avg === '' ? null : Number(item.marker.dataset.avg);
+      const currentGust = item.marker.dataset.gust === '' ? null : Number(item.marker.dataset.gust);
+
       for (const child of item.marker.children) {
-        const matches = geoJson.features.filter((f) => {
-          return f.properties.dbId === item.marker.id;
-        });
-        if (!matches || !matches.length) continue;
-
-        const f = matches[0];
-        const currentAvg = f.properties.currentAverage;
-        const currentGust = f.properties.currentGust;
-        const isOffline = f.properties.isOffline;
-
         if (child.className === 'marker-text') {
           if (currentAvg != null) {
             child.innerHTML = Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg);
           }
         }
+      }
 
-        // update popup
-        if (!isOffline) {
-          let temp = '';
-          if (currentAvg != null && currentGust != null) {
-            temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
-          } else if (currentAvg != null && currentGust == null) {
-            temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
-          }
-          const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
-          temp += ` ${unit}`;
-
-          const regex = /(\d+\s-\s\d+\s|\d+\s)(km\/h|kt)/g;
-          const html = item.popup._content.innerHTML.replace(regex, temp);
-          item.popup.setHTML(html);
+      // update popup
+      let temp = '';
+      if (currentAvg != null) {
+        if (currentGust != null) {
+          temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)} - ${Math.round(cookies.unit === 'kt' ? currentGust / 1.852 : currentGust)}`;
+        } else {
+          temp = `${Math.round(cookies.unit === 'kt' ? currentAvg / 1.852 : currentAvg)}`;
         }
       }
+      const unit = cookies.unit === 'kt' ? 'kt' : 'km/h';
+      temp += ` ${unit}`;
+
+      const regex = /(\d+\s-\s\d+\s|\d+\s)(km\/h|kt)/g;
+      const html = item.popup._content.innerHTML.replace(regex, temp);
+      item.popup.setHTML(html);
     }
   }, [cookies.unit]);
 
