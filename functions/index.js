@@ -1,5 +1,6 @@
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
+const { getStorage, getDownloadURL } = require('firebase-admin/storage');
 
 const functions = require('firebase-functions');
 const axios = require('axios');
@@ -89,7 +90,7 @@ async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempI
       ids[0],
       ids[1],
       longInterval,
-      'object'
+      sid === '1057' ? 'array' : 'object' // station 1057 has avg/gust switched
     );
     if (result) {
       windAverage = result;
@@ -105,7 +106,7 @@ async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempI
       ids[0],
       ids[1],
       longInterval,
-      'array'
+      sid === '1057' ? 'object' : 'array'
     );
     if (result) {
       windGust = result;
@@ -860,7 +861,7 @@ async function getNavigatusData() {
   };
 }
 
-async function wrapper(source) {
+async function stationWrapper(source) {
   try {
     const db = getFirestore();
     const snapshot = await db.collection('stations').get();
@@ -998,6 +999,181 @@ async function wrapper(source) {
   }
 }
 
+exports.updateWeatherStationData = functions
+  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('*/10 * * * *') // at every 10th minute
+  .onRun(() => {
+    return stationWrapper();
+  });
+
+exports.updateHarvestStationData = functions
+  .runWith({ timeoutSeconds: 120, memory: '1GB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('*/10 * * * *')
+  .onRun(() => {
+    return stationWrapper('harvest');
+  });
+
+exports.updateHolfuyStationData = functions
+  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('*/10 * * * *')
+  .onRun(() => {
+    return stationWrapper('holfuy');
+  });
+
+exports.updateMetserviceStationData = functions
+  .runWith({ timeoutSeconds: 120, memory: '1GB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('*/10 * * * *')
+  .onRun(() => {
+    return stationWrapper('metservice');
+  });
+
+async function getHarvestImage(siteId, hsn, lastUpdate) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const { data } = await axios.get(
+      `https://live.harvest.com/php/device_camera_images_functions.php?device_camera_images&request_type=initial&site_id=${siteId}&hsn=${hsn}`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    if (data.date_local) {
+      updated = new Date(`${data.date_local}+13:00`);
+      // skip if image already up to date
+      if (updated > lastUpdate && data.main_image) {
+        base64 = data.main_image.replace('\\/', '/').replace('data:image/jpeg;base64,', '');
+      }
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
+async function getMetserviceImage(id, lastUpdate) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const { data } = await axios.get(
+      `https://www.metservice.com/publicData/webdata/traffic-camera/${id}`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    const modules = data.layout.secondary.slots.major.modules;
+    if (modules && modules.length) {
+      const sets = modules[0].sets;
+      if (sets && sets.length) {
+        const times = sets[0].times;
+        if (times.length) {
+          const d = times[times.length - 1];
+          if (d.displayTime) {
+            updated = new Date(d.displayTime);
+            // skip if image already up to date
+            if (updated > lastUpdate && d.url) {
+              const response = await axios.get(`https://www.metservice.com${d.url}`, {
+                responseType: 'arraybuffer',
+                headers: {
+                  Connection: 'keep-alive'
+                }
+              });
+              base64 = Buffer.from(response.data, 'binary').toString('base64');
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
+async function webcamWrapper() {
+  try {
+    const db = getFirestore();
+    const snapshot = await db.collection('cams').get();
+    if (!snapshot.empty) {
+      const tempArray = [];
+      snapshot.forEach((doc) => {
+        tempArray.push(doc);
+      });
+
+      const bucket = getStorage().bucket();
+      for (const doc of tempArray) {
+        let data = null;
+        const docData = doc.data();
+        const lastUpdate = new Date(docData.lastUpdate._seconds * 1000);
+
+        if (docData.type === 'harvest') {
+          data = await getHarvestImage(docData.harvestSiteId, docData.harvestHsn, lastUpdate);
+          if (data.updated && data.base64) {
+            functions.logger.log(`harvest image updated - ${docData.harvestSiteId}`);
+          } else {
+            functions.logger.log(`harvest image update skipped - ${docData.harvestSiteId}`);
+          }
+        } else if (docData.type === 'metservice') {
+          data = await getMetserviceImage(docData.id, lastUpdate);
+          if (data.updated && data.base64) {
+            functions.logger.log(`metservice image updated - ${docData.id}`);
+          } else {
+            functions.logger.log(`metservice image update skipped - ${docData.id}`);
+          }
+        }
+
+        if (data && data.updated && data.base64) {
+          // save base64 to storage
+          const imgBuffer = Buffer.from(data.base64, 'base64');
+          const imgByteArray = new Uint8Array(imgBuffer);
+          const file = bucket.file(`cams/${docData.type}/${data.updated.toISOString()}.jpg`);
+          await file.save(imgByteArray);
+          const url = await getDownloadURL(file);
+
+          // update cam
+          await db.doc(`cams/${doc.id}`).update({ lastUpdate: data.updated });
+
+          // add image
+          await db.collection(`cams/${doc.id}/images`).add({
+            time: data.updated,
+            url: url,
+            expiry: new Date(data.updated.getTime() + 24 * 60 * 60 * 1000) // 1 day expiry to be deleted by TTL policy
+          });
+        }
+      }
+    }
+    functions.logger.log('Webcam images updated.');
+  } catch (error) {
+    functions.logger.error(error);
+    return null;
+  }
+}
+
+exports.updateWebcamImages = functions
+  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('*/10 * * * *') // at every 10th minute
+  .onRun(() => {
+    return webcamWrapper();
+  });
+
 async function checkForErrors() {
   try {
     const errors = [];
@@ -1099,38 +1275,6 @@ async function checkForErrors() {
     return null;
   }
 }
-
-exports.updateWeatherStationData = functions
-  .runWith({ timeoutSeconds: 60, memory: '1GB' })
-  .region('australia-southeast1')
-  .pubsub.schedule('*/10 * * * *') // at every 10th minute
-  .onRun(() => {
-    return wrapper();
-  });
-
-exports.updateHarvestStationData = functions
-  .runWith({ timeoutSeconds: 120, memory: '1GB' })
-  .region('australia-southeast1')
-  .pubsub.schedule('*/10 * * * *')
-  .onRun(() => {
-    return wrapper('harvest');
-  });
-
-exports.updateHolfuyStationData = functions
-  .runWith({ timeoutSeconds: 60, memory: '1GB' })
-  .region('australia-southeast1')
-  .pubsub.schedule('*/10 * * * *')
-  .onRun(() => {
-    return wrapper('holfuy');
-  });
-
-exports.updateMetserviceStationData = functions
-  .runWith({ timeoutSeconds: 120, memory: '1GB' })
-  .region('australia-southeast1')
-  .pubsub.schedule('*/10 * * * *')
-  .onRun(() => {
-    return wrapper('metservice');
-  });
 
 exports.checkForErrors = functions
   .runWith({ timeoutSeconds: 120, memory: '1GB' })
