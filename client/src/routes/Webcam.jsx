@@ -68,6 +68,8 @@ export default function Webcam() {
     navigate('/');
   }
 
+  const bigScreen = window.matchMedia('(min-width: 1000px)').matches;
+
   return (
     <Modal open onClose={handleClose} disableAutoFocus={true}>
       <Container component="main" maxWidth="xl" sx={{ height: '100%' }}>
@@ -105,7 +107,14 @@ export default function Webcam() {
                   No images in the last 24h.
                 </Typography>
               ) : images.length ? (
-                <Box sx={{ width: '80vw', height: '50vw', maxWidth: '800px', maxHeight: '480px' }}>
+                <Box
+                  sx={{
+                    width: '80vw',
+                    height: '50vw',
+                    maxWidth: '800px',
+                    maxHeight: bigScreen ? '480px' : '50vw'
+                  }}
+                >
                   <Carousel
                     showIndicators={false}
                     showThumbs={false}
