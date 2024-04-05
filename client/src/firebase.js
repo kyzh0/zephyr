@@ -105,3 +105,14 @@ export async function loadStationData(stationId) {
     console.error(error);
   }
 }
+
+export async function listCams() {
+  try {
+    const snap = await getDocs(collection(db, 'cams'));
+    return snap.docs.map((doc) => {
+      return { id: doc.id, ...doc.data() };
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}

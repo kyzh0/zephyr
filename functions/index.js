@@ -870,6 +870,14 @@ async function stationWrapper(source) {
       snapshot.forEach((doc) => {
         tempArray.push(doc);
       });
+
+      // floor data timestamp to 10 min
+      let date = new Date();
+      let rem = date.getMinutes() % 10;
+      if (rem > 0) date = new Date(date.getTime() - rem * 60 * 1000);
+      rem = date.getSeconds() % 60;
+      if (rem > 0) date = new Date(date.getTime() - rem * 1000);
+
       for (const doc of tempArray) {
         let data = null;
         const docData = doc.data();
@@ -959,9 +967,8 @@ async function stationWrapper(source) {
           }
 
           // update station data
-          let date = new Date();
           const s = {
-            lastUpdate: date,
+            lastUpdate: new Date(), // do not floor to 10 min
             currentAverage: avg ?? null,
             currentGust: gust ?? null,
             currentBearing: bearing ?? null,
@@ -976,11 +983,6 @@ async function stationWrapper(source) {
           await db.doc(`stations/${doc.id}`).update(s);
 
           // add data
-          // floor timestamp to 10 min
-          const rem = date.getMinutes() % 10;
-          if (rem > 0) {
-            date = new Date(date.getTime() - rem * 60 * 1000);
-          }
           await db.collection(`stations/${doc.id}/data`).add({
             time: date,
             expiry: new Date(date.getTime() + 24 * 60 * 60 * 1000), // 1 day expiry to be deleted by TTL policy
@@ -1008,7 +1010,7 @@ exports.updateWeatherStationData = functions
   });
 
 exports.updateHarvestStationData = functions
-  .runWith({ timeoutSeconds: 120, memory: '1GB' })
+  .runWith({ timeoutSeconds: 180, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
   .onRun(() => {
@@ -1142,13 +1144,13 @@ async function webcamWrapper() {
         if (data && data.updated && data.base64) {
           // save base64 to storage
           const imgBuffer = Buffer.from(data.base64, 'base64');
-          const imgByteArray = new Uint8Array(imgBuffer);
+          const imgByteArray = new Uint8Array(imgBuffer); // compress this with sharp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
           const file = bucket.file(`cams/${docData.type}/${data.updated.toISOString()}.jpg`);
           await file.save(imgByteArray);
           const url = await getDownloadURL(file);
 
           // update cam
-          await db.doc(`cams/${doc.id}`).update({ lastUpdate: data.updated });
+          await db.doc(`cams/${doc.id}`).update({ lastUpdate: data.updated, currentUrl: url });
 
           // add image
           await db.collection(`cams/${doc.id}/images`).add({

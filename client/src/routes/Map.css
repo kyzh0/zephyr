@@ -36,6 +36,15 @@
   padding-top: 3px;
 }
 
+.webcam {
+  width: 40px;
+  height: 25px;
+  cursor: pointer;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 /* popups */
 .mapboxgl-popup-content {
   border-radius: 8px;

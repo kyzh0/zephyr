@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { getStationById, listStations, listStationsUpdatedSince } from '../firebase';
+import { getStationById, listCams, listStations, listStationsUpdatedSince } from '../firebase';
 import { AppContext } from '../context/AppContext';
 import { useCookies } from 'react-cookie';
 import { getWindDirectionFromBearing } from '../helpers/utils';
@@ -31,6 +31,7 @@ export default function Map() {
   const navigate = useNavigate();
   const [cookies, setCookies] = useCookies();
   const [markers] = useState([]);
+  const [webcamMarkers] = useState([]);
 
   const unitRef = useRef('kmh');
   const [posInit, setPosInit] = useState(false);
@@ -183,6 +184,32 @@ export default function Map() {
     return geoJson;
   }
 
+  function getWebcamGeoJson(webcams) {
+    if (!webcams || !webcams.length) return null;
+
+    const geoJson = {
+      type: 'FeatureCollection',
+      features: []
+    };
+    for (const cam of webcams) {
+      const feature = {
+        type: 'Feature',
+        properties: {
+          name: cam.name,
+          dbId: cam.id,
+          lastUpdate: cam.lastUpdate,
+          currentUrl: cam.currentUrl
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [cam.coordinates._long, cam.coordinates._lat]
+        }
+      };
+      geoJson.features.push(feature);
+    }
+    return geoJson;
+  }
+
   let lastRefresh = 0;
   async function initialiseMarkers() {
     const geoJson = getGeoJson(await listStations());
@@ -289,6 +316,64 @@ export default function Map() {
       el.appendChild(childText);
 
       markers.push({ marker: el, popup: popup });
+      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).setPopup(popup).addTo(map.current);
+    }
+  }
+
+  async function initialiseWebcams() {
+    const geoJson = getWebcamGeoJson(await listCams());
+    if (!map.current || !geoJson || !geoJson.features.length) return;
+
+    const timestamp = Date.now();
+    // lastRefresh = timestamp;
+
+    for (const f of geoJson.features) {
+      const name = f.properties.name;
+      const dbId = f.properties.dbId;
+      const lastUpdate = f.properties.lastUpdate.seconds;
+      const currentUrl = f.properties.currentUrl;
+
+      // popup
+      const d = new Date(lastUpdate * 1000);
+      const displayDate = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+      let html = `<p align="center"><strong>${name}</strong></p>`;
+      if (currentUrl) {
+        if (timestamp - lastUpdate * 1000 <= 4 * 60 * 60 * 1000) {
+          html += `<p align="center">${displayDate}</p>`;
+          html += `<img width="300px" src="${currentUrl}"></img>`;
+        } else {
+          // display timestamp in red if not last updated within 4h
+          html += `<p style="color: red;" align="center">${displayDate}</p>`;
+        }
+      }
+
+      const popup = new mapboxgl.Popup({
+        maxWidth: 400,
+        closeButton: false,
+        closeOnClick: false
+      }).setHTML(html);
+
+      const el = document.createElement('div');
+      if (timestamp - lastUpdate * 1000 <= 60 * 60 * 1000) {
+        // updated in last 60 min
+        el.style.backgroundImage = `url('/camera-green.png')`;
+      } else if (timestamp - lastUpdate * 1000 <= 4 * 60 * 60 * 1000) {
+        // updated in last 4h
+        el.style.backgroundImage = `url('/camera-yellow.png')`;
+      } else {
+        el.style.backgroundImage = `url('/camera-grey.png')`;
+      }
+      el.id = dbId;
+      el.className = 'webcam';
+      el.dataset.timestamp = timestamp;
+      el.addEventListener('click', () => {
+        popup.remove();
+        // navigate(`/stations/${dbId}`);
+      });
+      el.addEventListener('mouseenter', () => popup.addTo(map.current));
+      el.addEventListener('mouseleave', () => popup.remove());
+
+      webcamMarkers.push({ marker: el, popup: popup });
       new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).setPopup(popup).addTo(map.current);
     }
   }
@@ -488,6 +573,7 @@ export default function Map() {
 
     map.current.on('load', async () => {
       await initialiseMarkers();
+      await initialiseWebcams();
 
       // poll for new data
       const interval = setInterval(
