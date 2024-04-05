@@ -4,6 +4,7 @@ const { getStorage, getDownloadURL } = require('firebase-admin/storage');
 
 const functions = require('firebase-functions');
 const axios = require('axios');
+const sharp = require('sharp');
 
 initializeApp();
 
@@ -1143,8 +1144,9 @@ async function webcamWrapper() {
 
         if (data && data.updated && data.base64) {
           // save base64 to storage
-          const imgBuffer = Buffer.from(data.base64, 'base64');
-          const imgByteArray = new Uint8Array(imgBuffer); // compress this with sharp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          const imgBuff = Buffer.from(data.base64, 'base64');
+          const resizedBuff = await sharp(imgBuff).resize({ width: 600 }).toBuffer();
+          const imgByteArray = new Uint8Array(resizedBuff);
           const file = bucket.file(`cams/${docData.type}/${data.updated.toISOString()}.jpg`);
           await file.save(imgByteArray);
           const url = await getDownloadURL(file);

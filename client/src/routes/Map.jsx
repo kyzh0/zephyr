@@ -32,6 +32,7 @@ export default function Map() {
   const [cookies, setCookies] = useCookies();
   const [markers] = useState([]);
   const [webcamMarkers] = useState([]);
+  const [showWebcams, setShowWebcams] = useState(false);
 
   const unitRef = useRef('kmh');
   const [posInit, setPosInit] = useState(false);
@@ -272,38 +273,38 @@ export default function Map() {
       }).setHTML(html);
 
       // arrow icon
-      const childArrow = document.createElement('div');
-      childArrow.className = 'marker-arrow';
-      childArrow.style.transform =
+      const arrow = document.createElement('div');
+      arrow.className = 'marker-arrow';
+      arrow.style.transform =
         currentBearing == null ? '' : `rotate(${Math.round(currentBearing)}deg)`;
-      childArrow.addEventListener('click', () => {
+      arrow.addEventListener('click', () => {
         popup.remove();
         navigate(`/stations/${dbId}`);
       });
-      childArrow.addEventListener('mouseenter', () => popup.addTo(map.current));
-      childArrow.addEventListener('mouseleave', () => popup.remove());
+      arrow.addEventListener('mouseenter', () => popup.addTo(map.current));
+      arrow.addEventListener('mouseleave', () => popup.remove());
 
       const [img, color] = getArrowStyle(currentAvg, currentBearing, validBearings, isOffline);
-      childArrow.style.backgroundImage = img;
+      arrow.style.backgroundImage = img;
 
       // avg wind text
-      const childText = document.createElement('span');
-      childText.className = 'marker-text';
-      childText.style.color = color;
+      const text = document.createElement('span');
+      text.className = 'marker-text';
+      text.style.color = color;
       if (isOffline) {
-        childText.innerHTML = 'X';
+        text.innerHTML = 'X';
       } else {
-        childText.innerHTML =
+        text.innerHTML =
           currentAvg == null
             ? '-'
             : Math.round(unitRef.current === 'kt' ? currentAvg / 1.852 : currentAvg);
       }
-      childText.addEventListener('click', () => {
+      text.addEventListener('click', () => {
         popup.remove();
         navigate(`/stations/${dbId}`);
       });
-      childText.addEventListener('mouseenter', () => popup.addTo(map.current));
-      childText.addEventListener('mouseleave', () => popup.remove());
+      text.addEventListener('mouseenter', () => popup.addTo(map.current));
+      text.addEventListener('mouseleave', () => popup.remove());
 
       // parent element
       const el = document.createElement('div');
@@ -312,8 +313,8 @@ export default function Map() {
       el.dataset.timestamp = timestamp;
       el.dataset.avg = currentAvg == null ? '' : currentAvg;
       el.dataset.gust = currentGust == null ? '' : currentGust;
-      el.appendChild(childArrow);
-      el.appendChild(childText);
+      el.appendChild(arrow);
+      el.appendChild(text);
 
       markers.push({ marker: el, popup: popup });
       new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).setPopup(popup).addTo(map.current);
@@ -333,48 +334,39 @@ export default function Map() {
       const lastUpdate = f.properties.lastUpdate.seconds;
       const currentUrl = f.properties.currentUrl;
 
-      // popup
+      const img = document.createElement('img');
+      img.width = 200;
+      img.src = currentUrl;
+
       const d = new Date(lastUpdate * 1000);
       const displayDate = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-      let html = `<p align="center"><strong>${name}</strong></p>`;
-      if (currentUrl) {
-        if (timestamp - lastUpdate * 1000 <= 4 * 60 * 60 * 1000) {
-          html += `<p align="center">${displayDate}</p>`;
-          html += `<img width="300px" src="${currentUrl}"></img>`;
-        } else {
-          // display timestamp in red if not last updated within 4h
-          html += `<p style="color: red;" align="center">${displayDate}</p>`;
-        }
-      }
+      const text = document.createElement('span');
+      text.className = 'webcam-text';
+      text.style.alignItems = 'start';
+      text.style.fontWeight = 600;
+      text.innerHTML = `${name}`;
 
-      const popup = new mapboxgl.Popup({
-        maxWidth: 400,
-        closeButton: false,
-        closeOnClick: false
-      }).setHTML(html);
+      const text1 = document.createElement('span');
+      text1.className = 'webcam-text';
+      text1.style.alignItems = 'end';
+      if (timestamp - lastUpdate * 1000 >= 4 * 60 * 60 * 1000) text1.style.color = 'red';
+      text1.innerHTML = `${displayDate}`;
 
       const el = document.createElement('div');
-      if (timestamp - lastUpdate * 1000 <= 60 * 60 * 1000) {
-        // updated in last 60 min
-        el.style.backgroundImage = `url('/camera-green.png')`;
-      } else if (timestamp - lastUpdate * 1000 <= 4 * 60 * 60 * 1000) {
-        // updated in last 4h
-        el.style.backgroundImage = `url('/camera-yellow.png')`;
-      } else {
-        el.style.backgroundImage = `url('/camera-grey.png')`;
-      }
+      el.style.backgroundColor = `white`;
+      el.style.visibility = 'hidden';
       el.id = dbId;
       el.className = 'webcam';
       el.dataset.timestamp = timestamp;
       el.addEventListener('click', () => {
-        popup.remove();
         // navigate(`/stations/${dbId}`);
       });
-      el.addEventListener('mouseenter', () => popup.addTo(map.current));
-      el.addEventListener('mouseleave', () => popup.remove());
+      el.appendChild(img);
+      el.appendChild(text);
+      el.appendChild(text1);
 
-      webcamMarkers.push({ marker: el, popup: popup });
-      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).setPopup(popup).addTo(map.current);
+      webcamMarkers.push(el);
+      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
     }
   }
 
@@ -617,6 +609,13 @@ export default function Map() {
     };
   }, []);
 
+  function handleWebcamClick() {
+    setShowWebcams(!showWebcams);
+    for (const marker of webcamMarkers) {
+      marker.style.visibility = showWebcams ? 'hidden' : 'visible';
+    }
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <Stack
@@ -658,6 +657,44 @@ export default function Map() {
               height: '26px'
             }}
           />
+        </IconButton>
+        <IconButton
+          color="primary"
+          sx={{
+            backgroundColor: 'white',
+            color: '#333333',
+            borderRadius: '4px',
+            boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
+            position: 'absolute',
+            top: 0,
+            left: 35,
+            m: '10px',
+            width: '29px',
+            height: '29px',
+            zIndex: 5,
+            '&:hover': {
+              backgroundColor: '#f2f2f2'
+            }
+          }}
+          onClick={handleWebcamClick}
+        >
+          {showWebcams ? (
+            <img
+              src="/camera-black.png"
+              style={{
+                width: '26px',
+                height: '16px'
+              }}
+            />
+          ) : (
+            <img
+              src="/camera-grey.png"
+              style={{
+                width: '26px',
+                height: '16px'
+              }}
+            />
+          )}
         </IconButton>
         <Box
           ref={mapContainer}
