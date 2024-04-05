@@ -232,50 +232,6 @@ async function getMetserviceData(stationId) {
   };
 }
 
-async function getHolfuyData(stationId) {
-  // const { data } = await axios.get(
-  //   `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=${stationId}`
-  // );
-
-  // return {
-  //   windAverage: data.wind.speed,
-  //   windGust: data.wind.gust,
-  //   windBearing: data.wind.direction,
-  //   temperature: data.temperature
-  // };
-
-  let windAverage = null;
-  let windGust = null;
-  let windBearing = null;
-  let temperature = null;
-
-  try {
-    const { headers } = await axios.get(`https://holfuy.com/en/weather/${stationId}`);
-    const cookies = headers['set-cookie'];
-    if (cookies && cookies.length && cookies[0].length) {
-      const { data } = await axios.get(`https://holfuy.com/puget/mjso.php?k=${stationId}`, {
-        headers: {
-          Cookie: cookies[0],
-          Connection: 'keep-alive'
-        }
-      });
-      windAverage = data.speed;
-      windGust = data.gust;
-      windBearing = data.dir;
-      temperature = data.temperature;
-    }
-  } catch (error) {
-    functions.logger.error(error);
-  }
-
-  return {
-    windAverage,
-    windGust,
-    windBearing,
-    temperature
-  };
-}
-
 async function getAttentisData(stationId) {
   let windAverage = null;
   let windGust = null;
@@ -896,12 +852,6 @@ async function stationWrapper(source) {
             functions.logger.log(`harvest data updated - ${docData.externalId}`);
             functions.logger.log(data);
           }
-        } else if (source === 'holfuy') {
-          if (docData.type === 'holfuy') {
-            data = await getHolfuyData(docData.externalId);
-            functions.logger.log(`holfuy data updated - ${docData.externalId}`);
-            functions.logger.log(data);
-          }
         } else if (source === 'metservice') {
           if (docData.type === 'metservice') {
             data = await getMetserviceData(docData.externalId);
@@ -1002,6 +952,100 @@ async function stationWrapper(source) {
   }
 }
 
+async function holfuyWrapper() {
+  try {
+    const db = getFirestore();
+    const snapshot = await db.collection('stations').where('type', '==', 'holfuy').get();
+    if (!snapshot.empty) {
+      const tempArray = [];
+      snapshot.forEach((doc) => {
+        tempArray.push(doc);
+      });
+      functions.logger.log(tempArray);
+
+      // floor data timestamp to 10 min
+      let date = new Date();
+      let rem = date.getMinutes() % 10;
+      if (rem > 0) date = new Date(date.getTime() - rem * 60 * 1000);
+      rem = date.getSeconds() % 60;
+      if (rem > 0) date = new Date(date.getTime() - rem * 1000);
+
+      const { data } = await axios.get(
+        `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
+      );
+      functions.logger.log(data);
+
+      for (const doc of tempArray) {
+        const docData = doc.data();
+
+        const matches = data.measurements.filter((m) => {
+          return m.stationId.toString() === docData.externalId;
+        });
+        functions.logger.log(matches);
+        if (matches.length != 1) continue;
+        const wind = matches[0].wind;
+        const d = {
+          windAverage: wind.speed,
+          windGust: wind.gust,
+          windBearing: wind.direction,
+          temperature: matches[0].temperature
+        };
+
+        functions.logger.log(`holfuy data updated - ${docData.externalId}`);
+        functions.logger.log(d);
+
+        // handle likely erroneous values
+        let avg = d.windAverage;
+        if (avg < 0 || avg > 500) {
+          avg = null;
+        }
+        let gust = d.windGust;
+        if (gust < 0 || gust > 500) {
+          gust = null;
+        }
+        let bearing = d.windBearing;
+        if (bearing < 0 || bearing > 360) {
+          bearing = null;
+        }
+        let temperature = d.temperature;
+        if (temperature < -40 || temperature > 60) {
+          temperature = null;
+        }
+
+        // update station data
+        const s = {
+          lastUpdate: new Date(), // do not floor to 10 min
+          currentAverage: avg ?? null,
+          currentGust: gust ?? null,
+          currentBearing: bearing ?? null,
+          currentTemperature: temperature ?? null
+        };
+        if (avg != null || gust != null) {
+          s.isOffline = false;
+        }
+        if (avg != null && gust != null && bearing != null && temperature != null) {
+          s.isError = false;
+        }
+        await db.doc(`stations/${doc.id}`).update(s);
+
+        // add data
+        await db.collection(`stations/${doc.id}/data`).add({
+          time: date,
+          expiry: new Date(date.getTime() + 24 * 60 * 60 * 1000), // 1 day expiry to be deleted by TTL policy
+          windAverage: avg ?? null,
+          windGust: gust ?? null,
+          windBearing: bearing ?? null,
+          temperature: temperature ?? null
+        });
+      }
+    }
+    functions.logger.log('Holfuy data updated.');
+  } catch (error) {
+    functions.logger.error(error);
+    return null;
+  }
+}
+
 exports.updateWeatherStationData = functions
   .runWith({ timeoutSeconds: 60, memory: '1GB' })
   .region('australia-southeast1')
@@ -1023,7 +1067,7 @@ exports.updateHolfuyStationData = functions
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
   .onRun(() => {
-    return stationWrapper('holfuy');
+    return holfuyWrapper();
   });
 
 exports.updateMetserviceStationData = functions
@@ -1177,7 +1221,7 @@ async function webcamWrapper() {
 exports.updateWebcamImages = functions
   .runWith({ timeoutSeconds: 60, memory: '1GB' })
   .region('australia-southeast1')
-  .pubsub.schedule('*/10 * * * *') // at every 10th minute
+  .pubsub.schedule('*/20 * * * *') // at every 20th minute
   .onRun(() => {
     return webcamWrapper();
   });
