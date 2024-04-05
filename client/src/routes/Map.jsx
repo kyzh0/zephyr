@@ -340,8 +340,10 @@ export default function Map() {
     for (const f of geoJson.features) {
       const name = f.properties.name;
       const dbId = f.properties.dbId;
-      const currentTime = f.properties.currentTime.seconds;
+      const currentTime = f.properties.currentTime;
       const currentUrl = f.properties.currentUrl;
+
+      if (timestamp - currentTime.seconds * 1000 > 24 * 60 * 60 * 1000) continue; // don't display cams that havent updated in last 24h
 
       const img = document.createElement('img');
       img.width = 200;
@@ -352,7 +354,7 @@ export default function Map() {
       text.className = 'webcam-text-name';
       text.innerHTML = `${name}`;
 
-      const d = new Date(currentTime * 1000);
+      const d = currentTime.toDate();
       const text1 = document.createElement('span');
       text1.className = 'webcam-text-date';
       text1.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
@@ -364,7 +366,7 @@ export default function Map() {
       el.className = 'webcam';
       el.dataset.timestamp = timestamp;
       el.addEventListener('click', () => {
-        // navigate(`/stations/${dbId}`);
+        navigate(`/webcams/${dbId}`);
       });
       el.appendChild(img);
       el.appendChild(text);
@@ -547,7 +549,7 @@ export default function Map() {
       if (!matches || !matches.length) continue;
 
       const f = matches[0];
-      const currentTime = f.properties.currentTime.seconds;
+      const currentTime = f.properties.currentTime;
       const currentUrl = f.properties.currentUrl;
 
       item.dataset.timestamp = timestamp;
@@ -555,7 +557,7 @@ export default function Map() {
         if (child.className === 'webcam-img') {
           child.src = currentUrl;
         } else if (child.className === 'webcam-text-date') {
-          const d = new Date(currentTime * 1000);
+          const d = currentTime.toDate();
           child.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
         }
       }

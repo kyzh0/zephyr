@@ -1134,11 +1134,11 @@ async function webcamWrapper() {
             functions.logger.log(`harvest image update skipped - ${docData.harvestSiteId}`);
           }
         } else if (docData.type === 'metservice') {
-          data = await getMetserviceImage(docData.id, lastUpdate);
+          data = await getMetserviceImage(docData.externalId, lastUpdate);
           if (data.updated && data.base64) {
-            functions.logger.log(`metservice image updated - ${docData.id}`);
+            functions.logger.log(`metservice image updated - ${docData.externalId}`);
           } else {
-            functions.logger.log(`metservice image update skipped - ${docData.id}`);
+            functions.logger.log(`metservice image update skipped - ${docData.externalId}`);
           }
         }
 

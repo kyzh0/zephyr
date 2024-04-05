@@ -140,3 +140,15 @@ export async function listCamsUpdatedSince(time) {
     console.error(error);
   }
 }
+
+export async function loadCamImages(camId) {
+  try {
+    const q = query(collection(db, `cams/${camId}/images`), orderBy('time', 'desc'), limit(145)); // data for last 24h
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => {
+      return { id: doc.id, ...doc.data() };
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
