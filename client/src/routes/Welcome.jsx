@@ -79,6 +79,14 @@ export default function Welcome() {
                     direction may be favourable
                   </TableCell>
                 </TableRow>
+                <TableRow>
+                  <TableCell align="center" sx={{ border: 'none', p: '1 0 1 0', width: '20%' }}>
+                    <img src="/camera.png" style={{ width: '32px', height: '20px' }} />
+                  </TableCell>
+                  <TableCell align="center" sx={{ border: 'none', p: 0, pb: 1 }}>
+                    Click this icon to view webcams
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
             <Stack direction="row-reverse" sx={{ width: '100%', mt: 2 }}>

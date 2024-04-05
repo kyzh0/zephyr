@@ -105,3 +105,50 @@ export async function loadStationData(stationId) {
     console.error(error);
   }
 }
+
+export async function getCamById(id) {
+  const docRef = doc(db, 'cams', id);
+  try {
+    const docSnap = await getDoc(docRef);
+    const data = docSnap.exists() ? docSnap.data() : null;
+    if (data === null || data === undefined) return null;
+    return { id, ...data };
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function listCams() {
+  try {
+    const snap = await getDocs(collection(db, 'cams'));
+    return snap.docs.map((doc) => {
+      return { id: doc.id, ...doc.data() };
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function listCamsUpdatedSince(time) {
+  try {
+    const q = query(collection(db, 'cams'), where('lastUpdate', '>=', time));
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => {
+      return { id: doc.id, ...doc.data() };
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function loadCamImages(camId) {
+  try {
+    const q = query(collection(db, `cams/${camId}/images`), orderBy('time', 'desc'), limit(145)); // data for last 24h
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => {
+      return { id: doc.id, ...doc.data() };
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}

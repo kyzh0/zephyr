@@ -4,13 +4,16 @@ import PropTypes from 'prop-types';
 export const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
-  const [refreshedIds, setRefreshedIds] = useState([]);
+  const [refreshedStations, setRefreshedStations] = useState([]);
+  const [refreshedWebcams, setRefreshedWebcams] = useState([]);
 
   return (
     <AppContext.Provider
       value={{
-        refreshedIds,
-        setRefreshedIds
+        refreshedStations,
+        setRefreshedStations,
+        refreshedWebcams,
+        setRefreshedWebcams
       }}
     >
       {children}

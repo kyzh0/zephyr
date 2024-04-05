@@ -1,7 +1,7 @@
 # Zephyr
 
 <p align="center">
-<a href="https://zephyr-3fb26.web.app/">
+<a href="https://www.zephyrapp.nz/">
   <img src="https://github.com/kyzh0/zephyr/blob/main/client/public/logo192.png?raw=true" />
   </a>
 </p>
@@ -27,6 +27,7 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 ## Features
 
 - Real-time data - average wind speed, gust, direction, and temperature.
+- Webcams - live images from various cameras.
 - Interactive map - easy to use with intuitive colours and icons.
 - Charts and tables - a tidy representation of each station's data over time.
 - Mobile-first design - scalable across different screen sizes.

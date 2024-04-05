@@ -14,6 +14,7 @@ import AdminDashboard from './routes/AdminDashboard';
 import AdminAddStation from './routes/AdminAddStation';
 import AdminErrors from './routes/AdminErrors';
 import ProtectedRoute from './routes/ProtectedRoute';
+import Webcam from './routes/Webcam';
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: 'stations/:id',
         element: <Station />
+      },
+      {
+        path: 'webcams/:id',
+        element: <Webcam />
       },
       {
         path: 'welcome',
