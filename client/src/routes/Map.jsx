@@ -1,6 +1,13 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { getStationById, listCams, listStations, listStationsUpdatedSince } from '../firebase';
+import {
+  getCamById,
+  getStationById,
+  listCams,
+  listCamsUpdatedSince,
+  listStations,
+  listStationsUpdatedSince
+} from '../firebase';
 import { AppContext } from '../context/AppContext';
 import { useCookies } from 'react-cookie';
 import { getWindDirectionFromBearing } from '../helpers/utils';
@@ -30,9 +37,10 @@ export default function Map() {
 
   const navigate = useNavigate();
   const [cookies, setCookies] = useCookies();
-  const [markers] = useState([]);
+  const [stationMarkers] = useState([]);
   const [webcamMarkers] = useState([]);
   const [showWebcams, setShowWebcams] = useState(false);
+  const webcamsHiddenRef = useRef(true);
 
   const unitRef = useRef('kmh');
   const [posInit, setPosInit] = useState(false);
@@ -75,7 +83,7 @@ export default function Map() {
   }, [cookies]);
 
   const REFRESH_INTERVAL_SECONDS = 60;
-  const { setRefreshedIds } = useContext(AppContext);
+  const { setRefreshedStations, setRefreshedWebcams } = useContext(AppContext);
 
   function getArrowStyle(avgWind, currentBearing, validBearings, isOffline) {
     let textColor = 'black';
@@ -145,7 +153,7 @@ export default function Map() {
     return [img, textColor];
   }
 
-  function getGeoJson(stations) {
+  function getStationGeoJson(stations) {
     if (!stations || !stations.length) return null;
 
     const geoJson = {
@@ -198,7 +206,7 @@ export default function Map() {
         properties: {
           name: cam.name,
           dbId: cam.id,
-          lastUpdate: cam.lastUpdate,
+          currentTime: cam.currentTime,
           currentUrl: cam.currentUrl
         },
         geometry: {
@@ -211,13 +219,13 @@ export default function Map() {
     return geoJson;
   }
 
-  let lastRefresh = 0;
-  async function initialiseMarkers() {
-    const geoJson = getGeoJson(await listStations());
+  const lastStationRefreshRef = useRef(0);
+  async function initialiseStations() {
+    const geoJson = getStationGeoJson(await listStations());
     if (!map.current || !geoJson || !geoJson.features.length) return;
 
     const timestamp = Date.now();
-    lastRefresh = timestamp;
+    lastStationRefreshRef.current = timestamp;
 
     geoJson.features.sort((a, b) => {
       // render stations with valid bearings first (on top)
@@ -316,41 +324,38 @@ export default function Map() {
       el.appendChild(arrow);
       el.appendChild(text);
 
-      markers.push({ marker: el, popup: popup });
+      stationMarkers.push({ marker: el, popup: popup });
       new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).setPopup(popup).addTo(map.current);
     }
   }
 
+  const lastWebcamRefreshRef = useRef(0);
   async function initialiseWebcams() {
     const geoJson = getWebcamGeoJson(await listCams());
     if (!map.current || !geoJson || !geoJson.features.length) return;
 
     const timestamp = Date.now();
-    // lastRefresh = timestamp;
+    lastWebcamRefreshRef.current = timestamp;
 
     for (const f of geoJson.features) {
       const name = f.properties.name;
       const dbId = f.properties.dbId;
-      const lastUpdate = f.properties.lastUpdate.seconds;
+      const currentTime = f.properties.currentTime.seconds;
       const currentUrl = f.properties.currentUrl;
 
       const img = document.createElement('img');
       img.width = 200;
       img.src = currentUrl;
+      img.className = 'webcam-img';
 
-      const d = new Date(lastUpdate * 1000);
-      const displayDate = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
       const text = document.createElement('span');
-      text.className = 'webcam-text';
-      text.style.alignItems = 'start';
-      text.style.fontWeight = 600;
+      text.className = 'webcam-text-name';
       text.innerHTML = `${name}`;
 
+      const d = new Date(currentTime * 1000);
       const text1 = document.createElement('span');
-      text1.className = 'webcam-text';
-      text1.style.alignItems = 'end';
-      if (timestamp - lastUpdate * 1000 >= 4 * 60 * 60 * 1000) text1.style.color = 'red';
-      text1.innerHTML = `${displayDate}`;
+      text1.className = 'webcam-text-date';
+      text1.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 
       const el = document.createElement('div');
       el.style.backgroundColor = `white`;
@@ -370,16 +375,16 @@ export default function Map() {
     }
   }
 
-  async function refreshMarkers() {
+  async function refreshStations() {
     if (document.visibilityState !== 'visible') return;
-    if (!markers.length) return;
+    if (!stationMarkers.length) return;
 
     let timestamp = Date.now();
-    if (timestamp - lastRefresh < REFRESH_INTERVAL_SECONDS * 1000) return; // enforce refresh interval
-    lastRefresh = timestamp;
+    if (timestamp - lastStationRefreshRef.current < REFRESH_INTERVAL_SECONDS * 1000) return; // enforce refresh interval
+    lastStationRefreshRef.current = timestamp;
 
     // update marker styling
-    const newestMarker = markers.reduce((prev, current) => {
+    const newestMarker = stationMarkers.reduce((prev, current) => {
       return prev && prev.marker.dataset.timestamp > current.marker.dataset.timestamp
         ? prev
         : current;
@@ -387,11 +392,11 @@ export default function Map() {
     const stations = await listStationsUpdatedSince(
       new Date(Number(newestMarker.marker.dataset.timestamp))
     );
-    let geoJson = getGeoJson(stations);
+    let geoJson = getStationGeoJson(stations);
     if (!geoJson || !geoJson.features.length) {
       // due to a small difference between js Date.now() and Firestore date, a few records
       // which update around the refresh time will be missed, so now we check for missed updates
-      let distinctTimestamps = [...new Set(markers.map((m) => m.marker.dataset.timestamp))];
+      let distinctTimestamps = [...new Set(stationMarkers.map((m) => m.marker.dataset.timestamp))];
       if (distinctTimestamps.length < 2) return;
 
       // find oldest and next oldest timestamp
@@ -410,21 +415,21 @@ export default function Map() {
       // the next oldest timestamp, then we missed some records
       if (secondMin - min > 1.1 * REFRESH_INTERVAL_SECONDS * 1000) {
         const stations = [];
-        const oldestMarkers = markers.filter((m) => {
+        const oldestMarkers = stationMarkers.filter((m) => {
           return m.marker.dataset.timestamp === min;
         });
         for (const m of oldestMarkers) {
           const station = await getStationById(m.marker.id);
           if (station) stations.push(station);
         }
-        geoJson = getGeoJson(stations);
+        geoJson = getStationGeoJson(stations);
         timestamp = secondMin; // update missed records with the oldest valid timestamp
       }
       if (!geoJson || !geoJson.features.length) return;
     }
 
     const updatedIds = [];
-    for (const item of markers) {
+    for (const item of stationMarkers) {
       const matches = geoJson.features.filter((f) => {
         return f.properties.dbId === item.marker.id;
       });
@@ -485,13 +490,86 @@ export default function Map() {
       updatedIds.push(item.marker.id);
     }
     // trigger refresh in Station component
-    setRefreshedIds(updatedIds);
+    setRefreshedStations(updatedIds);
+  }
+
+  async function refreshWebcams() {
+    if (document.visibilityState !== 'visible') return;
+    if (webcamsHiddenRef.current) return;
+    if (!webcamMarkers.length) return;
+
+    let timestamp = Date.now();
+    if (timestamp - lastWebcamRefreshRef.current < REFRESH_INTERVAL_SECONDS * 1000) return; // enforce refresh interval
+    lastWebcamRefreshRef.current = timestamp;
+
+    // update marker styling
+    const newestMarker = webcamMarkers.reduce((prev, current) => {
+      return prev && prev.dataset.timestamp > current.dataset.timestamp ? prev : current;
+    });
+    const webcams = await listCamsUpdatedSince(new Date(Number(newestMarker.dataset.timestamp)));
+    let geoJson = getWebcamGeoJson(webcams);
+    if (!geoJson || !geoJson.features.length) {
+      // check for missed updates
+      let distinctTimestamps = [...new Set(webcamMarkers.map((m) => m.dataset.timestamp))];
+      if (distinctTimestamps.length < 2) return;
+
+      let min = Infinity;
+      let secondMin = Infinity;
+      for (const t of distinctTimestamps) {
+        if (t < min) {
+          secondMin = min;
+          min = t;
+        } else if (t < secondMin) {
+          secondMin = t;
+        }
+      }
+
+      if (secondMin - min > 1.1 * REFRESH_INTERVAL_SECONDS * 1000) {
+        const cams = [];
+        const oldestMarkers = webcamMarkers.filter((m) => {
+          return m.dataset.timestamp === min;
+        });
+        for (const m of oldestMarkers) {
+          const cam = await getCamById(m.id);
+          if (cam) cams.push(cam);
+        }
+        geoJson = getWebcamGeoJson(cams);
+        timestamp = secondMin; // update missed records with the oldest valid timestamp
+      }
+      if (!geoJson || !geoJson.features.length) return;
+    }
+
+    const updatedIds = [];
+    for (const item of webcamMarkers) {
+      const matches = geoJson.features.filter((f) => {
+        return f.properties.dbId === item.id;
+      });
+      if (!matches || !matches.length) continue;
+
+      const f = matches[0];
+      const currentTime = f.properties.currentTime.seconds;
+      const currentUrl = f.properties.currentUrl;
+
+      item.dataset.timestamp = timestamp;
+      for (const child of item.children) {
+        if (child.className === 'webcam-img') {
+          child.src = currentUrl;
+        } else if (child.className === 'webcam-text-date') {
+          const d = new Date(currentTime * 1000);
+          child.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        }
+      }
+
+      updatedIds.push(item.id);
+    }
+    // trigger refresh in Webcam component
+    setRefreshedWebcams(updatedIds);
   }
 
   // change unit
   useEffect(() => {
     unitRef.current = cookies.unit;
-    for (const item of markers) {
+    for (const item of stationMarkers) {
       const currentAvg = item.marker.dataset.avg === '' ? null : Number(item.marker.dataset.avg);
       const currentGust = item.marker.dataset.gust === '' ? null : Number(item.marker.dataset.gust);
 
@@ -564,14 +642,15 @@ export default function Map() {
     );
 
     map.current.on('load', async () => {
-      await initialiseMarkers();
+      await initialiseStations();
       await initialiseWebcams();
 
       // poll for new data
       const interval = setInterval(
         async () => {
           try {
-            await refreshMarkers();
+            await refreshStations();
+            await refreshWebcams();
           } catch {
             if (interval) {
               clearInterval(interval);
@@ -603,17 +682,27 @@ export default function Map() {
 
   // refresh on visibility change
   useEffect(() => {
-    document.addEventListener('visibilitychange', refreshMarkers);
+    document.addEventListener('visibilitychange', () => {
+      refreshStations;
+      refreshWebcams();
+    });
     return () => {
-      document.removeEventListener('visibilitychange', refreshMarkers);
+      document.removeEventListener('visibilitychange', () => {
+        refreshStations;
+        refreshWebcams();
+      });
     };
   }, []);
 
   function handleWebcamClick() {
-    setShowWebcams(!showWebcams);
     for (const marker of webcamMarkers) {
       marker.style.visibility = showWebcams ? 'hidden' : 'visible';
     }
+    webcamsHiddenRef.current = showWebcams;
+    if (!showWebcams) {
+      refreshWebcams();
+    }
+    setShowWebcams(!showWebcams);
   }
 
   return (
@@ -678,23 +767,14 @@ export default function Map() {
           }}
           onClick={handleWebcamClick}
         >
-          {showWebcams ? (
-            <img
-              src="/camera-black.png"
-              style={{
-                width: '26px',
-                height: '16px'
-              }}
-            />
-          ) : (
-            <img
-              src="/camera-grey.png"
-              style={{
-                width: '26px',
-                height: '16px'
-              }}
-            />
-          )}
+          <img
+            src="/camera.png"
+            style={{
+              width: '26px',
+              height: '16px',
+              opacity: showWebcams ? 1 : 0.5
+            }}
+          />
         </IconButton>
         <Box
           ref={mapContainer}

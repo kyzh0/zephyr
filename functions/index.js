@@ -1152,7 +1152,11 @@ async function webcamWrapper() {
           const url = await getDownloadURL(file);
 
           // update cam
-          await db.doc(`cams/${doc.id}`).update({ lastUpdate: data.updated, currentUrl: url });
+          await db.doc(`cams/${doc.id}`).update({
+            lastUpdate: new Date(),
+            currentTime: data.updated,
+            currentUrl: url
+          });
 
           // add image
           await db.collection(`cams/${doc.id}/images`).add({

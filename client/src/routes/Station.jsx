@@ -125,7 +125,7 @@ export default function Station() {
   const [data, setData] = useState([]);
   const [bearingPairCount, setBearingPairCount] = useState(0);
   const tableRef = useRef(null);
-  const { refreshedIds } = useContext(AppContext);
+  const { refreshedStations } = useContext(AppContext);
   const [initialLoad, setInitialLoad] = useState(true);
   const [cookies] = useCookies();
 
@@ -183,14 +183,14 @@ export default function Station() {
 
   // on refresh trigger (ignore initial load)
   useEffect(() => {
-    if (!id || initialLoad || !refreshedIds || !refreshedIds.includes(id)) return;
+    if (!id || initialLoad || !refreshedStations || !refreshedStations.includes(id)) return;
 
     try {
       fetchData();
     } catch (error) {
       console.error(error);
     }
-  }, [id, refreshedIds]);
+  }, [id, refreshedStations]);
 
   useEffect(() => {
     if (!tableRef.current) return;
