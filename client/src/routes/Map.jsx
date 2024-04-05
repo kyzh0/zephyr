@@ -343,8 +343,6 @@ export default function Map() {
       const currentTime = f.properties.currentTime;
       const currentUrl = f.properties.currentUrl;
 
-      if (timestamp - currentTime.seconds * 1000 > 24 * 60 * 60 * 1000) continue; // don't display cams that havent updated in last 24h
-
       const img = document.createElement('img');
       img.width = 200;
       img.src = currentUrl;
@@ -368,8 +366,14 @@ export default function Map() {
       el.addEventListener('click', () => {
         navigate(`/webcams/${dbId}`);
       });
-      el.appendChild(img);
       el.appendChild(text);
+      if (timestamp - currentTime.seconds * 1000 > 24 * 60 * 60 * 1000) {
+        // don't display cams that havent updated in last 24h
+        img.src = '';
+        text1.innerHTML = 'No images in the last 24h.';
+        text1.style.color = 'red';
+      }
+      el.appendChild(img);
       el.appendChild(text1);
 
       webcamMarkers.push(el);
@@ -555,10 +559,18 @@ export default function Map() {
       item.dataset.timestamp = timestamp;
       for (const child of item.children) {
         if (child.className === 'webcam-img') {
-          child.src = currentUrl;
+          // don't display cams that havent updated in last 24h
+          child.src =
+            timestamp - currentTime.seconds * 1000 > 24 * 60 * 60 * 1000 ? '' : currentUrl;
         } else if (child.className === 'webcam-text-date') {
-          const d = currentTime.toDate();
-          child.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+          if (timestamp - currentTime.seconds * 1000 > 24 * 60 * 60 * 1000) {
+            child.innerHTML = 'No images in the last 24h.';
+            child.style.color = 'red';
+          } else {
+            const d = currentTime.toDate();
+            child.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+            child.style.color = '';
+          }
         }
       }
 

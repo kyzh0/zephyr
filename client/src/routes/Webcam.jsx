@@ -15,6 +15,7 @@ import Skeleton from '@mui/material/Skeleton';
 import { alpha } from '@mui/material';
 
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import './Webcam.css';
 import { Carousel } from 'react-responsive-carousel';
 
 export default function Webcam() {
@@ -67,8 +68,6 @@ export default function Webcam() {
     navigate('/');
   }
 
-  const bigScreen = window.matchMedia('(min-width: 800px)').matches;
-  const medScreen = window.matchMedia('(min-width: 600px)').matches;
   return (
     <Modal open onClose={handleClose} disableAutoFocus={true}>
       <Container component="main" maxWidth="xl" sx={{ height: '100%' }}>
@@ -85,11 +84,9 @@ export default function Webcam() {
             <Stack direction="row" sx={{ width: '100%' }}>
               <Stack direction="column" alignItems="center" sx={{ width: '100%', ml: 3 }}>
                 {webcam ? (
-                  <>
-                    <Typography component="h1" variant="h5" align="center">
-                      {webcam.name}
-                    </Typography>
-                  </>
+                  <Typography component="h1" variant="h5" align="center">
+                    {webcam.name}
+                  </Typography>
                 ) : (
                   <Skeleton
                     width="180px"
@@ -102,24 +99,25 @@ export default function Webcam() {
                 <CloseIcon />
               </IconButton>
             </Stack>
-            {webcam && images.length ? (
+            {webcam ? (
               Date.now() - webcam.currentTime.seconds * 1000 >= 24 * 60 * 60 * 1000 ? (
                 <Typography component="h1" variant="h5" sx={{ mt: 2, color: 'red' }}>
                   No images in the last 24h.
                 </Typography>
-              ) : (
-                <Box sx={{ maxWidth: bigScreen ? '800px' : medScreen ? '600px' : '300px' }}>
+              ) : images.length ? (
+                <Box sx={{ width: '80vw', height: '50vw', maxWidth: '800px', maxHeight: '480px' }}>
                   <Carousel
                     showIndicators={false}
                     showThumbs={false}
                     transitionTime={0}
                     selectedItem={images.length - 1}
+                    style={{ maxHeight: 'inherit', maxWidth: 'inherit' }}
                   >
                     {images.map((img) => {
                       const d = img.time.toDate();
                       return (
                         <div key={img.id}>
-                          <img width="100%" height="auto" src={img.url} />
+                          <img width="100%" src={img.url} />
                           <p
                             style={{ margin: 0 }}
                           >{`${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`}</p>
@@ -128,11 +126,17 @@ export default function Webcam() {
                     })}
                   </Carousel>
                 </Box>
+              ) : (
+                <Skeleton
+                  width="100%"
+                  height="40vh"
+                  sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2, mt: 2 }}
+                />
               )
             ) : (
               <Skeleton
                 width="100%"
-                height={bigScreen ? '460px' : medScreen ? '360px' : '200px'}
+                height="40vh"
                 sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2, mt: 2 }}
               />
             )}

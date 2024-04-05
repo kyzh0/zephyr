@@ -1,0 +1,24 @@
+.carousel-root {
+  max-width: inherit;
+  max-height: inherit;
+}
+
+.carousel.carousel-slider {
+  max-width: inherit;
+  max-height: inherit;
+}
+
+.carousel .slider-wrapper {
+  max-width: inherit;
+  max-height: inherit;
+}
+
+.carousel .slider {
+  max-width: inherit;
+  max-height: inherit;
+}
+
+.carousel .slide {
+  max-width: inherit;
+  max-height: inherit;
+}
