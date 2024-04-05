@@ -952,6 +952,39 @@ async function stationWrapper(source) {
   }
 }
 
+async function getHolfuyData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { headers } = await axios.get(`https://holfuy.com/en/weather/${stationId}`);
+    const cookies = headers['set-cookie'];
+    if (cookies && cookies.length && cookies[0].length) {
+      const { data } = await axios.get(`https://holfuy.com/puget/mjso.php?k=${stationId}`, {
+        headers: {
+          Cookie: cookies[0],
+          Connection: 'keep-alive'
+        }
+      });
+      windAverage = data.speed;
+      windGust = data.gust;
+      windBearing = data.dir;
+      temperature = data.temperature;
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function holfuyWrapper() {
   try {
     const db = getFirestore();
@@ -961,7 +994,6 @@ async function holfuyWrapper() {
       snapshot.forEach((doc) => {
         tempArray.push(doc);
       });
-      functions.logger.log(tempArray);
 
       // floor data timestamp to 10 min
       let date = new Date();
@@ -973,23 +1005,25 @@ async function holfuyWrapper() {
       const { data } = await axios.get(
         `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
       );
-      functions.logger.log(data);
 
       for (const doc of tempArray) {
+        let d = null;
         const docData = doc.data();
 
         const matches = data.measurements.filter((m) => {
           return m.stationId.toString() === docData.externalId;
         });
-        functions.logger.log(matches);
-        if (matches.length != 1) continue;
-        const wind = matches[0].wind;
-        const d = {
-          windAverage: wind.speed,
-          windGust: wind.gust,
-          windBearing: wind.direction,
-          temperature: matches[0].temperature
-        };
+        if (matches.length == 1) {
+          const wind = matches[0].wind;
+          d = {
+            windAverage: wind?.speed ?? null,
+            windGust: wind?.gust ?? null,
+            windBearing: wind?.direction ?? null,
+            temperature: matches[0]?.temperature ?? null
+          };
+        } else {
+          d = await getHolfuyData(docData.externalId);
+        }
 
         functions.logger.log(`holfuy data updated - ${docData.externalId}`);
         functions.logger.log(d);
@@ -1063,7 +1097,7 @@ exports.updateHarvestStationData = functions
   });
 
 exports.updateHolfuyStationData = functions
-  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .runWith({ timeoutSeconds: 30, memory: '512MB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
   .onRun(() => {

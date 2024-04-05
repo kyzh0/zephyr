@@ -143,7 +143,7 @@ export async function listCamsUpdatedSince(time) {
 
 export async function loadCamImages(camId) {
   try {
-    const q = query(collection(db, `cams/${camId}/images`), orderBy('time', 'desc'), limit(145)); // data for last 24h
+    const q = query(collection(db, `cams/${camId}/images`), orderBy('time', 'desc'), limit(73)); // data for last 24h
     const snap = await getDocs(q);
     return snap.docs.map((doc) => {
       return { id: doc.id, ...doc.data() };
