@@ -950,8 +950,11 @@ async function stationWrapper(source) {
             id: doc.id,
             name: docData.name,
             type: docData.type,
-            coordinates: docData.coordinates,
-            timestamp: Math.round(date.getTime() / 1000),
+            coordinates: {
+              lat: docData.coordinates._latitude,
+              lon: docData.coordinates._longitude
+            },
+            timestamp: date.getTime() / 1000,
             wind: {
               average: avg ?? null,
               gust: gust ?? null,
@@ -1105,8 +1108,11 @@ async function holfuyWrapper() {
           id: doc.id,
           name: docData.name,
           type: docData.type,
-          coordinates: docData.coordinates,
-          timestamp: Math.floor(date.getTime() / 1000),
+          coordinates: {
+            lat: docData.coordinates._latitude,
+            lon: docData.coordinates._longitude
+          },
+          timestamp: date.getTime() / 1000,
           wind: {
             average: avg ?? null,
             gust: gust ?? null,
@@ -1193,7 +1199,7 @@ async function processJsonOutputWrapper() {
     rem = date.getSeconds() % 60;
     if (rem > 0) date = new Date(date.getTime() - rem * 1000);
     date = new Date(Math.floor(date.getTime() / 1000) * 1000);
-    const timestamp = date.getTime();
+    const timestamp = date.getTime() / 1000;
 
     const json = [];
 
@@ -1596,6 +1602,99 @@ exports.data = functions
     }
 
     res.json(geoJson);
+  });
+
+exports.output = functions
+  .runWith({ timeoutSeconds: 10, memory: '256MB' })
+  .region('australia-southeast1')
+  .https.onRequest(async (req, res) => {
+    if (req.method !== 'GET') {
+      res.status(405).send('');
+      return;
+    }
+
+    const output = [];
+
+    try {
+      const db = getFirestore();
+
+      const apiKey = req.query.key;
+      if (!apiKey) {
+        res.status(401).json({ error: 'API key is required.' });
+        return;
+      }
+      let snapshot = await db.collection('clients').where('apiKey', '==', apiKey).get();
+      if (snapshot.empty) {
+        res.status(401).json({ error: 'Invalid API key.' });
+        return;
+      }
+
+      const client = snapshot.docs[0];
+      const date = new Date();
+      const currentMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+      snapshot = await db
+        .collection(`clients/${client.id}/usage`)
+        .where('month', '==', currentMonth)
+        .get();
+      if (!snapshot.empty) {
+        const usage = snapshot.docs[0];
+        const calls = usage.data().apiCalls;
+        const limit = client.data().monthlyLimit;
+        if (calls >= limit) {
+          res.status(403).json({ error: `Monthly limit of ${limit} API calls exceeded.` });
+          return;
+        }
+
+        await db.doc(`clients/${client.id}/usage/${usage.id}`).update({
+          apiCalls: calls + 1
+        });
+      } else {
+        await db.collection(`clients/${client.id}/usage`).add({
+          month: currentMonth,
+          apiCalls: 1
+        });
+      }
+
+      let dateFrom = null;
+      let dateTo = null;
+      if (req.query.dateFrom) {
+        const temp = Number(req.query.dateFrom);
+        if (!isNaN(temp)) {
+          dateFrom = new Date(temp * 1000);
+        } else {
+          dateFrom = new Date(`${req.query.dateFrom.replace('+13:00', '')}+13:00`);
+        }
+      }
+      if (req.query.dateTo) {
+        const temp = Number(req.query.dateTo);
+        if (!isNaN(temp)) {
+          dateTo = new Date(temp * 1000);
+        } else {
+          dateTo = new Date(`${req.query.dateTo.replace('+13:00', '')}+13:00`);
+        }
+      }
+
+      let query = db.collection('output').orderBy('time');
+      if (dateFrom != null && !isNaN(dateFrom)) query = query.where('time', '>=', dateFrom);
+      if (dateTo != null && !isNaN(dateTo)) query = query.where('time', '<=', dateTo);
+      snapshot = await query.get();
+      if (!snapshot.empty) {
+        const tempArray = [];
+        snapshot.forEach((doc) => {
+          tempArray.push(doc);
+        });
+        for (const doc of tempArray) {
+          output.push({
+            time: doc.data().time._seconds,
+            url: doc.data().url
+          });
+        }
+      }
+    } catch (e) {
+      functions.logger.log(e);
+    }
+
+    res.json(output);
   });
 
 // exports.test = functions
