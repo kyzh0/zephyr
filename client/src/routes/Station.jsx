@@ -97,7 +97,7 @@ function getWindColor(wind) {
 }
 
 function getDirectionColor(bearing, validBearings) {
-  if (validBearings) {
+  if (bearing != null && validBearings) {
     const pairs = validBearings.split(',');
     for (const p of pairs) {
       const bearings = p.split('-');

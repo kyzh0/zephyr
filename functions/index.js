@@ -834,7 +834,9 @@ async function stationWrapper(source) {
       if (rem > 0) date = new Date(date.getTime() - rem * 60 * 1000);
       rem = date.getSeconds() % 60;
       if (rem > 0) date = new Date(date.getTime() - rem * 1000);
+      date = new Date(Math.floor(date.getTime() / 1000) * 1000);
 
+      const json = [];
       for (const doc of tempArray) {
         let data = null;
         const docData = doc.data();
@@ -942,7 +944,31 @@ async function stationWrapper(source) {
             windBearing: bearing ?? null,
             temperature: temperature ?? null
           });
+
+          // write to json
+          json.push({
+            id: doc.id,
+            name: docData.name,
+            type: docData.type,
+            coordinates: docData.coordinates,
+            timestamp: Math.round(date.getTime() / 1000),
+            wind: {
+              average: avg ?? null,
+              gust: gust ?? null,
+              bearing: bearing ?? null
+            },
+            temperature: temperature ?? null
+          });
         }
+      }
+
+      if (json.length) {
+        // save json to storage
+        const bucket = getStorage().bucket();
+        const file = bucket.file(
+          `data/processing/${source ? source : 'all'}-${json[0].timestamp}.json`
+        );
+        await file.save(Buffer.from(JSON.stringify(json)));
       }
     }
     functions.logger.log('Weather station data updated.');
@@ -1001,11 +1027,13 @@ async function holfuyWrapper() {
       if (rem > 0) date = new Date(date.getTime() - rem * 60 * 1000);
       rem = date.getSeconds() % 60;
       if (rem > 0) date = new Date(date.getTime() - rem * 1000);
+      date = new Date(Math.floor(date.getTime() / 1000) * 1000);
 
       const { data } = await axios.get(
         `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
       );
 
+      const json = [];
       for (const doc of tempArray) {
         let d = null;
         const docData = doc.data();
@@ -1071,6 +1099,28 @@ async function holfuyWrapper() {
           windBearing: bearing ?? null,
           temperature: temperature ?? null
         });
+
+        // write to json
+        json.push({
+          id: doc.id,
+          name: docData.name,
+          type: docData.type,
+          coordinates: docData.coordinates,
+          timestamp: Math.floor(date.getTime() / 1000),
+          wind: {
+            average: avg ?? null,
+            gust: gust ?? null,
+            bearing: bearing ?? null
+          },
+          temperature: temperature ?? null
+        });
+      }
+
+      if (json.length) {
+        // save json to storage
+        const bucket = getStorage().bucket();
+        const file = bucket.file(`data/processing/holfuy-${json[0].timestamp}.json`);
+        await file.save(Buffer.from(JSON.stringify(json)));
       }
     }
     functions.logger.log('Holfuy data updated.');
@@ -1110,6 +1160,92 @@ exports.updateMetserviceStationData = functions
   .pubsub.schedule('*/10 * * * *')
   .onRun(() => {
     return stationWrapper('metservice');
+  });
+
+function cmp(a, b) {
+  if (a > b) return +1;
+  if (a < b) return -1;
+  return 0;
+}
+async function processJsonFile(bucket, source, timestamp) {
+  try {
+    const path = `data/processing/${source}-${timestamp}.json`;
+    const file = await bucket.file(path).download();
+    const contents = file.toString();
+    if (contents) {
+      await bucket.file(path).delete();
+      const json = JSON.parse(contents);
+      return json.sort((a, b) => {
+        return cmp(a.type, b.type) || cmp(a.name, b.name);
+      });
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+  return null;
+}
+
+async function processJsonOutputWrapper() {
+  try {
+    let date = new Date();
+    let rem = date.getMinutes() % 10;
+    if (rem > 0) date = new Date(date.getTime() - rem * 60 * 1000);
+    rem = date.getSeconds() % 60;
+    if (rem > 0) date = new Date(date.getTime() - rem * 1000);
+    date = new Date(Math.floor(date.getTime() / 1000) * 1000);
+    const timestamp = date.getTime();
+
+    const json = [];
+
+    const bucket = getStorage().bucket();
+    let data = await processJsonFile(bucket, 'harvest', timestamp);
+    if (data) {
+      for (const item of data) {
+        json.push(item);
+      }
+    }
+    data = await processJsonFile(bucket, 'holfuy', timestamp);
+    if (data) {
+      for (const item of data) {
+        json.push(item);
+      }
+    }
+    data = await processJsonFile(bucket, 'metservice', timestamp);
+    if (data) {
+      for (const item of data) {
+        json.push(item);
+      }
+    }
+    data = await processJsonFile(bucket, 'all', timestamp);
+    if (data) {
+      for (const item of data) {
+        json.push(item);
+      }
+    }
+
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const file = bucket.file(`data/${year}/${month}/${day}/zephyr-scrape-${timestamp}.json`);
+    await file.save(Buffer.from(JSON.stringify(json)));
+    const url = await getDownloadURL(file);
+
+    const db = getFirestore();
+    await db.collection(`output`).add({
+      time: date,
+      url: url
+    });
+  } catch (error) {
+    functions.logger.error(error);
+  }
+}
+
+exports.processJsonOutput = functions
+  .runWith({ timeoutSeconds: 10, memory: '256MB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('5-59/10 * * * *') // every 10 min with +5min offset
+  .onRun(() => {
+    return processJsonOutputWrapper();
   });
 
 async function getHarvestImage(siteId, hsn, lastUpdate) {
