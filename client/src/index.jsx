@@ -12,6 +12,7 @@ import Help from './routes/Help';
 import AdminSignIn from './routes/AdminSignIn';
 import AdminDashboard from './routes/AdminDashboard';
 import AdminAddStation from './routes/AdminAddStation';
+import AdminAddWebcam from './routes/AdminAddWebcam';
 import AdminErrors from './routes/AdminErrors';
 import ProtectedRoute from './routes/ProtectedRoute';
 import Webcam from './routes/Webcam';
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
           {
             path: 'admin/add-station',
             element: <AdminAddStation />
+          },
+          {
+            path: 'admin/add-webcam',
+            element: <AdminAddWebcam />
           },
           {
             path: 'admin/errors',

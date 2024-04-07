@@ -1267,8 +1267,8 @@ async function getHarvestImage(siteId, hsn, lastUpdate) {
         }
       }
     );
-    if (data.date_local) {
-      updated = new Date(`${data.date_local}+13:00`);
+    if (data.date_utc) {
+      updated = new Date(data.date_utc);
       // skip if image already up to date
       if (updated > lastUpdate && data.main_image) {
         base64 = data.main_image.replace('\\/', '/').replace('data:image/jpeg;base64,', '');
@@ -1330,6 +1330,29 @@ async function getMetserviceImage(id, lastUpdate) {
   };
 }
 
+async function getQueenstownAirportImage(id) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const response = await axios.get(`https://www.queenstownairport.co.nz/WebCam/${id}.jpg`, {
+      responseType: 'arraybuffer',
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    base64 = Buffer.from(response.data, 'binary').toString('base64');
+    updated = new Date();
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
 async function webcamWrapper() {
   try {
     const db = getFirestore();
@@ -1359,6 +1382,13 @@ async function webcamWrapper() {
             functions.logger.log(`metservice image updated - ${docData.externalId}`);
           } else {
             functions.logger.log(`metservice image update skipped - ${docData.externalId}`);
+          }
+        } else if (docData.type === 'qa') {
+          data = await getQueenstownAirportImage(docData.externalId);
+          if (data.updated && data.base64) {
+            functions.logger.log(`qa image updated - ${docData.externalId}`);
+          } else {
+            functions.logger.log(`qa image update skipped - ${docData.externalId}`);
           }
         }
 
@@ -1662,7 +1692,7 @@ exports.output = functions
         if (!isNaN(temp)) {
           dateFrom = new Date(temp * 1000);
         } else {
-          dateFrom = new Date(`${req.query.dateFrom.replace('+13:00', '')}+13:00`);
+          dateFrom = new Date(req.query.dateFrom);
         }
       }
       if (req.query.dateTo) {
@@ -1670,7 +1700,7 @@ exports.output = functions
         if (!isNaN(temp)) {
           dateTo = new Date(temp * 1000);
         } else {
-          dateTo = new Date(`${req.query.dateTo.replace('+13:00', '')}+13:00`);
+          dateTo = new Date(req.query.dateTo);
         }
       }
 

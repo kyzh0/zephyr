@@ -63,6 +63,15 @@ export default function AdminDashboard() {
             <Button
               variant="contained"
               onClick={() => {
+                navigate('../admin/add-webcam');
+              }}
+              sx={{ width: '180px', mb: 1 }}
+            >
+              Add New Webcam
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
                 navigate('../admin/errors');
               }}
               sx={{ width: '180px' }}

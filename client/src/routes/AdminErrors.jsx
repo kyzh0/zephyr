@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, listStationsWithErrors } from '../firebase';
-import { signOut } from 'firebase/auth';
+import { listStationsWithErrors } from '../firebase';
 
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -9,7 +8,6 @@ import IconButton from '@mui/material/IconButton';
 import Modal from '@mui/material/Modal';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -35,15 +33,6 @@ export default function AdminErrors() {
     navigate('/');
   }
 
-  async function handleSignOut() {
-    try {
-      await signOut(auth);
-      navigate('/');
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   return (
     <Modal open onClose={handleClose} disableAutoFocus={true}>
       <Container component="main" maxWidth="xs" sx={{ height: '100%' }}>
@@ -53,15 +42,7 @@ export default function AdminErrors() {
             alignItems="center"
             sx={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px' }}
           >
-            <Stack direction="row" justifyContent="space-between" sx={{ width: '100%' }}>
-              <Link
-                variant="body2"
-                underline="hover"
-                sx={{ cursor: 'pointer' }}
-                onClick={handleSignOut}
-              >
-                sign out
-              </Link>
+            <Stack direction="row" justifyContent="end" sx={{ width: '100%' }}>
               <IconButton sx={{ p: 0 }} onClick={handleClose}>
                 <CloseIcon />
               </IconButton>

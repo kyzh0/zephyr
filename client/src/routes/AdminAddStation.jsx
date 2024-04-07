@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, db } from '../firebase';
-import { signOut } from 'firebase/auth';
+import { db } from '../firebase';
 import axios from 'axios';
 
 import Typography from '@mui/material/Typography';
@@ -11,7 +10,6 @@ import Modal from '@mui/material/Modal';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import MenuItem from '@mui/material/MenuItem';
 import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
@@ -21,14 +19,6 @@ export default function AdminAddStation() {
   const navigate = useNavigate();
   function handleClose() {
     navigate('/');
-  }
-  async function handleSignOut() {
-    try {
-      await signOut(auth);
-      navigate('/');
-    } catch (error) {
-      console.error(error);
-    }
   }
 
   const [type, setType] = useState('');
@@ -236,15 +226,7 @@ export default function AdminAddStation() {
             alignItems="center"
             sx={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px' }}
           >
-            <Stack direction="row" justifyContent="space-between" sx={{ width: '100%' }}>
-              <Link
-                variant="body2"
-                underline="hover"
-                sx={{ cursor: 'pointer' }}
-                onClick={handleSignOut}
-              >
-                sign out
-              </Link>
+            <Stack direction="row" justifyContent="end" sx={{ width: '100%' }}>
               <IconButton sx={{ p: 0 }} onClick={handleClose}>
                 <CloseIcon />
               </IconButton>
