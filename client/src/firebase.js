@@ -120,7 +120,8 @@ export async function getCamById(id) {
 
 export async function listCams() {
   try {
-    const snap = await getDocs(collection(db, 'cams'));
+    const q = query(collection(db, 'cams'), orderBy('currentTime'));
+    const snap = await getDocs(q);
     return snap.docs.map((doc) => {
       return { id: doc.id, ...doc.data() };
     });
@@ -131,7 +132,11 @@ export async function listCams() {
 
 export async function listCamsUpdatedSince(time) {
   try {
-    const q = query(collection(db, 'cams'), where('lastUpdate', '>=', time));
+    const q = query(
+      collection(db, 'cams'),
+      where('lastUpdate', '>=', time),
+      orderBy('currentTime')
+    );
     const snap = await getDocs(q);
     return snap.docs.map((doc) => {
       return { id: doc.id, ...doc.data() };
@@ -143,7 +148,13 @@ export async function listCamsUpdatedSince(time) {
 
 export async function loadCamImages(camId) {
   try {
-    const q = query(collection(db, `cams/${camId}/images`), orderBy('time', 'desc'), limit(73)); // data for last 24h
+    // data for last 24h only
+    const date = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const q = query(
+      collection(db, `cams/${camId}/images`),
+      where('time', '>=', date),
+      orderBy('time', 'desc')
+    );
     const snap = await getDocs(q);
     return snap.docs.map((doc) => {
       return { id: doc.id, ...doc.data() };

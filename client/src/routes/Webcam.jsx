@@ -22,6 +22,7 @@ export default function Webcam() {
   const { id } = useParams();
   const [webcam, setWebcam] = useState(null);
   const [images, setImages] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const { refreshedWebcams } = useContext(AppContext);
   const [initialLoad, setInitialLoad] = useState(true);
 
@@ -35,6 +36,7 @@ export default function Webcam() {
       const images = await loadCamImages(id);
       images.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds)); // time asc
       setImages(images);
+      setSelectedIndex(images.length - 1);
     } catch (error) {
       console.error(error);
     }
@@ -121,17 +123,28 @@ export default function Webcam() {
                     transitionTime={0}
                     selectedItem={images.length - 1}
                     style={{ maxHeight: 'inherit', maxWidth: 'inherit' }}
+                    onChange={(index) => setSelectedIndex(index)}
                   >
-                    {images.map((img) => {
-                      const d = img.time.toDate();
-                      return (
-                        <div key={img.id}>
-                          <img width="100%" src={img.url} />
-                          <p
-                            style={{ margin: 0 }}
-                          >{`${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`}</p>
-                        </div>
-                      );
+                    {images.map((img, index) => {
+                      if (
+                        index === selectedIndex ||
+                        index === selectedIndex - 1 ||
+                        index === selectedIndex + 1 ||
+                        img.loaded
+                      ) {
+                        const d = img.time.toDate();
+                        img.loaded = true;
+                        return (
+                          <div key={img.id}>
+                            <img width="100%" src={img.url} />
+                            <p
+                              style={{ margin: 0 }}
+                            >{`${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`}</p>
+                          </div>
+                        );
+                      } else {
+                        return <div key={img.id} />;
+                      }
                     })}
                   </Carousel>
                 </Box>

@@ -344,7 +344,7 @@ export default function Map() {
       const currentUrl = f.properties.currentUrl;
 
       const img = document.createElement('img');
-      img.width = 200;
+      img.width = 150;
       img.src = currentUrl;
       img.className = 'webcam-img';
 
@@ -355,7 +355,7 @@ export default function Map() {
       const d = currentTime.toDate();
       const text1 = document.createElement('span');
       text1.className = 'webcam-text-date';
-      text1.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+      text1.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 
       const el = document.createElement('div');
       el.style.backgroundColor = `white`;
@@ -568,7 +568,7 @@ export default function Map() {
             child.style.color = 'red';
           } else {
             const d = currentTime.toDate();
-            child.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+            child.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
             child.style.color = '';
           }
         }

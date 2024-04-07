@@ -628,9 +628,18 @@ async function getCentrePortData(stationId) {
       }
     );
     if (data.length && data[0]) {
-      windAverage = data[0].WindSpd_01MnAvg * 1.852; // data is in kt
-      windGust = data[0].WindGst_01MnMax * 1.852;
-      windBearing = data[0].WindDir_01MnAvg;
+      if (stationId === 'BaringHead') {
+        const wind = data[0].value.contents;
+        if (wind) {
+          windAverage = wind['Wind Speed (Knots)(RAW)'] * 1.852; // data is in kt
+          windGust = wind['Gust Speed (Knots)(RAW)'] * 1.852;
+          windBearing = wind['Wind Direction(RAW)'];
+        }
+      } else {
+        windAverage = data[0].WindSpd_01MnAvg * 1.852;
+        windGust = data[0].WindGst_01MnMax * 1.852;
+        windBearing = data[0].WindDir_01MnAvg;
+      }
     }
   } catch (error) {
     functions.logger.error(error);
@@ -1358,12 +1367,51 @@ async function getQueenstownAirportImage(id) {
   let base64 = null;
 
   try {
-    const response = await axios.get(`https://www.queenstownairport.co.nz/WebCam/${id}.jpg`, {
-      responseType: 'arraybuffer',
-      headers: {
-        Connection: 'keep-alive'
-      }
+    const dateTimeFormat = new Intl.DateTimeFormat('en-NZ', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+      timeZone: 'Pacific/Auckland'
     });
+    const parts = dateTimeFormat.formatToParts(new Date());
+
+    let year = '';
+    let month = '';
+    let day = '';
+    let hour = '';
+    let minute = '';
+    for (const p of parts) {
+      switch (p.type) {
+        case 'year':
+          year = p.value;
+          break;
+        case 'month':
+          month = p.value.padStart(2, '0');
+          break;
+        case 'day':
+          day = p.value.padStart(2, '0');
+          break;
+        case 'hour':
+          hour = p.value.padStart(2, '0');
+          break;
+        case 'minute':
+          minute = p.value.padStart(2, '0');
+          break;
+      }
+    }
+
+    const response = await axios.get(
+      `https://www.queenstownairport.co.nz/WebCam/${id}.jpg?dt=${year}-${month}-${day}-${hour}-${minute}`,
+      {
+        responseType: 'arraybuffer',
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
@@ -1381,12 +1429,51 @@ async function getWanakaAirportImage(id) {
   let base64 = null;
 
   try {
-    const response = await axios.get(`https://www.wanakaairport.com/WebCam/${id}.jpg`, {
-      responseType: 'arraybuffer',
-      headers: {
-        Connection: 'keep-alive'
-      }
+    const dateTimeFormat = new Intl.DateTimeFormat('en-NZ', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+      timeZone: 'Pacific/Auckland'
     });
+    const parts = dateTimeFormat.formatToParts(new Date());
+
+    let year = '';
+    let month = '';
+    let day = '';
+    let hour = '';
+    let minute = '';
+    for (const p of parts) {
+      switch (p.type) {
+        case 'year':
+          year = p.value;
+          break;
+        case 'month':
+          month = p.value.padStart(2, '0');
+          break;
+        case 'day':
+          day = p.value.padStart(2, '0');
+          break;
+        case 'hour':
+          hour = p.value.padStart(2, '0');
+          break;
+        case 'minute':
+          minute = p.value.padStart(2, '0');
+          break;
+      }
+    }
+
+    const response = await axios.get(
+      `https://www.wanakaairport.com/WebCam/${id}.jpg?dt=${year}-${month}-${day}-${hour}-${minute}`,
+      {
+        responseType: 'arraybuffer',
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
