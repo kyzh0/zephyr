@@ -94,7 +94,8 @@ export default function AdminAddWebcam() {
           Math.round(lat * 1000000) / 1000000, // round to 6dp
           Math.round(lon * 1000000) / 1000000
         ),
-        currentTime: new Date()
+        currentTime: new Date(),
+        lastUpdate: new Date()
       };
 
       await addDoc(collection(db, 'cams'), cam);
