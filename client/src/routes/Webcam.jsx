@@ -161,7 +161,9 @@ export default function Webcam() {
                   Source:{' '}
                   {webcam.type === 'qa'
                     ? 'Queenstown Airport'
-                    : webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1)}
+                    : webcam.type === 'wa'
+                      ? 'Wanaka Airport'
+                      : webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1)}
                 </Link>
               )}
             </Stack>

@@ -93,7 +93,8 @@ export default function AdminAddWebcam() {
         coordinates: new GeoPoint(
           Math.round(lat * 1000000) / 1000000, // round to 6dp
           Math.round(lon * 1000000) / 1000000
-        )
+        ),
+        currentTime: new Date()
       };
 
       await addDoc(collection(db, 'cams'), cam);

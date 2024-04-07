@@ -1353,6 +1353,29 @@ async function getQueenstownAirportImage(id) {
   };
 }
 
+async function getWanakaAirportImage(id) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const response = await axios.get(`https://www.wanakaairport.com/WebCam/${id}.jpg`, {
+      responseType: 'arraybuffer',
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    base64 = Buffer.from(response.data, 'binary').toString('base64');
+    updated = new Date();
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
 async function webcamWrapper() {
   try {
     const db = getFirestore();
@@ -1389,6 +1412,13 @@ async function webcamWrapper() {
             functions.logger.log(`qa image updated - ${docData.externalId}`);
           } else {
             functions.logger.log(`qa image update skipped - ${docData.externalId}`);
+          }
+        } else if (docData.type === 'wa') {
+          data = await getWanakaAirportImage(docData.externalId);
+          if (data.updated && data.base64) {
+            functions.logger.log(`wa image updated - ${docData.externalId}`);
+          } else {
+            functions.logger.log(`wa image update skipped - ${docData.externalId}`);
           }
         }
 
