@@ -701,9 +701,11 @@ export default function Station() {
                       ? 'Port Otago'
                       : station.type === 'wp'
                         ? 'Weather Pro'
-                        : station.type.length <= 4
-                          ? station.type.toUpperCase()
-                          : station.type.charAt(0).toUpperCase() + station.type.slice(1)}
+                        : station.type === 'cp'
+                          ? 'CentrePort'
+                          : station.type.length <= 4
+                            ? station.type.toUpperCase()
+                            : station.type.charAt(0).toUpperCase() + station.type.slice(1)}
                 </Link>
               )}
             </Stack>

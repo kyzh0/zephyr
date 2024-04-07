@@ -607,6 +607,43 @@ async function getTempestData(stationId) {
   };
 }
 
+async function getCentrePortData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  const temperature = null;
+
+  try {
+    const dateFrom = new Date(Date.now() - 720 * 60 * 1000); // current time - 12h
+    const dateTo = new Date(dateFrom.getTime() + 1081 * 60 * 1000); // date from + 18h 1min
+    const { data } = await axios.get(
+      'https://portweather-public.omcinternational.com/api/datasources/proxy/393//api/data/transformRecordsFromPackets' +
+        `?sourcePath=${encodeURIComponent(`NZ/Wellington/Wind/Measured/${stationId}`)}` +
+        '&transformer=LatestNoTransform' +
+        `&fromDate_Utc=${encodeURIComponent(dateFrom.toISOString())}` +
+        `&toDate_Utc=${encodeURIComponent(dateTo.toISOString())}` +
+        '&qaStatusesString=*',
+      {
+        headers: { 'x-grafana-org-id': 338, Connection: 'keep-alive' }
+      }
+    );
+    if (data.length && data[0]) {
+      windAverage = data[0].WindSpd_01MnAvg * 1.852; // data is in kt
+      windGust = data[0].WindGst_01MnMax * 1.852;
+      windBearing = data[0].WindDir_01MnAvg;
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getLpcData() {
   let windAverage = null;
   let windGust = null;
@@ -868,6 +905,8 @@ async function stationWrapper(source) {
             data = await getCwuData(docData.externalId);
           } else if (docData.type === 'wp') {
             data = await getWeatherProData(docData.externalId);
+          } else if (docData.type === 'cp') {
+            data = await getCentrePortData(docData.externalId);
           } else if (docData.type === 'po') {
             data = await getPortOtagoData(docData.externalId);
           } else if (docData.type === 'lpc') {
@@ -1747,14 +1786,14 @@ exports.output = functions
     res.json(output);
   });
 
-exports.test = functions
-  .runWith({ timeoutSeconds: 30, memory: '1GB' })
-  .region('australia-southeast1')
-  .https.onRequest(async (req, res) => {
-    try {
-      webcamWrapper();
-    } catch (e) {
-      functions.logger.log(e);
-    }
-    res.send('ok');
-  });
+// exports.test = functions
+//   .runWith({ timeoutSeconds: 30, memory: '1GB' })
+//   .region('australia-southeast1')
+//   .https.onRequest(async (req, res) => {
+//     try {
+
+//     } catch (e) {
+//       functions.logger.log(e);
+//     }
+//     res.send('ok');
+//   });
