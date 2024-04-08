@@ -1396,6 +1396,51 @@ async function getSrsImage(id, lastUpdate) {
   };
 }
 
+async function getCmImage(id, lastUpdate) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const { data } = await axios.get(
+      `https://www.mtcheeseman.co.nz/wp-content/webcam-player/?cam=${id}`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    if (data.length) {
+      const matches = data.match(/\/wp-content\/webcam\/aframe\/\d{4}-\d{2}-\d{2}\/\d{12}\.jpg/g);
+      if (matches && matches.length) {
+        const url = matches[matches.length - 1];
+        const match = url.match(/\d{12}/g);
+        updated = fnsTz.fromZonedTime(
+          fns.parse(match, 'yyyyMMddHHmm', new Date()),
+          'Pacific/Auckland'
+        );
+
+        // skip if image already up to date
+        if (updated > lastUpdate) {
+          const response = await axios.get(`https://www.mtcheeseman.co.nz${url}`, {
+            responseType: 'arraybuffer',
+            headers: {
+              Connection: 'keep-alive'
+            }
+          });
+          base64 = Buffer.from(response.data, 'binary').toString('base64');
+        }
+      }
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
 async function getQueenstownAirportImage(id) {
   let updated = null;
   let base64 = null;
@@ -1618,6 +1663,8 @@ async function webcamWrapper() {
           data = await getMetserviceImage(docData.externalId, lastUpdate);
         } else if (docData.type === 'srs') {
           data = await getSrsImage(docData.externalId, lastUpdate);
+        } else if (docData.type === 'cm') {
+          data = await getCmImage(docData.externalId);
         } else if (docData.type === 'qa') {
           data = await getQueenstownAirportImage(docData.externalId);
         } else if (docData.type === 'wa') {

@@ -180,9 +180,11 @@ export default function Webcam() {
                           ? 'Canterbury Gliding Club'
                           : webcam.type === 'ch'
                             ? 'Castle Hill'
-                            : webcam.type === 'lpc'
-                              ? 'Lyttelton Port Company'
-                              : webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1)}
+                            : webcam.type === 'cm'
+                              ? 'Mt Cheeseman'
+                              : webcam.type === 'lpc'
+                                ? 'Lyttelton Port Company'
+                                : webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1)}
                 </Link>
               )}
             </Stack>
