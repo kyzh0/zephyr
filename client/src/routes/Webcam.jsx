@@ -176,9 +176,13 @@ export default function Webcam() {
                       ? 'Wanaka Airport'
                       : webcam.type === 'srs'
                         ? 'Summit Road Society'
-                        : webcam.type === 'lpc'
-                          ? 'Lyttelton Port Company'
-                          : webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1)}
+                        : webcam.type === 'cgc'
+                          ? 'Canterbury Gliding Club'
+                          : webcam.type === 'ch'
+                            ? 'Castle Hill'
+                            : webcam.type === 'lpc'
+                              ? 'Lyttelton Port Company'
+                              : webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1)}
                 </Link>
               )}
             </Stack>

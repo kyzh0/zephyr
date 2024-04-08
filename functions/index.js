@@ -1520,6 +1520,58 @@ async function getWanakaAirportImage(id) {
   };
 }
 
+async function getCgcImage(id) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const response = await axios.get(
+      `https://canterburyglidingclub.nz/images/CGCHdCam${id}_1.jpg`,
+      {
+        responseType: 'arraybuffer',
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    base64 = Buffer.from(response.data, 'binary').toString('base64');
+    updated = new Date();
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
+async function getChImage(id) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const response = await axios.get(
+      `https://www.castlehill.nz/php/webcam_wll.php?cam=${id}/webcam.php.jpg`,
+      {
+        responseType: 'arraybuffer',
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    base64 = Buffer.from(response.data, 'binary').toString('base64');
+    updated = new Date();
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
 async function getLpcImage() {
   let updated = null;
   let base64 = null;
@@ -1570,6 +1622,10 @@ async function webcamWrapper() {
           data = await getQueenstownAirportImage(docData.externalId);
         } else if (docData.type === 'wa') {
           data = await getWanakaAirportImage(docData.externalId);
+        } else if (docData.type === 'cgc') {
+          data = await getCgcImage(docData.externalId);
+        } else if (docData.type === 'ch') {
+          data = await getChImage(docData.externalId);
         } else if (docData.type === 'lpc') {
           data = await getLpcImage();
         }
@@ -1584,7 +1640,13 @@ async function webcamWrapper() {
           };
 
           // for types that don't have embedded timestamps, check for duplicate image
-          if (docData.type === 'qa' || docData.type === 'wa' || docData.type === 'lpc') {
+          if (
+            docData.type === 'qa' ||
+            docData.type === 'wa' ||
+            docData.type === 'cgc' ||
+            docData.type === 'ch' ||
+            docData.type === 'lpc'
+          ) {
             img.hash = md5(imgBuff);
             img.fileSize = imgBuff.length;
             const query = db.collection(`cams/${doc.id}/images`).orderBy('time', 'desc').limit(1);
