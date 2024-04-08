@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
+import { format } from 'date-fns';
 import { getStationById, loadStationData as loadStationData } from '../firebase';
 import { AppContext } from '../context/AppContext';
 import { getWindDirectionFromBearing } from '../helpers/utils';
@@ -153,7 +154,7 @@ export default function Station() {
       const data = await loadStationData(id);
       data.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds)); // time asc
       for (const d of data) {
-        d.timeLabel = `${d.time.toDate().getHours().toString().padStart(2, '0')}:${d.time.toDate().getMinutes().toString().padStart(2, '0')}`;
+        d.timeLabel = format(d.time.toDate(), 'HH:mm');
         d.windAverageKt = d.windAverage == null ? null : Math.round(d.windAverage / 1.852);
         d.windGustKt = d.windGust == null ? null : Math.round(d.windGust / 1.852);
         if (validBearings.length) {
@@ -408,7 +409,7 @@ export default function Station() {
                                 backgroundColor: d.time.toDate().getMinutes() == 0 ? '#e6e6e6' : ''
                               }}
                             >
-                              {`${d.time.toDate().getHours().toString().padStart(2, '0')}:${d.time.toDate().getMinutes().toString().padStart(2, '0')}`}
+                              {d.timeLabel}
                             </TableCell>
                           ))}
                         </TableRow>

@@ -4,10 +4,23 @@ const { getStorage, getDownloadURL } = require('firebase-admin/storage');
 
 const functions = require('firebase-functions');
 const axios = require('axios');
+const fns = require('date-fns');
+const fnsTz = require('date-fns-tz');
 const sharp = require('sharp');
 const md5 = require('md5');
 
 initializeApp();
+
+function getFlooredTime() {
+  // floor data timestamp to 10 min
+  let date = new Date();
+  let rem = date.getMinutes() % 10;
+  if (rem > 0) date = new Date(date.getTime() - rem * 60 * 1000);
+  rem = date.getSeconds() % 60;
+  if (rem > 0) date = new Date(date.getTime() - rem * 1000);
+  date = new Date(Math.floor(date.getTime() / 1000) * 1000);
+  return date;
+}
 
 async function processHarvestResponse(sid, configId, graphId, traceId, longInterval, format) {
   let date = new Date();
@@ -875,13 +888,7 @@ async function stationWrapper(source) {
         tempArray.push(doc);
       });
 
-      // floor data timestamp to 10 min
-      let date = new Date();
-      let rem = date.getMinutes() % 10;
-      if (rem > 0) date = new Date(date.getTime() - rem * 60 * 1000);
-      rem = date.getSeconds() % 60;
-      if (rem > 0) date = new Date(date.getTime() - rem * 1000);
-      date = new Date(Math.floor(date.getTime() / 1000) * 1000);
+      const date = getFlooredTime();
 
       const json = [];
       for (const doc of tempArray) {
@@ -1056,13 +1063,7 @@ async function holfuyWrapper() {
         tempArray.push(doc);
       });
 
-      // floor data timestamp to 10 min
-      let date = new Date();
-      let rem = date.getMinutes() % 10;
-      if (rem > 0) date = new Date(date.getTime() - rem * 60 * 1000);
-      rem = date.getSeconds() % 60;
-      if (rem > 0) date = new Date(date.getTime() - rem * 1000);
-      date = new Date(Math.floor(date.getTime() / 1000) * 1000);
+      const date = getFlooredTime();
 
       const { data } = await axios.get(
         `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
@@ -1225,12 +1226,7 @@ async function processJsonFile(bucket, source, timestamp) {
 
 async function processJsonOutputWrapper() {
   try {
-    let date = new Date();
-    let rem = date.getMinutes() % 10;
-    if (rem > 0) date = new Date(date.getTime() - rem * 60 * 1000);
-    rem = date.getSeconds() % 60;
-    if (rem > 0) date = new Date(date.getTime() - rem * 1000);
-    date = new Date(Math.floor(date.getTime() / 1000) * 1000);
+    const date = getFlooredTime();
     const timestamp = date.getTime() / 1000;
 
     const json = [];
@@ -1261,10 +1257,9 @@ async function processJsonOutputWrapper() {
       }
     }
 
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const file = bucket.file(`data/${year}/${month}/${day}/zephyr-scrape-${timestamp}.json`);
+    const file = bucket.file(
+      `data/${fns.format(date, 'yyyy/MM/dd')}/zephyr-scrape-${timestamp}.json`
+    );
     await file.save(Buffer.from(JSON.stringify(json)));
     const url = await getDownloadURL(file);
 
@@ -1349,6 +1344,45 @@ async function getMetserviceImage(id, lastUpdate) {
               base64 = Buffer.from(response.data, 'binary').toString('base64');
             }
           }
+        }
+      }
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
+async function getSrsImage(id, lastUpdate) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const { data } = await axios.get(`https://hills.treshna.com/get_imagelist?camera=${id}`, {
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    if (data.images && data.images.length) {
+      const d = data.images[data.images.length - 1];
+      if (d.name) {
+        updated = fnsTz.fromZonedTime(
+          fns.parse(d.name, 'dd MMMM yyyy hh:mma', new Date()),
+          'Pacific/Auckland'
+        );
+        // skip if image already up to date
+        if (updated > lastUpdate && d.url) {
+          const response = await axios.get(`https://hills.treshna.com${d.url}`, {
+            responseType: 'arraybuffer',
+            headers: {
+              Connection: 'keep-alive'
+            }
+          });
+          base64 = Buffer.from(response.data, 'binary').toString('base64');
         }
       }
     }
@@ -1486,6 +1520,29 @@ async function getWanakaAirportImage(id) {
   };
 }
 
+async function getLpcImage() {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const response = await axios.get('https://www.lpc.co.nz/cams/pacifica.jpg', {
+      responseType: 'arraybuffer',
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    base64 = Buffer.from(response.data, 'binary').toString('base64');
+    updated = new Date();
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
 async function webcamWrapper() {
   try {
     const db = getFirestore();
@@ -1507,10 +1564,14 @@ async function webcamWrapper() {
           data = await getHarvestImage(ids[0], ids[1], lastUpdate);
         } else if (docData.type === 'metservice') {
           data = await getMetserviceImage(docData.externalId, lastUpdate);
+        } else if (docData.type === 'srs') {
+          data = await getSrsImage(docData.externalId, lastUpdate);
         } else if (docData.type === 'qa') {
           data = await getQueenstownAirportImage(docData.externalId);
         } else if (docData.type === 'wa') {
           data = await getWanakaAirportImage(docData.externalId);
+        } else if (docData.type === 'lpc') {
+          data = await getLpcImage();
         }
 
         if (data && data.updated && data.base64) {
@@ -1523,7 +1584,7 @@ async function webcamWrapper() {
           };
 
           // for types that don't have embedded timestamps, check for duplicate image
-          if (docData.type === 'qa' || docData.type === 'wa') {
+          if (docData.type === 'qa' || docData.type === 'wa' || docData.type === 'lpc') {
             img.hash = md5(imgBuff);
             img.fileSize = imgBuff.length;
             const query = db.collection(`cams/${doc.id}/images`).orderBy('time', 'desc').limit(1);
@@ -1532,7 +1593,7 @@ async function webcamWrapper() {
               const d = snap.docs[0].data();
               if (d.fileSize == img.fileSize && d.hash == img.hash) {
                 functions.logger.log(
-                  `${docData.type} image update skipped - ${docData.externalId}`
+                  `${docData.type} image update skipped${docData.externalId ? ` - ${docData.externalId}` : ''}`
                 );
                 continue;
               }
@@ -1557,9 +1618,13 @@ async function webcamWrapper() {
           // add image
           await db.collection(`cams/${doc.id}/images`).add(img);
 
-          functions.logger.log(`${docData.type} image updated - ${docData.externalId}`);
+          functions.logger.log(
+            `${docData.type} image updated${docData.externalId ? ` - ${docData.externalId}` : ''}`
+          );
         } else {
-          functions.logger.log(`${docData.type} image update skipped - ${docData.externalId}`);
+          functions.logger.log(
+            `${docData.type} image update skipped${docData.externalId ? ` - ${docData.externalId}` : ''}`
+          );
         }
       }
     }
@@ -1688,6 +1753,55 @@ exports.checkForErrors = functions
     return checkForErrors();
   });
 
+async function authenticateApiKey(db, apiKey) {
+  if (!apiKey) {
+    return {
+      success: false,
+      httpCode: 401,
+      error: 'API key is required.'
+    };
+  }
+  let snapshot = await db.collection('clients').where('apiKey', '==', apiKey).get();
+  if (snapshot.empty) {
+    return {
+      success: false,
+      httpCode: 401,
+      error: 'Invalid API key.'
+    };
+  }
+
+  const client = snapshot.docs[0];
+  const date = new Date();
+  const currentMonth = fns.format(date, 'yyyy-MM');
+  snapshot = await db
+    .collection(`clients/${client.id}/usage`)
+    .where('month', '==', currentMonth)
+    .get();
+  if (!snapshot.empty) {
+    const usage = snapshot.docs[0];
+    const calls = usage.data().apiCalls;
+    const limit = client.data().monthlyLimit;
+    if (calls >= limit) {
+      return {
+        success: false,
+        httpCode: 403,
+        error: `Monthly limit of ${limit} API calls exceeded.`
+      };
+    }
+
+    await db.doc(`clients/${client.id}/usage/${usage.id}`).update({
+      apiCalls: calls + 1
+    });
+  } else {
+    await db.collection(`clients/${client.id}/usage`).add({
+      month: currentMonth,
+      apiCalls: 1
+    });
+  }
+
+  return { success: true };
+}
+
 exports.data = functions
   .runWith({ timeoutSeconds: 10, memory: '256MB' })
   .region('australia-southeast1')
@@ -1704,45 +1818,13 @@ exports.data = functions
 
     try {
       const db = getFirestore();
-
-      const apiKey = req.query.key;
-      if (!apiKey) {
-        res.status(401).json({ error: 'API key is required.' });
-        return;
-      }
-      let snapshot = await db.collection('clients').where('apiKey', '==', apiKey).get();
-      if (snapshot.empty) {
-        res.status(401).json({ error: 'Invalid API key.' });
+      const auth = await authenticateApiKey(db, req.query.key);
+      if (!auth.success) {
+        res.status(auth.httpCode).json({ error: auth.error });
         return;
       }
 
-      const client = snapshot.docs[0];
-      const date = new Date();
-      const currentMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-      snapshot = await db
-        .collection(`clients/${client.id}/usage`)
-        .where('month', '==', currentMonth)
-        .get();
-      if (!snapshot.empty) {
-        const usage = snapshot.docs[0];
-        const calls = usage.data().apiCalls;
-        const limit = client.data().monthlyLimit;
-        if (calls >= limit) {
-          res.status(403).json({ error: `Monthly limit of ${limit} API calls exceeded.` });
-          return;
-        }
-
-        await db.doc(`clients/${client.id}/usage/${usage.id}`).update({
-          apiCalls: calls + 1
-        });
-      } else {
-        await db.collection(`clients/${client.id}/usage`).add({
-          month: currentMonth,
-          apiCalls: 1
-        });
-      }
-
-      snapshot = await db.collection('stations').orderBy('type').orderBy('name').get();
+      const snapshot = await db.collection('stations').orderBy('type').orderBy('name').get();
       if (!snapshot.empty) {
         const tempArray = [];
         snapshot.forEach((doc) => {
@@ -1753,6 +1835,7 @@ exports.data = functions
           const feature = {
             type: 'Feature',
             properties: {
+              id: doc.id,
               name: station.name,
               type: station.type,
               link: station.externalLink,
@@ -1781,7 +1864,7 @@ exports.data = functions
   });
 
 exports.output = functions
-  .runWith({ timeoutSeconds: 10, memory: '256MB' })
+  .runWith({ timeoutSeconds: 20, memory: '256MB' })
   .region('australia-southeast1')
   .https.onRequest(async (req, res) => {
     if (req.method !== 'GET') {
@@ -1793,42 +1876,10 @@ exports.output = functions
 
     try {
       const db = getFirestore();
-
-      const apiKey = req.query.key;
-      if (!apiKey) {
-        res.status(401).json({ error: 'API key is required.' });
+      const auth = await authenticateApiKey(db, req.query.key);
+      if (!auth.success) {
+        res.status(auth.httpCode).json({ error: auth.error });
         return;
-      }
-      let snapshot = await db.collection('clients').where('apiKey', '==', apiKey).get();
-      if (snapshot.empty) {
-        res.status(401).json({ error: 'Invalid API key.' });
-        return;
-      }
-
-      const client = snapshot.docs[0];
-      const date = new Date();
-      const currentMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-      snapshot = await db
-        .collection(`clients/${client.id}/usage`)
-        .where('month', '==', currentMonth)
-        .get();
-      if (!snapshot.empty) {
-        const usage = snapshot.docs[0];
-        const calls = usage.data().apiCalls;
-        const limit = client.data().monthlyLimit;
-        if (calls >= limit) {
-          res.status(403).json({ error: `Monthly limit of ${limit} API calls exceeded.` });
-          return;
-        }
-
-        await db.doc(`clients/${client.id}/usage/${usage.id}`).update({
-          apiCalls: calls + 1
-        });
-      } else {
-        await db.collection(`clients/${client.id}/usage`).add({
-          month: currentMonth,
-          apiCalls: 1
-        });
       }
 
       let dateFrom = null;
@@ -1853,7 +1904,7 @@ exports.output = functions
       let query = db.collection('output').orderBy('time');
       if (dateFrom != null && !isNaN(dateFrom)) query = query.where('time', '>=', dateFrom);
       if (dateTo != null && !isNaN(dateTo)) query = query.where('time', '<=', dateTo);
-      snapshot = await query.get();
+      const snapshot = await query.get();
       if (!snapshot.empty) {
         const tempArray = [];
         snapshot.forEach((doc) => {

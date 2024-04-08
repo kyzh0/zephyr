@@ -17,6 +17,7 @@ import { alpha } from '@mui/material';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import './Webcam.css';
 import { Carousel } from 'react-responsive-carousel';
+import { format } from 'date-fns';
 
 export default function Webcam() {
   const { id } = useParams();
@@ -132,14 +133,11 @@ export default function Webcam() {
                         index === selectedIndex + 1 ||
                         img.loaded
                       ) {
-                        const d = img.time.toDate();
                         img.loaded = true;
                         return (
                           <div key={img.id}>
                             <img width="100%" src={img.url} />
-                            <p
-                              style={{ margin: 0 }}
-                            >{`${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`}</p>
+                            <p style={{ margin: 0 }}>{format(img.time.toDate(), 'dd MMM HH:mm')}</p>
                           </div>
                         );
                       } else {
@@ -176,7 +174,11 @@ export default function Webcam() {
                     ? 'Queenstown Airport'
                     : webcam.type === 'wa'
                       ? 'Wanaka Airport'
-                      : webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1)}
+                      : webcam.type === 'srs'
+                        ? 'Summit Road Society'
+                        : webcam.type === 'lpc'
+                          ? 'Lyttelton Port Company'
+                          : webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1)}
                 </Link>
               )}
             </Stack>

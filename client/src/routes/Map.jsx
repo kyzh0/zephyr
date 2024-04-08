@@ -1,5 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
+import { format } from 'date-fns';
 import {
   getCamById,
   getStationById,
@@ -9,7 +11,6 @@ import {
   listStationsUpdatedSince
 } from '../firebase';
 import { AppContext } from '../context/AppContext';
-import { useCookies } from 'react-cookie';
 import { getWindDirectionFromBearing } from '../helpers/utils';
 
 import { createTheme, ThemeProvider } from '@mui/material';
@@ -352,10 +353,9 @@ export default function Map() {
       text.className = 'webcam-text-name';
       text.innerHTML = `${name}`;
 
-      const d = currentTime.toDate();
       const text1 = document.createElement('span');
       text1.className = 'webcam-text-date';
-      text1.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+      text1.innerHTML = format(currentTime.toDate(), 'dd MMM HH:mm');
 
       const el = document.createElement('div');
       el.style.backgroundColor = `white`;
@@ -567,8 +567,7 @@ export default function Map() {
             child.innerHTML = 'No images in the last 24h.';
             child.style.color = 'red';
           } else {
-            const d = currentTime.toDate();
-            child.innerHTML = `${d.getDate().toString().padStart(2, '0')} ${d.toLocaleString('default', { month: 'short' })} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+            child.innerHTML = format(currentTime.toDate(), 'dd MMM HH:mm');
             child.style.color = '';
           }
         }
