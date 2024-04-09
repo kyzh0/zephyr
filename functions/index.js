@@ -1357,33 +1357,31 @@ async function getMetserviceImage(id, lastUpdate) {
   };
 }
 
-async function getSrsImage(id, lastUpdate) {
+async function getLakeWanakaImage(id, lastUpdate) {
   let updated = null;
   let base64 = null;
 
   try {
-    const { data } = await axios.get(`https://hills.treshna.com/get_imagelist?camera=${id}`, {
+    const { data } = await axios.get(`https://api.lakewanaka.co.nz/webcam/feed/${id}`, {
       headers: {
         Connection: 'keep-alive'
       }
     });
-    if (data.images && data.images.length) {
-      const d = data.images[data.images.length - 1];
-      if (d.name) {
-        updated = fnsTz.fromZonedTime(
-          fns.parse(d.name, 'dd MMMM yyyy hh:mma', new Date()),
-          'Pacific/Auckland'
-        );
-        // skip if image already up to date
-        if (updated > lastUpdate && d.url) {
-          const response = await axios.get(`https://hills.treshna.com${d.url}`, {
-            responseType: 'arraybuffer',
-            headers: {
-              Connection: 'keep-alive'
-            }
-          });
-          base64 = Buffer.from(response.data, 'binary').toString('base64');
-        }
+    const d = data.latest_image;
+    if (d && d.timestamp) {
+      updated = fnsTz.fromZonedTime(
+        fns.parse(d.timestamp, 'yyyy-MM-dd HH:mm:ss', new Date()),
+        'Pacific/Auckland'
+      );
+      // skip if image already up to date
+      if (updated > lastUpdate && d.url) {
+        const response = await axios.get(d.url, {
+          responseType: 'arraybuffer',
+          headers: {
+            Connection: 'keep-alive'
+          }
+        });
+        base64 = Buffer.from(response.data, 'binary').toString('base64');
       }
     }
   } catch (error) {
@@ -1396,7 +1394,7 @@ async function getSrsImage(id, lastUpdate) {
   };
 }
 
-async function getCmImage(id, lastUpdate) {
+async function getCheesemanImage(id, lastUpdate) {
   let updated = null;
   let base64 = null;
 
@@ -1415,7 +1413,7 @@ async function getCmImage(id, lastUpdate) {
         const url = matches[matches.length - 1];
         const match = url.match(/\d{12}/g);
         updated = fnsTz.fromZonedTime(
-          fns.parse(match, 'yyyyMMddHHmm', new Date()),
+          fns.parse(match[0], 'yyyyMMddHHmm', new Date()),
           'Pacific/Auckland'
         );
 
@@ -1591,7 +1589,7 @@ async function getCgcImage(id) {
   };
 }
 
-async function getChImage(id) {
+async function getCastleHillImage(id) {
   let updated = null;
   let base64 = null;
 
@@ -1617,12 +1615,77 @@ async function getChImage(id) {
   };
 }
 
-async function getLpcImage() {
+async function getCwuImage(id) {
   let updated = null;
   let base64 = null;
 
   try {
-    const response = await axios.get('https://www.lpc.co.nz/cams/pacifica.jpg', {
+    const dateTimeFormat = new Intl.DateTimeFormat('en-NZ', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+      timeZone: 'Pacific/Auckland'
+    });
+    const parts = dateTimeFormat.formatToParts(new Date());
+
+    let year = '';
+    let month = '';
+    let day = '';
+    let hour = '';
+    let minute = '';
+    let temp = 0;
+    for (const p of parts) {
+      switch (p.type) {
+        case 'year':
+          year = p.value.slice(2);
+          break;
+        case 'month':
+          month = p.value.padStart(2, '0');
+          break;
+        case 'day':
+          day = p.value.padStart(2, '0');
+          break;
+        case 'hour':
+          hour = p.value.padStart(2, '0');
+          break;
+        case 'minute':
+          temp = Number(p.value);
+          temp = temp - (temp % 15);
+          minute = temp.toString().padStart(2, '0');
+          break;
+      }
+    }
+
+    const response = await axios.get(
+      `https://cwu.co.nz/temp/seeit-${id}-${day}-${month}-${year}-${hour}-${minute}.jpg`,
+      {
+        responseType: 'arraybuffer',
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    base64 = Buffer.from(response.data, 'binary').toString('base64');
+    updated = new Date();
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
+async function getTaylorsSurfImage() {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const response = await axios.get('https://stream.webmad.co.nz/shots/taylorssouth.jpg', {
       responseType: 'arraybuffer',
       headers: {
         Connection: 'keep-alive'
@@ -1661,10 +1724,10 @@ async function webcamWrapper() {
           data = await getHarvestImage(ids[0], ids[1], lastUpdate);
         } else if (docData.type === 'metservice') {
           data = await getMetserviceImage(docData.externalId, lastUpdate);
-        } else if (docData.type === 'srs') {
-          data = await getSrsImage(docData.externalId, lastUpdate);
+        } else if (docData.type === 'lw') {
+          data = await getLakeWanakaImage(docData.externalId, lastUpdate);
         } else if (docData.type === 'cm') {
-          data = await getCmImage(docData.externalId);
+          data = await getCheesemanImage(docData.externalId, lastUpdate);
         } else if (docData.type === 'qa') {
           data = await getQueenstownAirportImage(docData.externalId);
         } else if (docData.type === 'wa') {
@@ -1672,9 +1735,11 @@ async function webcamWrapper() {
         } else if (docData.type === 'cgc') {
           data = await getCgcImage(docData.externalId);
         } else if (docData.type === 'ch') {
-          data = await getChImage(docData.externalId);
-        } else if (docData.type === 'lpc') {
-          data = await getLpcImage();
+          data = await getCastleHillImage(docData.externalId);
+        } else if (docData.type === 'cwu') {
+          data = await getCwuImage(docData.externalId);
+        } else if (docData.type === 'ts') {
+          data = await getTaylorsSurfImage();
         }
 
         if (data && data.updated && data.base64) {
@@ -1692,7 +1757,8 @@ async function webcamWrapper() {
             docData.type === 'wa' ||
             docData.type === 'cgc' ||
             docData.type === 'ch' ||
-            docData.type === 'lpc'
+            docData.type === 'cwu' ||
+            docData.type === 'ts'
           ) {
             img.hash = md5(imgBuff);
             img.fileSize = imgBuff.length;
@@ -1711,7 +1777,9 @@ async function webcamWrapper() {
 
           const resizedBuff = await sharp(imgBuff).resize({ width: 600 }).toBuffer();
           const imgByteArray = new Uint8Array(resizedBuff);
-          const file = bucket.file(`cams/${docData.type}/${data.updated.toISOString()}.jpg`);
+          const file = bucket.file(
+            `cams/${docData.type}/${doc.id}/${data.updated.toISOString()}.jpg`
+          );
           await file.save(imgByteArray);
           const url = await getDownloadURL(file);
 

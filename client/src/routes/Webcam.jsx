@@ -170,21 +170,23 @@ export default function Webcam() {
                   variant="subtitle2"
                 >
                   Source:{' '}
-                  {webcam.type === 'qa'
-                    ? 'Queenstown Airport'
-                    : webcam.type === 'wa'
-                      ? 'Wanaka Airport'
-                      : webcam.type === 'srs'
-                        ? 'Summit Road Society'
+                  {webcam.type === 'lw'
+                    ? 'Lake Wanaka'
+                    : webcam.type === 'qa'
+                      ? 'Queenstown Airport'
+                      : webcam.type === 'wa'
+                        ? 'Wanaka Airport'
                         : webcam.type === 'cgc'
                           ? 'Canterbury Gliding Club'
                           : webcam.type === 'ch'
                             ? 'Castle Hill'
                             : webcam.type === 'cm'
                               ? 'Mt Cheeseman'
-                              : webcam.type === 'lpc'
-                                ? 'Lyttelton Port Company'
-                                : webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1)}
+                              : webcam.type === 'cwu'
+                                ? 'Canterbury Weather Updates'
+                                : webcam.type === 'ts'
+                                  ? 'Taylors Surf'
+                                  : webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1)}
                 </Link>
               )}
             </Stack>
