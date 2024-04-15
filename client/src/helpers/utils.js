@@ -37,3 +37,22 @@ export function getWindDirectionFromBearing(bearing) {
     return 'N';
   }
 }
+
+export function getStationTypeName(code) {
+  switch (code) {
+    case 'wu':
+      return 'Weather Underground';
+    case 'po':
+      return 'Port Otago';
+    case 'wp':
+      return 'Weather Pro';
+    case 'cp':
+      return 'CentrePort';
+    case 'cwu':
+      return 'Canterbury Weather Updates';
+    case 'mpyc':
+      return 'Mt Pleasant Yacht Club';
+    default:
+      return code.charAt(0).toUpperCase() + code.slice(1);
+  }
+}

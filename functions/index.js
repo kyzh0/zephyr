@@ -620,6 +620,40 @@ async function getTempestData(stationId) {
   };
 }
 
+async function getWindguruData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      `https://www.windguru.cz/int/iapi.php?q=station_data_current&id_station=${stationId}`,
+      {
+        headers: {
+          Connection: 'keep-alive',
+          Referer: `https://www.windguru.cz/station/${stationId}`
+        }
+      }
+    );
+    if (data) {
+      windAverage = data.wind_avg * 1.852;
+      windGust = data.wind_max * 1.852;
+      windBearing = data.wind_direction;
+      temperature = data.temperature;
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getCentrePortData(stationId) {
   let windAverage = null;
   let windGust = null;
@@ -917,6 +951,8 @@ async function stationWrapper(source) {
             data = await getWUndergroundData(docData.externalId);
           } else if (docData.type === 'tempest') {
             data = await getTempestData(docData.externalId);
+          } else if (docData.type === 'windguru') {
+            data = await getWindguruData(docData.externalId);
           } else if (docData.type === 'cwu') {
             data = await getCwuData(docData.externalId);
           } else if (docData.type === 'wp') {
@@ -934,12 +970,12 @@ async function stationWrapper(source) {
           }
         }
 
-        functions.logger.log(
-          `${docData.type} data updated${docData.externalId ? ` - ${docData.externalId}` : ''}`
-        );
-        functions.logger.log(data);
-
         if (data) {
+          functions.logger.log(
+            `${docData.type} data updated${docData.externalId ? ` - ${docData.externalId}` : ''}`
+          );
+          functions.logger.log(data);
+
           // handle likely erroneous values
           let avg = data.windAverage;
           if (avg < 0 || avg > 500) {

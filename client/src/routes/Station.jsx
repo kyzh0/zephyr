@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { format } from 'date-fns';
 import { getStationById, loadStationData as loadStationData } from '../firebase';
 import { AppContext } from '../context/AppContext';
-import { getWindDirectionFromBearing } from '../helpers/utils';
+import { getStationTypeName, getWindDirectionFromBearing } from '../helpers/utils';
 
 import {
   LineChart,
@@ -695,18 +695,7 @@ export default function Station() {
                   rel="noreferrer"
                   variant="subtitle2"
                 >
-                  Source:{' '}
-                  {station.type === 'wu'
-                    ? 'Weather Underground'
-                    : station.type === 'po'
-                      ? 'Port Otago'
-                      : station.type === 'wp'
-                        ? 'Weather Pro'
-                        : station.type === 'cp'
-                          ? 'CentrePort'
-                          : station.type.length <= 4
-                            ? station.type.toUpperCase()
-                            : station.type.charAt(0).toUpperCase() + station.type.slice(1)}
+                  Source: {getStationTypeName(station.type)}
                 </Link>
               )}
             </Stack>

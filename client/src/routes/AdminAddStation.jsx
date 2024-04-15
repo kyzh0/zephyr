@@ -300,6 +300,7 @@ export default function AdminAddStation() {
                 <MenuItem value="wu">Weather Underground</MenuItem>
                 <MenuItem value="tempest">Tempest</MenuItem>
                 <MenuItem value="attentis">Attentis</MenuItem>
+                <MenuItem value="windguru">Windguru</MenuItem>
                 <MenuItem value="wp">Weather Pro</MenuItem>
               </TextField>
               <TextField
