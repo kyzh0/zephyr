@@ -12,6 +12,8 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
 
+import GridViewIcon from '@mui/icons-material/GridView';
+
 export default function Welcome() {
   const navigate = useNavigate();
   const [cookies, setCookies] = useCookies(); // eslint-disable-line
@@ -85,6 +87,15 @@ export default function Welcome() {
                   </TableCell>
                   <TableCell align="center" sx={{ border: 'none', p: 0, pb: 1 }}>
                     Click this icon to view webcams
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell align="center" sx={{ border: 'none', p: 0, width: '20%', pb: 1 }}>
+                    <GridViewIcon sx={{ width: '32px', height: '20px' }} />
+                  </TableCell>
+                  <TableCell align="center" sx={{ border: 'none', p: 0, pb: 1 }}>
+                    Click this icon for a grid view of nearby stations. Location permissions must be
+                    enabled.
                   </TableCell>
                 </TableRow>
               </TableBody>

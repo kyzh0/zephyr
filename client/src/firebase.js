@@ -5,6 +5,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
   doc,
+  documentId,
   endAt,
   getDoc,
   getDocs,
@@ -69,7 +70,9 @@ export async function listStationsUpdatedSince(time, ids) {
     let q = query(collection(db, 'stations'), where('lastUpdate', '>=', time));
 
     if (ids && ids.length) {
-      q = query(q, where('id', 'in', ids));
+      q = query(q, where(documentId(), 'in', ids));
+      // need inequality on key to satisfy firebase query limitation, this id is for Stevenson's Bay which nobody should be flying close to
+      q = query(q, where(documentId(), '!=', 'u48ETt3qxSxlGhXuMxg7'));
     }
 
     const snap = await getDocs(q);

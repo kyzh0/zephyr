@@ -65,12 +65,12 @@ export default function GridView() {
       return prev && prev.timestamp > current.timestamp ? prev : current;
     });
     const d = await listStationsUpdatedSince(
-      newestItem.timestamp,
+      new Date(newestItem.timestamp),
       data.map((a) => a.id)
     );
 
     let updated = false;
-    const time = new Date();
+    const time = Date.now();
     const clone = JSON.parse(JSON.stringify(data)); // deep clone + set state to trigger re-render
 
     for (const item of d) {
@@ -134,7 +134,7 @@ export default function GridView() {
         d = await listStationsWithinRadius(positionRef.current.lat, positionRef.current.lon, 200);
 
       if (d.length) {
-        const time = new Date();
+        const time = Date.now();
         for (const item of d) {
           item.timestamp = time;
         }
