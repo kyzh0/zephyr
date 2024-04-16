@@ -186,11 +186,15 @@ export default function GridView() {
                         return (
                           <Grid key={d.id} item xs={data.length > 2 ? 4 : 12 / data.length}>
                             <Paper
+                              onClick={() => {
+                                navigate(`../stations/${d.id}`);
+                              }}
                               sx={{
                                 boxShadow: 'none',
                                 backgroundColor: color ? color : alpha('#a8a8a8', 0.1),
                                 p: 1,
-                                borderRadius: '8px'
+                                borderRadius: '8px',
+                                cursor: 'pointer'
                               }}
                             >
                               <Stack direction="column">
