@@ -25,6 +25,7 @@ export default function Welcome() {
     navigate('/');
   }
 
+  const bigScreen = window.matchMedia('(min-height: 360px)').matches;
   return (
     <Modal open disableAutoFocus={true}>
       <Container component="main" maxWidth="lg" sx={{ height: '100%' }}>
@@ -34,7 +35,7 @@ export default function Welcome() {
             alignItems="center"
             sx={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px' }}
           >
-            <Box sx={{ mt: 1, mb: 2 }}>
+            <Box sx={{ mt: bigScreen ? 1 : 0, mb: bigScreen ? 2 : 0 }}>
               <img src="/logo192.png" style={{ width: '100px', height: '100px' }} />
             </Box>
             <Typography component="h1" variant="h5">
@@ -43,8 +44,8 @@ export default function Welcome() {
 
             <Grid
               container
-              spacing={1}
-              sx={{ mt: 1, fontFamily: 'Arial', fontWeight: 400, fontSize: '14px' }}
+              spacing={bigScreen ? 1 : 0}
+              sx={{ mt: bigScreen ? 1 : 0, fontFamily: 'Arial', fontWeight: 400, fontSize: '14px' }}
             >
               <Grid item xs={2} sm={1} order={{ xs: 1, sm: 1 }}>
                 <Stack
@@ -152,7 +153,7 @@ export default function Welcome() {
                   direction="row"
                   justifyContent="center"
                   alignItems="center"
-                  sx={{ height: '100%', textAlign: 'center', mt: 1 }}
+                  sx={{ height: '100%', textAlign: 'center', mt: 1, pl: 2 }}
                 >
                   Click for a live grid view of nearby stations. Location permissions must be
                   enabled.
@@ -160,7 +161,7 @@ export default function Welcome() {
               </Grid>
             </Grid>
 
-            <Stack direction="row-reverse" sx={{ width: '100%', mt: 2 }}>
+            <Stack direction="row-reverse" sx={{ width: '100%', mt: bigScreen ? 2 : 0 }}>
               <Button variant="contained" onClick={handleClose}>
                 OK
               </Button>
