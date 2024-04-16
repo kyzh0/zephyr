@@ -783,7 +783,7 @@ export default function Map() {
             navigate('/grid');
           }}
         >
-          <GridViewIcon sx={{ width: '26px', height: '16px' }} />
+          <GridViewIcon sx={{ width: '26px', height: '16px', opacity: 0.7 }} />
         </IconButton>
         <IconButton
           color="primary"

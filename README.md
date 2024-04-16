@@ -30,6 +30,7 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 - Webcams - live images from various cameras.
 - Interactive map - easy to use with intuitive colours and icons.
 - Charts and tables - a tidy representation of each station's data over time.
+- Live grid view - easy to integrate with XCTrack for in-flight updates.
 - Mobile-first design - scalable across different screen sizes.
 - Help tab - provides a way for users to contact the developer.
 - Admin-only area - for adding new weather stations and viewing errors.
@@ -37,9 +38,18 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 
 <p align="center">
   <img src = "https://i.imgur.com/CGOYE31.png" width=700>
+  <br/>
+  Interactive map view
 </p>
 <p align="center">
   <img src = "https://i.imgur.com/QdaaxCb.png" width=700>
+  <br/>
+  Tables and graphs
+</p>
+<p align="center">
+  <img src = "https://i.imgur.com/hK6Dyg6.png" width=300>
+  <br/>
+  Live grid view
 </p>
 
 ## Technologies

@@ -42,6 +42,7 @@ export default function GridView() {
   const lastRefreshRef = useRef(0);
 
   const [error, setError] = useState(null);
+  const [outOfRange, setOutOfRange] = useState(false);
   const [data, setData] = useState([]);
 
   const [cookies] = useCookies();
@@ -127,6 +128,8 @@ export default function GridView() {
     if (error || !position) return;
 
     async function loadData() {
+      if (outOfRange) setOutOfRange(false);
+
       let d = await listStationsWithinRadius(position.lat, position.lon, 50);
       if (!d.length) d = await listStationsWithinRadius(position.lat, position.lon, 100);
       if (!d.length) d = await listStationsWithinRadius(position.lat, position.lon, 200);
@@ -137,6 +140,8 @@ export default function GridView() {
           item.timestamp = time;
         }
         setData(d);
+      } else {
+        setOutOfRange(true);
       }
     }
 
@@ -169,67 +174,83 @@ export default function GridView() {
                 <CloseIcon />
               </IconButton>
             </Stack>
-            {error != null && data.length ? (
-              !error && (
-                <Box sx={{ maxHeight: '90vh', overflowY: 'scroll', mt: 1 }}>
-                  <Grid container spacing={1}>
-                    {data.map((d) => {
-                      const color =
-                        d.currentAverage != null ? getWindColor(d.currentAverage + 10) : ''; // arbitrary offset so colors are more relevant for xc
-                      return (
-                        <Grid key={d.id} item xs={4}>
-                          <Paper
-                            sx={{
-                              boxShadow: 'none',
-                              backgroundColor: color ? color : alpha('#a8a8a8', 0.1),
-                              p: 1,
-                              borderRadius: '8px'
-                            }}
-                          >
-                            <Stack direction="column">
-                              <Typography noWrap align="center" sx={{ fontSize: '12px' }}>
-                                {d.name}
-                              </Typography>
-                              <Typography align="center" sx={{ fontSize: '18px' }}>
-                                {d.currentAverage == null
-                                  ? '-'
-                                  : Math.round(
-                                      cookies.unit === 'kt'
-                                        ? d.currentAverage / 1.852
-                                        : d.currentAverage
-                                    )}
-                                {' | '}
-                                {d.currentGust == null
-                                  ? '-'
-                                  : Math.round(
-                                      cookies.unit === 'kt' ? d.currentGust / 1.852 : d.currentGust
-                                    )}
-                              </Typography>
-                              <Typography align="center" sx={{ fontSize: '14px' }}>
-                                {getWindDirectionFromBearing(d.currentBearing)}
-                              </Typography>
-                              <Typography align="center" sx={{ fontSize: '12px' }}>
-                                {d.distance} km
-                              </Typography>
-                            </Stack>
-                          </Paper>
-                        </Grid>
-                      );
-                    })}
-                  </Grid>
-                </Box>
-              )
-            ) : (
-              <Skeleton height="20vh" width="100%" sx={{ transform: 'none', mt: 2 }}></Skeleton>
-            )}
+            {!outOfRange &&
+              (error != null ? (
+                !error &&
+                (data.length ? (
+                  <Box sx={{ maxHeight: '90vh', width: '100%', overflowY: 'scroll', mt: 1 }}>
+                    <Grid container spacing={1}>
+                      {data.map((d) => {
+                        const color =
+                          d.currentAverage != null ? getWindColor(d.currentAverage + 10) : ''; // arbitrary offset so colors are more relevant for xc
+                        return (
+                          <Grid key={d.id} item xs={data.length > 2 ? 4 : 12 / data.length}>
+                            <Paper
+                              sx={{
+                                boxShadow: 'none',
+                                backgroundColor: color ? color : alpha('#a8a8a8', 0.1),
+                                p: 1,
+                                borderRadius: '8px'
+                              }}
+                            >
+                              <Stack direction="column">
+                                <Typography noWrap align="center" sx={{ fontSize: '12px' }}>
+                                  {d.name}
+                                </Typography>
+                                <Typography align="center" sx={{ fontSize: '18px' }}>
+                                  {d.currentAverage == null
+                                    ? '-'
+                                    : Math.round(
+                                        cookies.unit === 'kt'
+                                          ? d.currentAverage / 1.852
+                                          : d.currentAverage
+                                      )}
+                                  {' | '}
+                                  {d.currentGust == null
+                                    ? '-'
+                                    : Math.round(
+                                        cookies.unit === 'kt'
+                                          ? d.currentGust / 1.852
+                                          : d.currentGust
+                                      )}
+                                </Typography>
+                                <Typography align="center" sx={{ fontSize: '14px' }}>
+                                  {getWindDirectionFromBearing(d.currentBearing)}
+                                </Typography>
+                                <Typography align="center" sx={{ fontSize: '12px' }}>
+                                  {d.distance} km
+                                </Typography>
+                              </Stack>
+                            </Paper>
+                          </Grid>
+                        );
+                      })}
+                    </Grid>
+                  </Box>
+                ) : (
+                  <Skeleton height="20vh" width="100%" sx={{ transform: 'none', mt: 2 }}></Skeleton>
+                ))
+              ) : (
+                <Skeleton height="20vh" width="100%" sx={{ transform: 'none', mt: 2 }}></Skeleton>
+              ))}
             {(error == null || error) && (
               <Typography
                 component="h1"
                 variant={error ? 'h5' : 'caption'}
                 align="center"
-                sx={{ mt: 2, color: 'red' }}
+                sx={{ mt: 2, mb: 2, color: 'red' }}
               >
                 Please grant location permissions, and &quot;remember&quot; the setting.
+              </Typography>
+            )}
+            {outOfRange && (
+              <Typography
+                component="h1"
+                variant={'h5'}
+                align="center"
+                sx={{ mt: 2, mb: 2, color: 'red' }}
+              >
+                No weather stations found within a 200km radius.
               </Typography>
             )}
           </Stack>
