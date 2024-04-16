@@ -7,6 +7,8 @@ import './index.css';
 
 import Map from './routes/Map';
 import Station from './routes/Station';
+import Webcam from './routes/Webcam';
+import GridView from './routes/GridView';
 import Welcome from './routes/Welcome';
 import Help from './routes/Help';
 import AdminSignIn from './routes/AdminSignIn';
@@ -15,7 +17,6 @@ import AdminAddStation from './routes/AdminAddStation';
 import AdminAddWebcam from './routes/AdminAddWebcam';
 import AdminErrors from './routes/AdminErrors';
 import ProtectedRoute from './routes/ProtectedRoute';
-import Webcam from './routes/Webcam';
 
 const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
       {
         path: 'webcams/:id',
         element: <Webcam />
+      },
+      {
+        path: 'grid',
+        element: <GridView />
       },
       {
         path: 'welcome',

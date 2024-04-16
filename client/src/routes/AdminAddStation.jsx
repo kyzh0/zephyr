@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
+import * as geofire from 'geofire-common';
 import axios from 'axios';
 
 import Typography from '@mui/material/Typography';
@@ -191,6 +192,7 @@ export default function AdminAddStation() {
           Math.round(lat * 1000000) / 1000000, // round to 6dp
           Math.round(lon * 1000000) / 1000000
         ),
+        geohash: geofire.geohashForLocation([lat, lon]),
         currentAverage: null,
         currentGust: null,
         currentBearing: null,

@@ -5,14 +5,17 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
   doc,
+  endAt,
   getDoc,
   getDocs,
   getFirestore,
   limit,
   orderBy,
   query,
+  startAt,
   where
 } from 'firebase/firestore';
+import * as geofire from 'geofire-common';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_KEY,
@@ -61,13 +64,49 @@ export async function listStations() {
   }
 }
 
-export async function listStationsUpdatedSince(time) {
+export async function listStationsUpdatedSince(time, ids) {
   try {
-    const q = query(collection(db, 'stations'), where('lastUpdate', '>=', time));
+    let q = query(collection(db, 'stations'), where('lastUpdate', '>=', time));
+
+    if (ids && ids.length) {
+      q = query(q, where('id', 'in', ids));
+    }
+
     const snap = await getDocs(q);
     return snap.docs.map((doc) => {
       return { id: doc.id, ...doc.data() };
     });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function listStationsWithinRadius(lat, lon, radiusKm) {
+  try {
+    const centre = [lat, lon];
+    const bounds = geofire.geohashQueryBounds(centre, radiusKm * 1000);
+    const promises = [];
+    for (const b of bounds) {
+      const q = query(collection(db, 'stations'), orderBy('geohash'), startAt(b[0]), endAt(b[1]));
+      promises.push(getDocs(q));
+    }
+
+    const snapshots = await Promise.all(promises);
+    const result = [];
+    for (const snap of snapshots) {
+      for (const doc of snap.docs) {
+        // filter false geohash positives
+        const distanceKm = geofire.distanceBetween(
+          [doc.data().coordinates._lat, doc.data().coordinates._long],
+          centre
+        );
+        if (distanceKm <= radiusKm) {
+          result.push({ id: doc.id, ...doc.data(), distance: Math.round(distanceKm * 10) / 10 });
+        }
+      }
+    }
+    result.sort((a, b) => a.distance - b.distance);
+    return result;
   } catch (error) {
     console.error(error);
   }

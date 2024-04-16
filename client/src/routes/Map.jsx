@@ -17,6 +17,7 @@ import { createTheme, ThemeProvider } from '@mui/material';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
+import GridViewIcon from '@mui/icons-material/GridView';
 
 import MapTerrainControl from './MapTerrainControl';
 import MapUnitControl from './MapUnitControl';
@@ -696,12 +697,12 @@ export default function Map() {
   // refresh on visibility change
   useEffect(() => {
     document.addEventListener('visibilitychange', () => {
-      refreshStations;
+      refreshStations();
       refreshWebcams();
     });
     return () => {
       document.removeEventListener('visibilitychange', () => {
-        refreshStations;
+        refreshStations();
         refreshWebcams();
       });
     };
@@ -770,6 +771,30 @@ export default function Map() {
             position: 'absolute',
             top: 0,
             left: 35,
+            m: '10px',
+            width: '29px',
+            height: '29px',
+            zIndex: 5,
+            '&:hover': {
+              backgroundColor: '#f2f2f2'
+            }
+          }}
+          onClick={() => {
+            navigate('/grid');
+          }}
+        >
+          <GridViewIcon sx={{ width: '26px', height: '16px' }}></GridViewIcon>
+        </IconButton>
+        <IconButton
+          color="primary"
+          sx={{
+            backgroundColor: 'white',
+            color: '#333333',
+            borderRadius: '4px',
+            boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
+            position: 'absolute',
+            top: 0,
+            left: 70,
             m: '10px',
             width: '29px',
             height: '29px',

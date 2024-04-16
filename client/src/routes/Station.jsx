@@ -1,10 +1,10 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { format } from 'date-fns';
 import { getStationById, loadStationData as loadStationData } from '../firebase';
 import { AppContext } from '../context/AppContext';
-import { getStationTypeName, getWindDirectionFromBearing } from '../helpers/utils';
+import { getStationTypeName, getWindDirectionFromBearing, getWindColor } from '../helpers/utils';
 
 import {
   LineChart,
@@ -36,66 +36,6 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Skeleton from '@mui/material/Skeleton';
 import { alpha } from '@mui/material';
-
-function getWindColor(wind) {
-  if (wind == null) {
-    return '';
-  } else if (wind <= 2) {
-    return '';
-  } else if (wind <= 4) {
-    return '#d1f9ff';
-  } else if (wind <= 6) {
-    return '#b5fffe';
-  } else if (wind <= 8) {
-    return '#a8ffec';
-  } else if (wind <= 10) {
-    return '#a8ffe2';
-  } else if (wind <= 12) {
-    return '#a8ffd1';
-  } else if (wind <= 14) {
-    return '#a8ffc2';
-  } else if (wind <= 16) {
-    return '#a8ffb1';
-  } else if (wind <= 18) {
-    return '#abffa8';
-  } else if (wind <= 20) {
-    return '#95ff91';
-  } else if (wind <= 22) {
-    return '#87ff82';
-  } else if (wind <= 24) {
-    return '#9dff82';
-  } else if (wind <= 26) {
-    return '#c3ff82';
-  } else if (wind <= 28) {
-    return '#e2ff82';
-  } else if (wind <= 30) {
-    return '#fff582';
-  } else if (wind <= 32) {
-    return '#ffda82';
-  } else if (wind <= 34) {
-    return '#ff9966';
-  } else if (wind <= 36) {
-    return '#ff8766';
-  } else if (wind <= 38) {
-    return '#ff7d66';
-  } else if (wind <= 40) {
-    return '#ff6666';
-  } else if (wind <= 42) {
-    return '#ff4d4d';
-  } else if (wind <= 50) {
-    return '#ff365e';
-  } else if (wind <= 60) {
-    return '#ff3683';
-  } else if (wind <= 70) {
-    return '#ff36a8';
-  } else if (wind <= 80) {
-    return '#ff36c6';
-  } else if (wind <= 90) {
-    return '#ff36e1';
-  } else {
-    return '#f536ff';
-  }
-}
 
 function getDirectionColor(bearing, validBearings) {
   if (bearing != null && validBearings) {
@@ -199,8 +139,13 @@ export default function Station() {
   }, [data]);
 
   const navigate = useNavigate();
+  const location = useLocation();
   function handleClose() {
-    navigate('/');
+    if (location.key === 'default') {
+      navigate('/');
+    } else {
+      navigate(-1);
+    }
   }
 
   const bigScreen = window.matchMedia('(min-height: 720px)').matches;

@@ -56,11 +56,11 @@ export default function AdminErrors() {
             <Box sx={{ maxHeight: '70vh', overflowY: 'scroll' }}>
               <List disablePadding>
                 {stations.length ? (
-                  stations.map((station, index) => {
+                  stations.map((station) => {
                     return (
                       <ListItem
                         disablePadding
-                        key={index}
+                        key={station.id}
                         onClick={() => navigate(`../stations/${station.id}`)}
                       >
                         <ListItemButton>
