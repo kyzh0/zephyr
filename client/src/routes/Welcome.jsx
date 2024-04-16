@@ -6,10 +6,7 @@ import Stack from '@mui/material/Stack';
 import Modal from '@mui/material/Modal';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableRow from '@mui/material/TableRow';
+import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 
 import GridViewIcon from '@mui/icons-material/GridView';
@@ -30,7 +27,7 @@ export default function Welcome() {
 
   return (
     <Modal open disableAutoFocus={true}>
-      <Container component="main" maxWidth="xs" sx={{ height: '100%' }}>
+      <Container component="main" maxWidth="lg" sx={{ height: '100%' }}>
         <Stack direction="column" justifyContent="center" sx={{ height: '100%' }}>
           <Stack
             direction="column"
@@ -44,62 +41,125 @@ export default function Welcome() {
               Welcome to Zephyr
             </Typography>
 
-            <Table sx={{ width: '100%', mt: 2 }}>
-              <TableBody>
-                <TableRow>
-                  <TableCell align="center" sx={{ border: 'none', p: 0, width: '20%', pb: 1 }}>
-                    <img
-                      src="/arrow-yellow.png"
-                      style={{ width: '25px', height: '36px', transform: 'rotate(315deg)' }}
-                    />
-                  </TableCell>
-                  <TableCell align="center" sx={{ border: 'none', p: 0, pb: 1 }}>
-                    Click a station for details
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell align="center" sx={{ border: 'none', p: 0, width: '20%', pb: 1 }}>
-                    <img
-                      src="/gold-arrow-green.png"
-                      style={{ width: '25px', height: '36px', transform: 'rotate(315deg)' }}
-                    />
-                  </TableCell>
-                  <TableCell align="center" sx={{ border: 'none', p: 0, pb: 1 }}>
-                    Popular sites are outlined
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell align="center" sx={{ border: 'none', p: 0, width: '20%', pb: 1 }}>
-                    <img
-                      src="/gold-valid-arrow-light-green.png"
-                      style={{ width: '25px', height: '36px', transform: 'rotate(315deg)' }}
-                    />
-                  </TableCell>
-                  <TableCell align="center" sx={{ border: 'none', p: 0, pb: 1 }}>
-                    A green tail indicates the wind
-                    <br />
-                    direction may be favourable
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell align="center" sx={{ border: 'none', p: '1 0 1 0', width: '20%' }}>
-                    <img src="/camera.png" style={{ width: '32px', height: '20px' }} />
-                  </TableCell>
-                  <TableCell align="center" sx={{ border: 'none', p: 0, pb: 1 }}>
-                    Click this icon to view webcams
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell align="center" sx={{ border: 'none', p: 0, width: '20%', pb: 1 }}>
-                    <GridViewIcon sx={{ width: '32px', height: '20px' }} />
-                  </TableCell>
-                  <TableCell align="center" sx={{ border: 'none', p: 0, pb: 1 }}>
-                    Click this icon for a grid view of nearby stations. Location permissions must be
-                    enabled.
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+            <Grid
+              container
+              spacing={1}
+              sx={{ mt: 1, fontFamily: 'Arial', fontWeight: 400, fontSize: '14px' }}
+            >
+              <Grid item xs={2} sm={1} order={{ xs: 1, sm: 1 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="end"
+                  alignItems="center"
+                  sx={{ height: '100%' }}
+                >
+                  <img
+                    src="/arrow-yellow.png"
+                    style={{ width: '25px', height: '36px', transform: 'rotate(315deg)' }}
+                  />
+                </Stack>
+              </Grid>
+              <Grid item xs={10} sm={5} order={{ xs: 2, sm: 2 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                  sx={{ height: '100%', textAlign: 'center' }}
+                >
+                  Click a station for details
+                </Stack>
+              </Grid>
+              <Grid item xs={2} sm={1} order={{ xs: 3, sm: 5 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="end"
+                  alignItems="center"
+                  sx={{ height: '100%' }}
+                >
+                  <img
+                    src="/gold-arrow-green.png"
+                    style={{ width: '25px', height: '36px', transform: 'rotate(315deg)' }}
+                  />
+                </Stack>
+              </Grid>
+              <Grid item xs={10} sm={5} order={{ xs: 4, sm: 6 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                  sx={{ height: '100%', textAlign: 'center' }}
+                >
+                  Popular sites are outlined
+                </Stack>
+              </Grid>
+              <Grid item xs={2} sm={1} order={{ xs: 5, sm: 9 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="end"
+                  alignItems="center"
+                  sx={{ height: '100%' }}
+                >
+                  <img
+                    src="/gold-valid-arrow-light-green.png"
+                    style={{ width: '25px', height: '36px', transform: 'rotate(315deg)' }}
+                  />
+                </Stack>
+              </Grid>
+              <Grid item xs={10} sm={5} order={{ xs: 6, sm: 10 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                  sx={{ height: '100%', textAlign: 'center' }}
+                >
+                  A green tail indicates the wind
+                  <br />
+                  direction may be favourable
+                </Stack>
+              </Grid>
+              <Grid item xs={2} sm={1} order={{ xs: 7, sm: 3 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="end"
+                  alignItems="center"
+                  sx={{ height: '100%', mt: 1 }}
+                >
+                  <img src="/camera.png" style={{ width: '32px', height: '20px' }} />
+                </Stack>
+              </Grid>
+              <Grid item xs={10} sm={5} order={{ xs: 8, sm: 4 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                  sx={{ height: '100%', textAlign: 'center', mt: 1 }}
+                >
+                  Click this icon to view webcams
+                </Stack>
+              </Grid>
+              <Grid item xs={2} sm={1} order={{ xs: 9, sm: 7 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="end"
+                  alignItems="center"
+                  sx={{ height: '100%', mt: 1 }}
+                >
+                  <GridViewIcon sx={{ width: '32px', height: '20px' }} />
+                </Stack>
+              </Grid>
+              <Grid item xs={10} sm={5} order={{ xs: 10, sm: 8 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                  sx={{ height: '100%', textAlign: 'center', mt: 1 }}
+                >
+                  Click for a live grid view of nearby stations. Location permissions must be
+                  enabled.
+                </Stack>
+              </Grid>
+            </Grid>
+
             <Stack direction="row-reverse" sx={{ width: '100%', mt: 2 }}>
               <Button variant="contained" onClick={handleClose}>
                 OK
