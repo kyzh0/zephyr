@@ -37,7 +37,7 @@ function useInterval(callback, delay) {
 
 export default function GridView() {
   const REFRESH_INTERVAL_SECONDS = 60;
-  const positionRef = useRef(null);
+  const [position, setPosition] = useState(null);
   const posUpdatedRef = useRef(false);
   const lastRefreshRef = useRef(0);
 
@@ -93,20 +93,20 @@ export default function GridView() {
     if (geoError) setError(false);
     const coords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
 
-    // skip coord update if moved <200m to reduce db reads
-    if (positionRef.current) {
+    // skip coord update if moved <1km to reduce db reads
+    if (position) {
       const distance = geofire.distanceBetween(
-        [positionRef.current.lat, positionRef.current.lon],
+        [position.lat, position.lon],
         [coords.lat, coords.lon]
       );
-      if (distance < 0.2) {
+      if (distance < 1) {
         posUpdatedRef.current = false;
         return;
       }
     }
 
     posUpdatedRef.current = true;
-    positionRef.current = coords;
+    setPosition(coords);
   }
   function geoError() {
     setError(true);
@@ -124,14 +124,12 @@ export default function GridView() {
   }, []);
 
   useEffect(() => {
-    if (error || !positionRef.current) return;
+    if (error || !position) return;
 
     async function loadData() {
-      let d = await listStationsWithinRadius(positionRef.current.lat, positionRef.current.lon, 50);
-      if (!d.length)
-        d = await listStationsWithinRadius(positionRef.current.lat, positionRef.current.lon, 100);
-      if (!d.length)
-        d = await listStationsWithinRadius(positionRef.current.lat, positionRef.current.lon, 200);
+      let d = await listStationsWithinRadius(position.lat, position.lon, 50);
+      if (!d.length) d = await listStationsWithinRadius(position.lat, position.lon, 100);
+      if (!d.length) d = await listStationsWithinRadius(position.lat, position.lon, 200);
 
       if (d.length) {
         const time = Date.now();
@@ -143,7 +141,7 @@ export default function GridView() {
     }
 
     loadData();
-  }, [positionRef.current, error]);
+  }, [position, error]);
 
   // refresh on visibility change
   useEffect(() => {
