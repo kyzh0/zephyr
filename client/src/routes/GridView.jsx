@@ -169,7 +169,15 @@ export default function GridView() {
             alignItems="center"
             sx={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px' }}
           >
-            <Stack direction="row" justifyContent="end" sx={{ width: '100%' }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ width: '100%' }}
+            >
+              <Typography sx={{ fontSize: '10px' }}>
+                {cookies.unit === 'kt' ? 'kt' : 'km/h'}
+              </Typography>
               <IconButton sx={{ p: 0 }} onClick={handleClose}>
                 <CloseIcon />
               </IconButton>

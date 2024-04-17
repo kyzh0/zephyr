@@ -16,7 +16,15 @@ function getFlooredTime() {
   return date;
 }
 
-async function processHarvestResponse(sid, configId, graphId, traceId, longInterval, format) {
+async function processHarvestResponse(
+  sid,
+  configId,
+  graphId,
+  traceId,
+  longInterval,
+  format,
+  cookie
+) {
   let date = new Date();
   let utcYear = date.getUTCFullYear();
   let utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
@@ -35,6 +43,13 @@ async function processHarvestResponse(sid, configId, graphId, traceId, longInter
   const dateFrom = `${utcYear}-${utcMonth}-${utcDay}T${utcHours}:${utcMins}:00.000`;
 
   try {
+    const cfg = {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Connection: 'keep-alive'
+      }
+    };
+    if (cookie) cfg.headers.Cookie = cookie;
     const { data } = await axios.post(
       `https://data1.harvest.com//php/site_graph_functions.php?retrieve_trace=&req_ref=${sid}_${configId}_${graphId}}`,
       {
@@ -45,12 +60,7 @@ async function processHarvestResponse(sid, configId, graphId, traceId, longInter
         start_date_stats: dateFrom,
         end_date: dateTo
       },
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Connection: 'keep-alive'
-        }
-      }
+      cfg
     );
 
     if (format === 'array') {
@@ -90,6 +100,14 @@ async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempI
   let windBearing = null;
   let temperature = null;
 
+  let cookie = '';
+  // need auth for realjourneys station
+  if (sid === '10243') {
+    // todo : update phpsessid dynamically, otherwise
+    // I have to update this key every 12 months...
+    cookie = process.env.HARVEST_REALJOURNEYS_KEY;
+  }
+
   // wind avg
   ids = windAvgId.split('_');
   if (ids.length == 2) {
@@ -99,7 +117,8 @@ async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempI
       ids[0],
       ids[1],
       longInterval,
-      sid === '1057' ? 'array' : 'object' // station 1057 has avg/gust switched
+      sid === '1057' ? 'array' : 'object', // station 1057 has avg/gust switched
+      cookie
     );
     if (result) {
       windAverage = result;
@@ -115,7 +134,8 @@ async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempI
       ids[0],
       ids[1],
       longInterval,
-      sid === '1057' ? 'object' : 'array'
+      sid === '1057' ? 'object' : 'array',
+      cookie
     );
     if (result) {
       windGust = result;
@@ -131,7 +151,8 @@ async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempI
       ids[0],
       ids[1],
       longInterval,
-      'array'
+      'array',
+      cookie
     );
     if (result) {
       windBearing = result;
@@ -147,7 +168,8 @@ async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempI
       ids[0],
       ids[1],
       longInterval,
-      'array'
+      'array',
+      cookie
     );
     if (result) {
       temperature = result;
