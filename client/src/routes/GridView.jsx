@@ -8,14 +8,16 @@ import { getWindColor, getWindDirectionFromBearing } from '../helpers/utils';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
+import Slider from '@mui/material/Slider';
 import Modal from '@mui/material/Modal';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
-import { alpha } from '@mui/material';
+
+import { alpha, styled } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 function useInterval(callback, delay) {
   const savedCallback = useRef();
@@ -35,6 +37,18 @@ function useInterval(callback, delay) {
   }, [delay]);
 }
 
+const StyledSlider = styled(Slider)(() => ({
+  padding: '0 !important',
+  '& .MuiSlider-thumb': {
+    height: 15,
+    width: 15,
+    boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.01)',
+    '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
+      boxShadow: '0px 0px 3px 3px rgba(0, 0, 0, 0.2)'
+    }
+  }
+}));
+
 export default function GridView() {
   const REFRESH_INTERVAL_SECONDS = 60;
   const [position, setPosition] = useState(null);
@@ -44,12 +58,35 @@ export default function GridView() {
   const [error, setError] = useState(null);
   const [outOfRange, setOutOfRange] = useState(false);
   const [data, setData] = useState([]);
+  const [radius, setRadius] = useState(null);
+  const [threshold, setThreshold] = useState(null);
 
-  const [cookies] = useCookies();
+  const [cookies, setCookies] = useCookies();
   const navigate = useNavigate();
   function handleClose() {
     navigate('/');
   }
+
+  const cookiesOptions = {
+    path: '/',
+    maxAge: 31536000, // 365 days
+    secure: true,
+    sameSite: 'strict'
+  };
+
+  // read cookies
+  useEffect(() => {
+    if (cookies.gridRadius == null) {
+      setCookies('gridRadius', 50, cookiesOptions);
+    } else if (radius == null) {
+      setRadius(cookies.gridRadius);
+    }
+    if (cookies.gridThreshold == null) {
+      setCookies('gridThreshold', 0, cookiesOptions);
+    } else if (threshold == null) {
+      setThreshold(cookies.gridThreshold);
+    }
+  }, [cookies]);
 
   async function refresh() {
     if (document.visibilityState !== 'visible') return;
@@ -65,10 +102,11 @@ export default function GridView() {
     const newestItem = data.reduce((prev, current) => {
       return prev && prev.timestamp > current.timestamp ? prev : current;
     });
-    const d = await listStationsUpdatedSince(
-      new Date(newestItem.timestamp),
-      data.map((a) => a.id)
-    );
+    const d = await listStationsUpdatedSince(new Date(newestItem.timestamp), {
+      lat: position.lat,
+      lon: position.lon,
+      radius: radius
+    });
 
     let updated = false;
     const time = Date.now();
@@ -124,29 +162,35 @@ export default function GridView() {
     navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
   }, []);
 
+  async function loadData() {
+    if (outOfRange) setOutOfRange(false);
+
+    const d = await listStationsWithinRadius(position.lat, position.lon, radius);
+    if (d.length) {
+      const time = Date.now();
+      for (const item of d) {
+        item.timestamp = time;
+      }
+      setData(d);
+    } else {
+      setOutOfRange(true);
+    }
+  }
+
   useEffect(() => {
     if (error || !position) return;
-
-    async function loadData() {
-      if (outOfRange) setOutOfRange(false);
-
-      let d = await listStationsWithinRadius(position.lat, position.lon, 50);
-      if (!d.length) d = await listStationsWithinRadius(position.lat, position.lon, 100);
-      if (!d.length) d = await listStationsWithinRadius(position.lat, position.lon, 200);
-
-      if (d.length) {
-        const time = Date.now();
-        for (const item of d) {
-          item.timestamp = time;
-        }
-        setData(d);
-      } else {
-        setOutOfRange(true);
-      }
-    }
-
     loadData();
   }, [position, error]);
+
+  useEffect(() => {
+    setCookies('gridRadius', radius, cookiesOptions);
+    if (error || !position) return;
+    loadData();
+  }, [radius]);
+
+  useEffect(() => {
+    setCookies('gridThreshold', threshold, cookiesOptions);
+  }, [threshold]);
 
   // refresh on visibility change
   useEffect(() => {
@@ -169,74 +213,102 @@ export default function GridView() {
             alignItems="center"
             sx={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px' }}
           >
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              sx={{ width: '100%' }}
-            >
-              <Typography sx={{ fontSize: '10px' }}>
-                {cookies.unit === 'kt' ? 'kt' : 'km/h'}
-              </Typography>
-              <IconButton sx={{ p: 0 }} onClick={handleClose}>
-                <CloseIcon />
-              </IconButton>
+            <Stack direction="row" justifyContent="space-between" sx={{ width: '100%' }}>
+              <Stack direction="row">
+                <Stack direction="column" alignItems="center" sx={{ width: '80px', mr: 1 }}>
+                  <StyledSlider
+                    value={radius}
+                    onChange={(event, value) => setRadius(value)}
+                    step={50}
+                    shiftStep={50}
+                    min={50}
+                    max={150}
+                    sx={{ width: '50px', mb: 1 }}
+                  />
+                  <Typography sx={{ fontSize: '10px' }}>Radius: {radius} km</Typography>
+                </Stack>
+                <Stack direction="column" alignItems="center" sx={{ width: '100px' }}>
+                  <StyledSlider
+                    value={threshold}
+                    onChange={(event, value) => setThreshold(value)}
+                    min={0}
+                    max={50}
+                    sx={{ width: '50px', mb: 1 }}
+                  />
+                  <Typography sx={{ fontSize: '10px' }}>
+                    Threshold:{' '}
+                    {cookies.unit === 'kt'
+                      ? `${Math.round(threshold / 1.852)} kt`
+                      : `${threshold} km/h`}
+                  </Typography>
+                </Stack>
+              </Stack>
+              <Stack direction="row" alignItems="center">
+                <Typography sx={{ fontSize: '12px', mr: 1 }}>
+                  Unit: {cookies.unit === 'kt' ? 'kt' : 'km/h'}
+                </Typography>
+                <IconButton sx={{ p: 0 }} onClick={handleClose}>
+                  <CloseIcon />
+                </IconButton>
+              </Stack>
             </Stack>
             {!outOfRange &&
               (error != null ? (
                 !error &&
                 (data.length ? (
-                  <Box sx={{ maxHeight: '90vh', width: '100%', overflowY: 'scroll', mt: 1 }}>
+                  <Box sx={{ maxHeight: '85vh', width: '100%', overflowY: 'scroll', mt: 1 }}>
                     <Grid container spacing={1}>
-                      {data.map((d) => {
-                        const color =
-                          d.currentAverage != null ? getWindColor(d.currentAverage + 10) : ''; // arbitrary offset so colors are more relevant for xc
-                        return (
-                          <Grid key={d.id} item xs={data.length > 2 ? 4 : 12 / data.length}>
-                            <Paper
-                              onClick={() => {
-                                navigate(`../stations/${d.id}`);
-                              }}
-                              sx={{
-                                boxShadow: 'none',
-                                backgroundColor: color ? color : alpha('#a8a8a8', 0.1),
-                                p: 1,
-                                borderRadius: '8px',
-                                cursor: 'pointer'
-                              }}
-                            >
-                              <Stack direction="column">
-                                <Typography noWrap align="center" sx={{ fontSize: '12px' }}>
-                                  {d.name}
-                                </Typography>
-                                <Typography align="center" sx={{ fontSize: '18px' }}>
-                                  {d.currentAverage == null
-                                    ? '-'
-                                    : Math.round(
-                                        cookies.unit === 'kt'
-                                          ? d.currentAverage / 1.852
-                                          : d.currentAverage
-                                      )}
-                                  {' | '}
-                                  {d.currentGust == null
-                                    ? '-'
-                                    : Math.round(
-                                        cookies.unit === 'kt'
-                                          ? d.currentGust / 1.852
-                                          : d.currentGust
-                                      )}
-                                </Typography>
-                                <Typography align="center" sx={{ fontSize: '14px' }}>
-                                  {getWindDirectionFromBearing(d.currentBearing)}
-                                </Typography>
-                                <Typography align="center" sx={{ fontSize: '12px' }}>
-                                  {d.distance} km
-                                </Typography>
-                              </Stack>
-                            </Paper>
-                          </Grid>
-                        );
-                      })}
+                      {data
+                        .filter((a) => a.currentAverage >= threshold)
+                        .map((d) => {
+                          const color =
+                            d.currentAverage != null ? getWindColor(d.currentAverage + 10) : ''; // arbitrary offset so colors are more relevant for xc
+                          return (
+                            <Grid key={d.id} item xs={data.length > 2 ? 4 : 12 / data.length}>
+                              <Paper
+                                onClick={() => {
+                                  navigate(`../stations/${d.id}`);
+                                }}
+                                sx={{
+                                  boxShadow: 'none',
+                                  backgroundColor: color ? color : alpha('#a8a8a8', 0.1),
+                                  p: 1,
+                                  borderRadius: '8px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <Stack direction="column">
+                                  <Typography noWrap align="center" sx={{ fontSize: '12px' }}>
+                                    {d.name}
+                                  </Typography>
+                                  <Typography align="center" sx={{ fontSize: '18px' }}>
+                                    {d.currentAverage == null
+                                      ? '-'
+                                      : Math.round(
+                                          cookies.unit === 'kt'
+                                            ? d.currentAverage / 1.852
+                                            : d.currentAverage
+                                        )}
+                                    {' | '}
+                                    {d.currentGust == null
+                                      ? '-'
+                                      : Math.round(
+                                          cookies.unit === 'kt'
+                                            ? d.currentGust / 1.852
+                                            : d.currentGust
+                                        )}
+                                  </Typography>
+                                  <Typography align="center" sx={{ fontSize: '14px' }}>
+                                    {getWindDirectionFromBearing(d.currentBearing)}
+                                  </Typography>
+                                  <Typography align="center" sx={{ fontSize: '12px' }}>
+                                    {d.distance} km
+                                  </Typography>
+                                </Stack>
+                              </Paper>
+                            </Grid>
+                          );
+                        })}
                     </Grid>
                   </Box>
                 ) : (
@@ -262,7 +334,7 @@ export default function GridView() {
                 align="center"
                 sx={{ mt: 2, mb: 2, color: 'red' }}
               >
-                No weather stations found within a 200km radius.
+                No weather stations found within a {radius}km radius.
               </Typography>
             )}
           </Stack>

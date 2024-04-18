@@ -5,7 +5,6 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
   doc,
-  documentId,
   endAt,
   getDoc,
   getDocs,
@@ -65,20 +64,34 @@ export async function listStations() {
   }
 }
 
-export async function listStationsUpdatedSince(time, ids) {
+export async function listStationsUpdatedSince(time, bounds) {
   try {
-    let q = query(collection(db, 'stations'), where('lastUpdate', '>=', time));
+    const q = query(collection(db, 'stations'), where('lastUpdate', '>=', time));
 
-    if (ids && ids.length) {
-      q = query(q, where(documentId(), 'in', ids));
-      // need inequality on key to satisfy firebase query limitation, this id is for Stevenson's Bay which nobody should be flying close to
-      q = query(q, where(documentId(), '!=', 'u48ETt3qxSxlGhXuMxg7'));
+    const promises = [];
+    if (bounds) {
+      // rough geohash bounds to reduce db reads
+      const centre = [bounds.lat, bounds.lon];
+      const geoBounds = geofire.geohashQueryBounds(centre, bounds.radius * 1000);
+      for (const b of geoBounds) {
+        const q1 = query(q, orderBy('geohash'), startAt(b[0]), endAt(b[1]));
+        promises.push(getDocs(q1));
+      }
+    } else {
+      promises.push(getDocs(q));
     }
 
-    const snap = await getDocs(q);
-    return snap.docs.map((doc) => {
-      return { id: doc.id, ...doc.data() };
-    });
+    const snapshots = await Promise.all(promises);
+    const result = [];
+    for (const snap of snapshots) {
+      for (const doc of snap.docs) {
+        result.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      }
+    }
+    return result;
   } catch (error) {
     console.error(error);
   }
