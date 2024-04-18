@@ -79,12 +79,21 @@ export default function GridView() {
     if (cookies.gridRadius == null) {
       setCookies('gridRadius', 50, cookiesOptions);
     } else if (radius == null) {
-      setRadius(cookies.gridRadius);
+      let r = 50;
+      if (cookies.gridRadius == 50 || cookies.gridRadius == 100 || cookies.gridRadius == 150) {
+        r = cookies.gridRadius;
+      }
+      setRadius(r);
     }
+
     if (cookies.gridThreshold == null) {
       setCookies('gridThreshold', 0, cookiesOptions);
     } else if (threshold == null) {
-      setThreshold(cookies.gridThreshold);
+      let t = 0;
+      if (cookies.gridThreshold >= 0 && cookies.gridThreshold <= 50) {
+        t = Math.floor(cookies.gridThreshold);
+      }
+      setThreshold(t);
     }
   }, [cookies]);
 

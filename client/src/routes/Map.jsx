@@ -60,17 +60,17 @@ export default function Map() {
   // read cookies
   useEffect(() => {
     if (cookies.lon) {
-      setLon(cookies.lon);
+      if (!isNaN(cookies.lon) && cookies.lon >= -180 && cookies.lon <= 180) setLon(cookies.lon);
     } else {
       setCookies('lon', 172.5, cookiesOptions);
     }
     if (cookies.lat) {
-      setLat(cookies.lat);
+      if (!isNaN(cookies.lat) && cookies.lat >= -90 && cookies.lat <= 90) setLat(cookies.lat);
     } else {
       setCookies('lat', -41, cookiesOptions);
     }
     if (cookies.zoom) {
-      setZoom(cookies.zoom);
+      if (!isNaN(cookies.zoom)) setZoom(cookies.zoom);
     } else {
       setCookies('zoom', window.innerWidth > 1000 ? 5.1 : 4.3, cookiesOptions);
     }
@@ -80,7 +80,7 @@ export default function Map() {
     }
 
     if (cookies.unit) {
-      unitRef.current = cookies.unit;
+      unitRef.current = cookies.unit === 'kt' ? 'kt' : 'kmh';
     }
   }, [cookies]);
 
@@ -582,7 +582,7 @@ export default function Map() {
 
   // change unit
   useEffect(() => {
-    unitRef.current = cookies.unit;
+    unitRef.current = cookies.unit === 'kt' ? 'kt' : 'kmh';
     for (const item of stationMarkers) {
       const currentAvg = item.marker.dataset.avg === '' ? null : Number(item.marker.dataset.avg);
       const currentGust = item.marker.dataset.gust === '' ? null : Number(item.marker.dataset.gust);
