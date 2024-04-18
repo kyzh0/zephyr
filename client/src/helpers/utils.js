@@ -52,6 +52,8 @@ export function getStationTypeName(code) {
       return 'Canterbury Weather Updates';
     case 'mpyc':
       return 'Mt Pleasant Yacht Club';
+    case 'lpc':
+      return 'Lyttelton Port Company';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }

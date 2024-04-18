@@ -87,7 +87,15 @@ async function processHarvestResponse(
   return null;
 }
 
-async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempId, longInterval) {
+async function getHarvestData(
+  stationId,
+  windAvgId,
+  windGustId,
+  windDirId,
+  tempId,
+  longInterval,
+  cookie
+) {
   let ids = stationId.split('_');
   if (ids.length != 2) {
     return;
@@ -99,14 +107,6 @@ async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempI
   let windGust = null;
   let windBearing = null;
   let temperature = null;
-
-  let cookie = '';
-  // need auth for realjourneys station
-  if (sid === '10243') {
-    // todo : update phpsessid dynamically, otherwise
-    // I have to update this key every 12 months...
-    cookie = process.env.HARVEST_REALJOURNEYS_KEY;
-  }
 
   // wind avg
   ids = windAvgId.split('_');
@@ -931,7 +931,12 @@ async function getNavigatusData() {
 exports.stationWrapper = async function stationWrapper(source) {
   try {
     const db = getFirestore();
-    const snapshot = await db.collection('stations').get();
+    let q = db.collection('stations');
+    if (source === 'harvest') q = q.where('type', '==', 'harvest');
+    else if (source === 'metservice') q = q.where('type', '==', 'metservice');
+    else q = q.where('type', 'not-in', ['holfuy', 'harvest', 'metservice']);
+
+    const snapshot = await q.get();
     if (!snapshot.empty) {
       const tempArray = [];
       snapshot.forEach((doc) => {
@@ -953,7 +958,8 @@ exports.stationWrapper = async function stationWrapper(source) {
               docData.harvestWindGustId,
               docData.harvestWindDirectionId,
               docData.harvestTemperatureId,
-              docData.harvestLongInterval // some harvest stations only update every 30 min
+              docData.harvestLongInterval, // some harvest stations only update every 30 min
+              docData.harvestCookie // station 10243 needs PHPSESSID cookie for auth
             );
           }
         } else if (source === 'metservice') {
@@ -1081,7 +1087,7 @@ async function getHolfuyData(stationId) {
   try {
     const { headers } = await axios.get(`https://holfuy.com/en/weather/${stationId}`);
     const cookies = headers['set-cookie'];
-    if (cookies && cookies.length && cookies[0].length) {
+    if (cookies && cookies.length && cookies[0]) {
       const { data } = await axios.get(`https://holfuy.com/puget/mjso.php?k=${stationId}`, {
         headers: {
           Cookie: cookies[0],
@@ -1389,6 +1395,50 @@ exports.checkForErrors = async function checkForErrors() {
     }
 
     functions.logger.log(`Checked for errors - ${errors.length} stations newly offline.`);
+  } catch (error) {
+    functions.logger.error(error);
+    return null;
+  }
+};
+
+exports.updateKeys = async function updateKeys() {
+  try {
+    const db = getFirestore();
+    const snapshot = await db
+      .collection('stations')
+      .where('type', '==', 'harvest')
+      .where('externalId', '==', '10243_113703')
+      .get();
+    if (snapshot.docs.length == 1) {
+      const { headers } = await axios.post(
+        'https://live.harvest.com/?sid=10243',
+        {
+          username: process.env.HARVEST_REALJOURNEYS_USERNAME,
+          password: process.env.HARVEST_REALJOURNEYS_PASSWORD,
+          submit: 'Login'
+        },
+        {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          maxRedirects: 0,
+          validateStatus: (status) => {
+            return status == 302;
+          }
+        }
+      );
+
+      const cookies = headers['set-cookie'];
+      const regex = /PHPSESSID=[0-9a-zA-Z]+;\s/g;
+      if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
+        const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
+        if (cookie) {
+          const doc = snapshot.docs[0];
+          await db.doc(`stations/${doc.id}`).update({
+            harvestCookie: cookie
+          });
+        }
+      }
+    }
+    functions.logger.log('Updated keys');
   } catch (error) {
     functions.logger.error(error);
     return null;

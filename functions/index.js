@@ -5,7 +5,8 @@ const {
   stationWrapper,
   processJsonOutputWrapper,
   holfuyWrapper,
-  checkForErrors
+  checkForErrors,
+  updateKeys
 } = require('./functions/stations');
 const { webcamWrapper } = require('./functions/cams');
 const { getGeojsonCallback, getJsonCallback } = require('./functions/api');
@@ -68,6 +69,14 @@ exports.updateWebcamImages = functions
     return webcamWrapper();
   });
 
+exports.updateKeys = functions
+  .runWith({ timeoutSeconds: 10, memory: '256MB' })
+  .region('australia-southeast1')
+  .pubsub.schedule('0 0 * * *') // midnight every day
+  .onRun(() => {
+    return updateKeys();
+  });
+
 exports.data = functions
   .runWith({ timeoutSeconds: 10, memory: '256MB' })
   .region('australia-southeast1')
@@ -83,7 +92,6 @@ exports.output = functions
 //   .region('australia-southeast1')
 //   .https.onRequest(async (req, res) => {
 //     try {
-
 //     } catch (e) {
 //       functions.logger.log(e);
 //     }
