@@ -16,6 +16,46 @@ function getFlooredTime() {
   return date;
 }
 
+function getWindBearingFromDirection(direction) {
+  if (!direction) return 0;
+  switch (direction.trim().toUpperCase()) {
+    case 'N':
+      return 0;
+    case 'NNE':
+      return 22.5;
+    case 'NE':
+      return 45;
+    case 'ENE':
+      return 67.5;
+    case 'E':
+      return 90;
+    case 'ESE':
+      return 112.5;
+    case 'SE':
+      return 135;
+    case 'SSE':
+      return 157.5;
+    case 'S':
+      return 180;
+    case 'SSW':
+      return 202.5;
+    case 'SW':
+      return 225;
+    case 'WSW':
+      return 247.5;
+    case 'W':
+      return 270;
+    case 'WNW':
+      return 292.5;
+    case 'NW':
+      return 325;
+    case 'NNW':
+      return 337.5;
+    default:
+      return 0;
+  }
+}
+
 async function processHarvestResponse(
   sid,
   configId,
@@ -215,35 +255,7 @@ async function getMetserviceData(stationId) {
           }
         }
 
-        switch (wind[0].direction.toUpperCase()) {
-          case 'N':
-            windBearing = 0;
-            break;
-          case 'NE':
-            windBearing = 45;
-            break;
-          case 'E':
-            windBearing = 90;
-            break;
-          case 'SE':
-            windBearing = 135;
-            break;
-          case 'S':
-            windBearing = 180;
-            break;
-          case 'SW':
-            windBearing = 225;
-            break;
-          case 'W':
-            windBearing = 270;
-            break;
-          case 'NW':
-            windBearing = 325;
-            break;
-          default:
-            windBearing = 0;
-            break;
-        }
+        windBearing = getWindBearingFromDirection(wind[0].direction);
       }
       const temp = modules[0].observations.temperature;
       if (temp && temp.length && temp[0]) {
@@ -318,61 +330,7 @@ async function getCwuData(stationId) {
             .trim()
             .split(' ');
           if (tempArray.length == 2) {
-            const temp = tempArray[0];
-            switch (temp.toUpperCase()) {
-              case 'N':
-                windBearing = 0;
-                break;
-              case 'NNE':
-                windBearing = 22.5;
-                break;
-              case 'NE':
-                windBearing = 45;
-                break;
-              case 'ENE':
-                windBearing = 67.5;
-                break;
-              case 'E':
-                windBearing = 90;
-                break;
-              case 'ESE':
-                windBearing = 112.5;
-                break;
-              case 'SE':
-                windBearing = 135;
-                break;
-              case 'SSE':
-                windBearing = 157.5;
-                break;
-              case 'S':
-                windBearing = 180;
-                break;
-              case 'SSW':
-                windBearing = 202.5;
-                break;
-              case 'SW':
-                windBearing = 225;
-                break;
-              case 'WSW':
-                windBearing = 247.5;
-                break;
-              case 'W':
-                windBearing = 270;
-                break;
-              case 'WNW':
-                windBearing = 292.5;
-                break;
-              case 'NW':
-                windBearing = 325;
-                break;
-              case 'NNW':
-                windBearing = 337.5;
-                break;
-              default:
-                windBearing = 0;
-                break;
-            }
-
+            windBearing = getWindBearingFromDirection(tempArray[0]);
             const temp1 = Number(tempArray[1]);
             if (!isNaN(temp1)) {
               windAverage = temp1;
@@ -937,233 +895,79 @@ exports.stationWrapper = async function stationWrapper(source) {
     else q = q.where('type', 'not-in', ['holfuy', 'harvest', 'metservice']);
 
     const snapshot = await q.get();
-    if (!snapshot.empty) {
-      const tempArray = [];
-      snapshot.forEach((doc) => {
-        tempArray.push(doc);
-      });
+    if (snapshot.empty) {
+      functions.logger.error(`No ${source} stations found.`);
+      return null;
+    }
 
-      const date = getFlooredTime();
+    const date = getFlooredTime();
+    const json = [];
+    for (const doc of snapshot.docs) {
+      let data = null;
+      const docData = doc.data();
 
-      const json = [];
-      for (const doc of tempArray) {
-        let data = null;
-        const docData = doc.data();
-
-        if (source === 'harvest') {
-          if (docData.type === 'harvest') {
-            data = await getHarvestData(
-              docData.externalId,
-              docData.harvestWindAverageId,
-              docData.harvestWindGustId,
-              docData.harvestWindDirectionId,
-              docData.harvestTemperatureId,
-              docData.harvestLongInterval, // some harvest stations only update every 30 min
-              docData.harvestCookie // station 10243 needs PHPSESSID cookie for auth
-            );
-          }
-        } else if (source === 'metservice') {
-          if (docData.type === 'metservice') {
-            data = await getMetserviceData(docData.externalId);
-          }
-        } else {
-          if (docData.type === 'attentis') {
-            data = await getAttentisData(docData.externalId);
-          } else if (docData.type === 'wu') {
-            data = await getWUndergroundData(docData.externalId);
-          } else if (docData.type === 'tempest') {
-            data = await getTempestData(docData.externalId);
-          } else if (docData.type === 'windguru') {
-            data = await getWindguruData(docData.externalId);
-          } else if (docData.type === 'cwu') {
-            data = await getCwuData(docData.externalId);
-          } else if (docData.type === 'wp') {
-            data = await getWeatherProData(docData.externalId);
-          } else if (docData.type === 'cp') {
-            data = await getCentrePortData(docData.externalId);
-          } else if (docData.type === 'po') {
-            data = await getPortOtagoData(docData.externalId);
-          } else if (docData.type === 'lpc') {
-            data = await getLpcData();
-          } else if (docData.type === 'mpyc') {
-            data = await getMpycData();
-          } else if (docData.type === 'navigatus') {
-            data = await getNavigatusData();
-          }
-        }
-
-        if (data) {
-          functions.logger.log(
-            `${docData.type} data updated${docData.externalId ? ` - ${docData.externalId}` : ''}`
+      if (source === 'harvest') {
+        if (docData.type === 'harvest') {
+          data = await getHarvestData(
+            docData.externalId,
+            docData.harvestWindAverageId,
+            docData.harvestWindGustId,
+            docData.harvestWindDirectionId,
+            docData.harvestTemperatureId,
+            docData.harvestLongInterval, // some harvest stations only update every 30 min
+            docData.harvestCookie // station 10243 needs PHPSESSID cookie for auth
           );
-          functions.logger.log(data);
-
-          // handle likely erroneous values
-          let avg = data.windAverage;
-          if (avg < 0 || avg > 500) {
-            avg = null;
-          }
-          let gust = data.windGust;
-          if (gust < 0 || gust > 500) {
-            gust = null;
-          }
-          let bearing = data.windBearing;
-          if (bearing < 0 || bearing > 360) {
-            bearing = null;
-          }
-          let temperature = data.temperature;
-          if (temperature < -40 || temperature > 60) {
-            temperature = null;
-          }
-
-          // update station data
-          const s = {
-            lastUpdate: new Date(), // do not floor to 10 min
-            currentAverage: avg ?? null,
-            currentGust: gust ?? null,
-            currentBearing: bearing ?? null,
-            currentTemperature: temperature ?? null
-          };
-          if (avg != null || gust != null) {
-            s.isOffline = false;
-          }
-          if (avg != null && gust != null && bearing != null && temperature != null) {
-            s.isError = false;
-          }
-          await db.doc(`stations/${doc.id}`).update(s);
-
-          // add data
-          await db.collection(`stations/${doc.id}/data`).add({
-            time: date,
-            expiry: new Date(date.getTime() + 24 * 60 * 60 * 1000), // 1 day expiry to be deleted by TTL policy
-            windAverage: avg ?? null,
-            windGust: gust ?? null,
-            windBearing: bearing ?? null,
-            temperature: temperature ?? null
-          });
-
-          // write to json
-          json.push({
-            id: doc.id,
-            name: docData.name,
-            type: docData.type,
-            coordinates: {
-              lat: docData.coordinates._latitude,
-              lon: docData.coordinates._longitude
-            },
-            timestamp: date.getTime() / 1000,
-            wind: {
-              average: avg ?? null,
-              gust: gust ?? null,
-              bearing: bearing ?? null
-            },
-            temperature: temperature ?? null
-          });
+        }
+      } else if (source === 'metservice') {
+        if (docData.type === 'metservice') {
+          data = await getMetserviceData(docData.externalId);
+        }
+      } else {
+        if (docData.type === 'attentis') {
+          data = await getAttentisData(docData.externalId);
+        } else if (docData.type === 'wu') {
+          data = await getWUndergroundData(docData.externalId);
+        } else if (docData.type === 'tempest') {
+          data = await getTempestData(docData.externalId);
+        } else if (docData.type === 'windguru') {
+          data = await getWindguruData(docData.externalId);
+        } else if (docData.type === 'cwu') {
+          data = await getCwuData(docData.externalId);
+        } else if (docData.type === 'wp') {
+          data = await getWeatherProData(docData.externalId);
+        } else if (docData.type === 'cp') {
+          data = await getCentrePortData(docData.externalId);
+        } else if (docData.type === 'po') {
+          data = await getPortOtagoData(docData.externalId);
+        } else if (docData.type === 'lpc') {
+          data = await getLpcData();
+        } else if (docData.type === 'mpyc') {
+          data = await getMpycData();
+        } else if (docData.type === 'navigatus') {
+          data = await getNavigatusData();
         }
       }
 
-      if (json.length) {
-        // save json to storage
-        const bucket = getStorage().bucket();
-        const file = bucket.file(
-          `data/processing/${source ? source : 'all'}-${json[0].timestamp}.json`
+      if (data) {
+        functions.logger.log(
+          `${docData.type} data updated${docData.externalId ? ` - ${docData.externalId}` : ''}`
         );
-        await file.save(Buffer.from(JSON.stringify(json)));
-      }
-    }
-    functions.logger.log('Weather station data updated.');
-  } catch (error) {
-    functions.logger.error(error);
-    return null;
-  }
-};
-
-async function getHolfuyData(stationId) {
-  let windAverage = null;
-  let windGust = null;
-  let windBearing = null;
-  let temperature = null;
-
-  try {
-    const { headers } = await axios.get(`https://holfuy.com/en/weather/${stationId}`);
-    const cookies = headers['set-cookie'];
-    if (cookies && cookies.length && cookies[0]) {
-      const { data } = await axios.get(`https://holfuy.com/puget/mjso.php?k=${stationId}`, {
-        headers: {
-          Cookie: cookies[0],
-          Connection: 'keep-alive'
-        }
-      });
-      windAverage = data.speed;
-      windGust = data.gust;
-      windBearing = data.dir;
-      temperature = data.temperature;
-    }
-  } catch (error) {
-    functions.logger.error(error);
-  }
-
-  return {
-    windAverage,
-    windGust,
-    windBearing,
-    temperature
-  };
-}
-
-exports.holfuyWrapper = async function holfuyWrapper() {
-  try {
-    const db = getFirestore();
-    const snapshot = await db.collection('stations').where('type', '==', 'holfuy').get();
-    if (!snapshot.empty) {
-      const tempArray = [];
-      snapshot.forEach((doc) => {
-        tempArray.push(doc);
-      });
-
-      const date = getFlooredTime();
-
-      const { data } = await axios.get(
-        `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
-      );
-
-      const json = [];
-      for (const doc of tempArray) {
-        let d = null;
-        const docData = doc.data();
-
-        const matches = data.measurements.filter((m) => {
-          return m.stationId.toString() === docData.externalId;
-        });
-        if (matches.length == 1) {
-          const wind = matches[0].wind;
-          d = {
-            windAverage: wind?.speed ?? null,
-            windGust: wind?.gust ?? null,
-            windBearing: wind?.direction ?? null,
-            temperature: matches[0]?.temperature ?? null
-          };
-        } else {
-          d = await getHolfuyData(docData.externalId);
-        }
-
-        functions.logger.log(`holfuy data updated - ${docData.externalId}`);
-        functions.logger.log(d);
+        functions.logger.log(data);
 
         // handle likely erroneous values
-        let avg = d.windAverage;
+        let avg = data.windAverage;
         if (avg < 0 || avg > 500) {
           avg = null;
         }
-        let gust = d.windGust;
+        let gust = data.windGust;
         if (gust < 0 || gust > 500) {
           gust = null;
         }
-        let bearing = d.windBearing;
+        let bearing = data.windBearing;
         if (bearing < 0 || bearing > 360) {
           bearing = null;
         }
-        let temperature = d.temperature;
+        let temperature = data.temperature;
         if (temperature < -40 || temperature > 60) {
           temperature = null;
         }
@@ -1212,14 +1016,165 @@ exports.holfuyWrapper = async function holfuyWrapper() {
           temperature: temperature ?? null
         });
       }
-
-      if (json.length) {
-        // save json to storage
-        const bucket = getStorage().bucket();
-        const file = bucket.file(`data/processing/holfuy-${json[0].timestamp}.json`);
-        await file.save(Buffer.from(JSON.stringify(json)));
-      }
     }
+
+    if (json.length) {
+      // save json to storage
+      const bucket = getStorage().bucket();
+      const file = bucket.file(
+        `data/processing/${source ? source : 'all'}-${json[0].timestamp}.json`
+      );
+      await file.save(Buffer.from(JSON.stringify(json)));
+    }
+
+    functions.logger.log('Weather station data updated.');
+  } catch (error) {
+    functions.logger.error(error);
+    return null;
+  }
+};
+
+async function getHolfuyData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { headers } = await axios.get(`https://holfuy.com/en/weather/${stationId}`);
+    const cookies = headers['set-cookie'];
+    if (cookies && cookies.length && cookies[0]) {
+      const { data } = await axios.get(`https://holfuy.com/puget/mjso.php?k=${stationId}`, {
+        headers: {
+          Cookie: cookies[0],
+          Connection: 'keep-alive'
+        }
+      });
+      windAverage = data.speed;
+      windGust = data.gust;
+      windBearing = data.dir;
+      temperature = data.temperature;
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
+exports.holfuyWrapper = async function holfuyWrapper() {
+  try {
+    const db = getFirestore();
+    const snapshot = await db.collection('stations').where('type', '==', 'holfuy').get();
+
+    if (snapshot.empty) {
+      functions.logger.error('No holfuy stations found.');
+      return null;
+    }
+
+    const { data } = await axios.get(
+      `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
+    );
+
+    const date = getFlooredTime();
+    const json = [];
+    for (const doc of snapshot.docs) {
+      let d = null;
+      const docData = doc.data();
+
+      const matches = data.measurements.filter((m) => {
+        return m.stationId.toString() === docData.externalId;
+      });
+      if (matches.length == 1) {
+        const wind = matches[0].wind;
+        d = {
+          windAverage: wind?.speed ?? null,
+          windGust: wind?.gust ?? null,
+          windBearing: wind?.direction ?? null,
+          temperature: matches[0]?.temperature ?? null
+        };
+      } else {
+        d = await getHolfuyData(docData.externalId);
+      }
+
+      functions.logger.log(`holfuy data updated - ${docData.externalId}`);
+      functions.logger.log(d);
+
+      // handle likely erroneous values
+      let avg = d.windAverage;
+      if (avg < 0 || avg > 500) {
+        avg = null;
+      }
+      let gust = d.windGust;
+      if (gust < 0 || gust > 500) {
+        gust = null;
+      }
+      let bearing = d.windBearing;
+      if (bearing < 0 || bearing > 360) {
+        bearing = null;
+      }
+      let temperature = d.temperature;
+      if (temperature < -40 || temperature > 60) {
+        temperature = null;
+      }
+
+      // update station data
+      const s = {
+        lastUpdate: new Date(), // do not floor to 10 min
+        currentAverage: avg ?? null,
+        currentGust: gust ?? null,
+        currentBearing: bearing ?? null,
+        currentTemperature: temperature ?? null
+      };
+      if (avg != null || gust != null) {
+        s.isOffline = false;
+      }
+      if (avg != null && gust != null && bearing != null && temperature != null) {
+        s.isError = false;
+      }
+      await db.doc(`stations/${doc.id}`).update(s);
+
+      // add data
+      await db.collection(`stations/${doc.id}/data`).add({
+        time: date,
+        expiry: new Date(date.getTime() + 24 * 60 * 60 * 1000), // 1 day expiry to be deleted by TTL policy
+        windAverage: avg ?? null,
+        windGust: gust ?? null,
+        windBearing: bearing ?? null,
+        temperature: temperature ?? null
+      });
+
+      // write to json
+      json.push({
+        id: doc.id,
+        name: docData.name,
+        type: docData.type,
+        coordinates: {
+          lat: docData.coordinates._latitude,
+          lon: docData.coordinates._longitude
+        },
+        timestamp: date.getTime() / 1000,
+        wind: {
+          average: avg ?? null,
+          gust: gust ?? null,
+          bearing: bearing ?? null
+        },
+        temperature: temperature ?? null
+      });
+    }
+
+    if (json.length) {
+      // save json to storage
+      const bucket = getStorage().bucket();
+      const file = bucket.file(`data/processing/holfuy-${json[0].timestamp}.json`);
+      await file.save(Buffer.from(JSON.stringify(json)));
+    }
+
     functions.logger.log('Holfuy data updated.');
   } catch (error) {
     functions.logger.error(error);
@@ -1301,73 +1256,71 @@ exports.processJsonOutputWrapper = async function processJsonOutputWrapper() {
 
 exports.checkForErrors = async function checkForErrors() {
   try {
-    const errors = [];
-    const timeNow = Math.round(Date.now() / 1000);
     const db = getFirestore();
     const snapshot = await db.collection('stations').get();
-    if (!snapshot.empty) {
-      const tempArray = [];
-      snapshot.forEach((doc) => {
-        tempArray.push(doc);
-      });
-      for (const doc of tempArray) {
-        // check if last 6h data is all null
-        let isDataError = true;
-        let isWindError = true;
-        let isBearingError = true;
-        let isTempError = true;
-        const query = db.collection(`stations/${doc.id}/data`).orderBy('time', 'desc').limit(36); // 36 records in 6h
-        const snap = await query.get();
-        if (!snap.empty) {
-          const tempArray1 = [];
-          snap.forEach((doc) => {
-            tempArray1.push(doc);
+    if (snapshot.empty) {
+      functions.logger.error('No stations found.');
+      return null;
+    }
+
+    const errors = [];
+    const timeNow = Math.round(Date.now() / 1000);
+
+    for (const doc of snapshot.docs) {
+      // check if last 6h data is all null
+      let isDataError = true;
+      let isWindError = true;
+      let isBearingError = true;
+      let isTempError = true;
+
+      const snapshot1 = await db
+        .collection(`stations/${doc.id}/data`)
+        .orderBy('time', 'desc')
+        .limit(36) // 36 records in 6h
+        .get();
+      if (snapshot1.empty) continue;
+
+      // check that data exists up to 20min before current time
+      if (timeNow - snapshot1.docs[0].data().time.seconds <= 20 * 60) {
+        isDataError = false;
+        for (const doc1 of snapshot1.docs) {
+          const data = doc1.data();
+          if (data.windAverage != null || data.windGust != null) {
+            isWindError = false;
+          }
+          if (data.windBearing != null) {
+            isBearingError = false;
+          }
+          if (data.temperature != null) {
+            isTempError = false;
+          }
+        }
+      }
+
+      let errorMsg = '';
+      if (isDataError) {
+        errorMsg = 'ERROR: Data scraper has stopped.\n';
+      } else if (isWindError) {
+        errorMsg += 'ERROR: No wind avg/gust data.\n';
+      }
+
+      if (isDataError || isWindError) {
+        if (!doc.data().isOffline) {
+          await db.doc(`stations/${doc.id}`).update({
+            isOffline: true
           });
-          if (tempArray1.length) {
-            // check that data exists up to 20min before current time
-            if (timeNow - tempArray1[0].data().time.seconds <= 20 * 60) {
-              isDataError = false;
-              for (const doc1 of tempArray1) {
-                const data = doc1.data();
-                if (data.windAverage != null || data.windGust != null) {
-                  isWindError = false;
-                }
-                if (data.windBearing != null) {
-                  isBearingError = false;
-                }
-                if (data.temperature != null) {
-                  isTempError = false;
-                }
-              }
-            }
-          }
+          errors.push({
+            type: doc.data().type,
+            msg: `${errorMsg}Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
+          });
         }
+      }
 
-        let errorMsg = '';
-        if (isDataError) {
-          errorMsg = 'ERROR: Data scraper has stopped.\n';
-        } else if (isWindError) {
-          errorMsg += 'ERROR: No wind avg/gust data.\n';
-        }
-
-        if (isDataError || isWindError) {
-          if (!doc.data().isOffline) {
-            await db.doc(`stations/${doc.id}`).update({
-              isOffline: true
-            });
-            errors.push({
-              type: doc.data().type,
-              msg: `${errorMsg}Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
-            });
-          }
-        }
-
-        if (isDataError || isWindError || isBearingError || isTempError) {
-          if (!doc.data().isError) {
-            await db.doc(`stations/${doc.id}`).update({
-              isError: true
-            });
-          }
+      if (isDataError || isWindError || isBearingError || isTempError) {
+        if (!doc.data().isError) {
+          await db.doc(`stations/${doc.id}`).update({
+            isError: true
+          });
         }
       }
     }
@@ -1431,14 +1384,13 @@ exports.updateKeys = async function updateKeys() {
       if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
         const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
         if (cookie) {
-          const doc = snapshot.docs[0];
-          await db.doc(`stations/${doc.id}`).update({
+          await db.doc(`stations/${snapshot.docs[0].id}`).update({
             harvestCookie: cookie
           });
         }
       }
     }
-    functions.logger.log('Updated keys');
+    functions.logger.log('Keys updated.');
   } catch (error) {
     functions.logger.error(error);
     return null;

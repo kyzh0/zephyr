@@ -72,36 +72,36 @@ exports.getGeojsonCallback = async function getGeojsonCallback(req, res) {
     }
 
     const snapshot = await db.collection('stations').orderBy('type').orderBy('name').get();
-    if (!snapshot.empty) {
-      const tempArray = [];
-      snapshot.forEach((doc) => {
-        tempArray.push(doc);
-      });
-      for (const doc of tempArray) {
-        const station = doc.data();
-        const feature = {
-          type: 'Feature',
-          properties: {
-            id: doc.id,
-            name: station.name,
-            type: station.type,
-            link: station.externalLink,
-            lastUpdateUnix: station.lastUpdate._seconds,
-            currentAverage:
-              station.currentAverage == null ? null : Math.round(station.currentAverage),
-            currentGust: station.currentGust == null ? null : Math.round(station.currentGust),
-            currentBearing:
-              station.currentBearing == null ? null : Math.round(station.currentBearing),
-            currentTemperature:
-              station.currentTemperature == null ? null : Math.round(station.currentTemperature)
-          },
-          geometry: {
-            type: 'Point',
-            coordinates: [station.coordinates._longitude, station.coordinates._latitude]
-          }
-        };
-        geoJson.features.push(feature);
-      }
+    if (snapshot.empty) {
+      functions.logger.error('No stations found.');
+      res.status(500).json({ error: 'No stations found. Please contact the Zephyr admin.' });
+      return;
+    }
+
+    for (const doc of snapshot.docs) {
+      const station = doc.data();
+      const feature = {
+        type: 'Feature',
+        properties: {
+          id: doc.id,
+          name: station.name,
+          type: station.type,
+          link: station.externalLink,
+          lastUpdateUnix: station.lastUpdate._seconds,
+          currentAverage:
+            station.currentAverage == null ? null : Math.round(station.currentAverage),
+          currentGust: station.currentGust == null ? null : Math.round(station.currentGust),
+          currentBearing:
+            station.currentBearing == null ? null : Math.round(station.currentBearing),
+          currentTemperature:
+            station.currentTemperature == null ? null : Math.round(station.currentTemperature)
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [station.coordinates._longitude, station.coordinates._latitude]
+        }
+      };
+      geoJson.features.push(feature);
     }
   } catch (e) {
     functions.logger.log(e);
@@ -150,11 +150,7 @@ exports.getJsonCallback = async function getJsonCallback(req, res) {
     if (dateTo != null && !isNaN(dateTo)) query = query.where('time', '<=', dateTo);
     const snapshot = await query.get();
     if (!snapshot.empty) {
-      const tempArray = [];
-      snapshot.forEach((doc) => {
-        tempArray.push(doc);
-      });
-      for (const doc of tempArray) {
+      for (const doc of snapshot.docs) {
         output.push({
           time: doc.data().time._seconds,
           url: doc.data().url

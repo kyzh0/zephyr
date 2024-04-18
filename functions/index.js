@@ -78,12 +78,12 @@ exports.updateKeys = functions
   });
 
 exports.data = functions
-  .runWith({ timeoutSeconds: 10, memory: '256MB' })
+  .runWith({ timeoutSeconds: 20, memory: '256MB' })
   .region('australia-southeast1')
   .https.onRequest(getGeojsonCallback);
 
 exports.output = functions
-  .runWith({ timeoutSeconds: 20, memory: '256MB' })
+  .runWith({ timeoutSeconds: 30, memory: '256MB' })
   .region('australia-southeast1')
   .https.onRequest(getJsonCallback);
 
@@ -92,6 +92,7 @@ exports.output = functions
 //   .region('australia-southeast1')
 //   .https.onRequest(async (req, res) => {
 //     try {
+
 //     } catch (e) {
 //       functions.logger.log(e);
 //     }

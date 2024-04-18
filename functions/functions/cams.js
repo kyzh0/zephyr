@@ -434,104 +434,103 @@ exports.webcamWrapper = async function webcamWrapper() {
   try {
     const db = getFirestore();
     const snapshot = await db.collection('cams').get();
-    if (!snapshot.empty) {
-      const tempArray = [];
-      snapshot.forEach((doc) => {
-        tempArray.push(doc);
-      });
+    if (snapshot.empty) {
+      functions.logger.error('No cams found.');
+      return null;
+    }
 
-      const bucket = getStorage().bucket();
-      for (const doc of tempArray) {
-        let data = null;
-        const docData = doc.data();
-        const lastUpdate = new Date(docData.lastUpdate._seconds * 1000);
+    const bucket = getStorage().bucket();
+    for (const doc of snapshot.docs) {
+      let data = null;
+      const docData = doc.data();
+      const lastUpdate = new Date(docData.lastUpdate._seconds * 1000);
 
-        if (docData.type === 'harvest') {
-          const ids = docData.externalId.split('_');
-          data = await getHarvestImage(ids[0], ids[1], lastUpdate);
-        } else if (docData.type === 'metservice') {
-          data = await getMetserviceImage(docData.externalId, lastUpdate);
-        } else if (docData.type === 'lw') {
-          data = await getLakeWanakaImage(docData.externalId, lastUpdate);
-        } else if (docData.type === 'cm') {
-          data = await getCheesemanImage(docData.externalId, lastUpdate);
-        } else if (docData.type === 'qa') {
-          data = await getQueenstownAirportImage(docData.externalId);
-        } else if (docData.type === 'wa') {
-          data = await getWanakaAirportImage(docData.externalId);
-        } else if (docData.type === 'cgc') {
-          data = await getCgcImage(docData.externalId);
-        } else if (docData.type === 'ch') {
-          data = await getCastleHillImage(docData.externalId);
-        } else if (docData.type === 'cwu') {
-          data = await getCwuImage(docData.externalId);
-        } else if (docData.type === 'ts') {
-          data = await getTaylorsSurfImage();
-        }
+      if (docData.type === 'harvest') {
+        const ids = docData.externalId.split('_');
+        data = await getHarvestImage(ids[0], ids[1], lastUpdate);
+      } else if (docData.type === 'metservice') {
+        data = await getMetserviceImage(docData.externalId, lastUpdate);
+      } else if (docData.type === 'lw') {
+        data = await getLakeWanakaImage(docData.externalId, lastUpdate);
+      } else if (docData.type === 'cm') {
+        data = await getCheesemanImage(docData.externalId, lastUpdate);
+      } else if (docData.type === 'qa') {
+        data = await getQueenstownAirportImage(docData.externalId);
+      } else if (docData.type === 'wa') {
+        data = await getWanakaAirportImage(docData.externalId);
+      } else if (docData.type === 'cgc') {
+        data = await getCgcImage(docData.externalId);
+      } else if (docData.type === 'ch') {
+        data = await getCastleHillImage(docData.externalId);
+      } else if (docData.type === 'cwu') {
+        data = await getCwuImage(docData.externalId);
+      } else if (docData.type === 'ts') {
+        data = await getTaylorsSurfImage();
+      }
 
-        if (data && data.updated && data.base64) {
-          // save base64 to storage
-          const imgBuff = Buffer.from(data.base64, 'base64');
+      if (data && data.updated && data.base64) {
+        // save base64 to storage
+        const imgBuff = Buffer.from(data.base64, 'base64');
 
-          const img = {
-            time: data.updated,
-            expiry: new Date(data.updated.getTime() + 24 * 60 * 60 * 1000) // 1 day expiry to be deleted by TTL policy
-          };
+        const img = {
+          time: data.updated,
+          expiry: new Date(data.updated.getTime() + 24 * 60 * 60 * 1000) // 1 day expiry to be deleted by TTL policy
+        };
 
-          // for types that don't have embedded timestamps, check for duplicate image
-          if (
-            docData.type === 'qa' ||
-            docData.type === 'wa' ||
-            docData.type === 'cgc' ||
-            docData.type === 'ch' ||
-            docData.type === 'cwu' ||
-            docData.type === 'ts'
-          ) {
-            img.hash = md5(imgBuff);
-            img.fileSize = imgBuff.length;
-            const query = db.collection(`cams/${doc.id}/images`).orderBy('time', 'desc').limit(1);
-            const snap = await query.get();
-            if (!snap.empty) {
-              const d = snap.docs[0].data();
-              if (d.fileSize == img.fileSize && d.hash == img.hash) {
-                functions.logger.log(
-                  `${docData.type} image update skipped${docData.externalId ? ` - ${docData.externalId}` : ''}`
-                );
-                continue;
-              }
+        // for types that don't have embedded timestamps, check for duplicate image
+        if (
+          docData.type === 'qa' ||
+          docData.type === 'wa' ||
+          docData.type === 'cgc' ||
+          docData.type === 'ch' ||
+          docData.type === 'cwu' ||
+          docData.type === 'ts'
+        ) {
+          img.hash = md5(imgBuff);
+          img.fileSize = imgBuff.length;
+          const query = db.collection(`cams/${doc.id}/images`).orderBy('time', 'desc').limit(1);
+          const snap = await query.get();
+          if (!snap.empty) {
+            const d = snap.docs[0].data();
+            if (d.fileSize == img.fileSize && d.hash == img.hash) {
+              functions.logger.log(
+                `${docData.type} image update skipped${docData.externalId ? ` - ${docData.externalId}` : ''}`
+              );
+              continue;
             }
           }
-
-          const resizedBuff = await sharp(imgBuff).resize({ width: 600 }).toBuffer();
-          const imgByteArray = new Uint8Array(resizedBuff);
-          const file = bucket.file(
-            `cams/${docData.type}/${doc.id}/${data.updated.toISOString()}.jpg`
-          );
-          await file.save(imgByteArray);
-          const url = await getDownloadURL(file);
-
-          img.url = url;
-
-          // update cam
-          await db.doc(`cams/${doc.id}`).update({
-            lastUpdate: new Date(),
-            currentTime: data.updated,
-            currentUrl: url
-          });
-
-          // add image
-          await db.collection(`cams/${doc.id}/images`).add(img);
-
-          functions.logger.log(
-            `${docData.type} image updated${docData.externalId ? ` - ${docData.externalId}` : ''}`
-          );
-        } else {
-          functions.logger.log(
-            `${docData.type} image update skipped${docData.externalId ? ` - ${docData.externalId}` : ''}`
-          );
         }
+
+        const resizedBuff = await sharp(imgBuff).resize({ width: 600 }).toBuffer();
+        const imgByteArray = new Uint8Array(resizedBuff);
+        const file = bucket.file(
+          `cams/${docData.type}/${doc.id}/${data.updated.toISOString()}.jpg`
+        );
+        await file.save(imgByteArray);
+        const url = await getDownloadURL(file);
+
+        img.url = url;
+
+        // update cam
+        await db.doc(`cams/${doc.id}`).update({
+          lastUpdate: new Date(),
+          currentTime: data.updated,
+          currentUrl: url
+        });
+
+        // add image
+        await db.collection(`cams/${doc.id}/images`).add(img);
+
+        functions.logger.log(
+          `${docData.type} image updated${docData.externalId ? ` - ${docData.externalId}` : ''}`
+        );
+      } else {
+        functions.logger.log(
+          `${docData.type} image update skipped${docData.externalId ? ` - ${docData.externalId}` : ''}`
+        );
       }
     }
+
     functions.logger.log('Webcam images updated.');
   } catch (error) {
     functions.logger.error(error);
