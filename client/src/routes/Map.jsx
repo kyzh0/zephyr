@@ -230,7 +230,21 @@ export default function Map() {
     lastStationRefreshRef.current = timestamp;
 
     geoJson.features.sort((a, b) => {
-      // render stations with valid bearings first (on top)
+      // render offline stations on bottom
+      if (a.properties.isOffline && !b.properties.isOffline) {
+        return -1;
+      } else if (!a.properties.isOffline && b.properties.isOffline) {
+        return 1;
+      }
+
+      // render stations with no data on bottom
+      if (a.properties.currentAverage == null && b.properties.currentAverage != null) {
+        return -1;
+      } else if (a.properties.currentAverage != null && b.properties.currentAverage == null) {
+        return 1;
+      }
+
+      // render stations with valid bearings on top
       if (!a.properties.validBearings) {
         if (!b.properties.validBearings) {
           return 0;
@@ -247,6 +261,7 @@ export default function Map() {
       }
       return 0;
     });
+
     for (const f of geoJson.features) {
       const name = f.properties.name;
       const dbId = f.properties.dbId;
