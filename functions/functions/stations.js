@@ -886,6 +886,70 @@ async function getNavigatusData() {
   };
 }
 
+async function saveData(db, data, stationId, date, json, name, type, lat, lon) {
+  // handle likely erroneous values
+  let avg = data.windAverage;
+  if (avg < 0 || avg > 500) {
+    avg = null;
+  }
+  let gust = data.windGust;
+  if (gust < 0 || gust > 500) {
+    gust = null;
+  }
+  let bearing = data.windBearing;
+  if (bearing < 0 || bearing > 360) {
+    bearing = null;
+  }
+  let temperature = data.temperature;
+  if (temperature < -40 || temperature > 60) {
+    temperature = null;
+  }
+
+  // update station data
+  const s = {
+    lastUpdate: new Date(), // do not floor to 10 min
+    currentAverage: avg ?? null,
+    currentGust: gust ?? null,
+    currentBearing: bearing ?? null,
+    currentTemperature: temperature ?? null
+  };
+  if (avg != null || gust != null) {
+    s.isOffline = false;
+  }
+  if (avg != null && gust != null && bearing != null && temperature != null) {
+    s.isError = false;
+  }
+  await db.doc(`stations/${stationId}`).update(s);
+
+  // add data
+  await db.collection(`stations/${stationId}/data`).add({
+    time: date,
+    expiry: new Date(date.getTime() + 24 * 60 * 60 * 1000), // 1 day expiry to be deleted by TTL policy
+    windAverage: avg ?? null,
+    windGust: gust ?? null,
+    windBearing: bearing ?? null,
+    temperature: temperature ?? null
+  });
+
+  // write to json
+  json.push({
+    id: stationId,
+    name: name,
+    type: type,
+    coordinates: {
+      lat: lat,
+      lon: lon
+    },
+    timestamp: date.getTime() / 1000,
+    wind: {
+      average: avg ?? null,
+      gust: gust ?? null,
+      bearing: bearing ?? null
+    },
+    temperature: temperature ?? null
+  });
+}
+
 exports.stationWrapper = async function stationWrapper(source) {
   try {
     const db = getFirestore();
@@ -954,67 +1018,17 @@ exports.stationWrapper = async function stationWrapper(source) {
         );
         functions.logger.log(data);
 
-        // handle likely erroneous values
-        let avg = data.windAverage;
-        if (avg < 0 || avg > 500) {
-          avg = null;
-        }
-        let gust = data.windGust;
-        if (gust < 0 || gust > 500) {
-          gust = null;
-        }
-        let bearing = data.windBearing;
-        if (bearing < 0 || bearing > 360) {
-          bearing = null;
-        }
-        let temperature = data.temperature;
-        if (temperature < -40 || temperature > 60) {
-          temperature = null;
-        }
-
-        // update station data
-        const s = {
-          lastUpdate: new Date(), // do not floor to 10 min
-          currentAverage: avg ?? null,
-          currentGust: gust ?? null,
-          currentBearing: bearing ?? null,
-          currentTemperature: temperature ?? null
-        };
-        if (avg != null || gust != null) {
-          s.isOffline = false;
-        }
-        if (avg != null && gust != null && bearing != null && temperature != null) {
-          s.isError = false;
-        }
-        await db.doc(`stations/${doc.id}`).update(s);
-
-        // add data
-        await db.collection(`stations/${doc.id}/data`).add({
-          time: date,
-          expiry: new Date(date.getTime() + 24 * 60 * 60 * 1000), // 1 day expiry to be deleted by TTL policy
-          windAverage: avg ?? null,
-          windGust: gust ?? null,
-          windBearing: bearing ?? null,
-          temperature: temperature ?? null
-        });
-
-        // write to json
-        json.push({
-          id: doc.id,
-          name: docData.name,
-          type: docData.type,
-          coordinates: {
-            lat: docData.coordinates._latitude,
-            lon: docData.coordinates._longitude
-          },
-          timestamp: date.getTime() / 1000,
-          wind: {
-            average: avg ?? null,
-            gust: gust ?? null,
-            bearing: bearing ?? null
-          },
-          temperature: temperature ?? null
-        });
+        await saveData(
+          db,
+          data,
+          doc.id,
+          date,
+          json,
+          docData.name,
+          docData.type,
+          docData.coordinates._latitude,
+          docData.coordinates._longitude
+        );
       }
     }
 
@@ -1102,70 +1116,22 @@ exports.holfuyWrapper = async function holfuyWrapper() {
         d = await getHolfuyData(docData.externalId);
       }
 
-      functions.logger.log(`holfuy data updated - ${docData.externalId}`);
-      functions.logger.log(d);
+      if (d) {
+        functions.logger.log(`holfuy data updated - ${docData.externalId}`);
+        functions.logger.log(d);
 
-      // handle likely erroneous values
-      let avg = d.windAverage;
-      if (avg < 0 || avg > 500) {
-        avg = null;
+        await saveData(
+          db,
+          d,
+          doc.id,
+          date,
+          json,
+          docData.name,
+          docData.type,
+          docData.coordinates._latitude,
+          docData.coordinates._longitude
+        );
       }
-      let gust = d.windGust;
-      if (gust < 0 || gust > 500) {
-        gust = null;
-      }
-      let bearing = d.windBearing;
-      if (bearing < 0 || bearing > 360) {
-        bearing = null;
-      }
-      let temperature = d.temperature;
-      if (temperature < -40 || temperature > 60) {
-        temperature = null;
-      }
-
-      // update station data
-      const s = {
-        lastUpdate: new Date(), // do not floor to 10 min
-        currentAverage: avg ?? null,
-        currentGust: gust ?? null,
-        currentBearing: bearing ?? null,
-        currentTemperature: temperature ?? null
-      };
-      if (avg != null || gust != null) {
-        s.isOffline = false;
-      }
-      if (avg != null && gust != null && bearing != null && temperature != null) {
-        s.isError = false;
-      }
-      await db.doc(`stations/${doc.id}`).update(s);
-
-      // add data
-      await db.collection(`stations/${doc.id}/data`).add({
-        time: date,
-        expiry: new Date(date.getTime() + 24 * 60 * 60 * 1000), // 1 day expiry to be deleted by TTL policy
-        windAverage: avg ?? null,
-        windGust: gust ?? null,
-        windBearing: bearing ?? null,
-        temperature: temperature ?? null
-      });
-
-      // write to json
-      json.push({
-        id: doc.id,
-        name: docData.name,
-        type: docData.type,
-        coordinates: {
-          lat: docData.coordinates._latitude,
-          lon: docData.coordinates._longitude
-        },
-        timestamp: date.getTime() / 1000,
-        wind: {
-          average: avg ?? null,
-          gust: gust ?? null,
-          bearing: bearing ?? null
-        },
-        temperature: temperature ?? null
-      });
     }
 
     if (json.length) {

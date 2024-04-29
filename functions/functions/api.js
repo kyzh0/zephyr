@@ -71,7 +71,12 @@ exports.getGeojsonCallback = async function getGeojsonCallback(req, res) {
       return;
     }
 
-    const snapshot = await db.collection('stations').orderBy('type').orderBy('name').get();
+    const snapshot = await db
+      .collection('stations')
+      .where('type', '!=', 'metservice')
+      .orderBy('type')
+      .orderBy('name')
+      .get();
     if (snapshot.empty) {
       functions.logger.error('No stations found.');
       res.status(500).json({ error: 'No stations found. Please contact the Zephyr admin.' });
