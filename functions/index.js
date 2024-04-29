@@ -4,7 +4,6 @@ const functions = require('firebase-functions');
 const {
   stationWrapper,
   processJsonOutputWrapper,
-  harvestWrapper,
   holfuyWrapper,
   checkForErrors,
   updateKeys
@@ -27,7 +26,7 @@ exports.updateHarvestStationData = functions
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
   .onRun(() => {
-    return harvestWrapper();
+    return stationWrapper('harvest');
   });
 
 exports.updateHolfuyStationData = functions
