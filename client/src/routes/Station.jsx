@@ -220,7 +220,9 @@ export default function Station() {
                           sx={{
                             p: 1,
                             background: getDirectionColor(
-                              station.currentBearing,
+                              station.currentAverage == null && station.currentGust == null
+                                ? null
+                                : station.currentBearing,
                               station.validBearings
                             )
                           }}
@@ -423,7 +425,12 @@ export default function Station() {
                               sx={{
                                 padding: 0,
                                 borderBottom: 'none',
-                                background: getDirectionColor(d.windBearing, station.validBearings)
+                                background: getDirectionColor(
+                                  d.windAverage == null && d.windGust == null
+                                    ? null
+                                    : d.windBearing,
+                                  station.validBearings
+                                )
                               }}
                             >
                               {d.windBearing == null ||

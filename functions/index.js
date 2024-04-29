@@ -23,7 +23,7 @@ exports.updateWeatherStationData = functions
   });
 
 exports.updateHarvestStationData = functions
-  .runWith({ timeoutSeconds: 60, memory: '1GB' })
+  .runWith({ timeoutSeconds: 120, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
   .onRun(() => {

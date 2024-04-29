@@ -197,7 +197,8 @@ export default function AdminAddStation() {
         currentGust: null,
         currentBearing: null,
         currentTemperature: null,
-        elevation: elevation
+        elevation: elevation,
+        lastUpdate: new Date()
       };
       if (type === 'harvest') {
         station.harvestWindAverageId = `${harvestWindAvgGraphId}_${harvestWindAvgTraceId}`;

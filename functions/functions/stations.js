@@ -1124,8 +1124,13 @@ exports.harvestWrapper = async function harvestWrapper() {
           docData.harvestWindDirectionId,
           docData.harvestTemperatureId,
           docData.harvestLongInterval, // some harvest stations only update every 30 min
-          docData.harvestCookie // station 10243 needs PHPSESSID cookie for auth
+          docData.harvestCookie // station 10243,11433 needs PHPSESSID cookie for auth
         );
+        if (docData.externalId === '11433_171221') {
+          // this station is in kt
+          if (d.windAverage) d.windAverage *= 1.852;
+          if (d.windGust) d.windGust *= 1.852;
+        }
       }
 
       if (
@@ -1443,9 +1448,9 @@ exports.updateKeys = async function updateKeys() {
     const snapshot = await db
       .collection('stations')
       .where('type', '==', 'harvest')
-      .where('externalId', '==', '10243_113703')
+      .where('externalId', 'in', ['10243_113703', '11433_171221'])
       .get();
-    if (snapshot.docs.length == 1) {
+    if (snapshot.docs.length == 2) {
       const { headers } = await axios.post(
         'https://live.harvest.com/?sid=10243',
         {
@@ -1467,9 +1472,11 @@ exports.updateKeys = async function updateKeys() {
       if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
         const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
         if (cookie) {
-          await db.doc(`stations/${snapshot.docs[0].id}`).update({
-            harvestCookie: cookie
-          });
+          for (const doc of snapshot.docs) {
+            await db.doc(`stations/${doc.id}`).update({
+              harvestCookie: cookie
+            });
+          }
         }
       }
     }

@@ -109,7 +109,7 @@ exports.getGeojsonCallback = async function getGeojsonCallback(req, res) {
       geoJson.features.push(feature);
     }
   } catch (e) {
-    functions.logger.log(e);
+    functions.logger.error(e);
   }
 
   res.json(geoJson);
@@ -163,7 +163,7 @@ exports.getJsonCallback = async function getJsonCallback(req, res) {
       }
     }
   } catch (e) {
-    functions.logger.log(e);
+    functions.logger.error(e);
   }
 
   res.json(output);
