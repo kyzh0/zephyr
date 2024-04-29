@@ -4,6 +4,7 @@ const functions = require('firebase-functions');
 const {
   stationWrapper,
   processJsonOutputWrapper,
+  harvestWrapper,
   holfuyWrapper,
   checkForErrors,
   updateKeys
@@ -22,11 +23,11 @@ exports.updateWeatherStationData = functions
   });
 
 exports.updateHarvestStationData = functions
-  .runWith({ timeoutSeconds: 180, memory: '1GB' })
+  .runWith({ timeoutSeconds: 60, memory: '1GB' })
   .region('australia-southeast1')
   .pubsub.schedule('*/10 * * * *')
   .onRun(() => {
-    return stationWrapper('harvest');
+    return harvestWrapper();
   });
 
 exports.updateHolfuyStationData = functions

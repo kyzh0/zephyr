@@ -56,174 +56,6 @@ function getWindBearingFromDirection(direction) {
   }
 }
 
-async function processHarvestResponse(
-  sid,
-  configId,
-  graphId,
-  traceId,
-  longInterval,
-  format,
-  cookie
-) {
-  let date = new Date();
-  let utcYear = date.getUTCFullYear();
-  let utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-  let utcDay = date.getUTCDate().toString().padStart(2, '0');
-  let utcHours = date.getUTCHours().toString().padStart(2, '0');
-  let utcMins = date.getUTCMinutes().toString().padStart(2, '0');
-  const dateTo = `${utcYear}-${utcMonth}-${utcDay}T${utcHours}:${utcMins}:00.000`;
-
-  const intervalMins = longInterval ? 40 : 20; // get data for last 20 min, with some exceptions
-  date = new Date(date.getTime() - intervalMins * 60 * 1000);
-  utcYear = date.getUTCFullYear();
-  utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-  utcDay = date.getUTCDate().toString().padStart(2, '0');
-  utcHours = date.getUTCHours().toString().padStart(2, '0');
-  utcMins = date.getUTCMinutes().toString().padStart(2, '0');
-  const dateFrom = `${utcYear}-${utcMonth}-${utcDay}T${utcHours}:${utcMins}:00.000`;
-
-  try {
-    const cfg = {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Connection: 'keep-alive'
-      }
-    };
-    if (cookie) cfg.headers.Cookie = cookie;
-    const { data } = await axios.post(
-      `https://data1.harvest.com//php/site_graph_functions.php?retrieve_trace=&req_ref=${sid}_${configId}_${graphId}}`,
-      {
-        config_id: configId,
-        trace_id: traceId,
-        graph_id: graphId,
-        start_date: dateFrom,
-        start_date_stats: dateFrom,
-        end_date: dateTo
-      },
-      cfg
-    );
-
-    if (format === 'array') {
-      if (data && data.length) {
-        const d = data[0].data;
-        if (d && d.length) {
-          const d1 = d[d.length - 1];
-          return d1.data_value;
-        }
-      }
-    } else if (format === 'object') {
-      if (data && data['1']) {
-        const d = data['1'].data;
-        if (d && d.length) {
-          const d1 = d[d.length - 1];
-          return d1.data_value;
-        }
-      }
-    }
-  } catch (error) {
-    functions.logger.error(error);
-  }
-
-  return null;
-}
-
-async function getHarvestData(
-  stationId,
-  windAvgId,
-  windGustId,
-  windDirId,
-  tempId,
-  longInterval,
-  cookie
-) {
-  let ids = stationId.split('_');
-  if (ids.length != 2) {
-    return;
-  }
-  const sid = ids[0];
-  const configId = ids[1];
-
-  let windAverage = null;
-  let windGust = null;
-  let windBearing = null;
-  let temperature = null;
-
-  // wind avg
-  ids = windAvgId.split('_');
-  if (ids.length == 2) {
-    const result = await processHarvestResponse(
-      sid,
-      configId,
-      ids[0],
-      ids[1],
-      longInterval,
-      sid === '1057' ? 'array' : 'object', // station 1057 has avg/gust switched
-      cookie
-    );
-    if (result) {
-      windAverage = result;
-    }
-  }
-
-  // wind gust
-  ids = windGustId.split('_');
-  if (ids.length == 2) {
-    const result = await processHarvestResponse(
-      sid,
-      configId,
-      ids[0],
-      ids[1],
-      longInterval,
-      sid === '1057' ? 'object' : 'array',
-      cookie
-    );
-    if (result) {
-      windGust = result;
-    }
-  }
-
-  // wind direction
-  ids = windDirId.split('_');
-  if (ids.length == 2) {
-    const result = await processHarvestResponse(
-      sid,
-      configId,
-      ids[0],
-      ids[1],
-      longInterval,
-      'array',
-      cookie
-    );
-    if (result) {
-      windBearing = result;
-    }
-  }
-
-  // temperature
-  ids = tempId.split('_');
-  if (ids.length == 2) {
-    const result = await processHarvestResponse(
-      sid,
-      configId,
-      ids[0],
-      ids[1],
-      longInterval,
-      'array',
-      cookie
-    );
-    if (result) {
-      temperature = result;
-    }
-  }
-
-  return {
-    windAverage,
-    windGust,
-    windBearing,
-    temperature
-  };
-}
-
 async function getMetserviceData(stationId) {
   let windAverage = null;
   let windGust = null;
@@ -970,19 +802,7 @@ exports.stationWrapper = async function stationWrapper(source) {
       let data = null;
       const docData = doc.data();
 
-      if (source === 'harvest') {
-        if (docData.type === 'harvest') {
-          data = await getHarvestData(
-            docData.externalId,
-            docData.harvestWindAverageId,
-            docData.harvestWindGustId,
-            docData.harvestWindDirectionId,
-            docData.harvestTemperatureId,
-            docData.harvestLongInterval, // some harvest stations only update every 30 min
-            docData.harvestCookie // station 10243 needs PHPSESSID cookie for auth
-          );
-        }
-      } else if (source === 'metservice') {
+      if (source === 'metservice') {
         if (docData.type === 'metservice') {
           data = await getMetserviceData(docData.externalId);
         }
@@ -1042,6 +862,303 @@ exports.stationWrapper = async function stationWrapper(source) {
     }
 
     functions.logger.log('Weather station data updated.');
+  } catch (error) {
+    functions.logger.error(error);
+    return null;
+  }
+};
+
+async function processHarvestResponse(
+  sid,
+  configId,
+  graphId,
+  traceId,
+  longInterval,
+  format,
+  cookie
+) {
+  let date = new Date();
+  let utcYear = date.getUTCFullYear();
+  let utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  let utcDay = date.getUTCDate().toString().padStart(2, '0');
+  let utcHours = date.getUTCHours().toString().padStart(2, '0');
+  let utcMins = date.getUTCMinutes().toString().padStart(2, '0');
+  const dateTo = `${utcYear}-${utcMonth}-${utcDay}T${utcHours}:${utcMins}:00.000`;
+
+  const intervalMins = longInterval ? 40 : 20; // get data for last 20 min, with some exceptions
+  date = new Date(date.getTime() - intervalMins * 60 * 1000);
+  utcYear = date.getUTCFullYear();
+  utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  utcDay = date.getUTCDate().toString().padStart(2, '0');
+  utcHours = date.getUTCHours().toString().padStart(2, '0');
+  utcMins = date.getUTCMinutes().toString().padStart(2, '0');
+  const dateFrom = `${utcYear}-${utcMonth}-${utcDay}T${utcHours}:${utcMins}:00.000`;
+
+  try {
+    const cfg = {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Connection: 'keep-alive'
+      }
+    };
+    if (cookie) cfg.headers.Cookie = cookie;
+    const { data } = await axios.post(
+      `https://data1.harvest.com//php/site_graph_functions.php?retrieve_trace=&req_ref=${sid}_${configId}_${graphId}}`,
+      {
+        config_id: configId,
+        trace_id: traceId,
+        graph_id: graphId,
+        start_date: dateFrom,
+        start_date_stats: dateFrom,
+        end_date: dateTo
+      },
+      cfg
+    );
+
+    if (format === 'array') {
+      if (data && data.length) {
+        const d = data[0].data;
+        if (d && d.length) {
+          const d1 = d[d.length - 1];
+          return d1.data_value;
+        }
+      }
+    } else if (format === 'object') {
+      if (data && data['1']) {
+        const d = data['1'].data;
+        if (d && d.length) {
+          const d1 = d[d.length - 1];
+          return d1.data_value;
+        }
+      }
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return null;
+}
+
+async function getHarvestData(
+  stationId,
+  windAvgId,
+  windGustId,
+  windDirId,
+  tempId,
+  longInterval,
+  cookie
+) {
+  let ids = stationId.split('_');
+  if (ids.length != 2) {
+    return;
+  }
+  const sid = ids[0];
+  const configId = ids[1];
+
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  // wind avg
+  ids = windAvgId.split('_');
+  if (ids.length == 2) {
+    const result = await processHarvestResponse(
+      sid,
+      configId,
+      ids[0],
+      ids[1],
+      longInterval,
+      'object',
+      cookie
+    );
+    if (result) {
+      windAverage = result;
+    }
+  }
+
+  // wind gust
+  ids = windGustId.split('_');
+  if (ids.length == 2) {
+    const result = await processHarvestResponse(
+      sid,
+      configId,
+      ids[0],
+      ids[1],
+      longInterval,
+      'array',
+      cookie
+    );
+    if (result) {
+      windGust = result;
+    }
+  }
+
+  // wind direction
+  ids = windDirId.split('_');
+  if (ids.length == 2) {
+    const result = await processHarvestResponse(
+      sid,
+      configId,
+      ids[0],
+      ids[1],
+      longInterval,
+      'array',
+      cookie
+    );
+    if (result) {
+      windBearing = result;
+    }
+  }
+
+  // temperature
+  ids = tempId.split('_');
+  if (ids.length == 2) {
+    const result = await processHarvestResponse(
+      sid,
+      configId,
+      ids[0],
+      ids[1],
+      longInterval,
+      'array',
+      cookie
+    );
+    if (result) {
+      temperature = result;
+    }
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
+exports.harvestWrapper = async function harvestWrapper() {
+  try {
+    const db = getFirestore();
+    const snapshot = await db.collection('stations').where('type', '==', 'harvest').get();
+
+    if (snapshot.empty) {
+      functions.logger.error('No harvest stations found.');
+      return null;
+    }
+
+    const traceIds = [];
+    for (const doc of snapshot.docs) {
+      const docData = doc.data();
+      let temp = docData.harvestWindAverageId.split('_');
+      if (temp.length == 2) traceIds.push(temp[1]);
+      temp = docData.harvestWindGustId.split('_');
+      if (temp.length == 2) traceIds.push(temp[1]);
+      temp = docData.harvestWindDirectionId.split('_');
+      if (temp.length == 2) traceIds.push(temp[1]);
+      temp = docData.harvestTemperatureId.split('_');
+      if (temp.length == 2) traceIds.push(temp[1]);
+    }
+
+    let url = `https://live.harvest.com/api.php?api_key=${process.env.HARVEST_FENZ_KEY}&output_type=application%2Fjson&command_type=get_latest_data&trace_ids=`;
+    url += encodeURIComponent(`[${traceIds.join(',')}]`);
+    const { data } = await axios.get(url);
+
+    const date = getFlooredTime();
+    const dateUnix = date.getTime();
+    const json = [];
+    for (const doc of snapshot.docs) {
+      let d = {
+        windAverage: null,
+        windGust: null,
+        windBearing: null,
+        temperature: null
+      };
+      const docData = doc.data();
+
+      let temp = docData.harvestWindAverageId.split('_');
+      let temp1 = data.traces[temp[1]];
+      if (temp1 && !temp1.error && !temp1.unauthorised && temp1.value && temp1.unix_time) {
+        const age = (dateUnix / 1000 - temp1.unix_time) / 60;
+        if (age < 20 || (docData.harvestLongInterval && age < 40)) {
+          d.windAverage = temp1.value;
+        }
+      }
+
+      temp = docData.harvestWindGustId.split('_');
+      temp1 = data.traces[temp[1]];
+      if (temp1 && !temp1.error && !temp1.unauthorised && temp1.value && temp1.unix_time) {
+        const age = (dateUnix / 1000 - temp1.unix_time) / 60;
+        if (age < 20 || (docData.harvestLongInterval && age < 40)) {
+          d.windGust = temp1.value;
+        }
+      }
+
+      temp = docData.harvestWindDirectionId.split('_');
+      temp1 = data.traces[temp[1]];
+      if (temp1 && !temp1.error && !temp1.unauthorised && temp1.value && temp1.unix_time) {
+        const age = (dateUnix / 1000 - temp1.unix_time) / 60;
+        if (age < 20 || (docData.harvestLongInterval && age < 40)) {
+          d.windBearing = temp1.value;
+        }
+      }
+
+      temp = docData.harvestTemperatureId.split('_');
+      temp1 = data.traces[temp[1]];
+      if (temp1 && !temp1.error && !temp1.unauthorised && temp1.value && temp1.unix_time) {
+        const age = (dateUnix / 1000 - temp1.unix_time) / 60;
+        if (age < 20 || (docData.harvestLongInterval && age < 40)) {
+          d.temperature = temp1.value;
+        }
+      }
+
+      if (
+        d.windAverage == null &&
+        d.windGust == null &&
+        d.windBearing == null &&
+        d.temperature == null
+      ) {
+        d = await getHarvestData(
+          docData.externalId,
+          docData.harvestWindAverageId,
+          docData.harvestWindGustId,
+          docData.harvestWindDirectionId,
+          docData.harvestTemperatureId,
+          docData.harvestLongInterval, // some harvest stations only update every 30 min
+          docData.harvestCookie // station 10243 needs PHPSESSID cookie for auth
+        );
+      }
+
+      if (
+        d.windAverage != null ||
+        d.windGust != null ||
+        d.windBearing != null ||
+        d.temperature != null
+      ) {
+        functions.logger.log(`harvest data updated - ${docData.externalId}`);
+        functions.logger.log(d);
+
+        await saveData(
+          db,
+          d,
+          doc.id,
+          date,
+          json,
+          docData.name,
+          docData.type,
+          docData.coordinates._latitude,
+          docData.coordinates._longitude
+        );
+      }
+    }
+
+    if (json.length) {
+      // save json to storage
+      const bucket = getStorage().bucket();
+      const file = bucket.file(`data/processing/harvest-${json[0].timestamp}.json`);
+      await file.save(Buffer.from(JSON.stringify(json)));
+    }
+
+    functions.logger.log('Harvest data updated.');
   } catch (error) {
     functions.logger.error(error);
     return null;
