@@ -2,7 +2,7 @@
 
 <p align="center">
 <a href="https://www.zephyrapp.nz/">
-  <img src="https://github.com/kyzh0/zephyr/blob/main/client/public/logo192.png?raw=true" />
+  <img src="https://github.com/kyzh0/zephyr-firebase/blob/main/client/public/logo192.png?raw=true" />
   </a>
 </p>
 
@@ -71,7 +71,7 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 
 ### Clone the Repository
 
-`git clone https://github.com/kyzh0/zephyr.git`
+`git clone https://github.com/kyzh0/zephyr-firebase.git`
 
 ### Initialise Environment Variables
 
@@ -108,7 +108,7 @@ $ firebase deploy --only functions
 
 ## Contribute
 
-Spotted a bug, or got a new feature in mind? Open a new [issue](https://github.com/kyzh0/zephyr/issues), or even better, fork the repo and submit your own pull request! Any help on open issues is appreciated.
+Spotted a bug, or got a new feature in mind? Open a new [issue](https://github.com/kyzh0/zephyr-firebase/issues), or even better, fork the repo and submit your own pull request! Any help on open issues is appreciated.
 
 ## Acknowledgements
 
@@ -116,4 +116,4 @@ Thanks to Jonas Yang for providing the icons and logo design.
 
 ## License
 
-[MIT © 2024 Kyle Zhou](https://github.com/kyzh0/zephyr/blob/main/LICENSE.md)
+[MIT © 2024 Kyle Zhou](https://github.com/kyzh0/zephyr-firebase/blob/main/LICENSE.md)
