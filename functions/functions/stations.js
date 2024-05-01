@@ -654,12 +654,12 @@ async function getCentrePortData(stationId) {
         if (wind) {
           windAverage = wind['Wind Speed (Knots)(RAW)'] * 1.852; // data is in kt
           windGust = wind['Gust Speed (Knots)(RAW)'] * 1.852;
-          windBearing = wind['Wind Direction(RAW)'];
+          windBearing = Number(wind['Wind Direction(RAW)']);
         }
       } else {
         windAverage = data[0].WindSpd_01MnAvg * 1.852;
         windGust = data[0].WindGst_01MnMax * 1.852;
-        windBearing = data[0].WindDir_01MnAvg;
+        windBearing = Number(data[0].WindDir_01MnAvg);
       }
     }
   } catch (error) {
