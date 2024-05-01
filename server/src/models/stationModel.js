@@ -17,8 +17,7 @@ const schema = mongoose.Schema({
     coordinates: {
       type: [Number],
       required: true
-    },
-    required: true
+    }
   },
   externalLink: {
     type: String,
