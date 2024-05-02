@@ -100,7 +100,7 @@ $ cd ./server
 $ npm install
 
 # run the web server with nodemon
-$ npm run app
+$ npm run dev
 ```
 
 ## Contribute
