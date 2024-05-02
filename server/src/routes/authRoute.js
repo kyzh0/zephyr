@@ -1,6 +1,5 @@
 import express from 'express';
 import { User } from '../models/userModel.js';
-import md5 from 'md5';
 
 const router = express.Router();
 
@@ -11,7 +10,7 @@ router.post('/', async (req, res) => {
     res.status(401).send();
     return;
   }
-  res.json({ key: md5(username + password) });
+  res.json({ key: user.key });
 });
 
 export default router;

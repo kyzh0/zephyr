@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../firebase';
-import * as geofire from 'geofire-common';
+import { addStation } from '../services/stationService';
+import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 
 import Typography from '@mui/material/Typography';
@@ -14,7 +14,6 @@ import Box from '@mui/material/Box';
 import MenuItem from '@mui/material/MenuItem';
 import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { addDoc, collection, GeoPoint } from 'firebase/firestore';
 
 export default function AdminAddStation() {
   const navigate = useNavigate();
@@ -22,6 +21,7 @@ export default function AdminAddStation() {
     navigate('/');
   }
 
+  const { userKey } = useContext(AppContext);
   const [type, setType] = useState('');
   const [loading, setLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -175,42 +175,30 @@ export default function AdminAddStation() {
     }
 
     try {
-      let elevation = 0;
+      const station = {
+        name: name,
+        type: type,
+        coordinates: [Math.round(lon * 1000000) / 1000000, Math.round(lat * 1000000) / 1000000],
+        externalLink: externalLink,
+        externalId: externalId
+      };
       const { data } = await axios.get(
         `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`
       );
       if (data.elevation && data.elevation.length) {
-        elevation = data.elevation[0];
+        station.elevation = data.elevation[0];
       }
-
-      const station = {
-        name: name,
-        externalId: harvestConfigId ? `${externalId}_${harvestConfigId}` : externalId,
-        externalLink: externalLink,
-        type: type,
-        coordinates: new GeoPoint(
-          Math.round(lat * 1000000) / 1000000, // round to 6dp
-          Math.round(lon * 1000000) / 1000000
-        ),
-        geohash: geofire.geohashForLocation([lat, lon]),
-        currentAverage: null,
-        currentGust: null,
-        currentBearing: null,
-        currentTemperature: null,
-        elevation: elevation,
-        lastUpdate: new Date()
-      };
+      if (bearings) {
+        station.validBearings = bearings;
+      }
       if (type === 'harvest') {
         station.harvestWindAverageId = `${harvestWindAvgGraphId}_${harvestWindAvgTraceId}`;
         station.harvestWindGustId = `${harvestWindGustGraphId}_${harvestWindGustTraceId}`;
         station.harvestWindDirectionId = `${harvestWindDirGraphId}_${harvestWindDirTraceId}`;
         station.harvestTemperatureId = `${harvestTempGraphId}_${harvestTempTraceId}`;
       }
-      if (bearings) {
-        station.validBearings = bearings;
-      }
 
-      await addDoc(collection(db, 'stations'), station);
+      await addStation(station, userKey);
 
       setLoading(false);
       handleClose();

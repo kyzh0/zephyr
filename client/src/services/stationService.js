@@ -58,3 +58,11 @@ export async function loadStationData(id) {
     console.error(error);
   }
 }
+
+export async function addStation(station, key) {
+  try {
+    await axios.post(`${APIROOT}/stations?key=${key}`, station);
+  } catch (error) {
+    console.error(error);
+  }
+}

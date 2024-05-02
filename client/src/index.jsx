@@ -13,7 +13,7 @@ import Welcome from './routes/Welcome';
 import Help from './routes/Help';
 import AdminSignIn from './routes/AdminSignIn';
 import AdminDashboard from './routes/AdminDashboard';
-// import AdminAddStation from './routes/AdminAddStation';
+import AdminAddStation from './routes/AdminAddStation';
 // import AdminAddWebcam from './routes/AdminAddWebcam';
 import AdminErrors from './routes/AdminErrors';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -58,10 +58,10 @@ const router = createBrowserRouter([
             path: 'admin/dashboard',
             element: <AdminDashboard />
           },
-          // {
-          //   path: 'admin/add-station',
-          //   element: <AdminAddStation />
-          // },
+          {
+            path: 'admin/add-station',
+            element: <AdminAddStation />
+          },
           // {
           //   path: 'admin/add-webcam',
           //   element: <AdminAddWebcam />

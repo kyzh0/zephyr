@@ -2,6 +2,7 @@ import express from 'express';
 import * as geofire from 'geofire-common';
 import { ObjectId } from 'mongodb';
 import { Station } from '../models/stationModel.js';
+import { User } from '../models/userModel.js';
 
 const router = express.Router();
 
@@ -49,6 +50,58 @@ router.get('/', async (req, res) => {
   }
 
   res.json(stations);
+});
+
+router.post('/', async (req, res) => {
+  const user = await User.findOne({ key: req.query.key });
+  if (!user) {
+    res.status(401).send();
+    return;
+  }
+
+  const {
+    name,
+    type,
+    coordinates,
+    externalLink,
+    externalId,
+    elevation,
+    validBearings,
+    harvestWindAverageId,
+    harvestWindGustId,
+    harvestWindDirectionId,
+    harvestTemperatureId
+  } = req.body;
+
+  const station = new Station({
+    name: name,
+    type: type,
+    location: {
+      type: 'Point',
+      coordinates: coordinates
+    },
+    externalLink: externalLink,
+    externalId: externalId,
+    elevation: elevation,
+    currentAverage: null,
+    currentGust: null,
+    currentBearing: null,
+    currentTemperature: null,
+    lastUpdate: new Date()
+  });
+
+  if (validBearings) {
+    station.validBearings = validBearings;
+  }
+  if (harvestWindAverageId && harvestWindGustId && harvestWindDirectionId && harvestTemperatureId) {
+    station.harvestWindAverageId = harvestWindAverageId;
+    station.harvestWindGustId = harvestWindGustId;
+    station.harvestWindDirectionId = harvestWindDirectionId;
+    station.harvestTemperatureId = harvestTemperatureId;
+  }
+
+  await station.save();
+  res.status(204).send();
 });
 
 router.get('/:id', async (req, res) => {

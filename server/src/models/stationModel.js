@@ -33,6 +33,7 @@ const schema = mongoose.Schema({
   currentBearing: Number,
   currentTemperature: Number,
   elevation: Number,
+  validBearings: String,
   isError: Boolean,
   isOffline: Boolean,
   data: [
