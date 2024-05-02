@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../firebase';
+import { AppContext } from '../context/AppContext';
 
+import { addCam } from '../services/camService';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
@@ -11,7 +12,6 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { addDoc, collection, GeoPoint } from 'firebase/firestore';
 
 export default function AdminAddWebcam() {
   const navigate = useNavigate();
@@ -19,6 +19,7 @@ export default function AdminAddWebcam() {
     navigate('/');
   }
 
+  const { userKey } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -90,15 +91,9 @@ export default function AdminAddWebcam() {
         externalId: externalId,
         externalLink: externalLink,
         type: type,
-        coordinates: new GeoPoint(
-          Math.round(lat * 1000000) / 1000000, // round to 6dp
-          Math.round(lon * 1000000) / 1000000
-        ),
-        currentTime: new Date(),
-        lastUpdate: new Date()
+        coordinates: [Math.round(lon * 1000000) / 1000000, Math.round(lat * 1000000) / 1000000]
       };
-
-      await addDoc(collection(db, 'cams'), cam);
+      await addCam(cam, userKey);
 
       setLoading(false);
       handleClose();

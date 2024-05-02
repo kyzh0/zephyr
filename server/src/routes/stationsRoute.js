@@ -86,8 +86,7 @@ router.post('/', async (req, res) => {
     currentAverage: null,
     currentGust: null,
     currentBearing: null,
-    currentTemperature: null,
-    lastUpdate: new Date()
+    currentTemperature: null
   });
 
   if (validBearings) {

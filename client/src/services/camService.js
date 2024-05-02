@@ -36,3 +36,11 @@ export async function loadCamImages(id) {
     console.error(error);
   }
 }
+
+export async function addCam(cam, key) {
+  try {
+    await axios.post(`${APIROOT}/cams?key=${key}`, cam);
+  } catch (error) {
+    console.error(error);
+  }
+}

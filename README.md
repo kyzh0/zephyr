@@ -2,7 +2,7 @@
 
 <p align="center">
 <a href="https://www.zephyrapp.nz/">
-  <img src="https://github.com/kyzh0/zephyr-firebase/blob/main/client/public/logo192.png?raw=true" />
+  <img src="https://github.com/kyzh0/zephyr/blob/main/client/public/logo192.png?raw=true" />
   </a>
 </p>
 
@@ -57,25 +57,25 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 ### Frontend
 
 - React
-- Mapbox GL
 - MUI
+- Mapbox GL
 - Recharts
 
 ### Backend
 
-- Cloud Firestore
-- Google Cloud Functions
-- Firebase Authentication
+- Node JS
+- Express
+- MongoDB
 
 ## Setup
 
 ### Clone the Repository
 
-`git clone https://github.com/kyzh0/zephyr-firebase.git`
+`git clone https://github.com/kyzh0/zephyr.git`
 
 ### Initialise Environment Variables
 
-Follow the instructions in `client/.env.example` and `functions/.env.example` to set up your own environment variables.
+Follow the instructions in `client/.env.example` and `server/.env.example` to set up your own environment variables.
 
 ### Client
 
@@ -90,25 +90,22 @@ $ npm install
 $ npm run start
 ```
 
-### Functions
+### Server
 
 ```
 # go to directory
-$ cd ./functions
+$ cd ./server
 
 # install dependencies
 $ npm install
 
-# run emulators
-$ firebase emulators:start
-
-# deploy functions
-$ firebase deploy --only functions
+# run the web server with nodemon
+$ npm run app
 ```
 
 ## Contribute
 
-Spotted a bug, or got a new feature in mind? Open a new [issue](https://github.com/kyzh0/zephyr-firebase/issues), or even better, fork the repo and submit your own pull request! Any help on open issues is appreciated.
+Spotted a bug, or got a new feature in mind? Open a new [issue](https://github.com/kyzh0/zephyr/issues), or even better, fork the repo and submit your own pull request! Any help on open issues is appreciated.
 
 ## Acknowledgements
 
@@ -116,4 +113,4 @@ Thanks to Jonas Yang for providing the icons and logo design.
 
 ## License
 
-[MIT © 2024 Kyle Zhou](https://github.com/kyzh0/zephyr-firebase/blob/main/LICENSE.md)
+[MIT © 2024 Kyle Zhou](https://github.com/kyzh0/zephyr/blob/main/LICENSE.md)

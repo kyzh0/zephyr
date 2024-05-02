@@ -1,6 +1,7 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
 import { Cam } from '../models/camModel.js';
+import { User } from '../models/userModel.js';
 
 const router = express.Router();
 
@@ -15,6 +16,30 @@ router.get('/', async (req, res) => {
 
   const cams = await Cam.find(query, { images: 0 }).sort({ currentTime: 1 });
   res.json(cams);
+});
+
+router.post('/', async (req, res) => {
+  const user = await User.findOne({ key: req.query.key });
+  if (!user) {
+    res.status(401).send();
+    return;
+  }
+
+  const { name, type, coordinates, externalLink, externalId } = req.body;
+
+  const cam = new Cam({
+    name: name,
+    type: type,
+    location: {
+      type: 'Point',
+      coordinates: coordinates
+    },
+    externalLink: externalLink,
+    externalId: externalId
+  });
+
+  await cam.save();
+  res.status(204).send();
 });
 
 router.get('/:id', async (req, res) => {
