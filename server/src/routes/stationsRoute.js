@@ -76,7 +76,7 @@ router.get('/:id/data', async (req, res) => {
     return;
   }
 
-  const data = await Station.aggregate([
+  const result = await Station.aggregate([
     {
       $match: { _id: new ObjectId(id) }
     },
@@ -95,12 +95,12 @@ router.get('/:id/data', async (req, res) => {
     }
   ]);
 
-  if (!data.length) {
+  if (!result.length) {
     res.json([]);
     return;
   }
 
-  res.json(data[0].data);
+  res.json(result[0].data);
 });
 
 export default router;
