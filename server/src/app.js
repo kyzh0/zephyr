@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
+import authRoute from './routes/authRoute.js';
 import stationsRoute from './routes/stationsRoute.js';
 import camsRoute from './routes/camsRoute.js';
 
@@ -15,6 +16,7 @@ mongoose.connect(process.env.CONNECTION_STRING);
 
 app.get('/', (req, res) => res.send('Hello world 2!'));
 
+app.use('/auth', authRoute);
 app.use('/stations', stationsRoute);
 app.use('/cams', camsRoute);
 

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, getUser } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { AppContext } from '../context/AppContext';
+import axios from 'axios';
 
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -13,22 +13,24 @@ import Box from '@mui/material/Box';
 import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
 
+import { APIROOT } from '../constants';
+
 export default function AdminSignIn() {
   const navigate = useNavigate();
   function handleClose() {
     navigate('/');
   }
 
-  const user = getUser();
+  const { userKey, setUserKey } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    if (user) {
+    if (userKey) {
       navigate('/admin/dashboard');
     }
-  }, [user]);
+  }, [userKey]);
 
   async function handleSubmit(e) {
     if (loading) {
@@ -42,17 +44,18 @@ export default function AdminSignIn() {
     setPasswordError(false);
 
     const data = new FormData(e.currentTarget);
-    const email = data.get('email').trim();
+    const username = data.get('username').trim();
     const password = data.get('password').trim();
 
     // input validation
-    if (!email || !password) {
+    if (!username || !password) {
       setLoading(false);
       return;
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { data } = await axios.post(`${APIROOT}/auth`, { username, password });
+      setUserKey(data.key);
       setLoading(false);
     } catch {
       setPasswordError(true);
@@ -82,10 +85,10 @@ export default function AdminSignIn() {
               <TextField
                 margin="normal"
                 fullWidth
-                id="email"
-                label="Email"
-                name="email"
-                autoComplete="email"
+                id="username"
+                label="Username"
+                name="username"
+                autoComplete="username"
               />
               <TextField
                 margin="normal"

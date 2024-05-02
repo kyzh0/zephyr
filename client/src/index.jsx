@@ -11,12 +11,12 @@ import Webcam from './routes/Webcam';
 import GridView from './routes/GridView';
 import Welcome from './routes/Welcome';
 import Help from './routes/Help';
-// import AdminSignIn from './routes/AdminSignIn';
-// import AdminDashboard from './routes/AdminDashboard';
+import AdminSignIn from './routes/AdminSignIn';
+import AdminDashboard from './routes/AdminDashboard';
 // import AdminAddStation from './routes/AdminAddStation';
 // import AdminAddWebcam from './routes/AdminAddWebcam';
 // import AdminErrors from './routes/AdminErrors';
-// import ProtectedRoute from './routes/ProtectedRoute';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 const router = createBrowserRouter([
   {
@@ -46,32 +46,32 @@ const router = createBrowserRouter([
       {
         path: 'help',
         element: <Help />
+      },
+      {
+        path: 'admin/sign-in',
+        element: <AdminSignIn />
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: 'admin/dashboard',
+            element: <AdminDashboard />
+          }
+          // {
+          //   path: 'admin/add-station',
+          //   element: <AdminAddStation />
+          // },
+          // {
+          //   path: 'admin/add-webcam',
+          //   element: <AdminAddWebcam />
+          // },
+          // {
+          //   path: 'admin/errors',
+          //   element: <AdminErrors />
+          // }
+        ]
       }
-      // {
-      //   path: 'admin/sign-in',
-      //   element: <AdminSignIn />
-      // },
-      // {
-      //   element: <ProtectedRoute />,
-      //   children: [
-      //     {
-      //       path: 'admin/dashboard',
-      //       element: <AdminDashboard />
-      //     },
-      //     {
-      //       path: 'admin/add-station',
-      //       element: <AdminAddStation />
-      //     },
-      //     {
-      //       path: 'admin/add-webcam',
-      //       element: <AdminAddWebcam />
-      //     },
-      //     {
-      //       path: 'admin/errors',
-      //       element: <AdminErrors />
-      //     }
-      //   ]
-      // }
     ]
   }
 ]);

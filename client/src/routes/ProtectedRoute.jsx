@@ -1,15 +1,11 @@
+import { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Navigate, Outlet } from 'react-router-dom';
-import { getAuth } from 'firebase/auth';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { AppContext } from '../context/AppContext';
 
 export default function ProtectedRoute({ children }) {
-  const auth = getAuth();
-  const [user, loading] = useAuthState(auth);
-  if (loading) {
-    return;
-  }
-  if (!user) {
+  const { userKey } = useContext(AppContext);
+  if (!userKey) {
     return <Navigate to="/" replace />;
   }
   return children ? children : <Outlet />;

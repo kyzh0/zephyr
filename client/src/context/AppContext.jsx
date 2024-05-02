@@ -6,6 +6,7 @@ export const AppContext = createContext(null);
 export function AppProvider({ children }) {
   const [refreshedStations, setRefreshedStations] = useState([]);
   const [refreshedWebcams, setRefreshedWebcams] = useState([]);
+  const [userKey, setUserKey] = useState(null);
 
   return (
     <AppContext.Provider
@@ -13,7 +14,9 @@ export function AppProvider({ children }) {
         refreshedStations,
         setRefreshedStations,
         refreshedWebcams,
-        setRefreshedWebcams
+        setRefreshedWebcams,
+        userKey,
+        setUserKey
       }}
     >
       {children}

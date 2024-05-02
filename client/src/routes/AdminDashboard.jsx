@@ -1,6 +1,6 @@
+import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../firebase';
-import { signOut } from 'firebase/auth';
+import { AppContext } from '../context/AppContext';
 
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
 
 export default function AdminDashboard() {
+  const { setUserKey } = useContext(AppContext);
   const navigate = useNavigate();
   function handleClose() {
     navigate('/');
@@ -19,7 +20,7 @@ export default function AdminDashboard() {
 
   async function handleSignOut() {
     try {
-      await signOut(auth);
+      setUserKey(null);
       navigate('/');
     } catch (error) {
       console.error(error);
