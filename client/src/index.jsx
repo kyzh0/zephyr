@@ -15,7 +15,7 @@ import AdminSignIn from './routes/AdminSignIn';
 import AdminDashboard from './routes/AdminDashboard';
 // import AdminAddStation from './routes/AdminAddStation';
 // import AdminAddWebcam from './routes/AdminAddWebcam';
-// import AdminErrors from './routes/AdminErrors';
+import AdminErrors from './routes/AdminErrors';
 import ProtectedRoute from './routes/ProtectedRoute';
 
 const router = createBrowserRouter([
@@ -57,7 +57,7 @@ const router = createBrowserRouter([
           {
             path: 'admin/dashboard',
             element: <AdminDashboard />
-          }
+          },
           // {
           //   path: 'admin/add-station',
           //   element: <AdminAddStation />
@@ -66,10 +66,10 @@ const router = createBrowserRouter([
           //   path: 'admin/add-webcam',
           //   element: <AdminAddWebcam />
           // },
-          // {
-          //   path: 'admin/errors',
-          //   element: <AdminErrors />
-          // }
+          {
+            path: 'admin/errors',
+            element: <AdminErrors />
+          }
         ]
       }
     ]

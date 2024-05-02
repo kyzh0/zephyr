@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listStationsWithErrors } from '../firebase';
+import { listStationsWithErrors } from '../services/stationService';
 
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -60,8 +60,8 @@ export default function AdminErrors() {
                     return (
                       <ListItem
                         disablePadding
-                        key={station.id}
-                        onClick={() => navigate(`../stations/${station.id}`)}
+                        key={station._id}
+                        onClick={() => navigate(`../stations/${station._id}`)}
                       >
                         <ListItemButton>
                           <Stack
