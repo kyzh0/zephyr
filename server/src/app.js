@@ -8,6 +8,7 @@ import authRoute from './routes/authRoute.js';
 import stationRoute from './routes/stationRoute.js';
 import camRoute from './routes/camRoute.js';
 
+import { webcamWrapper } from './services/camService.js';
 import {
   stationWrapper,
   holfuyWrapper,
@@ -20,6 +21,7 @@ import {
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 dotenv.config();
 
 mongoose.connect(process.env.CONNECTION_STRING);
@@ -30,10 +32,15 @@ app.use('/stations', stationRoute);
 app.use('/cams', camRoute);
 
 app.get('/test', async () => {
-  await removeOldData();
+  await webcamWrapper();
 });
 
 // cron jobs
+cron.schedule('*/10 * * * *', async () => {
+  const ts = Date.now();
+  await webcamWrapper();
+  console.info(`Update webcams - ${Date.now() - ts}ms elapsed.`);
+});
 cron.schedule('*/10 * * * *', async () => {
   const ts = Date.now();
   await stationWrapper();

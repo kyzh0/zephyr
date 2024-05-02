@@ -21,6 +21,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 import './Map.css';
 
+import { APIROOT } from '../constants';
+
 export default function Map() {
   let theme = createTheme({
     palette: {
@@ -351,7 +353,7 @@ export default function Map() {
 
       const img = document.createElement('img');
       img.width = 150;
-      img.src = currentUrl;
+      img.src = `${APIROOT}/${currentUrl}`;
       img.className = 'webcam-img';
 
       const text = document.createElement('span');
@@ -567,7 +569,10 @@ export default function Map() {
       for (const child of item.children) {
         if (child.className === 'webcam-img') {
           // don't display cams that havent updated in last 24h
-          child.src = timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000 ? '' : currentUrl;
+          child.src =
+            timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000
+              ? ''
+              : `${APIROOT}${currentUrl}`;
         } else if (child.className === 'webcam-text-date') {
           if (timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000) {
             child.innerHTML = 'No images in the last 24h.';

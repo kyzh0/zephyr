@@ -904,6 +904,7 @@ async function saveData(station, data, date) {
     temperature = null;
   }
 
+  // update station
   station.lastUpdate = new Date();
   station.currentAverage = avg ?? null;
   station.currentGust = gust ?? null;
