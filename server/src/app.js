@@ -3,7 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-import { Station } from './models/stationModel.js';
+import stationsRoute from './routes/stationsRoute.js';
 
 const app = express();
 app.use(cors());
@@ -13,10 +13,8 @@ dotenv.config();
 mongoose.connect(process.env.CONNECTION_STRING);
 
 app.get('/', (req, res) => res.send('Hello world 2!'));
-app.get('/test', async (req, res) => {
-  const stations = await Station.find();
-  res.json(stations);
-});
+
+app.use('/stations', stationsRoute);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
