@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { format } from 'date-fns';
-import { getStationById, loadStationData as loadStationData } from '../firebase';
+import { getStationById, loadStationData } from '../services/stationService';
 import { AppContext } from '../context/AppContext';
 import { getStationTypeName, getWindDirectionFromBearing, getWindColor } from '../helpers/utils';
 
@@ -92,9 +92,9 @@ export default function Station() {
       }
 
       const data = await loadStationData(id);
-      data.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds)); // time asc
+      data.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()); // time asc
       for (const d of data) {
-        d.timeLabel = format(d.time.toDate(), 'HH:mm');
+        d.timeLabel = format(new Date(d.time), 'HH:mm');
         d.windAverageKt = d.windAverage == null ? null : Math.round(d.windAverage / 1.852);
         d.windGustKt = d.windGust == null ? null : Math.round(d.windGust / 1.852);
         if (validBearings.length) {
@@ -348,12 +348,12 @@ export default function Station() {
                           <TableCell variant="head"></TableCell>
                           {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                             <TableCell
-                              key={d.time.seconds}
+                              key={d.time}
                               align="center"
                               sx={{
                                 padding: bigScreen ? '2px' : '0px 2px 0px 2px',
                                 fontSize: '12px',
-                                backgroundColor: d.time.toDate().getMinutes() == 0 ? '#e6e6e6' : ''
+                                backgroundColor: new Date(d.time).getMinutes() == 0 ? '#e6e6e6' : ''
                               }}
                             >
                               {d.timeLabel}
@@ -364,7 +364,7 @@ export default function Station() {
                           <TableCell variant="head">Avg</TableCell>
                           {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                             <TableCell
-                              key={d.time.seconds}
+                              key={d.time}
                               align="center"
                               sx={{
                                 padding: bigScreen ? '2px' : '0px',
@@ -383,7 +383,7 @@ export default function Station() {
                           <TableCell variant="head">Gust</TableCell>
                           {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                             <TableCell
-                              key={d.time.seconds}
+                              key={d.time}
                               align="center"
                               sx={{
                                 padding: bigScreen ? '2px' : '0px',
@@ -402,7 +402,7 @@ export default function Station() {
                           <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
                           {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                             <TableCell
-                              key={d.time.seconds}
+                              key={d.time}
                               align="center"
                               sx={{
                                 padding: bigScreen ? '2px' : '0px',
@@ -420,7 +420,7 @@ export default function Station() {
                           <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
                           {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                             <TableCell
-                              key={d.time.seconds}
+                              key={d.time}
                               align="center"
                               sx={{
                                 padding: 0,
@@ -459,7 +459,7 @@ export default function Station() {
                           <TableCell variant="head"></TableCell>
                           {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                             <TableCell
-                              key={d.time.seconds}
+                              key={d.time}
                               align="center"
                               sx={{
                                 padding: bigScreen ? '2px' : '0px',
@@ -477,7 +477,7 @@ export default function Station() {
                           <TableCell variant="head"></TableCell>
                           {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                             <TableCell
-                              key={d.time.seconds}
+                              key={d.time}
                               align="center"
                               sx={{
                                 padding: bigScreen ? '2px' : '0px',

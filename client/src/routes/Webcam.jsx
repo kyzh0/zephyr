@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCamById, loadCamImages } from '../firebase';
 import { AppContext } from '../context/AppContext';
+import { getCamById, loadCamImages } from '../services/camService';
 
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -32,10 +32,10 @@ export default function Webcam() {
       const cam = await getCamById(id);
       if (!cam) navigate('/');
       setWebcam(cam);
-      if (Date.now() - cam.currentTime.seconds * 1000 >= 24 * 60 * 60 * 1000) return;
+      if (Date.now() - new Date(cam.currentTime).getTime() >= 24 * 60 * 60 * 1000) return;
 
       const images = await loadCamImages(id);
-      images.sort((a, b) => parseFloat(a.time.seconds) - parseFloat(b.time.seconds)); // time asc
+      images.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()); // time asc
       setImages(images);
       setSelectedIndex(images.length - 1);
     } catch (error) {
@@ -105,7 +105,7 @@ export default function Webcam() {
               </IconButton>
             </Stack>
             {webcam ? (
-              Date.now() - webcam.currentTime.seconds * 1000 >= 24 * 60 * 60 * 1000 ? (
+              Date.now() - new Date(webcam.currentTime).getTime() >= 24 * 60 * 60 * 1000 ? (
                 <Typography component="h1" variant="h5" sx={{ mt: 2, color: 'red' }}>
                   No images in the last 24h.
                 </Typography>
@@ -135,13 +135,15 @@ export default function Webcam() {
                       ) {
                         img.loaded = true;
                         return (
-                          <div key={img.id}>
+                          <div key={img.time}>
                             <img width="100%" src={img.url} />
-                            <p style={{ margin: 0 }}>{format(img.time.toDate(), 'dd MMM HH:mm')}</p>
+                            <p style={{ margin: 0 }}>
+                              {format(new Date(img.time), 'dd MMM HH:mm')}
+                            </p>
                           </div>
                         );
                       } else {
-                        return <div key={img.id} />;
+                        return <div key={img.time} />;
                       }
                     })}
                   </Carousel>

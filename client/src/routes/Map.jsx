@@ -2,16 +2,11 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { format } from 'date-fns';
-import {
-  getCamById,
-  getStationById,
-  listCams,
-  listCamsUpdatedSince,
-  listStations,
-  listStationsUpdatedSince
-} from '../firebase';
 import { AppContext } from '../context/AppContext';
 import { getWindDirectionFromBearing } from '../helpers/utils';
+
+import { getStationById, listStations, listStationsUpdatedSince } from '../services/stationService';
+import { getCamById, listCams, listCamsUpdatedSince } from '../services/camService';
 
 import { createTheme, ThemeProvider } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -173,7 +168,7 @@ export default function Map() {
         type: 'Feature',
         properties: {
           name: station.name,
-          dbId: station.id,
+          dbId: station._id,
           currentAverage: avg,
           currentGust: gust,
           currentBearing:
@@ -181,10 +176,7 @@ export default function Map() {
           validBearings: station.validBearings,
           isOffline: station.isOffline
         },
-        geometry: {
-          type: 'Point',
-          coordinates: [station.coordinates._long, station.coordinates._lat]
-        }
+        geometry: station.location
       };
       // cwu stations sometimes show avg=0 even when gust is high
       if (station.type === 'cwu' && avg == 0 && gust - avg > 5) {
@@ -207,14 +199,11 @@ export default function Map() {
         type: 'Feature',
         properties: {
           name: cam.name,
-          dbId: cam.id,
-          currentTime: cam.currentTime,
+          dbId: cam._id,
+          currentTime: new Date(cam.currentTime),
           currentUrl: cam.currentUrl
         },
-        geometry: {
-          type: 'Point',
-          coordinates: [cam.coordinates._long, cam.coordinates._lat]
-        }
+        geometry: cam.location
       };
       geoJson.features.push(feature);
     }
@@ -371,7 +360,7 @@ export default function Map() {
 
       const text1 = document.createElement('span');
       text1.className = 'webcam-text-date';
-      text1.innerHTML = format(currentTime.toDate(), 'dd MMM HH:mm');
+      text1.innerHTML = format(currentTime, 'dd MMM HH:mm');
 
       const el = document.createElement('div');
       el.style.backgroundColor = `white`;
@@ -383,7 +372,7 @@ export default function Map() {
         navigate(`/webcams/${dbId}`);
       });
       el.appendChild(text);
-      if (timestamp - currentTime.seconds * 1000 > 24 * 60 * 60 * 1000) {
+      if (timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000) {
         // don't display cams that havent updated in last 24h
         img.src = '';
         text1.innerHTML = 'No images in the last 24h.';
@@ -412,7 +401,7 @@ export default function Map() {
         : current;
     });
     const stations = await listStationsUpdatedSince(
-      new Date(Number(newestMarker.marker.dataset.timestamp))
+      Math.round(Number(newestMarker.marker.dataset.timestamp) / 1000)
     );
     let geoJson = getStationGeoJson(stations);
     if (!geoJson || !geoJson.features.length) {
@@ -528,7 +517,9 @@ export default function Map() {
     const newestMarker = webcamMarkers.reduce((prev, current) => {
       return prev && prev.dataset.timestamp > current.dataset.timestamp ? prev : current;
     });
-    const webcams = await listCamsUpdatedSince(new Date(Number(newestMarker.dataset.timestamp)));
+    const webcams = await listCamsUpdatedSince(
+      Math.round(Number(newestMarker.dataset.timestamp) / 1000)
+    );
     let geoJson = getWebcamGeoJson(webcams);
     if (!geoJson || !geoJson.features.length) {
       // check for missed updates
@@ -576,14 +567,13 @@ export default function Map() {
       for (const child of item.children) {
         if (child.className === 'webcam-img') {
           // don't display cams that havent updated in last 24h
-          child.src =
-            timestamp - currentTime.seconds * 1000 > 24 * 60 * 60 * 1000 ? '' : currentUrl;
+          child.src = timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000 ? '' : currentUrl;
         } else if (child.className === 'webcam-text-date') {
-          if (timestamp - currentTime.seconds * 1000 > 24 * 60 * 60 * 1000) {
+          if (timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000) {
             child.innerHTML = 'No images in the last 24h.';
             child.style.color = 'red';
           } else {
-            child.innerHTML = format(currentTime.toDate(), 'dd MMM HH:mm');
+            child.innerHTML = format(currentTime, 'dd MMM HH:mm');
             child.style.color = '';
           }
         }

@@ -1,0 +1,38 @@
+import axios from 'axios';
+import { APIROOT } from '../constants';
+
+export async function getCamById(id) {
+  try {
+    const { data } = await axios.get(`${APIROOT}/cams/${id}`);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function listCams() {
+  try {
+    const { data } = await axios.get(`${APIROOT}/cams`);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function listCamsUpdatedSince(unixTime) {
+  try {
+    const { data } = await axios.get(`${APIROOT}/cams?unixTimeFrom=${unixTime}`);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function loadCamImages(id) {
+  try {
+    const { data } = await axios.get(`${APIROOT}/cams/${id}/images`);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+}
