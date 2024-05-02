@@ -3,6 +3,7 @@ import * as fns from 'date-fns';
 
 import { Client } from '../models/clientModel.js';
 import { Station } from '../models/stationModel.js';
+import { Output } from '../models/outputModel.js';
 
 const router = express.Router();
 
@@ -109,4 +110,53 @@ router.get('/geojson', async (req, res) => {
   res.json(geoJson);
 });
 
+router.get('/json-output', async (req, res) => {
+  const result = [];
+
+  try {
+    const auth = await authenticateApiKey(req.query.key);
+    if (!auth.success) {
+      res.status(auth.httpCode).json({ error: auth.error });
+      return;
+    }
+
+    let dateFrom = null;
+    let dateTo = null;
+    if (req.query.dateFrom) {
+      const temp = Number(req.query.dateFrom);
+      if (!isNaN(temp)) {
+        dateFrom = new Date(temp * 1000);
+      } else {
+        dateFrom = new Date(req.query.dateFrom);
+      }
+    }
+    if (req.query.dateTo) {
+      const temp = Number(req.query.dateTo);
+      if (!isNaN(temp)) {
+        dateTo = new Date(temp * 1000);
+      } else {
+        dateTo = new Date(req.query.dateTo);
+      }
+    }
+
+    const query = {};
+    if (dateFrom != null && !isNaN(dateFrom)) query.time = { $gte: dateFrom };
+    if (dateTo != null && !isNaN(dateTo)) {
+      if (query.time) query.time.$lte = dateTo;
+      else query.time = { $lte: dateTo };
+    }
+
+    const output = await Output.find(query).sort({ time: 1 });
+    for (const o of output) {
+      result.push({
+        time: new Date(o.time).getTime() / 1000,
+        path: o.path
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  res.json(result);
+});
 export default router;

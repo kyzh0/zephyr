@@ -3,6 +3,7 @@ import * as fns from 'date-fns';
 import fs from 'fs/promises';
 
 import { Station } from '../models/stationModel.js';
+import { Output } from '../models/outputModel.js';
 
 function getFlooredTime() {
   // floor data timestamp to 10 min
@@ -1161,8 +1162,14 @@ export async function jsonOutputWrapper() {
     });
     const dir = `public/data/${fns.format(date, 'yyyy/MM/dd')}`;
     await fs.mkdir(dir, { recursive: true });
+    const path = `${dir}/zephyr-scrape-${date.getTime() / 1000}.json`;
+    await fs.writeFile(path, JSON.stringify(json));
 
-    await fs.writeFile(`${dir}/zephyr-scrape-${date.getTime() / 1000}.json`, JSON.stringify(json));
+    const output = new Output({
+      time: date,
+      path: path.replace('public/', '')
+    });
+    await output.save();
   } catch (error) {
     console.error(error);
   }
