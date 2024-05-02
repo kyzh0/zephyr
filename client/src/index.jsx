@@ -8,9 +8,9 @@ import './index.css';
 import Map from './routes/Map';
 import Station from './routes/Station';
 import Webcam from './routes/Webcam';
-// import GridView from './routes/GridView';
-// import Welcome from './routes/Welcome';
-// import Help from './routes/Help';
+import GridView from './routes/GridView';
+import Welcome from './routes/Welcome';
+import Help from './routes/Help';
 // import AdminSignIn from './routes/AdminSignIn';
 // import AdminDashboard from './routes/AdminDashboard';
 // import AdminAddStation from './routes/AdminAddStation';
@@ -34,19 +34,19 @@ const router = createBrowserRouter([
       {
         path: 'webcams/:id',
         element: <Webcam />
+      },
+      {
+        path: 'grid',
+        element: <GridView />
+      },
+      {
+        path: 'welcome',
+        element: <Welcome />
+      },
+      {
+        path: 'help',
+        element: <Help />
       }
-      // {
-      //   path: 'grid',
-      //   element: <GridView />
-      // },
-      // {
-      //   path: 'welcome',
-      //   element: <Welcome />
-      // },
-      // {
-      //   path: 'help',
-      //   element: <Help />
-      // },
       // {
       //   path: 'admin/sign-in',
       //   element: <AdminSignIn />

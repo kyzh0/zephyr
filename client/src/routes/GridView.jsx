@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import * as geofire from 'geofire-common';
-import { listStationsUpdatedSince, listStationsWithinRadius } from '../firebase';
+import { listStationsUpdatedSince, listStationsWithinRadius } from '../services/stationService';
 import { getWindColor, getWindDirectionFromBearing } from '../helpers/utils';
 
 import Stack from '@mui/material/Stack';
@@ -111,11 +111,12 @@ export default function GridView() {
     const newestItem = data.reduce((prev, current) => {
       return prev && prev.timestamp > current.timestamp ? prev : current;
     });
-    const d = await listStationsUpdatedSince(new Date(newestItem.timestamp), {
-      lat: position.lat,
-      lon: position.lon,
-      radius: radius
-    });
+    const d = await listStationsUpdatedSince(
+      Math.round(newestItem.timestamp / 1000),
+      position.lat,
+      position.lon,
+      radius
+    );
 
     let updated = false;
     const time = Date.now();
@@ -123,7 +124,7 @@ export default function GridView() {
 
     for (const item of d) {
       const matches = clone.filter((a) => {
-        return a.id === item.id;
+        return a._id === item._id;
       });
       if (matches.length == 1) {
         updated = true;
@@ -273,10 +274,10 @@ export default function GridView() {
                           const color =
                             d.currentAverage != null ? getWindColor(d.currentAverage + 10) : ''; // arbitrary offset so colors are more relevant for xc
                           return (
-                            <Grid key={d.id} item xs={data.length > 2 ? 4 : 12 / data.length}>
+                            <Grid key={d._id} item xs={data.length > 2 ? 4 : 12 / data.length}>
                               <Paper
                                 onClick={() => {
-                                  navigate(`../stations/${d.id}`);
+                                  navigate(`../stations/${d._id}`);
                                 }}
                                 sx={{
                                   boxShadow: 'none',
