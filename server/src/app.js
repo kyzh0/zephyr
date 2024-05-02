@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import authRoute from './routes/authRoute.js';
 import stationRoute from './routes/stationRoute.js';
 import camRoute from './routes/camRoute.js';
+import publicRoute from './routes/publicRoute.js';
 
 import { removeOldImages, webcamWrapper } from './services/camService.js';
 import {
@@ -30,6 +31,7 @@ mongoose.connect(process.env.CONNECTION_STRING);
 app.use('/auth', authRoute);
 app.use('/stations', stationRoute);
 app.use('/cams', camRoute);
+app.use('/v1', publicRoute);
 
 // cron jobs
 cron.schedule('*/10 * * * *', async () => {

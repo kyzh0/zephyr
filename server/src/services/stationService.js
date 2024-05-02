@@ -1,8 +1,8 @@
-import { Station } from '../models/stationModel.js';
-
 import axios from 'axios';
 import * as fns from 'date-fns';
 import fs from 'fs/promises';
+
+import { Station } from '../models/stationModel.js';
 
 function getFlooredTime() {
   // floor data timestamp to 10 min

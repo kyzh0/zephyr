@@ -1,11 +1,11 @@
-import { Cam } from '../models/camModel.js';
-
 import axios from 'axios';
 import * as fns from 'date-fns';
 import * as fnsTz from 'date-fns-tz';
 import sharp from 'sharp';
 import md5 from 'md5';
 import fs from 'fs/promises';
+
+import { Cam } from '../models/camModel.js';
 
 async function getHarvestImage(siteId, hsn, lastUpdate) {
   let updated = null;

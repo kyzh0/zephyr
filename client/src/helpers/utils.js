@@ -54,6 +54,8 @@ export function getStationTypeName(code) {
       return 'Mt Pleasant Yacht Club';
     case 'lpc':
       return 'Lyttelton Port Company';
+    case 'mrc':
+      return 'Mountain Research Centre';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
