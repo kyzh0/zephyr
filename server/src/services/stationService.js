@@ -2,6 +2,7 @@ import { Station } from '../models/stationModel.js';
 
 import axios from 'axios';
 import * as fns from 'date-fns';
+import fs from 'fs/promises';
 
 function getFlooredTime() {
   // floor data timestamp to 10 min
@@ -998,13 +999,13 @@ export async function stationWrapper(source) {
       }
 
       if (data) {
-        console.log(`${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`);
-        console.log(data);
+        console.info(`${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`);
+        console.info(data);
         await saveData(s, data, date);
       }
     }
 
-    console.log('Weather station data updated.');
+    console.info('Weather station data updated.');
   } catch (error) {
     console.error(error);
     return null;
@@ -1075,90 +1076,59 @@ export async function holfuyWrapper() {
       }
 
       if (d) {
-        console.log(`holfuy data updated - ${s.externalId}`);
-        console.log(d);
+        console.info(`holfuy data updated - ${s.externalId}`);
+        console.info(d);
         await saveData(s, d, date);
       }
     }
 
-    console.log('Holfuy data updated.');
+    console.info('Holfuy data updated.');
   } catch (error) {
     console.error(error);
     return null;
   }
 }
 
-// function cmp(a, b) {
-//   if (a > b) return +1;
-//   if (a < b) return -1;
-//   return 0;
-// }
-// async function processJsonFile(bucket, source, timestamp) {
-//   try {
-//     const path = `data/processing/${source}-${timestamp}.json`;
-//     const file = await bucket.file(path).download();
-//     const contents = file.toString();
-//     if (contents) {
-//       await bucket.file(path).delete();
-//       const json = JSON.parse(contents);
-//       return json.sort((a, b) => {
-//         return cmp(a.type, b.type) || cmp(a.name, b.name);
-//       });
-//     }
-//   } catch (error) {
-//     console.error(error);
-//   }
-//   return null;
-// }
+function cmp(a, b) {
+  if (a > b) return +1;
+  if (a < b) return -1;
+  return 0;
+}
+export async function jsonOutputWrapper() {
+  try {
+    var date = getFlooredTime();
+    const stations = await Station.find({}, { data: 0 });
+    const json = [];
+    for (const s of stations) {
+      json.push({
+        id: s._id,
+        name: s.name,
+        type: s.type,
+        coordinates: {
+          lat: s.location.coordinates[1],
+          lon: s.location.coordinates[0]
+        },
+        timestamp: date.getTime() / 1000,
+        wind: {
+          average: s.currentAverage,
+          gust: s.currentGust,
+          bearing: s.currentBearing
+        },
+        temperature: s.currentTemperature
+      });
+    }
 
-// export async function processJsonOutputWrapper() {
-//   try {
-//     const date = getFlooredTime();
-//     const timestamp = date.getTime() / 1000;
+    json.sort((a, b) => {
+      return cmp(a.type, b.type) || cmp(a.name, b.name);
+    });
+    const dir = `public/data/${fns.format(date, 'yyyy/MM/dd')}`;
+    await fs.mkdir(dir, { recursive: true });
 
-//     const json = [];
-
-//     const bucket = getStorage().bucket();
-//     let data = await processJsonFile(bucket, 'harvest', timestamp);
-//     if (data) {
-//       for (const item of data) {
-//         json.push(item);
-//       }
-//     }
-//     data = await processJsonFile(bucket, 'holfuy', timestamp);
-//     if (data) {
-//       for (const item of data) {
-//         json.push(item);
-//       }
-//     }
-//     data = await processJsonFile(bucket, 'metservice', timestamp);
-//     if (data) {
-//       for (const item of data) {
-//         json.push(item);
-//       }
-//     }
-//     data = await processJsonFile(bucket, 'all', timestamp);
-//     if (data) {
-//       for (const item of data) {
-//         json.push(item);
-//       }
-//     }
-
-//     const file = bucket.file(
-//       `data/${fns.format(date, 'yyyy/MM/dd')}/zephyr-scrape-${timestamp}.json`
-//     );
-//     await file.save(Buffer.from(JSON.stringify(json)));
-//     const url = await getDownloadURL(file);
-
-//     const db = getFirestore();
-//     await db.collection(`output`).add({
-//       time: date,
-//       url: url
-//     });
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
+    await fs.writeFile(`${dir}/zephyr-scrape-${date.getTime() / 1000}.json`, JSON.stringify(json));
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 // export async function checkForErrors() {
 //   try {
@@ -1253,7 +1223,7 @@ export async function holfuyWrapper() {
 //       });
 //     }
 
-//     console.log(`Checked for errors - ${errors.length} stations newly offline.`);
+//     console.info(`Checked for errors - ${errors.length} stations newly offline.`);
 //   } catch (error) {
 //     console.error(error);
 //     return null;
@@ -1298,7 +1268,7 @@ export async function holfuyWrapper() {
 //         }
 //       }
 //     }
-//     console.log('Keys updated.');
+//     console.info('Keys updated.');
 //   } catch (error) {
 //     console.error(error);
 //     return null;
