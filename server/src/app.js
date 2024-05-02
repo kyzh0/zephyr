@@ -13,7 +13,8 @@ import {
   holfuyWrapper,
   jsonOutputWrapper,
   checkForErrors,
-  updateKeys
+  updateKeys,
+  removeOldData
 } from './services/stationService.js';
 
 const app = express();
@@ -27,6 +28,10 @@ mongoose.connect(process.env.CONNECTION_STRING);
 app.use('/auth', authRoute);
 app.use('/stations', stationRoute);
 app.use('/cams', camRoute);
+
+app.get('/test', async () => {
+  await removeOldData();
+});
 
 // cron jobs
 cron.schedule('*/10 * * * *', async () => {
@@ -63,6 +68,11 @@ cron.schedule('0 0 * * *', async () => {
   const ts = Date.now();
   await updateKeys();
   console.info(`Update keys - ${Date.now() - ts}ms elapsed.`);
+});
+cron.schedule('0 0 * * *', async () => {
+  const ts = Date.now();
+  await removeOldData();
+  console.info(`Remove old data - ${Date.now() - ts}ms elapsed.`);
 });
 
 const port = process.env.PORT || 5000;

@@ -1274,3 +1274,21 @@ export async function updateKeys() {
     return null;
   }
 }
+
+export async function removeOldData() {
+  try {
+    const stations = await Station.find({});
+    if (!stations.length) {
+      console.error(`No stations found.`);
+      return null;
+    }
+
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    for (const s of stations) {
+      await Station.updateOne({ _id: s._id }, { $pull: { data: { time: { $lte: cutoff } } } });
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
