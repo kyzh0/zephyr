@@ -916,7 +916,7 @@ async function saveData(station, data, date) {
   if (avg != null && gust != null && bearing != null && temperature != null) {
     station.isError = false;
   }
-  station.save();
+  await station.save();
 
   // add data
   await Station.updateOne(
@@ -1130,105 +1130,108 @@ export async function jsonOutputWrapper() {
   }
 }
 
-// export async function checkForErrors() {
-//   try {
-//     const db = getFirestore();
-//     const snapshot = await db.collection('stations').get();
-//     if (snapshot.empty) {
-//       console.error('No stations found.');
-//       return null;
-//     }
+function groupBy(xs, key) {
+  return xs.reduce(function (rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+}
+export async function checkForErrors() {
+  try {
+    const stations = await Station.find({});
+    if (!stations.length) {
+      console.error(`No stations found.`);
+      return null;
+    }
 
-//     const errors = [];
-//     const timeNow = Math.round(Date.now() / 1000);
+    const errors = [];
+    const timeNow = Date.now();
 
-//     for (const doc of snapshot.docs) {
-//       // check if last 6h data is all null
-//       let isDataError = true;
-//       let isWindError = true;
-//       let isBearingError = true;
-//       let isTempError = true;
+    for (const s of stations) {
+      let isDataError = true;
+      let isWindError = true;
+      let isBearingError = true;
+      let isTempError = true;
 
-//       const snapshot1 = await db
-//         .collection(`stations/${doc.id}/data`)
-//         .orderBy('time', 'desc')
-//         .limit(36) // 36 records in 6h
-//         .get();
-//       if (snapshot1.empty) continue;
+      // check if last 6h data is all null
+      const data = s.data.filter((x) => {
+        return new Date(x.time) >= new Date(timeNow - 6 * 60 * 60 * 1000);
+      });
+      if (!data.length) continue;
+      data.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()); // time desc
 
-//       // check that data exists up to 20min before current time
-//       if (timeNow - snapshot1.docs[0].data().time.seconds <= 20 * 60) {
-//         isDataError = false;
-//         for (const doc1 of snapshot1.docs) {
-//           const data = doc1.data();
-//           if (data.windAverage != null || data.windGust != null) {
-//             isWindError = false;
-//           }
-//           if (data.windBearing != null) {
-//             isBearingError = false;
-//           }
-//           if (data.temperature != null) {
-//             isTempError = false;
-//           }
-//         }
-//       }
+      // check that data exists up to 20min before current time
+      if (timeNow - new Date(data[0].time).getTime() <= 20 * 60 * 1000) {
+        isDataError = false;
+        for (const d of data) {
+          if (d.windAverage != null || d.windGust != null) {
+            isWindError = false;
+          }
+          if (d.windBearing != null) {
+            isBearingError = false;
+          }
+          if (d.temperature != null) {
+            isTempError = false;
+          }
+        }
+      }
 
-//       let errorMsg = '';
-//       if (isDataError) {
-//         errorMsg = 'ERROR: Data scraper has stopped.\n';
-//       } else if (isWindError) {
-//         errorMsg += 'ERROR: No wind avg/gust data.\n';
-//       }
+      let errorMsg = '';
+      if (isDataError) {
+        errorMsg = 'ERROR: Data scraper has stopped.\n';
+      } else if (isWindError) {
+        errorMsg += 'ERROR: No wind avg/gust data.\n';
+      }
 
-//       if (isDataError || isWindError) {
-//         if (!doc.data().isOffline) {
-//           await db.doc(`stations/${doc.id}`).update({
-//             isOffline: true
-//           });
-//           errors.push({
-//             type: doc.data().type,
-//             msg: `${errorMsg}Name: ${doc.data().name}\nURL: ${doc.data().externalLink}\nFirestore ID: ${doc.id}\n`
-//           });
-//         }
-//       }
+      if (isDataError || isWindError) {
+        if (!s.isOffline) {
+          s.isOffline = true;
+          await s.save();
+          errors.push({
+            type: s.type,
+            msg: `${errorMsg}Name: ${s.name}\nURL: ${s.externalLink}\nDatabase ID: ${s._id}\n`
+          });
+        }
+      }
 
-//       if (isDataError || isWindError || isBearingError || isTempError) {
-//         if (!doc.data().isError) {
-//           await db.doc(`stations/${doc.id}`).update({
-//             isError: true
-//           });
-//         }
-//       }
-//     }
+      if (isDataError || isWindError || isBearingError || isTempError) {
+        if (!s.isError) {
+          s.isError = true;
+          await s.save();
+        }
+      }
+    }
 
-//     if (errors.length) {
-//       // send email if >2 stations of 1 type went offline at the same time
-//       let msg = `Scheduled check ran successfully at ${new Date().toISOString()}\n`;
-//       const g = Object.groupBy(errors, ({ type }) => type);
-//       const singleStations = ['lpc', 'mpyc', 'navigatus'];
-//       for (const [key, value] of Object.entries(g)) {
-//         if (singleStations.includes(key) || value.length > 2) {
-//           msg += `\n${key.toUpperCase()}\n\n`;
-//           msg += value.map((x) => x.msg).join('\n');
-//         }
-//       }
-//       await axios.post(`https://api.emailjs.com/api/v1.0/email/send`, {
-//         service_id: process.env.EMAILJS_SERVICE_ID,
-//         template_id: process.env.EMAILJS_TEMPLATE_ID,
-//         user_id: process.env.EMAILJS_PUBLIC_KEY,
-//         template_params: {
-//           message: msg
-//         },
-//         accessToken: process.env.EMAILJS_PRIVATE_KEY
-//       });
-//     }
+    if (errors.length) {
+      // send email if >2 stations of the same type went offline simultaneously
+      let msg = '';
+      const g = groupBy(errors, 'type');
+      const singleStations = ['lpc', 'mpyc', 'navigatus'];
+      for (const [key, value] of Object.entries(g)) {
+        if (singleStations.includes(key) || value.length > 2) {
+          msg += `\n${key.toUpperCase()}\n\n`;
+          msg += value.map((x) => x.msg).join('\n');
+        }
+      }
+      if (msg.length) {
+        await axios.post(`https://api.emailjs.com/api/v1.0/email/send`, {
+          service_id: process.env.EMAILJS_SERVICE_ID,
+          template_id: process.env.EMAILJS_TEMPLATE_ID,
+          user_id: process.env.EMAILJS_PUBLIC_KEY,
+          template_params: {
+            message: `Scheduled check ran successfully at ${new Date().toISOString()}\n${msg}`
+          },
+          accessToken: process.env.EMAILJS_PRIVATE_KEY
+        });
+      }
+    }
 
-//     console.info(`Checked for errors - ${errors.length} stations newly offline.`);
-//   } catch (error) {
-//     console.error(error);
-//     return null;
-//   }
-// }
+    console.info(`Checked for errors - ${errors.length} stations newly offline.`);
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
 
 // export async function updateKeys() {
 //   try {

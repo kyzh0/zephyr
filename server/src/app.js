@@ -8,7 +8,12 @@ import authRoute from './routes/authRoute.js';
 import stationRoute from './routes/stationRoute.js';
 import camRoute from './routes/camRoute.js';
 
-import { stationWrapper, holfuyWrapper, jsonOutputWrapper } from './services/stationService.js';
+import {
+  stationWrapper,
+  holfuyWrapper,
+  jsonOutputWrapper,
+  checkForErrors
+} from './services/stationService.js';
 
 const app = express();
 app.use(cors());
@@ -47,6 +52,11 @@ cron.schedule('5,15,25,35,45,55 * * * *', async () => {
   const ts = Date.now();
   await jsonOutputWrapper();
   console.info(`Process json output - ${Date.now() - ts}ms elapsed.`);
+});
+cron.schedule('0 */6 * * *', async () => {
+  const ts = Date.now();
+  await checkForErrors();
+  console.info(`Check for errors - ${Date.now() - ts}ms elapsed.`);
 });
 
 const port = process.env.PORT || 5000;
