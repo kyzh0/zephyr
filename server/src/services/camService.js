@@ -531,3 +531,21 @@ export async function webcamWrapper() {
     return null;
   }
 }
+
+export async function removeOldImages() {
+  try {
+    const cams = await Cam.find({});
+    if (!cams.length) {
+      console.error(`No cams found.`);
+      return null;
+    }
+
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    for (const c of cams) {
+      await Cam.updateOne({ _id: c._id }, { $pull: { images: { time: { $lte: cutoff } } } });
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}

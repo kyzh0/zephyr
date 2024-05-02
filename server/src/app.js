@@ -8,7 +8,7 @@ import authRoute from './routes/authRoute.js';
 import stationRoute from './routes/stationRoute.js';
 import camRoute from './routes/camRoute.js';
 
-import { webcamWrapper } from './services/camService.js';
+import { removeOldImages, webcamWrapper } from './services/camService.js';
 import {
   stationWrapper,
   holfuyWrapper,
@@ -30,10 +30,6 @@ mongoose.connect(process.env.CONNECTION_STRING);
 app.use('/auth', authRoute);
 app.use('/stations', stationRoute);
 app.use('/cams', camRoute);
-
-app.get('/test', async () => {
-  await webcamWrapper();
-});
 
 // cron jobs
 cron.schedule('*/10 * * * *', async () => {
@@ -80,6 +76,11 @@ cron.schedule('0 0 * * *', async () => {
   const ts = Date.now();
   await removeOldData();
   console.info(`Remove old data - ${Date.now() - ts}ms elapsed.`);
+});
+cron.schedule('0 0 * * *', async () => {
+  const ts = Date.now();
+  await removeOldImages();
+  console.info(`Remove old images - ${Date.now() - ts}ms elapsed.`);
 });
 
 const port = process.env.PORT || 5000;
