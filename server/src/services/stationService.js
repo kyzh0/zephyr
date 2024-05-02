@@ -1004,8 +1004,6 @@ export async function stationWrapper(source) {
         await saveData(s, data, date);
       }
     }
-
-    console.info('Weather station data updated.');
   } catch (error) {
     console.error(error);
     return null;
@@ -1081,8 +1079,6 @@ export async function holfuyWrapper() {
         await saveData(s, d, date);
       }
     }
-
-    console.info('Holfuy data updated.');
   } catch (error) {
     console.error(error);
     return null;
@@ -1233,47 +1229,48 @@ export async function checkForErrors() {
   }
 }
 
-// export async function updateKeys() {
-//   try {
-//     const db = getFirestore();
-//     const snapshot = await db
-//       .collection('stations')
-//       .where('type', '==', 'harvest')
-//       .where('externalId', 'in', ['10243_113703', '11433_171221'])
-//       .get();
-//     if (snapshot.docs.length == 2) {
-//       const { headers } = await axios.post(
-//         'https://live.harvest.com/?sid=10243',
-//         {
-//           username: process.env.HARVEST_REALJOURNEYS_USERNAME,
-//           password: process.env.HARVEST_REALJOURNEYS_PASSWORD,
-//           submit: 'Login'
-//         },
-//         {
-//           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-//           maxRedirects: 0,
-//           validateStatus: (status) => {
-//             return status == 302;
-//           }
-//         }
-//       );
+export async function updateKeys() {
+  try {
+    const stations = await Station.find({
+      type: 'harvest',
+      externalId: { $in: ['10243_113703', '11433_171221'] }
+    });
+    if (!stations.length) {
+      console.error(`No stations found.`);
+      return null;
+    }
 
-//       const cookies = headers['set-cookie'];
-//       const regex = /PHPSESSID=[0-9a-zA-Z]+;\s/g;
-//       if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
-//         const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
-//         if (cookie) {
-//           for (const doc of snapshot.docs) {
-//             await db.doc(`stations/${doc.id}`).update({
-//               harvestCookie: cookie
-//             });
-//           }
-//         }
-//       }
-//     }
-//     console.info('Keys updated.');
-//   } catch (error) {
-//     console.error(error);
-//     return null;
-//   }
-// }
+    if (stations.length == 2) {
+      const { headers } = await axios.post(
+        'https://live.harvest.com/?sid=10243',
+        {
+          username: process.env.HARVEST_REALJOURNEYS_USERNAME,
+          password: process.env.HARVEST_REALJOURNEYS_PASSWORD,
+          submit: 'Login'
+        },
+        {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          maxRedirects: 0,
+          validateStatus: (status) => {
+            return status == 302;
+          }
+        }
+      );
+
+      const cookies = headers['set-cookie'];
+      const regex = /PHPSESSID=[0-9a-zA-Z]+;\s/g;
+      if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
+        const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
+        if (cookie) {
+          for (const s of stations) {
+            s.harvestCookie = cookie;
+            await s.save();
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}

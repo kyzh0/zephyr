@@ -12,7 +12,8 @@ import {
   stationWrapper,
   holfuyWrapper,
   jsonOutputWrapper,
-  checkForErrors
+  checkForErrors,
+  updateKeys
 } from './services/stationService.js';
 
 const app = express();
@@ -56,7 +57,12 @@ cron.schedule('5,15,25,35,45,55 * * * *', async () => {
 cron.schedule('0 */6 * * *', async () => {
   const ts = Date.now();
   await checkForErrors();
-  console.info(`Check for errors - ${Date.now() - ts}ms elapsed.`);
+  console.info(`Check errors - ${Date.now() - ts}ms elapsed.`);
+});
+cron.schedule('0 0 * * *', async () => {
+  const ts = Date.now();
+  await updateKeys();
+  console.info(`Update keys - ${Date.now() - ts}ms elapsed.`);
 });
 
 const port = process.env.PORT || 5000;
