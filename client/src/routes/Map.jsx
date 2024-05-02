@@ -572,7 +572,7 @@ export default function Map() {
           child.src =
             timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000
               ? ''
-              : `${APIROOT}${currentUrl}`;
+              : `${APIROOT}/${currentUrl}`;
         } else if (child.className === 'webcam-text-date') {
           if (timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000) {
             child.innerHTML = 'No images in the last 24h.';

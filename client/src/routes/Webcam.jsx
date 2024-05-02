@@ -138,7 +138,7 @@ export default function Webcam() {
                         img.loaded = true;
                         return (
                           <div key={img.time}>
-                            <img width="100%" src={`${APIROOT}${img.url}`} />
+                            <img width="100%" src={`${APIROOT}/${img.url}`} />
                             <p style={{ margin: 0 }}>
                               {format(new Date(img.time), 'dd MMM HH:mm')}
                             </p>
