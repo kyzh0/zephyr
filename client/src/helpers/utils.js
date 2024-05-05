@@ -56,6 +56,8 @@ export function getStationTypeName(code) {
       return 'Lyttelton Port Company';
     case 'mrc':
       return 'Mountain Research Centre';
+    case 'mfhb':
+      return "Model Flying Hawke's Bay";
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }

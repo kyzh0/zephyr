@@ -886,6 +886,38 @@ async function getNavigatusData() {
   };
 }
 
+async function getMfhbData() {
+  let windAverage = null;
+  const windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.post(
+      '	https://www.weatherlink.com/embeddablePage/getData/5e1372c8fe104ac5acc1fe2d8cb8b85c',
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    if (data) {
+      windAverage = data.wind;
+      windBearing = data.windDirection;
+      temperature = data.temperature;
+    }
+  } catch (error) {
+    functions.logger.error(error);
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getMrcData() {
   let windAverage = null;
   let windGust = null;
@@ -1036,6 +1068,8 @@ export async function stationWrapper(source) {
           data = await getMpycData();
         } else if (s.type === 'navigatus') {
           data = await getNavigatusData();
+        } else if (s.type === 'mfhb') {
+          data = await getMfhbData();
         } else if (s.type === 'mrc') {
           data = await getMrcData();
         }
@@ -1139,6 +1173,18 @@ export async function jsonOutputWrapper() {
     const stations = await Station.find({}, { data: 0 });
     const json = [];
     for (const s of stations) {
+      let avg = s.currentAverage;
+      let gust = s.currentGust;
+      let bearing = s.currentBearing;
+      let temp = s.currentTemperature;
+
+      if (Date.now() - new Date(s.lastUpdate).getTime() > 10 * 60 * 1000) {
+        avg = null;
+        gust = null;
+        bearing = null;
+        temp = null;
+      }
+
       json.push({
         id: s._id,
         name: s.name,
@@ -1149,11 +1195,11 @@ export async function jsonOutputWrapper() {
         },
         timestamp: date.getTime() / 1000,
         wind: {
-          average: s.currentAverage,
-          gust: s.currentGust,
-          bearing: s.currentBearing
+          average: avg,
+          gust: gust,
+          bearing: bearing
         },
-        temperature: s.currentTemperature
+        temperature: temp
       });
     }
 
