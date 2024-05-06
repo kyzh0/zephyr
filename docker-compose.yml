@@ -1,0 +1,50 @@
+services:
+  server:
+    container_name: server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}"
+    env_file: ./.env
+    environment:
+      - DB_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
+    depends_on:
+      - mongodb
+      - seq
+
+  # client:
+  #   container_name: client
+  #   build:
+  #     context: ./client
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "${REACT_LOCAL_PORT}:${REACT_LOCAL_PORT}"
+  #   depends_on:
+  #     - server
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    ports:
+      - "${MONGO_LOCAL_PORT}:${MONGO_DOCKER_PORT}"
+    volumes:
+      - ~/mongo:/data/db
+
+  seq:
+    container_name: seq
+    image: datalust/seq:latest
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "${SEQ_LOCAL_PORT}:${SEQ_DOCKER_PORT}"
+      - "${SEQ_INGESTION_LOCAL_PORT}:${SEQ_INGESTION_DOCKER_PORT}"
+    volumes:
+      - ~/seq:/data

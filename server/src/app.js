@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(express.static('public'));
 dotenv.config();
 
-mongoose.connect(process.env.CONNECTION_STRING);
+mongoose.connect(process.env.DB_CONNECTION_STRING);
 
 // routes
 app.use('/auth', authRoute);
@@ -96,5 +96,5 @@ cron.schedule('0 0 * * *', async () => {
   logger.info(`Remove old images end - ${Date.now() - ts}ms elapsed.`);
 });
 
-const port = process.env.PORT || 5000;
+const port = process.env.NODE_LOCAL_PORT || 5000;
 app.listen(port, () => logger.info(`Server running on port ${port}`));
