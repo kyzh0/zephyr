@@ -269,7 +269,7 @@ export default function GridView() {
                   <Box sx={{ maxHeight: '85vh', width: '100%', overflowY: 'scroll', mt: 1 }}>
                     <Grid container spacing={1}>
                       {data
-                        .filter((a) => a.currentAverage >= threshold)
+                        .filter((a) => !a.isOffline && a.currentAverage >= threshold)
                         .map((d) => {
                           const color =
                             d.currentAverage != null ? getWindColor(d.currentAverage + 10) : ''; // arbitrary offset so colors are more relevant for xc
