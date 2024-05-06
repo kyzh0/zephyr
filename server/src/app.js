@@ -9,6 +9,7 @@ import stationRoute from './routes/stationRoute.js';
 import camRoute from './routes/camRoute.js';
 import publicRoute from './routes/publicRoute.js';
 
+import logger from './helpers/log.js';
 import { removeOldImages, webcamWrapper } from './services/camService.js';
 import {
   stationWrapper,
@@ -37,53 +38,53 @@ app.use('/v1', publicRoute);
 cron.schedule('*/10 * * * *', async () => {
   const ts = Date.now();
   await webcamWrapper();
-  console.info(`Update webcams - ${Date.now() - ts}ms elapsed.`);
+  logger.info(`Update webcams - ${Date.now() - ts}ms elapsed.`);
 });
 cron.schedule('*/10 * * * *', async () => {
   const ts = Date.now();
   await stationWrapper();
-  console.info(`Update stations - ${Date.now() - ts}ms elapsed.`);
+  logger.info(`Update stations - ${Date.now() - ts}ms elapsed.`);
 });
 cron.schedule('*/10 * * * *', async () => {
   const ts = Date.now();
   await stationWrapper('harvest');
-  console.info(`Update harvest stations - ${Date.now() - ts}ms elapsed.`);
+  logger.info(`Update harvest stations - ${Date.now() - ts}ms elapsed.`);
 });
 cron.schedule('*/10 * * * *', async () => {
   const ts = Date.now();
   await stationWrapper('metservice');
-  console.info(`Update metservice stations - ${Date.now() - ts}ms elapsed.`);
+  logger.info(`Update metservice stations - ${Date.now() - ts}ms elapsed.`);
 });
 cron.schedule('*/10 * * * *', async () => {
   const ts = Date.now();
   await holfuyWrapper();
-  console.info(`Update holfuy stations - ${Date.now() - ts}ms elapsed.`);
+  logger.info(`Update holfuy stations - ${Date.now() - ts}ms elapsed.`);
 });
 cron.schedule('5,15,25,35,45,55 * * * *', async () => {
   const ts = Date.now();
   await jsonOutputWrapper();
-  console.info(`Process json output - ${Date.now() - ts}ms elapsed.`);
+  logger.info(`Process json output - ${Date.now() - ts}ms elapsed.`);
 });
 cron.schedule('0 */6 * * *', async () => {
   const ts = Date.now();
   await checkForErrors();
-  console.info(`Check errors - ${Date.now() - ts}ms elapsed.`);
+  logger.info(`Check errors - ${Date.now() - ts}ms elapsed.`);
 });
 cron.schedule('0 0 * * *', async () => {
   const ts = Date.now();
   await updateKeys();
-  console.info(`Update keys - ${Date.now() - ts}ms elapsed.`);
+  logger.info(`Update keys - ${Date.now() - ts}ms elapsed.`);
 });
 cron.schedule('0 0 * * *', async () => {
   const ts = Date.now();
   await removeOldData();
-  console.info(`Remove old data - ${Date.now() - ts}ms elapsed.`);
+  logger.info(`Remove old data - ${Date.now() - ts}ms elapsed.`);
 });
 cron.schedule('0 0 * * *', async () => {
   const ts = Date.now();
   await removeOldImages();
-  console.info(`Remove old images - ${Date.now() - ts}ms elapsed.`);
+  logger.info(`Remove old images - ${Date.now() - ts}ms elapsed.`);
 });
 
 const port = process.env.PORT || 5000;
-app.listen(port, () => console.info(`Server running on port ${port}`));
+app.listen(port, () => logger.info(`Server running on port ${port}`));

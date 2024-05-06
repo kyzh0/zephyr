@@ -1,6 +1,8 @@
 import express from 'express';
 import * as fns from 'date-fns';
 
+import logger from '../helpers/log.js';
+
 import { Client } from '../models/clientModel.js';
 import { Station } from '../models/stationModel.js';
 import { Output } from '../models/outputModel.js';
@@ -23,6 +25,7 @@ async function authenticateApiKey(apiKey) {
       error: 'Invalid API key.'
     };
   }
+  logger.info(`... by ${client.name}`);
 
   const date = new Date();
   const currentMonth = fns.format(date, 'yyyy-MM');
@@ -63,6 +66,8 @@ async function authenticateApiKey(apiKey) {
 }
 
 router.get('/geojson', async (req, res) => {
+  logger.info('GeoJSON requested');
+
   const geoJson = {
     type: 'FeatureCollection',
     features: []
@@ -80,7 +85,7 @@ router.get('/geojson', async (req, res) => {
       name: 1
     });
     if (!stations.length) {
-      console.error('No stations found.');
+      logger.error('No stations found.');
       res.status(500).json({ error: 'No stations found. Please contact the Zephyr admin.' });
       return;
     }
@@ -104,13 +109,15 @@ router.get('/geojson', async (req, res) => {
       geoJson.features.push(feature);
     }
   } catch (e) {
-    console.error(e);
+    logger.error(e);
   }
 
   res.json(geoJson);
 });
 
 router.get('/json-output', async (req, res) => {
+  logger.info('JSON output requested');
+
   const result = [];
 
   try {
@@ -154,7 +161,7 @@ router.get('/json-output', async (req, res) => {
       });
     }
   } catch (e) {
-    console.error(e);
+    logger.error(e);
   }
 
   res.json(result);

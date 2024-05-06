@@ -5,6 +5,8 @@ import sharp from 'sharp';
 import md5 from 'md5';
 import fs from 'fs/promises';
 
+import logger from '../helpers/log.js';
+
 import { Cam } from '../models/camModel.js';
 
 async function getHarvestImage(siteId, hsn, lastUpdate) {
@@ -28,7 +30,7 @@ async function getHarvestImage(siteId, hsn, lastUpdate) {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -74,7 +76,7 @@ async function getMetserviceImage(id, lastUpdate) {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -111,7 +113,7 @@ async function getLakeWanakaImage(id, lastUpdate) {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -156,7 +158,7 @@ async function getCheesemanImage(id, lastUpdate) {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -218,7 +220,7 @@ async function getQueenstownAirportImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -280,7 +282,7 @@ async function getWanakaAirportImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -306,7 +308,7 @@ async function getCgcImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -332,7 +334,7 @@ async function getCastleHillImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -397,7 +399,7 @@ async function getCwuImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -420,7 +422,7 @@ async function getTaylorsSurfImage() {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -433,7 +435,7 @@ export async function webcamWrapper() {
   try {
     const cams = await Cam.find({});
     if (!cams.length) {
-      console.error('No webcams found.');
+      logger.error('No webcams found.');
       return null;
     }
 
@@ -488,7 +490,7 @@ export async function webcamWrapper() {
               return prev && new Date(prev.time) > new Date(current.time) ? prev : current;
             });
             if (latestImg && latestImg.fileSize == img.fileSize && latestImg.hash == img.hash) {
-              console.info(
+              logger.info(
                 `${c.type} image update skipped${c.externalId ? ` - ${c.externalId}` : ''}`
               );
               continue;
@@ -521,13 +523,13 @@ export async function webcamWrapper() {
           }
         );
 
-        console.info(`${c.type} image updated${c.externalId ? ` - ${c.externalId}` : ''}`);
+        logger.info(`${c.type} image updated${c.externalId ? ` - ${c.externalId}` : ''}`);
       } else {
-        console.info(`${c.type} image update skipped${c.externalId ? ` - ${c.externalId}` : ''}`);
+        logger.info(`${c.type} image update skipped${c.externalId ? ` - ${c.externalId}` : ''}`);
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return null;
   }
 }
@@ -536,7 +538,7 @@ export async function removeOldImages() {
   try {
     const cams = await Cam.find({});
     if (!cams.length) {
-      console.error(`No cams found.`);
+      logger.error(`No cams found.`);
       return null;
     }
 
@@ -545,7 +547,7 @@ export async function removeOldImages() {
       await Cam.updateOne({ _id: c._id }, { $pull: { images: { time: { $lte: cutoff } } } });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return null;
   }
 }

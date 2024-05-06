@@ -2,6 +2,8 @@ import axios from 'axios';
 import * as fns from 'date-fns';
 import fs from 'fs/promises';
 
+import logger from '../helpers/log.js';
+
 import { Station } from '../models/stationModel.js';
 import { Output } from '../models/outputModel.js';
 
@@ -121,7 +123,7 @@ async function processHarvestResponse(
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return null;
@@ -263,7 +265,7 @@ async function getMetserviceData(stationId) {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -294,7 +296,7 @@ async function getAttentisData(stationId) {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -366,7 +368,7 @@ async function getCwuData(stationId) {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -433,7 +435,7 @@ async function getWeatherProData(stationId) {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -512,7 +514,7 @@ async function getPortOtagoData(stationId) {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -549,7 +551,7 @@ async function getWUndergroundData(stationId) {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -583,7 +585,7 @@ async function getTempestData(stationId) {
       temperature = cc.air_temperature;
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -617,7 +619,7 @@ async function getWindguruData(stationId) {
       temperature = data.temperature;
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -663,7 +665,7 @@ async function getCentrePortData(stationId) {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -733,7 +735,7 @@ async function getLpcData() {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -777,7 +779,7 @@ async function getMpycData() {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -875,7 +877,7 @@ async function getNavigatusData() {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -893,7 +895,7 @@ async function getMfhbData() {
   let temperature = null;
 
   try {
-    const { data } = await axios.post(
+    const { data } = await axios.get(
       '	https://www.weatherlink.com/embeddablePage/getData/5e1372c8fe104ac5acc1fe2d8cb8b85c',
       {
         headers: {
@@ -946,7 +948,7 @@ async function getMrcData() {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -1017,7 +1019,7 @@ export async function stationWrapper(source) {
 
     const stations = await Station.find(query, { data: 0 });
     if (!stations.length) {
-      console.error(`No ${source} stations found.`);
+      logger.error(`No ${source} stations found.`);
       return null;
     }
 
@@ -1076,13 +1078,13 @@ export async function stationWrapper(source) {
       }
 
       if (data) {
-        console.info(`${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`);
-        console.info(data);
+        logger.info(`${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`);
+        logger.info(JSON.stringify(data));
         await saveData(s, data, date);
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return null;
   }
 }
@@ -1109,7 +1111,7 @@ async function getHolfuyData(stationId) {
       temperature = data.temperature;
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 
   return {
@@ -1124,7 +1126,7 @@ export async function holfuyWrapper() {
   try {
     const stations = await Station.find({ type: 'holfuy' }, { data: 0 });
     if (!stations.length) {
-      console.error('No holfuy stations found.');
+      logger.error('No holfuy stations found.');
       return null;
     }
 
@@ -1151,13 +1153,13 @@ export async function holfuyWrapper() {
       }
 
       if (d) {
-        console.info(`holfuy data updated - ${s.externalId}`);
-        console.info(d);
+        logger.info(`holfuy data updated - ${s.externalId}`);
+        logger.info(JSON.stringify(d));
         await saveData(s, d, date);
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return null;
   }
 }
@@ -1217,7 +1219,7 @@ export async function jsonOutputWrapper() {
     });
     await output.save();
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 }
 
@@ -1231,7 +1233,7 @@ export async function checkForErrors() {
   try {
     const stations = await Station.find({});
     if (!stations.length) {
-      console.error(`No stations found.`);
+      logger.error(`No stations found.`);
       return null;
     }
 
@@ -1317,9 +1319,9 @@ export async function checkForErrors() {
       }
     }
 
-    console.info(`Checked for errors - ${errors.length} stations newly offline.`);
+    logger.info(`Checked for errors - ${errors.length} stations newly offline.`);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return null;
   }
 }
@@ -1331,7 +1333,7 @@ export async function updateKeys() {
       externalId: { $in: ['10243_113703', '11433_171221'] }
     });
     if (!stations.length) {
-      console.error(`No stations found.`);
+      logger.error(`No stations found.`);
       return null;
     }
 
@@ -1365,7 +1367,7 @@ export async function updateKeys() {
       }
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return null;
   }
 }
@@ -1374,7 +1376,7 @@ export async function removeOldData() {
   try {
     const stations = await Station.find({});
     if (!stations.length) {
-      console.error(`No stations found.`);
+      logger.error(`No stations found.`);
       return null;
     }
 
@@ -1383,7 +1385,7 @@ export async function removeOldData() {
       await Station.updateOne({ _id: s._id }, { $pull: { data: { time: { $lte: cutoff } } } });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return null;
   }
 }
