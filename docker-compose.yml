@@ -3,7 +3,6 @@ services:
     container_name: server
     build:
       context: ./server
-      dockerfile: Dockerfile
     restart: unless-stopped
     ports:
       - "${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}"
@@ -20,7 +19,6 @@ services:
   #   container_name: client
   #   build:
   #     context: ./client
-  #     dockerfile: Dockerfile
   #   ports:
   #     - "${REACT_LOCAL_PORT}:${REACT_LOCAL_PORT}"
   #   depends_on:
@@ -50,6 +48,13 @@ services:
       - "${SEQ_INGESTION_LOCAL_PORT}:${SEQ_INGESTION_DOCKER_PORT}"
     volumes:
       - logs:/data
+
+  nginx:
+    restart: unless-stopped
+    build:
+      context: ./nginx
+    ports:
+      - "${NGINX_LOCAL_PORT}:${NGINX_DOCKER_PORT}"
 
 volumes:
   server-public:

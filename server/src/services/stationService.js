@@ -1244,6 +1244,7 @@ export async function jsonOutputWrapper() {
     await fs.mkdir(dir, { recursive: true });
     const path = `${dir}/zephyr-scrape-${date.getTime() / 1000}.json`;
     await fs.writeFile(path, JSON.stringify(json));
+    logger.info(`File created - ${path}`, { type: 'station' });
 
     const output = new Output({
       time: date,
