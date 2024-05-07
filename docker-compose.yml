@@ -49,14 +49,23 @@ services:
     volumes:
       - logs:/data
 
-  nginx:
+  caddy:
+    container_name: caddy
+    image: caddy:alpine
     restart: unless-stopped
-    build:
-      context: ./nginx
     ports:
-      - "${NGINX_LOCAL_PORT}:${NGINX_DOCKER_PORT}"
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - $PWD/Caddyfile:/etc/caddy/Caddyfile
+      - $PWD/site:/srv
+      - caddy_data:/data
+      - caddy_config:/config
 
 volumes:
   server-public:
   mongo:
   logs:
+  caddy_data:
+  caddy_config:

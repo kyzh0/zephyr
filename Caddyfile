@@ -1,0 +1,7 @@
+api.zephyrapp.nz www.api.zephyrapp.nz {
+  reverse_proxy server:5000
+}
+
+logs.zephyrapp.nz www.logs.zephyrapp.nz {
+  reverse_proxy server:9000
+}
