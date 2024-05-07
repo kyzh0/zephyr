@@ -123,7 +123,9 @@ async function processHarvestResponse(
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching data for harvest - ${siteId}`, {
+      type: 'station'
+    });
   }
 
   return null;
@@ -265,7 +267,9 @@ async function getMetserviceData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching data for metservice - ${stationId}`, {
+      type: 'station'
+    });
   }
 
   return {
@@ -296,7 +300,9 @@ async function getAttentisData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching data for attentis - ${stationId}`, {
+      type: 'station'
+    });
   }
 
   return {
@@ -368,7 +374,9 @@ async function getCwuData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching data for cwu - ${stationId}`, {
+      type: 'station'
+    });
   }
 
   return {
@@ -435,7 +443,9 @@ async function getWeatherProData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching data for weatherpro - ${stationId}`, {
+      type: 'station'
+    });
   }
 
   return {
@@ -514,7 +524,9 @@ async function getPortOtagoData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching data for port otago - ${stationId}`, {
+      type: 'station'
+    });
   }
 
   return {
@@ -551,7 +563,9 @@ async function getWUndergroundData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching data for wunderground - ${stationId}`, {
+      type: 'station'
+    });
   }
 
   return {
@@ -585,7 +599,9 @@ async function getTempestData(stationId) {
       temperature = cc.air_temperature;
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching data for tempest - ${stationId}`, {
+      type: 'station'
+    });
   }
 
   return {
@@ -619,7 +635,9 @@ async function getWindguruData(stationId) {
       temperature = data.temperature;
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching data for windguru - ${stationId}`, {
+      type: 'station'
+    });
   }
 
   return {
@@ -665,7 +683,9 @@ async function getCentrePortData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching data for centreport - ${stationId}`, {
+      type: 'station'
+    });
   }
 
   return {
@@ -735,7 +755,9 @@ async function getLpcData() {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occured while fetching data for lpc', {
+      type: 'station'
+    });
   }
 
   return {
@@ -779,7 +801,9 @@ async function getMpycData() {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occured while fetching data for mpyc', {
+      type: 'station'
+    });
   }
 
   return {
@@ -877,7 +901,9 @@ async function getNavigatusData() {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occured while fetching data for navigatus', {
+      type: 'station'
+    });
   }
 
   return {
@@ -909,7 +935,9 @@ async function getMfhbData() {
       temperature = data.temperature;
     }
   } catch (error) {
-    functions.logger.error(error);
+    logger.error('An error occured while fetching data for mfhb', {
+      type: 'station'
+    });
   }
 
   return {
@@ -948,7 +976,9 @@ async function getMrcData() {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occured while fetching data for mrc', {
+      type: 'station'
+    });
   }
 
   return {
@@ -1019,7 +1049,7 @@ export async function stationWrapper(source) {
 
     const stations = await Station.find(query, { data: 0 });
     if (!stations.length) {
-      logger.error(`No ${source} stations found.`);
+      logger.error(`No ${source} stations found.`, { type: 'station' });
       return null;
     }
 
@@ -1078,13 +1108,15 @@ export async function stationWrapper(source) {
       }
 
       if (data) {
-        logger.info(`${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`);
-        logger.info(JSON.stringify(data));
+        logger.info(`${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`, {
+          type: 'station'
+        });
+        logger.info(JSON.stringify(data), { type: 'station' });
         await saveData(s, data, date);
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occurred while fetching station data', { type: 'station' });
     return null;
   }
 }
@@ -1111,7 +1143,7 @@ async function getHolfuyData(stationId) {
       temperature = data.temperature;
     }
   } catch (error) {
-    logger.error(error);
+    logger.error('Something went wrong');
   }
 
   return {
@@ -1126,7 +1158,7 @@ export async function holfuyWrapper() {
   try {
     const stations = await Station.find({ type: 'holfuy' }, { data: 0 });
     if (!stations.length) {
-      logger.error('No holfuy stations found.');
+      logger.error('No holfuy stations found.', { type: 'station' });
       return null;
     }
 
@@ -1153,13 +1185,13 @@ export async function holfuyWrapper() {
       }
 
       if (d) {
-        logger.info(`holfuy data updated - ${s.externalId}`);
-        logger.info(JSON.stringify(d));
+        logger.info(`holfuy data updated - ${s.externalId}`, { type: 'station' });
+        logger.info(JSON.stringify(d), { type: 'station' });
         await saveData(s, d, date);
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occured while fetching holfuy station data', { type: 'station' });
     return null;
   }
 }
@@ -1219,7 +1251,7 @@ export async function jsonOutputWrapper() {
     });
     await output.save();
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occurred while processing json output', { type: 'station' });
   }
 }
 
@@ -1233,7 +1265,7 @@ export async function checkForErrors() {
   try {
     const stations = await Station.find({});
     if (!stations.length) {
-      logger.error(`No stations found.`);
+      logger.error('No stations found.', { type: 'station' });
       return null;
     }
 
@@ -1319,9 +1351,11 @@ export async function checkForErrors() {
       }
     }
 
-    logger.info(`Checked for errors - ${errors.length} stations newly offline.`);
+    logger.info(`Checked for errors - ${errors.length} stations newly offline.`, {
+      type: 'station'
+    });
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occurred while checking for station errors', { type: 'station' });
     return null;
   }
 }
@@ -1333,7 +1367,7 @@ export async function updateKeys() {
       externalId: { $in: ['10243_113703', '11433_171221'] }
     });
     if (!stations.length) {
-      logger.error(`No stations found.`);
+      logger.error('No stations found.', { type: 'station' });
       return null;
     }
 
@@ -1367,7 +1401,7 @@ export async function updateKeys() {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occurred while updating keys', { type: 'station' });
     return null;
   }
 }
@@ -1376,7 +1410,7 @@ export async function removeOldData() {
   try {
     const stations = await Station.find({});
     if (!stations.length) {
-      logger.error(`No stations found.`);
+      logger.error('No stations found.', { type: 'station' });
       return null;
     }
 
@@ -1385,7 +1419,7 @@ export async function removeOldData() {
       await Station.updateOne({ _id: s._id }, { $pull: { data: { time: { $lte: cutoff } } } });
     }
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occurred while removing old data', { type: 'station' });
     return null;
   }
 }

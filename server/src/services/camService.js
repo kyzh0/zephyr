@@ -30,7 +30,7 @@ async function getHarvestImage(siteId, hsn, lastUpdate) {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching images for harvest - ${siteId}`, { type: 'cam' });
   }
 
   return {
@@ -76,7 +76,7 @@ async function getMetserviceImage(id, lastUpdate) {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching images for metservice - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -113,7 +113,7 @@ async function getLakeWanakaImage(id, lastUpdate) {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching images for lake wanaka - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -158,7 +158,9 @@ async function getCheesemanImage(id, lastUpdate) {
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching images for mt cheeseman - ${id}`, {
+      type: 'cam'
+    });
   }
 
   return {
@@ -220,7 +222,7 @@ async function getQueenstownAirportImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching images for qt airport - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -282,7 +284,9 @@ async function getWanakaAirportImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching images for wanaka airport - ${id}`, {
+      type: 'cam'
+    });
   }
 
   return {
@@ -308,7 +312,7 @@ async function getCgcImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching images for cgc - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -334,7 +338,7 @@ async function getCastleHillImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching images for castle hill - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -399,7 +403,7 @@ async function getCwuImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error(error);
+    logger.error(`An error occured while fetching images for cwu - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -422,7 +426,7 @@ async function getTaylorsSurfImage() {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occured while fetching images for taylors surf', { type: 'cam' });
   }
 
   return {
@@ -435,7 +439,7 @@ export async function webcamWrapper() {
   try {
     const cams = await Cam.find({});
     if (!cams.length) {
-      logger.error('No webcams found.');
+      logger.error('No webcams found.', { type: 'cam' });
       return null;
     }
 
@@ -491,7 +495,8 @@ export async function webcamWrapper() {
             });
             if (latestImg && latestImg.fileSize == img.fileSize && latestImg.hash == img.hash) {
               logger.info(
-                `${c.type} image update skipped${c.externalId ? ` - ${c.externalId}` : ''}`
+                `${c.type} image update skipped${c.externalId ? ` - ${c.externalId}` : ''}`,
+                { type: 'cam' }
               );
               continue;
             }
@@ -523,13 +528,17 @@ export async function webcamWrapper() {
           }
         );
 
-        logger.info(`${c.type} image updated${c.externalId ? ` - ${c.externalId}` : ''}`);
+        logger.info(`${c.type} image updated${c.externalId ? ` - ${c.externalId}` : ''}`, {
+          type: 'cam'
+        });
       } else {
-        logger.info(`${c.type} image update skipped${c.externalId ? ` - ${c.externalId}` : ''}`);
+        logger.info(`${c.type} image update skipped${c.externalId ? ` - ${c.externalId}` : ''}`, {
+          type: 'cam'
+        });
       }
     }
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occured while fetching webcam images', { type: 'cam' });
     return null;
   }
 }
@@ -538,7 +547,7 @@ export async function removeOldImages() {
   try {
     const cams = await Cam.find({});
     if (!cams.length) {
-      logger.error(`No cams found.`);
+      logger.error(`No cams found.`, { type: 'cam' });
       return null;
     }
 
@@ -547,7 +556,7 @@ export async function removeOldImages() {
       await Cam.updateOne({ _id: c._id }, { $pull: { images: { time: { $lte: cutoff } } } });
     }
   } catch (error) {
-    logger.error(error);
+    logger.error('An error occured while removing old images', { type: 'cam' });
     return null;
   }
 }
