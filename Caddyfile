@@ -3,5 +3,8 @@ api.zephyrapp.nz www.api.zephyrapp.nz {
 }
 
 web.zephyrapp.nz www.web.zephyrapp.nz {
-	reverse_proxy client:3000
+	root * /srv
+	encode gzip
+	try_files {path} /index.html
+	file_server
 }

@@ -13,16 +13,7 @@ services:
       - mongodb
       - seq
     volumes:
-      - server-public:/app/public/
-
-  # client:
-  #   container_name: client
-  #   build:
-  #     context: ./client
-  #   ports:
-  #     - "${REACT_LOCAL_PORT}:${REACT_DOCKER_PORT}"
-  #   depends_on:
-  #     - server
+      - server_public:/app/public/
 
   mongodb:
     container_name: mongodb
@@ -50,6 +41,15 @@ services:
     volumes:
       - logs:/data
 
+  client:
+    container_name: client
+    build:
+      context: ./client
+    ports:
+      - "${REACT_LOCAL_PORT}:${REACT_DOCKER_PORT}"
+    volumes:
+      - client_build:/app/build
+
   caddy:
     container_name: caddy
     image: caddy:alpine
@@ -59,12 +59,15 @@ services:
       - "443:443"
     volumes:
       - $PWD/Caddyfile:/etc/caddy/Caddyfile
-      - $PWD/site:/srv
+      - client_build:/srv
       - caddy_data:/data
       - caddy_config:/config
+    depends_on:
+      - server
+      - client
 
 volumes:
-  server-public:
+  server_public:
   mongo:
   logs:
   caddy_data:
