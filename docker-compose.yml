@@ -43,6 +43,7 @@ services:
     restart: unless-stopped
     environment:
       - ACCEPT_EULA=Y
+      - SEQ_INGESTION_URL=${SEQ_INGESTION_URL}
     ports:
       - "${SEQ_LOCAL_PORT}:${SEQ_DOCKER_PORT}"
       - "${SEQ_INGESTION_LOCAL_PORT}:${SEQ_INGESTION_DOCKER_PORT}"

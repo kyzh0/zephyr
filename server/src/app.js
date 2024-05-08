@@ -26,7 +26,11 @@ app.use(express.json());
 app.use(express.static('public'));
 dotenv.config();
 
-mongoose.connect(process.env.DB_CONNECTION_STRING);
+mongoose.connect(
+  process.env.NODE_ENV === 'production'
+    ? process.env.DB_CONNECTION_STRING
+    : process.env.DEV_CONNECTION_STRING
+);
 
 // routes
 app.use('/auth', authRoute);
