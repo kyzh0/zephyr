@@ -2,7 +2,7 @@ api.zephyrapp.nz www.api.zephyrapp.nz {
 	reverse_proxy server:{$NODE_LOCAL_PORT}
 }
 
-web.zephyrapp.nz www.web.zephyrapp.nz {
+web.zephyrapp.nz {
 	root * /srv
 	encode gzip
 	try_files {path} /index.html

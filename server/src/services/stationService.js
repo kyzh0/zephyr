@@ -1116,7 +1116,8 @@ export async function stationWrapper(source) {
       }
     }
   } catch (error) {
-    logger.error('An error occurred while fetching station data', { type: 'station' });
+    logger.error(`An error occurred while fetching ${source} station data`, { type: 'station' });
+    logger.error(error);
     return null;
   }
 }
