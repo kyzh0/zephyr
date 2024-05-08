@@ -15,14 +15,14 @@ services:
     volumes:
       - server-public:/app/public/
 
-  client:
-    container_name: client
-    build:
-      context: ./client
-    ports:
-      - "${REACT_LOCAL_PORT}:${REACT_DOCKER_PORT}"
-    depends_on:
-      - server
+  # client:
+  #   container_name: client
+  #   build:
+  #     context: ./client
+  #   ports:
+  #     - "${REACT_LOCAL_PORT}:${REACT_DOCKER_PORT}"
+  #   depends_on:
+  #     - server
 
   mongodb:
     container_name: mongodb

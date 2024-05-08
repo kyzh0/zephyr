@@ -4,6 +4,7 @@ import * as fnsTz from 'date-fns-tz';
 import sharp from 'sharp';
 import md5 from 'md5';
 import fs from 'fs/promises';
+import dir from 'node-dir';
 
 import logger from '../helpers/log.js';
 
@@ -555,6 +556,14 @@ export async function removeOldImages() {
     for (const c of cams) {
       await Cam.updateOne({ _id: c._id }, { $pull: { images: { time: { $lte: cutoff } } } });
     }
+
+    dir.files('public/cams', async (err, files) => {
+      if (err) throw err;
+      for (const file of files) {
+        const stats = await fs.stat(file);
+        if (stats.birthtimeMs <= cutoff.getTime()) await fs.rm(file);
+      }
+    });
   } catch (error) {
     logger.error('An error occured while removing old images', { type: 'cam' });
     return null;
