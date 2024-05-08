@@ -123,7 +123,7 @@ async function processHarvestResponse(
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching data for harvest - ${siteId}`, {
+    logger.error(`An error occured while fetching data for harvest - ${sid}`, {
       type: 'station'
     });
   }
@@ -1117,7 +1117,7 @@ export async function stationWrapper(source) {
     }
   } catch (error) {
     logger.error(`An error occurred while fetching ${source} station data`, { type: 'station' });
-    logger.error(error);
+    logger.error(error, { type: 'station' });
     return null;
   }
 }
@@ -1144,7 +1144,8 @@ async function getHolfuyData(stationId) {
       temperature = data.temperature;
     }
   } catch (error) {
-    logger.error('Something went wrong');
+    logger.error('An error occured while fetching holfuy station data', { type: 'station' });
+    logger.error(error, { type: 'station' });
   }
 
   return {
@@ -1193,6 +1194,7 @@ export async function holfuyWrapper() {
     }
   } catch (error) {
     logger.error('An error occured while fetching holfuy station data', { type: 'station' });
+    logger.error(error, { type: 'station' });
     return null;
   }
 }
@@ -1254,6 +1256,7 @@ export async function jsonOutputWrapper() {
     await output.save();
   } catch (error) {
     logger.error('An error occurred while processing json output', { type: 'station' });
+    logger.error(error, { type: 'station' });
   }
 }
 
@@ -1358,6 +1361,7 @@ export async function checkForErrors() {
     });
   } catch (error) {
     logger.error('An error occurred while checking for station errors', { type: 'station' });
+    logger.error(error, { type: 'station' });
     return null;
   }
 }
@@ -1404,6 +1408,7 @@ export async function updateKeys() {
     }
   } catch (error) {
     logger.error('An error occurred while updating keys', { type: 'station' });
+    logger.error(error, { type: 'station' });
     return null;
   }
 }
@@ -1422,6 +1427,7 @@ export async function removeOldData() {
     }
   } catch (error) {
     logger.error('An error occurred while removing old data', { type: 'station' });
+    logger.error(error, { type: 'station' });
     return null;
   }
 }
