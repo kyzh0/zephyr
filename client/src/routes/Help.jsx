@@ -11,7 +11,7 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
-import CheckIcon from '@mui/icons-material/Check';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 
 import emailjs from '@emailjs/browser';
 
@@ -75,10 +75,6 @@ export default function Help() {
 
       setLoading(false);
       setSuccess(true);
-
-      // const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-      // await sleep(3000);
-      // handleClose();
     } catch (error) {
       setLoading(false);
       setMessageError(true);
@@ -113,13 +109,11 @@ export default function Help() {
             </Stack>
             {success ? (
               <Stack direction="column" justifyContent="center" alignItems="center">
-                <CheckIcon sx={{ color: '#9aff8a', width: '128px', height: '128px' }} />
-                <Typography component="h1" variant="h5">
-                  Message sent
-                </Typography>
-                <Typography component="h1" variant="h5">
-                  Thanks for your feedback!
-                </Typography>
+                <CheckCircleOutlineOutlinedIcon
+                  sx={{ color: '#39b83f', width: '128px', height: '128px' }}
+                />
+                <Typography sx={{ fontSize: '24px', color: '#39b83f' }}>Success!</Typography>
+                <Typography sx={{ fontSize: '16px', mb: 2 }}>Thanks for your feedback.</Typography>
               </Stack>
             ) : (
               <>

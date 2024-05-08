@@ -67,11 +67,20 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 - Express
 - MongoDB
 
+### Deployment
+
+- Docker Compose
+- Caddy
+
 ## Setup
 
 ### Clone the Repository
 
 `git clone https://github.com/kyzh0/zephyr.git`
+
+### Install Dependencies
+
+The `server` app requires [MongoDB](https://www.mongodb.com/docs/manual/installation/) and [Seq](https://docs.datalust.co/v3/docs/getting-started) to be installed. You will need the MongoDB connection string and Seq URL for the next section.
 
 ### Initialise Environment Variables
 
@@ -101,6 +110,13 @@ $ npm install
 
 # run the web server with nodemon
 $ npm run dev
+```
+
+### Deploy
+
+```
+# from root directory
+$ docker compose --build -d
 ```
 
 ## Contribute
