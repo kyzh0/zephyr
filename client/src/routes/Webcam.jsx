@@ -19,7 +19,7 @@ import './Webcam.css';
 import { Carousel } from 'react-responsive-carousel';
 import { format } from 'date-fns';
 
-import { APIROOT } from '../constants';
+import { APIROOT } from '../helpers/constants';
 
 export default function Webcam() {
   const { id } = useParams();

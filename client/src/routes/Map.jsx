@@ -21,7 +21,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 import './Map.css';
 
-import { APIROOT } from '../constants';
+import { APIROOT } from '../helpers/constants';
 
 export default function Map() {
   let theme = createTheme({
