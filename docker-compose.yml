@@ -49,6 +49,7 @@ services:
     restart: unless-stopped
     environment:
       - NODE_PORT=${NODE_PORT}
+      - SEQ_PORT=${SEQ_LOCAL_PORT}
     ports:
       - "80:80"
       - "443:443"

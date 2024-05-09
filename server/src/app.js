@@ -71,7 +71,7 @@ cron.schedule('*/10 * * * *', async () => {
   await holfuyWrapper();
   logger.info(`Update holfuy stations end - ${Date.now() - ts}ms elapsed.`, { type: 'station' });
 });
-cron.schedule('2,12,22,32,42,52 * * * *', async () => {
+cron.schedule('3,13,23,33,43,53 * * * *', async () => {
   logger.info('--- Process json output start ---', { type: 'station' });
   const ts = Date.now();
   await jsonOutputWrapper();
