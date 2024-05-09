@@ -13,6 +13,7 @@ services:
       - server_public:/app/public/
 
   mongodb:
+    container_name: mongodb
     image: mongo:latest
     restart: unless-stopped
     env_file: ./.env
@@ -25,6 +26,7 @@ services:
       - mongo:/data/db
 
   seq:
+    container_name: seq
     image: datalust/seq:latest
     restart: unless-stopped
     environment:
@@ -37,6 +39,7 @@ services:
       - logs:/data
 
   client:
+    container_name: client
     build:
       context: ./client
     ports:
@@ -49,7 +52,7 @@ services:
     restart: unless-stopped
     environment:
       - NODE_PORT=${NODE_PORT}
-      - SEQ_PORT=${SEQ_LOCAL_PORT}
+      - SEQ_PORT=${SEQ_DOCKER_PORT}
     ports:
       - "80:80"
       - "443:443"
@@ -59,7 +62,6 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - server
       - client
 
 volumes:
