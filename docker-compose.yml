@@ -1,6 +1,5 @@
 services:
   server:
-    container_name: server
     build:
       context: ./server
     restart: unless-stopped
@@ -16,7 +15,6 @@ services:
       - server_public:/app/public/
 
   mongodb:
-    container_name: mongodb
     image: mongo:latest
     restart: unless-stopped
     env_file: ./.env
@@ -29,7 +27,6 @@ services:
       - mongo:/data/db
 
   seq:
-    container_name: seq
     image: datalust/seq:latest
     restart: unless-stopped
     environment:
@@ -42,7 +39,6 @@ services:
       - logs:/data
 
   client:
-    container_name: client
     build:
       context: ./client
     ports:
@@ -51,7 +47,6 @@ services:
       - client_build:/app/build
 
   caddy:
-    container_name: caddy
     image: caddy:alpine
     restart: unless-stopped
     environment:

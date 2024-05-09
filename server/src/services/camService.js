@@ -10,13 +10,13 @@ import logger from '../helpers/log.js';
 
 import { Cam } from '../models/camModel.js';
 
-async function getHarvestImage(siteId, hsn, lastUpdate) {
+async function getHarvestImage(sid, hsn, lastUpdate) {
   let updated = null;
   let base64 = null;
 
   try {
     const { data } = await axios.get(
-      `https://live.harvest.com/php/device_camera_images_functions.php?device_camera_images&request_type=initial&site_id=${siteId}&hsn=${hsn}`,
+      `https://live.harvest.com/php/device_camera_images_functions.php?device_camera_images&request_type=initial&site_id=${sid}&hsn=${hsn}`,
       {
         headers: {
           Connection: 'keep-alive'
@@ -31,7 +31,7 @@ async function getHarvestImage(siteId, hsn, lastUpdate) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching images for harvest - ${siteId}`, { type: 'cam' });
+    logger.error(`An error occured while fetching images for harvest - ${sid}`, { type: 'cam' });
   }
 
   return {
