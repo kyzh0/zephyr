@@ -102,5 +102,5 @@ cron.schedule('0 0 * * *', async () => {
   logger.info(`Remove old images end - ${Date.now() - ts}ms elapsed.`, { type: 'cam' });
 });
 
-const port = process.env.NODE_LOCAL_PORT || 5000;
+const port = process.env.NODE_PORT || 5000;
 app.listen(port, () => logger.info(`Server running on port ${port}`));

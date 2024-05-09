@@ -48,7 +48,7 @@ services:
     image: caddy:alpine
     restart: unless-stopped
     environment:
-      - NODE_PORT=${NODE_LOCAL_PORT}
+      - NODE_PORT=${NODE_PORT}
     ports:
       - "80:80"
       - "443:443"
