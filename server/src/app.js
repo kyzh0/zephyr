@@ -21,7 +21,7 @@ import {
 } from './services/stationService.js';
 
 const app = express();
-app.use(cors({ origin: /zephyrapp\.nz$/ }));
+app.use(cors({ origin: [/zephyrapp\.nz$/, /^http(s)?:\/\/localhost:\d{4}.*$/] }));
 app.use(express.json());
 app.use(express.static('public'));
 dotenv.config();

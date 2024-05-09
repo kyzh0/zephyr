@@ -1,4 +1,2 @@
 export const APIROOT =
-  process.env.NODE_ENV === 'development'
-    ? `http://localhost:${process.env.NODE_PORT}`
-    : 'https://api.zephyrapp.nz';
+  process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://api.zephyrapp.nz';
