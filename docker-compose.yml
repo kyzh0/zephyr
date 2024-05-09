@@ -3,8 +3,6 @@ services:
     build:
       context: ./server
     restart: unless-stopped
-    ports:
-      - "${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}"
     env_file: ./.env
     environment:
       - DB_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
