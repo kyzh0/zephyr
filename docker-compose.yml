@@ -48,6 +48,7 @@ services:
       - client_build:/app/build
 
   caddy:
+    container_name: caddy
     image: caddy:alpine
     restart: unless-stopped
     environment:
