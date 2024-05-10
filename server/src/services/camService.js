@@ -31,7 +31,7 @@ async function getHarvestImage(sid, hsn, lastUpdate) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching images for harvest - ${sid}`, { type: 'cam' });
+    logger.warn(`An error occured while fetching images for harvest - ${sid}`, { type: 'cam' });
   }
 
   return {
@@ -77,7 +77,7 @@ async function getMetserviceImage(id, lastUpdate) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching images for metservice - ${id}`, { type: 'cam' });
+    logger.warn(`An error occured while fetching images for metservice - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -114,7 +114,7 @@ async function getLakeWanakaImage(id, lastUpdate) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching images for lake wanaka - ${id}`, { type: 'cam' });
+    logger.warn(`An error occured while fetching images for lake wanaka - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -159,7 +159,7 @@ async function getCheesemanImage(id, lastUpdate) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching images for mt cheeseman - ${id}`, {
+    logger.warn(`An error occured while fetching images for mt cheeseman - ${id}`, {
       type: 'cam'
     });
   }
@@ -223,7 +223,7 @@ async function getQueenstownAirportImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error(`An error occured while fetching images for qt airport - ${id}`, { type: 'cam' });
+    logger.warn(`An error occured while fetching images for qt airport - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -285,7 +285,7 @@ async function getWanakaAirportImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error(`An error occured while fetching images for wanaka airport - ${id}`, {
+    logger.warn(`An error occured while fetching images for wanaka airport - ${id}`, {
       type: 'cam'
     });
   }
@@ -313,7 +313,7 @@ async function getCgcImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error(`An error occured while fetching images for cgc - ${id}`, { type: 'cam' });
+    logger.warn(`An error occured while fetching images for cgc - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -339,7 +339,7 @@ async function getCastleHillImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error(`An error occured while fetching images for castle hill - ${id}`, { type: 'cam' });
+    logger.warn(`An error occured while fetching images for castle hill - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -404,7 +404,7 @@ async function getCwuImage(id) {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error(`An error occured while fetching images for cwu - ${id}`, { type: 'cam' });
+    logger.warn(`An error occured while fetching images for cwu - ${id}`, { type: 'cam' });
   }
 
   return {
@@ -427,7 +427,7 @@ async function getTaylorsSurfImage() {
     base64 = Buffer.from(response.data, 'binary').toString('base64');
     updated = new Date();
   } catch (error) {
-    logger.error('An error occured while fetching images for taylors surf', { type: 'cam' });
+    logger.warn('An error occured while fetching images for taylors surf', { type: 'cam' });
   }
 
   return {

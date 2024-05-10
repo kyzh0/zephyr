@@ -123,7 +123,7 @@ async function processHarvestResponse(
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching data for harvest - ${sid}`, {
+    logger.warn(`An error occured while fetching data for harvest - ${sid}`, {
       type: 'station'
     });
   }
@@ -267,7 +267,7 @@ async function getMetserviceData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching data for metservice - ${stationId}`, {
+    logger.warn(`An error occured while fetching data for metservice - ${stationId}`, {
       type: 'station'
     });
   }
@@ -300,7 +300,7 @@ async function getAttentisData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching data for attentis - ${stationId}`, {
+    logger.warn(`An error occured while fetching data for attentis - ${stationId}`, {
       type: 'station'
     });
   }
@@ -374,7 +374,7 @@ async function getCwuData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching data for cwu - ${stationId}`, {
+    logger.warn(`An error occured while fetching data for cwu - ${stationId}`, {
       type: 'station'
     });
   }
@@ -443,7 +443,7 @@ async function getWeatherProData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching data for weatherpro - ${stationId}`, {
+    logger.warn(`An error occured while fetching data for weatherpro - ${stationId}`, {
       type: 'station'
     });
   }
@@ -524,7 +524,7 @@ async function getPortOtagoData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching data for port otago - ${stationId}`, {
+    logger.warn(`An error occured while fetching data for port otago - ${stationId}`, {
       type: 'station'
     });
   }
@@ -563,7 +563,7 @@ async function getWUndergroundData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching data for wunderground - ${stationId}`, {
+    logger.warn(`An error occured while fetching data for wunderground - ${stationId}`, {
       type: 'station'
     });
   }
@@ -599,7 +599,7 @@ async function getTempestData(stationId) {
       temperature = cc.air_temperature;
     }
   } catch (error) {
-    logger.error(`An error occured while fetching data for tempest - ${stationId}`, {
+    logger.warn(`An error occured while fetching data for tempest - ${stationId}`, {
       type: 'station'
     });
   }
@@ -635,7 +635,7 @@ async function getWindguruData(stationId) {
       temperature = data.temperature;
     }
   } catch (error) {
-    logger.error(`An error occured while fetching data for windguru - ${stationId}`, {
+    logger.warn(`An error occured while fetching data for windguru - ${stationId}`, {
       type: 'station'
     });
   }
@@ -683,7 +683,7 @@ async function getCentrePortData(stationId) {
       }
     }
   } catch (error) {
-    logger.error(`An error occured while fetching data for centreport - ${stationId}`, {
+    logger.warn(`An error occured while fetching data for centreport - ${stationId}`, {
       type: 'station'
     });
   }
@@ -755,7 +755,7 @@ async function getLpcData() {
       }
     }
   } catch (error) {
-    logger.error('An error occured while fetching data for lpc', {
+    logger.warn('An error occured while fetching data for lpc', {
       type: 'station'
     });
   }
@@ -801,7 +801,7 @@ async function getMpycData() {
       }
     }
   } catch (error) {
-    logger.error('An error occured while fetching data for mpyc', {
+    logger.warn('An error occured while fetching data for mpyc', {
       type: 'station'
     });
   }
@@ -901,7 +901,7 @@ async function getNavigatusData() {
       }
     }
   } catch (error) {
-    logger.error('An error occured while fetching data for navigatus', {
+    logger.warn('An error occured while fetching data for navigatus', {
       type: 'station'
     });
   }
@@ -935,7 +935,7 @@ async function getMfhbData() {
       temperature = data.temperature;
     }
   } catch (error) {
-    logger.error('An error occured while fetching data for mfhb', {
+    logger.warn('An error occured while fetching data for mfhb', {
       type: 'station'
     });
   }
@@ -976,7 +976,7 @@ async function getMrcData() {
       }
     }
   } catch (error) {
-    logger.error('An error occured while fetching data for mrc', {
+    logger.warn('An error occured while fetching data for mrc', {
       type: 'station'
     });
   }
@@ -1144,8 +1144,9 @@ async function getHolfuyData(stationId) {
       temperature = data.temperature;
     }
   } catch (error) {
-    logger.error('An error occured while fetching holfuy station data', { type: 'station' });
-    logger.error(error, { type: 'station' });
+    logger.warn(`An error occured while fetching data for holfuy - ${stationId}`, {
+      type: 'station'
+    });
   }
 
   return {
