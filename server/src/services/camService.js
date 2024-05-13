@@ -548,6 +548,7 @@ export async function webcamWrapper() {
     }
   } catch (error) {
     logger.error('An error occured while fetching webcam images', { type: 'cam' });
+    logger.error(error);
     return null;
   }
 }
