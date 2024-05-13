@@ -6,7 +6,7 @@ services:
     ports:
       - '${REACT_LOCAL_PORT}:${REACT_DOCKER_PORT}'
     volumes:
-      - client_build:/app/build
+      - build:/app/build
 
 volumes:
-  client_build:
+  build:
