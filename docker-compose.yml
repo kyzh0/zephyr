@@ -38,15 +38,6 @@ services:
     volumes:
       - logs:/data
 
-  client:
-    container_name: client
-    build:
-      context: ./client
-    ports:
-      - "${REACT_LOCAL_PORT}:${REACT_DOCKER_PORT}"
-    volumes:
-      - client_build:/app/build
-
   caddy:
     container_name: caddy
     image: caddy:alpine
@@ -59,17 +50,16 @@ services:
       - "443:443"
     volumes:
       - $PWD/Caddyfile:/etc/caddy/Caddyfile
-      - client_build:/srv
+      - caddy_srv:/srv
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
       - server
-      - client
 
 volumes:
   server_public:
   mongo:
   logs:
-  client_build:
+  caddy_srv:
   caddy_data:
   caddy_config:
