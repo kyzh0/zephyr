@@ -17,7 +17,7 @@ services:
       - '443:443'
     volumes:
       - $PWD/Caddyfile:/etc/caddy/Caddyfile
-      - caddy_srv:/srv
+      - client_build:/srv
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -25,6 +25,5 @@ services:
 
 volumes:
   client_build:
-  caddy_srv:
   caddy_data:
   caddy_config:
