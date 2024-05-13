@@ -56,8 +56,6 @@ services:
       - server
 
 volumes:
-  server_public:
-  mongo:
-  logs:
+  client_build:
   caddy_data:
   caddy_config:
