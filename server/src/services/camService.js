@@ -471,71 +471,79 @@ export async function webcamWrapper() {
         data = await getTaylorsSurfImage();
       }
 
-      if (data && data.updated && data.base64) {
-        const imgBuff = Buffer.from(data.base64, 'base64');
+      try {
+        if (data && data.updated && data.base64) {
+          const imgBuff = Buffer.from(data.base64, 'base64');
 
-        const img = {
-          time: data.updated
-        };
+          const img = {
+            time: data.updated
+          };
 
-        // for types that don't have embedded timestamps, check for duplicate image
-        if (
-          c.type === 'qa' ||
-          c.type === 'wa' ||
-          c.type === 'cgc' ||
-          c.type === 'ch' ||
-          c.type === 'cwu' ||
-          c.type === 'ts'
-        ) {
-          img.hash = md5(imgBuff);
-          img.fileSize = imgBuff.length;
+          // for types that don't have embedded timestamps, check for duplicate image
+          if (
+            c.type === 'qa' ||
+            c.type === 'wa' ||
+            c.type === 'cgc' ||
+            c.type === 'ch' ||
+            c.type === 'cwu' ||
+            c.type === 'ts'
+          ) {
+            img.hash = md5(imgBuff);
+            img.fileSize = imgBuff.length;
 
-          if (c.images.length) {
-            const latestImg = c.images.reduce((prev, current) => {
-              return prev && new Date(prev.time) > new Date(current.time) ? prev : current;
-            });
-            if (latestImg && latestImg.fileSize == img.fileSize && latestImg.hash == img.hash) {
-              logger.info(
-                `${c.type} image update skipped${c.externalId ? ` - ${c.externalId}` : ''}`,
-                { type: 'cam' }
-              );
-              continue;
+            if (c.images.length) {
+              const latestImg = c.images.reduce((prev, current) => {
+                return prev && new Date(prev.time) > new Date(current.time) ? prev : current;
+              });
+              if (latestImg && latestImg.fileSize == img.fileSize && latestImg.hash == img.hash) {
+                logger.info(
+                  `${c.type} image update skipped${c.externalId ? ` - ${c.externalId}` : ''}`,
+                  { type: 'cam' }
+                );
+                continue;
+              }
             }
           }
+
+          const dir = `public/cams/${c.type}/${c._id}`;
+          await fs.mkdir(dir, { recursive: true });
+
+          const resizedBuf = await sharp(imgBuff).resize({ width: 600 }).toBuffer();
+          const path = `${dir}/${data.updated.toISOString()}.jpg`;
+          await fs.writeFile(path, resizedBuf);
+
+          img.url = path.replace('public/', '');
+
+          // update cam
+          c.lastUpdate = new Date();
+          c.currentTime = data.updated;
+          c.currentUrl = path.replace('public/', '');
+          await c.save();
+
+          // add image
+          await Cam.updateOne(
+            { _id: c._id },
+            {
+              $push: {
+                images: img
+              }
+            }
+          );
+
+          logger.info(`${c.type} image updated${c.externalId ? ` - ${c.externalId}` : ''}`, {
+            type: 'cam'
+          });
+        } else {
+          logger.info(`${c.type} image update skipped${c.externalId ? ` - ${c.externalId}` : ''}`, {
+            type: 'cam'
+          });
         }
-
-        const dir = `public/cams/${c.type}/${c._id}`;
-        await fs.mkdir(dir, { recursive: true });
-
-        const resizedBuf = await sharp(imgBuff).resize({ width: 600 }).toBuffer();
-        const path = `${dir}/${data.updated.toISOString()}.jpg`;
-        await fs.writeFile(path, resizedBuf);
-
-        img.url = path.replace('public/', '');
-
-        // update cam
-        c.lastUpdate = new Date();
-        c.currentTime = data.updated;
-        c.currentUrl = path.replace('public/', '');
-        await c.save();
-
-        // add image
-        await Cam.updateOne(
-          { _id: c._id },
-          {
-            $push: {
-              images: img
-            }
-          }
+      } catch (error) {
+        logger.error(
+          `An error occured while saving image for ${c.type}${c.externalId ? ` - ${x.externalId}` : ''}`,
+          { type: 'cam' }
         );
-
-        logger.info(`${c.type} image updated${c.externalId ? ` - ${c.externalId}` : ''}`, {
-          type: 'cam'
-        });
-      } else {
-        logger.info(`${c.type} image update skipped${c.externalId ? ` - ${c.externalId}` : ''}`, {
-          type: 'cam'
-        });
+        logger.error(error);
       }
     }
   } catch (error) {
