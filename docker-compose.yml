@@ -10,7 +10,7 @@ services:
       - mongodb
       - seq
     volumes:
-      - server_public:/app/public/
+      - caddy_fs:/app/public/
 
   mongodb:
     container_name: mongodb
@@ -50,6 +50,7 @@ services:
       - "443:443"
     volumes:
       - $PWD/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_fs:/var/www
       - caddy_srv:/srv
       - caddy_data:/data
       - caddy_config:/config
@@ -57,7 +58,6 @@ services:
       - server
 
 volumes:
-  server_public:
   mongo:
   logs:
   caddy_srv:

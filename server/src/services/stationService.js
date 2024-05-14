@@ -1281,7 +1281,7 @@ export async function jsonOutputWrapper() {
 
     const output = new Output({
       time: date,
-      path: path.replace('public/', '')
+      url: `https://fs.zephyrapp.nz/${path.replace('public/', '')}`
     });
     await output.save();
   } catch (error) {

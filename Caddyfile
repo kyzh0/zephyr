@@ -9,6 +9,11 @@ web.zephyrapp.nz {
 	file_server
 }
 
+fs.zephyrapp.nz {
+	root * /var/www
+	file_server
+}
+
 logs.zephyrapp.nz {
 	reverse_proxy seq:{$SEQ_PORT}
 }

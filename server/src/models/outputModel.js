@@ -5,7 +5,7 @@ const schema = mongoose.Schema({
     type: Date,
     required: true
   },
-  path: {
+  url: {
     type: String,
     required: true
   }
