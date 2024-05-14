@@ -992,19 +992,19 @@ async function getMrcData() {
 async function saveData(station, data, date) {
   // handle likely erroneous values
   let avg = data.windAverage;
-  if (avg < 0 || avg > 500) {
+  if (!isNaN(avg) || avg < 0 || avg > 500) {
     avg = null;
   }
   let gust = data.windGust;
-  if (gust < 0 || gust > 500) {
+  if (isNaN(gust) || gust < 0 || gust > 500) {
     gust = null;
   }
   let bearing = data.windBearing;
-  if (bearing < 0 || bearing > 360) {
+  if (isNaN(bearing) || bearing < 0 || bearing > 360) {
     bearing = null;
   }
   let temperature = data.temperature;
-  if (temperature < -40 || temperature > 60) {
+  if (isNaN(temperature) || temperature < -40 || temperature > 60) {
     temperature = null;
   }
 

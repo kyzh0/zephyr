@@ -220,8 +220,10 @@ async function getQueenstownAirportImage(id) {
         }
       }
     );
-    base64 = Buffer.from(response.data, 'binary').toString('base64');
-    updated = new Date();
+    if (response.status == 200 && response.headers['content-type'] === 'image/jpeg') {
+      base64 = Buffer.from(response.data, 'binary').toString('base64');
+      updated = new Date();
+    }
   } catch (error) {
     logger.warn(`An error occured while fetching images for qt airport - ${id}`, { type: 'cam' });
   }
@@ -282,8 +284,10 @@ async function getWanakaAirportImage(id) {
         }
       }
     );
-    base64 = Buffer.from(response.data, 'binary').toString('base64');
-    updated = new Date();
+    if (response.status == 200 && response.headers['content-type'] === 'image/jpeg') {
+      base64 = Buffer.from(response.data, 'binary').toString('base64');
+      updated = new Date();
+    }
   } catch (error) {
     logger.warn(`An error occured while fetching images for wanaka airport - ${id}`, {
       type: 'cam'
@@ -401,8 +405,10 @@ async function getCwuImage(id) {
         }
       }
     );
-    base64 = Buffer.from(response.data, 'binary').toString('base64');
-    updated = new Date();
+    if (response.status == 200 && response.headers['content-type'] === 'image/jpeg') {
+      base64 = Buffer.from(response.data, 'binary').toString('base64');
+      updated = new Date();
+    }
   } catch (error) {
     logger.warn(`An error occured while fetching images for cwu - ${id}`, { type: 'cam' });
   }
