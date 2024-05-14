@@ -60,6 +60,7 @@ services:
 volumes:
   mongo:
   logs:
+  caddy_fs:
   caddy_srv:
   caddy_data:
   caddy_config:
