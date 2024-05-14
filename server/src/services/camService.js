@@ -540,7 +540,7 @@ export async function webcamWrapper() {
         }
       } catch (error) {
         logger.error(
-          `An error occured while saving image for ${c.type}${c.externalId ? ` - ${x.externalId}` : ''}`,
+          `An error occured while saving image for ${c.type}${c.externalId ? ` - ${c.externalId}` : ''}`,
           { type: 'cam' }
         );
         logger.error(error);
