@@ -549,7 +549,7 @@ export async function webcamWrapper() {
           // update cam
           c.lastUpdate = new Date();
           c.currentTime = data.updated;
-          c.currentUrl = path.replace('public/', '');
+          c.currentUrl = img.url;
           await c.save();
 
           // add image
