@@ -124,7 +124,8 @@ async function processHarvestResponse(
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for harvest - ${sid}`, {
-      type: 'station'
+      service: 'station',
+      type: 'harvest'
     });
   }
 
@@ -268,7 +269,8 @@ async function getMetserviceData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for metservice - ${stationId}`, {
-      type: 'station'
+      service: 'station',
+      type: 'metservice'
     });
   }
 
@@ -301,7 +303,8 @@ async function getAttentisData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for attentis - ${stationId}`, {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -375,7 +378,8 @@ async function getCwuData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for cwu - ${stationId}`, {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -444,7 +448,8 @@ async function getWeatherProData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for weatherpro - ${stationId}`, {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -525,7 +530,8 @@ async function getPortOtagoData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for port otago - ${stationId}`, {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -564,7 +570,8 @@ async function getWUndergroundData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for wunderground - ${stationId}`, {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -600,7 +607,8 @@ async function getTempestData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for tempest - ${stationId}`, {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -636,7 +644,8 @@ async function getWindguruData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for windguru - ${stationId}`, {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -684,7 +693,8 @@ async function getCentrePortData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for centreport - ${stationId}`, {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -756,7 +766,8 @@ async function getLpcData() {
     }
   } catch (error) {
     logger.warn('An error occured while fetching data for lpc', {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -802,7 +813,8 @@ async function getMpycData() {
     }
   } catch (error) {
     logger.warn('An error occured while fetching data for mpyc', {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -902,7 +914,8 @@ async function getNavigatusData() {
     }
   } catch (error) {
     logger.warn('An error occured while fetching data for navigatus', {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -936,7 +949,8 @@ async function getMfhbData() {
     }
   } catch (error) {
     logger.warn('An error occured while fetching data for mfhb', {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -977,7 +991,8 @@ async function getMrcData() {
     }
   } catch (error) {
     logger.warn('An error occured while fetching data for mrc', {
-      type: 'station'
+      service: 'station',
+      type: 'other'
     });
   }
 
@@ -996,15 +1011,15 @@ async function saveData(station, data, date) {
     avg = null;
   }
   let gust = data.windGust;
-  if (isNaN(gust) || gust < 0 || gust > 500) {
+  if (!isNaN(gust) || gust < 0 || gust > 500) {
     gust = null;
   }
   let bearing = data.windBearing;
-  if (isNaN(bearing) || bearing < 0 || bearing > 360) {
+  if (!isNaN(bearing) || bearing < 0 || bearing > 360) {
     bearing = null;
   }
   let temperature = data.temperature;
-  if (isNaN(temperature) || temperature < -40 || temperature > 60) {
+  if (!isNaN(temperature) || temperature < -40 || temperature > 60) {
     temperature = null;
   }
 
@@ -1049,7 +1064,10 @@ export async function stationWrapper(source) {
 
     const stations = await Station.find(query, { data: 0 });
     if (!stations.length) {
-      logger.error(`No ${source} stations found.`, { type: 'station' });
+      logger.error(`No ${source} stations found.`, {
+        service: 'station',
+        type: source ? source : 'other'
+      });
       return null;
     }
 
@@ -1109,15 +1127,19 @@ export async function stationWrapper(source) {
 
       if (data) {
         logger.info(`${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`, {
-          type: 'station'
+          service: 'station',
+          type: source ? source : 'other'
         });
-        logger.info(JSON.stringify(data), { type: 'station' });
+        logger.info(JSON.stringify(data), { service: 'station', type: source ? source : 'other' });
         await saveData(s, data, date);
       }
     }
   } catch (error) {
-    logger.error(`An error occurred while fetching ${source} station data`, { type: 'station' });
-    logger.error(error, { type: 'station' });
+    logger.error(`An error occurred while fetching ${source} station data`, {
+      service: 'station',
+      type: source ? source : 'other'
+    });
+    logger.error(error, { service: 'station', type: source ? source : 'other' });
     return null;
   }
 }
@@ -1145,7 +1167,8 @@ async function getHolfuyData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for holfuy - ${stationId}`, {
-      type: 'station'
+      service: 'station',
+      type: 'holfuy'
     });
   }
 
@@ -1161,7 +1184,7 @@ export async function holfuyWrapper() {
   try {
     const stations = await Station.find({ type: 'holfuy' }, { data: 0 });
     if (!stations.length) {
-      logger.error('No holfuy stations found.', { type: 'station' });
+      logger.error('No holfuy stations found.', { service: 'station', type: 'holfuy' });
       return null;
     }
 
@@ -1188,14 +1211,20 @@ export async function holfuyWrapper() {
       }
 
       if (d) {
-        logger.info(`holfuy data updated - ${s.externalId}`, { type: 'station' });
-        logger.info(JSON.stringify(d), { type: 'station' });
+        logger.info(`holfuy data updated - ${s.externalId}`, {
+          service: 'station',
+          type: 'holfuy'
+        });
+        logger.info(JSON.stringify(d), { service: 'station', type: 'holfuy' });
         await saveData(s, d, date);
       }
     }
   } catch (error) {
-    logger.error('An error occured while fetching holfuy station data', { type: 'station' });
-    logger.error(error, { type: 'station' });
+    logger.error('An error occured while fetching holfuy station data', {
+      service: 'station',
+      type: 'holfuy'
+    });
+    logger.error(error, { service: 'station', type: 'holfuy' });
     return null;
   }
 }
@@ -1248,7 +1277,7 @@ export async function jsonOutputWrapper() {
     await fs.mkdir(dir, { recursive: true });
     const path = `${dir}/zephyr-scrape-${date.getTime() / 1000}.json`;
     await fs.writeFile(path, JSON.stringify(json));
-    logger.info(`File created - ${path}`, { type: 'station' });
+    logger.info(`File created - ${path}`, { service: 'json' });
 
     const output = new Output({
       time: date,
@@ -1256,8 +1285,8 @@ export async function jsonOutputWrapper() {
     });
     await output.save();
   } catch (error) {
-    logger.error('An error occurred while processing json output', { type: 'station' });
-    logger.error(error, { type: 'station' });
+    logger.error('An error occurred while processing json output', { service: 'json' });
+    logger.error(error, { service: 'json' });
   }
 }
 
@@ -1271,7 +1300,7 @@ export async function checkForErrors() {
   try {
     const stations = await Station.find({});
     if (!stations.length) {
-      logger.error('No stations found.', { type: 'station' });
+      logger.error('No stations found.', { service: 'errors' });
       return null;
     }
 
@@ -1358,11 +1387,11 @@ export async function checkForErrors() {
     }
 
     logger.info(`Checked for errors - ${errors.length} stations newly offline.`, {
-      type: 'station'
+      service: 'errors'
     });
   } catch (error) {
-    logger.error('An error occurred while checking for station errors', { type: 'station' });
-    logger.error(error, { type: 'station' });
+    logger.error('An error occurred while checking for station errors', { service: 'errors' });
+    logger.error(error, { service: 'errors' });
     return null;
   }
 }
@@ -1374,7 +1403,7 @@ export async function updateKeys() {
       externalId: { $in: ['10243_113703', '11433_171221'] }
     });
     if (!stations.length) {
-      logger.error('No stations found.', { type: 'station' });
+      logger.error('No stations found.', { service: 'keys' });
       return null;
     }
 
@@ -1408,8 +1437,8 @@ export async function updateKeys() {
       }
     }
   } catch (error) {
-    logger.error('An error occurred while updating keys', { type: 'station' });
-    logger.error(error, { type: 'station' });
+    logger.error('An error occurred while updating keys', { service: 'keys' });
+    logger.error(error, { service: 'keys' });
     return null;
   }
 }
@@ -1418,7 +1447,7 @@ export async function removeOldData() {
   try {
     const stations = await Station.find({});
     if (!stations.length) {
-      logger.error('No stations found.', { type: 'station' });
+      logger.error('No stations found.', { service: 'cleanup' });
       return null;
     }
 
@@ -1427,8 +1456,8 @@ export async function removeOldData() {
       await Station.updateOne({ _id: s._id }, { $pull: { data: { time: { $lte: cutoff } } } });
     }
   } catch (error) {
-    logger.error('An error occurred while removing old data', { type: 'station' });
-    logger.error(error, { type: 'station' });
+    logger.error('An error occurred while removing old data', { service: 'cleanup' });
+    logger.error(error, { service: 'cleanup' });
     return null;
   }
 }

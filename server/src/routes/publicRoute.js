@@ -25,7 +25,7 @@ async function authenticateApiKey(apiKey) {
       error: 'Invalid API key.'
     };
   }
-  logger.info(`... by ${client.name}`);
+  logger.info(`... by ${client.name}`, { service: 'public' });
 
   const date = new Date();
   const currentMonth = fns.format(date, 'yyyy-MM');
@@ -66,7 +66,7 @@ async function authenticateApiKey(apiKey) {
 }
 
 router.get('/geojson', async (req, res) => {
-  logger.info('GeoJSON requested');
+  logger.info('GeoJSON requested', { service: 'public' });
 
   const geoJson = {
     type: 'FeatureCollection',
@@ -85,7 +85,7 @@ router.get('/geojson', async (req, res) => {
       name: 1
     });
     if (!stations.length) {
-      logger.error('No stations found.');
+      logger.error('No stations found.', { service: 'public' });
       res.status(500).json({ error: 'No stations found. Please contact the Zephyr admin.' });
       return;
     }
@@ -108,15 +108,15 @@ router.get('/geojson', async (req, res) => {
       };
       geoJson.features.push(feature);
     }
-  } catch (e) {
-    logger.error(e);
+  } catch (error) {
+    logger.error(error, { service: 'public' });
   }
 
   res.json(geoJson);
 });
 
 router.get('/json-output', async (req, res) => {
-  logger.info('JSON output requested');
+  logger.info('JSON output requested', { service: 'public' });
 
   const result = [];
 
@@ -160,8 +160,8 @@ router.get('/json-output', async (req, res) => {
         path: o.path
       });
     }
-  } catch (e) {
-    logger.error(e);
+  } catch (error) {
+    logger.error(error, { service: 'public' });
   }
 
   res.json(result);
