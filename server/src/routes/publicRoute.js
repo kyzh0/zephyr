@@ -157,7 +157,7 @@ router.get('/json-output', async (req, res) => {
     for (const o of output) {
       result.push({
         time: new Date(o.time).getTime() / 1000,
-        path: o.path
+        url: o.url
       });
     }
   } catch (error) {
