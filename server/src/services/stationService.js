@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as fns from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import fs from 'fs/promises';
 
 import logger from '../helpers/log.js';
@@ -1273,7 +1273,7 @@ export async function jsonOutputWrapper() {
     json.sort((a, b) => {
       return cmp(a.type, b.type) || cmp(a.name, b.name);
     });
-    const dir = `public/data/${fns.format(date, 'yyyy/MM/dd')}`;
+    const dir = `public/data/${formatInTimeZone(date, 'UTC', 'yyyy/MM/dd')}`;
     await fs.mkdir(dir, { recursive: true });
     const path = `${dir}/zephyr-scrape-${date.getTime() / 1000}.json`;
     await fs.writeFile(path, JSON.stringify(json));

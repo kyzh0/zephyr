@@ -1,6 +1,6 @@
 import axios from 'axios';
-import * as fns from 'date-fns';
-import * as fnsTz from 'date-fns-tz';
+import { parse } from 'date-fns';
+import { fromZonedTime } from 'date-fns-tz';
 import sharp from 'sharp';
 import md5 from 'md5';
 import fs from 'fs/promises';
@@ -104,8 +104,8 @@ async function getLakeWanakaImage(id, lastUpdate) {
     });
     const d = data.latest_image;
     if (d && d.timestamp) {
-      updated = fnsTz.fromZonedTime(
-        fns.parse(d.timestamp, 'yyyy-MM-dd HH:mm:ss', new Date()),
+      updated = fromZonedTime(
+        parse(d.timestamp, 'yyyy-MM-dd HH:mm:ss', new Date()),
         'Pacific/Auckland'
       );
       // skip if image already up to date
@@ -150,10 +150,7 @@ async function getCheesemanImage(id, lastUpdate) {
       if (matches && matches.length) {
         const url = matches[matches.length - 1];
         const match = url.match(/\d{12}/g);
-        updated = fnsTz.fromZonedTime(
-          fns.parse(match[0], 'yyyyMMddHHmm', new Date()),
-          'Pacific/Auckland'
-        );
+        updated = fromZonedTime(parse(match[0], 'yyyyMMddHHmm', new Date()), 'Pacific/Auckland');
 
         // skip if image already up to date
         if (updated > lastUpdate) {

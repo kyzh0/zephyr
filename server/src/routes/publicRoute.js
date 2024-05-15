@@ -1,5 +1,5 @@
 import express from 'express';
-import * as fns from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 import logger from '../helpers/log.js';
 
@@ -28,7 +28,7 @@ async function authenticateApiKey(apiKey) {
   logger.info(`... by ${client.name}`, { service: 'public' });
 
   const date = new Date();
-  const currentMonth = fns.format(date, 'yyyy-MM');
+  const currentMonth = formatInTimeZone(date, 'UTC', 'yyyy-MM');
   const matches = client.usage.filter((c) => {
     return c.month === currentMonth;
   });
