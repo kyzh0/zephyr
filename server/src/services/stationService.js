@@ -1313,25 +1313,27 @@ export async function checkForErrors() {
       let isBearingError = true;
       let isTempError = true;
 
-      // check if last 6h data is all null
+      // check last 6h data
       const data = s.data.filter((x) => {
         return new Date(x.time) >= new Date(timeNow - 6 * 60 * 60 * 1000);
       });
-      if (!data.length) continue;
-      data.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()); // time desc
 
-      // check that data exists up to 20min before current time
-      if (timeNow - new Date(data[0].time).getTime() <= 20 * 60 * 1000) {
-        isDataError = false;
-        for (const d of data) {
-          if (d.windAverage != null || d.windGust != null) {
-            isWindError = false;
-          }
-          if (d.windBearing != null) {
-            isBearingError = false;
-          }
-          if (d.temperature != null) {
-            isTempError = false;
+      if (data.length) {
+        data.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()); // time desc
+
+        // check that data exists up to 20min before current time
+        if (timeNow - new Date(data[0].time).getTime() <= 20 * 60 * 1000) {
+          isDataError = false;
+          for (const d of data) {
+            if (d.windAverage != null || d.windGust != null) {
+              isWindError = false;
+            }
+            if (d.windBearing != null) {
+              isBearingError = false;
+            }
+            if (d.temperature != null) {
+              isTempError = false;
+            }
           }
         }
       }
@@ -1366,7 +1368,7 @@ export async function checkForErrors() {
       // send email if >2 stations of the same type went offline simultaneously
       let msg = '';
       const g = groupBy(errors, 'type');
-      const singleStations = ['lpc', 'mpyc', 'navigatus'];
+      const singleStations = ['lpc', 'mpyc', 'navigatus', 'mfhb'];
       for (const [key, value] of Object.entries(g)) {
         if (singleStations.includes(key) || value.length > 2) {
           msg += `\n${key.toUpperCase()}\n\n`;
