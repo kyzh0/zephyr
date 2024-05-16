@@ -19,7 +19,7 @@ import './Webcam.css';
 import { Carousel } from 'react-responsive-carousel';
 import { format } from 'date-fns';
 
-import { APIROOT } from '../helpers/constants';
+import { FILESERVERROOT } from '../helpers/constants';
 
 export default function Webcam() {
   const { id } = useParams();
@@ -138,7 +138,7 @@ export default function Webcam() {
                         img.loaded = true;
                         return (
                           <div key={img.time}>
-                            <img width="100%" src={`${APIROOT}/${img.url}`} />
+                            <img width="100%" src={`${FILESERVERROOT}/${img.url}`} />
                             <p style={{ margin: 0 }}>
                               {format(new Date(img.time), 'dd MMM HH:mm')}
                             </p>

@@ -21,7 +21,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 import './Map.css';
 
-import { APIROOT } from '../helpers/constants';
+import { FILESERVERROOT } from '../helpers/constants';
 
 export default function Map() {
   let theme = createTheme({
@@ -353,7 +353,7 @@ export default function Map() {
 
       const img = document.createElement('img');
       img.width = 150;
-      img.src = `${APIROOT}/${currentUrl}`;
+      img.src = `${FILESERVERROOT}/${currentUrl}`;
       img.className = 'webcam-img';
 
       const text = document.createElement('span');
@@ -572,7 +572,7 @@ export default function Map() {
           child.src =
             timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000
               ? ''
-              : `${APIROOT}/${currentUrl}`;
+              : `${FILESERVERROOT}/${currentUrl}`;
         } else if (child.className === 'webcam-text-date') {
           if (timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000) {
             child.innerHTML = 'No images in the last 24h.';
