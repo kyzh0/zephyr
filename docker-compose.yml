@@ -22,6 +22,9 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     ports:
       - "${MONGO_LOCAL_PORT}:${MONGO_DOCKER_PORT}"
+    ulimits:
+      nproc: 64000
+      nofile: 64000
     volumes:
       - mongo:/data/db
 
