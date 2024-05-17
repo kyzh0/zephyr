@@ -192,6 +192,7 @@ export default function AdminAddStation() {
         station.validBearings = bearings;
       }
       if (type === 'harvest') {
+        station.externalId = `${externalId}_${harvestConfigId}`;
         station.harvestWindAverageId = `${harvestWindAvgGraphId}_${harvestWindAvgTraceId}`;
         station.harvestWindGustId = `${harvestWindGustGraphId}_${harvestWindGustTraceId}`;
         station.harvestWindDirectionId = `${harvestWindDirGraphId}_${harvestWindDirTraceId}`;
