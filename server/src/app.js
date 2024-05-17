@@ -83,7 +83,7 @@ cron.schedule('*/10 * * * *', async () => {
     type: 'holfuy'
   });
 });
-cron.schedule('3,13,23,33,43,53 * * * *', async () => {
+cron.schedule('2,12,22,22,42,52 * * * *', async () => {
   logger.info('--- Process json output start ---', { service: 'json' });
   const ts = Date.now();
   await jsonOutputWrapper();
