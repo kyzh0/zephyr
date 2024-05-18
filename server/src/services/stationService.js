@@ -156,7 +156,7 @@ async function getHarvestData(
   // wind avg
   ids = windAvgId.split('_');
   if (ids.length == 2) {
-    const result = await processHarvestResponse(
+    windAverage = await processHarvestResponse(
       sid,
       configId,
       ids[0],
@@ -165,15 +165,12 @@ async function getHarvestData(
       sid === '1057' ? 'array' : 'object', // station 1057 has avg/gust switched
       cookie
     );
-    if (result) {
-      windAverage = result;
-    }
   }
 
   // wind gust
   ids = windGustId.split('_');
   if (ids.length == 2) {
-    const result = await processHarvestResponse(
+    windGust = await processHarvestResponse(
       sid,
       configId,
       ids[0],
@@ -182,15 +179,12 @@ async function getHarvestData(
       sid === '1057' ? 'object' : 'array',
       cookie
     );
-    if (result) {
-      windGust = result;
-    }
   }
 
   // wind direction
   ids = windDirId.split('_');
   if (ids.length == 2) {
-    const result = await processHarvestResponse(
+    windBearing = await processHarvestResponse(
       sid,
       configId,
       ids[0],
@@ -199,15 +193,12 @@ async function getHarvestData(
       'array',
       cookie
     );
-    if (result) {
-      windBearing = result;
-    }
   }
 
   // temperature
   ids = tempId.split('_');
   if (ids.length == 2) {
-    const result = await processHarvestResponse(
+    temperature = await processHarvestResponse(
       sid,
       configId,
       ids[0],
@@ -216,9 +207,6 @@ async function getHarvestData(
       'array',
       cookie
     );
-    if (result) {
-      temperature = result;
-    }
   }
 
   return {
