@@ -396,7 +396,7 @@ async function getWeatherProData(stationId) {
     );
     if (data.length) {
       // wind avg
-      let startStr = 'Wind Speed</td><td style="font-size:120%;">:';
+      let startStr = 'Wind Speed</td><td style="font-size:200%;">:';
       let i = data.indexOf(startStr);
       if (i >= 0) {
         const j = data.indexOf('kph</td></tr>', i);
@@ -409,7 +409,7 @@ async function getWeatherProData(stationId) {
       }
 
       // wind direction
-      startStr = 'Wind Direction</td><td style="font-size:120%;">:';
+      startStr = 'Wind Direction</td><td style="font-size:200%;">:';
       i = data.indexOf(startStr);
       if (i >= 0) {
         const j = data.indexOf('°</td></tr>', i);
@@ -422,7 +422,7 @@ async function getWeatherProData(stationId) {
       }
 
       // temperature
-      startStr = 'Air Temperature</td><td style="font-size:120%;">:';
+      startStr = 'Air Temperature</td><td style="font-size:200%;">:';
       i = data.indexOf(startStr);
       if (i >= 0) {
         const j = data.indexOf('°C</td></tr>', i);
