@@ -84,20 +84,7 @@ The `server` app requires [MongoDB](https://www.mongodb.com/docs/manual/installa
 
 ### Initialise Environment Variables
 
-Follow the instructions in `client/.env.example` and `server/.env.example` to set up your own environment variables.
-
-### Client
-
-```
-# go to directory
-$ cd ./client
-
-# install dependencies
-$ npm install
-
-# run the web app
-$ npm run start
-```
+Follow the instructions in `.env.example`, `client/.env.example`, and `server/.env.example` to set up your own environment variables.
 
 ### Server
 
@@ -112,11 +99,35 @@ $ npm install
 $ npm run dev
 ```
 
-### Deploy
+#### Deploy
 
 ```
 # from root directory
 $ docker compose --build -d
+```
+
+### Client
+
+```
+# go to directory
+$ cd ./client
+
+# install dependencies
+$ npm install
+
+# run the web app
+$ npm run start
+```
+
+#### Deploy
+
+```
+# from client directory
+$ docker compose --build -d
+
+# wait for build to complete, then copy build files to caddy container
+$ docker container run --rm -i -v client_build:/from -v zephyr_caddy_srv:/to \
+  alpine ash -c "rm -rf /to/*; cp -r /from/* /to; rm -rf /from/*"
 ```
 
 ## Contribute
