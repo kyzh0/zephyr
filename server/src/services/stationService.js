@@ -1533,7 +1533,7 @@ export async function checkForErrors() {
       // send email if >2 stations of the same type went offline simultaneously
       let msg = '';
       const g = groupBy(errors, 'type');
-      const singleStations = ['lpc', 'mpyc', 'navigatus', 'mfhb'];
+      const singleStations = ['lpc', 'mpyc', 'navigatus', 'mfhb', 'mrc', 'wainui'];
       for (const [key, value] of Object.entries(g)) {
         if (singleStations.includes(key) || value.length > 2) {
           msg += `\n${key.toUpperCase()}\n\n`;
