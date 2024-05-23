@@ -60,6 +60,8 @@ export function getStationTypeName(code) {
       return 'Mountain Research Centre';
     case 'mfhb':
       return "Model Flying Hawke's Bay";
+    case 'wainui':
+      return 'Wainuiomata';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }

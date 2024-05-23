@@ -345,9 +345,7 @@ async function getCwuData(stationId) {
         const j = data.indexOf('km/h.</span>', i);
         if (j > i) {
           const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) {
-            windGust = temp;
-          }
+          if (!isNaN(temp)) windGust = temp;
         }
       }
 
@@ -402,9 +400,7 @@ async function getWeatherProData(stationId) {
         const j = data.indexOf('kph</td></tr>', i);
         if (j > i) {
           const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) {
-            windAverage = temp;
-          }
+          if (!isNaN(temp)) windAverage = temp;
         }
       }
 
@@ -415,9 +411,7 @@ async function getWeatherProData(stationId) {
         const j = data.indexOf('°</td></tr>', i);
         if (j > i) {
           const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) {
-            windBearing = temp;
-          }
+          if (!isNaN(temp)) windBearing = temp;
         }
       }
 
@@ -428,9 +422,7 @@ async function getWeatherProData(stationId) {
         const j = data.indexOf('°C</td></tr>', i);
         if (j > i) {
           const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) {
-            temperature = temp;
-          }
+          if (!isNaN(temp)) temperature = temp;
         }
       }
     }
@@ -475,9 +467,7 @@ async function getPortOtagoData(stationId) {
           const k = data.indexOf('</p>', j);
           if (k > i) {
             const temp = Number(data.slice(j + startStr.length, k).trim());
-            if (!isNaN(temp)) {
-              windAverage = temp * 1.852;
-            }
+            if (!isNaN(temp)) windAverage = temp * 1.852;
           }
         }
       }
@@ -492,9 +482,7 @@ async function getPortOtagoData(stationId) {
           const k = data.indexOf('</p>', j);
           if (k > i) {
             const temp = Number(data.slice(j + startStr.length, k).trim());
-            if (!isNaN(temp)) {
-              windGust = temp * 1.852;
-            }
+            if (!isNaN(temp)) windGust = temp * 1.852;
           }
         }
       }
@@ -509,9 +497,7 @@ async function getPortOtagoData(stationId) {
           const k = data.indexOf('</p>', j);
           if (k > i) {
             const temp = Number(data.slice(j + startStr.length, k).trim());
-            if (!isNaN(temp)) {
-              windBearing = temp;
-            }
+            if (!isNaN(temp)) windBearing = temp;
           }
         }
       }
@@ -900,9 +886,7 @@ async function getMpycData() {
         windBearing = bearing;
       }
       const temp = data.current.outTemp_formatted ? Number(data.current.outTemp_formatted) : null;
-      if (temp != null && !isNaN(temp)) {
-        temperature = temp;
-      }
+      if (temp != null && !isNaN(temp)) temperature = temp;
     }
   } catch (error) {
     logger.warn('An error occured while fetching data for mpyc', {
@@ -985,9 +969,7 @@ async function getNavigatusData() {
           const k = data.indexOf('km/h</p>', j);
           if (k > i) {
             const temp = Number(data.slice(j + startStr1.length, k).trim());
-            if (!isNaN(temp)) {
-              windAverage = temp;
-            }
+            if (!isNaN(temp)) windAverage = temp;
           }
         }
       }
@@ -999,9 +981,7 @@ async function getNavigatusData() {
         const j = data.indexOf('&deg;</p>', i);
         if (j > i) {
           const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) {
-            temperature = temp;
-          }
+          if (!isNaN(temp)) temperature = temp;
         }
       }
     }
@@ -1084,6 +1064,88 @@ async function getMrcData() {
     }
   } catch (error) {
     logger.warn('An error occured while fetching data for mrc', {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
+async function getWainuiData() {
+  let windAverage = null;
+  const windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get('http://mcgavin.no-ip.info/weather/wainui/index.html', {
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    if (data.length) {
+      // wind direction
+      let startStr = '<td><b>Wind Direction</b> (average 1 minute)</td>';
+      let i = data.indexOf(startStr);
+      if (i >= 0) {
+        const startStr1 = '<td><b>';
+        const j = data.indexOf(startStr1, i + startStr.length);
+        if (j > i) {
+          const k = data.indexOf('&#176;', j);
+          if (k > i) {
+            const temp = Number(data.slice(j + startStr1.length, k).trim());
+            if (!isNaN(temp)) windBearing = temp;
+          }
+        }
+      }
+
+      // wind avg
+      startStr = '<td><b>Wind Speed</b> (average 1 minute)</td>';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const startStr1 = '<td><b>';
+        const j = data.indexOf(startStr1, i + startStr.length);
+        if (j > i) {
+          const k = data.indexOf('</b></td>', j);
+          if (k > i) {
+            const temp1 = data
+              .slice(j + startStr1.length, k)
+              .replace('km/h', '')
+              .trim();
+            console.log(temp1);
+            if (temp1.toUpperCase() === 'CALM') {
+              windAverage = 0;
+            } else {
+              const temp = Number(temp1);
+              if (!isNaN(temp)) windAverage = temp;
+            }
+          }
+        }
+      }
+
+      // temperature
+      startStr = '<td><b>Temperature</b></td>';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const startStr1 = '<td><b>';
+        const j = data.indexOf(startStr1, i + startStr.length);
+        if (j > i) {
+          const k = data.indexOf('&#176;', j);
+          if (k > i) {
+            const temp = Number(data.slice(j + startStr1.length + 1, k).trim());
+            if (!isNaN(temp)) temperature = temp;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn('An error occured while fetching data for wainui', {
       service: 'station',
       type: 'other'
     });
@@ -1223,6 +1285,8 @@ export async function stationWrapper(source) {
           data = await getMfhbData();
         } else if (s.type === 'mrc') {
           data = await getMrcData();
+        } else if (s.type === 'wainui') {
+          data = await getWainuiData();
         }
       }
 
