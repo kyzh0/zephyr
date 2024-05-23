@@ -174,6 +174,17 @@ export default function AdminAddStation() {
       }
     }
 
+    let gwWindAvgFieldName = '';
+    let gwWindGustFieldName = '';
+    let gwWindBearingFieldName = '';
+    let gwTemperatureFieldName = '';
+    if (type === 'gw') {
+      gwWindAvgFieldName = data.get('gwWindAvgFieldName').trim();
+      gwWindGustFieldName = data.get('gwWindGustFieldName').trim();
+      gwWindBearingFieldName = data.get('gwWindBearingFieldName').trim();
+      gwTemperatureFieldName = data.get('gwTemperatureFieldName').trim();
+    }
+
     try {
       const station = {
         name: name,
@@ -197,6 +208,12 @@ export default function AdminAddStation() {
         station.harvestWindGustId = `${harvestWindGustGraphId}_${harvestWindGustTraceId}`;
         station.harvestWindDirectionId = `${harvestWindDirGraphId}_${harvestWindDirTraceId}`;
         station.harvestTemperatureId = `${harvestTempGraphId}_${harvestTempTraceId}`;
+      }
+      if (type === 'gw') {
+        station.gwWindAverageFieldName = gwWindAvgFieldName;
+        station.gwWindGustFieldName = gwWindGustFieldName;
+        station.gwWindBearingFieldName = gwWindBearingFieldName;
+        station.gwTemperatureFieldName = gwTemperatureFieldName;
       }
 
       await addStation(station, userKey);
@@ -294,6 +311,7 @@ export default function AdminAddStation() {
                 <MenuItem value="attentis">Attentis</MenuItem>
                 <MenuItem value="windguru">Windguru</MenuItem>
                 <MenuItem value="wp">Weather Pro</MenuItem>
+                <MenuItem value="gw">Greater Wellington</MenuItem>
               </TextField>
               <TextField
                 margin="dense"
@@ -373,6 +391,42 @@ export default function AdminAddStation() {
                     id="harvestTempTraceId"
                     label="Trace ID"
                     name="harvestTempTraceId"
+                    required
+                    sx={{ width: '49%', ml: '2%' }}
+                  />
+                </>
+              )}
+              {type === 'gw' && (
+                <>
+                  <TextField
+                    margin="dense"
+                    id="gwWindAvgFieldName"
+                    label="Wind Avg Field Name"
+                    name="gwWindAvgFieldName"
+                    required
+                    sx={{ width: '49%' }}
+                  />
+                  <TextField
+                    margin="dense"
+                    id="gwWindGustFieldName"
+                    label="Wind Gust Field Name"
+                    name="gwWindGustFieldName"
+                    required
+                    sx={{ width: '49%', ml: '2%' }}
+                  />
+                  <TextField
+                    margin="dense"
+                    id="gwWindBearingFieldName"
+                    label="Wind Bearing Field Name"
+                    name="gwWindBearingFieldName"
+                    required
+                    sx={{ width: '49%' }}
+                  />
+                  <TextField
+                    margin="dense"
+                    id="gwTemperatureFieldName"
+                    label="Temperature Field Name"
+                    name="gwTemperatureFieldName"
                     required
                     sx={{ width: '49%', ml: '2%' }}
                   />

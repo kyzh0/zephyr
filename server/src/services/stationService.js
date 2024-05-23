@@ -694,6 +694,111 @@ async function getCentrePortData(stationId) {
   };
 }
 
+async function getGreaterWellingtonData(
+  stationId,
+  gwWindAverageFieldName,
+  gwWindGustFieldName,
+  gwWindBearingFieldName,
+  gwTemperatureFieldName
+) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const dateTo = new Date();
+    const dateFrom = new Date(dateTo.getTime() - 30 * 60 * 1000);
+    const url =
+      'https://hilltop.gw.govt.nz/Data.hts/?Service=Hilltop&Request=GetData' +
+      `&Site=${encodeURIComponent(stationId)}` +
+      `&From=${encodeURIComponent(formatInTimeZone(dateFrom, 'Pacific/Auckland', 'yyyy-MM-dd HH:mm:ss'))}` +
+      `&To=${encodeURIComponent(formatInTimeZone(dateTo, 'Pacific/Auckland', 'yyyy-MM-dd HH:mm:ss'))}`;
+
+    // wind avg
+    if (gwWindAverageFieldName) {
+      const { data } = await axios.get(
+        url + `&Measurement=${encodeURIComponent(gwWindAverageFieldName)}`,
+        {
+          headers: { Connection: 'keep-alive' }
+        }
+      );
+      if (data.length) {
+        const matches = data.match(/<I1>\d+.?\d*<\/I1>/g);
+        if (matches && matches.length) {
+          windAverage = Number(
+            matches[matches.length - 1].replace('<I1>', '').replace('</I1>', '')
+          );
+        }
+      }
+    }
+
+    // wind gust
+    if (gwWindGustFieldName) {
+      const { data } = await axios.get(
+        url + `&Measurement=${encodeURIComponent(gwWindGustFieldName)}`,
+        {
+          headers: { Connection: 'keep-alive' }
+        }
+      );
+      if (data.length) {
+        const matches = data.match(/<I1>\d+.?\d*<\/I1>/g);
+        if (matches && matches.length) {
+          windGust = Number(matches[matches.length - 1].replace('<I1>', '').replace('</I1>', ''));
+        }
+      }
+    }
+
+    // wind bearing
+    if (gwWindBearingFieldName) {
+      const { data } = await axios.get(
+        url + `&Measurement=${encodeURIComponent(gwWindBearingFieldName)}`,
+        {
+          headers: { Connection: 'keep-alive' }
+        }
+      );
+      if (data.length) {
+        const matches = data.match(/<I1>\d+.?\d*<\/I1>/g);
+        if (matches && matches.length) {
+          windBearing = Number(
+            matches[matches.length - 1].replace('<I1>', '').replace('</I1>', '')
+          );
+        }
+      }
+    }
+
+    // temperature
+    if (gwTemperatureFieldName) {
+      const { data } = await axios.get(
+        url + `&Measurement=${encodeURIComponent(gwTemperatureFieldName)}`,
+        {
+          headers: { Connection: 'keep-alive' }
+        }
+      );
+      if (data.length) {
+        const matches = data.match(/<I1>\d+.?\d*<\/I1>/g);
+        if (matches && matches.length) {
+          temperature = Number(
+            matches[matches.length - 1].replace('<I1>', '').replace('</I1>', '')
+          );
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn(`An error occured while fetching data for greater wellington - ${stationId}`, {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getLpcData() {
   let windAverage = null;
   let windGust = null;
@@ -967,7 +1072,7 @@ async function getMrcData() {
       }
     );
     const matches = data.match(/"[0-9]{4}-[0-9]{2}-[0-9]{2}\s[0-9]{2}:[0-9]{2}:[0-9]{2}"/g);
-    if (matches.length) {
+    if (matches && matches.length) {
       const lastRow = data.slice(data.lastIndexOf(matches[matches.length - 1]));
       const temp = lastRow.split(',');
       if (temp.length == 39) {
@@ -1098,6 +1203,14 @@ export async function stationWrapper(source) {
           data = await getWeatherProData(s.externalId);
         } else if (s.type === 'cp') {
           data = await getCentrePortData(s.externalId);
+        } else if (s.type === 'gw') {
+          data = await getGreaterWellingtonData(
+            s.externalId,
+            s.gwWindAverageFieldName,
+            s.gwWindGustFieldName,
+            s.gwWindBearingFieldName,
+            s.gwTemperatureFieldName
+          );
         } else if (s.type === 'po') {
           data = await getPortOtagoData(s.externalId);
         } else if (s.type === 'lpc') {
