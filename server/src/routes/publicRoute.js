@@ -98,7 +98,7 @@ router.get('/geojson', async (req, res) => {
           name: s.name,
           type: s.type,
           link: s.externalLink,
-          lastUpdateUnix: s.lastUpdate._seconds,
+          lastUpdateUnix: Math.round(s.lastUpdate.getTime() / 1000),
           currentAverage: s.currentAverage == null ? null : Math.round(s.currentAverage),
           currentGust: s.currentGust == null ? null : Math.round(s.currentGust),
           currentBearing: s.currentBearing == null ? null : Math.round(s.currentBearing),
