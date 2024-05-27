@@ -8,6 +8,7 @@ import './index.css';
 import Map from './routes/Map';
 import Station from './routes/Station';
 import Webcam from './routes/Webcam';
+import Sounding from './routes/Sounding';
 import GridView from './routes/GridView';
 import Welcome from './routes/Welcome';
 import Help from './routes/Help';
@@ -15,6 +16,7 @@ import AdminSignIn from './routes/AdminSignIn';
 import AdminDashboard from './routes/AdminDashboard';
 import AdminAddStation from './routes/AdminAddStation';
 import AdminAddWebcam from './routes/AdminAddWebcam';
+import AdminAddSounding from './routes/AdminAddSounding';
 import AdminErrors from './routes/AdminErrors';
 import ProtectedRoute from './routes/ProtectedRoute';
 
@@ -34,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: 'webcams/:id',
         element: <Webcam />
+      },
+      {
+        path: 'soundings/:id',
+        element: <Sounding />
       },
       {
         path: 'grid',
@@ -65,6 +71,10 @@ const router = createBrowserRouter([
           {
             path: 'admin/add-webcam',
             element: <AdminAddWebcam />
+          },
+          {
+            path: 'admin/add-sounding',
+            element: <AdminAddSounding />
           },
           {
             path: 'admin/errors',

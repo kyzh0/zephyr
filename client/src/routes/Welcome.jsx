@@ -10,6 +10,7 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 
 import GridViewIcon from '@mui/icons-material/GridView';
+import SsidChartIcon from '@mui/icons-material/SsidChart';
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -155,8 +156,31 @@ export default function Welcome() {
                   alignItems="center"
                   sx={{ height: '100%', textAlign: 'center', mt: 1, pl: 2 }}
                 >
-                  Click for a live grid view of nearby stations. Location permissions must be
-                  enabled.
+                  Click for a live grid view of nearby
+                  <br />
+                  stations. Enable location permissions.
+                </Stack>
+              </Grid>
+              <Grid item xs={2} sm={1} order={{ xs: 11, sm: 11 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="end"
+                  alignItems="center"
+                  sx={{ height: '100%', mt: 1 }}
+                >
+                  <SsidChartIcon
+                    sx={{ width: '32px', height: '20px', transform: 'rotate(270deg)' }}
+                  />
+                </Stack>
+              </Grid>
+              <Grid item xs={10} sm={5} order={{ xs: 12, sm: 12 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                  sx={{ height: '100%', textAlign: 'center', mt: 1, pl: 2 }}
+                >
+                  Click for RASP Skew-T soundings
                 </Stack>
               </Grid>
             </Grid>
