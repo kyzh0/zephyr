@@ -66,6 +66,8 @@ export default function Sounding() {
     navigate('/');
   }
 
+  const bigScreen = window.matchMedia('(min-width: 900px)').matches;
+
   return (
     <Modal open onClose={handleClose} disableAutoFocus={true}>
       <Container component="main" maxWidth="xl" sx={{ height: '100%' }}>
@@ -101,7 +103,7 @@ export default function Sounding() {
               sounding.images.length ? (
                 <Box
                   sx={{
-                    maxWidth: '670px'
+                    maxWidth: bigScreen ? '690px' : '80vw'
                   }}
                 >
                   <Carousel

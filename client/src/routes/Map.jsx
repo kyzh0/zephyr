@@ -696,8 +696,8 @@ export default function Map() {
     if (timestamp - lastSoundingRefreshRef.current < REFRESH_INTERVAL_SECONDS * 1000) return; // enforce refresh interval
     if (
       timestamp - lastSoundingRefreshRef.current < 60 * 60 * 1000 &&
-      new Date(lastSoundingRefreshRef.current).getUTCMinutes() < 30 &&
-      new Date().getUTCMinutes() < 30
+      new Date(lastSoundingRefreshRef.current).getUTCMinutes() < 31 &&
+      new Date().getUTCMinutes() < 31
     )
       return; // only refresh if passing 30 min mark
     lastSoundingRefreshRef.current = timestamp;
@@ -722,7 +722,7 @@ export default function Map() {
           child.src = currentUrl ? `${FILESERVERROOT}/${currentUrl}` : '';
         } else if (child.className === 'webcam-text-date') {
           if (currentTime) {
-            child.innerHTML = format(currentTime, 'dd MMM H H:mm');
+            child.innerHTML = format(currentTime, 'dd MMM HH:mm');
           } else {
             child.innerHTML = 'Click to view more...';
           }

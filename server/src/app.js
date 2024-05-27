@@ -38,10 +38,6 @@ mongoose.connect(
     : process.env.DEV_CONNECTION_STRING
 );
 
-app.get('/test', async () => {
-  await soundingWrapper();
-});
-
 // routes
 app.use('/auth', authRoute);
 app.use('/stations', stationRoute);
