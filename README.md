@@ -31,6 +31,7 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 - Interactive map - easy to use with intuitive colours and icons.
 - Charts and tables - a tidy representation of each station's data over time.
 - Live grid view - easy to integrate with XCTrack for in-flight updates.
+- RASP soudings - overlay of skew-T plots from [RASP](https://rasp.nz).
 - Mobile-first design - scalable across different screen sizes.
 - Help tab - provides a way for users to contact the developer.
 - Admin-only area - for adding new weather stations and viewing errors.

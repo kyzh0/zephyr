@@ -694,12 +694,20 @@ export default function Map() {
 
     let timestamp = Date.now();
     if (timestamp - lastSoundingRefreshRef.current < REFRESH_INTERVAL_SECONDS * 1000) return; // enforce refresh interval
+
+    // check if not refreshed in 1h, or passing 30 min mark
+    let nowMins = new Date().getUTCMinutes();
+    let lastMins = new Date(lastSoundingRefreshRef.current).getUTCMinutes();
+    if (lastMins > 30) {
+      if (nowMins > lastMins) nowMins -= 30;
+      lastMins -= 30;
+    }
     if (
       timestamp - lastSoundingRefreshRef.current < 60 * 60 * 1000 &&
-      new Date(lastSoundingRefreshRef.current).getUTCMinutes() < 31 &&
-      new Date().getUTCMinutes() < 31
+      !(lastMins < 30 && nowMins >= 30)
     )
-      return; // only refresh if passing 30 min mark
+      return;
+
     lastSoundingRefreshRef.current = timestamp;
 
     // update marker styling
