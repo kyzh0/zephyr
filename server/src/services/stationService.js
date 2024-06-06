@@ -1190,7 +1190,7 @@ async function getPrimePortData() {
     let path = `${dir}/primeportavg.jpg`;
     await fs.writeFile(path, croppedBuf);
 
-    const reg = /[a-zA-Z\s\\]/g;
+    const reg = /[^0-9.]/g;
     let ret = await worker.recognize(path);
     let textAvg = ret.data.text.replace(reg, '');
 
@@ -1213,10 +1213,8 @@ async function getPrimePortData() {
       textGust = `${textGust.slice(0, i)}.${textGust.slice(i)}`;
     }
 
-    if (textAvg.match(/^[0-9]+.?[0-9]*$/))
-      windAverage = Math.round(Number(textAvg) * 1.852 * 100) / 100;
-    if (textGust.match(/^[0-9]+.?[0-9]*$/))
-      windGust = Math.round(Number(textGust) * 1.852 * 100) / 100;
+    windAverage = Math.round(Number(textAvg) * 1.852 * 100) / 100;
+    windGust = Math.round(Number(textGust) * 1.852 * 100) / 100;
 
     // direction
     croppedBuf = await sharp(imgBuff)
@@ -1226,8 +1224,7 @@ async function getPrimePortData() {
     await fs.writeFile(path, croppedBuf);
 
     ret = await worker.recognize(path);
-    const textDir = ret.data.text.replace(reg, '');
-    if (textDir.match(/^[0-9]+$/)) windBearing = Number(textDir);
+    windBearing = Number(ret.data.text.replace(reg, ''));
 
     // cleanup
     await worker.terminate();
