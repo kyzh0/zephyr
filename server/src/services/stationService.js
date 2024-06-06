@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
 import fs from 'fs/promises';
+import sharp from 'sharp';
+import { createWorker } from 'tesseract.js';
 
 import logger from '../helpers/log.js';
 
@@ -1159,6 +1161,92 @@ async function getWainuiData() {
   };
 }
 
+async function getPrimePortData() {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  const temperature = null;
+
+  try {
+    // fetch img
+    const response = await axios.get('https://local.timaru.govt.nz/primeport/NorthMoleWind.jpg', {
+      responseType: 'arraybuffer',
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    const base64 = Buffer.from(response.data, 'binary').toString('base64');
+    const imgBuff = Buffer.from(base64, 'base64');
+
+    // init OCR
+    const dir = 'public/temp';
+    await fs.mkdir(dir, { recursive: true });
+    const worker = await createWorker('eng');
+
+    // avg
+    let croppedBuf = await sharp(imgBuff)
+      .extract({ left: 850, top: 165, width: 175, height: 50 })
+      .toBuffer();
+    let path = `${dir}/primeportavg.jpg`;
+    await fs.writeFile(path, croppedBuf);
+
+    const reg = /[a-zA-Z\s\\]/g;
+    let ret = await worker.recognize(path);
+    let textAvg = ret.data.text.replace(reg, '');
+
+    // gust
+    croppedBuf = await sharp(imgBuff)
+      .extract({ left: 850, top: 25, width: 175, height: 50 })
+      .toBuffer();
+    path = `${dir}/primeportgust.jpg`;
+    await fs.writeFile(path, croppedBuf);
+
+    ret = await worker.recognize(path);
+    let textGust = ret.data.text.replace(reg, '');
+
+    // sometimes OCR misses a period
+    if (!textAvg.includes('.') && textGust.includes('.')) {
+      const i = textGust.indexOf('.');
+      textAvg = `${textAvg.slice(0, i)}.${textAvg.slice(i)}`;
+    } else if (textAvg.includes('.') && !textGust.includes('.')) {
+      const i = textAvg.indexOf('.');
+      textGust = `${textGust.slice(0, i)}.${textGust.slice(i)}`;
+    }
+
+    if (textAvg.match(/^[0-9]+.?[0-9]*$/))
+      windAverage = Math.round(Number(textAvg) * 1.852 * 100) / 100;
+    if (textGust.match(/^[0-9]+.?[0-9]*$/))
+      windGust = Math.round(Number(textGust) * 1.852 * 100) / 100;
+
+    // direction
+    croppedBuf = await sharp(imgBuff)
+      .extract({ left: 845, top: 245, width: 180, height: 50 })
+      .toBuffer();
+    path = `${dir}/primeportdir.jpg`;
+    await fs.writeFile(path, croppedBuf);
+
+    ret = await worker.recognize(path);
+    const textDir = ret.data.text.replace(reg, '');
+    if (textDir.match(/^[0-9]+$/)) windBearing = Number(textDir);
+
+    // cleanup
+    await worker.terminate();
+    await fs.rm(dir, { recursive: true, force: true });
+  } catch (error) {
+    logger.warn('An error occured while fetching data for prime port', {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function saveData(station, data, date) {
   // handle likely erroneous values
   let avg = data.windAverage;
@@ -1287,6 +1375,8 @@ export async function stationWrapper(source) {
           data = await getMrcData();
         } else if (s.type === 'wainui') {
           data = await getWainuiData();
+        } else if (s.type === 'prime') {
+          data = await getPrimePortData();
         }
       }
 

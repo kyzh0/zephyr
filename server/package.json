@@ -24,6 +24,7 @@
     "node-cron": "^3.0.3",
     "node-dir": "^0.1.17",
     "sharp": "^0.33.3",
+    "tesseract.js": "^5.1.0",
     "winston": "^3.13.0"
   },
   "devDependencies": {

@@ -62,6 +62,8 @@ export function getStationTypeName(code) {
       return "Model Flying Hawke's Bay";
     case 'wainui':
       return 'Wainuiomata';
+    case 'prime':
+      return 'Prime Port';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
