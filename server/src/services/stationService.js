@@ -1192,7 +1192,7 @@ async function getPrimePortData() {
 
     const reg = /[^0-9.]/g;
     let ret = await worker.recognize(path);
-    let textAvg = ret.data.text.replace(reg, '');
+    const textAvg = ret.data.text.replace(reg, '');
 
     // gust
     croppedBuf = await sharp(imgBuff)
@@ -1202,19 +1202,27 @@ async function getPrimePortData() {
     await fs.writeFile(path, croppedBuf);
 
     ret = await worker.recognize(path);
-    let textGust = ret.data.text.replace(reg, '');
+    const textGust = ret.data.text.replace(reg, '');
+
+    windAverage = isNaN(textAvg) ? 0 : Number(textAvg);
+    windGust = isNaN(textGust) ? 0 : Number(textGust);
 
     // sometimes OCR misses a period
     if (!textAvg.includes('.') && textGust.includes('.')) {
       const i = textGust.indexOf('.');
-      textAvg = `${textAvg.slice(0, i)}.${textAvg.slice(i)}`;
+      windAverage = Number(`${textAvg.slice(0, i)}.${textAvg.slice(i)}`);
+      if (windAverage > windGust) windAverage = Math.round(windAverage * 100) / 1000;
     } else if (textAvg.includes('.') && !textGust.includes('.')) {
       const i = textAvg.indexOf('.');
-      textGust = `${textGust.slice(0, i)}.${textGust.slice(i)}`;
+      windGust = Number(`${textGust.slice(0, i)}.${textGust.slice(i)}`);
+      if (windAverage > windGust) windGust = Math.round(windGust * 1000) / 100;
+    } else if (!textAvg.includes('.') && !textGust.includes('.')) {
+      if (windAverage > 10) windAverage = null;
+      if (windGust > 10) windGust = null;
     }
 
-    windAverage = Math.round(Number(textAvg) * 1.852 * 100) / 100;
-    windGust = Math.round(Number(textGust) * 1.852 * 100) / 100;
+    if (windAverage != null) windAverage = Math.round(windAverage * 1.852 * 100) / 100;
+    if (windGust != null) windGust = Math.round(windGust * 1.852 * 100) / 100;
 
     // direction
     croppedBuf = await sharp(imgBuff)
