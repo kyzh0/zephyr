@@ -1252,6 +1252,50 @@ async function getPrimePortData() {
   };
 }
 
+async function getWeatherLinkData() {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      'https://www.weatherlink.com/embeddablePage/summaryData/daf6068a35484c1aad7a941c4a9b0701',
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+
+    if (data && data.currConditionValues.length) {
+      for (const d of data.currConditionValues) {
+        if (d.sensorDataName.toUpperCase() === '10 MIN AVG WIND SPEED') {
+          windAverage = Number(d.convertedValue);
+        } else if (d.sensorDataName.toUpperCase() === '10 MIN HIGH WIND SPEED') {
+          windGust = Number(d.convertedValue);
+        } else if (d.sensorDataName.toUpperCase() === '1 MIN SCALAR AVG WIND DIRECTION') {
+          windBearing = d.value;
+        } else if (d.sensorDataName.toUpperCase() === 'TEMP') {
+          temperature = Number(d.convertedValue);
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn('An error occured while fetching data for weatherlink', {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function saveData(station, data, date) {
   // handle likely erroneous values
   let avg = data.windAverage;
@@ -1382,6 +1426,8 @@ export async function stationWrapper(source) {
           data = await getWainuiData();
         } else if (s.type === 'prime') {
           data = await getPrimePortData();
+        } else if (s.type === 'wl') {
+          data = await getWeatherLinkData();
         }
       }
 

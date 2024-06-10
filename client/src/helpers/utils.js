@@ -64,6 +64,8 @@ export function getStationTypeName(code) {
       return 'Wainuiomata';
     case 'prime':
       return 'Prime Port';
+    case 'wl':
+      return 'Weather Link';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
