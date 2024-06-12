@@ -156,6 +156,6 @@ export function getWebcamTypeName(code) {
     case 'ts':
       return 'Taylors Surf';
     default:
-      webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1);
+      code.charAt(0).toUpperCase() + code.slice(1);
   }
 }
