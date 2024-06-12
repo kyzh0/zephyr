@@ -1296,6 +1296,80 @@ async function getWeatherLinkData() {
   };
 }
 
+async function getHuttWeatherData() {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get('https://www.huttweather.co.nz/pwsWD/', {
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    if (data.length) {
+      // wind avg
+      let startStr =
+        '<td style="font-size: 15px; text-align: right; border-right: 1px solid  black;"><b>';
+      let i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('</b>&nbsp;</td>', i);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) windAverage = temp;
+        }
+      }
+
+      // wind gust
+      startStr = '<td style="font-size: 15px; text-align: left;  width: 50%; ">&nbsp;<b>';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('</b></td>', i);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) windGust = temp;
+        }
+      }
+
+      // wind direction
+      startStr =
+        '<td colspan="2" style="height: 24px; text-align: center; border-top: 1px solid   black;">';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('&deg;  <b>', i);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) windBearing = temp;
+        }
+      }
+
+      // temperature
+      startStr = '<b style="font-size: 20px;">';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('&deg;</b>', i);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) temperature = temp;
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn('An error occured while fetching data for hutt weather', {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function saveData(station, data, date) {
   // handle likely erroneous values
   let avg = data.windAverage;
@@ -1428,6 +1502,8 @@ export async function stationWrapper(source) {
           data = await getPrimePortData();
         } else if (s.type === 'wl') {
           data = await getWeatherLinkData();
+        } else if (s.type === 'hw') {
+          data = await getHuttWeatherData();
         }
       }
 

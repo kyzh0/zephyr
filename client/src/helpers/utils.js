@@ -66,6 +66,8 @@ export function getStationTypeName(code) {
       return 'Prime Port';
     case 'wl':
       return 'Weather Link';
+    case 'hw':
+      return 'Hutt Weather';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
