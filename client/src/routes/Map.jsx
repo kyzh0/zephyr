@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { AppContext } from '../context/AppContext';
 import { getWindDirectionFromBearing } from '../helpers/utils';
 
@@ -410,7 +410,7 @@ export default function Map() {
 
       const text1 = document.createElement('span');
       text1.className = 'webcam-text-date';
-      text1.innerHTML = format(currentTime, 'dd MMM HH:mm');
+      text1.innerHTML = formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm');
 
       const el = document.createElement('div');
       el.style.backgroundColor = `white`;
@@ -463,7 +463,7 @@ export default function Map() {
 
       if (currentUrl && currentTime) {
         img.src = `${FILESERVERROOT}/${currentUrl}`;
-        text1.innerHTML = format(currentTime, 'dd MMM HH:mm');
+        text1.innerHTML = formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm');
       } else {
         text1.innerHTML = 'Click to view more...';
       }
@@ -675,7 +675,7 @@ export default function Map() {
             child.innerHTML = 'No images in the last 24h.';
             child.style.color = 'red';
           } else {
-            child.innerHTML = format(currentTime, 'dd MMM HH:mm');
+            child.innerHTML = formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm');
             child.style.color = '';
           }
         }
@@ -730,7 +730,7 @@ export default function Map() {
           child.src = currentUrl ? `${FILESERVERROOT}/${currentUrl}` : '';
         } else if (child.className === 'webcam-text-date') {
           if (currentTime) {
-            child.innerHTML = format(currentTime, 'dd MMM HH:mm');
+            child.innerHTML = formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm');
           } else {
             child.innerHTML = 'Click to view more...';
           }

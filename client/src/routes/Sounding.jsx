@@ -15,7 +15,7 @@ import { alpha } from '@mui/material';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import './Webcam.css';
 import { Carousel } from 'react-responsive-carousel';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 import { FILESERVERROOT } from '../helpers/constants';
 import { getSoundingById } from '../services/soundingService';
@@ -126,7 +126,11 @@ export default function Sounding() {
                           <div key={img.time}>
                             <img height="100%" src={`${FILESERVERROOT}/${img.url}`} />
                             <p style={{ margin: 0 }}>
-                              {format(new Date(img.time), 'dd MMM HH:mm')}
+                              {formatInTimeZone(
+                                new Date(img.time),
+                                'Pacific/Auckland',
+                                'dd MMM HH:mm'
+                              )}
                             </p>
                           </div>
                         );
@@ -152,7 +156,7 @@ export default function Sounding() {
             <Stack direction="row" justifyContent="end" sx={{ width: '100%' }}>
               {sounding && (
                 <Link
-                  href={`http://rasp.nz/rasp/view.php?region=${sounding.raspRegion}&mod=%2B0&date=${format(sounding.images.length ? new Date(sounding.images[0].time) : new Date(), 'yyyyMMdd')}&all=sounding${sounding.raspId}&section=${sounding.raspRegion}.sounding.params`}
+                  href={`http://rasp.nz/rasp/view.php?region=${sounding.raspRegion}&mod=%2B0&date=${formatInTimeZone(sounding.images.length ? new Date(sounding.images[0].time) : new Date(), 'Pacific/Auckland', 'yyyyMMdd')}&all=sounding${sounding.raspId}&section=${sounding.raspRegion}.sounding.params`}
                   target="_blank"
                   rel="noreferrer"
                   variant="subtitle2"

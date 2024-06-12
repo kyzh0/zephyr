@@ -17,7 +17,7 @@ import { alpha } from '@mui/material';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import './Webcam.css';
 import { Carousel } from 'react-responsive-carousel';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 import { FILESERVERROOT } from '../helpers/constants';
 
@@ -140,7 +140,11 @@ export default function Webcam() {
                           <div key={img.time}>
                             <img width="100%" src={`${FILESERVERROOT}/${img.url}`} />
                             <p style={{ margin: 0 }}>
-                              {format(new Date(img.time), 'dd MMM HH:mm')}
+                              {formatInTimeZone(
+                                new Date(img.time),
+                                'Pacific/Auckland',
+                                'dd MMM HH:mm'
+                              )}
                             </p>
                           </div>
                         );
