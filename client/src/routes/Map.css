@@ -73,6 +73,14 @@
   align-items: end;
 }
 
+.sounding .carousel .control-prev.control-arrow::before {
+  border-right: 8px solid #333333 !important;
+}
+
+.sounding .carousel .control-next.control-arrow::before {
+  border-left: 8px solid #333333 !important;
+}
+
 /* popups */
 .mapboxgl-popup-content {
   border-radius: 8px;

@@ -103,15 +103,17 @@ export default function Sounding() {
               sounding.images.length ? (
                 <Box
                   sx={{
-                    maxWidth: bigScreen ? '690px' : '80vw'
+                    maxWidth: bigScreen ? '690px' : '80vw',
+                    maxHeight: '90vh'
                   }}
+                  className="sounding"
                 >
                   <Carousel
                     showIndicators={false}
                     showThumbs={false}
                     transitionTime={0}
                     selectedItem={selectedIndex}
-                    style={{ maxHeight: 'inherit', maxWidth: 'inherit' }}
+                    style={{ maxWidth: 'inherit', maxHeight: 'inherit' }}
                     onChange={(index) => setSelectedIndex(index)}
                   >
                     {sounding.images.map((img, index) => {
@@ -123,8 +125,19 @@ export default function Sounding() {
                       ) {
                         img.loaded = true;
                         return (
-                          <div key={img.time}>
-                            <img height="100%" src={`${FILESERVERROOT}/${img.url}`} />
+                          <div
+                            key={img.time}
+                            style={{
+                              width: '100%',
+                              height: '100%'
+                            }}
+                          >
+                            <img
+                              width="100%"
+                              height="100%"
+                              src={`${FILESERVERROOT}/${img.url}`}
+                              style={{ objectFit: 'contain' }}
+                            />
                             <p style={{ margin: 0 }}>
                               {formatInTimeZone(
                                 new Date(img.time),
