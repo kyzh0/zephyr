@@ -468,6 +468,49 @@ async function getArthursPassImage(id) {
   };
 }
 
+async function getMtHuttImage(id) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const { data } = await axios.get('https://www.mthutt.co.nz/weather-report/', {
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    if (data.length) {
+      let startStr = `/Webcams/MtHutt/SummitCamera/${id}/`;
+      let i = data.lastIndexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('.jpg', i);
+        if (j > i) {
+          const response = await axios.get(
+            `https://www.mthutt.co.nz${data.slice(i, j).trim()}.jpg`,
+            {
+              responseType: 'arraybuffer',
+              headers: {
+                Connection: 'keep-alive'
+              }
+            }
+          );
+          base64 = Buffer.from(response.data, 'binary').toString('base64');
+          updated = new Date();
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn(`An error occured while fetching images for mt hutt - ${id}`, {
+      service: 'cam',
+      type: 'hutt'
+    });
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
 async function getTaylorsSurfImage() {
   let updated = null;
   let base64 = null;
@@ -527,6 +570,8 @@ export async function webcamWrapper() {
         data = await getCwuImage(c.externalId);
       } else if (c.type === 'ap') {
         data = await getArthursPassImage(c.externalId);
+      } else if (c.type === 'hutt') {
+        data = await getMtHuttImage(c.externalId);
       } else if (c.type === 'ts') {
         data = await getTaylorsSurfImage();
       }
@@ -547,6 +592,7 @@ export async function webcamWrapper() {
             c.type === 'ch' ||
             c.type === 'cwu' ||
             c.type === 'ap' ||
+            c.type === 'hutt' ||
             c.type === 'ts'
           ) {
             img.hash = md5(imgBuff);

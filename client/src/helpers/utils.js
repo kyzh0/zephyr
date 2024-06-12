@@ -151,6 +151,8 @@ export function getWebcamTypeName(code) {
       return 'Canterbury Weather Updates';
     case 'ap':
       return 'Arthurs Pass';
+    case 'hutt':
+      return 'Mt Hutt';
     case 'ts':
       return 'Taylors Surf';
     default:
