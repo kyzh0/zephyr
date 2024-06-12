@@ -439,6 +439,35 @@ async function getCwuImage(id) {
   };
 }
 
+async function getArthursPassImage(id) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const response = await axios.get(
+      `https://www.arthurspass.com/webcams/webcam3.php?id=D&unique_id=${id}`,
+      {
+        responseType: 'arraybuffer',
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+    base64 = Buffer.from(response.data, 'binary').toString('base64');
+    updated = new Date();
+  } catch (error) {
+    logger.warn(`An error occured while fetching images for arthurs pass - ${id}`, {
+      service: 'cam',
+      type: 'ap'
+    });
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
 async function getTaylorsSurfImage() {
   let updated = null;
   let base64 = null;
@@ -496,6 +525,8 @@ export async function webcamWrapper() {
         data = await getCastleHillImage(c.externalId);
       } else if (c.type === 'cwu') {
         data = await getCwuImage(c.externalId);
+      } else if (c.type === 'ap') {
+        data = await getArthursPassImage(c.externalId);
       } else if (c.type === 'ts') {
         data = await getTaylorsSurfImage();
       }
@@ -515,6 +546,7 @@ export async function webcamWrapper() {
             c.type === 'cgc' ||
             c.type === 'ch' ||
             c.type === 'cwu' ||
+            c.type === 'ap' ||
             c.type === 'ts'
           ) {
             img.hash = md5(imgBuff);

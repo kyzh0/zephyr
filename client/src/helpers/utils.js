@@ -132,3 +132,28 @@ export function getWindColor(wind) {
     return '#f536ff';
   }
 }
+
+export function getWebcamTypeName(code) {
+  switch (code) {
+    case 'lw':
+      return 'Lake Wanaka';
+    case 'qa':
+      return 'Queenstown Airport';
+    case 'wa':
+      return 'Wanaka Airport';
+    case 'cgc':
+      return 'Canterbury Gliding Club';
+    case 'ch':
+      return 'Castle Hill';
+    case 'cm':
+      return 'Mt Cheeseman';
+    case 'cwu':
+      return 'Canterbury Weather Updates';
+    case 'ap':
+      return 'Arthurs Pass';
+    case 'ts':
+      return 'Taylors Surf';
+    default:
+      webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1);
+  }
+}

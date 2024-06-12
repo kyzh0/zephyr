@@ -20,6 +20,7 @@ import { Carousel } from 'react-responsive-carousel';
 import { formatInTimeZone } from 'date-fns-tz';
 
 import { FILESERVERROOT } from '../helpers/constants';
+import { getWebcamTypeName } from '../helpers/utils';
 
 export default function Webcam() {
   const { id } = useParams();
@@ -177,24 +178,7 @@ export default function Webcam() {
                   rel="noreferrer"
                   variant="subtitle2"
                 >
-                  Source:{' '}
-                  {webcam.type === 'lw'
-                    ? 'Lake Wanaka'
-                    : webcam.type === 'qa'
-                      ? 'Queenstown Airport'
-                      : webcam.type === 'wa'
-                        ? 'Wanaka Airport'
-                        : webcam.type === 'cgc'
-                          ? 'Canterbury Gliding Club'
-                          : webcam.type === 'ch'
-                            ? 'Castle Hill'
-                            : webcam.type === 'cm'
-                              ? 'Mt Cheeseman'
-                              : webcam.type === 'cwu'
-                                ? 'Canterbury Weather Updates'
-                                : webcam.type === 'ts'
-                                  ? 'Taylors Surf'
-                                  : webcam.type.charAt(0).toUpperCase() + webcam.type.slice(1)}
+                  Source: {getWebcamTypeName(webcam.type)}
                 </Link>
               )}
             </Stack>
