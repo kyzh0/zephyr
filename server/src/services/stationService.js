@@ -460,7 +460,7 @@ async function getPortOtagoData(stationId) {
     );
     if (data.length) {
       // wind avg
-      let startStr = '<p class="seriesName">Wind Speed Avg:</p>';
+      let startStr = '<p class="seriesName">Wind Speed Avg</p>';
       let i = data.indexOf(startStr);
       if (i >= 0) {
         startStr = '<p class="seriesValue">';
@@ -475,7 +475,7 @@ async function getPortOtagoData(stationId) {
       }
 
       // wind gust
-      startStr = '<p class="seriesName">Wind Gust Max:</p>';
+      startStr = '<p class="seriesName">Wind Gust Max</p>';
       i = data.indexOf(startStr);
       if (i >= 0) {
         startStr = '<p class="seriesValue">';
@@ -490,7 +490,7 @@ async function getPortOtagoData(stationId) {
       }
 
       // wind direction
-      startStr = '<p class="seriesName">Wind Dir Avg:</p>';
+      startStr = '<p class="seriesName">Wind Dir Avg</p>';
       i = data.indexOf(startStr);
       if (i >= 0) {
         startStr = '<p class="seriesValue">';
