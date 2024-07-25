@@ -284,21 +284,14 @@ export default function Map() {
       }
 
       // render stations with valid bearings on top
-      if (!a.properties.validBearings) {
-        if (!b.properties.validBearings) {
-          return 0;
-        } else {
-          return -1;
-        }
+      if (!a.properties.validBearings && b.properties.validBearings) {
+        return -1;
+      } else if (a.properties.validBearings && !b.properties.validBearings) {
+        return 1;
       }
-      if (!b.properties.validBearings) {
-        if (!a.properties.validBearings) {
-          return 0;
-        } else {
-          return 1;
-        }
-      }
-      return 0;
+
+      // render stations with higher reading on top
+      return a.properties.currentAverage - b.properties.currentAverage;
     });
 
     for (const f of geoJson.features) {
