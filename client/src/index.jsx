@@ -11,6 +11,7 @@ import Webcam from './routes/Webcam';
 import Sounding from './routes/Sounding';
 import GridView from './routes/GridView';
 import Welcome from './routes/Welcome';
+import Donate from './routes/Donate';
 import Help from './routes/Help';
 import AdminSignIn from './routes/AdminSignIn';
 import AdminDashboard from './routes/AdminDashboard';
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: 'welcome',
         element: <Welcome />
+      },
+      {
+        path: 'donate',
+        element: <Donate />
       },
       {
         path: 'help',

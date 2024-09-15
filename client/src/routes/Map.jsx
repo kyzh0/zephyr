@@ -949,6 +949,37 @@ export default function Map() {
             }
           }}
           onClick={() => {
+            navigate('/donate');
+          }}
+        >
+          <img
+            src="/donate.png"
+            style={{
+              width: '18px',
+              height: '18px',
+              opacity: 0.7
+            }}
+          />
+        </IconButton>
+        <IconButton
+          color="primary"
+          sx={{
+            backgroundColor: 'white',
+            color: '#333333',
+            borderRadius: '4px',
+            boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
+            position: 'absolute',
+            top: 0,
+            left: 70,
+            m: '10px',
+            width: '29px',
+            height: '29px',
+            zIndex: 5,
+            '&:hover': {
+              backgroundColor: '#f2f2f2'
+            }
+          }}
+          onClick={() => {
             navigate('/grid');
           }}
         >
@@ -963,7 +994,7 @@ export default function Map() {
             boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
             position: 'absolute',
             top: 0,
-            left: 70,
+            left: 105,
             m: '10px',
             width: '29px',
             height: '29px',
@@ -992,7 +1023,7 @@ export default function Map() {
             boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
             position: 'absolute',
             top: 0,
-            left: 105,
+            left: 140,
             m: '10px',
             width: '29px',
             height: '29px',
