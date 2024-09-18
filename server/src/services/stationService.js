@@ -732,7 +732,7 @@ async function getSofarOceanData(stationId) {
       service: 'station',
       type: 'other'
     });
-    logger.warn(error, {
+    logger.warn(error.toString(), {
       service: 'station',
       type: 'other'
     });
