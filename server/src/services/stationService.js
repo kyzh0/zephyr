@@ -693,7 +693,7 @@ async function getCentrePortData(stationId) {
   };
 }
 
-export async function getSofarOceanData(stationId) {
+async function getSofarOceanData(stationId) {
   let windAverage = null;
   let windGust = null;
   let windBearing = null;
@@ -729,6 +729,10 @@ export async function getSofarOceanData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for sofarocean - ${stationId}`, {
+      service: 'station',
+      type: 'other'
+    });
+    logger.warn(error, {
       service: 'station',
       type: 'other'
     });
