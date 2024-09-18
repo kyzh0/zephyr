@@ -693,6 +693,55 @@ async function getCentrePortData(stationId) {
   };
 }
 
+export async function getSofarOceanData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.post(
+      `https://api.sofarocean.com/fetch/devices/`,
+      {
+        devices: [{ spotterId: stationId }]
+      },
+      {
+        headers: {
+          Connection: 'keep-alive',
+          view_token: process.env.SOFAROCEAN_KEY
+        }
+      }
+    );
+    if (data && data.data) {
+      const currentConditions = data.data.currentConditions;
+      if (currentConditions && currentConditions.length === 1) {
+        const lastUpdate = new Date(currentConditions[0].timeLastUpdatedUTC).getTime();
+        // only update if data is less than 15 min old
+        if (Date.now() - lastUpdate < 15 * 60 * 1000) {
+          temperature = currentConditions[0].temperature;
+          const wind = currentConditions[0].wind;
+          if (wind) {
+            windAverage = wind.speed * 3.6; // m/s
+            windBearing = wind.direction;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn(`An error occured while fetching data for sofarocean - ${stationId}`, {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getGreaterWellingtonData(
   stationId,
   gwWindAverageFieldName,
@@ -1487,6 +1536,8 @@ export async function stationWrapper(source) {
           data = await getWeatherProData(s.externalId);
         } else if (s.type === 'cp') {
           data = await getCentrePortData(s.externalId);
+        } else if (s.type === 'sfo') {
+          data = await getSofarOceanData(s.externalId);
         } else if (s.type === 'gw') {
           data = await getGreaterWellingtonData(
             s.externalId,

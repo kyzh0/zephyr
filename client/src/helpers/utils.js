@@ -48,6 +48,8 @@ export function getStationTypeName(code) {
       return 'Weather Pro';
     case 'cp':
       return 'CentrePort';
+    case 'sfo':
+      return 'Sofar Ocean';
     case 'gw':
       return 'Greater Wellington';
     case 'cwu':
