@@ -642,27 +642,41 @@ async function getCentrePortData(stationId) {
   try {
     const dateFrom = new Date(Date.now() - 720 * 60 * 1000); // current time - 12h
     const dateTo = new Date(dateFrom.getTime() + 1081 * 60 * 1000); // date from + 18h 1min
-    const { data } = await axios.get(
-      'https://portweather-public.omcinternational.com/api/datasources/proxy/393//api/data/transformRecordsFromPackets' +
-        `?sourcePath=${encodeURIComponent(`NZ/Wellington/Wind/Measured/${stationId}`)}` +
-        '&transformer=LatestNoTransform' +
-        `&fromDate_Utc=${encodeURIComponent(dateFrom.toISOString())}` +
-        `&toDate_Utc=${encodeURIComponent(dateTo.toISOString())}` +
-        '&qaStatusesString=*',
-      {
-        headers: { 'x-grafana-org-id': 338, Connection: 'keep-alive' }
-      }
-    );
-    if (data.length && data[0]) {
-      if (stationId === 'BaringHead') {
+
+    if (stationId === 'BaringHead') {
+      const { data } = await axios.get(
+        'https://portweather-public.omcinternational.com/api/datasources/proxy/393//api/data/transformRecordsFromPackets' +
+          `?sourcePath=${encodeURIComponent(`NZ/Wellington/Wind/Measured/NIWA-API/${stationId}`)}` +
+          '&transformer=LatestNoTransform' +
+          `&fromDate_Utc=${encodeURIComponent(dateFrom.toISOString())}` +
+          `&toDate_Utc=${encodeURIComponent(dateTo.toISOString())}` +
+          '&qaStatusesString=*',
+        {
+          headers: { 'x-grafana-org-id': 338, Connection: 'keep-alive' }
+        }
+      );
+      if (data.length && data[0]) {
         const wind = data[0].value.contents;
         if (wind) {
-          windAverage = wind['Wind Speed (Knots)(RAW)'] * 1.852; // data is in kt
-          windGust = wind['Gust Speed (Knots)(RAW)'] * 1.852;
-          windBearing = Number(wind['Wind Direction(RAW)']);
+          windAverage = data[0].speed_kn * 1.852; // data is in kt
+          windGust = data[0].gust_kn * 1.852;
+          windBearing = data[0].from_deg;
         }
-      } else {
-        windAverage = data[0].WindSpd_01MnAvg * 1.852;
+      }
+    } else {
+      const { data } = await axios.get(
+        'https://portweather-public.omcinternational.com/api/datasources/proxy/393//api/data/transformRecordsFromPackets' +
+          `?sourcePath=${encodeURIComponent(`NZ/Wellington/Wind/Measured/${stationId}`)}` +
+          '&transformer=LatestNoTransform' +
+          `&fromDate_Utc=${encodeURIComponent(dateFrom.toISOString())}` +
+          `&toDate_Utc=${encodeURIComponent(dateTo.toISOString())}` +
+          '&qaStatusesString=*',
+        {
+          headers: { 'x-grafana-org-id': 338, Connection: 'keep-alive' }
+        }
+      );
+      if (data.length && data[0]) {
+        windAverage = data[0].WindSpd_01MnAvg * 1.852; // data is in kt
         windGust = data[0].WindGst_01MnMax * 1.852;
         windBearing = Number(data[0].WindDir_01MnAvg);
       }
