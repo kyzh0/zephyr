@@ -656,12 +656,9 @@ async function getCentrePortData(stationId) {
         }
       );
       if (data.length && data[0]) {
-        const wind = data[0].value.contents;
-        if (wind) {
-          windAverage = data[0].speed_kn * 1.852; // data is in kt
-          windGust = data[0].gust_kn * 1.852;
-          windBearing = data[0].from_deg;
-        }
+        windAverage = data[0].speed_kn * 1.852; // data is in kt
+        windGust = data[0].gust_kn * 1.852;
+        windBearing = data[0].from_deg;
       }
     } else {
       const { data } = await axios.get(
