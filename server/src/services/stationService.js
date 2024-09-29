@@ -755,13 +755,14 @@ async function getGreaterWellingtonData(
   let temperature = null;
 
   try {
+    // dates are always in NZST ignoring daylight savings
     const dateTo = new Date();
     const dateFrom = new Date(dateTo.getTime() - 30 * 60 * 1000);
     const url =
       'https://hilltop.gw.govt.nz/Data.hts/?Service=Hilltop&Request=GetData' +
       `&Site=${encodeURIComponent(stationId)}` +
-      `&From=${encodeURIComponent(formatInTimeZone(dateFrom, 'Pacific/Auckland', 'yyyy-MM-dd HH:mm:ss'))}` +
-      `&To=${encodeURIComponent(formatInTimeZone(dateTo, 'Pacific/Auckland', 'yyyy-MM-dd HH:mm:ss'))}`;
+      `&From=${encodeURIComponent(formatInTimeZone(dateFrom, '+12', 'yyyy-MM-dd HH:mm:ss'))}` +
+      `&To=${encodeURIComponent(formatInTimeZone(dateTo, '+12', 'yyyy-MM-dd HH:mm:ss'))}`;
 
     // wind avg
     if (gwWindAverageFieldName) {
