@@ -516,7 +516,7 @@ async function getTaylorsSurfImage() {
   let base64 = null;
 
   try {
-    const response = await axios.get('https://stream.webmad.co.nz/shots/taylorssouth.jpg', {
+    const response = await axios.get('https://stream.webmad.co.nz/shots/taylorssouth2.jpg', {
       responseType: 'arraybuffer',
       headers: {
         Connection: 'keep-alive'
