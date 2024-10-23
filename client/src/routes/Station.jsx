@@ -66,6 +66,7 @@ export default function Station() {
   const [data, setData] = useState([]);
   const [bearingPairCount, setBearingPairCount] = useState(0);
   const tableRef = useRef(null);
+  const modalRef = useRef(null);
   const { refreshedStations } = useContext(AppContext);
   const [initialLoad, setInitialLoad] = useState(true);
   const [cookies] = useCookies();
@@ -136,6 +137,9 @@ export default function Station() {
   useEffect(() => {
     if (!tableRef.current) return;
     tableRef.current.querySelector('tbody td:last-child').scrollIntoView();
+
+    if (!modalRef.current) return;
+    modalRef.current.scroll(0, 0);
   }, [data]);
 
   const navigate = useNavigate();
@@ -149,6 +153,8 @@ export default function Station() {
   }
 
   const bigScreen = window.matchMedia('(min-height: 720px)').matches;
+  const tinyScreen = window.matchMedia('(max-height: 530px)').matches;
+  const scaling = bigScreen ? 1 : tinyScreen ? 0.5 : 0.65;
   return (
     <Modal open onClose={handleClose} disableAutoFocus={true}>
       <Container component="main" maxWidth="xl" sx={{ height: '100%' }}>
@@ -157,10 +163,13 @@ export default function Station() {
             direction="column"
             alignItems="center"
             sx={{
+              height: '100%',
+              ...(tinyScreen && { overflowY: 'scroll' }),
               backgroundColor: 'white',
               padding: bigScreen ? '24px' : '12px',
               borderRadius: '8px'
             }}
+            ref={modalRef}
           >
             <Stack direction="row" sx={{ width: '100%' }}>
               <Stack direction="column" alignItems="center" sx={{ width: '100%', ml: 3 }}>
@@ -181,7 +190,7 @@ export default function Station() {
                 ) : (
                   <Skeleton
                     width="180px"
-                    height={bigScreen ? '50px' : '40px'}
+                    height={`${scaling * 50}px`}
                     sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none' }}
                   />
                 )}
@@ -207,7 +216,7 @@ export default function Station() {
                         <Typography
                           variant="h5"
                           sx={{
-                            fontSize: bigScreen ? '16px' : '12px',
+                            fontSize: `${scaling * 16}px`,
                             mb: 1
                           }}
                         >
@@ -230,8 +239,8 @@ export default function Station() {
                           <img
                             src="/arrow.png"
                             style={{
-                              width: bigScreen ? '48px' : '32px',
-                              height: bigScreen ? '48px' : '32px',
+                              width: `${scaling * 48}px`,
+                              height: `${scaling * 48}px`,
                               transform: `rotate(${Math.round(station.currentBearing)}deg)`
                             }}
                           />
@@ -266,7 +275,7 @@ export default function Station() {
                         <TableCell
                           align="center"
                           sx={{
-                            fontSize: '24px',
+                            fontSize: tinyScreen ? '18px' : '24px',
                             backgroundColor: getWindColor(station.currentAverage),
                             borderBottom: 'none',
                             p: bigScreen ? 1 : 0
@@ -283,7 +292,7 @@ export default function Station() {
                         <TableCell
                           align="center"
                           sx={{
-                            fontSize: '24px',
+                            fontSize: tinyScreen ? '18px' : '24px',
                             backgroundColor: getWindColor(station.currentGust),
                             borderBottom: 'none',
                             p: bigScreen ? 1 : 0
@@ -300,7 +309,7 @@ export default function Station() {
                         <TableCell
                           align="center"
                           sx={{
-                            fontSize: '16px',
+                            fontSize: tinyScreen ? '14px' : '16px',
                             borderBottom: 'none',
                             p: 0
                           }}
@@ -329,7 +338,7 @@ export default function Station() {
             ) : (
               <Skeleton
                 width="100%"
-                height={bigScreen ? '110px' : '80px'}
+                height={`${scaling * 110}px`}
                 sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2, mt: 2 }}
               />
             )}
@@ -338,8 +347,11 @@ export default function Station() {
                 <></>
               ) : data && data.length ? (
                 <>
-                  <TableContainer component={Paper}>
-                    <Table sx={{ minWidth: 650 }} size="small">
+                  <TableContainer
+                    component={Paper}
+                    sx={{ ...(tinyScreen && { minHeight: '125px' }) }}
+                  >
+                    <Table sx={{ minWidth: '650px' }} size="small">
                       <TableBody>
                         <TableRow
                           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -352,7 +364,7 @@ export default function Station() {
                               align="center"
                               sx={{
                                 padding: bigScreen ? '2px' : '0px 2px 0px 2px',
-                                fontSize: '12px',
+                                fontSize: tinyScreen ? '10px' : '12px',
                                 backgroundColor: new Date(d.time).getMinutes() == 0 ? '#e6e6e6' : ''
                               }}
                             >
@@ -361,12 +373,21 @@ export default function Station() {
                           ))}
                         </TableRow>
                         <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                          <TableCell variant="head">Avg</TableCell>
+                          <TableCell
+                            variant="head"
+                            sx={{
+                              ...(tinyScreen && { fontSize: '12px' }),
+                              padding: bigScreen ? '2px' : '0px 0px 0px 2px'
+                            }}
+                          >
+                            Avg
+                          </TableCell>
                           {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                             <TableCell
                               key={d.time}
                               align="center"
                               sx={{
+                                ...(tinyScreen && { fontSize: '12px' }),
                                 padding: bigScreen ? '2px' : '0px',
                                 backgroundColor: getWindColor(d.windAverage)
                               }}
@@ -380,12 +401,21 @@ export default function Station() {
                           ))}
                         </TableRow>
                         <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                          <TableCell variant="head">Gust</TableCell>
+                          <TableCell
+                            variant="head"
+                            sx={{
+                              ...(tinyScreen && { fontSize: '12px' }),
+                              padding: bigScreen ? '2px' : '0px 0px 0px 2px'
+                            }}
+                          >
+                            Gust
+                          </TableCell>
                           {data.slice(Math.max(data.length - 37, 0)).map((d) => (
                             <TableCell
                               key={d.time}
                               align="center"
                               sx={{
+                                ...(tinyScreen && { fontSize: '12px' }),
                                 padding: bigScreen ? '2px' : '0px',
                                 backgroundColor: getWindColor(d.windGust)
                               }}
@@ -405,6 +435,7 @@ export default function Station() {
                               key={d.time}
                               align="center"
                               sx={{
+                                ...(tinyScreen && { fontSize: '10px' }),
                                 padding: bigScreen ? '2px' : '0px',
                                 borderBottom: 'none'
                               }}
@@ -497,6 +528,7 @@ export default function Station() {
                     sx={{
                       width: '100%',
                       height: '20vh',
+                      minHeight: '120px',
                       mt: 2
                     }}
                   >
@@ -549,7 +581,8 @@ export default function Station() {
                   <Box
                     sx={{
                       width: '100%',
-                      height: '20vh'
+                      height: '20vh',
+                      minHeight: '120px'
                     }}
                   >
                     <ResponsiveContainer width="100%" height="100%">
@@ -627,14 +660,14 @@ export default function Station() {
               ) : (
                 <Skeleton
                   width="100%"
-                  height={bigScreen ? '540px' : '400px'}
+                  height={`${scaling * 540}px`}
                   sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2 }}
                 />
               )
             ) : (
               <Skeleton
                 width="100%"
-                height={bigScreen ? '540px' : '400px'}
+                height={`${scaling * 540}px`}
                 sx={{ backgroundColor: alpha('#a8a8a8', 0.1), transform: 'none', mb: 2 }}
               />
             )}
