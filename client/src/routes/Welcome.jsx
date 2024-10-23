@@ -26,7 +26,8 @@ export default function Welcome() {
     navigate('/');
   }
 
-  const bigScreen = window.matchMedia('(min-height: 360px)').matches;
+  const bigScreen = window.matchMedia('(min-height: 530px)').matches;
+  const scaling = bigScreen ? 1 : 0.8;
   return (
     <Modal open disableAutoFocus={true}>
       <Container component="main" maxWidth="lg" sx={{ height: '100%' }}>
@@ -37,7 +38,10 @@ export default function Welcome() {
             sx={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px' }}
           >
             <Box sx={{ mt: bigScreen ? 1 : 0, mb: bigScreen ? 2 : 0 }}>
-              <img src="/logo192.png" style={{ width: '100px', height: '100px' }} />
+              <img
+                src="/logo192.png"
+                style={{ width: `${scaling * 100}px`, height: `${scaling * 100}px` }}
+              />
             </Box>
             <Typography component="h1" variant="h5">
               Welcome to Zephyr
@@ -46,7 +50,12 @@ export default function Welcome() {
             <Grid
               container
               spacing={bigScreen ? 1 : 0}
-              sx={{ mt: bigScreen ? 1 : 0, fontFamily: 'Arial', fontWeight: 400, fontSize: '14px' }}
+              sx={{
+                mt: bigScreen ? 1 : 0,
+                fontFamily: 'Arial',
+                fontWeight: 400,
+                fontSize: bigScreen ? '14px' : '12px'
+              }}
             >
               <Grid item xs={2} sm={1} order={{ xs: 1, sm: 1 }}>
                 <Stack
@@ -57,7 +66,11 @@ export default function Welcome() {
                 >
                   <img
                     src="/arrow-yellow.png"
-                    style={{ width: '25px', height: '36px', transform: 'rotate(315deg)' }}
+                    style={{
+                      width: `${scaling * 25}px`,
+                      height: `${scaling * 36}px`,
+                      transform: 'rotate(315deg)'
+                    }}
                   />
                 </Stack>
               </Grid>
@@ -80,7 +93,11 @@ export default function Welcome() {
                 >
                   <img
                     src="/gold-arrow-green.png"
-                    style={{ width: '25px', height: '36px', transform: 'rotate(315deg)' }}
+                    style={{
+                      width: `${scaling * 25}px`,
+                      height: `${scaling * 36}px`,
+                      transform: 'rotate(315deg)'
+                    }}
                   />
                 </Stack>
               </Grid>
@@ -103,7 +120,11 @@ export default function Welcome() {
                 >
                   <img
                     src="/gold-valid-arrow-light-green.png"
-                    style={{ width: '25px', height: '36px', transform: 'rotate(315deg)' }}
+                    style={{
+                      width: `${scaling * 25}px`,
+                      height: `${scaling * 36}px`,
+                      transform: 'rotate(315deg)'
+                    }}
                   />
                 </Stack>
               </Grid>
@@ -126,7 +147,10 @@ export default function Welcome() {
                   alignItems="center"
                   sx={{ height: '100%', mt: 1 }}
                 >
-                  <img src="/camera.png" style={{ width: '32px', height: '20px' }} />
+                  <img
+                    src="/camera.png"
+                    style={{ width: `${scaling * 32}px`, height: `${scaling * 20}px` }}
+                  />
                 </Stack>
               </Grid>
               <Grid item xs={10} sm={5} order={{ xs: 8, sm: 4 }}>
@@ -146,7 +170,7 @@ export default function Welcome() {
                   alignItems="center"
                   sx={{ height: '100%', mt: 1 }}
                 >
-                  <GridViewIcon sx={{ width: '32px', height: '20px' }} />
+                  <GridViewIcon sx={{ width: `${scaling * 32}px`, height: `${scaling * 20}px` }} />
                 </Stack>
               </Grid>
               <Grid item xs={10} sm={5} order={{ xs: 10, sm: 8 }}>
@@ -169,7 +193,11 @@ export default function Welcome() {
                   sx={{ height: '100%', mt: 1 }}
                 >
                   <SsidChartIcon
-                    sx={{ width: '32px', height: '20px', transform: 'rotate(270deg)' }}
+                    sx={{
+                      width: `${scaling * 32}px`,
+                      height: `${scaling * 20}px`,
+                      transform: 'rotate(270deg)'
+                    }}
                   />
                 </Stack>
               </Grid>
@@ -185,7 +213,7 @@ export default function Welcome() {
               </Grid>
             </Grid>
 
-            <Stack direction="row-reverse" sx={{ width: '100%', mt: bigScreen ? 2 : 0 }}>
+            <Stack direction="row-reverse" sx={{ width: '100%', mt: bigScreen ? 2 : 1 }}>
               <Button variant="contained" onClick={handleClose}>
                 OK
               </Button>
