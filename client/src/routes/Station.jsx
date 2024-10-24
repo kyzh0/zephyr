@@ -227,7 +227,7 @@ export default function Station() {
                           justifyContent="center"
                           alignItems="center"
                           sx={{
-                            p: 1,
+                            p: `${scaling * 8}px`,
                             background: getDirectionColor(
                               station.currentAverage == null && station.currentGust == null
                                 ? null
@@ -349,7 +349,7 @@ export default function Station() {
                 <>
                   <TableContainer
                     component={Paper}
-                    sx={{ ...(tinyScreen && { minHeight: '125px' }) }}
+                    sx={{ ...(tinyScreen && { minHeight: '122px' }) }}
                   >
                     <Table sx={{ minWidth: '650px' }} size="small">
                       <TableBody>
@@ -512,7 +512,7 @@ export default function Station() {
                               align="center"
                               sx={{
                                 padding: bigScreen ? '2px' : '0px',
-                                fontSize: '10px'
+                                fontSize: tinyScreen ? '8px' : '10px'
                               }}
                             >
                               {d.temperature == null
