@@ -70,6 +70,8 @@ export function getStationTypeName(code) {
       return 'Weather Link';
     case 'hw':
       return 'Hutt Weather';
+    case 'pw':
+      return 'PredictWind';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }

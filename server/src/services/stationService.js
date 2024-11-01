@@ -1431,6 +1431,43 @@ async function getHuttWeatherData() {
   };
 }
 
+async function getPredictWindData() {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      'https://forecast.predictwind.com/observations/jardines.json' +
+        `?api_key=${process.env.PREDICTWIND_KEY}`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+
+    if (data && data.samples.length) {
+      windAverage = data.samples[0].tws;
+      windGust = data.samples[0].gust;
+      windBearing = data.samples[0].twd;
+    }
+  } catch (error) {
+    logger.warn('An error occured while fetching data for predictwind', {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function saveData(station, data, date) {
   // handle likely erroneous values
   let avg = data.windAverage;
@@ -1567,6 +1604,8 @@ export async function stationWrapper(source) {
           data = await getWeatherLinkData();
         } else if (s.type === 'hw') {
           data = await getHuttWeatherData();
+        } else if (s.type === 'pw') {
+          data = await getPredictWindData();
         }
       }
 
