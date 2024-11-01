@@ -1448,6 +1448,8 @@ async function getPredictWindData() {
       }
     );
 
+    logger.log(data);
+
     if (data && data.samples.length) {
       windAverage = data.samples[0].tws;
       windGust = data.samples[0].gust;
@@ -1455,6 +1457,10 @@ async function getPredictWindData() {
     }
   } catch (error) {
     logger.warn('An error occured while fetching data for predictwind', {
+      service: 'station',
+      type: 'other'
+    });
+    logger.warn(error.toString(), {
       service: 'station',
       type: 'other'
     });
