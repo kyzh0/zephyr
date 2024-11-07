@@ -163,7 +163,6 @@ export default function Station() {
             direction="column"
             alignItems="center"
             sx={{
-              height: '100%',
               ...(tinyScreen && { overflowY: 'scroll' }),
               backgroundColor: 'white',
               padding: bigScreen ? '24px' : '12px',
