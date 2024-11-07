@@ -701,7 +701,7 @@ async function getSofarOceanData(stationId) {
 
   try {
     const { data } = await axios.post(
-      `https://api.sofarocean.com/fetch/devices/`,
+      'https://api.sofarocean.com/fetch/devices/',
       {
         devices: [{ spotterId: stationId }]
       },
@@ -729,6 +729,120 @@ async function getSofarOceanData(stationId) {
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for sofarocean - ${stationId}`, {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
+async function getNavigatusData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    if (stationId.toUpperCase() === 'NZQNWX') {
+      const { data } = await axios.get(`https://nzqnwx.navigatus.aero/frontend/kelvin_iframe`, {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      });
+      if (data.length) {
+        // wind direction
+        let dirStr = '';
+        let startStr = '<div class="wind-data">';
+        let i = data.indexOf(startStr);
+        if (i >= 0) {
+          startStr = '<p>';
+          const j = data.indexOf(startStr, i);
+          if (j > i) {
+            const k = data.indexOf('</p>', j);
+            if (k > i) {
+              dirStr = data.slice(j + startStr.length, k).trim();
+              switch (dirStr.toUpperCase()) {
+                case 'NORTHERLY':
+                  windBearing = 0;
+                  break;
+                case 'NORTH-EASTERLY':
+                  windBearing = 45;
+                  break;
+                case 'EASTERLY':
+                  windBearing = 90;
+                  break;
+                case 'SOUTH-EASTERLY':
+                  windBearing = 135;
+                  break;
+                case 'SOUTHERLY':
+                  windBearing = 180;
+                  break;
+                case 'SOUTH-WESTERLY':
+                  windBearing = 225;
+                  break;
+                case 'WESTERLY':
+                  windBearing = 270;
+                  break;
+                case 'NORTH-WESTERLY':
+                  windBearing = 315;
+                  break;
+                default:
+                  break;
+              }
+            }
+          }
+        }
+
+        // wind avg
+        startStr = `<p>${dirStr}</p>`;
+        i = data.indexOf(startStr);
+        if (i >= 0) {
+          const startStr1 = '<p>';
+          const j = data.indexOf(startStr1, i + startStr.length);
+          if (j > i) {
+            const k = data.indexOf('km/h</p>', j);
+            if (k > i) {
+              const temp = Number(data.slice(j + startStr1.length, k).trim());
+              if (!isNaN(temp)) windAverage = temp;
+            }
+          }
+        }
+
+        // temperature
+        startStr = '<p>Temperature:';
+        i = data.indexOf(startStr);
+        if (i >= 0) {
+          const j = data.indexOf('&deg;</p>', i);
+          if (j > i) {
+            const temp = Number(data.slice(i + startStr.length, j).trim());
+            if (!isNaN(temp)) temperature = temp;
+          }
+        }
+      }
+    } else if (stationId.toUpperCase() === 'OMARAMA') {
+      const { data } = await axios.get('https://omarama.navigatus.aero/get_new_data/3', {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      });
+      if (data) {
+        windAverage = data.average_speed * 1.852; // kt
+        windGust = data.max_gust * 1.852;
+        windBearing = data.average_dir;
+
+        if (data.wind_data) {
+          temperature = data.wind_data.temperature;
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn(`An error occured while fetching data for navigatus - ${stationId}`, {
       service: 'station',
       type: 'other'
     });
@@ -953,103 +1067,6 @@ async function getMpycData() {
     }
   } catch (error) {
     logger.warn('An error occured while fetching data for mpyc', {
-      service: 'station',
-      type: 'other'
-    });
-  }
-
-  return {
-    windAverage,
-    windGust,
-    windBearing,
-    temperature
-  };
-}
-
-async function getNavigatusData() {
-  let windAverage = null;
-  const windGust = null;
-  let windBearing = null;
-  let temperature = null;
-
-  try {
-    const { data } = await axios.get(`https://nzqnwx.navigatus.aero/frontend/kelvin_iframe`, {
-      headers: {
-        Connection: 'keep-alive'
-      }
-    });
-    if (data.length) {
-      // wind direction
-      let dirStr = '';
-      let startStr = '<div class="wind-data">';
-      let i = data.indexOf(startStr);
-      if (i >= 0) {
-        startStr = '<p>';
-        const j = data.indexOf(startStr, i);
-        if (j > i) {
-          const k = data.indexOf('</p>', j);
-          if (k > i) {
-            dirStr = data.slice(j + startStr.length, k).trim();
-            switch (dirStr.toUpperCase()) {
-              case 'NORTHERLY':
-                windBearing = 0;
-                break;
-              case 'NORTH-EASTERLY':
-                windBearing = 45;
-                break;
-              case 'EASTERLY':
-                windBearing = 90;
-                break;
-              case 'SOUTH-EASTERLY':
-                windBearing = 135;
-                break;
-              case 'SOUTHERLY':
-                windBearing = 180;
-                break;
-              case 'SOUTH-WESTERLY':
-                windBearing = 225;
-                break;
-              case 'WESTERLY':
-                windBearing = 270;
-                break;
-              case 'NORTH-WESTERLY':
-                windBearing = 315;
-                break;
-              default:
-                break;
-            }
-          }
-        }
-      }
-
-      // wind avg
-      startStr = `<p>${dirStr}</p>`;
-      i = data.indexOf(startStr);
-      if (i >= 0) {
-        const startStr1 = '<p>';
-        const j = data.indexOf(startStr1, i + startStr.length);
-        if (j > i) {
-          const k = data.indexOf('km/h</p>', j);
-          if (k > i) {
-            const temp = Number(data.slice(j + startStr1.length, k).trim());
-            if (!isNaN(temp)) windAverage = temp;
-          }
-        }
-      }
-
-      // temperature
-      startStr = '<p>Temperature:';
-      i = data.indexOf(startStr);
-      if (i >= 0) {
-        const j = data.indexOf('&deg;</p>', i);
-        if (j > i) {
-          const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) temperature = temp;
-        }
-      }
-    }
-  } catch (error) {
-    logger.warn('An error occured while fetching data for navigatus', {
       service: 'station',
       type: 'other'
     });
