@@ -1603,12 +1603,12 @@ export async function stationWrapper(source) {
           );
         } else if (s.type === 'po') {
           data = await getPortOtagoData(s.externalId);
+        } else if (s.type === 'navigatus') {
+          data = await getNavigatusData(s.externalId);
         } else if (s.type === 'lpc') {
           data = await getLpcData();
         } else if (s.type === 'mpyc') {
           data = await getMpycData();
-        } else if (s.type === 'navigatus') {
-          data = await getNavigatusData();
         } else if (s.type === 'mfhb') {
           data = await getMfhbData();
         } else if (s.type === 'mrc') {
