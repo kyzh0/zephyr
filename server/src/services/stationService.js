@@ -1566,8 +1566,8 @@ export async function stationWrapper(source) {
             s.harvestLongInterval, // some harvest stations only update every 30 min
             s.harvestCookie // station 10243,11433 needs PHPSESSID cookie for auth
           );
-          if (s.externalId === '11433_171221') {
-            // this station is in kt
+          if (s.externalId === '10243_113703' || s.externalId === '11433_171221') {
+            // these stations are in kt
             if (data.windAverage) data.windAverage *= 1.852;
             if (data.windGust) data.windGust *= 1.852;
           }
