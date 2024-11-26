@@ -95,7 +95,7 @@ async function processHarvestResponse(
     };
     if (cookie) cfg.headers.Cookie = cookie;
     const { data } = await axios.post(
-      `https://data1.harvest.com//php/site_graph_functions.php?retrieve_trace=&req_ref=${sid}_${configId}_${graphId}}`,
+      `https://data1.harvest.com//php/site_graph_functions.php?retrieve_trace=&req_ref=${sid}_${configId}_${graphId}`,
       {
         config_id: configId,
         trace_id: traceId,
@@ -1869,7 +1869,7 @@ export async function checkForErrors() {
       // send email if >2 stations of the same type went offline simultaneously
       let msg = '';
       const g = groupBy(errors, 'type');
-      const singleStations = ['lpc', 'mpyc', 'navigatus', 'mfhb', 'mrc', 'wainui'];
+      const singleStations = ['lpc', 'mpyc', 'navigatus', 'mfhb', 'mrc', 'wainui', 'pw'];
       for (const [key, value] of Object.entries(g)) {
         if (singleStations.includes(key) || value.length > 2) {
           msg += `\n${key.toUpperCase()}\n\n`;
