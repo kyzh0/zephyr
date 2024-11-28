@@ -227,35 +227,33 @@ async function getMetserviceData(stationId) {
 
   try {
     const { data } = await axios.get(
-      `https://www.metservice.com/publicData/webdata/weather-station-location/${stationId}/`,
+      `https://www.metservice.com/publicData/webdata/module/weatherStationCurrentConditions/${stationId}`,
       {
         headers: {
           Connection: 'keep-alive'
         }
       }
     );
-    const modules = data.layout.primary.slots.main.modules;
-    if (modules && modules.length) {
-      const wind = modules[0].observations.wind;
-      if (wind && wind.length) {
-        windAverage = wind[0].averageSpeed;
-        windGust = wind[0].gustSpeed;
+    const wind = data.observations.wind;
+    if (wind && wind.length && wind[0]) {
+      windAverage = wind[0].averageSpeed;
+      windGust = wind[0].gustSpeed;
 
-        if (wind[0].strength === 'Calm') {
-          if (windAverage == null) {
-            windAverage = 0;
-          }
-          if (windGust == null) {
-            windGust = 0;
-          }
+      if (wind[0].strength === 'Calm') {
+        if (windAverage == null) {
+          windAverage = 0;
         }
+        if (windGust == null) {
+          windGust = 0;
+        }
+      }
 
-        windBearing = getWindBearingFromDirection(wind[0].direction);
-      }
-      const temp = modules[0].observations.temperature;
-      if (temp && temp.length && temp[0]) {
-        temperature = temp[0].current;
-      }
+      windBearing = getWindBearingFromDirection(wind[0].direction);
+    }
+
+    const temp = data.observations.temperature;
+    if (temp && temp.length && temp[0]) {
+      temperature = temp[0].current;
     }
   } catch (error) {
     logger.warn(`An error occured while fetching data for metservice - ${stationId}`, {
