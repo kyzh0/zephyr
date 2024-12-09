@@ -99,25 +99,25 @@ async function processHarvestResponse(sid, configId, graphId, traceId, longInter
       cfg
     );
 
-    // if data format is array
-    if (data && Array.isArray(obj) && data.length) {
-      const d = data[0].data;
-      if (d && d.length) {
-        const d1 = d[d.length - 1];
-        return d1.data_value;
-      }
-    }
-
-    // else object
     if (data) {
-      let d = null;
-      if (data['1']) d = data['1'].data;
-      else if (data['2']) d = data['2'].data;
-      else if (data['3']) d = data['3'].data;
+      if (Array.isArray(data) && data.length) {
+        // if data format is array
+        const d = data[0].data;
+        if (d && d.length) {
+          const d1 = d[d.length - 1];
+          return d1.data_value;
+        }
+      } else {
+        // else data format is object
+        let d = null;
+        if (data['1']) d = data['1'].data;
+        else if (data['2']) d = data['2'].data;
+        else if (data['3']) d = data['3'].data;
 
-      if (d && d.length) {
-        const d1 = d[d.length - 1];
-        return d1.data_value;
+        if (d && d.length) {
+          const d1 = d[d.length - 1];
+          return d1.data_value;
+        }
       }
     }
   } catch (error) {
