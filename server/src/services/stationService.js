@@ -60,15 +60,7 @@ function getWindBearingFromDirection(direction) {
   }
 }
 
-async function processHarvestResponse(
-  sid,
-  configId,
-  graphId,
-  traceId,
-  longInterval,
-  format,
-  cookie
-) {
+async function processHarvestResponse(sid, configId, graphId, traceId, longInterval, cookie) {
   let date = new Date();
   let utcYear = date.getUTCFullYear();
   let utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
@@ -107,25 +99,25 @@ async function processHarvestResponse(
       cfg
     );
 
-    if (format === 'array') {
-      if (data && data.length) {
-        const d = data[0].data;
-        if (d && d.length) {
-          const d1 = d[d.length - 1];
-          return d1.data_value;
-        }
+    // if data format is array
+    if (data && Array.isArray(obj) && data.length) {
+      const d = data[0].data;
+      if (d && d.length) {
+        const d1 = d[d.length - 1];
+        return d1.data_value;
       }
-    } else if (format === 'object') {
-      if (data) {
-        let d = null;
-        if (data['1']) d = data['1'].data;
-        else if (data['2']) d = data['2'].data;
-        else if (data['3']) d = data['3'].data;
+    }
 
-        if (d && d.length) {
-          const d1 = d[d.length - 1];
-          return d1.data_value;
-        }
+    // else object
+    if (data) {
+      let d = null;
+      if (data['1']) d = data['1'].data;
+      else if (data['2']) d = data['2'].data;
+      else if (data['3']) d = data['3'].data;
+
+      if (d && d.length) {
+        const d1 = d[d.length - 1];
+        return d1.data_value;
       }
     }
   } catch (error) {
@@ -145,8 +137,7 @@ async function getHarvestData(
   windDirId,
   tempId,
   longInterval,
-  cookie,
-  windFormatSwitched
+  cookie
 ) {
   let ids = stationId.split('_');
   if (ids.length != 2) {
@@ -163,57 +154,25 @@ async function getHarvestData(
   // wind avg
   ids = windAvgId.split('_');
   if (ids.length == 2) {
-    windAverage = await processHarvestResponse(
-      sid,
-      configId,
-      ids[0],
-      ids[1],
-      longInterval,
-      windFormatSwitched ? 'array' : 'object',
-      cookie
-    );
+    windAverage = await processHarvestResponse(sid, configId, ids[0], ids[1], longInterval, cookie);
   }
 
   // wind gust
   ids = windGustId.split('_');
   if (ids.length == 2) {
-    windGust = await processHarvestResponse(
-      sid,
-      configId,
-      ids[0],
-      ids[1],
-      longInterval,
-      windFormatSwitched ? 'object' : 'array',
-      cookie
-    );
+    windGust = await processHarvestResponse(sid, configId, ids[0], ids[1], longInterval, cookie);
   }
 
   // wind direction
   ids = windDirId.split('_');
   if (ids.length == 2) {
-    windBearing = await processHarvestResponse(
-      sid,
-      configId,
-      ids[0],
-      ids[1],
-      longInterval,
-      'array',
-      cookie
-    );
+    windBearing = await processHarvestResponse(sid, configId, ids[0], ids[1], longInterval, cookie);
   }
 
   // temperature
   ids = tempId.split('_');
   if (ids.length == 2) {
-    temperature = await processHarvestResponse(
-      sid,
-      configId,
-      ids[0],
-      ids[1],
-      longInterval,
-      'array',
-      cookie
-    );
+    temperature = await processHarvestResponse(sid, configId, ids[0], ids[1], longInterval, cookie);
   }
 
   return {
@@ -1567,8 +1526,7 @@ export async function stationWrapper(source) {
             s.harvestWindDirectionId,
             s.harvestTemperatureId,
             s.harvestLongInterval, // some harvest stations only update every 30 min
-            s.harvestCookie, // station 10243,11433 needs PHPSESSID cookie for auth
-            s.harvestWindFormatSwitched // some stations have avg/gust format switched
+            s.harvestCookie // station 10243,11433 needs PHPSESSID cookie for auth
           );
           if (s.externalId === '10243_113703' || s.externalId === '11433_171221') {
             // these stations are in kt
