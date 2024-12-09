@@ -116,8 +116,12 @@ async function processHarvestResponse(
         }
       }
     } else if (format === 'object') {
-      if (data && data['1']) {
-        const d = data['1'].data;
+      if (data) {
+        let d = null;
+        if (data['1']) d = data['1'].data;
+        else if (data['2']) d = data['2'].data;
+        else if (data['3']) d = data['3'].data;
+
         if (d && d.length) {
           const d1 = d[d.length - 1];
           return d1.data_value;
@@ -141,7 +145,8 @@ async function getHarvestData(
   windDirId,
   tempId,
   longInterval,
-  cookie
+  cookie,
+  windFormatSwitched
 ) {
   let ids = stationId.split('_');
   if (ids.length != 2) {
@@ -164,7 +169,7 @@ async function getHarvestData(
       ids[0],
       ids[1],
       longInterval,
-      sid === '1057' ? 'array' : 'object', // station 1057 has avg/gust switched
+      windFormatSwitched ? 'array' : 'object',
       cookie
     );
   }
@@ -178,7 +183,7 @@ async function getHarvestData(
       ids[0],
       ids[1],
       longInterval,
-      sid === '1057' ? 'object' : 'array',
+      windFormatSwitched ? 'object' : 'array',
       cookie
     );
   }
@@ -1562,7 +1567,8 @@ export async function stationWrapper(source) {
             s.harvestWindDirectionId,
             s.harvestTemperatureId,
             s.harvestLongInterval, // some harvest stations only update every 30 min
-            s.harvestCookie // station 10243,11433 needs PHPSESSID cookie for auth
+            s.harvestCookie, // station 10243,11433 needs PHPSESSID cookie for auth
+            s.harvestWindFormatSwitched // some stations have avg/gust format switched
           );
           if (s.externalId === '10243_113703' || s.externalId === '11433_171221') {
             // these stations are in kt

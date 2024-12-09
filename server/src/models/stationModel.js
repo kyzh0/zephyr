@@ -54,6 +54,7 @@ const schema = mongoose.Schema({
   harvestTemperatureId: String,
   harvestLongInterval: Boolean,
   harvestCookie: String,
+  harvestWindFormatSwitched: Boolean,
   gwWindAverageFieldName: String,
   gwWindGustFieldName: String,
   gwWindBearingFieldName: String,
