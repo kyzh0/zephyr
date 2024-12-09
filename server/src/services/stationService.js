@@ -60,7 +60,7 @@ function getWindBearingFromDirection(direction) {
   }
 }
 
-async function processHarvestResponse(sid, configId, graphId, traceId, longInterval, cookie) {
+async function processHarvestResponse(sid, configId, graphId, traceId, cookie) {
   let date = new Date();
   let utcYear = date.getUTCFullYear();
   let utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
@@ -69,8 +69,7 @@ async function processHarvestResponse(sid, configId, graphId, traceId, longInter
   let utcMins = date.getUTCMinutes().toString().padStart(2, '0');
   const dateTo = `${utcYear}-${utcMonth}-${utcDay}T${utcHours}:${utcMins}:00.000`;
 
-  const intervalMins = longInterval ? 40 : 20; // get data for last 20 min, with some exceptions
-  date = new Date(date.getTime() - intervalMins * 60 * 1000);
+  date = new Date(date.getTime() - 40 * 60 * 1000); // get data for last 40 min
   utcYear = date.getUTCFullYear();
   utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
   utcDay = date.getUTCDate().toString().padStart(2, '0');
@@ -130,15 +129,7 @@ async function processHarvestResponse(sid, configId, graphId, traceId, longInter
   return null;
 }
 
-async function getHarvestData(
-  stationId,
-  windAvgId,
-  windGustId,
-  windDirId,
-  tempId,
-  longInterval,
-  cookie
-) {
+async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempId, cookie) {
   let ids = stationId.split('_');
   if (ids.length != 2) {
     return;
@@ -154,25 +145,25 @@ async function getHarvestData(
   // wind avg
   ids = windAvgId.split('_');
   if (ids.length == 2) {
-    windAverage = await processHarvestResponse(sid, configId, ids[0], ids[1], longInterval, cookie);
+    windAverage = await processHarvestResponse(sid, configId, ids[0], ids[1], cookie);
   }
 
   // wind gust
   ids = windGustId.split('_');
   if (ids.length == 2) {
-    windGust = await processHarvestResponse(sid, configId, ids[0], ids[1], longInterval, cookie);
+    windGust = await processHarvestResponse(sid, configId, ids[0], ids[1], cookie);
   }
 
   // wind direction
   ids = windDirId.split('_');
   if (ids.length == 2) {
-    windBearing = await processHarvestResponse(sid, configId, ids[0], ids[1], longInterval, cookie);
+    windBearing = await processHarvestResponse(sid, configId, ids[0], ids[1], cookie);
   }
 
   // temperature
   ids = tempId.split('_');
   if (ids.length == 2) {
-    temperature = await processHarvestResponse(sid, configId, ids[0], ids[1], longInterval, cookie);
+    temperature = await processHarvestResponse(sid, configId, ids[0], ids[1], cookie);
   }
 
   return {
@@ -1525,7 +1516,6 @@ export async function stationWrapper(source) {
             s.harvestWindGustId,
             s.harvestWindDirectionId,
             s.harvestTemperatureId,
-            s.harvestLongInterval, // some harvest stations only update every 30 min
             s.harvestCookie // station 10243,11433 needs PHPSESSID cookie for auth
           );
           if (s.externalId === '10243_113703' || s.externalId === '11433_171221') {
