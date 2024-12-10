@@ -259,6 +259,47 @@ async function getAttentisData(stationId) {
   };
 }
 
+async function getWowData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      `https://wow.metoffice.gov.uk/observations/details/tableviewdata/${stationId}/details/${formatInTimeZone(new Date(), 'UTC', 'yyyy-MM-dd')}`,
+      {
+        headers: { Connection: 'keep-alive' }
+      }
+    );
+    if (data.Observations && data.Observations.length) {
+      const d = data.Observations[0];
+      if (d) {
+        const time = new Date(d.ReportEndDateTime);
+        // only update if data is <15min old
+        if (Date.now() - time.getTime() < 15 * 60 * 1000) {
+          windAverage = d.windSpeed_MetrePerSecond * 3.6;
+          windGust = d.windGust_MetrePerSecond * 3.6;
+          windBearing = d.windDirection;
+          temperature = d.dryBulbTemperature_Celsius;
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn(`An error occured while fetching data for metoffice wow - ${stationId}`, {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getCwuData(stationId) {
   let windAverage = null;
   let windGust = null;
@@ -1533,6 +1574,8 @@ export async function stationWrapper(source) {
           data = await getAttentisData(s.externalId);
         } else if (s.type === 'wu') {
           data = await getWUndergroundData(s.externalId);
+        } else if (s.type === 'wow') {
+          data = await getWowData(s.externalId);
         } else if (s.type === 'tempest') {
           data = await getTempestData(s.externalId);
         } else if (s.type === 'windguru') {

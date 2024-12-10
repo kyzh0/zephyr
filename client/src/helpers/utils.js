@@ -42,6 +42,8 @@ export function getStationTypeName(code) {
   switch (code) {
     case 'wu':
       return 'Weather Underground';
+    case 'wow':
+      return 'Met Office WOW';
     case 'po':
       return 'Port Otago';
     case 'wp':
