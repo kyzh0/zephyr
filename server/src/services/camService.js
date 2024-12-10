@@ -537,6 +537,32 @@ async function getTaylorsSurfImage() {
   };
 }
 
+async function getSnowgrassImage() {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const response = await axios.get('https://snowgrass.nz/cust/contact/clyde/images/webcam.jpg', {
+      responseType: 'arraybuffer',
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    base64 = Buffer.from(response.data, 'binary').toString('base64');
+    updated = new Date();
+  } catch (error) {
+    logger.warn('An error occured while fetching images for snowgrass', {
+      service: 'cam',
+      type: 'snowgrass'
+    });
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
 export async function webcamWrapper() {
   try {
     const cams = await Cam.find({});
@@ -574,6 +600,8 @@ export async function webcamWrapper() {
         data = await getMtHuttImage(c.externalId);
       } else if (c.type === 'ts') {
         data = await getTaylorsSurfImage();
+      } else if (c.type === 'snowgrass') {
+        data = await getSnowgrassImage();
       }
 
       try {
@@ -593,7 +621,8 @@ export async function webcamWrapper() {
             c.type === 'cwu' ||
             c.type === 'ap' ||
             c.type === 'hutt' ||
-            c.type === 'ts'
+            c.type === 'ts' ||
+            c.type === 'snowgrass'
           ) {
             img.hash = md5(imgBuff);
             img.fileSize = imgBuff.length;
