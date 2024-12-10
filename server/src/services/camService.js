@@ -177,6 +177,34 @@ async function getCheesemanImage(id, lastUpdate) {
   };
 }
 
+async function getSnowgrassImage(lastUpdate) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const response = await axios.get('https://snowgrass.nz/cust/contact/clyde/images/webcam.jpg', {
+      responseType: 'arraybuffer',
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+
+    updated = new Date(response.headers['last-modified']);
+    // skip if image already up to date
+    if (updated > lastUpdate) base64 = Buffer.from(response.data, 'binary').toString('base64');
+  } catch (error) {
+    logger.warn('An error occured while fetching images for snowgrass', {
+      service: 'cam',
+      type: 'snowgrass'
+    });
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
 async function getQueenstownAirportImage(id) {
   let updated = null;
   let base64 = null;
@@ -537,32 +565,6 @@ async function getTaylorsSurfImage() {
   };
 }
 
-async function getSnowgrassImage() {
-  let updated = null;
-  let base64 = null;
-
-  try {
-    const response = await axios.get('https://snowgrass.nz/cust/contact/clyde/images/webcam.jpg', {
-      responseType: 'arraybuffer',
-      headers: {
-        Connection: 'keep-alive'
-      }
-    });
-    base64 = Buffer.from(response.data, 'binary').toString('base64');
-    updated = new Date();
-  } catch (error) {
-    logger.warn('An error occured while fetching images for snowgrass', {
-      service: 'cam',
-      type: 'snowgrass'
-    });
-  }
-
-  return {
-    updated,
-    base64
-  };
-}
-
 export async function webcamWrapper() {
   try {
     const cams = await Cam.find({});
@@ -584,6 +586,8 @@ export async function webcamWrapper() {
         data = await getLakeWanakaImage(c.externalId, lastUpdate);
       } else if (c.type === 'cm') {
         data = await getCheesemanImage(c.externalId, lastUpdate);
+      } else if (c.type === 'snowgrass') {
+        data = await getSnowgrassImage(lastUpdate);
       } else if (c.type === 'qa') {
         data = await getQueenstownAirportImage(c.externalId);
       } else if (c.type === 'wa') {
@@ -600,8 +604,6 @@ export async function webcamWrapper() {
         data = await getMtHuttImage(c.externalId);
       } else if (c.type === 'ts') {
         data = await getTaylorsSurfImage();
-      } else if (c.type === 'snowgrass') {
-        data = await getSnowgrassImage();
       }
 
       try {

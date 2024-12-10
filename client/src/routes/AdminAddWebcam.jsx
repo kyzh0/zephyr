@@ -43,7 +43,7 @@ export default function AdminAddWebcam() {
     const type = data.get('type').trim();
 
     // input validation
-    if (!name || !externalId || !externalLink || !coordinates || !type) {
+    if (!name || !externalLink || !coordinates || !type) {
       setLoading(false);
       setErrorMsg('Complete all fields');
       setIsError(true);
@@ -137,7 +137,6 @@ export default function AdminAddWebcam() {
                 id="externalId"
                 label="External ID"
                 name="externalId"
-                required
               />
               <TextField
                 margin="dense"
