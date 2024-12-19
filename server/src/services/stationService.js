@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { parse } from 'date-fns';
-import { fromZonedTime, formatInTimeZone } from 'date-fns-tz';
+import { formatInTimeZone } from 'date-fns-tz';
 import fs from 'fs/promises';
 import sharp from 'sharp';
 import { createWorker } from 'tesseract.js';
@@ -851,126 +850,6 @@ async function getNavigatusData(stationId) {
   };
 }
 
-async function getDownerData(stationId) {
-  let windAverage = null;
-  let windGust = null;
-  let windBearing = null;
-  let temperature = null;
-
-  try {
-    // fetch img
-    const response = await axios.get('https://www.metdata.net.nz/es/Milford_DataMap.png', {
-      responseType: 'arraybuffer'
-    });
-    const base64 = Buffer.from(response.data, 'binary').toString('base64');
-    const imgBuff = Buffer.from(base64, 'base64');
-
-    // init OCR
-    const dir = 'public/temp';
-    await fs.mkdir(dir, { recursive: true });
-    const worker = await createWorker('eng');
-
-    // time
-    let croppedBuf = await sharp(imgBuff)
-      .extract({ left: 20, top: 148, width: 90, height: 12 })
-      .toBuffer();
-    let path = `${dir}/downertime.jpg`;
-    await fs.writeFile(path, croppedBuf);
-
-    let ret = await worker.recognize(path);
-    let textTime = ret.data.text.replaceAll(' ', '').replaceAll('\n', '');
-    let time = null;
-    if (textTime.match(/\d\d:\d\d[AP]M\d\d[\/M]?\d\d/g)) {
-      // ocr sometimes sees "M" instead of "/" or misses it entirely
-      const temp = textTime.split('');
-      if (temp[9] === 'M') {
-        temp[9] = '/';
-      } else if (!isNaN(temp[9])) {
-        temp.splice(9, 0, '/');
-      }
-      textTime = temp.join('');
-      time = fromZonedTime(parse(textTime, 'hh:mmaadd/MM', new Date()), 'Pacific/Auckland');
-    }
-
-    // only update if data is <40 min old
-    if (time && Date.now() - time.getTime() < 40 * 60 * 1000) {
-      const xOffset = stationId === 'stannepoint' ? 0 : 525;
-      const yOffset = stationId === 'stannepoint' ? 0 : 45;
-
-      // avg
-      croppedBuf = await sharp(imgBuff)
-        .extract({ left: 20 + xOffset, top: 253 + yOffset, width: 90, height: 15 })
-        .toBuffer();
-      path = `${dir}/downeravg.jpg`;
-      await fs.writeFile(path, croppedBuf);
-
-      const reg = /[^0-9.]/g;
-      let ret = await worker.recognize(path);
-      const textAvg = ret.data.text.replace(reg, '');
-
-      // gust
-      croppedBuf = await sharp(imgBuff)
-        .extract({ left: 20 + xOffset, top: 290 + yOffset, width: 90, height: 15 })
-        .toBuffer();
-      path = `${dir}/downergust.jpg`;
-      await fs.writeFile(path, croppedBuf);
-
-      ret = await worker.recognize(path);
-      const textGust = ret.data.text.replace(reg, '');
-
-      windAverage = isNaN(textAvg) ? null : Number(textAvg);
-      windGust = isNaN(textGust) ? null : Number(textGust);
-
-      if (windAverage) windAverage = Math.round(windAverage * 1.852 * 100) / 100;
-      if (windGust) windGust = Math.round(windGust * 1.852 * 100) / 100;
-
-      // direction
-      croppedBuf = await sharp(imgBuff)
-        .extract({ left: 56 + xOffset, top: 202 + yOffset, width: 15, height: 11 })
-        .toBuffer();
-      path = `${dir}/downerdir.jpg`;
-      await fs.writeFile(path, croppedBuf);
-
-      ret = await worker.recognize(path);
-      if (ret.data.text) {
-        windBearing = getWindBearingFromDirection(
-          ret.data.text.replaceAll(' ', '').replaceAll('\n', '')
-        );
-      }
-
-      if (stationId === 'stannepoint') {
-        // temperature
-        croppedBuf = await sharp(imgBuff)
-          .extract({ left: 35, top: 330, width: 60, height: 15 })
-          .toBuffer();
-        path = `${dir}/downertemperature.jpg`;
-        await fs.writeFile(path, croppedBuf);
-
-        ret = await worker.recognize(path);
-        const textTemperature = ret.data.text.replace(reg, '');
-        temperature = isNaN(textTemperature) ? null : Number(textTemperature);
-        if (temperature > 100) temperature = temperature / 10; // if ocr misses a period
-      }
-
-      // cleanup
-      await worker.terminate();
-      await fs.rm(dir, { recursive: true, force: true });
-    }
-  } catch (error) {
-    logger.warn('An error occured while fetching data for downer', {
-      service: 'station',
-      type: 'other'
-    });
-  }
-
-  return {
-    windAverage,
-    windGust,
-    windBearing,
-    temperature
-  };
-}
-
 async function getGreaterWellingtonData(
   stationId,
   gwWindAverageFieldName,
@@ -1721,8 +1600,6 @@ export async function stationWrapper(source) {
           data = await getPortOtagoData(s.externalId);
         } else if (s.type === 'navigatus') {
           data = await getNavigatusData(s.externalId);
-        } else if (s.type === 'downer') {
-          data = await getDownerData(s.externalId);
         } else if (s.type === 'lpc') {
           data = await getLpcData();
         } else if (s.type === 'mpyc') {
@@ -1987,7 +1864,7 @@ export async function checkForErrors() {
       // send email if >2 stations of the same type went offline simultaneously
       let msg = '';
       const g = groupBy(errors, 'type');
-      const singleStations = ['lpc', 'mpyc', 'navigatus', 'mfhb', 'mrc', 'wainui', 'pw', 'downer'];
+      const singleStations = ['lpc', 'mpyc', 'navigatus', 'mfhb', 'mrc', 'wainui', 'pw'];
       for (const [key, value] of Object.entries(g)) {
         if (singleStations.includes(key) || value.length > 2) {
           msg += `\n${key.toUpperCase()}\n\n`;
