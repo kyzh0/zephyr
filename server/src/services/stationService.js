@@ -1605,6 +1605,8 @@ export async function stationWrapper(source) {
           data = await getPortOtagoData(s.externalId);
         } else if (s.type === 'navigatus') {
           data = await getNavigatusData(s.externalId);
+        } else if (s.type === 'pw') {
+          data = await getPredictWindData(s.externalId);
         } else if (s.type === 'lpc') {
           data = await getLpcData();
         } else if (s.type === 'mpyc') {
@@ -1621,8 +1623,6 @@ export async function stationWrapper(source) {
           data = await getWeatherLinkData();
         } else if (s.type === 'hw') {
           data = await getHuttWeatherData();
-        } else if (s.type === 'pw') {
-          data = await getPredictWindData();
         }
       }
 
