@@ -850,6 +850,48 @@ async function getNavigatusData(stationId) {
   };
 }
 
+async function getPredictWindData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      'https://forecast.predictwind.com/observations/jardines.json' +
+        `?api_key=${process.env.PREDICTWIND_KEY}`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+
+    if (data && data.samples.length) {
+      for (const s of data.samples) {
+        if (s.id === stationId.toString()) {
+          windAverage = s.tws * 1.852;
+          windGust = s.gust * 1.852;
+          windBearing = s.twd;
+          break;
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn('An error occured while fetching data for predictwind', {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getGreaterWellingtonData(
   stationId,
   gwWindAverageFieldName,
@@ -1429,43 +1471,6 @@ async function getHuttWeatherData() {
     }
   } catch (error) {
     logger.warn('An error occured while fetching data for hutt weather', {
-      service: 'station',
-      type: 'other'
-    });
-  }
-
-  return {
-    windAverage,
-    windGust,
-    windBearing,
-    temperature
-  };
-}
-
-async function getPredictWindData() {
-  let windAverage = null;
-  let windGust = null;
-  let windBearing = null;
-  let temperature = null;
-
-  try {
-    const { data } = await axios.get(
-      'https://forecast.predictwind.com/observations/jardines.json' +
-        `?api_key=${process.env.PREDICTWIND_KEY}`,
-      {
-        headers: {
-          Connection: 'keep-alive'
-        }
-      }
-    );
-
-    if (data && data.samples.length) {
-      windAverage = data.samples[0].tws * 1.852;
-      windGust = data.samples[0].gust * 1.852;
-      windBearing = data.samples[0].twd;
-    }
-  } catch (error) {
-    logger.warn('An error occured while fetching data for predictwind', {
       service: 'station',
       type: 'other'
     });
