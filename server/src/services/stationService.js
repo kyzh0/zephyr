@@ -869,7 +869,7 @@ async function getPredictWindData(stationId) {
 
     if (data && data.samples.length) {
       for (const s of data.samples) {
-        if (s.id === stationId.toString()) {
+        if (s.id.toString() === stationId) {
           windAverage = s.tws * 1.852;
           windGust = s.gust * 1.852;
           windBearing = s.twd;
