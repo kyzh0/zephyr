@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { formatInTimeZone } from 'date-fns-tz';
+import { parse } from 'date-fns';
+import { formatInTimeZone, fromZonedTime } from 'date-fns-tz';
 import fs from 'fs/promises';
 import sharp from 'sharp';
 import { createWorker } from 'tesseract.js';
@@ -1484,6 +1485,105 @@ async function getHuttWeatherData() {
   };
 }
 
+async function getWhanganuiInletData() {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get('http://whanganuiinletweather.info/', {
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+    if (data.length) {
+      let skipUpdate = true;
+
+      // check last update
+      let startStr = '<div class="subHeaderRight">Updated: ';
+      let i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('</div>', i + startStr.length);
+        if (j > i) {
+          const temp = data.slice(i + startStr.length, j);
+          const lastUpdate = fromZonedTime(
+            parse(temp, 'd/M/yyyy hh:mm aa', new Date()),
+            'Pacific/Auckland'
+          );
+          // skip if data older than 20 min
+          if (Date.now() - lastUpdate.getTime() < 20 * 60 * 1000) {
+            skipUpdate = false;
+          }
+        }
+      }
+
+      if (skipUpdate) {
+        return {
+          windAverage,
+          windGust,
+          windBearing,
+          temperature
+        };
+      }
+
+      // wind avg + direction
+      startStr = '<p class="sideBarTitle">Wind</p>';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const startStr1 = '<li>Current: ';
+        const j = data.indexOf(startStr1, i + startStr.length);
+        if (j > i) {
+          const k = data.indexOf(' ', j + startStr1.length);
+          if (k > j) {
+            const temp = Number(data.slice(j + startStr1.length, k).trim());
+            if (!isNaN(temp)) windAverage = temp;
+
+            const l = data.indexOf('</li>', k);
+            if (l > k) {
+              windBearing = getWindBearingFromDirection(data.slice(k, l).trim());
+            }
+          }
+        }
+      }
+
+      // wind gust
+      startStr = '<li>Gust: ';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf(' ', i + startStr.length);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) windGust = temp;
+        }
+      }
+
+      // temperature
+      startStr = '<li>Now:';
+      i = data.indexOf(startStr);
+      if (i >= 0) {
+        const j = data.indexOf('&nbsp;', i);
+        if (j > i) {
+          const temp = Number(data.slice(i + startStr.length, j).trim());
+          if (!isNaN(temp)) temperature = temp;
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn('An error occured while fetching data for whanganui inlet', {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function saveData(station, data, date) {
   // handle likely erroneous values
   let avg = data.windAverage;
@@ -1623,6 +1723,8 @@ export async function stationWrapper(source) {
           data = await getWeatherLinkData();
         } else if (s.type === 'hw') {
           data = await getHuttWeatherData();
+        } else if (s.type === 'wi') {
+          data = await getWhanganuiInletData();
         }
       }
 

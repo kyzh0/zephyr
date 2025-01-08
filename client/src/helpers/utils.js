@@ -74,6 +74,8 @@ export function getStationTypeName(code) {
       return 'Hutt Weather';
     case 'pw':
       return 'PredictWind';
+    case 'wi':
+      return 'Whanganui Inlet';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
