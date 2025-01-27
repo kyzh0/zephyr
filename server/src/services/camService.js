@@ -211,7 +211,7 @@ async function getCamFtpImage(lastUpdate) {
 
   try {
     const response = await axios.get(
-      'https://cameraftpapi.drivehq.com/api/Camera/GetCameraThumbnail.ashx',
+      'https://cameraftpapi.drivehq.com/api/Camera/GetCameraThumbnail.ashx?shareID=16834851',
       {
         responseType: 'arraybuffer',
         headers: {
