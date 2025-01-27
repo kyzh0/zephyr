@@ -163,6 +163,8 @@ export function getWebcamTypeName(code) {
       return 'Mt Hutt';
     case 'ts':
       return 'Taylors Surf';
+    case 'camftp':
+      return 'Camera FTP';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }

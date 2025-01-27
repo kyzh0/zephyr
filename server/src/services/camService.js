@@ -205,6 +205,37 @@ async function getSnowgrassImage(lastUpdate) {
   };
 }
 
+async function getCamFtpImage(lastUpdate) {
+  let updated = null;
+  let base64 = null;
+
+  try {
+    const response = await axios.get(
+      'https://cameraftpapi.drivehq.com/api/Camera/GetCameraThumbnail.ashx',
+      {
+        responseType: 'arraybuffer',
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+
+    updated = new Date(response.headers['last-modified']);
+    // skip if image already up to date
+    if (updated > lastUpdate) base64 = Buffer.from(response.data, 'binary').toString('base64');
+  } catch (error) {
+    logger.warn('An error occured while fetching images for cameraftp', {
+      service: 'cam',
+      type: 'camftp'
+    });
+  }
+
+  return {
+    updated,
+    base64
+  };
+}
+
 async function getQueenstownAirportImage(id) {
   let updated = null;
   let base64 = null;
@@ -588,6 +619,8 @@ export async function webcamWrapper() {
         data = await getCheesemanImage(c.externalId, lastUpdate);
       } else if (c.type === 'snowgrass') {
         data = await getSnowgrassImage(lastUpdate);
+      } else if (c.type === 'camftp') {
+        data = await getCamFtpImage(lastUpdate);
       } else if (c.type === 'qa') {
         data = await getQueenstownAirportImage(c.externalId);
       } else if (c.type === 'wa') {
