@@ -464,7 +464,7 @@ async function getPortOtagoData(stationId) {
           const k = data.indexOf('</p>', j);
           if (k > i) {
             const temp = Number(data.slice(j + startStr.length, k).trim());
-            if (!isNaN(temp)) windAverage = temp * 1.852;
+            if (!isNaN(temp)) windAverage = Math.round(temp * 1.852 * 100) / 100;
           }
         }
       }
@@ -479,7 +479,7 @@ async function getPortOtagoData(stationId) {
           const k = data.indexOf('</p>', j);
           if (k > i) {
             const temp = Number(data.slice(j + startStr.length, k).trim());
-            if (!isNaN(temp)) windGust = temp * 1.852;
+            if (!isNaN(temp)) windGust = Math.round(temp * 1.852 * 100) / 100;
           }
         }
       }
@@ -608,8 +608,8 @@ async function getWindguruData(stationId) {
       }
     );
     if (data) {
-      windAverage = data.wind_avg * 1.852;
-      windGust = data.wind_max * 1.852;
+      windAverage = Math.round(data.wind_avg * 1.852 * 100) / 100;
+      windGust = Math.round(data.wind_max * 1.852 * 100) / 100;
       windBearing = data.wind_direction;
       temperature = data.temperature;
     }
@@ -651,8 +651,8 @@ async function getCentrePortData(stationId) {
         }
       );
       if (data.length && data[0]) {
-        windAverage = data[0].speed_kn * 1.852; // data is in kt
-        windGust = data[0].gust_kn * 1.852;
+        windAverage = Math.round(data[0].speed_kn * 1.852 * 100) / 100; // data is in kt
+        windGust = Math.round(data[0].gust_kn * 1.852 * 100) / 100;
         windBearing = data[0].from_deg;
       }
     } else {
@@ -668,8 +668,8 @@ async function getCentrePortData(stationId) {
         }
       );
       if (data.length && data[0]) {
-        windAverage = data[0].WindSpd_01MnAvg * 1.852; // data is in kt
-        windGust = data[0].WindGst_01MnMax * 1.852;
+        windAverage = Math.round(data[0].WindSpd_01MnAvg * 1.852 * 100) / 100; // data is in kt
+        windGust = Math.round(data[0].WindGst_01MnMax * 1.852 * 100) / 100;
         windBearing = Number(data[0].WindDir_01MnAvg);
       }
     }
@@ -827,12 +827,31 @@ async function getNavigatusData(stationId) {
         }
       });
       if (data) {
-        windAverage = data.average_speed * 1.852; // kt
-        windGust = data.max_gust * 1.852;
+        windAverage = Math.round(data.average_speed * 1.852 * 100) / 100; // kt
+        windGust = Math.round(data.max_gust * 1.852 * 100) / 100;
         windBearing = data.average_dir;
 
         if (data.wind_data) {
           temperature = data.wind_data.temperature;
+        }
+      }
+    } else if (stationId.toUpperCase() === 'SLOPEHILL') {
+      const { data } = await axios.get('https://nzqnwx2.navigatus.aero/frontend/json_latest_data', {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      });
+      if (data) {
+        const lastUpdate = fromZonedTime(
+          parse(data.date_local, 'yyyy-MM-dd HH:mm:ss', new Date()),
+          'Pacific/Auckland'
+        );
+        // skip if data older than 20 min
+        if (Date.now() - lastUpdate.getTime() < 20 * 60 * 1000) {
+          windAverage = Math.round(data.wind_speed * 1.852 * 100) / 100; // kt
+          windGust = Math.round(data.wind_gust * 1.852 * 100) / 100;
+          windBearing = data.wind_direction;
+          temperature = data.air_temperature;
         }
       }
     }
@@ -871,8 +890,8 @@ async function getPredictWindData(stationId) {
     if (data && data.samples.length) {
       for (const s of data.samples) {
         if (s.id.toString() === stationId) {
-          windAverage = s.tws * 1.852;
-          windGust = s.gust * 1.852;
+          windAverage = Math.round(s.tws * 1.852 * 100) / 100;
+          windGust = Math.round(s.gust * 1.852 * 100) / 100;
           windBearing = s.twd;
           break;
         }
@@ -1022,8 +1041,8 @@ async function getLpcData() {
       }
     );
     if (data.length && data[0]) {
-      windAverage = data[0].windspd_01mnavg * 1.852; // data is in kt
-      windGust = data[0].windgst_01mnmax * 1.852;
+      windAverage = Math.round(data[0].windspd_01mnavg * 1.852 * 100) / 100; // data is in kt
+      windGust = Math.round(data[0].windgst_01mnmax * 1.852 * 100) / 100;
       windBearing = data[0].winddir_01mnavg;
     }
 
@@ -1085,13 +1104,13 @@ async function getMpycData() {
         ? Number(data.current.windspeed.replace(' knots', ''))
         : null;
       if (avg != null && !isNaN(avg)) {
-        windAverage = avg * 1.852; // data is in kt
+        windAverage = Math.round(avg * 1.852 * 100) / 100; // data is in kt
       }
       const gust = data.current.windGust
         ? Number(data.current.windspeed.replace(' knots', ''))
         : null;
       if (gust != null && !isNaN(gust)) {
-        windGust = gust * 1.852;
+        windGust = Math.round(gust * 1.852 * 100) / 100;
       }
       const bearing = data.current.winddir_formatted
         ? Number(data.current.winddir_formatted)
