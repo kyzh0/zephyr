@@ -1878,6 +1878,7 @@ export async function jsonOutputWrapper() {
         id: s._id,
         name: s.name,
         type: s.type,
+        elevation: s.elevation,
         coordinates: {
           lat: s.location.coordinates[1],
           lon: s.location.coordinates[0]
