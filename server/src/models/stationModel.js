@@ -34,6 +34,7 @@ const schema = mongoose.Schema({
   currentTemperature: Number,
   elevation: Number,
   validBearings: String,
+  popupMessage: String,
   isError: Boolean,
   isOffline: Boolean,
   data: [

@@ -70,6 +70,8 @@ export default function Station() {
   const { refreshedStations } = useContext(AppContext);
   const [initialLoad, setInitialLoad] = useState(true);
   const [cookies] = useCookies();
+  const [hoveringOnInfoIcon, setHoveringOnInfoIcon] = useState(false);
+  const [mouseCoords, setMouseCoords] = useState({ x: 0, y: 0 });
 
   async function fetchData() {
     try {
@@ -142,6 +144,20 @@ export default function Station() {
     modalRef.current.scroll(0, 0);
   }, [data]);
 
+  useEffect(() => {
+    const handleWindowMouseMove = (event) => {
+      setMouseCoords({
+        x: event.clientX,
+        y: event.clientY
+      });
+    };
+    window.addEventListener('mousemove', handleWindowMouseMove);
+
+    return () => {
+      window.removeEventListener('mousemove', handleWindowMouseMove);
+    };
+  }, []);
+
   const navigate = useNavigate();
   const location = useLocation();
   function handleClose() {
@@ -157,7 +173,42 @@ export default function Station() {
   const scaling = bigScreen ? 1 : tinyScreen ? 0.5 : 0.65;
   return (
     <Modal open onClose={handleClose} disableAutoFocus={true}>
-      <Container component="main" maxWidth="xl" sx={{ height: '100%' }}>
+      <Container
+        component="main"
+        maxWidth="xl"
+        sx={{ height: '100%' }}
+        onClick={() => {
+          setHoveringOnInfoIcon(false);
+        }}
+      >
+        {hoveringOnInfoIcon && (
+          <Paper
+            sx={{
+              bgcolor: '#fff8fd',
+              position: 'absolute',
+              top: mouseCoords.y + 20,
+              left: mouseCoords.x,
+              minWidth: '40vh',
+              transform: 'translateX(-70%)',
+              zIndex: 100,
+              p: 4 * scaling
+            }}
+          >
+            <Typography
+              component="h1"
+              variant="h5"
+              align="center"
+              fontWeight="bold"
+              fontSize="18px"
+              gutterBottom
+            >
+              INFO
+            </Typography>
+            <Typography variant="body2" align="center">
+              {station.popupMessage}
+            </Typography>
+          </Paper>
+        )}
         <Stack direction="column" justifyContent="center" sx={{ height: '100%' }}>
           <Stack
             direction="column"
@@ -317,6 +368,34 @@ export default function Station() {
                             ? ''
                             : `${Math.round(station.currentTemperature * 10) / 10}°C`}
                         </TableCell>
+                        {station.popupMessage && (
+                          <TableCell
+                            align="center"
+                            sx={{
+                              borderBottom: 'none',
+                              p: 0
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setHoveringOnInfoIcon(!hoveringOnInfoIcon);
+                            }}
+                            onMouseOver={() => {
+                              setHoveringOnInfoIcon(true);
+                            }}
+                            onMouseOut={() => {
+                              setHoveringOnInfoIcon(false);
+                            }}
+                          >
+                            <img
+                              src="/info.png"
+                              style={{
+                                width: `${scaling * 48}px`,
+                                height: `${scaling * 48}px`,
+                                opacity: hoveringOnInfoIcon ? 0.3 : 1
+                              }}
+                            />
+                          </TableCell>
+                        )}
                       </TableRow>
                       <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0, p: 0 } }}>
                         <TableCell
