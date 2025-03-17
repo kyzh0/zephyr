@@ -177,9 +177,7 @@ export default function Station() {
         component="main"
         maxWidth="xl"
         sx={{ height: '100%' }}
-        onClick={() => {
-          setHoveringOnInfoIcon(false);
-        }}
+        onClick={() => setHoveringOnInfoIcon(false)}
       >
         {hoveringOnInfoIcon && (
           <Paper
@@ -379,12 +377,8 @@ export default function Station() {
                               e.stopPropagation();
                               setHoveringOnInfoIcon(!hoveringOnInfoIcon);
                             }}
-                            onMouseOver={() => {
-                              setHoveringOnInfoIcon(true);
-                            }}
-                            onMouseOut={() => {
-                              setHoveringOnInfoIcon(false);
-                            }}
+                            onMouseOver={() => setHoveringOnInfoIcon(true)}
+                            onMouseOut={() => setHoveringOnInfoIcon(false)}
                           >
                             <img
                               src="/info.png"

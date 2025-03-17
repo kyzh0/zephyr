@@ -16,7 +16,7 @@ import TextField from '@mui/material/TextField';
 import CloseIcon from '@mui/icons-material/Close';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
-export default function AdminErrors() {
+export default function AdminEditStation() {
   const [stations, setStations] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -99,7 +99,7 @@ export default function AdminErrors() {
                       <ListItem
                         disablePadding
                         key={station._id}
-                        onClick={() => navigate(`../stations/${station._id}`)}
+                        onClick={() => navigate(`/admin/edit-station/${station._id}`)}
                       >
                         <ListItemButton>
                           <Stack

@@ -20,6 +20,7 @@ import AdminAddWebcam from './routes/AdminAddWebcam';
 import AdminAddSounding from './routes/AdminAddSounding';
 import AdminErrors from './routes/AdminErrors';
 import AdminEditStationList from './routes/AdminEditStationList';
+import AdminEditStation from './routes/AdminEditStation';
 import ProtectedRoute from './routes/ProtectedRoute';
 
 const router = createBrowserRouter([
@@ -89,6 +90,10 @@ const router = createBrowserRouter([
           {
             path: 'admin/edit-station-list',
             element: <AdminEditStationList />
+          },
+          {
+            path: 'admin/edit-station/:id',
+            element: <AdminEditStation />
           }
         ]
       }
