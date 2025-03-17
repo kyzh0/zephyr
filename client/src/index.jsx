@@ -19,6 +19,7 @@ import AdminAddStation from './routes/AdminAddStation';
 import AdminAddWebcam from './routes/AdminAddWebcam';
 import AdminAddSounding from './routes/AdminAddSounding';
 import AdminErrors from './routes/AdminErrors';
+import AdminEditStationList from './routes/AdminEditStationList';
 import ProtectedRoute from './routes/ProtectedRoute';
 
 const router = createBrowserRouter([
@@ -84,6 +85,10 @@ const router = createBrowserRouter([
           {
             path: 'admin/errors',
             element: <AdminErrors />
+          },
+          {
+            path: 'admin/edit-station-list',
+            element: <AdminEditStationList />
           }
         ]
       }

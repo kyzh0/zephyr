@@ -84,9 +84,18 @@ export default function AdminDashboard() {
               onClick={() => {
                 navigate('../admin/errors');
               }}
-              sx={{ width: '180px' }}
+              sx={{ width: '180px', mb: 1 }}
             >
               View Errors
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                navigate('../admin/edit-station-list');
+              }}
+              sx={{ width: '180px' }}
+            >
+              View / Edit Stations
             </Button>
           </Stack>
         </Stack>
