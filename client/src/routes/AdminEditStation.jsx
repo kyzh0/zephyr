@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { getStationById, updateStation } from '../services/stationService';
+import { getStationById, patchStation } from '../services/stationService';
 import { AppContext } from '../context/AppContext';
 
 import Typography from '@mui/material/Typography';
@@ -88,7 +88,7 @@ export default function AdminEditStation() {
       }
 
       const updates = { patch: toPatch, remove: toRemove };
-      await updateStation(id, updates, userKey);
+      await patchStation(id, updates, userKey);
 
       setLoading(false);
       handleClose();
