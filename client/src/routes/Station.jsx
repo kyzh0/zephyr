@@ -371,7 +371,8 @@ export default function Station() {
                             align="center"
                             sx={{
                               borderBottom: 'none',
-                              p: 0
+                              p: 0,
+                              pl: 1 * scaling
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -381,10 +382,10 @@ export default function Station() {
                             onMouseOut={() => setHoveringOnInfoIcon(false)}
                           >
                             <img
-                              src="/info.png"
+                              src="/caution.png"
                               style={{
-                                width: `${scaling * 48}px`,
-                                height: `${scaling * 48}px`,
+                                width: `${scaling * 40}px`,
+                                height: `${scaling * 40}px`,
                                 opacity: hoveringOnInfoIcon ? 0.3 : 1
                               }}
                             />
