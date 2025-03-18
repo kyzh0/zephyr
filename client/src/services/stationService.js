@@ -66,3 +66,11 @@ export async function addStation(station, key) {
     console.error(error);
   }
 }
+
+export async function patchStation(id, updates, key) {
+  try {
+    await axios.patch(`${APIROOT}/stations/${id}?key=${key}`, updates);
+  } catch (error) {
+    console.error(error);
+  }
+}

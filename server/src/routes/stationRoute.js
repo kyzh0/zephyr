@@ -7,6 +7,7 @@ import { User } from '../models/userModel.js';
 
 const router = express.Router();
 
+// get stations
 router.get('/', async (req, res) => {
   const { unixTimeFrom, lat, lon, radius, err } = req.query;
   const time = unixTimeFrom ? Number(unixTimeFrom) : NaN;
@@ -53,6 +54,7 @@ router.get('/', async (req, res) => {
   res.json(stations);
 });
 
+// add station
 router.post('/', async (req, res) => {
   const user = await User.findOne({ key: req.query.key });
   if (!user) {
@@ -120,6 +122,7 @@ router.post('/', async (req, res) => {
   res.status(204).send();
 });
 
+// get station
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -137,6 +140,34 @@ router.get('/:id', async (req, res) => {
   res.json(s);
 });
 
+// patch station
+router.patch('/:id', async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findOne({ key: req.query.key });
+  if (!user) {
+    res.status(401).send();
+    return;
+  }
+
+  const { patch, remove } = req.body;
+  try {
+    const station = await Station.findOne({ _id: new ObjectId(id) }, { data: 0 });
+
+    for (const key of Object.keys(patch)) {
+      station[key] = patch[key];
+    }
+    for (const key of Object.keys(remove)) {
+      station[key] = undefined;
+    }
+
+    await station.save();
+    res.status(204).send();
+  } catch {
+    res.status(400).send();
+  }
+});
+
+// get station data
 router.get('/:id/data', async (req, res) => {
   const { id } = req.params;
 

@@ -1254,7 +1254,6 @@ async function getWainuiData() {
               .slice(j + startStr1.length, k)
               .replace('km/h', '')
               .trim();
-            console.log(temp1);
             if (temp1.toUpperCase() === 'CALM') {
               windAverage = 0;
             } else {
