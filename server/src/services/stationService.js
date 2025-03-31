@@ -565,7 +565,9 @@ async function getTempestData(stationId) {
       `https://swd.weatherflow.com/swd/rest/better_forecast?api_key=${process.env.TEMPEST_KEY}&station_id=${stationId}&units_temp=c&units_wind=kph`,
       {
         headers: {
-          Connection: 'keep-alive'
+          Connection: 'keep-alive',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0'
         }
       }
     );
