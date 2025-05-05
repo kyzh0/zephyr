@@ -130,6 +130,121 @@ async function processHarvestResponse(sid, configId, graphId, traceId, cookie) {
   return null;
 }
 
+async function getFenzHarvestStationIds() {
+  const ids = [];
+  try {
+    let { data } = await axios.get(
+      `https://live.harvest.com/api.php?output_type=application/json&command_type=get_user_site_list&api_key=${process.env.HARVEST_FENZ_KEY}`
+    );
+
+    if (data) {
+      if (data.sites && data.sites.length) {
+        for (const s of data.sites) {
+          ids.push(s.site_id);
+        }
+      }
+
+      // get next 200
+      if (data['_links'] && data['_links'].next) {
+        ({ data } = await axios.get(
+          `https://live.harvest.com/api.php?output_type=application/json&command_type=get_user_site_list&api_key=${process.env.HARVEST_FENZ_KEY}&start=200`
+        ));
+
+        if (data && data.sites && data.sites.length) {
+          for (const s of data.sites) {
+            ids.push(s.site_id);
+          }
+        }
+      }
+    }
+  } catch {
+    logger.warn('An error occured while fetching fenz harvest ids', {
+      service: 'station',
+      type: 'harvest'
+    });
+  }
+
+  return ids;
+}
+
+async function getFenzHarvestData(stationId, windAvgId, windGustId, windDirId, tempId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  const windAvgTraceId = windAvgId.split('_')[1];
+  const windGustTraceId = windGustId.split('_')[1];
+  const windDirTraceId = windDirId.split('_')[1];
+  const tempTraceId = tempId.split('_')[1];
+
+  try {
+    // wind avg
+    let { data } = await axios.get(
+      `https://live.harvest.com/api.php?output_type=application/json&command_type=get_data&api_key=${process.env.HARVEST_FENZ_KEY}&trace_id=${windAvgTraceId}`
+    );
+    if (data && data.data && data.data.length === 1) {
+      const unix = Number(data.data[0].unix_time.replace('.000', ''));
+      const ts = new Date(unix * 1000);
+      // skip data older than 40 mins
+      if (Date.now() - ts.getTime() < 40 * 60 * 1000) {
+        windAverage = data.data[0].data_value;
+      }
+    }
+
+    // wind gust
+    ({ data } = await axios.get(
+      `https://live.harvest.com/api.php?output_type=application/json&command_type=get_data&api_key=${process.env.HARVEST_FENZ_KEY}&trace_id=${windGustTraceId}`
+    ));
+    if (data && data.data && data.data.length === 1) {
+      const unix = Number(data.data[0].unix_time.replace('.000', ''));
+      const ts = new Date(unix * 1000);
+      // skip data older than 40 mins
+      if (Date.now() - ts.getTime() < 40 * 60 * 1000) {
+        windGust = data.data[0].data_value;
+      }
+    }
+
+    // wind direction
+    ({ data } = await axios.get(
+      `https://live.harvest.com/api.php?output_type=application/json&command_type=get_data&api_key=${process.env.HARVEST_FENZ_KEY}&trace_id=${windDirTraceId}`
+    ));
+    if (data && data.data && data.data.length === 1) {
+      const unix = Number(data.data[0].unix_time.replace('.000', ''));
+      const ts = new Date(unix * 1000);
+      // skip data older than 40 mins
+      if (Date.now() - ts.getTime() < 40 * 60 * 1000) {
+        windBearing = data.data[0].data_value;
+      }
+    }
+
+    // temperature
+    ({ data } = await axios.get(
+      `https://live.harvest.com/api.php?output_type=application/json&command_type=get_data&api_key=${process.env.HARVEST_FENZ_KEY}&trace_id=${tempTraceId}`
+    ));
+    if (data && data.data && data.data.length === 1) {
+      const unix = Number(data.data[0].unix_time.replace('.000', ''));
+      const ts = new Date(unix * 1000);
+      // skip data older than 40 mins
+      if (Date.now() - ts.getTime() < 40 * 60 * 1000) {
+        temperature = data.data[0].data_value;
+      }
+    }
+  } catch {
+    logger.warn(`An error occured while fetching data for fenz harvest - ${stationId}`, {
+      service: 'station',
+      type: 'harvest'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getHarvestData(stationId, windAvgId, windGustId, windDirId, tempId, cookie) {
   let ids = stationId.split('_');
   if (ids.length != 2) {
@@ -1671,23 +1786,40 @@ export async function stationWrapper(source) {
       return null;
     }
 
+    const fenzHarvestStationIds = [];
+
     const date = getFlooredTime();
     for (const s of stations) {
       let data = null;
       if (source === 'harvest') {
+        if (!fenzHarvestStationIds.length) {
+          fenzHarvestStationIds.push(...(await getFenzHarvestStationIds()));
+        }
+
         if (s.type === 'harvest') {
-          data = await getHarvestData(
-            s.externalId,
-            s.harvestWindAverageId,
-            s.harvestWindGustId,
-            s.harvestWindDirectionId,
-            s.harvestTemperatureId,
-            s.harvestCookie // station 10243,11433 needs PHPSESSID cookie for auth
-          );
-          if (s.externalId === '10243_113703' || s.externalId === '11433_171221') {
-            // these stations are in kt
-            if (data.windAverage) data.windAverage *= 1.852;
-            if (data.windGust) data.windGust *= 1.852;
+          const sid = Number(s.externalId.split('_')[0]);
+          if (fenzHarvestStationIds.includes(sid)) {
+            data = await getFenzHarvestData(
+              s.externalId,
+              s.harvestWindAverageId,
+              s.harvestWindGustId,
+              s.harvestWindDirectionId,
+              s.harvestTemperatureId
+            );
+          } else {
+            data = await getHarvestData(
+              s.externalId,
+              s.harvestWindAverageId,
+              s.harvestWindGustId,
+              s.harvestWindDirectionId,
+              s.harvestTemperatureId,
+              s.harvestCookie // station 10243,11433 needs PHPSESSID cookie for auth
+            );
+            if (sid === 10243 || sid === 11433) {
+              // these stations are in kt
+              if (data.windAverage) data.windAverage *= 1.852;
+              if (data.windGust) data.windGust *= 1.852;
+            }
           }
         }
       } else if (source === 'metservice') {
