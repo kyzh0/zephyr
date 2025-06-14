@@ -1029,6 +1029,64 @@ async function getPredictWindData(stationId) {
   };
 }
 
+async function getEcowittData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      `https://api.ecowitt.net/api/v3/device/real_time?api_key=${process.env.ECOWITT_API_KEY}&application_key=${process.env.ECOWITT_APPLICATION_KEY}&mac=${stationId}&wind_speed_unitid=7&temp_unitid=1`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+
+    const timeNow = Math.round(Date.now() / 1000); // epoch time in s
+    if (data && data.data) {
+      const d = data.data;
+      if (d.wind) {
+        const w = d.wind;
+        if (w.wind_speed) {
+          if (timeNow - Number(w.wind_speed.time) < 20 * 60) {
+            windAverage = Number(w.wind_speed.value);
+          }
+        }
+        if (w.wind_gust) {
+          if (timeNow - Number(w.wind_gust.time) < 20 * 60) {
+            windGust = Number(w.wind_gust.value);
+          }
+        }
+        if (w.wind_direction) {
+          if (timeNow - Number(w.wind_direction.time) < 20 * 60) {
+            windBearing = Number(w.wind_direction.value);
+          }
+        }
+      }
+      if (d.outdoor && d.outdoor.temperature) {
+        if (timeNow - Number(d.outdoor.temperature.time) < 20 * 60) {
+          temperature = Number(d.outdoor.temperature.value);
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn('An error occured while fetching data for ecowitt', {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getGreaterWellingtonData(
   stationId,
   gwWindAverageFieldName,
@@ -1859,6 +1917,8 @@ export async function stationWrapper(source) {
           data = await getNavigatusData(s.externalId);
         } else if (s.type === 'pw') {
           data = await getPredictWindData(s.externalId);
+        } else if (s.type === 'ecowitt') {
+          data = await getEcowittData(s.externalId);
         } else if (s.type === 'lpc') {
           data = await getLpcData();
         } else if (s.type === 'mpyc') {
