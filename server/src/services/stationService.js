@@ -1113,7 +1113,7 @@ async function getHbrcData(stationId) {
       }
     );
 
-    if (data && data.Data.length) {
+    if (data && data.Data && data.Data.length) {
       // ignore old data
       const lastUpdate = new Date(data.Data[0].t);
       if (Date.now() - lastUpdate.getTime() < 40 * 60 * 1000) {
@@ -1132,7 +1132,7 @@ async function getHbrcData(stationId) {
       }
     ));
 
-    if (data && data.Data.length) {
+    if (data && data.Data && data.Data.length) {
       const lastUpdate = new Date(data.Data[0].t);
       if (Date.now() - lastUpdate.getTime() < 40 * 60 * 1000) {
         windGust = Number(data.Data[0].v);
@@ -1150,7 +1150,7 @@ async function getHbrcData(stationId) {
       }
     ));
 
-    if (data && data.Data.length) {
+    if (data && data.Data && data.Data.length) {
       const lastUpdate = new Date(data.Data[0].t);
       if (Date.now() - lastUpdate.getTime() < 40 * 60 * 1000) {
         windBearing = Number(data.Data[0].v);
@@ -1168,7 +1168,7 @@ async function getHbrcData(stationId) {
       }
     ));
 
-    if (data && data.Data.length) {
+    if (data && data.Data && data.Data.length) {
       const lastUpdate = new Date(data.Data[0].t);
       if (Date.now() - lastUpdate.getTime() < 40 * 60 * 1000) {
         temperature = Number(data.Data[0].v);
