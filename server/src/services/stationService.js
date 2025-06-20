@@ -1,3 +1,4 @@
+import https from 'https';
 import axios from 'axios';
 import { parse } from 'date-fns';
 import { formatInTimeZone, fromZonedTime } from 'date-fns-tz';
@@ -1087,6 +1088,107 @@ async function getEcowittData(stationId) {
   };
 }
 
+async function getHbrcData(stationId) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    // ignore 'invalid' self-signed cert
+    const agent = new https.Agent({
+      rejectUnauthorized: false,
+      requestCert: false,
+      agent: false
+    });
+
+    // avg
+    let { data } = await axios.get(
+      `https://data.hbrc.govt.nz/Envirodata/EMAR.hts?Service=Hilltop&Request=GetData&Site=${stationId}&Measurement=Average%20Wind%20Speed&Format=JSON`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        },
+        httpsAgent: agent
+      }
+    );
+
+    if (data && data.Data.length) {
+      // ignore old data
+      const lastUpdate = new Date(data.Data[0].t);
+      if (Date.now() - lastUpdate.getTime() < 40 * 60 * 1000) {
+        windAverage = Number(data.Data[0].v);
+      }
+    }
+
+    // gust
+    ({ data } = await axios.get(
+      `https://data.hbrc.govt.nz/Envirodata/EMAR.hts?Service=Hilltop&Request=GetData&Site=${stationId}&Measurement=Maximum%20Wind%20Speed&Format=JSON`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        },
+        httpsAgent: agent
+      }
+    ));
+
+    if (data && data.Data.length) {
+      const lastUpdate = new Date(data.Data[0].t);
+      if (Date.now() - lastUpdate.getTime() < 40 * 60 * 1000) {
+        windGust = Number(data.Data[0].v);
+      }
+    }
+
+    // direction
+    ({ data } = await axios.get(
+      `https://data.hbrc.govt.nz/Envirodata/EMAR.hts?Service=Hilltop&Request=GetData&Site=${stationId}&Measurement=Average%20Wind%20Direction&Format=JSON`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        },
+        httpsAgent: agent
+      }
+    ));
+
+    if (data && data.Data.length) {
+      const lastUpdate = new Date(data.Data[0].t);
+      if (Date.now() - lastUpdate.getTime() < 40 * 60 * 1000) {
+        windBearing = Number(data.Data[0].v);
+      }
+    }
+
+    // temperature
+    ({ data } = await axios.get(
+      `https://data.hbrc.govt.nz/Envirodata/EMAR.hts?Service=Hilltop&Request=GetData&Site=${stationId}&Measurement=Average%20Air%20Temperature&Format=JSON`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        },
+        httpsAgent: agent
+      }
+    ));
+
+    if (data && data.Data.length) {
+      const lastUpdate = new Date(data.Data[0].t);
+      if (Date.now() - lastUpdate.getTime() < 40 * 60 * 1000) {
+        temperature = Number(data.Data[0].v);
+      }
+    }
+  } catch (error) {
+    logger.warn('An error occured while fetching data for hbrc', {
+      service: 'station',
+      type: 'other'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getGreaterWellingtonData(
   stationId,
   gwWindAverageFieldName,
@@ -1919,6 +2021,8 @@ export async function stationWrapper(source) {
           data = await getPredictWindData(s.externalId);
         } else if (s.type === 'ecowitt') {
           data = await getEcowittData(s.externalId);
+        } else if (s.type === 'hbrc') {
+          data = await getHbrcData(s.externalId);
         } else if (s.type === 'lpc') {
           data = await getLpcData();
         } else if (s.type === 'mpyc') {

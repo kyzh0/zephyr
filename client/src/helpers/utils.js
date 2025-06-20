@@ -76,6 +76,8 @@ export function getStationTypeName(code) {
       return 'PredictWind';
     case 'wi':
       return 'Whanganui Inlet';
+    case 'hbrc':
+      return "Hawke's Bay Regional Council";
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
