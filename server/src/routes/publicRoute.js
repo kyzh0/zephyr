@@ -80,7 +80,7 @@ router.get('/geojson', async (req, res) => {
       return;
     }
 
-    const stations = await Station.find({ type: { $ne: 'metservice' } }, { data: 0 }).sort({
+    const stations = await Station.find({ type: { $ne: 'test' } }, { data: 0 }).sort({
       type: 1,
       name: 1
     });
