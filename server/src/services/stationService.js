@@ -1595,7 +1595,7 @@ async function getPrimePortData() {
 
     // avg
     let croppedBuf = await sharp(imgBuff)
-      .extract({ left: 850, top: 165, width: 175, height: 50 })
+      .extract({ left: 680, top: 170, width: 140, height: 50 })
       .toBuffer();
     let path = `${dir}/primeportavg.jpg`;
     await fs.writeFile(path, croppedBuf);
@@ -1606,7 +1606,7 @@ async function getPrimePortData() {
 
     // gust
     croppedBuf = await sharp(imgBuff)
-      .extract({ left: 850, top: 25, width: 175, height: 50 })
+      .extract({ left: 680, top: 30, width: 140, height: 50 })
       .toBuffer();
     path = `${dir}/primeportgust.jpg`;
     await fs.writeFile(path, croppedBuf);
@@ -1636,7 +1636,7 @@ async function getPrimePortData() {
 
     // direction
     croppedBuf = await sharp(imgBuff)
-      .extract({ left: 845, top: 245, width: 180, height: 50 })
+      .extract({ left: 675, top: 250, width: 145, height: 50 })
       .toBuffer();
     path = `${dir}/primeportdir.jpg`;
     await fs.writeFile(path, croppedBuf);
