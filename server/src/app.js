@@ -3,7 +3,6 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import cron from 'node-cron';
 import dotenv from 'dotenv';
-import v8 from 'v8';
 
 import authRoute from './routes/authRoute.js';
 import stationRoute from './routes/stationRoute.js';
@@ -27,12 +26,6 @@ const app = express();
 app.use(cors({ origin: [/zephyrapp\.nz$/, /^http(s)?:\/\/localhost:\d{4}.*$/] }));
 app.use(express.json());
 dotenv.config();
-
-// memory leak diagnostics
-process.on('SIGUSR2', () => {
-  const fileName = v8.writeHeapSnapshot();
-  logger.info(`Created heapdump file: ${fileName}`);
-});
 
 // static files are served by caddy in prod
 if (process.env.NODE_ENV !== 'production') {
