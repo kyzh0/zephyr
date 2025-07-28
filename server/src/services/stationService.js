@@ -1737,6 +1737,7 @@ async function getPortersData() {
 
     windAverage = isNaN(textAvg) ? 0 : Number(textAvg);
     windGust = isNaN(textGust) ? 0 : Number(textGust);
+    if (windGust < windAverage) windGust = null; // sometimes ocr fails for gust PORTERS BASE
 
     // direction
     croppedBuf = await sharp(imgBuff)
@@ -1766,7 +1767,13 @@ async function getPortersData() {
     await fs.writeFile(path, croppedBuf);
 
     ret = await worker.recognize(path);
-    temperature = Number(ret.data.text.replace(reg, ''));
+    let textTemperature = ret.data.text.replace(reg, '');
+    if (textTemperature.length && !textTemperature.includes('.')) {
+      // sometimes ocr misses a .
+      // temperature is always 1dp here
+      textTemperature = `${textTemperature.slice(0, -1)}.${textTemperature.slice(-1)}`;
+    }
+    temperature = Number(textTemperature);
     result.push({
       id: 'base',
       data: {
@@ -1839,7 +1846,11 @@ async function getPortersData() {
     await fs.writeFile(path, croppedBuf);
 
     ret = await worker.recognize(path);
-    temperature = Number(ret.data.text.replace(reg, ''));
+    textTemperature = ret.data.text.replace(reg, '');
+    if (textTemperature.length && !textTemperature.includes('.')) {
+      textTemperature = `${textTemperature.slice(0, -1)}.${textTemperature.slice(-1)}`;
+    }
+    temperature = Number(textTemperature);
     result.push({
       id: 'tbar',
       data: {
@@ -1912,7 +1923,11 @@ async function getPortersData() {
     await fs.writeFile(path, croppedBuf);
 
     ret = await worker.recognize(path);
-    temperature = Number(ret.data.text.replace(reg, ''));
+    textTemperature = ret.data.text.replace(reg, '');
+    if (textTemperature.length && !textTemperature.includes('.')) {
+      textTemperature = `${textTemperature.slice(0, -1)}.${textTemperature.slice(-1)}`;
+    }
+    temperature = Number(textTemperature);
     result.push({
       id: 'ridgeline',
       data: {
