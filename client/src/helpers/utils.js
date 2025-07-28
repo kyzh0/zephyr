@@ -68,6 +68,8 @@ export function getStationTypeName(code) {
       return 'Wainuiomata';
     case 'prime':
       return 'Prime Port';
+    case 'porters':
+      return 'Porters Alpine Resort';
     case 'wl':
       return 'Weather Link';
     case 'hw':
