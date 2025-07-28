@@ -1593,9 +1593,17 @@ async function getPrimePortData() {
     await fs.mkdir(dir, { recursive: true });
     const worker = await createWorker('eng');
 
+    // sometimes img changes size
+    const meta = await sharp(imgBuff).metadata();
+
     // avg
     let croppedBuf = await sharp(imgBuff)
-      .extract({ left: 680, top: 170, width: 140, height: 50 })
+      .extract({
+        left: meta.width > 1000 ? 850 : 680,
+        top: 170,
+        width: meta.width > 1000 ? 175 : 140,
+        height: 50
+      })
       .toBuffer();
     let path = `${dir}/primeportavg.jpg`;
     await fs.writeFile(path, croppedBuf);
@@ -1606,7 +1614,12 @@ async function getPrimePortData() {
 
     // gust
     croppedBuf = await sharp(imgBuff)
-      .extract({ left: 680, top: 30, width: 140, height: 50 })
+      .extract({
+        left: meta.width > 1000 ? 850 : 680,
+        top: 30,
+        width: meta.width > 1000 ? 175 : 140,
+        height: 50
+      })
       .toBuffer();
     path = `${dir}/primeportgust.jpg`;
     await fs.writeFile(path, croppedBuf);
@@ -1636,7 +1649,12 @@ async function getPrimePortData() {
 
     // direction
     croppedBuf = await sharp(imgBuff)
-      .extract({ left: 675, top: 250, width: 145, height: 50 })
+      .extract({
+        left: meta.width > 1000 ? 845 : 675,
+        top: 250,
+        width: meta.width > 1000 ? 180 : 145,
+        height: 50
+      })
       .toBuffer();
     path = `${dir}/primeportdir.jpg`;
     await fs.writeFile(path, croppedBuf);
