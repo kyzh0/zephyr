@@ -25,7 +25,7 @@ export default function AdminEditStation() {
     if (stations.length) return;
 
     async function load() {
-      const s = await listStations();
+      const s = await listStations(true);
       if (s.length) {
         setStations(s);
         setSearchResults(s);

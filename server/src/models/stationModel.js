@@ -37,6 +37,7 @@ const schema = mongoose.Schema({
   popupMessage: String,
   isError: Boolean,
   isOffline: Boolean,
+  isDisabled: Boolean,
   data: [
     {
       time: {
