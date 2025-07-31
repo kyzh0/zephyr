@@ -9,7 +9,7 @@ const router = express.Router();
 
 // get stations
 router.get('/', async (req, res) => {
-  const { unixTimeFrom, lat, lon, radius, err } = req.query;
+  const { unixTimeFrom, lat, lon, radius, err, includeDisabled } = req.query;
   const time = unixTimeFrom ? Number(unixTimeFrom) : NaN;
   const latitude = lat ? Number(lat) : NaN;
   const longitude = lon ? Number(lon) : NaN;
@@ -22,6 +22,9 @@ router.get('/', async (req, res) => {
     query.isError = true;
     orderby.isOffline = -1;
     orderby.name = 1;
+  }
+  if (String(includeDisabled).toLowerCase() !== 'true') {
+    query.isDisabled = { $ne: true };
   }
 
   if (!isNaN(latitude) && !isNaN(longitude) && !isNaN(rad)) {

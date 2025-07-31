@@ -10,9 +10,9 @@ export async function getStationById(id) {
   }
 }
 
-export async function listStations() {
+export async function listStations(includeDisabled) {
   try {
-    const { data } = await axios.get(`${APIROOT}/stations`);
+    const { data } = await axios.get(`${APIROOT}/stations?includeDisabled=${includeDisabled}`);
     return data;
   } catch (error) {
     console.error(error);

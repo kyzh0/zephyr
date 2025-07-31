@@ -2240,6 +2240,8 @@ export async function stationWrapper(source) {
 
     const date = getFlooredTime();
     for (const s of stations) {
+      if (s.isDisabled) continue;
+
       let data = null;
       if (source === 'harvest') {
         if (!fenzHarvestStationIds.length) {
@@ -2406,6 +2408,8 @@ export async function holfuyWrapper() {
 
     const date = getFlooredTime();
     for (const s of stations) {
+      if (s.isDisabled) continue;
+
       let d = null;
       const matches = data.measurements.filter((m) => {
         return m.stationId.toString() === s.externalId;
@@ -2452,6 +2456,8 @@ export async function jsonOutputWrapper() {
     const stations = await Station.find({}, { data: 0 });
     const json = [];
     for (const s of stations) {
+      if (s.isDisabled) continue;
+
       let avg = s.currentAverage;
       let gust = s.currentGust;
       let bearing = s.currentBearing;
@@ -2521,6 +2527,8 @@ export async function checkForErrors() {
     const timeNow = Date.now();
 
     for (const s of stations) {
+      if (s.isDisabled) continue;
+
       let isDataError = true;
       let isWindError = true;
       let isBearingError = true;
