@@ -2228,21 +2228,8 @@ export async function stationWrapper(source) {
 
     const stations = await Station.find(query, {
       _id: 1,
-      name: 1,
       type: 1,
-      location: 1,
-      externalLink: 1,
       externalId: 1,
-      lastUpdate: 1,
-      currentAverage: 1,
-      currentGust: 1,
-      currentBearing: 1,
-      currentTemperature: 1,
-      elevation: 1,
-      validBearings: 1,
-      popupMessage: 1,
-      isError: 1,
-      isOffline: 1,
       isDisabled: 1,
       harvestWindAverageId: 1,
       harvestWindGustId: 1,
@@ -2450,7 +2437,23 @@ async function getHolfuyData(stationId) {
 
 export async function holfuyWrapper() {
   try {
-    const stations = await Station.find({ type: 'holfuy' }, { data: 0 });
+    const stations = await Station.find(
+      { type: 'holfuy' },
+      {
+        _id: 1,
+        type: 1,
+        externalId: 1,
+        isDisabled: 1,
+        data: {
+          $slice: [
+            {
+              $sortArray: { input: '$data', sortBy: { time: -1 } }
+            },
+            1 // include latest data record
+          ]
+        }
+      }
+    );
     if (!stations.length) {
       logger.error('No holfuy stations found.', { service: 'station', type: 'holfuy' });
       return null;
@@ -2463,6 +2466,25 @@ export async function holfuyWrapper() {
     const date = getFlooredTime();
     for (const s of stations) {
       if (s.isDisabled) continue;
+
+      // check if previous data record is missing - sometimes scraper skips a beat
+      if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 11 * 60 * 1000) {
+        // insert empty record
+        await Station.updateOne(
+          { _id: s._id },
+          {
+            $push: {
+              data: {
+                time: new Date(date.getTime() - 10 * 60 * 1000),
+                windAverage: null,
+                windGust: null,
+                windBearing: null,
+                temperature: null
+              }
+            }
+          }
+        );
+      }
 
       let d = null;
       const matches = data.measurements.filter((m) => {
