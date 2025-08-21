@@ -745,8 +745,14 @@ export default function Station() {
               />
             )}
 
-            <Stack direction="row" justifyContent="end" sx={{ width: '100%' }}>
-              {station && (
+            {station && (
+              <Stack direction="row" justifyContent="space-between" sx={{ width: '100%' }}>
+                <Stack direction="column" justifyContent="center" sx={{ height: '100%' }}>
+                  <Typography variant="body2" sx={{ ...(!bigScreen && { fontSize: '10px' }) }}>
+                    Updated{' '}
+                    {formatInTimeZone(new Date(station.lastUpdate), 'Pacific/Auckland', 'HH:mm')}
+                  </Typography>
+                </Stack>
                 <Link
                   href={station.externalLink}
                   target="_blank"
@@ -755,8 +761,8 @@ export default function Station() {
                 >
                   Source: {getStationTypeName(station.type)}
                 </Link>
-              )}
-            </Stack>
+              </Stack>
+            )}
           </Stack>
         </Stack>
       </Container>
