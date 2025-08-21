@@ -2226,7 +2226,42 @@ export async function stationWrapper(source) {
     else if (source === 'metservice') query.type = 'metservice';
     else query.type = { $nin: ['holfuy', 'harvest', 'metservice'] };
 
-    const stations = await Station.find(query, { data: 0 });
+    const stations = await Station.find(query, {
+      _id: 1,
+      name: 1,
+      type: 1,
+      location: 1,
+      externalLink: 1,
+      externalId: 1,
+      lastUpdate: 1,
+      currentAverage: 1,
+      currentGust: 1,
+      currentBearing: 1,
+      currentTemperature: 1,
+      elevation: 1,
+      validBearings: 1,
+      popupMessage: 1,
+      isError: 1,
+      isOffline: 1,
+      isDisabled: 1,
+      harvestWindAverageId: 1,
+      harvestWindGustId: 1,
+      harvestWindDirectionId: 1,
+      harvestTemperatureId: 1,
+      harvestCookie: 1,
+      gwWindAverageFieldName: 1,
+      gwWindGustFieldName: 1,
+      gwWindBearingFieldName: 1,
+      gwTemperatureFieldName: 1,
+      data: {
+        $slice: [
+          {
+            $sortArray: { input: '$data', sortBy: { time: -1 } }
+          },
+          1 // include latest data record
+        ]
+      }
+    });
     if (!stations.length) {
       logger.error(`No ${source} stations found.`, {
         service: 'station',
@@ -2241,6 +2276,25 @@ export async function stationWrapper(source) {
     const date = getFlooredTime();
     for (const s of stations) {
       if (s.isDisabled) continue;
+
+      // check if previous data record is missing - sometimes scraper skips a beat
+      if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 11 * 60 * 1000) {
+        // insert empty record
+        await Station.updateOne(
+          { _id: s._id },
+          {
+            $push: {
+              data: {
+                time: new Date(date.getTime() - 10 * 60 * 1000),
+                windAverage: null,
+                windGust: null,
+                windBearing: null,
+                temperature: null
+              }
+            }
+          }
+        );
+      }
 
       let data = null;
       if (source === 'harvest') {
@@ -2542,8 +2596,8 @@ export async function checkForErrors() {
       if (data.length) {
         data.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()); // time desc
 
-        // check that data exists up to 20min before current time
-        if (timeNow - new Date(data[0].time).getTime() <= 20 * 60 * 1000) {
+        // check that data exists up to 60min before current time
+        if (timeNow - new Date(data[0].time).getTime() <= 60 * 60 * 1000) {
           isDataError = false;
           for (const d of data) {
             if (d.windAverage != null || d.windGust != null) {
