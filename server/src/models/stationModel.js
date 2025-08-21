@@ -35,6 +35,7 @@ const schema = mongoose.Schema({
   elevation: Number,
   validBearings: String,
   popupMessage: String,
+  isHighResolution: Boolean,
   isError: Boolean,
   isOffline: Boolean,
   isDisabled: Boolean,

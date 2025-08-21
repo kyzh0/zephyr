@@ -154,6 +154,9 @@ router.get('/json-output', async (req, res) => {
       else query.time = { $lte: dateTo };
     }
 
+    if (String(req.query.hr).toLowerCase() !== 'true') query.isHighResolution = { $ne: true };
+    else query.isHighResolution = true;
+
     const output = await Output.find(query).sort({ time: 1 });
     for (const o of output) {
       result.push({
