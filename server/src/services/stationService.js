@@ -11,10 +11,10 @@ import logger from '../helpers/log.js';
 import { Station } from '../models/stationModel.js';
 import { Output } from '../models/outputModel.js';
 
-function getFlooredTime() {
-  // floor data timestamp to 10 min
+function getFlooredTime(interval) {
+  // floor data timestamp to "interval" mins
   let date = new Date();
-  let rem = date.getMinutes() % 10;
+  let rem = date.getMinutes() % interval;
   if (rem > 0) date = new Date(date.getTime() - rem * 60 * 1000);
   rem = date.getSeconds() % 60;
   if (rem > 0) date = new Date(date.getTime() - rem * 1000);
@@ -2221,7 +2221,7 @@ async function saveData(station, data, date) {
 
 export async function stationWrapper(source) {
   try {
-    const query = {};
+    const query = { isHighResolution: { $ne: true } };
     if (source === 'harvest') query.type = 'harvest';
     else if (source === 'metservice') query.type = 'metservice';
     else query.type = { $nin: ['holfuy', 'harvest', 'metservice'] };
@@ -2260,7 +2260,7 @@ export async function stationWrapper(source) {
     const fenzHarvestStationIds = [];
     const portersData = await getPortersData();
 
-    const date = getFlooredTime();
+    const date = getFlooredTime(10);
     for (const s of stations) {
       if (s.isDisabled) continue;
 
@@ -2438,7 +2438,7 @@ async function getHolfuyData(stationId) {
 export async function holfuyWrapper() {
   try {
     const stations = await Station.find(
-      { type: 'holfuy' },
+      { type: 'holfuy', isHighResolution: { $ne: true } },
       {
         _id: 1,
         type: 1,
@@ -2463,7 +2463,7 @@ export async function holfuyWrapper() {
       `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
     );
 
-    const date = getFlooredTime();
+    const date = getFlooredTime(10);
     for (const s of stations) {
       if (s.isDisabled) continue;
 
@@ -2528,7 +2528,7 @@ function cmp(a, b) {
 }
 export async function jsonOutputWrapper() {
   try {
-    var date = getFlooredTime();
+    var date = getFlooredTime(10);
     const stations = await Station.find({}, { data: 0 });
     const json = [];
     for (const s of stations) {
@@ -2574,14 +2574,146 @@ export async function jsonOutputWrapper() {
     await fs.writeFile(path, JSON.stringify(json));
     logger.info(`File created - ${path}`, { service: 'json' });
 
+    const urlPrefix =
+      process.env.NODE_ENV === 'production' ? 'https://fs.zephyrapp.nz/' : 'http://localhost:5000/';
     const output = new Output({
       time: date,
-      url: `https://fs.zephyrapp.nz/${path.replace('public/', '')}`
+      url: `${urlPrefix}${path.replace('public/', '')}`
     });
     await output.save();
   } catch (error) {
     logger.error('An error occurred while processing json output', { service: 'json' });
     logger.error(error, { service: 'json' });
+  }
+}
+
+// selected stations have 2 min resolution
+export async function highResolutionStationWrapper() {
+  try {
+    const stations = await Station.find(
+      { isHighResolution: true },
+      {
+        _id: 1,
+        name: 1,
+        type: 1,
+        elevation: 1,
+        location: 1,
+        externalId: 1,
+        isDisabled: 1,
+        harvestWindAverageId: 1,
+        harvestWindGustId: 1,
+        harvestWindDirectionId: 1,
+        harvestTemperatureId: 1,
+        data: {
+          $slice: [
+            {
+              $sortArray: { input: '$data', sortBy: { time: -1 } }
+            },
+            1 // include latest data record
+          ]
+        }
+      }
+    );
+    if (!stations.length) {
+      logger.error(`No high resolution stations found.`, {
+        service: 'station',
+        type: 'hr'
+      });
+      return null;
+    }
+
+    const json = [];
+    const date = getFlooredTime(2);
+    for (const s of stations) {
+      if (s.isDisabled) continue;
+
+      if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 3 * 60 * 1000) {
+        await Station.updateOne(
+          { _id: s._id },
+          {
+            $push: {
+              data: {
+                time: new Date(date.getTime() - 2 * 60 * 1000),
+                windAverage: null,
+                windGust: null,
+                windBearing: null,
+                temperature: null
+              }
+            }
+          }
+        );
+      }
+
+      let data = null;
+      if (s.type === 'harvest') {
+        data = await getHarvestData(
+          s.externalId,
+          s.harvestWindAverageId,
+          s.harvestWindGustId,
+          s.harvestWindDirectionId,
+          s.harvestTemperatureId
+        );
+      } else if (s.type === 'holfuy') {
+        data = await getHolfuyData(s.externalId);
+      } else if (s.type === 'metservice') {
+        data = await getMetserviceData(s.externalId);
+      } else if (s.type === 'attentis') {
+        data = await getAttentisData(s.externalId);
+      }
+
+      if (data) {
+        logger.info(`${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`, {
+          service: 'station',
+          type: 'hr'
+        });
+        logger.info(JSON.stringify(data), { service: 'station', type: 'hr' });
+        await saveData(s, data, date);
+      }
+
+      json.push({
+        id: s._id,
+        name: s.name,
+        type: s.type,
+        elevation: s.elevation,
+        coordinates: {
+          lat: s.location.coordinates[1],
+          lon: s.location.coordinates[0]
+        },
+        timestamp: date.getTime() / 1000,
+        wind: {
+          average: data?.windAverage ?? null,
+          gust: data?.windGust ?? null,
+          bearing: data?.windBearing ?? null
+        },
+        temperature: data?.temperature ?? null
+      });
+    }
+
+    // export json
+    json.sort((a, b) => {
+      return cmp(a.type, b.type) || cmp(a.name, b.name);
+    });
+    const dir = `public/data/hr/${formatInTimeZone(date, 'UTC', 'yyyy/MM/dd')}`;
+    await fs.mkdir(dir, { recursive: true });
+    const path = `${dir}/zephyr-scrape-${date.getTime() / 1000}.json`;
+    await fs.writeFile(path, JSON.stringify(json));
+    logger.info(`File created - ${path}`, { service: 'json' });
+
+    const urlPrefix =
+      process.env.NODE_ENV === 'production' ? 'https://fs.zephyrapp.nz/' : 'http://localhost:5000/';
+    const output = new Output({
+      time: date,
+      url: `${urlPrefix}${path.replace('public/', '')}`,
+      isHighResolution: true
+    });
+    await output.save();
+  } catch (error) {
+    logger.error(`An error occurred while fetching high resolution station data`, {
+      service: 'station',
+      type: 'hr'
+    });
+    logger.error(error, { service: 'station', type: 'hr' });
+    return null;
   }
 }
 

@@ -23,9 +23,7 @@ router.get('/', async (req, res) => {
     orderby.isOffline = -1;
     orderby.name = 1;
   }
-  if (String(includeDisabled).toLowerCase() !== 'true') {
-    query.isDisabled = { $ne: true };
-  }
+  if (String(includeDisabled).toLowerCase() !== 'true') query.isDisabled = { $ne: true };
 
   if (!isNaN(latitude) && !isNaN(longitude) && !isNaN(rad)) {
     query.location = {

@@ -18,7 +18,8 @@ import {
   jsonOutputWrapper,
   checkForErrors,
   updateKeys,
-  removeOldData
+  removeOldData,
+  highResolutionStationWrapper
 } from './services/stationService.js';
 import { soundingWrapper } from './services/soundingService.js';
 
@@ -92,6 +93,15 @@ cron.schedule('*/10 * * * *', async () => {
   logger.info(`Update holfuy stations end - ${Date.now() - ts}ms elapsed.`, {
     service: 'station',
     type: 'holfuy'
+  });
+});
+cron.schedule('*/2 * * * *', async () => {
+  logger.info('--- Update high resolution stations start ---', { service: 'station', type: 'hr' });
+  const ts = Date.now();
+  await highResolutionStationWrapper();
+  logger.info(`Update high resolution stations end - ${Date.now() - ts}ms elapsed.`, {
+    service: 'station',
+    type: 'hr'
   });
 });
 
