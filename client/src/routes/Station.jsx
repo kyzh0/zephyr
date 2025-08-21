@@ -64,6 +64,7 @@ export default function Station() {
   const { id } = useParams();
   const [station, setStation] = useState(null);
   const [data, setData] = useState([]);
+  const [tableData, setTableData] = useState([]);
   const [bearingPairCount, setBearingPairCount] = useState(0);
   const tableRef = useRef(null);
   const modalRef = useRef(null);
@@ -108,6 +109,94 @@ export default function Station() {
         }
       }
       setData(data);
+
+      // show 36 records (last 6h) in table
+      if (!s.isHighResolution) setTableData(data.slice(Math.max(data.length - 37, 0)));
+
+      // calculate 10 min averages for high-res stations
+      if (s.isHighResolution && data.length) {
+        // interval starts at XX:X2
+        let startIdx = 0;
+        for (const d of data) {
+          if (new Date(d.time).getMinutes() % 10 === 2) break;
+          startIdx++;
+        }
+
+        const result = [];
+        let sumAvg = 0;
+        let sumBearing = 0;
+        let sumTemperature = 0;
+        let maxGust = null;
+        let count = 0;
+        let intervalStart = new Date(data[startIdx].time);
+        for (let i = startIdx; i < data.length; i += 1) {
+          const time = new Date(data[i].time);
+          if (time.getMinutes() % 10 === 2) intervalStart = time;
+
+          // handle missing readings
+          if (
+            time.getTime() - intervalStart.getTime() >= 10 * 60 * 1000 || // crossed 10min
+            (time.getMinutes() % 10 > 0 && time.getMinutes() % 10 < intervalStart.getMinutes() % 10) // crossed XX:X0 mark
+          ) {
+            const avg = count > 0 ? Math.round(sumAvg / count) : null;
+            const bearing = count > 0 ? Math.round(sumBearing / count) : null;
+            const temperature = count > 0 ? Math.round(sumTemperature / count) : null;
+            result.push({
+              time: new Date(
+                intervalStart.getTime() + (10 - intervalStart.getMinutes()) * 60 * 1000
+              ).toISOString(),
+              windAverage: avg,
+              windGust: maxGust,
+              windBearing: bearing,
+              temperature: temperature
+            });
+            intervalStart = time;
+            count = 0;
+            sumAvg = 0;
+            sumBearing = 0;
+            sumTemperature = 0;
+            maxGust = null;
+          }
+
+          if (data[i].windAverage != null) {
+            count++;
+            sumAvg += data[i].windAverage;
+            if (data[i].windBearing != null) sumBearing += data[i].windBearing;
+            if (data[i].temperature != null) sumTemperature += data[i].temperature;
+            if (data[i].windGust != null && data[i].windGust > maxGust) maxGust = data[i].windGust;
+          }
+
+          // calculate average at XX:X0
+          // latest (incomplete) interval is ignored
+          if (time.getMinutes() % 10 === 0) {
+            const avg = count > 0 ? Math.round(sumAvg / count) : null;
+            const bearing = count > 0 ? Math.round(sumBearing / count) : null;
+            const temperature = count > 0 ? Math.round(sumTemperature / count) : null;
+            result.push({
+              time: time.toISOString(),
+              windAverage: avg,
+              windGust: maxGust,
+              windBearing: bearing,
+              temperature: temperature
+            });
+            count = 0;
+            sumAvg = 0;
+            sumBearing = 0;
+            sumTemperature = 0;
+            maxGust = null;
+          }
+        }
+
+        for (const item of result) {
+          item.timeLabel = formatInTimeZone(new Date(item.time), 'Pacific/Auckland', 'HH:mm');
+          item.windAverageKt =
+            item.windAverage == null ? null : Math.round(item.windAverage / 1.852);
+          item.windGustKt = item.windGust == null ? null : Math.round(item.windGust / 1.852);
+        }
+
+        // show 36 records (last 6h) in table
+        setTableData(result.slice(Math.max(result.length - 37, 0)));
+      }
     } catch (error) {
       console.error(error);
     }
@@ -418,7 +507,7 @@ export default function Station() {
             {station ? (
               station.isOffline ? (
                 <></>
-              ) : data && data.length ? (
+              ) : data && data.length && tableData && tableData.length ? (
                 <>
                   <TableContainer
                     component={Paper}
@@ -431,7 +520,7 @@ export default function Station() {
                           ref={tableRef}
                         >
                           <TableCell variant="head"></TableCell>
-                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                          {tableData.map((d) => (
                             <TableCell
                               key={d.time}
                               align="center"
@@ -455,7 +544,7 @@ export default function Station() {
                           >
                             Avg
                           </TableCell>
-                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                          {tableData.map((d) => (
                             <TableCell
                               key={d.time}
                               align="center"
@@ -483,7 +572,7 @@ export default function Station() {
                           >
                             Gust
                           </TableCell>
-                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                          {tableData.map((d) => (
                             <TableCell
                               key={d.time}
                               align="center"
@@ -503,7 +592,7 @@ export default function Station() {
                         </TableRow>
                         <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                           <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
-                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                          {tableData.map((d) => (
                             <TableCell
                               key={d.time}
                               align="center"
@@ -522,7 +611,7 @@ export default function Station() {
                         </TableRow>
                         <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                           <TableCell variant="head" sx={{ borderBottom: 'none' }}></TableCell>
-                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                          {tableData.map((d) => (
                             <TableCell
                               key={d.time}
                               align="center"
@@ -561,7 +650,7 @@ export default function Station() {
                         </TableRow>
                         <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                           <TableCell variant="head"></TableCell>
-                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                          {tableData.map((d) => (
                             <TableCell
                               key={d.time}
                               align="center"
@@ -579,7 +668,7 @@ export default function Station() {
                         </TableRow>
                         <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                           <TableCell variant="head"></TableCell>
-                          {data.slice(Math.max(data.length - 37, 0)).map((d) => (
+                          {tableData.map((d) => (
                             <TableCell
                               key={d.time}
                               align="center"
