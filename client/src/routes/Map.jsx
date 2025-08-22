@@ -363,6 +363,9 @@ export default function Map() {
       text.addEventListener('mouseenter', () => popup.addTo(map.current));
       text.addEventListener('mouseleave', () => popup.remove());
 
+      // const border = document.createElement('span');
+      // border.className = 'marker-border';
+
       // parent element
       const el = document.createElement('div');
       el.id = dbId;
@@ -372,6 +375,7 @@ export default function Map() {
       el.dataset.gust = currentGust == null ? '' : currentGust;
       el.appendChild(arrow);
       el.appendChild(text);
+      // el.appendChild(border);
 
       stationMarkers.push({ marker: el, popup: popup });
       new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).setPopup(popup).addTo(map.current);
@@ -902,22 +906,8 @@ export default function Map() {
       >
         <IconButton
           color="primary"
-          sx={{
-            backgroundColor: 'white',
-            color: '#333333',
-            borderRadius: '4px',
-            boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            m: '10px',
-            width: '29px',
-            height: '29px',
-            zIndex: 5,
-            '&:hover': {
-              backgroundColor: '#f2f2f2'
-            }
-          }}
+          className="icon-button"
+          sx={{ left: 0 }}
           onClick={() => {
             navigate('/help');
           }}
@@ -932,22 +922,8 @@ export default function Map() {
         </IconButton>
         <IconButton
           color="primary"
-          sx={{
-            backgroundColor: 'white',
-            color: '#333333',
-            borderRadius: '4px',
-            boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
-            position: 'absolute',
-            top: 0,
-            left: 35,
-            m: '10px',
-            width: '29px',
-            height: '29px',
-            zIndex: 5,
-            '&:hover': {
-              backgroundColor: '#f2f2f2'
-            }
-          }}
+          className="icon-button"
+          sx={{ left: 35 }}
           onClick={() => {
             navigate('/donate');
           }}
@@ -963,22 +939,8 @@ export default function Map() {
         </IconButton>
         <IconButton
           color="primary"
-          sx={{
-            backgroundColor: 'white',
-            color: '#333333',
-            borderRadius: '4px',
-            boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
-            position: 'absolute',
-            top: 0,
-            left: 70,
-            m: '10px',
-            width: '29px',
-            height: '29px',
-            zIndex: 5,
-            '&:hover': {
-              backgroundColor: '#f2f2f2'
-            }
-          }}
+          className="icon-button"
+          sx={{ left: 70 }}
           onClick={() => {
             navigate('/grid');
           }}
@@ -987,22 +949,8 @@ export default function Map() {
         </IconButton>
         <IconButton
           color="primary"
-          sx={{
-            backgroundColor: 'white',
-            color: '#333333',
-            borderRadius: '4px',
-            boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
-            position: 'absolute',
-            top: 0,
-            left: 105,
-            m: '10px',
-            width: '29px',
-            height: '29px',
-            zIndex: 5,
-            '&:hover': {
-              backgroundColor: '#f2f2f2'
-            }
-          }}
+          className="icon-button"
+          sx={{ left: 105 }}
           onClick={handleWebcamClick}
         >
           <img
@@ -1016,22 +964,8 @@ export default function Map() {
         </IconButton>
         <IconButton
           color="primary"
-          sx={{
-            backgroundColor: 'white',
-            color: '#333333',
-            borderRadius: '4px',
-            boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
-            position: 'absolute',
-            top: 0,
-            left: 140,
-            m: '10px',
-            width: '29px',
-            height: '29px',
-            zIndex: 5,
-            '&:hover': {
-              backgroundColor: '#f2f2f2'
-            }
-          }}
+          className="icon-button"
+          sx={{ left: 140 }}
           onClick={handleSoundingClick}
         >
           <SsidChartIcon
