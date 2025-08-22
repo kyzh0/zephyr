@@ -179,6 +179,7 @@ export default function Map() {
         properties: {
           name: station.name,
           dbId: station._id,
+          elevation: station.elevation,
           currentAverage: avg,
           currentGust: gust,
           currentBearing:
@@ -297,6 +298,7 @@ export default function Map() {
     for (const f of geoJson.features) {
       const name = f.properties.name;
       const dbId = f.properties.dbId;
+      const elevation = f.properties.elevation;
       const currentAvg = f.properties.currentAverage;
       const currentGust = f.properties.currentGust;
       const currentBearing = f.properties.currentBearing;
@@ -363,8 +365,32 @@ export default function Map() {
       text.addEventListener('mouseenter', () => popup.addTo(map.current));
       text.addEventListener('mouseleave', () => popup.remove());
 
-      // const border = document.createElement('span');
-      // border.className = 'marker-border';
+      // elevation dashed border
+      let angle = currentBearing + 127;
+      if (angle >= 360) angle -= 360;
+      const d1 = elevation >= 250 ? 30 : 0;
+      const d2 = elevation >= 500 ? 30 : 0;
+      const d3 = elevation >= 750 ? 30 : 0;
+      const d4 = elevation >= 1000 ? 30 : 0;
+      const d5 = elevation >= 1250 ? 30 : 0;
+      const d6 = elevation >= 1500 ? 30 : 0;
+      const borderSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      borderSvg.setAttribute('class', 'marker-border');
+      borderSvg.setAttribute('viewBox', '0 0 120 120');
+      borderSvg.setAttribute('transform', `rotate(${angle})`);
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('fill', 'none');
+      circle.setAttribute('cx', '60');
+      circle.setAttribute('cy', '60');
+      circle.setAttribute('r', '56');
+      circle.setAttribute('stroke', 'black');
+      circle.setAttribute('stroke-width', '8');
+      circle.setAttributeNS(
+        null,
+        'stroke-dasharray',
+        `${d1} 20 ${d2} 20 ${d3} 20 ${d4} 20 ${d5} 20 ${d6} 1000`
+      );
+      borderSvg.appendChild(circle);
 
       // parent element
       const el = document.createElement('div');
@@ -375,7 +401,7 @@ export default function Map() {
       el.dataset.gust = currentGust == null ? '' : currentGust;
       el.appendChild(arrow);
       el.appendChild(text);
-      // el.appendChild(border);
+      el.appendChild(borderSvg);
 
       stationMarkers.push({ marker: el, popup: popup });
       new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).setPopup(popup).addTo(map.current);
