@@ -388,7 +388,7 @@ export default function Map() {
       circle.setAttribute('cx', '60');
       circle.setAttribute('cy', '60');
       circle.setAttribute('r', '56');
-      circle.setAttribute('stroke', 'black');
+      circle.setAttribute('stroke', '#ff4261');
       circle.setAttribute('stroke-width', '8');
       circle.setAttribute(
         'stroke-dasharray',

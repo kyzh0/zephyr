@@ -232,9 +232,17 @@ export default function Welcome() {
                   alignItems="center"
                   sx={{ height: '100%', textAlign: 'center', mt: 1, pl: 2 }}
                 >
-                  Show elevation border.
+                  Elevation border. Each
                   <br />
-                  Each dash represents 250m
+                  dash represents 250m
+                  <Box sx={{ width: '10px' }}></Box>
+                  <img
+                    src="/arrow-dashed-border.png"
+                    style={{
+                      width: `${scaling * 31}px`,
+                      height: `${scaling * 36}px`
+                    }}
+                  />
                 </Stack>
               </Grid>
             </Grid>
