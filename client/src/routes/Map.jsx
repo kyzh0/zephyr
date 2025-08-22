@@ -13,8 +13,10 @@ import { createTheme, ThemeProvider } from '@mui/material';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
+import Slider from '@mui/material/Slider';
 import GridViewIcon from '@mui/icons-material/GridView';
 import SsidChartIcon from '@mui/icons-material/SsidChart';
+import LandscapeOutlinedIcon from '@mui/icons-material/LandscapeOutlined';
 
 import MapTerrainControl from './MapTerrainControl';
 import MapUnitControl from './MapUnitControl';
@@ -48,6 +50,9 @@ export default function Map() {
   const [soundingMarkers] = useState([]);
   const [showSoundings, setShowSoundings] = useState(false);
   const soundingsHiddenRef = useRef(true);
+
+  const [showElevation, setShowElevation] = useState(false);
+  const [elevationFilter, setElevationFilter] = useState(0);
 
   const unitRef = useRef('kmh');
   const [posInit, setPosInit] = useState(false);
@@ -366,7 +371,7 @@ export default function Map() {
       text.addEventListener('mouseleave', () => popup.remove());
 
       // elevation dashed border
-      let angle = currentBearing + 127;
+      let angle = (currentBearing ?? 0) + 127;
       if (angle >= 360) angle -= 360;
       const d1 = elevation >= 250 ? 30 : 0;
       const d2 = elevation >= 500 ? 30 : 0;
@@ -375,7 +380,7 @@ export default function Map() {
       const d5 = elevation >= 1250 ? 30 : 0;
       const d6 = elevation >= 1500 ? 30 : 0;
       const borderSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      borderSvg.setAttribute('class', 'marker-border');
+      borderSvg.setAttribute('class', 'marker-border displaynone');
       borderSvg.setAttribute('viewBox', '0 0 120 120');
       borderSvg.setAttribute('transform', `rotate(${angle})`);
       const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -385,8 +390,7 @@ export default function Map() {
       circle.setAttribute('r', '56');
       circle.setAttribute('stroke', 'black');
       circle.setAttribute('stroke-width', '8');
-      circle.setAttributeNS(
-        null,
+      circle.setAttribute(
         'stroke-dasharray',
         `${d1} 20 ${d2} 20 ${d3} 20 ${d4} 20 ${d5} 20 ${d6} 1000`
       );
@@ -395,6 +399,7 @@ export default function Map() {
       // parent element
       const el = document.createElement('div');
       el.id = dbId;
+      el.setAttribute('elevation', elevation);
       el.className = 'marker';
       el.dataset.timestamp = timestamp;
       el.dataset.avg = currentAvg == null ? '' : currentAvg;
@@ -595,6 +600,10 @@ export default function Map() {
           child.style.backgroundImage = img;
           child.style.transform =
             currentBearing == null ? '' : `rotate(${Math.round(currentBearing)}deg)`;
+        } else if (child.classList.contains('marker-border')) {
+          let angle = (currentBearing ?? 0) + 127;
+          if (angle >= 360) angle -= 360;
+          child.setAttribute('transform', `rotate(${angle})`);
         }
 
         // update popup
@@ -797,6 +806,22 @@ export default function Map() {
     }
   }, [cookies.unit]);
 
+  // show/hide elevation borders
+  useEffect(() => {
+    const borders = document.querySelectorAll('svg.marker-border');
+    if (showElevation) for (const b of borders) b.classList.remove('displaynone');
+    else for (const b of borders) b.classList.add('displaynone');
+  }, [showElevation]);
+
+  // filter by elevation
+  useEffect(() => {
+    const markers = document.querySelectorAll('div.marker');
+    for (const m of markers) {
+      if (Number(m.getAttribute('elevation')) < elevationFilter) m.classList.add('displaynone');
+      else m.classList.remove('displaynone');
+    }
+  }, [elevationFilter]);
+
   const map = useRef(null);
   const mapContainer = useRef(null);
 
@@ -821,12 +846,6 @@ export default function Map() {
     map.current.touchZoomRotate.disableRotation();
 
     // map controls
-    map.current.addControl(
-      new mapboxgl.NavigationControl({
-        showCompass: false
-      }),
-      'top-right'
-    );
     map.current.addControl(new MapTerrainControl(), 'top-right');
     map.current.addControl(new MapUnitControl(), 'top-right');
     map.current.addControl(
@@ -932,7 +951,7 @@ export default function Map() {
       >
         <IconButton
           color="primary"
-          className="icon-button"
+          className="map-button"
           sx={{ left: 0 }}
           onClick={() => {
             navigate('/help');
@@ -948,7 +967,7 @@ export default function Map() {
         </IconButton>
         <IconButton
           color="primary"
-          className="icon-button"
+          className="map-button"
           sx={{ left: 35 }}
           onClick={() => {
             navigate('/donate');
@@ -965,7 +984,7 @@ export default function Map() {
         </IconButton>
         <IconButton
           color="primary"
-          className="icon-button"
+          className="map-button"
           sx={{ left: 70 }}
           onClick={() => {
             navigate('/grid');
@@ -975,7 +994,7 @@ export default function Map() {
         </IconButton>
         <IconButton
           color="primary"
-          className="icon-button"
+          className="map-button"
           sx={{ left: 105 }}
           onClick={handleWebcamClick}
         >
@@ -990,7 +1009,7 @@ export default function Map() {
         </IconButton>
         <IconButton
           color="primary"
-          className="icon-button"
+          className="map-button"
           sx={{ left: 140 }}
           onClick={handleSoundingClick}
         >
@@ -1003,6 +1022,33 @@ export default function Map() {
             }}
           />
         </IconButton>
+        <IconButton
+          color="primary"
+          className="map-button"
+          sx={{ right: 0, top: 115 }}
+          onClick={() => {
+            setShowElevation(!showElevation);
+          }}
+        >
+          <LandscapeOutlinedIcon
+            sx={{
+              width: '30px',
+              height: '20px',
+              opacity: showElevation ? 1 : 0.7
+            }}
+          />
+        </IconButton>
+        <Slider
+          className="elevation-slider"
+          orientation="vertical"
+          size="small"
+          step={250}
+          min={0}
+          max={1500}
+          value={elevationFilter}
+          onChange={(event, value) => setElevationFilter(value)}
+        />
+        {elevationFilter > 0 && <Box className="elevation-slider-label">&gt;{elevationFilter}</Box>}
         <Box
           ref={mapContainer}
           sx={{

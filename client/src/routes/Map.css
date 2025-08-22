@@ -1,19 +1,47 @@
-.icon-button {
+.displaynone {
+  display: none;
+}
+
+/* controls */
+.map-button {
   background-color: white !important;
   color: #333333 !important;
   border-radius: 4px !important;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
   position: absolute !important;
   top: 0;
-  left: 0;
   margin: 10px !important;
   width: 29px !important;
   height: 29px !important;
   z-index: 50 !important;
 }
 
-.icon-button:hover {
+.map-button:hover {
   background-color: #f2f2f2 !important;
+}
+
+.elevation-slider {
+  position: absolute !important;
+  top: 165px;
+  right: 4px;
+  padding: 0 20px !important;
+  height: 60px !important;
+  z-index: 50 !important;
+}
+
+.elevation-slider-label {
+  background-color: white !important;
+  color: #333333 !important;
+  border-radius: 4px !important;
+  position: absolute !important;
+  top: 225px;
+  right: 0;
+  margin: 10px !important;
+  width: 29px !important;
+  height: 15px !important;
+  z-index: 50 !important;
+  font-size: 10px;
+  text-align: center;
 }
 
 /* markers */
