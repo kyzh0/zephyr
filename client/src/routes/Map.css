@@ -56,14 +56,11 @@
 
 .marker-border {
   position: absolute;
-  top: -3px;
+  top: -2.2px;
   left: -3px;
   z-index: 4;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  border-style: solid;
-  display: inline-block;
+  width: 30px;
+  height: 30px;
 }
 
 .webcam {
