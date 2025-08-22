@@ -11,6 +11,7 @@ import Button from '@mui/material/Button';
 
 import GridViewIcon from '@mui/icons-material/GridView';
 import SsidChartIcon from '@mui/icons-material/SsidChart';
+import LandscapeOutlinedIcon from '@mui/icons-material/LandscapeOutlined';
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -160,7 +161,7 @@ export default function Welcome() {
                   alignItems="center"
                   sx={{ height: '100%', textAlign: 'center', mt: 1 }}
                 >
-                  Click this icon to view webcams
+                  Webcam overlay
                 </Stack>
               </Grid>
               <Grid item xs={2} sm={1} order={{ xs: 9, sm: 7 }}>
@@ -180,9 +181,7 @@ export default function Welcome() {
                   alignItems="center"
                   sx={{ height: '100%', textAlign: 'center', mt: 1, pl: 2 }}
                 >
-                  Click for a live grid view of nearby
-                  <br />
-                  stations. Enable location permissions.
+                  Live grid view
                 </Stack>
               </Grid>
               <Grid item xs={2} sm={1} order={{ xs: 11, sm: 11 }}>
@@ -208,7 +207,34 @@ export default function Welcome() {
                   alignItems="center"
                   sx={{ height: '100%', textAlign: 'center', mt: 1, pl: 2 }}
                 >
-                  Click for RASP Skew-T soundings
+                  RASP Skew-T soundings
+                </Stack>
+              </Grid>
+              <Grid item xs={2} sm={1} order={{ xs: 13, sm: 13 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="end"
+                  alignItems="center"
+                  sx={{ height: '100%', mt: 1 }}
+                >
+                  <LandscapeOutlinedIcon
+                    sx={{
+                      width: `${scaling * 32}px`,
+                      height: `${scaling * 20}px`
+                    }}
+                  />
+                </Stack>
+              </Grid>
+              <Grid item xs={10} sm={5} order={{ xs: 14, sm: 14 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                  sx={{ height: '100%', textAlign: 'center', mt: 1, pl: 2 }}
+                >
+                  Show elevation border.
+                  <br />
+                  Each dash represents 250m
                 </Stack>
               </Grid>
             </Grid>
