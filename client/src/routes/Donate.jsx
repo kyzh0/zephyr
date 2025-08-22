@@ -42,6 +42,9 @@ export default function Donate() {
             <Typography component="p" variant="body2" textAlign="center" gutterBottom>
               If you like, you can make a contribution to the following bank account:
             </Typography>
+            <Typography component="p" variant="body1" textAlign="center">
+              Kyle Zhou
+            </Typography>
             <Stack
               direction="row"
               justifyContent="center"
