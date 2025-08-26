@@ -95,7 +95,7 @@ export default function Station() {
         }
       }
 
-      const data = await loadStationData(id);
+      const data = await loadStationData(id, s.isHighResolution);
       data.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()); // time asc
       for (const d of data) {
         d.timeLabel = formatInTimeZone(new Date(d.time), 'Pacific/Auckland', 'HH:mm');
