@@ -1591,7 +1591,12 @@ async function getPrimePortData() {
     // init OCR
     const dir = 'public/temp';
     await fs.mkdir(dir, { recursive: true });
-    const worker = await createWorker('eng');
+    const worker = await createWorker('eng', 1, {
+      errorHandler: (err) => {
+        logger.warn(err);
+        return err;
+      }
+    });
 
     // sometimes img changes size
     const meta = await sharp(imgBuff).metadata();
@@ -1701,7 +1706,12 @@ async function getPortersData() {
     // init OCR
     const dir = 'public/temp';
     await fs.mkdir(dir, { recursive: true });
-    const worker = await createWorker('eng');
+    const worker = await createWorker('eng', 1, {
+      errorHandler: (err) => {
+        logger.warn(err);
+        return err;
+      }
+    });
 
     // BASE AREA WEATHER STATION
     // avg
