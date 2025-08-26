@@ -114,7 +114,7 @@ cron.schedule('2,12,22,32,42,52 * * * *', async () => {
 });
 
 // errors
-cron.schedule('0 */6 * * *', async () => {
+cron.schedule('5 */6 * * *', async () => {
   logger.info('--- Check errors start ---', { service: 'errors' });
   const ts = Date.now();
   await checkForErrors();
@@ -122,7 +122,7 @@ cron.schedule('0 */6 * * *', async () => {
 });
 
 // keys
-cron.schedule('0 0 * * *', async () => {
+cron.schedule('5 0 * * *', async () => {
   logger.info('--- Update keys start ---', { service: 'keys' });
   const ts = Date.now();
   await updateKeys();
@@ -130,13 +130,13 @@ cron.schedule('0 0 * * *', async () => {
 });
 
 // cleanup
-cron.schedule('0 0 * * *', async () => {
+cron.schedule('5 0 * * *', async () => {
   logger.info('--- Remove old data start ---', { service: 'cleanup' });
   const ts = Date.now();
   await removeOldData();
   logger.info(`Remove old data end - ${Date.now() - ts}ms elapsed.`, { service: 'cleanup' });
 });
-cron.schedule('0 0 * * *', async () => {
+cron.schedule('5 0 * * *', async () => {
   logger.info('--- Remove old images start ---', { service: 'cleanup' });
   const ts = Date.now();
   await removeOldImages();
