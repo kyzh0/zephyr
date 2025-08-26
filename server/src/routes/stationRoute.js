@@ -171,6 +171,7 @@ router.patch('/:id', async (req, res) => {
 // get station data
 router.get('/:id/data', async (req, res) => {
   const { id } = req.params;
+  const hr = String(req.query.hr).toLowerCase() === 'true';
 
   if (!ObjectId.isValid(id)) {
     res.status(404).send();
@@ -189,7 +190,7 @@ router.get('/:id/data', async (req, res) => {
             {
               $sortArray: { input: '$data', sortBy: { time: -1 } }
             },
-            145 // 145 records in last 24h
+            hr ? 725 : 145 // 145 (or 725 for hi res) records in last 24h
           ]
         }
       }

@@ -50,9 +50,11 @@ export async function listStationsWithErrors() {
   }
 }
 
-export async function loadStationData(id) {
+export async function loadStationData(id, isHighResolution) {
   try {
-    const { data } = await axios.get(`${APIROOT}/stations/${id}/data`);
+    let url = `${APIROOT}/stations/${id}/data`;
+    if (isHighResolution) url += '?hr=true';
+    const { data } = await axios.get(url);
     return data;
   } catch (error) {
     console.error(error);
