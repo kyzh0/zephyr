@@ -2690,6 +2690,7 @@ export async function checkForMissedReadings() {
     const date = getFlooredTime(10);
     const stationsToRescrape = [];
     for (const s of stations) {
+      if (s.isDisabled) continue;
       // check if latest data record is missing
       if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 10 * 60 * 1000) {
         stationsToRescrape.push(s);
