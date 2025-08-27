@@ -364,7 +364,7 @@ async function getAttentisData(stationId) {
   } catch (error) {
     logger.warn(`An error occured while fetching data for attentis - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'attentis'
     });
   }
 
@@ -405,7 +405,7 @@ async function getWowData(stationId) {
   } catch (error) {
     logger.warn(`An error occured while fetching data for metoffice wow - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'wow'
     });
   }
 
@@ -478,7 +478,7 @@ async function getCwuData(stationId) {
   } catch (error) {
     logger.warn(`An error occured while fetching data for cwu - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'cwu'
     });
   }
 
@@ -542,7 +542,7 @@ async function getWeatherProData(stationId) {
   } catch (error) {
     logger.warn(`An error occured while fetching data for weatherpro - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'wp'
     });
   }
 
@@ -618,7 +618,7 @@ async function getPortOtagoData(stationId) {
   } catch (error) {
     logger.warn(`An error occured while fetching data for port otago - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'po'
     });
   }
 
@@ -658,7 +658,7 @@ async function getWUndergroundData(stationId) {
   } catch (error) {
     logger.warn(`An error occured while fetching data for wunderground - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'wu'
     });
   }
 
@@ -697,7 +697,7 @@ async function getTempestData(stationId) {
   } catch (error) {
     logger.warn(`An error occured while fetching data for tempest - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'tempest'
     });
   }
 
@@ -734,7 +734,7 @@ async function getWindguruData(stationId) {
   } catch (error) {
     logger.warn(`An error occured while fetching data for windguru - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'windguru'
     });
   }
 
@@ -794,7 +794,7 @@ async function getCentrePortData(stationId) {
   } catch (error) {
     logger.warn(`An error occured while fetching data for centreport - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'cp'
     });
   }
 
@@ -843,7 +843,7 @@ async function getSofarOceanData(stationId) {
   } catch (error) {
     logger.warn(`An error occured while fetching data for sofarocean - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'sfo'
     });
   }
 
@@ -976,7 +976,7 @@ async function getNavigatusData(stationId) {
   } catch (error) {
     logger.warn(`An error occured while fetching data for navigatus - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'navigatus'
     });
   }
 
@@ -1018,7 +1018,7 @@ async function getPredictWindData(stationId) {
   } catch (error) {
     logger.warn('An error occured while fetching data for predictwind', {
       service: 'station',
-      type: 'other'
+      type: 'pw'
     });
   }
 
@@ -1076,7 +1076,7 @@ async function getEcowittData(stationId) {
   } catch (error) {
     logger.warn('An error occured while fetching data for ecowitt', {
       service: 'station',
-      type: 'other'
+      type: 'ecowitt'
     });
   }
 
@@ -1177,7 +1177,7 @@ async function getHbrcData(stationId) {
   } catch (error) {
     logger.warn('An error occured while fetching data for hbrc', {
       service: 'station',
-      type: 'other'
+      type: 'hbrc'
     });
   }
 
@@ -1283,7 +1283,7 @@ async function getGreaterWellingtonData(
   } catch (error) {
     logger.warn(`An error occured while fetching data for greater wellington - ${stationId}`, {
       service: 'station',
-      type: 'other'
+      type: 'gw'
     });
   }
 
@@ -1356,7 +1356,7 @@ async function getLpcData() {
   } catch (error) {
     logger.warn('An error occured while fetching data for lpc', {
       service: 'station',
-      type: 'other'
+      type: 'lpc'
     });
   }
 
@@ -1401,7 +1401,7 @@ async function getMpycData() {
   } catch (error) {
     logger.warn('An error occured while fetching data for mpyc', {
       service: 'station',
-      type: 'other'
+      type: 'mpyc'
     });
   }
 
@@ -1436,7 +1436,7 @@ async function getMfhbData() {
   } catch (error) {
     logger.warn('An error occured while fetching data for mfhb', {
       service: 'station',
-      type: 'other'
+      type: 'mfhb'
     });
   }
 
@@ -1478,7 +1478,7 @@ async function getMrcData() {
   } catch (error) {
     logger.warn('An error occured while fetching data for mrc', {
       service: 'station',
-      type: 'other'
+      type: 'mrc'
     });
   }
 
@@ -1559,7 +1559,7 @@ async function getWainuiData() {
   } catch (error) {
     logger.warn('An error occured while fetching data for wainui', {
       service: 'station',
-      type: 'other'
+      type: 'wainui'
     });
   }
 
@@ -1673,7 +1673,7 @@ async function getPrimePortData() {
   } catch (error) {
     logger.warn('An error occured while fetching data for prime port', {
       service: 'station',
-      type: 'other'
+      type: 'prime'
     });
   }
 
@@ -1954,7 +1954,7 @@ async function getPortersData() {
   } catch (error) {
     logger.warn('An error occured while fetching data for porters', {
       service: 'station',
-      type: 'other'
+      type: 'porters'
     });
   }
 
@@ -1993,7 +1993,7 @@ async function getWeatherLinkData() {
   } catch (error) {
     logger.warn('An error occured while fetching data for weatherlink', {
       service: 'station',
-      type: 'other'
+      type: 'wl'
     });
   }
 
@@ -2067,7 +2067,7 @@ async function getHuttWeatherData() {
   } catch (error) {
     logger.warn('An error occured while fetching data for hutt weather', {
       service: 'station',
-      type: 'other'
+      type: 'hw'
     });
   }
 
@@ -2166,7 +2166,7 @@ async function getWhanganuiInletData() {
   } catch (error) {
     logger.warn('An error occured while fetching data for whanganui inlet', {
       service: 'station',
-      type: 'other'
+      type: 'wi'
     });
   }
 
@@ -2236,29 +2236,7 @@ export async function stationWrapper(source) {
     else if (source === 'metservice') query.type = 'metservice';
     else query.type = { $nin: ['holfuy', 'harvest', 'metservice'] };
 
-    const stations = await Station.find(query, {
-      _id: 1,
-      type: 1,
-      externalId: 1,
-      isDisabled: 1,
-      harvestWindAverageId: 1,
-      harvestWindGustId: 1,
-      harvestWindDirectionId: 1,
-      harvestTemperatureId: 1,
-      harvestCookie: 1,
-      gwWindAverageFieldName: 1,
-      gwWindGustFieldName: 1,
-      gwWindBearingFieldName: 1,
-      gwTemperatureFieldName: 1,
-      data: {
-        $slice: [
-          {
-            $sortArray: { input: '$data', sortBy: { time: -1 } }
-          },
-          1 // include latest data record
-        ]
-      }
-    });
+    const stations = await Station.find(query, { data: 0 });
     if (!stations.length) {
       logger.error(`No ${source} stations found.`, {
         service: 'station',
@@ -2273,25 +2251,6 @@ export async function stationWrapper(source) {
     const date = getFlooredTime(10);
     for (const s of stations) {
       if (s.isDisabled) continue;
-
-      // check if previous data record is missing - sometimes scraper skips a beat
-      if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 11 * 60 * 1000) {
-        // insert empty record
-        await Station.updateOne(
-          { _id: s._id },
-          {
-            $push: {
-              data: {
-                time: new Date(date.getTime() - 10 * 60 * 1000),
-                windAverage: null,
-                windGust: null,
-                windBearing: null,
-                temperature: null
-              }
-            }
-          }
-        );
-      }
 
       let data = null;
       if (source === 'harvest') {
@@ -2393,18 +2352,18 @@ export async function stationWrapper(source) {
       if (data) {
         logger.info(`${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`, {
           service: 'station',
-          type: source ? source : 'other'
+          type: s.type
         });
-        logger.info(JSON.stringify(data), { service: 'station', type: source ? source : 'other' });
+        logger.info(JSON.stringify(data), { service: 'station', type: s.type });
         await saveData(s, data, date);
       }
     }
   } catch (error) {
     logger.error(`An error occurred while fetching ${source} station data`, {
       service: 'station',
-      type: source ? source : 'other'
+      type: s.type
     });
-    logger.error(error, { service: 'station', type: source ? source : 'other' });
+    logger.error(error, { service: 'station', type: s.type });
     return null;
   }
 }
@@ -2449,20 +2408,7 @@ export async function holfuyWrapper() {
   try {
     const stations = await Station.find(
       { type: 'holfuy', isHighResolution: { $ne: true } },
-      {
-        _id: 1,
-        type: 1,
-        externalId: 1,
-        isDisabled: 1,
-        data: {
-          $slice: [
-            {
-              $sortArray: { input: '$data', sortBy: { time: -1 } }
-            },
-            1 // include latest data record
-          ]
-        }
-      }
+      { data: 0 }
     );
     if (!stations.length) {
       logger.error('No holfuy stations found.', { service: 'station', type: 'holfuy' });
@@ -2476,25 +2422,6 @@ export async function holfuyWrapper() {
     const date = getFlooredTime(10);
     for (const s of stations) {
       if (s.isDisabled) continue;
-
-      // check if previous data record is missing - sometimes scraper skips a beat
-      if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 11 * 60 * 1000) {
-        // insert empty record
-        await Station.updateOne(
-          { _id: s._id },
-          {
-            $push: {
-              data: {
-                time: new Date(date.getTime() - 10 * 60 * 1000),
-                windAverage: null,
-                windGust: null,
-                windBearing: null,
-                temperature: null
-              }
-            }
-          }
-        );
-      }
 
       let d = null;
       const matches = data.measurements.filter((m) => {
@@ -2727,6 +2654,156 @@ export async function highResolutionStationWrapper() {
   }
 }
 
+export async function checkForMissedReadings() {
+  try {
+    const stations = await Station.find(
+      { isHighResolution: { $ne: true } },
+      {
+        _id: 1,
+        type: 1,
+        externalId: 1,
+        isDisabled: 1,
+        harvestWindAverageId: 1,
+        harvestWindGustId: 1,
+        harvestWindDirectionId: 1,
+        harvestTemperatureId: 1,
+        harvestCookie: 1,
+        gwWindAverageFieldName: 1,
+        gwWindGustFieldName: 1,
+        gwWindBearingFieldName: 1,
+        gwTemperatureFieldName: 1,
+        data: {
+          $slice: [
+            {
+              $sortArray: { input: '$data', sortBy: { time: -1 } }
+            },
+            1 // include latest data record
+          ]
+        }
+      }
+    );
+    if (!stations.length) {
+      logger.error('No stations found.', { service: 'miss' });
+      return null;
+    }
+
+    const date = getFlooredTime(10);
+    const stationsToRescrape = [];
+    for (const s of stations) {
+      // check if latest data record is missing
+      if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 10 * 60 * 1000) {
+        stationsToRescrape.push(s);
+      }
+    }
+
+    let portersData = [];
+    const matches = stationsToRescrape.filter((s) => {
+      return s.type === 'porters';
+    });
+    if (matches.length) portersData = await getPortersData();
+
+    for (const s of stationsToRescrape) {
+      let data = null;
+      if (s.type === 'harvest') {
+        data = await getHarvestData(
+          s.externalId,
+          s.harvestWindAverageId,
+          s.harvestWindGustId,
+          s.harvestWindDirectionId,
+          s.harvestTemperatureId,
+          s.harvestCookie // station 10243,11433 needs PHPSESSID cookie for auth
+        );
+        const sid = Number(s.externalId.split('_')[0]);
+        if (sid === 10243 || sid === 11433) {
+          // these stations are in kt
+          if (data.windAverage) data.windAverage *= 1.852;
+          if (data.windGust) data.windGust *= 1.852;
+        }
+      } else if (s.type === 'metservice') {
+        data = await getMetserviceData(s.externalId);
+      } else if (s.type === 'holfuy') {
+        data = await getHolfuyData(s.externalId);
+      } else if (s.type === 'attentis') {
+        data = await getAttentisData(s.externalId);
+      } else if (s.type === 'wu') {
+        data = await getWUndergroundData(s.externalId);
+      } else if (s.type === 'wow') {
+        data = await getWowData(s.externalId);
+      } else if (s.type === 'tempest') {
+        data = await getTempestData(s.externalId);
+      } else if (s.type === 'windguru') {
+        data = await getWindguruData(s.externalId);
+      } else if (s.type === 'cwu') {
+        data = await getCwuData(s.externalId);
+      } else if (s.type === 'wp') {
+        data = await getWeatherProData(s.externalId);
+      } else if (s.type === 'cp') {
+        data = await getCentrePortData(s.externalId);
+      } else if (s.type === 'sfo') {
+        data = await getSofarOceanData(s.externalId);
+      } else if (s.type === 'gw') {
+        data = await getGreaterWellingtonData(
+          s.externalId,
+          s.gwWindAverageFieldName,
+          s.gwWindGustFieldName,
+          s.gwWindBearingFieldName,
+          s.gwTemperatureFieldName
+        );
+      } else if (s.type === 'po') {
+        data = await getPortOtagoData(s.externalId);
+      } else if (s.type === 'navigatus') {
+        data = await getNavigatusData(s.externalId);
+      } else if (s.type === 'pw') {
+        data = await getPredictWindData(s.externalId);
+      } else if (s.type === 'ecowitt') {
+        data = await getEcowittData(s.externalId);
+      } else if (s.type === 'hbrc') {
+        data = await getHbrcData(s.externalId);
+      } else if (s.type === 'lpc') {
+        data = await getLpcData();
+      } else if (s.type === 'mpyc') {
+        data = await getMpycData();
+      } else if (s.type === 'mfhb') {
+        data = await getMfhbData();
+      } else if (s.type === 'mrc') {
+        data = await getMrcData();
+      } else if (s.type === 'wainui') {
+        data = await getWainuiData();
+      } else if (s.type === 'prime') {
+        data = await getPrimePortData();
+      } else if (s.type === 'porters') {
+        const d = portersData.find((x) => x.id === s.externalId);
+        if (d) data = d.data;
+      } else if (s.type === 'wl') {
+        data = await getWeatherLinkData();
+      } else if (s.type === 'hw') {
+        data = await getHuttWeatherData();
+      } else if (s.type === 'wi') {
+        data = await getWhanganuiInletData();
+      }
+
+      if (data) {
+        logger.info(
+          `missed reading - ${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`,
+          {
+            service: 'miss',
+            type: s.type
+          }
+        );
+        logger.info(JSON.stringify(data), {
+          service: 'miss',
+          type: s.type
+        });
+        await saveData(s, data, date);
+      }
+    }
+  } catch (error) {
+    logger.error('An error occurred while checking for missed readings', { service: 'miss' });
+    logger.error(error, { service: 'miss' });
+    return null;
+  }
+}
+
 function groupBy(xs, key) {
   return xs.reduce(function (rv, x) {
     (rv[x[key]] = rv[x[key]] || []).push(x);
@@ -2892,7 +2969,7 @@ export async function removeOldData() {
       return null;
     }
 
-    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days
     for (const s of stations) {
       await Station.updateOne({ _id: s._id }, { $pull: { data: { time: { $lte: cutoff } } } });
     }

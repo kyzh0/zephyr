@@ -19,7 +19,8 @@ import {
   checkForErrors,
   updateKeys,
   removeOldData,
-  highResolutionStationWrapper
+  highResolutionStationWrapper,
+  checkForMissedReadings
 } from './services/stationService.js';
 import { soundingWrapper } from './services/soundingService.js';
 
@@ -52,7 +53,7 @@ cron.schedule('*/10 * * * *', async () => {
   logger.info('--- Update webcams start ---', { service: 'cam' });
   const ts = Date.now();
   await webcamWrapper();
-  logger.info(`Update webcams end - ${Date.now() - ts}ms elapsed.`, { service: 'cam' });
+  logger.info(`--- Update webcams end - ${Date.now() - ts}ms elapsed.`, { service: 'cam' });
 });
 
 // stations
@@ -60,7 +61,7 @@ cron.schedule('*/10 * * * *', async () => {
   logger.info('--- Update stations start ---', { service: 'station', type: 'other' });
   const ts = Date.now();
   await stationWrapper();
-  logger.info(`Update stations end - ${Date.now() - ts}ms elapsed.`, {
+  logger.info(`--- Update stations end - ${Date.now() - ts}ms elapsed.`, {
     service: 'station',
     type: 'other'
   });
@@ -69,7 +70,7 @@ cron.schedule('*/10 * * * *', async () => {
   logger.info('--- Update harvest stations start ---', { service: 'station', type: 'harvest' });
   const ts = Date.now();
   await stationWrapper('harvest');
-  logger.info(`Update harvest stations end - ${Date.now() - ts}ms elapsed.`, {
+  logger.info(`--- Update harvest stations end - ${Date.now() - ts}ms elapsed.`, {
     service: 'station',
     type: 'harvest'
   });
@@ -81,7 +82,7 @@ cron.schedule('*/10 * * * *', async () => {
   });
   const ts = Date.now();
   await stationWrapper('metservice');
-  logger.info(`Update metservice stations end - ${Date.now() - ts}ms elapsed.`, {
+  logger.info(`--- Update metservice stations end - ${Date.now() - ts}ms elapsed.`, {
     service: 'station',
     type: 'metservice'
   });
@@ -90,7 +91,7 @@ cron.schedule('*/10 * * * *', async () => {
   logger.info('--- Update holfuy stations start ---', { service: 'station', type: 'holfuy' });
   const ts = Date.now();
   await holfuyWrapper();
-  logger.info(`Update holfuy stations end - ${Date.now() - ts}ms elapsed.`, {
+  logger.info(`--- Update holfuy stations end - ${Date.now() - ts}ms elapsed.`, {
     service: 'station',
     type: 'holfuy'
   });
@@ -99,9 +100,17 @@ cron.schedule('*/2 * * * *', async () => {
   logger.info('--- Update high resolution stations start ---', { service: 'station', type: 'hr' });
   const ts = Date.now();
   await highResolutionStationWrapper();
-  logger.info(`Update high resolution stations end - ${Date.now() - ts}ms elapsed.`, {
+  logger.info(`--- Update high resolution stations end - ${Date.now() - ts}ms elapsed.`, {
     service: 'station',
     type: 'hr'
+  });
+});
+cron.schedule('5,15,25,35,45,55 * * * *', async () => {
+  logger.info('--- Check missed readings start ---', { service: 'miss' });
+  const ts = Date.now();
+  await checkForMissedReadings();
+  logger.info(`--- Check missed readings end - ${Date.now() - ts}ms elapsed.`, {
+    service: 'miss'
   });
 });
 
@@ -110,7 +119,7 @@ cron.schedule('2,12,22,32,42,52 * * * *', async () => {
   logger.info('--- Process json output start ---', { service: 'json' });
   const ts = Date.now();
   await jsonOutputWrapper();
-  logger.info(`Process json output end - ${Date.now() - ts}ms elapsed.`, { service: 'json' });
+  logger.info(`--- Process json output end - ${Date.now() - ts}ms elapsed.`, { service: 'json' });
 });
 
 // errors
@@ -118,7 +127,7 @@ cron.schedule('5 */6 * * *', async () => {
   logger.info('--- Check errors start ---', { service: 'errors' });
   const ts = Date.now();
   await checkForErrors();
-  logger.info(`Check errors end - ${Date.now() - ts}ms elapsed.`, { service: 'errors' });
+  logger.info(`--- Check errors end - ${Date.now() - ts}ms elapsed.`, { service: 'errors' });
 });
 
 // keys
@@ -126,7 +135,7 @@ cron.schedule('5 0 * * *', async () => {
   logger.info('--- Update keys start ---', { service: 'keys' });
   const ts = Date.now();
   await updateKeys();
-  logger.info(`Update keys end - ${Date.now() - ts}ms elapsed.`, { service: 'keys' });
+  logger.info(`--- Update keys end - ${Date.now() - ts}ms elapsed.`, { service: 'keys' });
 });
 
 // cleanup
@@ -134,13 +143,13 @@ cron.schedule('5 0 * * *', async () => {
   logger.info('--- Remove old data start ---', { service: 'cleanup' });
   const ts = Date.now();
   await removeOldData();
-  logger.info(`Remove old data end - ${Date.now() - ts}ms elapsed.`, { service: 'cleanup' });
+  logger.info(`--- Remove old data end - ${Date.now() - ts}ms elapsed.`, { service: 'cleanup' });
 });
 cron.schedule('5 0 * * *', async () => {
   logger.info('--- Remove old images start ---', { service: 'cleanup' });
   const ts = Date.now();
   await removeOldImages();
-  logger.info(`Remove old images end - ${Date.now() - ts}ms elapsed.`, { service: 'cleanup' });
+  logger.info(`--- Remove old images end - ${Date.now() - ts}ms elapsed.`, { service: 'cleanup' });
 });
 
 // soundings - at 0730 NZT
@@ -150,7 +159,9 @@ cron.schedule(
     logger.info('--- Update soundings start ---', { service: 'sounding' });
     const ts = Date.now();
     await soundingWrapper();
-    logger.info(`Update soundings end - ${Date.now() - ts}ms elapsed.`, { service: 'sounding' });
+    logger.info(`--- Update soundings end - ${Date.now() - ts}ms elapsed.`, {
+      service: 'sounding'
+    });
   },
   { timezone: 'Pacific/Auckland' }
 );
