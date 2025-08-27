@@ -2231,7 +2231,7 @@ async function saveData(station, data, date) {
 
 export async function stationWrapper(source) {
   try {
-    const query = { isHighResolution: { $ne: true } };
+    const query = { isHighResolution: { $ne: true }, isDisabled: { $ne: true } };
     if (source === 'harvest') query.type = 'harvest';
     else if (source === 'metservice') query.type = 'metservice';
     else query.type = { $nin: ['holfuy', 'harvest', 'metservice'] };
@@ -2250,8 +2250,6 @@ export async function stationWrapper(source) {
 
     const date = getFlooredTime(10);
     for (const s of stations) {
-      if (s.isDisabled) continue;
-
       let data = null;
       if (source === 'harvest') {
         if (!fenzHarvestStationIds.length) {
@@ -2407,7 +2405,7 @@ async function getHolfuyData(stationId) {
 export async function holfuyWrapper() {
   try {
     const stations = await Station.find(
-      { type: 'holfuy', isHighResolution: { $ne: true } },
+      { type: 'holfuy', isHighResolution: { $ne: true }, isDisabled: { $ne: true } },
       { data: 0 }
     );
     if (!stations.length) {
@@ -2421,8 +2419,6 @@ export async function holfuyWrapper() {
 
     const date = getFlooredTime(10);
     for (const s of stations) {
-      if (s.isDisabled) continue;
-
       let d = null;
       const matches = data.measurements.filter((m) => {
         return m.stationId.toString() === s.externalId;
@@ -2466,11 +2462,9 @@ function cmp(a, b) {
 export async function jsonOutputWrapper() {
   try {
     var date = getFlooredTime(10);
-    const stations = await Station.find({}, { data: 0 });
+    const stations = await Station.find({ isDisabled: { $ne: true } }, { data: 0 });
     const json = [];
     for (const s of stations) {
-      if (s.isDisabled) continue;
-
       let avg = s.currentAverage;
       let gust = s.currentGust;
       let bearing = s.currentBearing;
@@ -2528,7 +2522,7 @@ export async function jsonOutputWrapper() {
 export async function highResolutionStationWrapper() {
   try {
     const stations = await Station.find(
-      { isHighResolution: true },
+      { isHighResolution: true, isDisabled: { $ne: true } },
       {
         _id: 1,
         name: 1,
@@ -2536,7 +2530,6 @@ export async function highResolutionStationWrapper() {
         elevation: 1,
         location: 1,
         externalId: 1,
-        isDisabled: 1,
         harvestWindAverageId: 1,
         harvestWindGustId: 1,
         harvestWindDirectionId: 1,
@@ -2562,8 +2555,6 @@ export async function highResolutionStationWrapper() {
     const json = [];
     const date = getFlooredTime(2);
     for (const s of stations) {
-      if (s.isDisabled) continue;
-
       if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 3 * 60 * 1000) {
         await Station.updateOne(
           { _id: s._id },
@@ -2657,12 +2648,11 @@ export async function highResolutionStationWrapper() {
 export async function checkForMissedReadings() {
   try {
     const stations = await Station.find(
-      { isHighResolution: { $ne: true } },
+      { isHighResolution: { $ne: true }, isDisabled: { $ne: true } },
       {
         _id: 1,
         type: 1,
         externalId: 1,
-        isDisabled: 1,
         harvestWindAverageId: 1,
         harvestWindGustId: 1,
         harvestWindDirectionId: 1,
@@ -2690,7 +2680,6 @@ export async function checkForMissedReadings() {
     const date = getFlooredTime(10);
     const stationsToRescrape = [];
     for (const s of stations) {
-      if (s.isDisabled) continue;
       // check if latest data record is missing
       if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 10 * 60 * 1000) {
         stationsToRescrape.push(s);
@@ -2813,7 +2802,7 @@ function groupBy(xs, key) {
 }
 export async function checkForErrors() {
   try {
-    const stations = await Station.find({});
+    const stations = await Station.find({ isDisabled: { $ne: true } });
     if (!stations.length) {
       logger.error('No stations found.', { service: 'errors' });
       return null;
@@ -2823,8 +2812,6 @@ export async function checkForErrors() {
     const timeNow = Date.now();
 
     for (const s of stations) {
-      if (s.isDisabled) continue;
-
       let isDataError = true;
       let isWindError = true;
       let isBearingError = true;
