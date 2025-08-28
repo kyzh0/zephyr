@@ -123,6 +123,64 @@ router.post('/', async (req, res) => {
   res.status(204).send();
 });
 
+// get all station data for timestamp
+router.get('/data', async (req, res) => {
+  let timeTo = new Date();
+  if (req.query.time) timeTo = new Date(req.query.time);
+  const timeFrom = new Date(timeTo.getTime() - 30 * 60 * 1000);
+
+  // select data for 30 min interval ending at specified time
+  const data = await Station.aggregate([
+    {
+      $project: {
+        _id: 1,
+        validBearings: 1,
+        data: {
+          $filter: {
+            input: '$data',
+            as: 'd',
+            cond: {
+              $and: [{ $gte: ['$$d.time', timeFrom] }, { $lte: ['$$d.time', timeTo] }]
+            }
+          }
+        }
+      }
+    }
+  ]);
+
+  if (!data.length) {
+    res.json([]);
+    return;
+  }
+
+  // calculate average for 30 min intervals
+  const result = [];
+  for (const d of data) {
+    let count = 0;
+    let sumAvg = 0;
+    let sumBearingSin = 0;
+    let sumBearingCos = 0;
+    for (const d1 of d.data) {
+      if (d1.windAverage !== null && d1.windBearing != null) {
+        count++;
+        sumAvg += d1.windAverage;
+        sumBearingSin += Math.sin((d1.windBearing * Math.PI) / 180);
+        sumBearingCos += Math.cos((d1.windBearing * Math.PI) / 180);
+      }
+    }
+    const bearing =
+      count > 0 ? Math.round(Math.atan2(sumBearingSin, sumBearingCos) / (Math.PI / 180)) : null;
+    result.push({
+      id: d._id,
+      windAverage: count > 0 ? Math.round(sumAvg / count) : null,
+      windBearing: bearing < 0 ? bearing + 360 : bearing,
+      validBearings: d.validBearings
+    });
+  }
+
+  res.json({ time: new Date().toISOString(), values: result });
+});
+
 // get station
 router.get('/:id', async (req, res) => {
   const { id } = req.params;

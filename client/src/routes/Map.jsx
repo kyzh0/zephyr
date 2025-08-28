@@ -5,7 +5,12 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { AppContext } from '../context/AppContext';
 import { getWindDirectionFromBearing } from '../helpers/utils';
 
-import { getStationById, listStations, listStationsUpdatedSince } from '../services/stationService';
+import {
+  getStationById,
+  listStations,
+  listStationsUpdatedSince,
+  loadAllStationDataAtTimestamp
+} from '../services/stationService';
 import { getCamById, listCams, listCamsUpdatedSince } from '../services/camService';
 import { listSoundings } from '../services/soundingService';
 
@@ -14,9 +19,14 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import Slider from '@mui/material/Slider';
+import Typography from '@mui/material/Typography';
+
 import GridViewIcon from '@mui/icons-material/GridView';
 import SsidChartIcon from '@mui/icons-material/SsidChart';
 import LandscapeOutlinedIcon from '@mui/icons-material/LandscapeOutlined';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import CloseIcon from '@mui/icons-material/Close';
 
 import MapTerrainControl from './MapTerrainControl';
 import MapUnitControl from './MapUnitControl';
@@ -53,6 +63,9 @@ export default function Map() {
 
   const [showElevation, setShowElevation] = useState(false);
   const [elevationFilter, setElevationFilter] = useState(0);
+
+  const [historyOffset, setHistoryOffset] = useState(0);
+  const [historyData, setHistoryData] = useState({});
 
   const unitRef = useRef('kmh');
   const [posInit, setPosInit] = useState(false);
@@ -300,6 +313,7 @@ export default function Map() {
       return a.properties.currentAverage - b.properties.currentAverage;
     });
 
+    const currentValues = [];
     for (const f of geoJson.features) {
       const name = f.properties.name;
       const dbId = f.properties.dbId;
@@ -309,6 +323,14 @@ export default function Map() {
       const currentBearing = f.properties.currentBearing;
       const validBearings = f.properties.validBearings;
       const isOffline = f.properties.isOffline;
+
+      currentValues.push({
+        id: dbId,
+        windAverage: currentAvg,
+        windBearing: currentBearing,
+        validBearings: validBearings,
+        isOffline: isOffline
+      });
 
       // popup
       let html = `<p align="center"><strong>${name}</strong></p>`;
@@ -411,6 +433,8 @@ export default function Map() {
       stationMarkers.push({ marker: el, popup: popup });
       new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).setPopup(popup).addTo(map.current);
     }
+
+    setHistoryData({ 0: { time: new Date().toISOString(), values: currentValues } });
   }
 
   const lastWebcamRefreshRef = useRef(0);
@@ -517,6 +541,7 @@ export default function Map() {
   async function refreshStations() {
     if (document.visibilityState !== 'visible') return;
     if (!stationMarkers.length) return;
+    if (historyOffset < 0) return;
 
     let timestamp = Date.now();
     if (timestamp - lastStationRefreshRef.current < REFRESH_INTERVAL_SECONDS * 1000) return; // enforce refresh interval
@@ -822,6 +847,135 @@ export default function Map() {
     }
   }, [elevationFilter]);
 
+  async function renderHistoricalData(time) {
+    let data = [];
+    // use cached values if current
+    if (
+      historyData[historyOffset] &&
+      new Date().getTime() - new Date(historyData[historyOffset].time).getTime() < 10 * 60 * 1000
+    ) {
+      data = historyData[historyOffset];
+    } else {
+      data = await loadAllStationDataAtTimestamp(time);
+    }
+
+    if (!data || !data.values || !data.values.length) {
+      setHistoryOffset(0);
+      return;
+    }
+
+    historyData[historyOffset] = data;
+    renderData(data.values);
+  }
+
+  async function renderCurrentData() {
+    let data = [];
+    if (
+      historyData['0'] &&
+      new Date().getTime() - new Date(historyData['0'].time).getTime() < 10 * 60 * 1000
+    ) {
+      // used cached values if current
+      data = historyData['0'].values;
+    } else {
+      const stations = await listStations();
+      for (const s of stations) {
+        data.push({
+          id: s._id,
+          windAverage: s.currentAverage,
+          windBearing: s.currentBearing,
+          validBearings: s.validBearings,
+          isOffline: s.isOffline
+        });
+      }
+    }
+
+    // redraw markers with current data
+    renderData(data);
+  }
+
+  function renderData(data) {
+    for (const item of stationMarkers) {
+      const matches = data.filter((d) => {
+        return d.id === item.marker.id;
+      });
+      if (!matches || !matches.length) continue;
+
+      const d = matches[0];
+      item.marker.dataset.avg = d.windAverage == null ? '' : d.windAverage;
+      for (const child of item.marker.children) {
+        const [img, color] = getArrowStyle(
+          d.windAverage,
+          d.windBearing,
+          d.validBearings,
+          d.isOffline
+        );
+        if (child.className === 'marker-text') {
+          child.style.color = color;
+          if (d.isOffline) {
+            child.innerHTML = 'X';
+          } else {
+            child.innerHTML =
+              d.windAverage == null
+                ? '-'
+                : Math.round(unitRef.current === 'kt' ? d.windAverage / 1.852 : d.windAverage);
+          }
+        } else if (child.className === 'marker-arrow') {
+          child.style.backgroundImage = img;
+          child.style.transform =
+            d.windBearing == null ? '' : `rotate(${Math.round(d.windBearing)}deg)`;
+        } else if (child.classList.contains('marker-border')) {
+          let angle = (d.windBearing ?? 0) + 127;
+          if (angle >= 360) angle -= 360;
+          child.setAttribute('transform', `rotate(${angle})`);
+        }
+      }
+    }
+  }
+
+  // show historical data
+  useEffect(() => {
+    if (!stationMarkers || !stationMarkers.length) return;
+
+    // disable some click events
+    const gridBtn = document.querySelector('#grid-button');
+    const camBtn = document.querySelector('#webcam-button');
+    const soundingBtn = document.querySelector('#sounding-button');
+    const markers = document.querySelectorAll('div.marker');
+    if (historyOffset < 0) {
+      if (showWebcams) handleWebcamClick();
+      if (showSoundings) handleSoundingClick();
+      gridBtn.classList.add('noclick');
+      gridBtn.classList.add('map-button-disabled');
+      camBtn.classList.add('noclick');
+      camBtn.classList.add('map-button-disabled');
+      soundingBtn.classList.add('noclick');
+      soundingBtn.classList.add('map-button-disabled');
+      for (const m of markers) m.classList.add('noclick');
+    } else {
+      gridBtn.classList.remove('noclick');
+      gridBtn.classList.remove('map-button-disabled');
+      camBtn.classList.remove('noclick');
+      camBtn.classList.remove('map-button-disabled');
+      soundingBtn.classList.remove('noclick');
+      soundingBtn.classList.remove('map-button-disabled');
+      for (const m of markers) m.classList.remove('noclick');
+    }
+
+    if (historyOffset < 0) {
+      const t = new Date();
+      // nearest 30 min mark
+      const time = new Date(
+        t.getTime() -
+          ((t.getMinutes() % 30) - historyOffset) * 60 * 1000 -
+          t.getSeconds() * 1000 -
+          t.getMilliseconds()
+      );
+      renderHistoricalData(time);
+    } else {
+      renderCurrentData();
+    }
+  }, [historyOffset]);
+
   const map = useRef(null);
   const mapContainer = useRef(null);
 
@@ -937,6 +1091,18 @@ export default function Map() {
     setShowSoundings(!showSoundings);
   }
 
+  function handleHistoryLeftClick() {
+    let newOffset = historyOffset - 30;
+    if (newOffset < -10080) newOffset = -10080;
+    setHistoryOffset(newOffset);
+  }
+
+  function handleHistoryRightClick() {
+    let newOffset = historyOffset + 30;
+    if (newOffset > 0) newOffset = 0;
+    setHistoryOffset(newOffset);
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <Stack
@@ -984,6 +1150,7 @@ export default function Map() {
         </IconButton>
         <IconButton
           color="primary"
+          id="grid-button"
           className="map-button"
           sx={{ left: 70 }}
           onClick={() => {
@@ -994,6 +1161,7 @@ export default function Map() {
         </IconButton>
         <IconButton
           color="primary"
+          id="webcam-button"
           className="map-button"
           sx={{ left: 105 }}
           onClick={handleWebcamClick}
@@ -1009,6 +1177,7 @@ export default function Map() {
         </IconButton>
         <IconButton
           color="primary"
+          id="sounding-button"
           className="map-button"
           sx={{ left: 140 }}
           onClick={handleSoundingClick}
@@ -1049,6 +1218,62 @@ export default function Map() {
           onChange={(event, value) => setElevationFilter(value)}
         />
         {elevationFilter > 0 && <Box className="elevation-slider-label">&gt;{elevationFilter}</Box>}
+        <Slider
+          className="history-slider"
+          size="small"
+          step={30}
+          min={-10080}
+          max={0}
+          value={historyOffset}
+          onChange={(event, value) => setHistoryOffset(value)}
+        />
+        {historyOffset < 0 && (
+          <Box className="history-slider-label">
+            <IconButton sx={{ p: 0 }} onClick={() => setHistoryOffset(0)}>
+              <CloseIcon sx={{ width: '10px', height: '10px' }} />
+            </IconButton>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ width: '100%', height: '100%', marginTop: '-10px' }}
+            >
+              <IconButton onClick={() => handleHistoryLeftClick()}>
+                <KeyboardArrowLeftIcon />
+              </IconButton>
+              <Stack
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ width: '100%', height: '100%' }}
+              >
+                <Typography
+                  component="p"
+                  variant="body2"
+                  textAlign="center"
+                  sx={{ fontSize: '10px' }}
+                >
+                  SNAPSHOT
+                </Typography>
+                <Typography component="p" variant="body1" textAlign="center">
+                  {formatInTimeZone(
+                    new Date(
+                      new Date().getTime() -
+                        ((new Date().getMinutes() % 30) - historyOffset) * 60 * 1000 -
+                        new Date().getSeconds() * 1000 -
+                        new Date().getMilliseconds()
+                    ),
+                    'Pacific/Auckland',
+                    'dd MMM HH:mm'
+                  )}
+                </Typography>
+              </Stack>
+              <IconButton onClick={() => handleHistoryRightClick()}>
+                <KeyboardArrowRightIcon />
+              </IconButton>
+            </Stack>
+          </Box>
+        )}
         <Box
           ref={mapContainer}
           sx={{
