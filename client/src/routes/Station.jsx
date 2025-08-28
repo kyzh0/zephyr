@@ -124,7 +124,8 @@ export default function Station() {
 
         const result = [];
         let sumAvg = 0;
-        let sumBearing = 0;
+        let sumBearingSin = 0;
+        let sumBearingCos = 0;
         let sumTemperature = 0;
         let maxGust = null;
         let count = 0;
@@ -139,21 +140,25 @@ export default function Station() {
             (time.getMinutes() % 10 > 0 && time.getMinutes() % 10 < intervalStart.getMinutes() % 10) // crossed XX:X0 mark
           ) {
             const avg = count > 0 ? Math.round(sumAvg / count) : null;
-            const bearing = count > 0 ? Math.round(sumBearing / count) : null;
+            const bearing =
+              count > 0
+                ? Math.round(Math.atan2(sumBearingSin, sumBearingCos) / (Math.PI / 180))
+                : null;
             const temperature = count > 0 ? Math.round(sumTemperature / count) : null;
             result.push({
               time: new Date(
-                intervalStart.getTime() + (10 - intervalStart.getMinutes()) * 60 * 1000
+                intervalStart.getTime() + (10 - (intervalStart.getMinutes() % 10)) * 60 * 1000
               ).toISOString(),
               windAverage: avg,
               windGust: maxGust,
-              windBearing: bearing,
+              windBearing: bearing < 0 ? bearing + 360 : bearing,
               temperature: temperature
             });
             intervalStart = time;
             count = 0;
             sumAvg = 0;
-            sumBearing = 0;
+            sumBearingSin = 0;
+            sumBearingCos = 0;
             sumTemperature = 0;
             maxGust = null;
           }
@@ -161,7 +166,10 @@ export default function Station() {
           if (data[i].windAverage != null) {
             count++;
             sumAvg += data[i].windAverage;
-            if (data[i].windBearing != null) sumBearing += data[i].windBearing;
+            if (data[i].windBearing != null) {
+              sumBearingSin += Math.sin(data[i].windBearing * (Math.PI / 180));
+              sumBearingCos += Math.cos(data[i].windBearing * (Math.PI / 180));
+            }
             if (data[i].temperature != null) sumTemperature += data[i].temperature;
             if (data[i].windGust != null && data[i].windGust > maxGust) maxGust = data[i].windGust;
           }
@@ -170,18 +178,22 @@ export default function Station() {
           // latest (incomplete) interval is ignored
           if (time.getMinutes() % 10 === 0) {
             const avg = count > 0 ? Math.round(sumAvg / count) : null;
-            const bearing = count > 0 ? Math.round(sumBearing / count) : null;
+            const bearing =
+              count > 0
+                ? Math.round(Math.atan2(sumBearingSin, sumBearingCos) / (Math.PI / 180))
+                : null;
             const temperature = count > 0 ? Math.round(sumTemperature / count) : null;
             result.push({
               time: time.toISOString(),
               windAverage: avg,
               windGust: maxGust,
-              windBearing: bearing,
+              windBearing: bearing < 0 ? bearing + 360 : bearing,
               temperature: temperature
             });
             count = 0;
             sumAvg = 0;
-            sumBearing = 0;
+            sumBearingSin = 0;
+            sumBearingCos = 0;
             sumTemperature = 0;
             maxGust = null;
           }
