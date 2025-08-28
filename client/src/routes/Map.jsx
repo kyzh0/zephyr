@@ -102,7 +102,7 @@ export default function Map() {
     let img = '';
 
     if (isOffline) {
-      textColor = 'red';
+      textColor = '#ff4261';
       img = `url('/circle-white.png')`;
       return [img, textColor];
     }
@@ -313,7 +313,7 @@ export default function Map() {
       // popup
       let html = `<p align="center"><strong>${name}</strong></p>`;
       if (isOffline) {
-        html += '<p style="color: red;" align="center">Offline</p>';
+        html += '<p style="color: #ff4261;" align="center">Offline</p>';
       } else {
         if (currentAvg == null && currentGust == null) {
           html += `<p align="center">-</p>`;
@@ -454,7 +454,7 @@ export default function Map() {
         // don't display cams that havent updated in last 24h
         img.src = '';
         text1.innerHTML = 'No images in the last 24h.';
-        text1.style.color = 'red';
+        text1.style.color = '#ff4261';
       }
       el.appendChild(img);
       el.appendChild(text1);
@@ -609,7 +609,7 @@ export default function Map() {
         // update popup
         let html = `<p align="center"><strong>${name}</strong></p>`;
         if (isOffline) {
-          html += '<p style="color: red;" align="center">Offline</p>';
+          html += '<p style="color: #ff4261;" align="center">Offline</p>';
         } else {
           if (currentAvg == null && currentGust == null) {
             html += `<p align="center">-</p>`;
@@ -705,7 +705,7 @@ export default function Map() {
         } else if (child.className === 'webcam-text-date') {
           if (timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000) {
             child.innerHTML = 'No images in the last 24h.';
-            child.style.color = 'red';
+            child.style.color = '#ff4261';
           } else {
             child.innerHTML = formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm');
             child.style.color = '';
