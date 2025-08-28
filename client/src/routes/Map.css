@@ -2,6 +2,14 @@
   display: none;
 }
 
+.noclick {
+  pointer-events: none;
+}
+
+.mapboxgl-ctrl-attrib {
+  display: none !important;
+}
+
 /* controls */
 .map-button {
   background-color: white !important;
@@ -20,6 +28,52 @@
   background-color: #f2f2f2 !important;
 }
 
+.map-button-disabled {
+  background-color: #cccccc !important;
+  box-shadow: none !important;
+}
+
+.history-slider {
+  position: absolute !important;
+  bottom: 20px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  padding: 0 !important;
+  width: 40vw !important;
+  z-index: 50 !important;
+}
+
+@media screen and (max-width: 400px) {
+  .history-slider {
+    transform: translate(-25%, 0);
+  }
+}
+
+.history-slider-label {
+  background-color: #fff9e5;
+  color: #333333;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+  margin: 10px;
+  width: 40vw;
+  height: 54px;
+  padding: 0 6px 6px 6px;
+  z-index: 50;
+  font-size: 12px;
+  text-align: end;
+}
+
+@media screen and (max-width: 600px) {
+  .history-slider-label {
+    top: 40px;
+    width: 60vw;
+  }
+}
+
 .elevation-slider {
   position: absolute !important;
   top: 165px;
@@ -30,16 +84,16 @@
 }
 
 .elevation-slider-label {
-  background-color: white !important;
-  color: #333333 !important;
-  border-radius: 4px !important;
-  position: absolute !important;
+  background-color: white;
+  color: #333333;
+  border-radius: 4px;
+  position: absolute;
   top: 225px;
   right: 0;
-  margin: 10px !important;
-  width: 29px !important;
-  height: 15px !important;
-  z-index: 50 !important;
+  margin: 10px 7px 10px 7px;
+  width: 35px;
+  height: 15px;
+  z-index: 50;
   font-size: 10px;
   text-align: center;
 }

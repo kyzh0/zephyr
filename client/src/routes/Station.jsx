@@ -167,8 +167,8 @@ export default function Station() {
             count++;
             sumAvg += data[i].windAverage;
             if (data[i].windBearing != null) {
-              sumBearingSin += Math.sin(data[i].windBearing * (Math.PI / 180));
-              sumBearingCos += Math.cos(data[i].windBearing * (Math.PI / 180));
+              sumBearingSin += Math.sin((data[i].windBearing * Math.PI) / 180);
+              sumBearingCos += Math.cos((data[i].windBearing * Math.PI) / 180);
             }
             if (data[i].temperature != null) sumTemperature += data[i].temperature;
             if (data[i].windGust != null && data[i].windGust > maxGust) maxGust = data[i].windGust;

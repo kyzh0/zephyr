@@ -12,7 +12,9 @@ export async function getStationById(id) {
 
 export async function listStations(includeDisabled) {
   try {
-    const { data } = await axios.get(`${APIROOT}/stations?includeDisabled=${includeDisabled}`);
+    let url = `${APIROOT}/stations`;
+    if (includeDisabled) url += '?includeDisabled=true';
+    const { data } = await axios.get(url);
     return data;
   } catch (error) {
     console.error(error);
@@ -55,6 +57,15 @@ export async function loadStationData(id, isHighResolution) {
     let url = `${APIROOT}/stations/${id}/data`;
     if (isHighResolution) url += '?hr=true';
     const { data } = await axios.get(url);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function loadAllStationDataAtTimestamp(time) {
+  try {
+    const { data } = await axios.get(`${APIROOT}/stations/data?time=${time.toISOString()}`);
     return data;
   } catch (error) {
     console.error(error);
