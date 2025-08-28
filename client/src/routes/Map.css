@@ -55,10 +55,9 @@
   border-radius: 4px;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   position: absolute;
-  top: 0;
+  bottom: 40px;
   left: 50%;
   transform: translate(-50%, 0);
-  margin: 10px;
   width: 40vw;
   height: 54px;
   padding: 0 6px 6px 6px;
@@ -69,7 +68,6 @@
 
 @media screen and (max-width: 600px) {
   .history-slider-label {
-    top: 40px;
     width: 60vw;
   }
 }
