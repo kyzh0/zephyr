@@ -43,9 +43,9 @@
   z-index: 50 !important;
 }
 
-@media screen and (max-width: 400px) {
+@media screen and (max-width: 450px) {
   .history-slider {
-    transform: translate(-25%, 0);
+    bottom: 50px; /* render above mobile navbar */
   }
 }
 
