@@ -149,7 +149,7 @@ router.get('/data', async (req, res) => {
   ]);
 
   if (!data.length) {
-    res.json([]);
+    res.json({ time: new Date().toISOString(), values: [] });
     return;
   }
 
