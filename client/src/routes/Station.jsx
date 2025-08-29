@@ -350,7 +350,12 @@ export default function Station() {
             </Stack>
             {station ? (
               station.isOffline ? (
-                <Typography component="h1" variant="h5" sx={{ mt: 2, color: '#ff4261' }}>
+                <Typography
+                  component="h1"
+                  variant="body1"
+                  gutterBottom
+                  sx={{ mt: 2, color: '#ff4261' }}
+                >
                   Station is offline.
                 </Typography>
               ) : (
