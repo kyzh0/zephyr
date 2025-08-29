@@ -1255,7 +1255,7 @@ export default function Map() {
                 >
                   SNAPSHOT
                 </Typography>
-                <Typography component="p" variant="body1" textAlign="center">
+                <Typography component="p" variant="body2" textAlign="center">
                   {formatInTimeZone(
                     new Date(
                       new Date().getTime() -
@@ -1264,7 +1264,7 @@ export default function Map() {
                         new Date().getMilliseconds()
                     ),
                     'Pacific/Auckland',
-                    'dd MMM HH:mm'
+                    'EEE dd MMM HH:mm'
                   )}
                 </Typography>
               </Stack>
