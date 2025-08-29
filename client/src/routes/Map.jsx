@@ -859,7 +859,7 @@ export default function Map() {
       data = await loadAllStationDataAtTimestamp(time);
     }
 
-    if (!data || !data.values || !data.values.length) {
+    if (!data || !data.values) {
       setHistoryOffset(0);
       return;
     }
@@ -898,9 +898,15 @@ export default function Map() {
       const matches = data.filter((d) => {
         return d.id === item.marker.id;
       });
-      if (!matches || !matches.length) continue;
 
-      const d = matches[0];
+      let d = {
+        windAverage: null,
+        windBearing: null,
+        validBearings: null,
+        isOffline: null
+      };
+      if (matches && matches.length) d = matches[0];
+
       item.marker.dataset.avg = d.windAverage == null ? '' : d.windAverage;
       for (const child of item.marker.children) {
         const [img, color] = getArrowStyle(
