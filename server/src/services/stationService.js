@@ -342,23 +342,24 @@ async function getMetserviceData(stationId) {
   };
 }
 
-async function getAttentisData(stationId) {
-  let windAverage = null;
-  let windGust = null;
-  let windBearing = null;
-  let temperature = null;
-
+async function getAttentisData() {
+  const result = [];
   try {
     const { data } = await axios.get('https://api.attentistechnology.com/sensor-overview', {
       headers: { Authorization: `Bearer ${process.env.ATTENTIS_KEY}`, Connection: 'keep-alive' }
     });
     if (data.data && data.data.weather_readings) {
-      const d = data.data.weather_readings[stationId];
-      if (d) {
-        windAverage = d.wind_speed;
-        windGust = d.wind_gust_speed;
-        windBearing = d.wind_direction;
-        temperature = d.air_temp;
+      for (var key of Object.keys(data.data.weather_readings)) {
+        const d = data.data.weather_readings[key];
+        result.push({
+          id: key,
+          data: {
+            windAverage: d.wind_speed,
+            windGust: d.wind_gust_speed,
+            windBearing: d.wind_direction,
+            temperature: d.air_temp
+          }
+        });
       }
     }
   } catch (error) {
@@ -366,14 +367,10 @@ async function getAttentisData(stationId) {
       service: 'station',
       type: 'attentis'
     });
+    logger.warn(error);
   }
 
-  return {
-    windAverage,
-    windGust,
-    windBearing,
-    temperature
-  };
+  return result;
 }
 
 async function getWowData(stationId) {
@@ -2247,6 +2244,7 @@ export async function stationWrapper(source) {
 
     const fenzHarvestStationIds = [];
     const portersData = await getPortersData();
+    const attentisData = await getAttentisData();
 
     const date = getFlooredTime(10);
     for (const s of stations) {
@@ -2288,7 +2286,8 @@ export async function stationWrapper(source) {
         }
       } else {
         if (s.type === 'attentis') {
-          data = await getAttentisData(s.externalId);
+          const d = attentisData.find((x) => x.id === s.externalId);
+          if (d) data = d.data;
         } else if (s.type === 'wu') {
           data = await getWUndergroundData(s.externalId);
         } else if (s.type === 'wow') {
@@ -2585,8 +2584,6 @@ export async function highResolutionStationWrapper() {
         data = await getHolfuyData(s.externalId);
       } else if (s.type === 'metservice') {
         data = await getMetserviceData(s.externalId);
-      } else if (s.type === 'attentis') {
-        data = await getAttentisData(s.externalId);
       }
 
       if (data) {
@@ -2692,6 +2689,12 @@ export async function checkForMissedReadings() {
     });
     if (matches.length) portersData = await getPortersData();
 
+    let attentisData = [];
+    const matches1 = stationsToRescrape.filter((s) => {
+      return s.type === 'attentis';
+    });
+    if (matches1.length) attentisData = await getAttentisData();
+
     for (const s of stationsToRescrape) {
       let data = null;
       if (s.type === 'harvest') {
@@ -2714,7 +2717,8 @@ export async function checkForMissedReadings() {
       } else if (s.type === 'holfuy') {
         data = await getHolfuyData(s.externalId);
       } else if (s.type === 'attentis') {
-        data = await getAttentisData(s.externalId);
+        const d = attentisData.find((x) => x.id === s.externalId);
+        if (d) data = d.data;
       } else if (s.type === 'wu') {
         data = await getWUndergroundData(s.externalId);
       } else if (s.type === 'wow') {
