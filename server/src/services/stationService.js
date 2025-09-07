@@ -2541,15 +2541,15 @@ export async function highResolutionStationWrapper() {
         harvestWindAverageId: 1,
         harvestWindGustId: 1,
         harvestWindDirectionId: 1,
-        harvestTemperatureId: 1,
-        data: {
-          $slice: [
-            {
-              $sortArray: { input: '$data', sortBy: { time: -1 } }
-            },
-            1 // include latest data record
-          ]
-        }
+        harvestTemperatureId: 1
+        // data: {
+        //   $slice: [
+        //     {
+        //       $sortArray: { input: '$data', sortBy: { time: -1 } }
+        //     },
+        //     1 // include latest data record
+        //   ]
+        // }
       }
     );
     if (!stations.length) {
