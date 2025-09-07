@@ -2554,22 +2554,22 @@ export async function highResolutionStationWrapper() {
     const json = [];
     const date = getFlooredTime(2);
     for (const s of stations) {
-      if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 3 * 60 * 1000) {
-        await Station.updateOne(
-          { _id: s._id },
-          {
-            $push: {
-              data: {
-                time: new Date(date.getTime() - 2 * 60 * 1000),
-                windAverage: null,
-                windGust: null,
-                windBearing: null,
-                temperature: null
-              }
-            }
-          }
-        );
-      }
+      // if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 3 * 60 * 1000) {
+      //   await Station.updateOne(
+      //     { _id: s._id },
+      //     {
+      //       $push: {
+      //         data: {
+      //           time: new Date(date.getTime() - 2 * 60 * 1000),
+      //           windAverage: null,
+      //           windGust: null,
+      //           windBearing: null,
+      //           temperature: null
+      //         }
+      //       }
+      //     }
+      //   );
+      // }
 
       const holfuyResponse = await axios.get(
         `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
