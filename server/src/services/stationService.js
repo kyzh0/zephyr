@@ -2560,6 +2560,15 @@ export async function highResolutionStationWrapper() {
       return null;
     }
 
+    const { data } = await axios.get(
+      `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+
     const json = [];
     const date = getFlooredTime(2);
     for (const s of stations) {
@@ -2579,15 +2588,6 @@ export async function highResolutionStationWrapper() {
       //     }
       //   );
       // }
-
-      const { data } = await axios.get(
-        `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`,
-        {
-          headers: {
-            Connection: 'keep-alive'
-          }
-        }
-      );
 
       let d = null;
       if (s.type === 'harvest') {
