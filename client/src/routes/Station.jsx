@@ -132,8 +132,6 @@ export default function Station() {
         let intervalStart = new Date(data[startIdx].time);
         for (let i = startIdx; i < data.length; i += 1) {
           const time = new Date(data[i].time);
-          if (time.getMinutes() % 10 === 2) intervalStart = time;
-
           // handle missing readings
           if (
             time.getTime() - intervalStart.getTime() >= 10 * 60 * 1000 || // crossed 10min
@@ -196,6 +194,7 @@ export default function Station() {
             sumBearingCos = 0;
             sumTemperature = 0;
             maxGust = null;
+            if (i < data.length - 1) intervalStart = new Date(data[i + 1].time);
           }
         }
 
