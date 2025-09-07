@@ -2421,8 +2421,6 @@ export async function holfuyWrapper() {
       }
     );
 
-    logger.warn('data len ' + data.measurements.length);
-
     const date = getFlooredTime(10);
     for (const s of stations) {
       let d = null;
@@ -2437,10 +2435,8 @@ export async function holfuyWrapper() {
           windBearing: wind?.direction ?? null,
           temperature: matches[0]?.temperature ?? null
         };
-        logger.warn('from api : ' + d);
       } else {
         d = await getHolfuyData(s.externalId);
-        logger.warn('from scrape : ' + d);
       }
 
       if (d) {
@@ -2560,7 +2556,7 @@ export async function highResolutionStationWrapper() {
       return null;
     }
 
-    const { data } = await axios.get(
+    const holfuyResponse = await axios.get(
       `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`,
       {
         headers: {
@@ -2589,9 +2585,9 @@ export async function highResolutionStationWrapper() {
       //   );
       // }
 
-      let d = null;
+      let data = null;
       if (s.type === 'harvest') {
-        d = await getHarvestData(
+        data = await getHarvestData(
           s.externalId,
           s.harvestWindAverageId,
           s.harvestWindGustId,
@@ -2599,31 +2595,31 @@ export async function highResolutionStationWrapper() {
           s.harvestTemperatureId
         );
       } else if (s.type === 'holfuy') {
-        const matches = data.measurements.filter((m) => {
+        const matches = holfuyResponse.data.measurements.filter((m) => {
           return m.stationId.toString() === s.externalId;
         });
         if (matches.length == 1) {
           const wind = matches[0].wind;
-          d = {
+          data = {
             windAverage: wind?.speed ?? null,
             windGust: wind?.gust ?? null,
             windBearing: wind?.direction ?? null,
             temperature: matches[0]?.temperature ?? null
           };
         } else {
-          d = await getHolfuyData(s.externalId);
+          data = await getHolfuyData(s.externalId);
         }
       } else if (s.type === 'metservice') {
-        d = await getMetserviceData(s.externalId);
+        data = await getMetserviceData(s.externalId);
       }
 
-      if (d) {
+      if (data) {
         logger.info(`${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`, {
           service: 'station',
           type: 'hr'
         });
-        logger.info(JSON.stringify(d), { service: 'station', type: 'hr' });
-        await saveData(s, d, date);
+        logger.info(JSON.stringify(data), { service: 'station', type: 'hr' });
+        await saveData(s, data, date);
       }
 
       json.push({
@@ -2637,11 +2633,11 @@ export async function highResolutionStationWrapper() {
         },
         timestamp: date.getTime() / 1000,
         wind: {
-          average: d?.windAverage ?? null,
-          gust: d?.windGust ?? null,
-          bearing: d?.windBearing ?? null
+          average: data?.windAverage ?? null,
+          gust: data?.windGust ?? null,
+          bearing: data?.windBearing ?? null
         },
-        temperature: d?.temperature ?? null
+        temperature: data?.temperature ?? null
       });
     }
 
