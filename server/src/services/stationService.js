@@ -2413,7 +2413,12 @@ export async function holfuyWrapper() {
     }
 
     const { data } = await axios.get(
-      `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
+      `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
     );
 
     const date = getFlooredTime(10);
@@ -2571,13 +2576,18 @@ export async function highResolutionStationWrapper() {
       //   );
       // }
 
-      const holfuyResponse = await axios.get(
-        `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
+      const { data } = await axios.get(
+        `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`,
+        {
+          headers: {
+            Connection: 'keep-alive'
+          }
+        }
       );
 
-      let data = null;
+      let d = null;
       if (s.type === 'harvest') {
-        data = await getHarvestData(
+        d = await getHarvestData(
           s.externalId,
           s.harvestWindAverageId,
           s.harvestWindGustId,
@@ -2585,31 +2595,31 @@ export async function highResolutionStationWrapper() {
           s.harvestTemperatureId
         );
       } else if (s.type === 'holfuy') {
-        const matches = holfuyResponse.data.measurements.filter((m) => {
+        const matches = data.measurements.filter((m) => {
           return m.stationId.toString() === s.externalId;
         });
         if (matches.length == 1) {
           const wind = matches[0].wind;
-          data = {
+          d = {
             windAverage: wind?.speed ?? null,
             windGust: wind?.gust ?? null,
             windBearing: wind?.direction ?? null,
             temperature: matches[0]?.temperature ?? null
           };
         } else {
-          data = await getHolfuyData(s.externalId);
+          d = await getHolfuyData(s.externalId);
         }
       } else if (s.type === 'metservice') {
-        data = await getMetserviceData(s.externalId);
+        d = await getMetserviceData(s.externalId);
       }
 
-      if (data) {
+      if (d) {
         logger.info(`${s.type} data updated${s.externalId ? ` - ${s.externalId}` : ''}`, {
           service: 'station',
           type: 'hr'
         });
-        logger.info(JSON.stringify(data), { service: 'station', type: 'hr' });
-        await saveData(s, data, date);
+        logger.info(JSON.stringify(d), { service: 'station', type: 'hr' });
+        await saveData(s, d, date);
       }
 
       json.push({
@@ -2623,11 +2633,11 @@ export async function highResolutionStationWrapper() {
         },
         timestamp: date.getTime() / 1000,
         wind: {
-          average: data?.windAverage ?? null,
-          gust: data?.windGust ?? null,
-          bearing: data?.windBearing ?? null
+          average: d?.windAverage ?? null,
+          gust: d?.windGust ?? null,
+          bearing: d?.windBearing ?? null
         },
-        temperature: data?.temperature ?? null
+        temperature: d?.temperature ?? null
       });
     }
 
@@ -2652,8 +2662,7 @@ export async function highResolutionStationWrapper() {
   } catch (error) {
     logger.error(`An error occurred while fetching high resolution station data`, {
       service: 'station',
-      type: 'hr',
-      eventSizeLimit: 2621440
+      type: 'hr'
     });
     logger.error(error, { service: 'station', type: 'hr' });
     return null;
