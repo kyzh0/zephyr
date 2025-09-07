@@ -2571,9 +2571,9 @@ export async function highResolutionStationWrapper() {
       //   );
       // }
 
-      const holfuyResponse = await axios.get(
-        `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
-      );
+      // const holfuyResponse = await axios.get(
+      //   `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
+      // );
 
       let data = null;
       if (s.type === 'harvest') {
@@ -2585,20 +2585,20 @@ export async function highResolutionStationWrapper() {
           s.harvestTemperatureId
         );
       } else if (s.type === 'holfuy') {
-        const matches = holfuyResponse.data.measurements.filter((m) => {
-          return m.stationId.toString() === s.externalId;
-        });
-        if (matches.length == 1) {
-          const wind = matches[0].wind;
-          data = {
-            windAverage: wind?.speed ?? null,
-            windGust: wind?.gust ?? null,
-            windBearing: wind?.direction ?? null,
-            temperature: matches[0]?.temperature ?? null
-          };
-        } else {
-          data = await getHolfuyData(s.externalId);
-        }
+        // const matches = holfuyResponse.data.measurements.filter((m) => {
+        //   return m.stationId.toString() === s.externalId;
+        // });
+        // if (matches.length == 1) {
+        //   const wind = matches[0].wind;
+        //   data = {
+        //     windAverage: wind?.speed ?? null,
+        //     windGust: wind?.gust ?? null,
+        //     windBearing: wind?.direction ?? null,
+        //     temperature: matches[0]?.temperature ?? null
+        //   };
+        // } else {
+        data = await getHolfuyData(s.externalId);
+        // }
       } else if (s.type === 'metservice') {
         data = await getMetserviceData(s.externalId);
       }
