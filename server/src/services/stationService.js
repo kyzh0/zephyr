@@ -2537,15 +2537,15 @@ export async function highResolutionStationWrapper() {
         harvestWindAverageId: 1,
         harvestWindGustId: 1,
         harvestWindDirectionId: 1,
-        harvestTemperatureId: 1
-        // data: {
-        //   $slice: [
-        //     {
-        //       $sortArray: { input: '$data', sortBy: { time: -1 } }
-        //     },
-        //     1 // include latest data record
-        //   ]
-        // }
+        harvestTemperatureId: 1,
+        data: {
+          $slice: [
+            {
+              $sortArray: { input: '$data', sortBy: { time: -1 } }
+            },
+            1 // include latest data record
+          ]
+        }
       }
     );
     if (!stations.length) {
@@ -2568,22 +2568,22 @@ export async function highResolutionStationWrapper() {
     const json = [];
     const date = getFlooredTime(2);
     for (const s of stations) {
-      // if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 3 * 60 * 1000) {
-      //   await Station.updateOne(
-      //     { _id: s._id },
-      //     {
-      //       $push: {
-      //         data: {
-      //           time: new Date(date.getTime() - 2 * 60 * 1000),
-      //           windAverage: null,
-      //           windGust: null,
-      //           windBearing: null,
-      //           temperature: null
-      //         }
-      //       }
-      //     }
-      //   );
-      // }
+      if (!s.data[0] || date.getTime() - new Date(s.data[0].time).getTime() >= 3 * 60 * 1000) {
+        await Station.updateOne(
+          { _id: s._id },
+          {
+            $push: {
+              data: {
+                time: new Date(date.getTime() - 2 * 60 * 1000),
+                windAverage: null,
+                windGust: null,
+                windBearing: null,
+                temperature: null
+              }
+            }
+          }
+        );
+      }
 
       let data = null;
       if (s.type === 'harvest') {
