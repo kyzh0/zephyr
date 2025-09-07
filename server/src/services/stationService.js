@@ -2421,7 +2421,7 @@ export async function holfuyWrapper() {
       }
     );
 
-    logger.debug('data len ' + data.measurements.length);
+    logger.warn('data len ' + data.measurements.length);
 
     const date = getFlooredTime(10);
     for (const s of stations) {
@@ -2437,10 +2437,10 @@ export async function holfuyWrapper() {
           windBearing: wind?.direction ?? null,
           temperature: matches[0]?.temperature ?? null
         };
-        logger.debug('from api : ' + d);
+        logger.warn('from api : ' + d);
       } else {
         d = await getHolfuyData(s.externalId);
-        logger.debug('from scrape : ' + d);
+        logger.warn('from scrape : ' + d);
       }
 
       if (d) {
