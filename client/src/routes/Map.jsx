@@ -98,7 +98,8 @@ export default function Map() {
       setCookies('zoom', window.innerWidth > 1000 ? 5.1 : 4.3, cookiesOptions);
     }
 
-    if (!cookies.visited) {
+    // ignore if iframe
+    if (window.self === window.top && !cookies.visited) {
       navigate('welcome');
     }
 
