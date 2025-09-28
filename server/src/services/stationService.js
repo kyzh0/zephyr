@@ -363,7 +363,7 @@ async function getAttentisData() {
       }
     }
   } catch (error) {
-    logger.warn(`An error occured while fetching data for attentis - ${stationId}`, {
+    logger.warn(`An error occured while fetching data for attentis`, {
       service: 'station',
       type: 'attentis'
     });
