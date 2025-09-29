@@ -2243,8 +2243,13 @@ export async function stationWrapper(source) {
     }
 
     const fenzHarvestStationIds = [];
-    const portersData = await getPortersData();
     const attentisData = await getAttentisData();
+
+    let portersData = [];
+    const matches = stations.filter((s) => {
+      return s.type === 'porters';
+    });
+    if (matches.length) portersData = await getPortersData();
 
     const date = getFlooredTime(10);
     for (const s of stations) {
