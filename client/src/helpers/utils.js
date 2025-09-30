@@ -80,6 +80,8 @@ export function getStationTypeName(code) {
       return 'Whanganui Inlet';
     case 'hbrc':
       return "Hawke's Bay Regional Council";
+    case 'ac':
+      return 'Auckland Council';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
