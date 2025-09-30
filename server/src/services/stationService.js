@@ -1186,6 +1186,46 @@ async function getHbrcData(stationId) {
   };
 }
 
+async function getAucklandCouncilData(stationId) {
+  let windAverage = null;
+  const windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      `https://coastalmonitoringac.netlify.app/.netlify/functions/obscapeProxy?station=${stationId}&parameters=Tp,Uw,Uwdir,invalid&latest=1`,
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+
+    if (data && data.data.length === 1) {
+      const d = data.data[0];
+      // ignore data older than 40 mins
+      if (d.invalid === '0' && Date.now() - Number(d.time) * 1000 < 40 * 60 * 1000) {
+        windAverage = d.Uw * 3.6;
+        windBearing = d.Uwdir;
+        temperature = d.Tp;
+      }
+    }
+  } catch (error) {
+    logger.warn('An error occured while fetching data for auckland council', {
+      service: 'station',
+      type: 'ac'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function getGreaterWellingtonData(
   stationId,
   gwWindAverageFieldName,
@@ -2327,6 +2367,8 @@ export async function stationWrapper(source) {
           data = await getEcowittData(s.externalId);
         } else if (s.type === 'hbrc') {
           data = await getHbrcData(s.externalId);
+        } else if (s.type === 'ac') {
+          data = await getAucklandCouncilData(s.externalId);
         } else if (s.type === 'lpc') {
           data = await getLpcData();
         } else if (s.type === 'mpyc') {
@@ -2785,6 +2827,8 @@ export async function checkForMissedReadings() {
         data = await getEcowittData(s.externalId);
       } else if (s.type === 'hbrc') {
         data = await getHbrcData(s.externalId);
+      } else if (s.type === 'ac') {
+        data = await getAucklandCouncilData(s.externalId);
       } else if (s.type === 'lpc') {
         data = await getLpcData();
       } else if (s.type === 'mpyc') {
