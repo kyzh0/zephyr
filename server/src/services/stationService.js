@@ -2405,9 +2405,9 @@ export async function stationWrapper(source) {
   } catch (error) {
     logger.error(`An error occurred while fetching ${source} station data`, {
       service: 'station',
-      type: s.type
+      type: source
     });
-    logger.error(error, { service: 'station', type: s.type });
+    logger.error(error, { service: 'station', type: source });
     return null;
   }
 }
@@ -2982,52 +2982,52 @@ export async function checkForErrors() {
   }
 }
 
-export async function updateKeys() {
-  try {
-    const stations = await Station.find({
-      type: 'harvest',
-      externalId: { $in: ['10243_113703', '11433_171221'] }
-    });
-    if (!stations.length) {
-      logger.error('No stations found.', { service: 'keys' });
-      return null;
-    }
+// export async function updateKeys() {
+//   try {
+//     const stations = await Station.find({
+//       type: 'harvest',
+//       harvestCookie: { $ne: null }
+//     });
+//     if (!stations.length) {
+//       logger.error('No stations found.', { service: 'keys' });
+//       return null;
+//     }
 
-    if (stations.length == 2) {
-      const { headers } = await axios.post(
-        'https://live.harvest.com/?sid=10243',
-        {
-          username: process.env.HARVEST_REALJOURNEYS_USERNAME,
-          password: process.env.HARVEST_REALJOURNEYS_PASSWORD,
-          submit: 'Login'
-        },
-        {
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          maxRedirects: 0,
-          validateStatus: (status) => {
-            return status == 302;
-          }
-        }
-      );
+//     if (stations.length == 2) {
+//       const { headers } = await axios.post(
+//         'https://live.harvest.com/?sid=10243',
+//         {
+//           username: process.env.HARVEST_REALJOURNEYS_USERNAME,
+//           password: process.env.HARVEST_REALJOURNEYS_PASSWORD,
+//           submit: 'Login'
+//         },
+//         {
+//           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+//           maxRedirects: 0,
+//           validateStatus: (status) => {
+//             return status == 302;
+//           }
+//         }
+//       );
 
-      const cookies = headers['set-cookie'];
-      const regex = /PHPSESSID=[0-9a-zA-Z]+;\s/g;
-      if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
-        const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
-        if (cookie) {
-          for (const s of stations) {
-            s.harvestCookie = cookie;
-            await s.save();
-          }
-        }
-      }
-    }
-  } catch (error) {
-    logger.error('An error occurred while updating keys', { service: 'keys' });
-    logger.error(error, { service: 'keys' });
-    return null;
-  }
-}
+//       const cookies = headers['set-cookie'];
+//       const regex = /PHPSESSID=[0-9a-zA-Z]+;\s/g;
+//       if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
+//         const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
+//         if (cookie) {
+//           for (const s of stations) {
+//             s.harvestCookie = cookie;
+//             await s.save();
+//           }
+//         }
+//       }
+//     }
+//   } catch (error) {
+//     logger.error('An error occurred while updating keys', { service: 'keys' });
+//     logger.error(error, { service: 'keys' });
+//     return null;
+//   }
+// }
 
 export async function removeOldData() {
   try {
