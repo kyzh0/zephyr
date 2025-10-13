@@ -2215,6 +2215,44 @@ async function getWhanganuiInletData() {
   };
 }
 
+async function getWSWRData() {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get('https://api.wswr.jkent.tech/weatherdata/mostrecent/60', {
+      headers: {
+        Connection: 'keep-alive'
+      }
+    });
+
+    if (data && data.length) {
+      const d = data[0];
+      const time = new Date(`${d.record_time}.000Z`);
+      if (Date.now() - time.getTime() < 20 * 60 * 1000) {
+        windAverage = Math.round(d.windspd_10mnavg * 1.852 * 10) / 10;
+        windGust = Math.round(d.windgst_10mnmax * 1.852 * 10) / 10;
+        windBearing = d.winddir_10mnavg;
+        temperature = d.airtemp_01mnavg;
+      }
+    }
+  } catch (error) {
+    logger.warn('An error occured while fetching data for wswr', {
+      service: 'station',
+      type: 'wswr'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function saveData(station, data, date) {
   // handle likely erroneous values
   let avg = data.windAverage;
@@ -2390,6 +2428,8 @@ export async function stationWrapper(source) {
           data = await getHuttWeatherData();
         } else if (s.type === 'wi') {
           data = await getWhanganuiInletData();
+        } else if (s.type === 'wswr') {
+          data = await getWSWRData();
         }
       }
 
@@ -2850,6 +2890,8 @@ export async function checkForMissedReadings() {
         data = await getHuttWeatherData();
       } else if (s.type === 'wi') {
         data = await getWhanganuiInletData();
+      } else if (s.type === 'wswr') {
+        data = await getWSWRData();
       }
 
       if (data) {
