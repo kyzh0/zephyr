@@ -82,6 +82,8 @@ export function getStationTypeName(code) {
       return "Hawke's Bay Regional Council";
     case 'ac':
       return 'Auckland Council';
+    case 'wswr':
+      return 'WSWR';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
