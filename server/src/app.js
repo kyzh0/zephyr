@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import mongoose from 'mongoose';
 import cron from 'node-cron';
 import dotenv from 'dotenv';
 
@@ -32,12 +31,6 @@ dotenv.config();
 if (process.env.NODE_ENV !== 'production') {
   app.use(express.static('public'));
 }
-
-mongoose.connect(
-  process.env.NODE_ENV === 'production'
-    ? process.env.DB_CONNECTION_STRING
-    : process.env.DEV_CONNECTION_STRING
-);
 
 // routes
 app.use('/auth', authRoute);
@@ -165,5 +158,4 @@ cron.schedule(
   { timezone: 'Pacific/Auckland' }
 );
 
-const port = process.env.NODE_PORT || 5000;
-app.listen(port, () => logger.info(`Server running on port ${port}`));
+export default app;
