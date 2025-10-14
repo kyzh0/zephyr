@@ -10,7 +10,7 @@ import camRoute from './routes/camRoute.js';
 import soundingRoute from './routes/soundingRoute.js';
 import publicRoute from './routes/publicRoute.js';
 
-import logger from './helpers/log.js';
+import logger from './lib/log.js';
 import { removeOldImages, webcamWrapper } from './services/camService.js';
 import {
   stationWrapper,
