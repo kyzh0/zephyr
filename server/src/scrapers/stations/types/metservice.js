@@ -1,10 +1,10 @@
 import pLimit from 'p-limit';
-import { httpClient } from '../../../lib/httpClient.js';
+import httpClient from '../../../lib/httpClient.js';
+import processScrapedData from '../processScrapedData.js';
 import { getWindBearingFromDirection } from '../../../lib/utils.js';
-import { processScrapedData } from '../processScrapedData.js';
 import logger from '../../../lib/log.js';
 
-export default async function getMetserviceData(stations) {
+export default async function scrapeMetserviceData(stations) {
   const limit = pLimit(10);
 
   await Promise.allSettled(

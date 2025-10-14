@@ -1,9 +1,15 @@
 import { getFlooredTime } from '../../lib/utils.js';
 import { validateStationData } from '../../validators/stationValidator.js';
 import { Station } from '../../models/stationModel.js';
-import logger from '../lib/log.js';
+import logger from '../../lib/log.js';
 
-export async function processScrapedData(station, windAverage, windGust, windBearing, temperature) {
+export default async function processScrapedData(
+  station,
+  windAverage,
+  windGust,
+  windBearing,
+  temperature
+) {
   const data = validateStationData(windAverage, windGust, windBearing, temperature);
 
   if (isNaN(data.windAverage)) data.windAverage = null;
