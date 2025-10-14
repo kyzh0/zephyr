@@ -2253,6 +2253,48 @@ async function getWSWRData() {
   };
 }
 
+async function getSouthPortData() {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  const temperature = null;
+
+  try {
+    const { data } = await axios.get(
+      'https://southportvendor.marketsouth.co.nz/testAPI/getBaconWindData.php?_=1760437457410',
+      {
+        headers: {
+          Connection: 'keep-alive'
+        }
+      }
+    );
+
+    if (data) {
+      const time = fromZonedTime(
+        parse(data.lastReading, 'yyyy-MM-dd HH:mm:ss', new Date()),
+        'Pacific/Auckland'
+      );
+      if (Date.now() - time.getTime() < 20 * 60 * 1000) {
+        windAverage = Math.round(data.AveSpeed * 1.852 * 10) / 10;
+        windGust = Math.round(data.GustSpeed * 1.852 * 10) / 10;
+        windBearing = Number(data.AveDirection);
+      }
+    }
+  } catch (error) {
+    logger.warn('An error occured while fetching data for sp', {
+      service: 'station',
+      type: 'sp'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
 async function saveData(station, data, date) {
   // handle likely erroneous values
   let avg = data.windAverage;
@@ -2430,6 +2472,8 @@ export async function stationWrapper(source) {
           data = await getWhanganuiInletData();
         } else if (s.type === 'wswr') {
           data = await getWSWRData();
+        } else if (s.type === 'sp') {
+          data = await getSouthPortData();
         }
       }
 
@@ -2892,6 +2936,8 @@ export async function checkForMissedReadings() {
         data = await getWhanganuiInletData();
       } else if (s.type === 'wswr') {
         data = await getWSWRData();
+      } else if (s.type === 'sp') {
+        data = await getSouthPortData();
       }
 
       if (data) {

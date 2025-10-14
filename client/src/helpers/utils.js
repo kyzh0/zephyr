@@ -84,6 +84,8 @@ export function getStationTypeName(code) {
       return 'Auckland Council';
     case 'wswr':
       return 'WSWR';
+    case 'sp':
+      return 'South Port';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
