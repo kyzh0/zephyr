@@ -1,7 +1,7 @@
 import express from 'express';
 import { formatInTimeZone } from 'date-fns-tz';
 
-import logger from '../helpers/log.js';
+import logger from '../lib/log.js';
 
 import { Client } from '../models/clientModel.js';
 import { Station } from '../models/stationModel.js';
