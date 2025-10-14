@@ -23,6 +23,7 @@
     "mongoose": "^8.3.3",
     "node-cron": "^3.0.3",
     "node-dir": "^0.1.17",
+    "p-limit": "^7.1.1",
     "sharp": "^0.33.3",
     "tesseract.js": "^6.0.1",
     "winston": "^3.13.0"
