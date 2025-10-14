@@ -3,7 +3,7 @@ import sharp from 'sharp';
 import fs from 'fs/promises';
 import { fromZonedTime } from 'date-fns-tz';
 
-import logger from '../helpers/log.js';
+import logger from '../lib/log.js';
 
 import { Sounding } from '../models/soundingModel.js';
 

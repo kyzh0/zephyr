@@ -6,7 +6,7 @@ import fs from 'fs/promises';
 import sharp from 'sharp';
 import { createWorker } from 'tesseract.js';
 
-import logger from '../helpers/log.js';
+import logger from '../lib/log.js';
 
 import { Station } from '../models/stationModel.js';
 import { Output } from '../models/outputModel.js';

@@ -6,7 +6,7 @@ import md5 from 'md5';
 import fs from 'fs/promises';
 import dir from 'node-dir';
 
-import logger from '../helpers/log.js';
+import logger from '../lib/log.js';
 
 import { Cam } from '../models/camModel.js';
 
