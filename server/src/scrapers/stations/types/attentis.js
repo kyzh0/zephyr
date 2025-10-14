@@ -1,8 +1,8 @@
-import { httpClient } from '../../../lib/httpClient.js';
-import { processScrapedData } from '../processScrapedData.js';
+import httpClient from '../../../lib/httpClient.js';
+import processScrapedData from '../processScrapedData.js';
 import logger from '../../../lib/log.js';
 
-export default async function getAttentisData(stations) {
+export default async function scrapeAttentisData(stations) {
   try {
     const result = [];
     const { data } = await httpClient.get('https://api.attentistechnology.com/sensor-overview', {
