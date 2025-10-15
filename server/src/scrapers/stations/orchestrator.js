@@ -31,12 +31,11 @@ export async function runScraper() {
         service: 'station',
         type: type
       });
-      const ts = Date.now();
 
       const scraper = scrapers[type];
       if (scraper) {
         await scraper(stations);
-        logger.info(`----- Finished: ${type}, ${Math.round((Date.now() - ts) / 1000)}s elapsed`, {
+        logger.info(`----- Finished: ${type} -----`, {
           service: 'station',
           type: type
         });
