@@ -2,8 +2,11 @@ import cron from 'node-cron';
 import { runScraper } from './orchestrator.js';
 import logger from '../../lib/logger.js';
 import {
+  checkForErrors,
   processHighResolutionStationJson,
-  processStationJson
+  processStationJson,
+  removeOldData,
+  updateKeys
 } from '../../services/stationService.js';
 
 logger.info('----- Initialising station scheduler -----', {
@@ -24,10 +27,10 @@ cron.schedule('*/10 * * * *', async () => {
     }
   );
 
-  logger.info('--- Process json output start ---', { service: 'json' });
+  logger.info('----- Process json output start -----', { service: 'json' });
   ts = Date.now();
   await processStationJson();
-  logger.info(`--- Process json output end - ${Date.now() - ts}ms elapsed.`, {
+  logger.info(`----- Process json output end - ${Date.now() - ts}ms elapsed. -----`, {
     service: 'json'
   });
 });
@@ -46,10 +49,39 @@ cron.schedule('*/2 * * * *', async () => {
     }
   );
 
-  logger.info('--- Process high resolution json output start ---', { service: 'json' });
+  logger.info('----- Process high resolution json output start -----', { service: 'json' });
   ts = Date.now();
   await processHighResolutionStationJson();
-  logger.info(`--- Process high resolution json output end - ${Date.now() - ts}ms elapsed.`, {
-    service: 'json'
+  logger.info(
+    `----- Process high resolution json output end - ${Date.now() - ts}ms elapsed. -----`,
+    {
+      service: 'json'
+    }
+  );
+});
+
+// errors
+cron.schedule('5 */6 * * *', async () => {
+  logger.info('----- Check errors start -----', { service: 'errors' });
+  const ts = Date.now();
+  await checkForErrors();
+  logger.info(`--- Check errors end - ${Date.now() - ts}ms elapsed. -----`, { service: 'errors' });
+});
+
+// keys
+cron.schedule('5 0 * * *', async () => {
+  logger.info('----- Update keys start -----', { service: 'keys' });
+  const ts = Date.now();
+  await updateKeys();
+  logger.info(`----- Update keys end - ${Date.now() - ts}ms elapsed. -----`, { service: 'keys' });
+});
+
+// cleanup
+cron.schedule('5 0 * * *', async () => {
+  logger.info('----- Remove old data start -----', { service: 'cleanup' });
+  const ts = Date.now();
+  await removeOldData();
+  logger.info(`----- Remove old data end - ${Date.now() - ts}ms elapsed. -----`, {
+    service: 'cleanup'
   });
 });
