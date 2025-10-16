@@ -3,6 +3,7 @@ import scrapeAucklandCouncilData from './types/aucklandCouncil.js';
 import scrapeCwuData from './types/cwu.js';
 import scrapeCentrePortData from './types/centrePort.js';
 import scrapeEcowittData from './types/ecowitt.js';
+import scrapeGreaterWellingtonData from './types/greaterWellington.js';
 import scrapeHbrcData from './types/hbrc.js';
 import scrapeHolfuyData from './types/holfuy.js';
 import scrapeMetserviceData from './types/metservice.js';
@@ -11,6 +12,7 @@ import scrapePortOtagoData from './types/portOtago.js';
 import scrapePredictWindData from './types/predictWind.js';
 import scrapeSofarOceanData from './types/sofarOcean.js';
 import scrapeTempestData from './types/tempest.js';
+import scrapeWeatherLinkData from './types/weatherlink.js';
 import scrapeWeatherProData from './types/weatherPro.js';
 import scrapeWeatherUndergroundData from './types/weatherUnderground.js';
 import scrapeWindGuruData from './types/windGuru.js';
@@ -22,6 +24,7 @@ export default {
   cwu: scrapeCwuData,
   cp: scrapeCentrePortData,
   ecowitt: scrapeEcowittData,
+  gw: scrapeGreaterWellingtonData,
   hbrc: scrapeHbrcData,
   holfuy: scrapeHolfuyData,
   metservice: scrapeMetserviceData,
@@ -30,6 +33,7 @@ export default {
   pw: scrapePredictWindData,
   sfo: scrapeSofarOceanData,
   tempest: scrapeTempestData,
+  wl: scrapeWeatherLinkData,
   wp: scrapeWeatherProData,
   wu: scrapeWeatherUndergroundData,
   windguru: scrapeWindGuruData,
