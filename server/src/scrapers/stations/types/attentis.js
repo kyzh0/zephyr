@@ -41,6 +41,8 @@ export default async function scrapeAttentisData(stations) {
             type: 'attentis'
           }
         );
+
+        await processScrapedData(station, null, null, null, null, true);
       }
     }
   } catch (error) {
@@ -49,5 +51,9 @@ export default async function scrapeAttentisData(stations) {
       type: 'attentis'
     });
     logger.warn(error);
+
+    for (const station of stations) {
+      await processScrapedData(station, null, null, null, null, true);
+    }
   }
 }

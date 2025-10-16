@@ -39,6 +39,8 @@ export default async function scrapeWowData(stations) {
             service: 'station',
             type: 'wow'
           });
+
+          await processScrapedData(station, null, null, null, null, true);
         }
       })
     )

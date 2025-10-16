@@ -38,6 +38,8 @@ export default async function scrapeWeatherUndergroundData(stations) {
               type: 'wu'
             }
           );
+
+          await processScrapedData(station, null, null, null, null, true);
         }
       })
     )

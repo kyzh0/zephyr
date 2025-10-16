@@ -38,6 +38,8 @@ export default async function scrapeTempestData(stations) {
             service: 'station',
             type: 'tempest'
           });
+
+          await processScrapedData(station, null, null, null, null, true);
         }
       })
     )
