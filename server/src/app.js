@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import cron from 'node-cron';
 import dotenv from 'dotenv';
 
 import authRoute from './routes/authRoute.js';
@@ -8,9 +7,6 @@ import stationRoute from './routes/stationRoute.js';
 import camRoute from './routes/camRoute.js';
 import soundingRoute from './routes/soundingRoute.js';
 import publicRoute from './routes/publicRoute.js';
-
-import logger from './lib/logger.js';
-import { soundingWrapper } from './services/soundingService.js';
 
 const app = express();
 app.use(cors({ origin: [/zephyrapp\.nz$/, /^http(s)?:\/\/localhost:\d{4}.*$/] }));
@@ -28,19 +24,5 @@ app.use('/stations', stationRoute);
 app.use('/cams', camRoute);
 app.use('/soundings', soundingRoute);
 app.use('/v1', publicRoute);
-
-// soundings - at 0730 NZT
-cron.schedule(
-  '30 7 * * *',
-  async () => {
-    logger.info('--- Update soundings start ---', { service: 'sounding' });
-    const ts = Date.now();
-    await soundingWrapper();
-    logger.info(`--- Update soundings end - ${Date.now() - ts}ms elapsed.`, {
-      service: 'sounding'
-    });
-  },
-  { timezone: 'Pacific/Auckland' }
-);
 
 export default app;
