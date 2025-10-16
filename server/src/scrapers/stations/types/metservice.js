@@ -50,6 +50,8 @@ export default async function scrapeMetserviceData(stations) {
               type: 'metservice'
             }
           );
+
+          await processScrapedData(station, null, null, null, null, true);
         }
       })
     )

@@ -36,6 +36,8 @@ export default async function scrapeWindGuruData(stations) {
             service: 'station',
             type: 'windguru'
           });
+
+          await processScrapedData(station, null, null, null, null, true);
         }
       })
     )

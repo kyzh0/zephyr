@@ -8,7 +8,8 @@ export default async function processScrapedData(
   windAverage,
   windGust,
   windBearing,
-  temperature
+  temperature,
+  suppressLog
 ) {
   const data = validateStationData(windAverage, windGust, windBearing, temperature);
 
@@ -52,11 +53,13 @@ export default async function processScrapedData(
     }
   );
 
-  logger.info(
-    `${station.type} data updated${station.externalId ? ` - ${station.externalId}` : ''}`,
-    {
-      service: 'station',
-      type: station.type
-    }
-  );
+  if (!suppressLog) {
+    logger.info(
+      `${station.type} data updated${station.externalId ? ` - ${station.externalId}` : ''}`,
+      {
+        service: 'station',
+        type: station.type
+      }
+    );
+  }
 }
