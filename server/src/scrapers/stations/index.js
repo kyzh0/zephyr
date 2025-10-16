@@ -14,8 +14,10 @@ import scrapeMrcData from './types/mrc.js';
 import scrapeNavigatusData from './types/navigatus.js';
 import scrapePortOtagoData from './types/portOtago.js';
 import scrapePredictWindData from './types/predictWind.js';
+import scrapePrimePortData from './types/primePort.js';
 import scrapeSofarOceanData from './types/sofarOcean.js';
 import scrapeTempestData from './types/tempest.js';
+import scrapeWainuiData from './types/wainui.js';
 import scrapeWeatherLinkData from './types/weatherlink.js';
 import scrapeWeatherProData from './types/weatherPro.js';
 import scrapeWeatherUndergroundData from './types/weatherUnderground.js';
@@ -39,8 +41,10 @@ export default {
   navigatus: scrapeNavigatusData,
   po: scrapePortOtagoData,
   pw: scrapePredictWindData,
+  prime: scrapePrimePortData,
   sfo: scrapeSofarOceanData,
   tempest: scrapeTempestData,
+  wainui: scrapeWainuiData,
   wl: scrapeWeatherLinkData,
   wp: scrapeWeatherProData,
   wu: scrapeWeatherUndergroundData,

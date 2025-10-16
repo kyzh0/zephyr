@@ -31,9 +31,9 @@ export default async function scrapeMrcData(stations) {
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {
-    logger.warn('An error occured while fetching data for mfhb', {
+    logger.warn('An error occured while fetching data for mrc', {
       service: 'station',
-      type: 'mfhb'
+      type: 'mrc'
     });
 
     await processScrapedData(station, null, null, null, null, true);
