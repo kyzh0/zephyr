@@ -10,7 +10,6 @@ import soundingRoute from './routes/soundingRoute.js';
 import publicRoute from './routes/publicRoute.js';
 
 import logger from './lib/logger.js';
-import { removeOldImages } from './services/camService.js';
 import { soundingWrapper } from './services/soundingService.js';
 
 const app = express();
@@ -29,23 +28,6 @@ app.use('/stations', stationRoute);
 app.use('/cams', camRoute);
 app.use('/soundings', soundingRoute);
 app.use('/v1', publicRoute);
-
-// cron jobs
-// webcams
-// cron.schedule('*/10 * * * *', async () => {
-//   logger.info('--- Update webcams start ---', { service: 'cam' });
-//   const ts = Date.now();
-//   await webcamWrapper();
-//   logger.info(`--- Update webcams end - ${Date.now() - ts}ms elapsed.`, { service: 'cam' });
-// });
-
-// cleanup
-cron.schedule('5 0 * * *', async () => {
-  logger.info('--- Remove old images start ---', { service: 'cleanup' });
-  const ts = Date.now();
-  await removeOldImages();
-  logger.info(`--- Remove old images end - ${Date.now() - ts}ms elapsed.`, { service: 'cleanup' });
-});
 
 // soundings - at 0730 NZT
 cron.schedule(
