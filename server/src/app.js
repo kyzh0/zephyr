@@ -11,12 +11,7 @@ import publicRoute from './routes/publicRoute.js';
 
 import logger from './lib/logger.js';
 import { removeOldImages, webcamWrapper } from './services/camService.js';
-import {
-  jsonOutputWrapper,
-  checkForErrors,
-  removeOldData,
-  updateKeys
-} from './services/stationService.js';
+import { checkForErrors, removeOldData, updateKeys } from './services/stationService.js';
 import { soundingWrapper } from './services/soundingService.js';
 
 const app = express();
@@ -104,12 +99,12 @@ cron.schedule('*/10 * * * *', async () => {
 // });
 
 // json
-cron.schedule('2,12,22,32,42,52 * * * *', async () => {
-  logger.info('--- Process json output start ---', { service: 'json' });
-  const ts = Date.now();
-  await jsonOutputWrapper();
-  logger.info(`--- Process json output end - ${Date.now() - ts}ms elapsed.`, { service: 'json' });
-});
+// cron.schedule('2,12,22,32,42,52 * * * *', async () => {
+//   logger.info('--- Process json output start ---', { service: 'json' });
+//   const ts = Date.now();
+//   await jsonOutputWrapper();
+//   logger.info(`--- Process json output end - ${Date.now() - ts}ms elapsed.`, { service: 'json' });
+// });
 
 // errors
 cron.schedule('5 */6 * * *', async () => {

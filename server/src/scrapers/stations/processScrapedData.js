@@ -43,7 +43,7 @@ export default async function processScrapedData(
     {
       $push: {
         data: {
-          time: getFlooredTime(10),
+          time: getFlooredTime(station.isHighResolution ? 2 : 10),
           windAverage: data.windAverage ?? null,
           windGust: data.windGust ?? null,
           windBearing: data.windBearing ?? null,
