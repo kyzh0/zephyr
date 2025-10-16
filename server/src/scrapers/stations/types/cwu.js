@@ -4,7 +4,7 @@ import processScrapedData from '../processScrapedData.js';
 import { getWindBearingFromDirection } from '../../../lib/utils.js';
 import logger from '../../../lib/log.js';
 
-export default async function scrapeCWUData(stations) {
+export default async function scrapeCwuData(stations) {
   const limit = pLimit(10);
 
   await Promise.allSettled(
