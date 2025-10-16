@@ -1,7 +1,7 @@
 import { getFlooredTime } from '../../lib/utils.js';
 import { validateStationData } from '../../validators/stationValidator.js';
 import { Station } from '../../models/stationModel.js';
-import logger from '../../lib/log.js';
+import logger from '../../lib/logger.js';
 
 export default async function processScrapedData(
   station,

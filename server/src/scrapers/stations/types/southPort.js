@@ -2,7 +2,7 @@ import { fromZonedTime } from 'date-fns-tz';
 import { parse } from 'date-fns';
 import httpClient from '../../../lib/httpClient.js';
 import processScrapedData from '../processScrapedData.js';
-import logger from '../../../lib/log.js';
+import logger from '../../../lib/logger.js';
 
 export default async function scrapeSouthPortData(stations) {
   const station = stations[0];

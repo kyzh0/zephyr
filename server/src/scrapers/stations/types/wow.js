@@ -2,7 +2,7 @@ import pLimit from 'p-limit';
 import { formatInTimeZone } from 'date-fns-tz';
 import httpClient from '../../../lib/httpClient.js';
 import processScrapedData from '../processScrapedData.js';
-import logger from '../../../lib/log.js';
+import logger from '../../../lib/logger.js';
 
 export default async function scrapeWowData(stations) {
   const limit = pLimit(10);
