@@ -4,6 +4,7 @@ import scrapeCwuData from './types/cwu.js';
 import scrapeCentrePortData from './types/centrePort.js';
 import scrapeEcowittData from './types/ecowitt.js';
 import scrapeGreaterWellingtonData from './types/greaterWellington.js';
+import scrapeHarvestData from './types/harvest.js';
 import scrapeHbrcData from './types/hbrc.js';
 import scrapeHolfuyData from './types/holfuy.js';
 import scrapeHuttWeatherData from './types/huttWeather.js';
@@ -36,6 +37,7 @@ export default {
   cp: scrapeCentrePortData,
   ecowitt: scrapeEcowittData,
   gw: scrapeGreaterWellingtonData,
+  harvest: scrapeHarvestData,
   hbrc: scrapeHbrcData,
   holfuy: scrapeHolfuyData,
   hw: scrapeHuttWeatherData,
