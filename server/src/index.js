@@ -5,6 +5,7 @@ import logger from './lib/logger.js';
 
 import './scrapers/stations/scheduler.js';
 import './scrapers/cams/scheduler.js';
+import './scrapers/soundings/scheduler.js';
 
 dotenv.config();
 

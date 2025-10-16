@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import { fromZonedTime } from 'date-fns-tz';
 import httpClient from '../../../lib/httpClient.js';
 import logger from '../../../lib/logger.js';
-import { Sounding } from '../../models/soundingModel.js';
+import { Sounding } from '../../../models/soundingModel.js';
 
 export default async function scrapeRaspData(soundings) {
   const limit = pLimit(10);
