@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { runScraper } from './orchestrator.js';
 import logger from '../../lib/logger.js';
+import { removeOldImages } from '../../services/camService.js';
 
 logger.info('----- Initialising webcam scheduler -----', {
   service: 'cam'
@@ -19,4 +20,14 @@ cron.schedule('*/10 * * * *', async () => {
       service: 'cam'
     }
   );
+});
+
+// cleanup
+cron.schedule('5 0 * * *', async () => {
+  logger.info('----- Remove old images start -----', { service: 'cleanup' });
+  const ts = Date.now();
+  await removeOldImages();
+  logger.info(`----- Remove old images end - ${Date.now() - ts}ms elapsed. -----`, {
+    service: 'cleanup'
+  });
 });
