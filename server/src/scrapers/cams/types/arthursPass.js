@@ -3,7 +3,7 @@ import httpClient from '../../../lib/httpClient.js';
 import processScrapedData from '../processScrapedData.js';
 import logger from '../../../lib/logger.js';
 
-export default async function scrapeCgcData(cams) {
+export default async function scrapeArthursPassData(cams) {
   const limit = pLimit(10);
 
   await Promise.allSettled(
@@ -14,7 +14,7 @@ export default async function scrapeCgcData(cams) {
           let base64 = null;
 
           const response = await httpClient.get(
-            `https://canterburyglidingclub.nz/images/CGCHdCam${cam.externalId}_1.jpg`,
+            `https://www.arthurspass.com/webcams/webcam3.php?id=D&unique_id=${cam.externalId}`,
             {
               responseType: 'arraybuffer'
             }
@@ -24,13 +24,10 @@ export default async function scrapeCgcData(cams) {
 
           await processScrapedData(cam, updated, base64);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for canterbury gliding club - ${cam.externalId}`,
-            {
-              service: 'cam',
-              type: 'cgc'
-            }
-          );
+          logger.warn(`An error occured while fetching data for arthurs pass - ${cam.externalId}`, {
+            service: 'cam',
+            type: 'ap'
+          });
         }
       })
     )
