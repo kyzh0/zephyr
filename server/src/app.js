@@ -12,7 +12,6 @@ import publicRoute from './routes/publicRoute.js';
 import logger from './lib/logger.js';
 import { removeOldImages, webcamWrapper } from './services/camService.js';
 import {
-  stationWrapper,
   jsonOutputWrapper,
   checkForErrors,
   removeOldData,
@@ -56,15 +55,15 @@ cron.schedule('*/10 * * * *', async () => {
 //     type: 'other'
 //   });
 // });
-cron.schedule('*/10 * * * *', async () => {
-  logger.info('--- Update harvest stations start ---', { service: 'station', type: 'harvest' });
-  const ts = Date.now();
-  await stationWrapper('harvest');
-  logger.info(`--- Update harvest stations end - ${Date.now() - ts}ms elapsed.`, {
-    service: 'station',
-    type: 'harvest'
-  });
-});
+// cron.schedule('*/10 * * * *', async () => {
+//   logger.info('--- Update harvest stations start ---', { service: 'station', type: 'harvest' });
+//   const ts = Date.now();
+//   await stationWrapper('harvest');
+//   logger.info(`--- Update harvest stations end - ${Date.now() - ts}ms elapsed.`, {
+//     service: 'station',
+//     type: 'harvest'
+//   });
+// });
 // cron.schedule('*/10 * * * *', async () => {
 //   logger.info('--- Update metservice stations start ---', {
 //     service: 'station',

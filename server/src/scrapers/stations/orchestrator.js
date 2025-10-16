@@ -24,7 +24,6 @@ export async function runScraper(highResolution) {
   logger.info(`----- Scraping ${Object.keys(grouped).length} station types -----`, {
     service: 'station'
   });
-  const time = Date.now();
 
   // scrape concurrently per type
   const jobs = Object.entries(grouped).map(async ([type, stations]) => {
@@ -56,7 +55,4 @@ export async function runScraper(highResolution) {
   });
 
   await Promise.allSettled(jobs);
-  logger.info(`----- Stations updated, ${Math.round((Date.now() - time) / 1000)}s elapsed -----`, {
-    service: 'station'
-  });
 }
