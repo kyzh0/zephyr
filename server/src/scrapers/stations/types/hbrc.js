@@ -2,7 +2,7 @@ import pLimit from 'p-limit';
 import https from 'https';
 import axios from 'axios';
 import processScrapedData from '../processScrapedData.js';
-import logger from '../../../lib/log.js';
+import logger from '../../../lib/logger.js';
 
 export default async function scrapeHbrcData(stations) {
   const limit = pLimit(10);

@@ -1,9 +1,11 @@
 import scrapers from './index.js';
-import logger from '../../lib/log.js';
+import logger from '../../lib/logger.js';
 import { Station } from '../../models/stationModel.js';
 
-export async function runScraper() {
+export async function runScraper(highResolution) {
   const query = { isHighResolution: { $ne: true }, isDisabled: { $ne: true } };
+  if (highResolution) query.isHighResolution = true;
+
   const stations = await Station.find(query, { data: 0 });
   if (!stations.length) {
     logger.error('No stations found.', {
@@ -19,7 +21,7 @@ export async function runScraper() {
     return acc;
   }, {});
 
-  logger.info(`----- Scraping ${Object.keys(grouped).length} types -----`, {
+  logger.info(`----- Scraping ${Object.keys(grouped).length} station types -----`, {
     service: 'station'
   });
   const time = Date.now();
@@ -54,10 +56,7 @@ export async function runScraper() {
   });
 
   await Promise.allSettled(jobs);
-  logger.info(
-    `----- All scrapers completed, ${Math.round((Date.now() - time) / 1000)}s elapsed -----`,
-    {
-      service: 'station'
-    }
-  );
+  logger.info(`----- Stations updated, ${Math.round((Date.now() - time) / 1000)}s elapsed -----`, {
+    service: 'station'
+  });
 }

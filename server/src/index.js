@@ -1,7 +1,9 @@
 import app from './app.js';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import logger from './lib/log.js';
+import logger from './lib/logger.js';
+
+import './scrapers/stations/scheduler.js';
 
 dotenv.config();
 

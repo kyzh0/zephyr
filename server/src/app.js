@@ -9,16 +9,13 @@ import camRoute from './routes/camRoute.js';
 import soundingRoute from './routes/soundingRoute.js';
 import publicRoute from './routes/publicRoute.js';
 
-import logger from './lib/log.js';
+import logger from './lib/logger.js';
 import { removeOldImages, webcamWrapper } from './services/camService.js';
 import {
   stationWrapper,
-  holfuyWrapper,
   jsonOutputWrapper,
   checkForErrors,
   removeOldData,
-  highResolutionStationWrapper,
-  checkForMissedReadings,
   updateKeys
 } from './services/stationService.js';
 import { soundingWrapper } from './services/soundingService.js';
@@ -50,15 +47,15 @@ cron.schedule('*/10 * * * *', async () => {
 });
 
 // stations
-cron.schedule('*/10 * * * *', async () => {
-  logger.info('--- Update stations start ---', { service: 'station', type: 'other' });
-  const ts = Date.now();
-  await stationWrapper();
-  logger.info(`--- Update stations end - ${Date.now() - ts}ms elapsed.`, {
-    service: 'station',
-    type: 'other'
-  });
-});
+// cron.schedule('*/10 * * * *', async () => {
+//   logger.info('--- Update stations start ---', { service: 'station', type: 'other' });
+//   const ts = Date.now();
+//   await stationWrapper();
+//   logger.info(`--- Update stations end - ${Date.now() - ts}ms elapsed.`, {
+//     service: 'station',
+//     type: 'other'
+//   });
+// });
 cron.schedule('*/10 * * * *', async () => {
   logger.info('--- Update harvest stations start ---', { service: 'station', type: 'harvest' });
   const ts = Date.now();
@@ -68,44 +65,44 @@ cron.schedule('*/10 * * * *', async () => {
     type: 'harvest'
   });
 });
-cron.schedule('*/10 * * * *', async () => {
-  logger.info('--- Update metservice stations start ---', {
-    service: 'station',
-    type: 'metservice'
-  });
-  const ts = Date.now();
-  await stationWrapper('metservice');
-  logger.info(`--- Update metservice stations end - ${Date.now() - ts}ms elapsed.`, {
-    service: 'station',
-    type: 'metservice'
-  });
-});
-cron.schedule('*/10 * * * *', async () => {
-  logger.info('--- Update holfuy stations start ---', { service: 'station', type: 'holfuy' });
-  const ts = Date.now();
-  await holfuyWrapper();
-  logger.info(`--- Update holfuy stations end - ${Date.now() - ts}ms elapsed.`, {
-    service: 'station',
-    type: 'holfuy'
-  });
-});
-cron.schedule('*/2 * * * *', async () => {
-  logger.info('--- Update high resolution stations start ---', { service: 'station', type: 'hr' });
-  const ts = Date.now();
-  await highResolutionStationWrapper();
-  logger.info(`--- Update high resolution stations end - ${Date.now() - ts}ms elapsed.`, {
-    service: 'station',
-    type: 'hr'
-  });
-});
-cron.schedule('5,15,25,35,45,55 * * * *', async () => {
-  logger.info('--- Check missed readings start ---', { service: 'miss' });
-  const ts = Date.now();
-  await checkForMissedReadings();
-  logger.info(`--- Check missed readings end - ${Date.now() - ts}ms elapsed.`, {
-    service: 'miss'
-  });
-});
+// cron.schedule('*/10 * * * *', async () => {
+//   logger.info('--- Update metservice stations start ---', {
+//     service: 'station',
+//     type: 'metservice'
+//   });
+//   const ts = Date.now();
+//   await stationWrapper('metservice');
+//   logger.info(`--- Update metservice stations end - ${Date.now() - ts}ms elapsed.`, {
+//     service: 'station',
+//     type: 'metservice'
+//   });
+// });
+// cron.schedule('*/10 * * * *', async () => {
+//   logger.info('--- Update holfuy stations start ---', { service: 'station', type: 'holfuy' });
+//   const ts = Date.now();
+//   await holfuyWrapper();
+//   logger.info(`--- Update holfuy stations end - ${Date.now() - ts}ms elapsed.`, {
+//     service: 'station',
+//     type: 'holfuy'
+//   });
+// });
+// cron.schedule('*/2 * * * *', async () => {
+//   logger.info('--- Update high resolution stations start ---', { service: 'station', type: 'hr' });
+//   const ts = Date.now();
+//   await highResolutionStationWrapper();
+//   logger.info(`--- Update high resolution stations end - ${Date.now() - ts}ms elapsed.`, {
+//     service: 'station',
+//     type: 'hr'
+//   });
+// });
+// cron.schedule('5,15,25,35,45,55 * * * *', async () => {
+//   logger.info('--- Check missed readings start ---', { service: 'miss' });
+//   const ts = Date.now();
+//   await checkForMissedReadings();
+//   logger.info(`--- Check missed readings end - ${Date.now() - ts}ms elapsed.`, {
+//     service: 'miss'
+//   });
+// });
 
 // json
 cron.schedule('2,12,22,32,42,52 * * * *', async () => {
