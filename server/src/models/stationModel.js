@@ -59,7 +59,8 @@ const schema = mongoose.Schema({
   gwWindAverageFieldName: String,
   gwWindGustFieldName: String,
   gwWindBearingFieldName: String,
-  gwTemperatureFieldName: String
+  gwTemperatureFieldName: String,
+  weatherlinkCookie: String
 });
 
 export const Station = mongoose.model('Station', schema);
