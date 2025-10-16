@@ -20,14 +20,14 @@ export async function runScraper() {
     return acc;
   }, {});
 
-  logger.info(`----- Scraping ${Object.keys(grouped).length} webcam types -----`, {
+  logger.info(`----- Webcam: scraping ${Object.keys(grouped).length} types -----`, {
     service: 'cam'
   });
 
   // scrape concurrently per type
   const jobs = Object.entries(grouped).map(async ([type, cams]) => {
     try {
-      logger.info(`----- Scraping: ${type}, ${cams.length} webcams -----`, {
+      logger.info(`----- Webcam: scraping ${type}, ${cams.length} cams -----`, {
         service: 'cam',
         type: type
       });
@@ -35,18 +35,18 @@ export async function runScraper() {
       const scraper = scrapers[type];
       if (scraper) {
         await scraper(cams);
-        logger.info(`----- Finished: ${type} -----`, {
+        logger.info(`----- Webcam finished: ${type} -----`, {
           service: 'cam',
           type: type
         });
       } else {
-        logger.error(`Scraper does not exist for: ${type}`, {
+        logger.error(`Webcam scraper does not exist for: ${type}`, {
           service: 'cam',
           type: type
         });
       }
     } catch (err) {
-      logger.error(`${type} scraper failed: ${err.message}`, {
+      logger.error(`Webcam scraper ${type} failed: ${err.message}`, {
         service: 'cam',
         type: type
       });
