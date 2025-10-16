@@ -18,13 +18,16 @@ import scrapePortOtagoData from './types/portOtago.js';
 import scrapePredictWindData from './types/predictWind.js';
 import scrapePrimePortData from './types/primePort.js';
 import scrapeSofarOceanData from './types/sofarOcean.js';
+import scrapeSouthPortData from './types/southPort.js';
 import scrapeTempestData from './types/tempest.js';
 import scrapeWainuiData from './types/wainui.js';
 import scrapeWeatherLinkData from './types/weatherlink.js';
 import scrapeWeatherProData from './types/weatherPro.js';
 import scrapeWeatherUndergroundData from './types/weatherUnderground.js';
+import scrapeWhanganuiInletData from './types/whanganuiInlet.js';
 import scrapeWindGuruData from './types/windGuru.js';
 import scrapeWowData from './types/wow.js';
+import scrapeWswrData from './types/wswr.js';
 
 export default {
   attentis: scrapeAttentisData,
@@ -47,11 +50,14 @@ export default {
   pw: scrapePredictWindData,
   prime: scrapePrimePortData,
   sfo: scrapeSofarOceanData,
+  sp: scrapeSouthPortData,
   tempest: scrapeTempestData,
   wainui: scrapeWainuiData,
   wl: scrapeWeatherLinkData,
   wp: scrapeWeatherProData,
   wu: scrapeWeatherUndergroundData,
+  wi: scrapeWhanganuiInletData,
   windguru: scrapeWindGuruData,
-  wow: scrapeWowData
+  wow: scrapeWowData,
+  wswr: scrapeWswrData
 };
