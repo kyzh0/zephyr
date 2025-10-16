@@ -16,12 +16,7 @@ export default async function scrapeCheesemanData(cams) {
           let base64 = null;
 
           const { data } = await httpClient.get(
-            `https://www.mtcheeseman.co.nz/wp-content/webcam-player/?cam=${cam.externalId}`,
-            {
-              headers: {
-                Connection: 'keep-alive'
-              }
-            }
+            `https://www.mtcheeseman.co.nz/wp-content/webcam-player/?cam=${cam.externalId}`
           );
           if (data.length) {
             const matches = data.match(
@@ -38,10 +33,7 @@ export default async function scrapeCheesemanData(cams) {
               // skip if image already up to date
               if (updated > new Date(cam.lastUpdate)) {
                 const response = await httpClient.get(`https://www.mtcheeseman.co.nz${url}`, {
-                  responseType: 'arraybuffer',
-                  headers: {
-                    Connection: 'keep-alive'
-                  }
+                  responseType: 'arraybuffer'
                 });
                 base64 = Buffer.from(response.data, 'binary').toString('base64');
               }
