@@ -6,12 +6,14 @@ import scrapeEcowittData from './types/ecowitt.js';
 import scrapeGreaterWellingtonData from './types/greaterWellington.js';
 import scrapeHbrcData from './types/hbrc.js';
 import scrapeHolfuyData from './types/holfuy.js';
+import scrapeHuttWeatherData from './types/huttWeather.js';
 import scrapeLpcData from './types/lpc.js';
 import scrapeMetserviceData from './types/metservice.js';
 import scrapeMfhbData from './types/mfhb.js';
 import scrapeMpycData from './types/mpyc.js';
 import scrapeMrcData from './types/mrc.js';
 import scrapeNavigatusData from './types/navigatus.js';
+import scrapePortersData from './types/porters.js';
 import scrapePortOtagoData from './types/portOtago.js';
 import scrapePredictWindData from './types/predictWind.js';
 import scrapePrimePortData from './types/primePort.js';
@@ -33,12 +35,14 @@ export default {
   gw: scrapeGreaterWellingtonData,
   hbrc: scrapeHbrcData,
   holfuy: scrapeHolfuyData,
+  hw: scrapeHuttWeatherData,
   lpc: scrapeLpcData,
   metservice: scrapeMetserviceData,
   mfhb: scrapeMfhbData,
   mpyc: scrapeMpycData,
   mrc: scrapeMrcData,
   navigatus: scrapeNavigatusData,
+  porters: scrapePortersData,
   po: scrapePortOtagoData,
   pw: scrapePredictWindData,
   prime: scrapePrimePortData,
