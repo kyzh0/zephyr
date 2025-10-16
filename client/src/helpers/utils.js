@@ -71,7 +71,7 @@ export function getStationTypeName(code) {
     case 'porters':
       return 'Porters Alpine Resort';
     case 'wl':
-      return 'Weather Link';
+      return 'Weatherlink';
     case 'hw':
       return 'Hutt Weather';
     case 'pw':

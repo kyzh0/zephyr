@@ -1013,7 +1013,7 @@ async function getPredictWindData(stationId) {
       }
     }
   } catch (error) {
-    logger.warn('An error occured while fetching data for predictwind', {
+    logger.warn(`An error occured while fetching data for predictwind - ${stationId}`, {
       service: 'station',
       type: 'pw'
     });
@@ -1071,7 +1071,7 @@ async function getEcowittData(stationId) {
       }
     }
   } catch (error) {
-    logger.warn('An error occured while fetching data for ecowitt', {
+    logger.warn(`An error occured while fetching data for ecowitt - ${stationId}`, {
       service: 'station',
       type: 'ecowitt'
     });
@@ -1172,7 +1172,7 @@ async function getHbrcData(stationId) {
       }
     }
   } catch (error) {
-    logger.warn('An error occured while fetching data for hbrc', {
+    logger.warn(`An error occured while fetching data for hbrc - ${stationId}`, {
       service: 'station',
       type: 'hbrc'
     });
@@ -1212,9 +1212,66 @@ async function getAucklandCouncilData(stationId) {
       }
     }
   } catch (error) {
-    logger.warn('An error occured while fetching data for auckland council', {
+    logger.warn(`An error occured while fetching data for auckland council - ${stationId}`, {
       service: 'station',
       type: 'ac'
+    });
+  }
+
+  return {
+    windAverage,
+    windGust,
+    windBearing,
+    temperature
+  };
+}
+
+async function getWeatherLinkData(stationId, cookie) {
+  let windAverage = null;
+  let windGust = null;
+  let windBearing = null;
+  let temperature = null;
+
+  try {
+    const { data } = await axios.get(`https://www.weatherlink.com/bulletin/data/${stationId}`, {
+      headers: {
+        Connection: 'keep-alive',
+        Cookie: cookie
+      }
+    });
+
+    if (data && data.oMaiaData && data.oMaiaData.length === 1) {
+      const omd = data.oMaiaData[0];
+      if (omd && omd.logicalSensor && omd.logicalSensor.length) {
+        const sensor = omd.logicalSensor.find((x) => x.productName === 'Temp/Hum');
+        if (sensor && sensor.sensorDataType && sensor.sensorDataType.length) {
+          const avgData = sensor.sensorDataType.find(
+            (x) => x.sensorDataName === '10 Min Avg Wind Speed'
+          );
+          if (avgData && avgData.dataValue)
+            windAverage = Math.round(avgData.dataValue * 1.609 * 10) / 10; // convert from mph
+
+          const gustData = sensor.sensorDataType.find(
+            (x) => x.sensorDataName === '10 Min High Wind Speed'
+          );
+          if (gustData && gustData.dataValue)
+            windGust = Math.round(gustData.dataValue * 1.609 * 10) / 10;
+
+          const bearingData = sensor.sensorDataType.find(
+            (x) => x.sensorDataName === '10 Min Scalar Avg Wind Direction'
+          );
+          if (bearingData && bearingData.dataValue) windBearing = bearingData.dataValue;
+
+          const tempData = sensor.sensorDataType.find((x) => x.sensorDataName === 'Temp');
+          if (tempData && tempData.dataValue)
+            temperature = Math.round((((tempData.dataValue - 32) * 5) / 9) * 10) / 10; // convert from F
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn(`An error occured while fetching data for weatherlink - ${stationId}`, {
+      service: 'station',
+      type: 'wl'
     });
   }
 
@@ -1998,50 +2055,6 @@ async function getPortersData() {
   return result;
 }
 
-async function getWeatherLinkData() {
-  let windAverage = null;
-  let windGust = null;
-  let windBearing = null;
-  let temperature = null;
-
-  try {
-    const { data } = await axios.get(
-      'https://www.weatherlink.com/embeddablePage/summaryData/daf6068a35484c1aad7a941c4a9b0701',
-      {
-        headers: {
-          Connection: 'keep-alive'
-        }
-      }
-    );
-
-    if (data && data.currConditionValues.length) {
-      for (const d of data.currConditionValues) {
-        if (d.sensorDataName.toUpperCase() === '10 MIN AVG WIND SPEED') {
-          windAverage = Number(d.convertedValue);
-        } else if (d.sensorDataName.toUpperCase() === '10 MIN HIGH WIND SPEED') {
-          windGust = Number(d.convertedValue);
-        } else if (d.sensorDataName.toUpperCase() === '1 MIN SCALAR AVG WIND DIRECTION') {
-          windBearing = d.value;
-        } else if (d.sensorDataName.toUpperCase() === 'TEMP') {
-          temperature = Number(d.convertedValue);
-        }
-      }
-    }
-  } catch (error) {
-    logger.warn('An error occured while fetching data for weatherlink', {
-      service: 'station',
-      type: 'wl'
-    });
-  }
-
-  return {
-    windAverage,
-    windGust,
-    windBearing,
-    temperature
-  };
-}
-
 async function getHuttWeatherData() {
   let windAverage = null;
   let windGust = null;
@@ -2449,6 +2462,8 @@ export async function stationWrapper(source) {
           data = await getHbrcData(s.externalId);
         } else if (s.type === 'ac') {
           data = await getAucklandCouncilData(s.externalId);
+        } else if (s.type === 'wl') {
+          data = await getWeatherLinkData(s.externalId, s.weatherlinkCookie);
         } else if (s.type === 'lpc') {
           data = await getLpcData();
         } else if (s.type === 'mpyc') {
@@ -2464,8 +2479,6 @@ export async function stationWrapper(source) {
         } else if (s.type === 'porters') {
           const d = portersData.find((x) => x.id === s.externalId);
           if (d) data = d.data;
-        } else if (s.type === 'wl') {
-          data = await getWeatherLinkData();
         } else if (s.type === 'hw') {
           data = await getHuttWeatherData();
         } else if (s.type === 'wi') {
@@ -2913,6 +2926,8 @@ export async function checkForMissedReadings() {
         data = await getHbrcData(s.externalId);
       } else if (s.type === 'ac') {
         data = await getAucklandCouncilData(s.externalId);
+      } else if (s.type === 'wl') {
+        data = await getWeatherLinkData(s.externalId, s.weatherlinkCookie);
       } else if (s.type === 'lpc') {
         data = await getLpcData();
       } else if (s.type === 'mpyc') {
@@ -2928,8 +2943,6 @@ export async function checkForMissedReadings() {
       } else if (s.type === 'porters') {
         const d = portersData.find((x) => x.id === s.externalId);
         if (d) data = d.data;
-      } else if (s.type === 'wl') {
-        data = await getWeatherLinkData();
       } else if (s.type === 'hw') {
         data = await getHuttWeatherData();
       } else if (s.type === 'wi') {
@@ -3070,52 +3083,88 @@ export async function checkForErrors() {
   }
 }
 
-// export async function updateKeys() {
-//   try {
-//     const stations = await Station.find({
-//       type: 'harvest',
-//       harvestCookie: { $ne: null }
-//     });
-//     if (!stations.length) {
-//       logger.error('No stations found.', { service: 'keys' });
-//       return null;
-//     }
+export async function updateKeys() {
+  try {
+    // const harvestStations = await Station.find({
+    //   type: 'harvest',
+    //   harvestCookie: { $ne: null }
+    // });
+    // if (!harvestStations.length) {
+    //   logger.error('Update keys: no harvest stations found.', { service: 'keys' });
+    //   return null;
+    // }
 
-//     if (stations.length == 2) {
-//       const { headers } = await axios.post(
-//         'https://live.harvest.com/?sid=10243',
-//         {
-//           username: process.env.HARVEST_REALJOURNEYS_USERNAME,
-//           password: process.env.HARVEST_REALJOURNEYS_PASSWORD,
-//           submit: 'Login'
-//         },
-//         {
-//           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-//           maxRedirects: 0,
-//           validateStatus: (status) => {
-//             return status == 302;
-//           }
-//         }
-//       );
+    // if (harvestStations.length == 2) {
+    //   const { headers } = await axios.post(
+    //     'https://live.harvest.com/?sid=10243',
+    //     {
+    //       username: process.env.HARVEST_REALJOURNEYS_USERNAME,
+    //       password: process.env.HARVEST_REALJOURNEYS_PASSWORD,
+    //       submit: 'Login'
+    //     },
+    //     {
+    //       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    //       maxRedirects: 0,
+    //       validateStatus: (status) => {
+    //         return status == 302;
+    //       }
+    //     }
+    //   );
 
-//       const cookies = headers['set-cookie'];
-//       const regex = /PHPSESSID=[0-9a-zA-Z]+;\s/g;
-//       if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
-//         const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
-//         if (cookie) {
-//           for (const s of stations) {
-//             s.harvestCookie = cookie;
-//             await s.save();
-//           }
-//         }
-//       }
-//     }
-//   } catch (error) {
-//     logger.error('An error occurred while updating keys', { service: 'keys' });
-//     logger.error(error, { service: 'keys' });
-//     return null;
-//   }
-// }
+    //   const cookies = headers['set-cookie'];
+    //   const regex = /PHPSESSID=[0-9a-zA-Z]+;\s/g;
+    //   if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
+    //     const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
+    //     if (cookie) {
+    //       for (const s of harvestStations) {
+    //         s.harvestCookie = cookie;
+    //         await s.save();
+    //       }
+    // logger.info('Keys updated: harvest', { service: 'keys' });
+    //     }
+    //   }
+    // }
+
+    const weatherlinkStations = await Station.find({
+      type: 'wl',
+      weatherlinkCookie: { $ne: null }
+    });
+    if (!weatherlinkStations.length) {
+      logger.error('Update keys: no weatherlink stations found.', { service: 'keys' });
+      return null;
+    }
+
+    if (weatherlinkStations.length) {
+      const { headers } = await axios.post(
+        'https://www.weatherlink.com/processLogin',
+        {
+          username: process.env.WEATHERLINK_USERNAME,
+          password: process.env.WEATHERLINK_PASSWORD
+        },
+        {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        }
+      );
+
+      const cookies = headers['set-cookie'];
+      const regex = /JSESSIONID=[0-9a-zA-Z-]+;\s.*/g;
+      if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
+        const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
+        if (cookie) {
+          for (const s of weatherlinkStations) {
+            s.weatherlinkCookie = cookie;
+            await s.save();
+          }
+          logger.info('Keys updated: weatherlink', { service: 'keys' });
+        }
+      }
+    }
+  } catch (error) {
+    logger.error('An error occurred while updating keys', { service: 'keys' });
+    logger.error(error, { service: 'keys' });
+    return null;
+  }
+}
 
 export async function removeOldData() {
   try {

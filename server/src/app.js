@@ -19,7 +19,8 @@ import {
   checkForErrors,
   removeOldData,
   highResolutionStationWrapper,
-  checkForMissedReadings
+  checkForMissedReadings,
+  updateKeys
 } from './services/stationService.js';
 import { soundingWrapper } from './services/soundingService.js';
 
@@ -130,12 +131,12 @@ cron.schedule('5 */6 * * *', async () => {
 });
 
 // keys
-// cron.schedule('5 0 * * *', async () => {
-//   logger.info('--- Update keys start ---', { service: 'keys' });
-//   const ts = Date.now();
-//   await updateKeys();
-//   logger.info(`--- Update keys end - ${Date.now() - ts}ms elapsed.`, { service: 'keys' });
-// });
+cron.schedule('5 0 * * *', async () => {
+  logger.info('--- Update keys start ---', { service: 'keys' });
+  const ts = Date.now();
+  await updateKeys();
+  logger.info(`--- Update keys end - ${Date.now() - ts}ms elapsed.`, { service: 'keys' });
+});
 
 // cleanup
 cron.schedule('5 0 * * *', async () => {
