@@ -4,7 +4,7 @@ import logger from '../../lib/logger.js';
 import {
   processHighResolutionStationJson,
   processStationJson
-} from '../../services/processStationJson.js';
+} from '../../services/stationService.js';
 
 logger.info('----- Initialising station scheduler -----', {
   service: 'station'
