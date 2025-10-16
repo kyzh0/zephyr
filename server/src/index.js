@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import logger from './lib/logger.js';
 
 import './scrapers/stations/scheduler.js';
+import './scrapers/cams/scheduler.js';
 
 dotenv.config();
 
