@@ -8,7 +8,9 @@ import scrapeHbrcData from './types/hbrc.js';
 import scrapeHolfuyData from './types/holfuy.js';
 import scrapeLpcData from './types/lpc.js';
 import scrapeMetserviceData from './types/metservice.js';
+import scrapeMfhbData from './types/mfhb.js';
 import scrapeMpycData from './types/mpyc.js';
+import scrapeMrcData from './types/mrc.js';
 import scrapeNavigatusData from './types/navigatus.js';
 import scrapePortOtagoData from './types/portOtago.js';
 import scrapePredictWindData from './types/predictWind.js';
@@ -31,7 +33,9 @@ export default {
   holfuy: scrapeHolfuyData,
   lpc: scrapeLpcData,
   metservice: scrapeMetserviceData,
+  mfhb: scrapeMfhbData,
   mpyc: scrapeMpycData,
+  mrc: scrapeMrcData,
   navigatus: scrapeNavigatusData,
   po: scrapePortOtagoData,
   pw: scrapePredictWindData,
