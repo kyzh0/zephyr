@@ -1,7 +1,9 @@
 import scrapeAttentisData from './types/attentis.js';
+import scrapeAucklandCouncilData from './types/aucklandCouncil.js';
 import scrapeCwuData from './types/cwu.js';
 import scrapeCentrePortData from './types/centrePort.js';
 import scrapeEcowittData from './types/ecowitt.js';
+import scrapeHbrcData from './types/hbrc.js';
 import scrapeHolfuyData from './types/holfuy.js';
 import scrapeMetserviceData from './types/metservice.js';
 import scrapeNavigatusData from './types/navigatus.js';
@@ -16,9 +18,11 @@ import scrapeWowData from './types/wow.js';
 
 export default {
   attentis: scrapeAttentisData,
+  ac: scrapeAucklandCouncilData,
   cwu: scrapeCwuData,
   cp: scrapeCentrePortData,
   ecowitt: scrapeEcowittData,
+  hbrc: scrapeHbrcData,
   holfuy: scrapeHolfuyData,
   metservice: scrapeMetserviceData,
   navigatus: scrapeNavigatusData,

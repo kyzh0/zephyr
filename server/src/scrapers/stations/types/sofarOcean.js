@@ -30,8 +30,8 @@ export default async function scrapeSofarOceanData(stations) {
             const currentConditions = data.data.currentConditions;
             if (currentConditions && currentConditions.length === 1) {
               const lastUpdate = new Date(currentConditions[0].timeLastUpdatedUTC).getTime();
-              // only update if data is less than 15 min old
-              if (Date.now() - lastUpdate < 15 * 60 * 1000) {
+              // only update if data is less than 40 min old
+              if (Date.now() - lastUpdate < 40 * 60 * 1000) {
                 temperature = currentConditions[0].temperature;
                 const wind = currentConditions[0].wind;
                 if (wind) {
