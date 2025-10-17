@@ -23,7 +23,7 @@ export default async function scrapeCamFtpData(cams) {
 
     processScrapedData(cam, updated, base64);
   } catch (error) {
-    logger.warn('An error occured while fetching images for cam ftp', {
+    logger.warn('camftp error', {
       service: 'cam',
       type: 'camftp'
     });

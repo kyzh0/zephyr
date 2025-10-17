@@ -30,7 +30,7 @@ export default async function scrapeSouthPortData(stations) {
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {
-    logger.warn('An error occured while fetching data for south port', {
+    logger.warn('southport error', {
       service: 'station',
       type: 'sp'
     });

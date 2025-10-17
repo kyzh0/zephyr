@@ -28,7 +28,7 @@ export default async function scrapeTempestData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for tempest - ${station.externalId}`, {
+          logger.warn(`tempest error - ${station.externalId}`, {
             service: 'station',
             type: 'tempest'
           });

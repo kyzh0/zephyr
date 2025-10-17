@@ -27,7 +27,7 @@ export default async function scrapeHarvestData(cams) {
 
           await processScrapedData(cam, updated, base64);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for harvest - ${cam.externalId}`, {
+          logger.warn(`harvest error - ${cam.externalId}`, {
             service: 'cam',
             type: 'harvest'
           });

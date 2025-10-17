@@ -109,7 +109,7 @@ export default async function scrapePrimePortData(stations) {
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {
-    logger.warn('An error occured while fetching data for prime', {
+    logger.warn('primeport error', {
       service: 'station',
       type: 'prime'
     });

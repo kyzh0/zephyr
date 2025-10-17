@@ -34,7 +34,7 @@ export default async function scrapeMtHuttData(cams) {
 
           await processScrapedData(cam, updated, base64);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for mt hutt - ${cam.externalId}`, {
+          logger.warn(`mt hutt error - ${cam.externalId}`, {
             service: 'cam',
             type: 'hutt'
           });

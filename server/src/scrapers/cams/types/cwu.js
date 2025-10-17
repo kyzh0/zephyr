@@ -65,7 +65,7 @@ export default async function scrapeCwuData(cams) {
 
           await processScrapedData(cam, updated, base64);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for cwu - ${cam.externalId}`, {
+          logger.warn(`cwu error - ${cam.externalId}`, {
             service: 'cam',
             type: 'cwu'
           });

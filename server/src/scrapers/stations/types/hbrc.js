@@ -86,7 +86,7 @@ export default async function scrapeHbrcData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for hbrc - ${station.externalId}`, {
+          logger.warn(`hbrc error - ${station.externalId}`, {
             service: 'station',
             type: 'hbrc'
           });

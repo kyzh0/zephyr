@@ -42,7 +42,7 @@ export default async function scrapeCheesemanData(cams) {
 
           await processScrapedData(cam, updated, base64);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for cheeseman - ${cam.externalId}`, {
+          logger.warn(`cheeseman error - ${cam.externalId}`, {
             service: 'cam',
             type: 'cm'
           });

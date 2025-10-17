@@ -280,19 +280,16 @@ export default async function scrapePortersData(stations) {
           d.data.temperature
         );
       } else {
-        logger.warn(
-          `An error occured while fetching data for porters - no data for ${station.externalId}`,
-          {
-            service: 'station',
-            type: 'porters'
-          }
-        );
+        logger.warn(`porters error - no data for ${station.externalId}`, {
+          service: 'station',
+          type: 'porters'
+        });
 
         await processScrapedData(station, null, null, null, null, true);
       }
     }
   } catch (error) {
-    logger.warn('An error occured while fetching data for porters', {
+    logger.warn('porters error', {
       service: 'station',
       type: 'porters'
     });

@@ -30,13 +30,10 @@ export default async function scrapeAucklandCouncilData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for auckland council - ${station.externalId}`,
-            {
-              service: 'station',
-              type: 'ac'
-            }
-          );
+          logger.warn(`ac error - ${station.externalId}`, {
+            service: 'station',
+            type: 'ac'
+          });
 
           await processScrapedData(station, null, null, null, null, true);
         }

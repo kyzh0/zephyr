@@ -44,13 +44,10 @@ export default async function scrapeSofarOceanData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for sofarocean - ${station.externalId}`,
-            {
-              service: 'station',
-              type: 'sfo'
-            }
-          );
+          logger.warn(`sofarocean error - ${station.externalId}`, {
+            service: 'station',
+            type: 'sfo'
+          });
 
           await processScrapedData(station, null, null, null, null, true);
         }

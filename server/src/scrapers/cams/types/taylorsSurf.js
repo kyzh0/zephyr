@@ -17,7 +17,7 @@ export default async function scrapeTaylorsSurfData(cams) {
 
     processScrapedData(cam, updated, base64);
   } catch (error) {
-    logger.warn('An error occured while fetching images for taylors surf', {
+    logger.warn('taylors surf error', {
       service: 'cam',
       type: 'ts'
     });

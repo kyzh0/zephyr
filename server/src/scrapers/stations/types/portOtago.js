@@ -67,13 +67,10 @@ export default async function scrapePortOtagoData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for port otago - ${station.externalId}`,
-            {
-              service: 'station',
-              type: 'po'
-            }
-          );
+          logger.warn(`port otago error - ${station.externalId}`, {
+            service: 'station',
+            type: 'po'
+          });
 
           await processScrapedData(station, null, null, null, null, true);
         }

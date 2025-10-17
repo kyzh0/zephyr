@@ -70,7 +70,7 @@ export default async function scrapeCwuData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for cwu - ${station.externalId}`, {
+          logger.warn(`cwu error - ${station.externalId}`, {
             service: 'station',
             type: 'cwu'
           });

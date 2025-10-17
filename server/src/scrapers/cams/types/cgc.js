@@ -24,13 +24,10 @@ export default async function scrapeCgcData(cams) {
 
           await processScrapedData(cam, updated, base64);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for canterbury gliding club - ${cam.externalId}`,
-            {
-              service: 'cam',
-              type: 'cgc'
-            }
-          );
+          logger.warn(`cgc error - ${cam.externalId}`, {
+            service: 'cam',
+            type: 'cgc'
+          });
         }
       })
     )

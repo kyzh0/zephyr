@@ -59,7 +59,7 @@ export default async function scrapeHarvestData(stations) {
       );
     }
   } catch (error) {
-    logger.warn('An error occured while fetching data from harvest API', {
+    logger.warn('harvest FENZ API error', {
       service: 'station',
       type: 'harvest'
     });
@@ -137,7 +137,7 @@ async function scrapeFenzHarvestStation(station) {
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {
-    logger.warn(`An error occured while fetching data for FENZ harvest - ${station.externalId}`, {
+    logger.warn(`harvest FENZ error - ${station.externalId}`, {
       service: 'station',
       type: 'harvest'
     });
@@ -205,13 +205,10 @@ async function processHarvestValue(sid, configId, graphId, traceId, cookie) {
       }
     }
   } catch (error) {
-    logger.warn(
-      `An error occured while processing harvest data value - ${sid} / ${graphId} / ${traceId}`,
-      {
-        service: 'station',
-        type: 'harvest'
-      }
-    );
+    logger.warn(`harvest error data value - ${sid} / ${graphId} / ${traceId}`, {
+      service: 'station',
+      type: 'harvest'
+    });
   }
 
   return null;

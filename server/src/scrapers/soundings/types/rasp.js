@@ -81,7 +81,7 @@ export default async function scrapeRaspData(soundings) {
             );
           } catch (error) {
             logger.warn(
-              `An error occured while fetching rasp soundings - ${sounding.raspRegion} - ${sounding.raspId} - ${hr}`,
+              `rasp soundings error - ${sounding.raspRegion} - ${sounding.raspId} - ${hr}`,
               {
                 service: 'sounding'
               }

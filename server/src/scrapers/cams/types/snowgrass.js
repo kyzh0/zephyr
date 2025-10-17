@@ -23,7 +23,7 @@ export default async function scrapeSnowgrassData(cams) {
 
     processScrapedData(cam, updated, base64);
   } catch (error) {
-    logger.warn('An error occured while fetching images for snowgrass', {
+    logger.warn('snowgrass error', {
       service: 'cam',
       type: 'snowgrass'
     });

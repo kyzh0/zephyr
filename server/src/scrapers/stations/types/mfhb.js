@@ -22,7 +22,7 @@ export default async function scrapeMfhbData(stations) {
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {
-    logger.warn('An error occured while fetching data for mfhb', {
+    logger.warn('mfhb error', {
       service: 'station',
       type: 'mfhb'
     });

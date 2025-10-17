@@ -39,7 +39,7 @@ export default async function scrapeMetserviceData(cams) {
 
           await processScrapedData(cam, updated, base64);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for metservice - ${cam.externalId}`, {
+          logger.warn(`metservice error - ${cam.externalId}`, {
             service: 'cam',
             type: 'metservice'
           });
