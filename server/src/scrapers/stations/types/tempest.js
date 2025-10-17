@@ -16,13 +16,7 @@ export default async function scrapeTempestData(stations) {
           let temperature = null;
 
           const { data } = await httpClient.get(
-            `https://swd.weatherflow.com/swd/rest/better_forecast?api_key=${process.env.TEMPEST_KEY}&station_id=${station.externalId}&units_temp=c&units_wind=kph`,
-            {
-              headers: {
-                'User-Agent':
-                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0'
-              }
-            }
+            `https://swd.weatherflow.com/swd/rest/better_forecast?api_key=${process.env.TEMPEST_KEY}&station_id=${station.externalId}&units_temp=c&units_wind=kph`
           );
           const cc = data.current_conditions;
           if (cc) {
