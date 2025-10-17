@@ -23,6 +23,8 @@ services:
     depends_on:
       - mongodb
       - seq
+    volumes:
+      - caddy_fs:/app/public/
 
   mongodb:
     container_name: mongodb
