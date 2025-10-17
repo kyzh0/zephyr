@@ -1,7 +1,10 @@
-import app from './app.js';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import logger from './lib/logger.js';
+
+import { startStationScheduler } from './scrapers/stations/scheduler.js';
+import { startCamScheduler } from './scrapers/cams/scheduler.js';
+import { startSoundingScheduler } from './scrapers/soundings/scheduler.js';
 
 dotenv.config();
 
@@ -12,8 +15,9 @@ try {
       : process.env.DEV_CONNECTION_STRING
   );
 
-  const port = process.env.NODE_PORT || 5000;
-  app.listen(port, () => logger.info(`Server running on port ${port}`));
+  await startStationScheduler();
+  await startCamScheduler();
+  await startSoundingScheduler();
 } catch (error) {
   logger.error(error);
 }
