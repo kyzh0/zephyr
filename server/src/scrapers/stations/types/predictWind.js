@@ -30,13 +30,10 @@ export default async function scrapePredictWindData(stations) {
           }
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for predictwind - ${station.externalId}`,
-            {
-              service: 'station',
-              type: 'pw'
-            }
-          );
+          logger.warn(`predictwind error - ${station.externalId}`, {
+            service: 'station',
+            type: 'pw'
+          });
 
           await processScrapedData(station, null, null, null, null, true);
         }

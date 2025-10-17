@@ -34,7 +34,7 @@ export default async function scrapeHolfuyData(stations) {
       );
     }
   } catch (error) {
-    logger.warn('An error occured while fetching data from holfuy API', {
+    logger.warn('holfuy API error', {
       service: 'station',
       type: 'holfuy'
     });
@@ -75,7 +75,7 @@ async function scrapeHolfuyStation(station) {
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {
-    logger.warn(`An error occured while fetching data for holfuy - ${station.externalId}`, {
+    logger.warn(`holfuy error - ${station.externalId}`, {
       service: 'station',
       type: 'holfuy'
     });

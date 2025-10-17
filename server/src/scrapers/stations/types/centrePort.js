@@ -55,13 +55,10 @@ export default async function scrapeCentrePortData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for centre port - ${station.externalId}`,
-            {
-              service: 'station',
-              type: 'cp'
-            }
-          );
+          logger.warn(`centreport error - ${station.externalId}`, {
+            service: 'station',
+            type: 'cp'
+          });
 
           await processScrapedData(station, null, null, null, null, true);
         }

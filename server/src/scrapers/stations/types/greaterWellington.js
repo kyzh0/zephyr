@@ -87,13 +87,10 @@ export default async function scrapeGreaterWellingtonData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for greater wellington - ${station.externalId}`,
-            {
-              service: 'station',
-              type: 'gw'
-            }
-          );
+          logger.warn(`gw error - ${station.externalId}`, {
+            service: 'station',
+            type: 'gw'
+          });
 
           await processScrapedData(station, null, null, null, null, true);
         }

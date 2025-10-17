@@ -35,7 +35,7 @@ export default async function scrapeWowData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for wow - ${station.externalId}`, {
+          logger.warn(`wow error - ${station.externalId}`, {
             service: 'station',
             type: 'wow'
           });

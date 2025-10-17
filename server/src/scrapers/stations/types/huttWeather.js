@@ -62,7 +62,7 @@ export default async function scrapeHuttWeatherData(stations) {
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {
-    logger.warn('An error occured while fetching data for hutt weather', {
+    logger.warn('hutt weather error', {
       service: 'station',
       type: 'hw'
     });

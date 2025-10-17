@@ -55,13 +55,10 @@ export default async function scrapeWeatherProData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for weatherpro - ${station.externalId}`,
-            {
-              service: 'station',
-              type: 'wp'
-            }
-          );
+          logger.warn(`weatherpro error - ${station.externalId}`, {
+            service: 'station',
+            type: 'wp'
+          });
 
           await processScrapedData(station, null, null, null, null, true);
         }

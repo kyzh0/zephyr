@@ -48,7 +48,7 @@ export default async function scrapeEcowittData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for ecowitt - ${station.externalId}`, {
+          logger.warn(`ecowitt error - ${station.externalId}`, {
             service: 'station',
             type: 'ecowitt'
           });

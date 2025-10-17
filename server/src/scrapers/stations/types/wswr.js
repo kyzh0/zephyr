@@ -25,7 +25,7 @@ export default async function scrapeWswrData(stations) {
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {
-    logger.warn('An error occured while fetching data for wswr', {
+    logger.warn('wswr error', {
       service: 'station',
       type: 'wswr'
     });

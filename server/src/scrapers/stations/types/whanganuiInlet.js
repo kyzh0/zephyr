@@ -90,7 +90,7 @@ export default async function scrapeWhanganuiInletData(stations) {
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {
-    logger.warn('An error occured while fetching data for whanganui inlet', {
+    logger.warn('whanganui inlet error', {
       service: 'station',
       type: 'wi'
     });

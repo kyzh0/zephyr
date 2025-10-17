@@ -69,7 +69,7 @@ export default async function scrapeWainuiData(stations) {
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {
-    logger.warn('An error occured while fetching data for wainui', {
+    logger.warn('wainui error', {
       service: 'station',
       type: 'wainui'
     });

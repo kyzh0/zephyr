@@ -24,7 +24,7 @@ export default async function scrapeCastleHillData(cams) {
 
           await processScrapedData(cam, updated, base64);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for castle hill - ${cam.externalId}`, {
+          logger.warn(`castle hill error - ${cam.externalId}`, {
             service: 'cam',
             type: 'ch'
           });

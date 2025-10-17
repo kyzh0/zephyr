@@ -62,13 +62,10 @@ export default async function scrapeQueenstownAirportData(cams) {
 
           await processScrapedData(cam, updated, base64);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for queenstown airport - ${cam.externalId}`,
-            {
-              service: 'cam',
-              type: 'qa'
-            }
-          );
+          logger.warn(`queenstown airport error - ${cam.externalId}`, {
+            service: 'cam',
+            type: 'qa'
+          });
         }
       })
     )

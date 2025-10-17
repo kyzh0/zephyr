@@ -121,13 +121,10 @@ export default async function scrapeNavigatusData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for navigatus - ${station.externalId}`,
-            {
-              service: 'station',
-              type: 'navigatus'
-            }
-          );
+          logger.warn(`navigatus error - ${station.externalId}`, {
+            service: 'station',
+            type: 'navigatus'
+          });
 
           await processScrapedData(station, null, null, null, null, true);
         }

@@ -43,13 +43,10 @@ export default async function scrapeMetserviceData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for metservice - ${station.externalId}`,
-            {
-              service: 'station',
-              type: 'metservice'
-            }
-          );
+          logger.warn(`metservice error - ${station.externalId}`, {
+            service: 'station',
+            type: 'metservice'
+          });
 
           await processScrapedData(station, null, null, null, null, true);
         }

@@ -34,19 +34,16 @@ export default async function scrapeAttentisData(stations) {
           d.data.temperature
         );
       } else {
-        logger.warn(
-          `An error occured while fetching data for attentis - no data for ${station.externalId}`,
-          {
-            service: 'station',
-            type: 'attentis'
-          }
-        );
+        logger.warn(`attentis error - no data for ${station.externalId}`, {
+          service: 'station',
+          type: 'attentis'
+        });
 
         await processScrapedData(station, null, null, null, null, true);
       }
     }
   } catch (error) {
-    logger.warn('An error occured while fetching data for attentis', {
+    logger.warn('attentis error', {
       service: 'station',
       type: 'attentis'
     });

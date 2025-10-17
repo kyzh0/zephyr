@@ -31,13 +31,10 @@ export default async function scrapeWeatherUndergroundData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for weatherunderground - ${station.externalId}`,
-            {
-              service: 'station',
-              type: 'wu'
-            }
-          );
+          logger.warn(`wu error - ${station.externalId}`, {
+            service: 'station',
+            type: 'wu'
+          });
 
           await processScrapedData(station, null, null, null, null, true);
         }

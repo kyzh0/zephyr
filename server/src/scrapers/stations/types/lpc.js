@@ -62,7 +62,7 @@ export default async function scrapeLpcData(stations) {
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {
-    logger.warn('An error occured while fetching data for lpc', {
+    logger.warn('lpc error', {
       service: 'station',
       type: 'lpc'
     });

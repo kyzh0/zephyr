@@ -32,7 +32,7 @@ export default async function scrapeWindGuruData(stations) {
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch (error) {
-          logger.warn(`An error occured while fetching data for windguru - ${station.externalId}`, {
+          logger.warn(`windguru error - ${station.externalId}`, {
             service: 'station',
             type: 'windguru'
           });

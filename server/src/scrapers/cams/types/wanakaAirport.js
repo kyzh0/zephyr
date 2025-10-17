@@ -62,13 +62,10 @@ export default async function scrapeWanakaAirportData(cams) {
 
           await processScrapedData(cam, updated, base64);
         } catch (error) {
-          logger.warn(
-            `An error occured while fetching data for wanaka airport - ${cam.externalId}`,
-            {
-              service: 'cam',
-              type: 'wa'
-            }
-          );
+          logger.warn(`wanaka airport error - ${cam.externalId}`, {
+            service: 'cam',
+            type: 'wa'
+          });
         }
       })
     )
