@@ -14,7 +14,7 @@ export default async function scrapeCastleHillData(cams) {
           let base64 = null;
 
           const response = await httpClient.get(
-            `https://www.castlehill.nz/php/webcam_wll.php?cam=${cam.externalId}/webcam.php.jpg`,
+            `https://www.castlehill.nz/php/webcam_wll.php?cam=${cam.externalId}`,
             {
               responseType: 'arraybuffer'
             }
