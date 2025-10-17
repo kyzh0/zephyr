@@ -147,11 +147,26 @@ router.get('/json-output', async (req, res) => {
       }
     }
 
+    // limit 6 months data
+    const ms180Days = 180 * 24 * 60 * 60 * 1000;
+    if (dateFrom != null && dateTo != null) {
+      if (dateTo.getTime() - dateFrom.getTime() > ms180Days) {
+        dateFrom = new Date(dateTo.getTime() - ms180Days);
+      }
+    } else if (dateFrom != null) {
+      dateTo = new Date(dateFrom.getTime() + ms180Days);
+    } else if (dateTo != null) {
+      dateFrom = new Date(dateTo.getTime() - ms180Days);
+    } else {
+      dateTo = new Date();
+      dateFrom = new Date(dateTo.getTime() - ms180Days);
+    }
+
     const query = {};
-    if (dateFrom != null && !isNaN(dateFrom)) query.time = { $gte: dateFrom };
-    if (dateTo != null && !isNaN(dateTo)) {
-      if (query.time) query.time.$lte = dateTo;
-      else query.time = { $lte: dateTo };
+    if (dateFrom != null) query.time = { $gte: dateFrom.getTime() };
+    if (dateTo != null) {
+      if (query.time) query.time.$lte = dateTo.getTime();
+      else query.time = { $lte: dateTo.getTime() };
     }
 
     if (String(req.query.hr).toLowerCase() !== 'true') query.isHighResolution = { $ne: true };
