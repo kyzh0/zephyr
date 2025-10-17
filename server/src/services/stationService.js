@@ -144,6 +144,8 @@ function groupBy(xs, key) {
 }
 export async function checkForErrors() {
   try {
+    // import { StationData } from '../models/stationDataModel.js';
+    // await Station.find({ name: 'Rocky Gully' }, { data: 0 }).populate({ path: 'dataNew' })
     const stations = await Station.find({ isDisabled: { $ne: true } });
     if (!stations.length) {
       logger.error('No stations found.', { service: 'errors' });
