@@ -15,13 +15,7 @@ export default async function scrapeHarvestData(cams) {
 
           const ids = cam.externalId.split('_');
           const { data } = await httpClient.get(
-            `https://live.harvest.com/php/device_camera_images_functions.php?device_camera_images&request_type=initial&source_id=9&site_id=${ids[0]}&hsn=${ids[1]}`,
-            {
-              headers: {
-                'User-Agent':
-                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0'
-              }
-            }
+            `https://live.harvest.com/php/device_camera_images_functions.php?device_camera_images&request_type=initial&source_id=9&site_id=${ids[0]}&hsn=${ids[1]}`
           );
           if (data.date_utc) {
             updated = new Date(data.date_utc);
