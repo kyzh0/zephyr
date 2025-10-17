@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "main": "index.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
+    "start": "node src/index.js",
+    "scheduler": "node src/schedulerIndex.js",
+    "dev": "nodemon src/index.js & nodemon src/schedulerIndex.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ./**/*.{js,jsx,ts,tsx,css,md,json} --config ./.prettierrc.json"
@@ -23,6 +24,7 @@
     "mongoose": "^8.3.3",
     "node-cron": "^3.0.3",
     "node-dir": "^0.1.17",
+    "p-limit": "^7.1.1",
     "sharp": "^0.33.3",
     "tesseract.js": "^6.0.1",
     "winston": "^3.13.0"
