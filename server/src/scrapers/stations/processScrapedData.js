@@ -1,6 +1,7 @@
 import { getFlooredTime } from '../../lib/utils.js';
 import { validateStationData } from '../../validators/stationValidator.js';
 import { Station } from '../../models/stationModel.js';
+import { StationData } from '../../models/stationDataModel.js';
 import logger from '../../lib/logger.js';
 
 export default async function processScrapedData(
@@ -24,6 +25,18 @@ export default async function processScrapedData(
   station.currentBearing = data.windBearing ?? null;
   station.currentTemperature = data.temperature ?? null;
 
+  // add data
+  const d = new StationData({
+    time: getFlooredTime(station.isHighResolution ? 2 : 10),
+    windAverage: data.windAverage ?? null,
+    windGust: data.windGust ?? null,
+    windBearing: data.windBearing ?? null,
+    temperature: data.temperature ?? null,
+    station: station._id
+  });
+  await d.save();
+
+  // save station
   if (data.windAverage != null || data.windGust != null) {
     station.isOffline = false;
   }

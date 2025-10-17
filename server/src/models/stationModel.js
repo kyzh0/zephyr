@@ -63,4 +63,13 @@ const schema = mongoose.Schema({
   weatherlinkCookie: String
 });
 
+schema.virtual('dataNew', {
+  ref: 'StationData',
+  localField: '_id',
+  foreignField: 'station'
+});
+
+schema.set('toObject', { virtuals: true });
+schema.set('toJSON', { virtuals: true });
+
 export const Station = mongoose.model('Station', schema);
