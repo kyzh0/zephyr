@@ -25,7 +25,7 @@ export default async function scrapePrimePortData(stations) {
     const imgBuff = Buffer.from(base64, 'base64');
 
     // init OCR
-    const dir = 'public/temp';
+    const dir = 'public/temp/prime';
     await fs.mkdir(dir, { recursive: true });
     const worker = await createWorker('eng', 1, {
       errorHandler: (err) => {
