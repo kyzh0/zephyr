@@ -16,7 +16,7 @@ export async function startCamScheduler() {
     let ts = Date.now();
     await runScraper();
     logger.info(
-      `----- Webcam scraper finished, ${Math.round((Date.now() - ts) / 1000)}s elapsed -----`,
+      `----- Webcam scraper finished, ${Math.floor((Date.now() - ts) / 1000)}s elapsed -----`,
       {
         service: 'cam'
       }
