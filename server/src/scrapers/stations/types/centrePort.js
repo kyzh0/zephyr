@@ -4,7 +4,7 @@ import processScrapedData from '../processScrapedData.js';
 import logger from '../../../lib/logger.js';
 
 export default async function scrapeCentrePortData(stations) {
-  const limit = pLimit(10);
+  const limit = pLimit(5);
 
   const dateFrom = new Date(Date.now() - 720 * 60 * 1000); // current time - 12h
   const dateTo = new Date(dateFrom.getTime() + 1081 * 60 * 1000); // date from + 18h 1min

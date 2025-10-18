@@ -7,7 +7,7 @@ import logger from '../../../lib/logger.js';
 import { Sounding } from '../../../models/soundingModel.js';
 
 export default async function scrapeRaspData(soundings) {
-  const limit = pLimit(10);
+  const limit = pLimit(5);
 
   await Promise.allSettled(
     soundings.map((sounding) =>
