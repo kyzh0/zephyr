@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { formatInTimeZone } from 'date-fns-tz';
 import { getStationById, loadStationData } from '../services/stationService';
 import { AppContext } from '../context/AppContext';
-import { getStationTypeName, getWindDirectionFromBearing, getWindColor } from '../helpers/utils';
+import { getStationTypeName, getWindDirectionFromBearing, getWindColor } from '../lib/utils';
 
 import {
   LineChart,

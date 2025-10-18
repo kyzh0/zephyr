@@ -5,10 +5,7 @@ const logger = winston.createLogger({
   format: winston.format.combine(winston.format.errors({ stack: true }), winston.format.json()),
   transports: [
     new SeqTransport({
-      serverUrl:
-        process.env.NODE_ENV === 'development'
-          ? process.env.DEV_SEQ_URL
-          : process.env.SEQ_INGESTION_URL,
+      serverUrl: process.env.SEQ_INGESTION_URL,
       onError: (e) => {
         console.error(e);
       }

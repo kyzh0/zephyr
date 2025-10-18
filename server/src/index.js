@@ -6,11 +6,7 @@ import logger from './lib/logger.js';
 dotenv.config();
 
 try {
-  await mongoose.connect(
-    process.env.NODE_ENV === 'production'
-      ? process.env.DB_CONNECTION_STRING
-      : process.env.DEV_CONNECTION_STRING
-  );
+  await mongoose.connect(process.env.DB_CONNECTION_STRING);
 
   const port = process.env.NODE_PORT || 5000;
   app.listen(port, () => logger.info(`Server running on port ${port}`));

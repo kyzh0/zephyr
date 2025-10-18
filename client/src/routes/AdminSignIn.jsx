@@ -13,8 +13,6 @@ import Box from '@mui/material/Box';
 import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
 
-import { APIROOT } from '../helpers/constants';
-
 export default function AdminSignIn() {
   const navigate = useNavigate();
   function handleClose() {
@@ -54,7 +52,10 @@ export default function AdminSignIn() {
     }
 
     try {
-      const { data } = await axios.post(`${APIROOT}/auth`, { username, password });
+      const { data } = await axios.post(`${process.env.REACT_APP_API_PREFIX}/auth`, {
+        username,
+        password
+      });
       setUserKey(data.key);
       setLoading(false);
     } catch {

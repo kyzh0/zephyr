@@ -13,11 +13,7 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
   const ts = Date.now();
 
   try {
-    await mongoose.connect(
-      process.env.NODE_ENV === 'production'
-        ? process.env.DB_CONNECTION_STRING
-        : process.env.DEV_CONNECTION_STRING
-    );
+    await mongoose.connect(process.env.DB_CONNECTION_STRING);
 
     let dateFrom = null;
     let dateTo = new Date();
@@ -86,9 +82,7 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
     XLSX.writeFile(wb, filePath);
     logger.info(`CSV generated, ${Date.now() - ts}ms elapsed - ${fileName}`);
 
-    const urlPrefix =
-      process.env.NODE_ENV === 'production' ? 'https://fs.zephyrapp.nz/' : 'http://localhost:5000/';
-    return `${urlPrefix}${filePath}`;
+    return `${process.env.FILE_SERVER_PREFIX}/${filePath}`;
   } catch (error) {
     logger.error(error, { service: 'public' });
   }

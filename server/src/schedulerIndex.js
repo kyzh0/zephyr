@@ -9,11 +9,7 @@ import { startSoundingScheduler } from './scrapers/soundings/scheduler.js';
 dotenv.config();
 
 try {
-  await mongoose.connect(
-    process.env.NODE_ENV === 'production'
-      ? process.env.DB_CONNECTION_STRING
-      : process.env.DEV_CONNECTION_STRING
-  );
+  await mongoose.connect(process.env.DB_CONNECTION_STRING);
 
   await startStationScheduler();
   await startCamScheduler();

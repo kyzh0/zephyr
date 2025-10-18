@@ -5,8 +5,6 @@ services:
     mem_limit: 4g
     restart: unless-stopped
     env_file: ./.env
-    environment:
-      - DB_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
     depends_on:
       - mongodb
       - seq
@@ -20,8 +18,6 @@ services:
     mem_limit: 8g
     restart: unless-stopped
     env_file: ./.env
-    environment:
-      - DB_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
     depends_on:
       - mongodb
       - seq

@@ -1,9 +1,8 @@
 import axios from 'axios';
-import { APIROOT } from '../helpers/constants';
 
 export async function getCamById(id) {
   try {
-    const { data } = await axios.get(`${APIROOT}/cams/${id}`);
+    const { data } = await axios.get(`${process.env.REACT_APP_API_PREFIX}/cams/${id}`);
     return data;
   } catch (error) {
     console.error(error);
@@ -12,7 +11,7 @@ export async function getCamById(id) {
 
 export async function listCams() {
   try {
-    const { data } = await axios.get(`${APIROOT}/cams`);
+    const { data } = await axios.get(`${process.env.REACT_APP_API_PREFIX}/cams`);
     return data;
   } catch (error) {
     console.error(error);
@@ -21,7 +20,9 @@ export async function listCams() {
 
 export async function listCamsUpdatedSince(unixTime) {
   try {
-    const { data } = await axios.get(`${APIROOT}/cams?unixTimeFrom=${unixTime}`);
+    const { data } = await axios.get(
+      `${process.env.REACT_APP_API_PREFIX}/cams?unixTimeFrom=${unixTime}`
+    );
     return data;
   } catch (error) {
     console.error(error);
@@ -30,7 +31,7 @@ export async function listCamsUpdatedSince(unixTime) {
 
 export async function loadCamImages(id) {
   try {
-    const { data } = await axios.get(`${APIROOT}/cams/${id}/images`);
+    const { data } = await axios.get(`${process.env.REACT_APP_API_PREFIX}/cams/${id}/images`);
     return data;
   } catch (error) {
     console.error(error);
@@ -39,7 +40,7 @@ export async function loadCamImages(id) {
 
 export async function addCam(cam, key) {
   try {
-    await axios.post(`${APIROOT}/cams?key=${key}`, cam);
+    await axios.post(`${process.env.REACT_APP_API_PREFIX}/cams?key=${key}`, cam);
   } catch (error) {
     console.error(error);
   }

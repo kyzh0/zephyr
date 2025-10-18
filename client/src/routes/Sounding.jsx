@@ -17,7 +17,6 @@ import './Webcam.css';
 import { Carousel } from 'react-responsive-carousel';
 import { formatInTimeZone } from 'date-fns-tz';
 
-import { FILESERVERROOT } from '../helpers/constants';
 import { getSoundingById } from '../services/soundingService';
 
 export default function Sounding() {
@@ -135,7 +134,7 @@ export default function Sounding() {
                             <img
                               width="100%"
                               height="100%"
-                              src={`${FILESERVERROOT}/${img.url}`}
+                              src={`${process.env.REACT_APP_FILE_SERVER_PREFIX}/${img.url}`}
                               style={{ objectFit: 'contain' }}
                             />
                             <p style={{ margin: 0 }}>
