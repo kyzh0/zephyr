@@ -22,7 +22,7 @@ export async function startStationScheduler() {
     let ts = Date.now();
     await runScraper();
     logger.info(
-      `----- Station scraper finished, ${Math.round((Date.now() - ts) / 1000)}s elapsed -----`,
+      `----- Station scraper finished, ${Math.floor((Date.now() - ts) / 1000)}s elapsed -----`,
       {
         service: 'station'
       }
@@ -44,7 +44,7 @@ export async function startStationScheduler() {
     let ts = Date.now();
     await runScraper(true);
     logger.info(
-      `----- High resolution station scraper finished, ${Math.round((Date.now() - ts) / 1000)}s elapsed -----`,
+      `----- High resolution station scraper finished, ${Math.floor((Date.now() - ts) / 1000)}s elapsed -----`,
       {
         service: 'station'
       }

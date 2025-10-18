@@ -20,7 +20,7 @@ export async function startSoundingScheduler() {
       const ts = Date.now();
       await runScraper();
       logger.info(
-        `----- Update soundings end - ${Math.round((Date.now() - ts) / 1000)}s elapsed. -----`,
+        `----- Update soundings end - ${Math.floor((Date.now() - ts) / 1000)}s elapsed. -----`,
         {
           service: 'sounding'
         }

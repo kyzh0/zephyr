@@ -9,7 +9,7 @@ export default async function scrapeAttentisData(stations) {
       headers: { Authorization: `Bearer ${process.env.ATTENTIS_KEY}` }
     });
     if (data.data && data.data.weather_readings) {
-      for (var key of Object.keys(data.data.weather_readings)) {
+      for (const key of Object.keys(data.data.weather_readings)) {
         const d = data.data.weather_readings[key];
         result.push({
           id: key,
