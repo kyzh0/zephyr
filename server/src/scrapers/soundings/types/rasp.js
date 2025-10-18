@@ -42,12 +42,9 @@ export default async function scrapeRaspData(soundings) {
 
           try {
             const response = await httpClient.get(
-              `http://rasp.nz/rasp/regions/${sounding.raspRegion}+0/${year}/${year}${month}${day}/sounding${sounding.raspId}.curr.${hr}00lst.w2.png`,
+              `http://rasp.nz/rasp/regions/${sounding.raspRegion}/${year}/${year}${month}${day}/sounding${sounding.raspId}.curr.${hr}00lst.w2.png`,
               {
-                responseType: 'arraybuffer',
-                headers: {
-                  Connection: 'keep-alive'
-                }
+                responseType: 'arraybuffer'
               }
             );
             const base64 = Buffer.from(response.data, 'binary').toString('base64');
