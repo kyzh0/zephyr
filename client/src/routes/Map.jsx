@@ -3,7 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { formatInTimeZone } from 'date-fns-tz';
 import { AppContext } from '../context/AppContext';
-import { getWindDirectionFromBearing } from '../helpers/utils';
+import { getWindDirectionFromBearing } from '../lib/utils';
 
 import {
   getStationById,
@@ -34,8 +34,6 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import './Map.css';
-
-import { FILESERVERROOT } from '../helpers/constants';
 
 export default function Map() {
   let theme = createTheme({
@@ -454,7 +452,7 @@ export default function Map() {
 
       const img = document.createElement('img');
       img.width = 150;
-      img.src = `${FILESERVERROOT}/${currentUrl}`;
+      img.src = `${process.env.REACT_APP_FILE_SERVER_PREFIX}/${currentUrl}`;
       img.className = 'webcam-img';
 
       const text = document.createElement('span');
@@ -515,7 +513,7 @@ export default function Map() {
       text1.className = 'webcam-text-date';
 
       if (currentUrl && currentTime) {
-        img.src = `${FILESERVERROOT}/${currentUrl}`;
+        img.src = `${process.env.REACT_APP_FILE_SERVER_PREFIX}/${currentUrl}`;
         text1.innerHTML = formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm');
       } else {
         text1.innerHTML = 'Click to view more...';
@@ -727,7 +725,7 @@ export default function Map() {
           child.src =
             timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000
               ? ''
-              : `${FILESERVERROOT}/${currentUrl}`;
+              : `${process.env.REACT_APP_FILE_SERVER_PREFIX}/${currentUrl}`;
         } else if (child.className === 'webcam-text-date') {
           if (timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000) {
             child.innerHTML = 'No images in the last 24h.';
@@ -785,7 +783,7 @@ export default function Map() {
       item.dataset.timestamp = timestamp;
       for (const child of item.children) {
         if (child.className === 'webcam-img') {
-          child.src = currentUrl ? `${FILESERVERROOT}/${currentUrl}` : '';
+          child.src = currentUrl ? `${process.env.REACT_APP_FILE_SERVER_PREFIX}/${currentUrl}` : '';
         } else if (child.className === 'webcam-text-date') {
           if (currentTime) {
             child.innerHTML = formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm');

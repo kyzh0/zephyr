@@ -19,8 +19,7 @@ import './Webcam.css';
 import { Carousel } from 'react-responsive-carousel';
 import { formatInTimeZone } from 'date-fns-tz';
 
-import { FILESERVERROOT } from '../helpers/constants';
-import { getWebcamTypeName } from '../helpers/utils';
+import { getWebcamTypeName } from '../lib/utils';
 
 export default function Webcam() {
   const { id } = useParams();
@@ -139,7 +138,10 @@ export default function Webcam() {
                         img.loaded = true;
                         return (
                           <div key={img.time}>
-                            <img width="100%" src={`${FILESERVERROOT}/${img.url}`} />
+                            <img
+                              width="100%"
+                              src={`${process.env.REACT_APP_FILE_SERVER_PREFIX}/${img.url}`}
+                            />
                             <p style={{ margin: 0 }}>
                               {formatInTimeZone(
                                 new Date(img.time),

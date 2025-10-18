@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import * as geofire from 'geofire-common';
 import { listStationsUpdatedSince, listStationsWithinRadius } from '../services/stationService';
-import { getWindColor, getWindDirectionFromBearing } from '../helpers/utils';
+import { getWindColor, getWindDirectionFromBearing } from '../lib/utils';
 
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';

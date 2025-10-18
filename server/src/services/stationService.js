@@ -58,11 +58,9 @@ export async function processStationJson() {
     await fs.writeFile(path, JSON.stringify(json));
     logger.info(`File created - ${path}`, { service: 'json' });
 
-    const urlPrefix =
-      process.env.NODE_ENV === 'production' ? 'https://fs.zephyrapp.nz/' : 'http://localhost:5000/';
     const output = new Output({
       time: date,
-      url: `${urlPrefix}${path.replace('public/', '')}`
+      url: `${process.env.FILE_SERVER_PREFIX}/${path.replace('public/', '')}`
     });
     await output.save();
   } catch (error) {
@@ -120,11 +118,9 @@ export async function processHighResolutionStationJson() {
     await fs.writeFile(path, JSON.stringify(json));
     logger.info(`File created - ${path}`, { service: 'json' });
 
-    const urlPrefix =
-      process.env.NODE_ENV === 'production' ? 'https://fs.zephyrapp.nz/' : 'http://localhost:5000/';
     const output = new Output({
       time: date,
-      url: `${urlPrefix}${path.replace('public/', '')}`,
+      url: `${process.env.FILE_SERVER_PREFIX}/${path.replace('public/', '')}`,
       isHighResolution: true
     });
     await output.save();
