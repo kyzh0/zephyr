@@ -5,7 +5,7 @@ import processScrapedData from '../processScrapedData.js';
 import logger from '../../../lib/logger.js';
 
 export default async function scrapeHbrcData(stations) {
-  const limit = pLimit(10);
+  const limit = pLimit(5);
 
   await Promise.allSettled(
     stations.map((station) =>

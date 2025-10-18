@@ -28,7 +28,7 @@ export default async function scrapeHolfuyData(stations) {
 
     // individual scrape
     if (individualScrapeStations.length) {
-      const limit = pLimit(10);
+      const limit = pLimit(5);
       await Promise.allSettled(
         individualScrapeStations.map((station) => limit(scrapeHolfuyStation(station)))
       );
@@ -41,7 +41,7 @@ export default async function scrapeHolfuyData(stations) {
     logger.warn(error);
 
     // try individually
-    const limit = pLimit(10);
+    const limit = pLimit(5);
     await Promise.allSettled(stations.map((station) => limit(scrapeHolfuyStation(station))));
   }
 }

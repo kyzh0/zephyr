@@ -45,7 +45,7 @@ export default async function scrapeHarvestData(stations) {
 
     // fenz
     if (fenzStations.length) {
-      const limit = pLimit(10);
+      const limit = pLimit(5);
       await Promise.allSettled(
         fenzStations.map((station) => limit(scrapeFenzHarvestStation(station)))
       );
@@ -53,7 +53,7 @@ export default async function scrapeHarvestData(stations) {
 
     // others
     if (otherStations.length) {
-      const limit = pLimit(10);
+      const limit = pLimit(5);
       await Promise.allSettled(
         otherStations.map((station) => limit(scrapeHarvestStation(station)))
       );
@@ -66,7 +66,7 @@ export default async function scrapeHarvestData(stations) {
     logger.warn(error);
 
     // try individually, ignore fenz API
-    const limit = pLimit(10);
+    const limit = pLimit(5);
     await Promise.allSettled(stations.map((station) => limit(scrapeHarvestStation(station))));
   }
 }

@@ -4,7 +4,7 @@ import processScrapedData from '../processScrapedData.js';
 import logger from '../../../lib/logger.js';
 
 export default async function scrapeQueenstownAirportData(cams) {
-  const limit = pLimit(10);
+  const limit = pLimit(5);
 
   await Promise.allSettled(
     cams.map((cam) =>
