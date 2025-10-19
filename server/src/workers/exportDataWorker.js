@@ -84,9 +84,14 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
   }
 
   try {
+    // sort by station name
+    const sortedKeys = Object.keys(data).sort((a, b) =>
+      stationNames[a].localeCompare(stationNames[b])
+    );
+
     // write xlsx
     const wb = XLSX.utils.book_new();
-    for (const key of Object.keys(data)) {
+    for (const key of sortedKeys) {
       const readings = data[key];
       readings.sort((a, b) => new Date(a.timeUtc).getTime() - new Date(b.timeUtc).getTime());
 
