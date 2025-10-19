@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import * as turf from '@turf/turf';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -12,15 +14,25 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import LoadingButton from '@mui/lab/LoadingButton';
 import CloseIcon from '@mui/icons-material/Close';
+import Slider from '@mui/material/Slider';
 
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { enGB } from 'date-fns/locale';
+import { exportXlsx } from '../services/publicService';
 
-function MapView() {
+const DEFAULT_LON = 172.5;
+const DEFAULT_LAT = -42;
+const DEFAULT_RADIUS = 50;
+
+function MapView({ onCoordinatesChange, radiusKm }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
+  const marker = useRef(null);
+  const markerCoords = useRef(null);
+  const radiusRef = useRef(null);
+  const circleSourceId = 'circle-radius';
 
   useEffect(() => {
     if (!mapContainer.current) {
@@ -33,11 +45,84 @@ function MapView() {
       center: [172.5, -41],
       zoom: 4.3
     });
-    return () => map.current?.remove();
-  }, []);
+
+    // circle
+    map.current.on('load', () => {
+      map.current.addSource(circleSourceId, {
+        type: 'geojson',
+        data: turf.featureCollection([])
+      });
+      map.current.addLayer({
+        id: circleSourceId,
+        type: 'fill',
+        source: circleSourceId,
+        layout: {},
+        paint: {
+          'fill-color': '#0074D9',
+          'fill-opacity': 0.2
+        }
+      });
+
+      // default marker and circle
+      marker.current = new mapboxgl.Marker()
+        .setLngLat([DEFAULT_LON, DEFAULT_LAT])
+        .addTo(map.current);
+      markerCoords.current = { lng: DEFAULT_LON, lat: DEFAULT_LAT };
+
+      const circle = turf.circle([DEFAULT_LON, DEFAULT_LAT], DEFAULT_RADIUS, {
+        units: 'kilometers',
+        steps: 64
+      });
+      map.current.getSource(circleSourceId).setData(circle);
+    });
+
+    // place marker
+    map.current.on('click', (e) => {
+      const { lng, lat } = e.lngLat;
+      markerCoords.current = { lng, lat };
+
+      if (marker.current) {
+        marker.current.setLngLat([lng, lat]);
+      } else {
+        marker.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(map.current);
+      }
+
+      // draw circle
+      const r = radiusRef.current ? radiusRef.current : radiusKm;
+      if (r > 0) {
+        const circle = turf.circle([lng, lat], r, { units: 'kilometers', steps: 64 });
+        map.current.getSource(circleSourceId).setData(circle);
+      }
+
+      if (onCoordinatesChange) {
+        onCoordinatesChange({ lng, lat });
+      }
+    });
+
+    return () => map.current.remove();
+  }, [onCoordinatesChange]);
+
+  // change radius
+  useEffect(() => {
+    if (!map.current || !markerCoords.current) {
+      return;
+    }
+
+    const { lng, lat } = markerCoords.current;
+    if (radiusKm > 0) {
+      radiusRef.current = radiusKm;
+      const circle = turf.circle([lng, lat], radiusKm, { units: 'kilometers', steps: 64 });
+      map.current.getSource(circleSourceId).setData(circle);
+    }
+  }, [radiusKm]);
 
   return <Box ref={mapContainer} sx={{ width: '100%', height: '50vh', marginBottom: 0 }} />;
 }
+
+MapView.propTypes = {
+  onCoordinatesChange: PropTypes.func,
+  radiusKm: PropTypes.number
+};
 
 export default function ExportXlsx() {
   const navigate = useNavigate();
@@ -47,6 +132,8 @@ export default function ExportXlsx() {
 
   const [dateFrom, setDateFrom] = useState(new Date(Date.now() - 24 * 60 * 60 * 1000));
   const [dateTo, setDateTo] = useState(new Date());
+  const [coords, setCoords] = useState({ lng: DEFAULT_LON, lat: DEFAULT_LAT });
+  const [radius, setRadius] = useState(DEFAULT_RADIUS);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
 
@@ -80,20 +167,26 @@ export default function ExportXlsx() {
       return;
     }
 
-    console.log(key);
-
     try {
-      // await emailjs.sendForm(
-      //   process.env.REACT_APP_EMAILJS_SERVICE_ID,
-      //   process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
-      //   e.target,
-      //   { publicKey: process.env.REACT_APP_EMAILJS_PUBLIC_KEY }
-      // );
-
+      const url = await exportXlsx(key, unixFrom, unixTo, coords.lat, coords.lng, radius);
       setLoading(false);
+      if (url === 'INVALID KEY') {
+        setErrorMsg('Invalid API key');
+        return;
+      }
+      if (!url) {
+        setErrorMsg('Something went wrong');
+        return;
+      }
+
+      // trigger download
+      const a = document.createElement('a');
+      a.download = 'zephyr-export';
+      a.href = url;
+      a.target = '_blank';
+      a.click();
     } catch (error) {
       setLoading(false);
-      setErrorMsg(error.message);
       console.error(error);
     }
   }
@@ -116,7 +209,18 @@ export default function ExportXlsx() {
                 <CloseIcon />
               </IconButton>
             </Stack>
-            <MapView />
+            <MapView onCoordinatesChange={setCoords} radiusKm={radius} />
+            <Stack direction="row" justifyContent="end" sx={{ width: '100%', fontSize: '10px' }}>
+              Radius {radius}km
+            </Stack>
+            <Slider
+              size="small"
+              step={10}
+              min={10}
+              max={100}
+              value={radius}
+              onChange={(event, value) => setRadius(value)}
+            />
             <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
               <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enGB}>
                 <Stack direction="row" sx={{ marginBottom: '4px' }}>

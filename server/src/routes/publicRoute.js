@@ -20,6 +20,7 @@ const router = express.Router();
 
 async function authenticateApiKey(apiKey) {
   if (!apiKey) {
+    logger.info('No API key provided...');
     return {
       success: false,
       httpCode: 401,
@@ -28,6 +29,7 @@ async function authenticateApiKey(apiKey) {
   }
   const client = await Client.findOne({ apiKey: apiKey });
   if (!client) {
+    logger.info('Invalid API key...');
     return {
       success: false,
       httpCode: 401,
@@ -201,16 +203,16 @@ router.get('/json-output', async (req, res) => {
   res.json(result);
 });
 
-router.get('/xlsx', async (req, res) => {
+router.post('/export-xlsx', async (req, res) => {
   logger.info('XLSX export requested', { service: 'public' });
 
-  const unixFrom = Number(req.query.unixFrom);
-  const unixTo = Number(req.query.unixTo);
-  const lat = Number(req.query.lat);
-  const lon = Number(req.query.lon);
-  let radius = Number(req.query.radius);
+  const unixFrom = Number(req.body.unixFrom);
+  const unixTo = Number(req.body.unixTo);
+  const lat = Number(req.body.lat);
+  const lon = Number(req.body.lon);
+  let radius = Number(req.body.radius);
   if (isNaN(radius) || radius < 10 || radius > 100) {
-    radius = 10;
+    radius = 50;
   }
 
   if (isNaN(lat) || isNaN(lon) || lon < -180 || lon > 180 || lat < -90 || lat > 90) {
