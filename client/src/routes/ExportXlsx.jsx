@@ -21,6 +21,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { enGB } from 'date-fns/locale';
 import { exportXlsx } from '../services/publicService';
+import { parse } from 'date-fns';
+import { zonedTimeToUtc } from 'date-fns-tz';
 
 const DEFAULT_LON = 172.5;
 const DEFAULT_LAT = -42;
@@ -148,8 +150,18 @@ export default function ExportXlsx() {
 
     const data = new FormData(e.currentTarget);
     const key = data.get('api_key').trim();
-    const unixFrom = Math.floor(dateFrom.getTime() / 1000);
-    const unixTo = Math.floor(dateTo.getTime() / 1000);
+
+    // always interpret dates as NZT
+    const dFrom = zonedTimeToUtc(
+      parse(dateFrom.toLocaleDateString(), 'dd/MM/yyyy', new Date()),
+      'Pacific/Auckland'
+    );
+    const dTo = zonedTimeToUtc(
+      parse(dateTo.toLocaleDateString(), 'dd/MM/yyyy', new Date()),
+      'Pacific/Auckland'
+    );
+    const unixFrom = Math.floor(dFrom.getTime() / 1000);
+    const unixTo = Math.floor(dTo.getTime() / 1000) + 24 * 60 * 60 - 1; // 23:59:59
 
     // input validation
     if (!key) {
