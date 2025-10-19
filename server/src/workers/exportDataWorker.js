@@ -98,12 +98,12 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
           const unixB = Math.floor(new Date(readings[i].timeUtc).getTime() / 1000);
           const unixA = Math.floor(new Date(readings[i - 1].timeUtc).getTime() / 1000);
           if (unixB - unixA > interval) {
-            fillerData.push(...createFillerData(unixA, unixB, interval, []));
+            fillerData.concat(createFillerData(unixA, unixB, interval, []));
           }
         }
         if (fillerData.length) {
           // append filler and resort
-          readings.push(...fillerData);
+          readings.concat(fillerData);
           readings.sort((a, b) => new Date(a.timeUtc).getTime() - new Date(b.timeUtc).getTime());
         }
       }
@@ -129,6 +129,7 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
     return `${process.env.FILE_SERVER_PREFIX}/${filePath.replace('public/', '')}`;
   } catch (error) {
     logger.error('Failed to save XLSX', { service: 'public' });
+    logger.error(error);
     return null;
   }
 }
