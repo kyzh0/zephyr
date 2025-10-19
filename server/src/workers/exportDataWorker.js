@@ -90,6 +90,7 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
     );
 
     // write xlsx
+    const wsNames = [];
     const wb = XLSX.utils.book_new();
     for (const key of sortedKeys) {
       const readings = data[key];
@@ -114,7 +115,12 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
       }
 
       const ws = XLSX.utils.json_to_sheet(readings);
-      XLSX.utils.book_append_sheet(wb, ws, stationNames[key]);
+      let name = stationNames[key];
+      while (wsNames.includes(name)) {
+        name += '_';
+      }
+      wsNames.push(name);
+      XLSX.utils.book_append_sheet(wb, ws, name);
     }
 
     // no results
