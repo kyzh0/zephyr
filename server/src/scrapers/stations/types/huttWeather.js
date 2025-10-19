@@ -21,7 +21,9 @@ export default async function scrapeHuttWeatherData(stations) {
         const j = data.indexOf('</b>&nbsp;</td>', i);
         if (j > i) {
           const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) windAverage = temp;
+          if (!isNaN(temp)) {
+            windAverage = temp;
+          }
         }
       }
 
@@ -32,7 +34,9 @@ export default async function scrapeHuttWeatherData(stations) {
         const j = data.indexOf('</b></td>', i);
         if (j > i) {
           const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) windGust = temp;
+          if (!isNaN(temp)) {
+            windGust = temp;
+          }
         }
       }
 
@@ -44,7 +48,9 @@ export default async function scrapeHuttWeatherData(stations) {
         const j = data.indexOf('&deg;  <b>', i);
         if (j > i) {
           const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) windBearing = temp;
+          if (!isNaN(temp)) {
+            windBearing = temp;
+          }
         }
       }
 
@@ -55,7 +61,9 @@ export default async function scrapeHuttWeatherData(stations) {
         const j = data.indexOf('&deg;</b>', i);
         if (j > i) {
           const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) temperature = temp;
+          if (!isNaN(temp)) {
+            temperature = temp;
+          }
         }
       }
     }

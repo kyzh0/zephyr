@@ -26,7 +26,9 @@ export default async function scrapeWeatherProData(stations) {
               const j = data.indexOf('kph</td></tr>', i);
               if (j > i) {
                 const temp = Number(data.slice(i + startStr.length, j).trim());
-                if (!isNaN(temp)) windAverage = temp;
+                if (!isNaN(temp)) {
+                  windAverage = temp;
+                }
               }
             }
 
@@ -37,7 +39,9 @@ export default async function scrapeWeatherProData(stations) {
               const j = data.indexOf('°</td></tr>', i);
               if (j > i) {
                 const temp = Number(data.slice(i + startStr.length, j).trim());
-                if (!isNaN(temp)) windBearing = temp;
+                if (!isNaN(temp)) {
+                  windBearing = temp;
+                }
               }
             }
 
@@ -48,7 +52,9 @@ export default async function scrapeWeatherProData(stations) {
               const j = data.indexOf('°C</td></tr>', i);
               if (j > i) {
                 const temp = Number(data.slice(i + startStr.length, j).trim());
-                if (!isNaN(temp)) temperature = temp;
+                if (!isNaN(temp)) {
+                  temperature = temp;
+                }
               }
             }
           }

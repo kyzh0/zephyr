@@ -16,20 +16,28 @@ export default async function scrapeMpycData(stations) {
       const avg = data.current.windspeed
         ? Number(data.current.windspeed.replace(' knots', ''))
         : null;
-      if (avg != null && !isNaN(avg)) windAverage = Math.round(avg * 1.852 * 100) / 100; // kt
+      if (avg != null && !isNaN(avg)) {
+        windAverage = Math.round(avg * 1.852 * 100) / 100;
+      } // kt
 
       const gust = data.current.windGust
         ? Number(data.current.windspeed.replace(' knots', ''))
         : null;
-      if (gust != null && !isNaN(gust)) windGust = Math.round(gust * 1.852 * 100) / 100;
+      if (gust != null && !isNaN(gust)) {
+        windGust = Math.round(gust * 1.852 * 100) / 100;
+      }
 
       const bearing = data.current.winddir_formatted
         ? Number(data.current.winddir_formatted)
         : null;
-      if (bearing != null && !isNaN(bearing)) windBearing = bearing;
+      if (bearing != null && !isNaN(bearing)) {
+        windBearing = bearing;
+      }
 
       const temp = data.current.outTemp_formatted ? Number(data.current.outTemp_formatted) : null;
-      if (temp != null && !isNaN(temp)) temperature = temp;
+      if (temp != null && !isNaN(temp)) {
+        temperature = temp;
+      }
     }
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);

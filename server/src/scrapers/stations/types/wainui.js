@@ -23,7 +23,9 @@ export default async function scrapeWainuiData(stations) {
           const k = data.indexOf('&#176;', j);
           if (k > i) {
             const temp = Number(data.slice(j + startStr1.length, k).trim());
-            if (!isNaN(temp)) windBearing = temp;
+            if (!isNaN(temp)) {
+              windBearing = temp;
+            }
           }
         }
       }
@@ -45,7 +47,9 @@ export default async function scrapeWainuiData(stations) {
               windAverage = 0;
             } else {
               const temp = Number(temp1);
-              if (!isNaN(temp)) windAverage = temp;
+              if (!isNaN(temp)) {
+                windAverage = temp;
+              }
             }
           }
         }
@@ -61,7 +65,9 @@ export default async function scrapeWainuiData(stations) {
           const k = data.indexOf('&#176;', j);
           if (k > i) {
             const temp = Number(data.slice(j + startStr1.length + 1, k).trim());
-            if (!isNaN(temp)) temperature = temp;
+            if (!isNaN(temp)) {
+              temperature = temp;
+            }
           }
         }
       }

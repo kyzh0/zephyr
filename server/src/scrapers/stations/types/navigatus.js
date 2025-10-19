@@ -75,7 +75,9 @@ export default async function scrapeNavigatusData(stations) {
                   const k = data.indexOf('km/h</p>', j);
                   if (k > i) {
                     const temp = Number(data.slice(j + startStr1.length, k).trim());
-                    if (!isNaN(temp)) windAverage = temp;
+                    if (!isNaN(temp)) {
+                      windAverage = temp;
+                    }
                   }
                 }
               }
@@ -87,7 +89,9 @@ export default async function scrapeNavigatusData(stations) {
                 const j = data.indexOf('&deg;</p>', i);
                 if (j > i) {
                   const temp = Number(data.slice(i + startStr.length, j).trim());
-                  if (!isNaN(temp)) temperature = temp;
+                  if (!isNaN(temp)) {
+                    temperature = temp;
+                  }
                 }
               }
             }
@@ -98,7 +102,9 @@ export default async function scrapeNavigatusData(stations) {
               windGust = Math.round(data.max_gust * 1.852 * 100) / 100;
               windBearing = data.average_dir;
 
-              if (data.wind_data) temperature = data.wind_data.temperature;
+              if (data.wind_data) {
+                temperature = data.wind_data.temperature;
+              }
             }
           } else if (station.externalId.toUpperCase() === 'SLOPEHILL') {
             const { data } = await httpClient.get(

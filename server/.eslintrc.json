@@ -9,5 +9,10 @@
     "es2021": true,
     "node": true
   },
-  "rules": {}
+  "rules": {
+    "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+    "curly": ["error", "all"],
+    "arrow-body-style": ["error", "as-needed"],
+    "lines-between-class-members": ["error", "always"]
+  }
 }

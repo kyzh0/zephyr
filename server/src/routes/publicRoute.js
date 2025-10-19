@@ -38,9 +38,7 @@ async function authenticateApiKey(apiKey) {
 
   const date = new Date();
   const currentMonth = formatInTimeZone(date, 'UTC', 'yyyy-MM');
-  const matches = client.usage.filter((c) => {
-    return c.month === currentMonth;
-  });
+  const matches = client.usage.filter((c) => c.month === currentMonth);
   if (matches.length) {
     const usage = matches[0];
     if (usage.apiCalls >= client.monthlyLimit) {
@@ -172,14 +170,22 @@ router.get('/json-output', async (req, res) => {
     }
 
     const query = {};
-    if (dateFrom != null) query.time = { $gte: dateFrom.getTime() };
+    if (dateFrom != null) {
+      query.time = { $gte: dateFrom.getTime() };
+    }
     if (dateTo != null) {
-      if (query.time) query.time.$lte = dateTo.getTime();
-      else query.time = { $lte: dateTo.getTime() };
+      if (query.time) {
+        query.time.$lte = dateTo.getTime();
+      } else {
+        query.time = { $lte: dateTo.getTime() };
+      }
     }
 
-    if (String(req.query.hr).toLowerCase() !== 'true') query.isHighResolution = { $ne: true };
-    else query.isHighResolution = true;
+    if (String(req.query.hr).toLowerCase() !== 'true') {
+      query.isHighResolution = { $ne: true };
+    } else {
+      query.isHighResolution = true;
+    }
 
     const output = await Output.find(query).sort({ time: 1 });
     for (const o of output) {
@@ -203,7 +209,9 @@ router.get('/xlsx', async (req, res) => {
   const lat = Number(req.query.lat);
   const lon = Number(req.query.lon);
   let radius = Number(req.query.radius);
-  if (isNaN(radius) || radius < 10 || radius > 100) radius = 10;
+  if (isNaN(radius) || radius < 10 || radius > 100) {
+    radius = 10;
+  }
 
   if (isNaN(lat) || isNaN(lon) || lon < -180 || lon > 180 || lat < -90 || lat > 90) {
     res.status(400).json({ error: 'Invalid lat/lon' });

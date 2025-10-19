@@ -14,10 +14,18 @@ export default async function processScrapedData(
 ) {
   const data = validateStationData(windAverage, windGust, windBearing, temperature);
 
-  if (isNaN(data.windAverage)) data.windAverage = null;
-  if (isNaN(data.windGust)) data.windGust = null;
-  if (isNaN(data.windBearing)) data.windBearing = null;
-  if (isNaN(data.temperature)) data.temperature = null;
+  if (isNaN(data.windAverage)) {
+    data.windAverage = null;
+  }
+  if (isNaN(data.windGust)) {
+    data.windGust = null;
+  }
+  if (isNaN(data.windBearing)) {
+    data.windBearing = null;
+  }
+  if (isNaN(data.temperature)) {
+    data.temperature = null;
+  }
 
   station.lastUpdate = new Date();
   station.currentAverage = data.windAverage ?? null;

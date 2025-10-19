@@ -75,18 +75,30 @@ export default async function scrapePrimePortData(stations) {
     if (!textAvg.includes('.') && textGust.includes('.')) {
       const i = textGust.indexOf('.');
       windAverage = Number(`${textAvg.slice(0, i)}.${textAvg.slice(i)}`);
-      if (windAverage > windGust) windAverage = Math.round(windAverage * 100) / 1000;
+      if (windAverage > windGust) {
+        windAverage = Math.round(windAverage * 100) / 1000;
+      }
     } else if (textAvg.includes('.') && !textGust.includes('.')) {
       const i = textAvg.indexOf('.');
       windGust = Number(`${textGust.slice(0, i)}.${textGust.slice(i)}`);
-      if (windAverage > windGust) windGust = Math.round(windGust * 1000) / 100;
+      if (windAverage > windGust) {
+        windGust = Math.round(windGust * 1000) / 100;
+      }
     } else if (!textAvg.includes('.') && !textGust.includes('.')) {
-      if (windAverage > 10) windAverage = null;
-      if (windGust > 10) windGust = null;
+      if (windAverage > 10) {
+        windAverage = null;
+      }
+      if (windGust > 10) {
+        windGust = null;
+      }
     }
 
-    if (windAverage != null) windAverage = Math.round(windAverage * 1.852 * 100) / 100;
-    if (windGust != null) windGust = Math.round(windGust * 1.852 * 100) / 100;
+    if (windAverage != null) {
+      windAverage = Math.round(windAverage * 1.852 * 100) / 100;
+    }
+    if (windGust != null) {
+      windGust = Math.round(windGust * 1.852 * 100) / 100;
+    }
 
     // direction
     croppedBuf = await sharp(imgBuff)

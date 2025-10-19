@@ -55,7 +55,9 @@ export default async function scrapeWhanganuiInletData(stations) {
           const k = data.indexOf(' ', j + startStr1.length);
           if (k > j) {
             const temp = Number(data.slice(j + startStr1.length, k).trim());
-            if (!isNaN(temp)) windAverage = temp;
+            if (!isNaN(temp)) {
+              windAverage = temp;
+            }
 
             const l = data.indexOf('</li>', k);
             if (l > k) {
@@ -72,7 +74,9 @@ export default async function scrapeWhanganuiInletData(stations) {
         const j = data.indexOf(' ', i + startStr.length);
         if (j > i) {
           const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) windGust = temp;
+          if (!isNaN(temp)) {
+            windGust = temp;
+          }
         }
       }
 
@@ -83,7 +87,9 @@ export default async function scrapeWhanganuiInletData(stations) {
         const j = data.indexOf('&nbsp;', i);
         if (j > i) {
           const temp = Number(data.slice(i + startStr.length, j).trim());
-          if (!isNaN(temp)) temperature = temp;
+          if (!isNaN(temp)) {
+            temperature = temp;
+          }
         }
       }
     }

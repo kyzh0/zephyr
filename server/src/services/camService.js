@@ -18,10 +18,14 @@ export async function removeOldImages() {
     }
 
     dir.files('public/cams', async (err, files) => {
-      if (err) throw err;
+      if (err) {
+        throw err;
+      }
       for (const file of files) {
         const stats = await fs.stat(file);
-        if (stats.birthtimeMs <= cutoff.getTime()) await fs.rm(file);
+        if (stats.birthtimeMs <= cutoff.getTime()) {
+          await fs.rm(file);
+        }
       }
     });
   } catch (error) {

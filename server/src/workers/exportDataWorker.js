@@ -38,7 +38,9 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
     const stationNames = {};
     for (const o of output) {
       const i = o.url.indexOf('/data');
-      if (i < 0) continue;
+      if (i < 0) {
+        continue;
+      }
       const fileData = await fs.readFile(`public/${o.url.slice(i)}`, 'utf8');
       const json = JSON.parse(fileData);
       for (const line of json) {
@@ -47,7 +49,9 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
           Math.round(
             geofire.distanceBetween([line.coordinates.lat, line.coordinates.lon], [lat, lon]) * 10
           ) / 10;
-        if (distance > radius) continue;
+        if (distance > radius) {
+          continue;
+        }
 
         const d = {
           timeUtc: new Date(line.timestamp * 1000).toISOString(),
@@ -56,10 +60,15 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
           windBearingDeg: line.wind.bearing,
           temperatureC: line.temperature
         };
-        if (data[line.id] == null) data[line.id] = [d];
-        else data[line.id].push(d);
+        if (data[line.id] == null) {
+          data[line.id] = [d];
+        } else {
+          data[line.id].push(d);
+        }
 
-        if (stationNames[line.id] == null) stationNames[line.id] = line.name;
+        if (stationNames[line.id] == null) {
+          stationNames[line.id] = line.name;
+        }
       }
     }
 
@@ -67,9 +76,7 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
     const wb = XLSX.utils.book_new();
     for (const key of Object.keys(data)) {
       const readings = data[key];
-      readings.sort((a, b) => {
-        return new Date(a.timeUTC).getTime() - new Date(b.timeUTC).getTime();
-      });
+      readings.sort((a, b) => new Date(a.timeUTC).getTime() - new Date(b.timeUTC).getTime());
 
       const ws = XLSX.utils.json_to_sheet(readings);
       XLSX.utils.book_append_sheet(wb, ws, stationNames[key]);

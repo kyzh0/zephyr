@@ -64,7 +64,9 @@ export default async function scrapePortersData(stations) {
 
     windAverage = isNaN(textAvg) ? 0 : Number(textAvg);
     windGust = isNaN(textGust) ? 0 : Number(textGust);
-    if (windGust < windAverage) windGust = null; // sometimes ocr fails for gust PORTERS BASE
+    if (windGust < windAverage) {
+      windGust = null;
+    } // sometimes ocr fails for gust PORTERS BASE
 
     // direction
     croppedBuf = await sharp(imgBuff)

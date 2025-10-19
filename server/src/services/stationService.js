@@ -8,8 +8,12 @@ import { Station } from '../models/stationModel.js';
 import { Output } from '../models/outputModel.js';
 
 function cmp(a, b) {
-  if (a > b) return +1;
-  if (a < b) return -1;
+  if (a > b) {
+    return +1;
+  }
+  if (a < b) {
+    return -1;
+  }
   return 0;
 }
 export async function processStationJson() {
@@ -49,9 +53,7 @@ export async function processStationJson() {
       });
     }
 
-    json.sort((a, b) => {
-      return cmp(a.type, b.type) || cmp(a.name, b.name);
-    });
+    json.sort((a, b) => cmp(a.type, b.type) || cmp(a.name, b.name));
     const dir = `public/data/${formatInTimeZone(date, 'UTC', 'yyyy/MM/dd')}`;
     await fs.mkdir(dir, { recursive: true });
     const path = `${dir}/zephyr-scrape-${date.getTime() / 1000}.json`;
@@ -109,9 +111,7 @@ export async function processHighResolutionStationJson() {
       });
     }
 
-    json.sort((a, b) => {
-      return cmp(a.type, b.type) || cmp(a.name, b.name);
-    });
+    json.sort((a, b) => cmp(a.type, b.type) || cmp(a.name, b.name));
     const dir = `public/data/hr/${formatInTimeZone(date, 'UTC', 'yyyy/MM/dd')}`;
     await fs.mkdir(dir, { recursive: true });
     const path = `${dir}/zephyr-scrape-${date.getTime() / 1000}.json`;
@@ -158,9 +158,7 @@ export async function checkForErrors() {
       let isTempError = true;
 
       // check last 6h data
-      const data = s.data.filter((x) => {
-        return new Date(x.time) >= new Date(timeNow - 6 * 60 * 60 * 1000);
-      });
+      const data = s.data.filter((x) => new Date(x.time) >= new Date(timeNow - 6 * 60 * 60 * 1000));
 
       if (data.length) {
         data.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()); // time desc
