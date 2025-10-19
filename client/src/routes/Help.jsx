@@ -159,6 +159,17 @@ export default function Help() {
                   >
                     Send
                   </LoadingButton>
+                  <Stack alignItems={'end'} sx={{ width: '100%' }}>
+                    <Link
+                      component={RouterLink}
+                      variant="body2"
+                      underline="hover"
+                      to="/export-xlsx"
+                      sx={{ fontSize: '10px' }}
+                    >
+                      Export XLSX
+                    </Link>
+                  </Stack>
                 </Box>
               </>
             )}

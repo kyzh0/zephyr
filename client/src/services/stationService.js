@@ -12,7 +12,9 @@ export async function getStationById(id) {
 export async function listStations(includeDisabled) {
   try {
     let url = `${process.env.REACT_APP_API_PREFIX}/stations`;
-    if (includeDisabled) url += '?includeDisabled=true';
+    if (includeDisabled) {
+      url += '?includeDisabled=true';
+    }
     const { data } = await axios.get(url);
     return data;
   } catch (error) {
@@ -56,7 +58,9 @@ export async function listStationsWithErrors() {
 export async function loadStationData(id, isHighResolution) {
   try {
     let url = `${process.env.REACT_APP_API_PREFIX}/stations/${id}/data`;
-    if (isHighResolution) url += '?hr=true';
+    if (isHighResolution) {
+      url += '?hr=true';
+    }
     const { data } = await axios.get(url);
     return data;
   } catch (error) {

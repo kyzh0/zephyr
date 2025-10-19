@@ -13,6 +13,7 @@ import GridView from './routes/GridView';
 import Welcome from './routes/Welcome';
 import Donate from './routes/Donate';
 import Help from './routes/Help';
+import ExportXlsx from './routes/ExportXlsx';
 import AdminSignIn from './routes/AdminSignIn';
 import AdminDashboard from './routes/AdminDashboard';
 import AdminAddStation from './routes/AdminAddStation';
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
       {
         path: 'help',
         element: <Help />
+      },
+      {
+        path: 'export-xlsx',
+        element: <ExportXlsx />
       },
       {
         path: 'admin/sign-in',

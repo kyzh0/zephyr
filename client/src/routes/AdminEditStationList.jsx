@@ -22,7 +22,9 @@ export default function AdminEditStation() {
   const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
-    if (stations.length) return;
+    if (stations.length) {
+      return;
+    }
 
     async function load() {
       const s = await listStations(true);
@@ -36,7 +38,9 @@ export default function AdminEditStation() {
   }, []);
 
   useEffect(() => {
-    if (!stations.length) return;
+    if (!stations.length) {
+      return;
+    }
 
     if (!searchText) {
       setSearchResults(stations);
@@ -52,12 +56,10 @@ export default function AdminEditStation() {
     const fuse = new Fuse(stations, options);
     const result = fuse.search(searchText);
     setSearchResults(
-      result.map((el) => {
-        return {
-          _id: el.item._id,
-          name: el.item.name
-        };
-      })
+      result.map((el) => ({
+        _id: el.item._id,
+        name: el.item.name
+      }))
     );
   }, [searchText]);
 
@@ -94,31 +96,29 @@ export default function AdminEditStation() {
             <Box sx={{ maxHeight: '70vh', overflowY: 'scroll' }}>
               <List disablePadding>
                 {searchResults.length ? (
-                  searchResults.map((station) => {
-                    return (
-                      <ListItem
-                        disablePadding
-                        key={station._id}
-                        onClick={() => navigate(`/admin/edit-station/${station._id}`)}
-                      >
-                        <ListItemButton>
-                          <Stack
-                            direction="row"
-                            justifyContent="left"
-                            alignItems="center"
-                            gap="24px"
-                            sx={{ width: '100%' }}
-                          >
-                            <Stack direction="column">
-                              <Typography noWrap>{station.name}</Typography>
-                            </Stack>
-                            <Box sx={{ flex: '1 0 auto' }} />
-                            <KeyboardArrowRightIcon />
+                  searchResults.map((station) => (
+                    <ListItem
+                      disablePadding
+                      key={station._id}
+                      onClick={() => navigate(`/admin/edit-station/${station._id}`)}
+                    >
+                      <ListItemButton>
+                        <Stack
+                          direction="row"
+                          justifyContent="left"
+                          alignItems="center"
+                          gap="24px"
+                          sx={{ width: '100%' }}
+                        >
+                          <Stack direction="column">
+                            <Typography noWrap>{station.name}</Typography>
                           </Stack>
-                        </ListItemButton>
-                      </ListItem>
-                    );
-                  })
+                          <Box sx={{ flex: '1 0 auto' }} />
+                          <KeyboardArrowRightIcon />
+                        </Stack>
+                      </ListItemButton>
+                    </ListItem>
+                  ))
                 ) : (
                   <ListItem>
                     <Typography>No results</Typography>

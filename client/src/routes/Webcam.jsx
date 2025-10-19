@@ -32,9 +32,13 @@ export default function Webcam() {
   async function fetchData() {
     try {
       const cam = await getCamById(id);
-      if (!cam) navigate('/');
+      if (!cam) {
+        navigate('/');
+      }
       setWebcam(cam);
-      if (Date.now() - new Date(cam.currentTime).getTime() >= 24 * 60 * 60 * 1000) return;
+      if (Date.now() - new Date(cam.currentTime).getTime() >= 24 * 60 * 60 * 1000) {
+        return;
+      }
 
       const images = await loadCamImages(id);
       images.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()); // time asc
@@ -47,7 +51,9 @@ export default function Webcam() {
 
   // initial load
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     try {
       setInitialLoad(false);
@@ -59,7 +65,9 @@ export default function Webcam() {
 
   // on refresh trigger (ignore initial load)
   useEffect(() => {
-    if (!id || initialLoad || !refreshedWebcams || !refreshedWebcams.includes(id)) return;
+    if (!id || initialLoad || !refreshedWebcams || !refreshedWebcams.includes(id)) {
+      return;
+    }
 
     try {
       fetchData();
