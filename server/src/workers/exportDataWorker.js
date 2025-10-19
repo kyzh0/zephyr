@@ -98,12 +98,12 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
           const unixB = Math.floor(new Date(readings[i].timeUtc).getTime() / 1000);
           const unixA = Math.floor(new Date(readings[i - 1].timeUtc).getTime() / 1000);
           if (unixB - unixA > interval) {
-            fillerData.concat(createFillerData(unixA, unixB, interval, []));
+            fillerData.push(...createFillerData(unixA, unixB, interval, []));
           }
         }
         if (fillerData.length) {
           // append filler and resort
-          readings.concat(fillerData);
+          readings.push(...fillerData);
           readings.sort((a, b) => new Date(a.timeUtc).getTime() - new Date(b.timeUtc).getTime());
         }
       }
@@ -134,19 +134,18 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
   }
 }
 
-function createFillerData(unixA, unixB, interval, result) {
-  if (unixB - unixA === interval) {
-    return result;
+function createFillerData(unixA, unixB, interval) {
+  const result = [];
+  for (let t = unixA + interval; t < unixB; t += interval) {
+    result.push({
+      timeUtc: new Date(t * 1000).toISOString(),
+      windAvgKmh: null,
+      windGustKmh: null,
+      windBearingDeg: null,
+      temperatureC: null
+    });
   }
-
-  result.push({
-    timeUtc: new Date((unixA + interval) * 1000).toISOString(),
-    windAvgKmh: null,
-    windGustKmh: null,
-    windBearingDeg: null,
-    temperatureC: null
-  });
-  return createFillerData(unixA + interval, unixB, interval, result);
+  return result;
 }
 
 (async () => {
