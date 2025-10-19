@@ -14,33 +14,38 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
 
   try {
     await mongoose.connect(process.env.DB_CONNECTION_STRING);
+  } catch {
+    logger.error('DB connection failed', { service: 'public' });
+  }
 
-    let dateFrom = null;
-    let dateTo = new Date();
-    if (unixFrom && !isNaN(unixFrom)) {
-      dateFrom = new Date(unixFrom * 1000);
-    }
-    if (unixFrom && !isNaN(unixTo)) {
-      dateTo = new Date(unixTo * 1000);
-    }
-    // limit 6 months data
-    const ms180Days = 180 * 24 * 60 * 60 * 1000;
-    if (dateFrom == null || dateTo.getTime() - dateFrom.getTime() > ms180Days) {
-      dateFrom = new Date(dateTo.getTime() - ms180Days);
-    }
+  let dateFrom = null;
+  let dateTo = new Date();
+  if (unixFrom && !isNaN(unixFrom)) {
+    dateFrom = new Date(unixFrom * 1000);
+  }
+  if (unixFrom && !isNaN(unixTo)) {
+    dateTo = new Date(unixTo * 1000);
+  }
+  // limit 6 months data
+  const ms180Days = 180 * 24 * 60 * 60 * 1000;
+  if (dateFrom == null || dateTo.getTime() - dateFrom.getTime() > ms180Days) {
+    dateFrom = new Date(dateTo.getTime() - ms180Days);
+  }
 
-    const output = await Output.find({
-      time: { $gte: dateFrom.getTime(), $lte: dateTo.getTime() }
-    }).sort({ time: 1 });
+  const output = await Output.find({
+    time: { $gte: dateFrom.getTime(), $lte: dateTo.getTime() }
+  }).sort({ time: 1 });
 
-    // read from json files
-    const data = {};
-    const stationNames = {};
-    for (const o of output) {
-      const i = o.url.indexOf('data/');
-      if (i < 0) {
-        continue;
-      }
+  // read from json files
+  const data = {};
+  const stationNames = {};
+  const stationHiRes = {};
+  for (const o of output) {
+    const i = o.url.indexOf('data/');
+    if (i < 0) {
+      continue;
+    }
+    try {
       const fileData = await fs.readFile(`public/${o.url.slice(i)}`, 'utf8');
       const json = JSON.parse(fileData);
       for (const line of json) {
@@ -69,14 +74,39 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
         if (stationNames[line.id] == null) {
           stationNames[line.id] = line.name;
         }
+        if (stationHiRes[line.id] == null) {
+          stationHiRes[line.id] = o.isHighResolution ? true : false;
+        }
       }
+    } catch (error) {
+      logger.warn(`JSON file not found - ${o.url}`, { service: 'public' });
     }
+  }
 
+  try {
     // write xlsx
     const wb = XLSX.utils.book_new();
     for (const key of Object.keys(data)) {
       const readings = data[key];
-      readings.sort((a, b) => new Date(a.timeUTC).getTime() - new Date(b.timeUTC).getTime());
+      readings.sort((a, b) => new Date(a.timeUtc).getTime() - new Date(b.timeUtc).getTime());
+
+      // filler rows for missing json files
+      if (readings.length > 1) {
+        let fillerData = [];
+        const interval = stationHiRes[key] ? 120 : 600; // s
+        for (let i = 1; i < readings.length; i++) {
+          const unixB = Math.floor(new Date(readings[i].timeUtc).getTime() / 1000);
+          const unixA = Math.floor(new Date(readings[i - 1].timeUtc).getTime() / 1000);
+          if (unixB - unixA > interval) {
+            fillerData.push(...createFillerData(unixA, unixB, interval, []));
+          }
+        }
+        if (fillerData.length) {
+          // append filler and resort
+          readings.push(...fillerData);
+          readings.sort((a, b) => new Date(a.timeUtc).getTime() - new Date(b.timeUtc).getTime());
+        }
+      }
 
       const ws = XLSX.utils.json_to_sheet(readings);
       XLSX.utils.book_append_sheet(wb, ws, stationNames[key]);
@@ -98,9 +128,24 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
 
     return `${process.env.FILE_SERVER_PREFIX}/${filePath.replace('public/', '')}`;
   } catch (error) {
-    logger.error(error, { service: 'public' });
+    logger.error('Failed to save XLSX', { service: 'public' });
+    return null;
   }
-  return null;
+}
+
+function createFillerData(unixA, unixB, interval, result) {
+  if (unixB - unixA === interval) {
+    return result;
+  }
+
+  result.push({
+    timeUtc: new Date((unixA + interval) * 1000).toISOString(),
+    windAvgKmh: null,
+    windGustKmh: null,
+    windBearingDeg: null,
+    temperatureC: null
+  });
+  return createFillerData(unixA + interval, unixB, interval, result);
 }
 
 (async () => {
