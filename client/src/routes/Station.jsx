@@ -77,9 +77,13 @@ export default function Station() {
   async function fetchData() {
     try {
       const s = await getStationById(id);
-      if (!s) navigate('/');
+      if (!s) {
+        navigate('/');
+      }
       setStation(s);
-      if (s.isOffline) return;
+      if (s.isOffline) {
+        return;
+      }
 
       const validBearings = [];
       const pairs = s.validBearings ? s.validBearings.split(',') : [];
@@ -111,14 +115,18 @@ export default function Station() {
       setData(data);
 
       // show 36 records (last 6h) in table
-      if (!s.isHighResolution) setTableData(data.slice(Math.max(data.length - 37, 0)));
+      if (!s.isHighResolution) {
+        setTableData(data.slice(Math.max(data.length - 37, 0)));
+      }
 
       // calculate 10 min averages for high-res stations
       if (s.isHighResolution && data.length) {
         // interval starts at XX:X2
         let startIdx = 0;
         for (const d of data) {
-          if (new Date(d.time).getMinutes() % 10 === 2) break;
+          if (new Date(d.time).getMinutes() % 10 === 2) {
+            break;
+          }
           startIdx++;
         }
 
@@ -168,8 +176,12 @@ export default function Station() {
               sumBearingSin += Math.sin((data[i].windBearing * Math.PI) / 180);
               sumBearingCos += Math.cos((data[i].windBearing * Math.PI) / 180);
             }
-            if (data[i].temperature != null) sumTemperature += data[i].temperature;
-            if (data[i].windGust != null && data[i].windGust > maxGust) maxGust = data[i].windGust;
+            if (data[i].temperature != null) {
+              sumTemperature += data[i].temperature;
+            }
+            if (data[i].windGust != null && data[i].windGust > maxGust) {
+              maxGust = data[i].windGust;
+            }
           }
 
           // calculate average at XX:X0
@@ -194,7 +206,9 @@ export default function Station() {
             sumBearingCos = 0;
             sumTemperature = 0;
             maxGust = null;
-            if (i < data.length - 1) intervalStart = new Date(data[i + 1].time);
+            if (i < data.length - 1) {
+              intervalStart = new Date(data[i + 1].time);
+            }
           }
         }
 
@@ -215,7 +229,9 @@ export default function Station() {
 
   // initial load
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     try {
       setInitialLoad(false);
@@ -227,7 +243,9 @@ export default function Station() {
 
   // on refresh trigger (ignore initial load)
   useEffect(() => {
-    if (!id || initialLoad || !refreshedStations || !refreshedStations.includes(id)) return;
+    if (!id || initialLoad || !refreshedStations || !refreshedStations.includes(id)) {
+      return;
+    }
 
     try {
       fetchData();
@@ -237,10 +255,14 @@ export default function Station() {
   }, [id, refreshedStations]);
 
   useEffect(() => {
-    if (!tableRef.current) return;
+    if (!tableRef.current) {
+      return;
+    }
     tableRef.current.querySelector('tbody td:last-child').scrollIntoView();
 
-    if (!modalRef.current) return;
+    if (!modalRef.current) {
+      return;
+    }
     modalRef.current.scroll(0, 0);
   }, [data]);
 

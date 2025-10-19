@@ -28,17 +28,19 @@ export default function Sounding() {
   async function fetchData() {
     try {
       const sounding = await getSoundingById(id);
-      if (!sounding) navigate('/');
+      if (!sounding) {
+        navigate('/');
+      }
       setSounding(sounding);
 
-      if (!sounding.images.length) return;
+      if (!sounding.images.length) {
+        return;
+      }
 
-      sounding.images.sort((a, b) => {
-        return new Date(a.time).getTime() - new Date(b.time).getTime();
-      });
-      const afterDates = sounding.images.filter((img) => {
-        return new Date(img.time).getTime() - (Date.now() - 30 * 60 * 1000) > 0;
-      });
+      sounding.images.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+      const afterDates = sounding.images.filter(
+        (img) => new Date(img.time).getTime() - (Date.now() - 30 * 60 * 1000) > 0
+      );
 
       if (afterDates && afterDates.length) {
         setSelectedIndex(sounding.images.findIndex((img) => img._id === afterDates[0]._id));
@@ -52,7 +54,9 @@ export default function Sounding() {
 
   // initial load
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     try {
       fetchData();

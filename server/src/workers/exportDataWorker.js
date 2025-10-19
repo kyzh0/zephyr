@@ -37,7 +37,7 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
     const data = {};
     const stationNames = {};
     for (const o of output) {
-      const i = o.url.indexOf('/data');
+      const i = o.url.indexOf('data/');
       if (i < 0) {
         continue;
       }
@@ -87,7 +87,9 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
     const fileName = `zephyr-data-${Math.floor(Date.now() / 1000)}.xlsx`;
     const filePath = `${dir}/${fileName}`;
     XLSX.writeFile(wb, filePath);
-    logger.info(`CSV generated, ${Date.now() - ts}ms elapsed - ${fileName}`);
+    logger.info(`XLSX generated, ${Date.now() - ts}ms elapsed - ${fileName}`, {
+      service: 'public'
+    });
 
     return `${process.env.FILE_SERVER_PREFIX}/${filePath}`;
   } catch (error) {

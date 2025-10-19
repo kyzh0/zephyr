@@ -18,11 +18,15 @@ export default function AdminErrors() {
   const [stations, setStations] = useState([]);
 
   useEffect(() => {
-    if (stations.length) return;
+    if (stations.length) {
+      return;
+    }
 
     async function load() {
       const s = await listStationsWithErrors();
-      if (s.length) setStations(s);
+      if (s.length) {
+        setStations(s);
+      }
     }
 
     load();
@@ -56,36 +60,34 @@ export default function AdminErrors() {
             <Box sx={{ maxHeight: '70vh', overflowY: 'scroll' }}>
               <List disablePadding>
                 {stations.length ? (
-                  stations.map((station) => {
-                    return (
-                      <ListItem
-                        disablePadding
-                        key={station._id}
-                        onClick={() => navigate(`../stations/${station._id}`)}
-                      >
-                        <ListItemButton>
-                          <Stack
-                            direction="row"
-                            justifyContent="left"
-                            alignItems="center"
-                            gap="24px"
-                            sx={{ width: '100%' }}
-                          >
-                            <Stack direction="column">
-                              <Typography noWrap>{station.name}</Typography>
-                              {station.isOffline && (
-                                <Typography noWrap sx={{ fontSize: '10px', color: 'red' }}>
-                                  Offline
-                                </Typography>
-                              )}
-                            </Stack>
-                            <Box sx={{ flex: '1 0 auto' }} />
-                            <KeyboardArrowRightIcon />
+                  stations.map((station) => (
+                    <ListItem
+                      disablePadding
+                      key={station._id}
+                      onClick={() => navigate(`../stations/${station._id}`)}
+                    >
+                      <ListItemButton>
+                        <Stack
+                          direction="row"
+                          justifyContent="left"
+                          alignItems="center"
+                          gap="24px"
+                          sx={{ width: '100%' }}
+                        >
+                          <Stack direction="column">
+                            <Typography noWrap>{station.name}</Typography>
+                            {station.isOffline && (
+                              <Typography noWrap sx={{ fontSize: '10px', color: 'red' }}>
+                                Offline
+                              </Typography>
+                            )}
                           </Stack>
-                        </ListItemButton>
-                      </ListItem>
-                    );
-                  })
+                          <Box sx={{ flex: '1 0 auto' }} />
+                          <KeyboardArrowRightIcon />
+                        </Stack>
+                      </ListItemButton>
+                    </ListItem>
+                  ))
                 ) : (
                   <ListItem>
                     <Typography>No stations with errors.</Typography>

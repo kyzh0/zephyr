@@ -98,19 +98,27 @@ export default function GridView() {
   }, [cookies]);
 
   async function refresh() {
-    if (document.visibilityState !== 'visible') return;
-    if (!data.length) return;
+    if (document.visibilityState !== 'visible') {
+      return;
+    }
+    if (!data.length) {
+      return;
+    }
 
     // only need to refresh when we haven't moved, grid updates when we move
-    if (posUpdatedRef.current) return;
+    if (posUpdatedRef.current) {
+      return;
+    }
 
     const ts = Date.now();
-    if (ts - lastRefreshRef.current < REFRESH_INTERVAL_SECONDS * 1000) return; // enforce refresh interval
+    if (ts - lastRefreshRef.current < REFRESH_INTERVAL_SECONDS * 1000) {
+      return;
+    } // enforce refresh interval
     lastRefreshRef.current = ts;
 
-    const newestItem = data.reduce((prev, current) => {
-      return prev && prev.timestamp > current.timestamp ? prev : current;
-    });
+    const newestItem = data.reduce((prev, current) =>
+      prev && prev.timestamp > current.timestamp ? prev : current
+    );
     const d = await listStationsUpdatedSince(
       Math.round(newestItem.timestamp / 1000),
       position.lat,
@@ -123,9 +131,7 @@ export default function GridView() {
     const clone = JSON.parse(JSON.stringify(data)); // deep clone + set state to trigger re-render
 
     for (const item of d) {
-      const matches = clone.filter((a) => {
-        return a._id === item._id;
-      });
+      const matches = clone.filter((a) => a._id === item._id);
       if (matches.length == 1) {
         updated = true;
         matches[0].currentAverage = item.currentAverage;
@@ -135,11 +141,15 @@ export default function GridView() {
       }
     }
 
-    if (updated) setData(clone);
+    if (updated) {
+      setData(clone);
+    }
   }
 
   function geoSuccess(pos) {
-    if (geoError) setError(false);
+    if (geoError) {
+      setError(false);
+    }
     const coords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
 
     // skip coord update if moved <1km to reduce db reads
@@ -173,7 +183,9 @@ export default function GridView() {
   }, []);
 
   async function loadData() {
-    if (outOfRange) setOutOfRange(false);
+    if (outOfRange) {
+      setOutOfRange(false);
+    }
 
     const d = await listStationsWithinRadius(position.lat, position.lon, radius);
     if (d.length) {
@@ -188,13 +200,17 @@ export default function GridView() {
   }
 
   useEffect(() => {
-    if (error || !position) return;
+    if (error || !position) {
+      return;
+    }
     loadData();
   }, [position, error]);
 
   useEffect(() => {
     setCookies('gridRadius', radius, cookiesOptions);
-    if (error || !position) return;
+    if (error || !position) {
+      return;
+    }
     loadData();
   }, [radius]);
 
