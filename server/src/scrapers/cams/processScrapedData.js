@@ -30,9 +30,9 @@ export default async function processScrapedData(cam, updated, base64) {
         img.fileSize = imgBuff.length;
 
         if (cam.images.length) {
-          const latestImg = cam.images.reduce((prev, current) => {
-            return prev && new Date(prev.time) > new Date(current.time) ? prev : current;
-          });
+          const latestImg = cam.images.reduce((prev, current) =>
+            prev && new Date(prev.time) > new Date(current.time) ? prev : current
+          );
           if (latestImg && latestImg.fileSize == img.fileSize && latestImg.hash == img.hash) {
             logger.info(
               `${cam.type} image update skipped${cam.externalId ? ` - ${cam.externalId}` : ''}`,

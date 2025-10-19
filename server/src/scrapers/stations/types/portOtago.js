@@ -29,7 +29,9 @@ export default async function scrapePortOtagoData(stations) {
                 const k = data.indexOf('</p>', j);
                 if (k > i) {
                   const temp = Number(data.slice(j + startStr.length, k).trim());
-                  if (!isNaN(temp)) windAverage = Math.round(temp * 1.852 * 100) / 100;
+                  if (!isNaN(temp)) {
+                    windAverage = Math.round(temp * 1.852 * 100) / 100;
+                  }
                 }
               }
             }
@@ -44,7 +46,9 @@ export default async function scrapePortOtagoData(stations) {
                 const k = data.indexOf('</p>', j);
                 if (k > i) {
                   const temp = Number(data.slice(j + startStr.length, k).trim());
-                  if (!isNaN(temp)) windGust = Math.round(temp * 1.852 * 100) / 100;
+                  if (!isNaN(temp)) {
+                    windGust = Math.round(temp * 1.852 * 100) / 100;
+                  }
                 }
               }
             }
@@ -59,7 +63,9 @@ export default async function scrapePortOtagoData(stations) {
                 const k = data.indexOf('</p>', j);
                 if (k > i) {
                   const temp = Number(data.slice(j + startStr.length, k).trim());
-                  if (!isNaN(temp)) windBearing = temp;
+                  if (!isNaN(temp)) {
+                    windBearing = temp;
+                  }
                 }
               }
             }

@@ -18,8 +18,9 @@ export default async function scrapeCamFtpData(cams) {
 
     updated = new Date(response.headers['last-modified']);
     // skip if image already up to date
-    if (updated > new Date(cam.lastUpdate))
+    if (updated > new Date(cam.lastUpdate)) {
       base64 = Buffer.from(response.data, 'binary').toString('base64');
+    }
 
     processScrapedData(cam, updated, base64);
   } catch (error) {

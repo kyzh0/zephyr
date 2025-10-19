@@ -23,7 +23,9 @@ router.get('/', async (req, res) => {
     orderby.isOffline = -1;
     orderby.name = 1;
   }
-  if (String(includeDisabled).toLowerCase() !== 'true') query.isDisabled = { $ne: true };
+  if (String(includeDisabled).toLowerCase() !== 'true') {
+    query.isDisabled = { $ne: true };
+  }
 
   if (!isNaN(latitude) && !isNaN(longitude) && !isNaN(rad)) {
     query.location = {
@@ -126,7 +128,9 @@ router.post('/', async (req, res) => {
 // get all station data for timestamp
 router.get('/data', async (req, res) => {
   let timeTo = new Date();
-  if (req.query.time) timeTo = new Date(req.query.time);
+  if (req.query.time) {
+    timeTo = new Date(req.query.time);
+  }
   const timeFrom = new Date(timeTo.getTime() - 30 * 60 * 1000);
 
   // select data for 30 min interval ending at specified time

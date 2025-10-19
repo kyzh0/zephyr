@@ -31,23 +31,28 @@ export default async function scrapeWeatherLinkData(stations) {
                 const avgData = sensor.sensorDataType.find(
                   (x) => x.sensorDataName === '10 Min Avg Wind Speed'
                 );
-                if (avgData && avgData.dataValue)
-                  windAverage = Math.round(avgData.dataValue * 1.609 * 10) / 10; // convert from mph
+                if (avgData && avgData.dataValue) {
+                  windAverage = Math.round(avgData.dataValue * 1.609 * 10) / 10;
+                } // convert from mph
 
                 const gustData = sensor.sensorDataType.find(
                   (x) => x.sensorDataName === '10 Min High Wind Speed'
                 );
-                if (gustData && gustData.dataValue)
+                if (gustData && gustData.dataValue) {
                   windGust = Math.round(gustData.dataValue * 1.609 * 10) / 10;
+                }
 
                 const bearingData = sensor.sensorDataType.find(
                   (x) => x.sensorDataName === '10 Min Scalar Avg Wind Direction'
                 );
-                if (bearingData && bearingData.dataValue) windBearing = bearingData.dataValue;
+                if (bearingData && bearingData.dataValue) {
+                  windBearing = bearingData.dataValue;
+                }
 
                 const tempData = sensor.sensorDataType.find((x) => x.sensorDataName === 'Temp');
-                if (tempData && tempData.dataValue)
-                  temperature = Math.round((((tempData.dataValue - 32) * 5) / 9) * 10) / 10; // convert from F
+                if (tempData && tempData.dataValue) {
+                  temperature = Math.round((((tempData.dataValue - 32) * 5) / 9) * 10) / 10;
+                } // convert from F
               }
             }
           }

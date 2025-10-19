@@ -4,7 +4,9 @@ import { Station } from '../../models/stationModel.js';
 
 export async function runScraper(highResolution) {
   const query = { isHighResolution: { $ne: true }, isDisabled: { $ne: true } };
-  if (highResolution) query.isHighResolution = true;
+  if (highResolution) {
+    query.isHighResolution = true;
+  }
 
   const stations = await Station.find(query, { data: 0 });
   if (!stations.length) {

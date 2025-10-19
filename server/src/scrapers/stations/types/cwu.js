@@ -50,7 +50,9 @@ export default async function scrapeCwuData(stations) {
               const j = data.indexOf('km/h.</span>', i);
               if (j > i) {
                 const temp = Number(data.slice(i + startStr.length, j).trim());
-                if (!isNaN(temp)) windGust = temp;
+                if (!isNaN(temp)) {
+                  windGust = temp;
+                }
               }
             }
 

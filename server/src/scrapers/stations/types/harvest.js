@@ -169,7 +169,9 @@ async function processHarvestValue(sid, configId, graphId, traceId, cookie) {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     };
-    if (cookie) cfg.headers.Cookie = cookie;
+    if (cookie) {
+      cfg.headers.Cookie = cookie;
+    }
     const { data } = await httpClient.post(
       `https://data1.harvest.com//php/site_graph_functions.php?retrieve_trace=&req_ref=${sid}_${configId}_${graphId}`,
       {
@@ -194,9 +196,13 @@ async function processHarvestValue(sid, configId, graphId, traceId, cookie) {
       } else {
         // else data format is object
         let d = null;
-        if (data['1']) d = data['1'].data;
-        else if (data['2']) d = data['2'].data;
-        else if (data['3']) d = data['3'].data;
+        if (data['1']) {
+          d = data['1'].data;
+        } else if (data['2']) {
+          d = data['2'].data;
+        } else if (data['3']) {
+          d = data['3'].data;
+        }
 
         if (d && d.length) {
           const d1 = d[d.length - 1];

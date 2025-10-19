@@ -1,5 +1,8 @@
 export function getWindBearingFromDirection(direction) {
-  if (!direction) return 0;
+  if (!direction) {
+    return 0;
+  }
+
   switch (direction.trim().toUpperCase()) {
     case 'N':
       return 0;
@@ -42,9 +45,13 @@ export function getFlooredTime(interval) {
   // floor data timestamp to "interval" mins
   let date = new Date();
   let rem = date.getMinutes() % interval;
-  if (rem > 0) date = new Date(date.getTime() - rem * 60 * 1000);
+  if (rem > 0) {
+    date = new Date(date.getTime() - rem * 60 * 1000);
+  }
   rem = date.getSeconds() % 60;
-  if (rem > 0) date = new Date(date.getTime() - rem * 1000);
+  if (rem > 0) {
+    date = new Date(date.getTime() - rem * 1000);
+  }
   date = new Date(Math.floor(date.getTime() / 1000) * 1000);
   return date;
 }
