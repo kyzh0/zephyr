@@ -9,6 +9,8 @@ export async function exportXlsx(key, unixFrom, unixTo, lat, lon, radius) {
     return data.url;
   } catch (error) {
     console.error(error);
-    return 'INVALID KEY';
+    if (error.message.includes('401') || error.message.includes('403')) {
+      return 'INVALID KEY';
+    }
   }
 }
