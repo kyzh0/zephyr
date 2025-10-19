@@ -82,6 +82,11 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
       XLSX.utils.book_append_sheet(wb, ws, stationNames[key]);
     }
 
+    // no results
+    if (!Object.keys(data).length) {
+      XLSX.utils.book_append_sheet(wb, {}, 'NO RESULTS');
+    }
+
     const dir = 'public/export';
     await fs.mkdir(dir, { recursive: true });
     const fileName = `zephyr-data-${Math.floor(Date.now() / 1000)}.xlsx`;
@@ -91,7 +96,7 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
       service: 'public'
     });
 
-    return `${process.env.FILE_SERVER_PREFIX}/${filePath}`;
+    return `${process.env.FILE_SERVER_PREFIX}/${filePath.replace('public/', '')}`;
   } catch (error) {
     logger.error(error, { service: 'public' });
   }
