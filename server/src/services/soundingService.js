@@ -7,7 +7,7 @@ export async function removeOldSoundings() {
     const soundings = await Sounding.find({});
     if (!soundings.length) {
       logger.error('No soundings found.', { service: 'sounding' });
-      return null;
+      return;
     }
 
     for (const s of soundings) {

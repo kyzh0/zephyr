@@ -10,7 +10,7 @@ export async function runScraper() {
     logger.error('No webcams found.', {
       service: 'cam'
     });
-    return null;
+    return;
   }
 
   // group by type

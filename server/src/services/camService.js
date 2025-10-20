@@ -9,7 +9,7 @@ export async function removeOldImages() {
     const cams = await Cam.find({});
     if (!cams.length) {
       logger.error(`No cams found.`, { service: 'cleanup' });
-      return null;
+      return;
     }
 
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -30,6 +30,6 @@ export async function removeOldImages() {
     });
   } catch (error) {
     logger.error('An error occured while removing old images', { service: 'cleanup' });
-    return null;
+    return;
   }
 }
