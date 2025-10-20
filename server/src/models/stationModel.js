@@ -51,7 +51,7 @@ const schema = mongoose.Schema({
   weatherlinkCookie: String
 });
 
-schema.virtual('dataNew', {
+schema.virtual('data', {
   ref: 'StationData',
   localField: '_id',
   foreignField: 'station'

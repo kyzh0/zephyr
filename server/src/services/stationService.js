@@ -141,7 +141,7 @@ function groupBy(xs, key) {
 export async function checkForErrors() {
   try {
     const stations = await Station.find({ isDisabled: { $ne: true } }).populate({
-      path: 'dataNew'
+      path: 'data'
     });
     if (!stations.length) {
       logger.error('No stations found.', { service: 'errors' });
@@ -158,9 +158,7 @@ export async function checkForErrors() {
       let isTempError = true;
 
       // check last 6h data
-      const data = s.dataNew.filter(
-        (x) => new Date(x.time) >= new Date(timeNow - 6 * 60 * 60 * 1000)
-      );
+      const data = s.data.filter((x) => new Date(x.time) >= new Date(timeNow - 6 * 60 * 60 * 1000));
 
       if (data.length) {
         data.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()); // time desc
