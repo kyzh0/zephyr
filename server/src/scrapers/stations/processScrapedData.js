@@ -1,6 +1,5 @@
 import { getFlooredTime } from '../../lib/utils.js';
 import { validateStationData } from '../../validators/stationValidator.js';
-import { Station } from '../../models/stationModel.js';
 import { StationData } from '../../models/stationDataModel.js';
 import logger from '../../lib/logger.js';
 
@@ -57,22 +56,6 @@ export default async function processScrapedData(
     station.isError = false;
   }
   await station.save();
-
-  // add data
-  await Station.updateOne(
-    { _id: station._id },
-    {
-      $push: {
-        data: {
-          time: getFlooredTime(station.isHighResolution ? 2 : 10),
-          windAverage: data.windAverage ?? null,
-          windGust: data.windGust ?? null,
-          windBearing: data.windBearing ?? null,
-          temperature: data.temperature ?? null
-        }
-      }
-    }
-  );
 
   if (!suppressLog) {
     logger.info(

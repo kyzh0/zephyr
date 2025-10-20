@@ -39,18 +39,6 @@ const schema = mongoose.Schema({
   isError: Boolean,
   isOffline: Boolean,
   isDisabled: Boolean,
-  data: [
-    {
-      time: {
-        type: Date,
-        required: true
-      },
-      windAverage: Number,
-      windGust: Number,
-      windBearing: Number,
-      temperature: Number
-    }
-  ],
   harvestWindAverageId: String,
   harvestWindGustId: String,
   harvestWindDirectionId: String,

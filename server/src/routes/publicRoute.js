@@ -89,7 +89,7 @@ router.get('/geojson', async (req, res) => {
       return;
     }
 
-    const stations = await Station.find({ isDisabled: { $ne: true } }, { data: 0 }).sort({
+    const stations = await Station.find({ isDisabled: { $ne: true } }).sort({
       type: 1,
       name: 1
     });
