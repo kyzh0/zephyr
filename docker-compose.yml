@@ -5,6 +5,8 @@ services:
     mem_limit: 4g
     restart: unless-stopped
     env_file: ./.env
+    ports:
+      - "${NODE_PORT}:${NODE_PORT}"
     depends_on:
       - mongodb
       - seq
