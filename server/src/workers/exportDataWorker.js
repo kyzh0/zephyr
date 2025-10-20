@@ -23,13 +23,13 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
   if (unixFrom && !isNaN(unixFrom)) {
     dateFrom = new Date(unixFrom * 1000);
   }
-  if (unixFrom && !isNaN(unixTo)) {
+  if (unixTo && !isNaN(unixTo)) {
     dateTo = new Date(unixTo * 1000);
   }
-  // limit 6 months data
-  const ms180Days = 180 * 24 * 60 * 60 * 1000;
-  if (dateFrom == null || dateTo.getTime() - dateFrom.getTime() > ms180Days) {
-    dateFrom = new Date(dateTo.getTime() - ms180Days);
+  // limit 30 days
+  const ms30Days = 30 * 24 * 60 * 60 * 1000;
+  if (dateFrom == null || dateTo.getTime() - dateFrom.getTime() > ms30Days) {
+    dateFrom = new Date(dateTo.getTime() - ms30Days);
   }
 
   const output = await Output.find({
@@ -104,7 +104,15 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
           const unixB = Math.floor(new Date(readings[i].timeUtc).getTime() / 1000);
           const unixA = Math.floor(new Date(readings[i - 1].timeUtc).getTime() / 1000);
           if (unixB - unixA > interval) {
-            fillerData.push(...createFillerData(unixA, unixB, interval, []));
+            for (let t = unixA + interval; t < unixB; t += interval) {
+              fillerData.push({
+                timeUtc: new Date(t * 1000).toISOString(),
+                windAvgKmh: null,
+                windGustKmh: null,
+                windBearingDeg: null,
+                temperatureC: null
+              });
+            }
           }
         }
         if (fillerData.length) {
@@ -143,20 +151,6 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
     logger.error(error);
     return null;
   }
-}
-
-function createFillerData(unixA, unixB, interval) {
-  const result = [];
-  for (let t = unixA + interval; t < unixB; t += interval) {
-    result.push({
-      timeUtc: new Date(t * 1000).toISOString(),
-      windAvgKmh: null,
-      windGustKmh: null,
-      windBearingDeg: null,
-      temperatureC: null
-    });
-  }
-  return result;
 }
 
 (async () => {

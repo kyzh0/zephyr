@@ -156,19 +156,19 @@ router.get('/json-output', async (req, res) => {
       }
     }
 
-    // limit 6 months data
-    const ms180Days = 180 * 24 * 60 * 60 * 1000;
+    // limit 30 days
+    const ms30Days = 30 * 24 * 60 * 60 * 1000;
     if (dateFrom != null && dateTo != null) {
-      if (dateTo.getTime() - dateFrom.getTime() > ms180Days) {
-        dateFrom = new Date(dateTo.getTime() - ms180Days);
+      if (dateTo.getTime() - dateFrom.getTime() > ms30Days) {
+        dateFrom = new Date(dateTo.getTime() - ms30Days);
       }
     } else if (dateFrom != null) {
-      dateTo = new Date(dateFrom.getTime() + ms180Days);
+      dateTo = new Date(dateFrom.getTime() + ms30Days);
     } else if (dateTo != null) {
-      dateFrom = new Date(dateTo.getTime() - ms180Days);
+      dateFrom = new Date(dateTo.getTime() - ms30Days);
     } else {
       dateTo = new Date();
-      dateFrom = new Date(dateTo.getTime() - ms180Days);
+      dateFrom = new Date(dateTo.getTime() - ms30Days);
     }
 
     const query = {};
