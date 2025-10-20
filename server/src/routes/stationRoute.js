@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
     query.lastUpdate = { $gte: new Date(time * 1000) };
   }
 
-  let stations = await Station.find(query).sort(orderby);
+  let stations = await Station.find(query).sort(orderby).lean();
 
   if (!isNaN(latitude) && !isNaN(longitude) && !isNaN(rad)) {
     stations = JSON.parse(JSON.stringify(stations)); // convert to plain js obj
@@ -60,7 +60,7 @@ router.get('/', async (req, res) => {
 
 // add station
 router.post('/', async (req, res) => {
-  const user = await User.findOne({ key: req.query.key });
+  const user = await User.findOne({ key: req.query.key }).lean();
   if (!user) {
     res.status(401).send();
     return;
@@ -137,7 +137,9 @@ router.get('/data', async (req, res) => {
   // select data for 30 min interval ending at specified time
   const stations = await Station.find({
     isDisabled: { $ne: true }
-  }).select('_id validBearings');
+  })
+    .select('_id validBearings')
+    .lean();
   const stationMap = new Map(stations.map((s) => [s._id.toString(), s]));
 
   const stationData = await StationData.find({
@@ -213,7 +215,7 @@ router.get('/:id', async (req, res) => {
     return;
   }
 
-  const s = await Station.findOne({ _id: new ObjectId(id) });
+  const s = await Station.findOne({ _id: new ObjectId(id) }).lean();
   if (!s) {
     res.status(404).send();
     return;
@@ -225,7 +227,7 @@ router.get('/:id', async (req, res) => {
 // patch station
 router.patch('/:id', async (req, res) => {
   const { id } = req.params;
-  const user = await User.findOne({ key: req.query.key });
+  const user = await User.findOne({ key: req.query.key }).lean();
   if (!user) {
     res.status(401).send();
     return;

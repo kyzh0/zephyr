@@ -6,7 +6,7 @@ import { Cam } from '../models/camModel.js';
 
 export async function removeOldImages() {
   try {
-    const cams = await Cam.find({});
+    const cams = await Cam.find().lean();
     if (!cams.length) {
       logger.error(`No cams found.`, { service: 'cleanup' });
       return;

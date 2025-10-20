@@ -34,7 +34,9 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
 
   const output = await Output.find({
     time: { $gte: dateFrom.getTime(), $lte: dateTo.getTime() }
-  }).sort({ time: 1 });
+  })
+    .sort({ time: 1 })
+    .lean();
 
   // read from json files
   const data = {};

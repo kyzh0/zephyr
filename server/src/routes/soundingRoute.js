@@ -7,12 +7,12 @@ import { User } from '../models/userModel.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const soundings = await Sounding.find({});
+  const soundings = await Sounding.find().lean();
   res.json(soundings);
 });
 
 router.post('/', async (req, res) => {
-  const user = await User.findOne({ key: req.query.key });
+  const user = await User.findOne({ key: req.query.key }).lean();
   if (!user) {
     res.status(401).send();
     return;
@@ -42,7 +42,7 @@ router.get('/:id', async (req, res) => {
     return;
   }
 
-  const sounding = await Sounding.findOne({ _id: new ObjectId(id) });
+  const sounding = await Sounding.findOne({ _id: new ObjectId(id) }).lean();
   if (!sounding) {
     res.status(404).send();
     return;
