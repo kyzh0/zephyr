@@ -259,31 +259,26 @@ router.get('/:id/data', async (req, res) => {
     return;
   }
 
-  const result = await Station.aggregate([
-    {
-      $match: { _id: new ObjectId(id) }
-    },
-    {
-      $project: {
-        _id: 0,
-        data: {
-          $slice: [
-            {
-              $sortArray: { input: '$data', sortBy: { time: -1 } }
-            },
-            hr ? 725 : 145 // 145 (or 725 for hi res) records in last 24h
-          ]
-        }
-      }
-    }
-  ]);
+  const result = await StationData.find({ station: id })
+    .sort({ time: -1 })
+    .limit(hr ? 725 : 145)
+    .lean();
 
-  if (!result.length) {
+  if (!result || !result.length) {
     res.json([]);
     return;
   }
 
-  res.json(result[0].data);
+  res.json(
+    result.map((r) => ({
+      time: r.time,
+      windAverage: r.windAverage,
+      windGust: r.windGust,
+      windBearing: r.windBearing,
+      temperature: r.temperature,
+      _id: r.station
+    }))
+  );
 });
 
 export default router;

@@ -257,7 +257,8 @@ export async function updateKeys() {
     // const harvestStations = await Station.find({
     //   type: 'harvest',
     //   harvestCookie: { $ne: null }
-    // });
+    // },
+    // { data: 0 });
     // if (!harvestStations.length) {
     //   logger.error('Update keys: no harvest stations found.', { service: 'keys' });
     //   return ;
@@ -294,10 +295,13 @@ export async function updateKeys() {
     //   }
     // }
 
-    const weatherlinkStations = await Station.find({
-      type: 'wl',
-      weatherlinkCookie: { $ne: null }
-    });
+    const weatherlinkStations = await Station.find(
+      {
+        type: 'wl',
+        weatherlinkCookie: { $ne: null }
+      },
+      { data: 0 }
+    );
     if (!weatherlinkStations.length) {
       logger.error('Update keys: no weatherlink stations found.', { service: 'keys' });
       return;
