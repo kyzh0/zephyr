@@ -126,6 +126,15 @@ MapView.propTypes = {
   radiusKm: PropTypes.number
 };
 
+function toNztZonedDate(date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const dateStr = `${day}/${month}/${year}`;
+
+  return zonedTimeToUtc(parse(dateStr, 'dd/MM/yyyy', new Date()), 'Pacific/Auckland');
+}
+
 export default function ExportXlsx() {
   const navigate = useNavigate();
   function handleClose() {
@@ -152,16 +161,8 @@ export default function ExportXlsx() {
     const key = data.get('api_key').trim();
 
     // always interpret dates as NZT
-    const dFrom = zonedTimeToUtc(
-      parse(dateFrom.toLocaleDateString(), 'dd/MM/yyyy', new Date()),
-      'Pacific/Auckland'
-    );
-    const dTo = zonedTimeToUtc(
-      parse(dateTo.toLocaleDateString(), 'dd/MM/yyyy', new Date()),
-      'Pacific/Auckland'
-    );
-    const unixFrom = Math.floor(dFrom.getTime() / 1000);
-    const unixTo = Math.floor(dTo.getTime() / 1000) + 24 * 60 * 60 - 1; // 23:59:59
+    const unixFrom = Math.floor(toNztZonedDate(dateFrom).getTime() / 1000);
+    const unixTo = Math.floor(toNztZonedDate(dateTo).getTime() / 1000) + 24 * 60 * 60 - 1; // 23:59:59
 
     // input validation
     if (!key) {
@@ -174,7 +175,7 @@ export default function ExportXlsx() {
       setLoading(false);
       return;
     } else if (unixTo - unixFrom > 180 * 24 * 60 * 60) {
-      setErrorMsg('Maximum 180 days data');
+      setErrorMsg('Maximum 30 days data');
       setLoading(false);
       return;
     }
