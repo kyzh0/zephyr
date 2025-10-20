@@ -16,4 +16,6 @@ const schema = mongoose.Schema({
   }
 });
 
+schema.index({ station: 1, time: -1 });
+
 export const StationData = mongoose.model('StationData', schema);

@@ -3,6 +3,7 @@ import * as geofire from 'geofire-common';
 
 import { ObjectId } from 'mongodb';
 import { Station } from '../models/stationModel.js';
+import { StationData } from '../models/stationDataModel.js';
 import { User } from '../models/userModel.js';
 
 const router = express.Router();
@@ -134,23 +135,41 @@ router.get('/data', async (req, res) => {
   const timeFrom = new Date(timeTo.getTime() - 30 * 60 * 1000);
 
   // select data for 30 min interval ending at specified time
-  const data = await Station.aggregate([
-    {
-      $project: {
-        _id: 1,
-        validBearings: 1,
-        data: {
-          $filter: {
-            input: '$data',
-            as: 'd',
-            cond: {
-              $and: [{ $gte: ['$$d.time', timeFrom] }, { $lte: ['$$d.time', timeTo] }]
-            }
-          }
+  const stations = await Station.find({
+    isDisabled: { $ne: true }
+  }).select('_id validBearings');
+  const stationMap = new Map(stations.map((s) => [s._id.toString(), s]));
+
+  const stationData = await StationData.find({
+    station: { $in: stations.map((s) => s._id) },
+    time: { $gt: timeFrom, $lte: timeTo }
+  }).lean();
+
+  const data = Array.from(
+    stationData
+      .reduce((acc, d) => {
+        const stationId = d.station.toString();
+
+        if (!acc.has(stationId)) {
+          acc.set(stationId, {
+            _id: stationId,
+            data: []
+          });
         }
-      }
-    }
-  ]);
+
+        acc.get(stationId).data.push({
+          windAverage: d.windAverage,
+          windBearing: d.windBearing
+        });
+
+        return acc;
+      }, new Map())
+      .values()
+  );
+
+  for (const group of data) {
+    group.validBearings = stationMap.get(group._id)?.validBearings || null;
+  }
 
   if (!data.length) {
     res.json({ time: new Date().toISOString(), values: [] });
