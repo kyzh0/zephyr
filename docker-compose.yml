@@ -15,7 +15,7 @@ services:
     build:
       context: ./server
     command: npm run scheduler
-    mem_limit: 8g
+    mem_limit: 10g
     restart: unless-stopped
     env_file: ./.env
     depends_on:
