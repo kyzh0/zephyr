@@ -145,7 +145,7 @@ export async function checkForErrors() {
     const stations = await Station.find({ isDisabled: { $ne: true } });
     if (!stations.length) {
       logger.error('No stations found.', { service: 'errors' });
-      return null;
+      return;
     }
 
     const errors = [];
@@ -248,7 +248,7 @@ export async function checkForErrors() {
   } catch (error) {
     logger.error('An error occurred while checking for station errors', { service: 'errors' });
     logger.error(error, { service: 'errors' });
-    return null;
+    return;
   }
 }
 
@@ -260,7 +260,7 @@ export async function updateKeys() {
     // });
     // if (!harvestStations.length) {
     //   logger.error('Update keys: no harvest stations found.', { service: 'keys' });
-    //   return null;
+    //   return ;
     // }
 
     // if (harvestStations.length == 2) {
@@ -300,7 +300,7 @@ export async function updateKeys() {
     });
     if (!weatherlinkStations.length) {
       logger.error('Update keys: no weatherlink stations found.', { service: 'keys' });
-      return null;
+      return;
     }
 
     if (weatherlinkStations.length) {
@@ -331,7 +331,7 @@ export async function updateKeys() {
   } catch (error) {
     logger.error('An error occurred while updating keys', { service: 'keys' });
     logger.error(error, { service: 'keys' });
-    return null;
+    return;
   }
 }
 
@@ -340,7 +340,7 @@ export async function removeOldData() {
     const stations = await Station.find({});
     if (!stations.length) {
       logger.error('No stations found.', { service: 'cleanup' });
-      return null;
+      return;
     }
 
     const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days
@@ -350,6 +350,6 @@ export async function removeOldData() {
   } catch (error) {
     logger.error('An error occurred while removing old data', { service: 'cleanup' });
     logger.error(error, { service: 'cleanup' });
-    return null;
+    return;
   }
 }

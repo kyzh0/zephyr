@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { runScraper } from './orchestrator.js';
+import { rerunScraper, runScraper } from './orchestrator.js';
 import logger from '../../lib/logger.js';
 import {
   checkForErrors,
@@ -59,6 +59,16 @@ export async function startStationScheduler() {
         service: 'json'
       }
     );
+  });
+
+  // missed readings
+  cron.schedule('3,13,23,33,43,53,6,16,26,36,46,56,35 * * * *', async () => {
+    logger.info('----- Check missed readings start -----', { service: 'miss' });
+    const ts = Date.now();
+    await rerunScraper();
+    logger.info(`--- Check missed readings end - ${Date.now() - ts}ms elapsed. -----`, {
+      service: 'miss'
+    });
   });
 
   // errors

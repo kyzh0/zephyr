@@ -10,7 +10,7 @@ export async function runScraper() {
     logger.error('No soundings found.', {
       service: 'sounding'
     });
-    return null;
+    return;
   }
 
   try {

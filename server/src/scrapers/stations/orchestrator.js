@@ -13,7 +13,7 @@ export async function runScraper(highResolution) {
     logger.error('No stations found.', {
       service: 'station'
     });
-    return null;
+    return;
   }
 
   // group by type
@@ -51,6 +51,82 @@ export async function runScraper(highResolution) {
     } catch (err) {
       logger.error(`Station scraper ${type} failed: ${err.message}`, {
         service: 'station',
+        type: type
+      });
+    }
+  });
+
+  await Promise.allSettled(jobs);
+}
+
+export async function rerunScraper() {
+  const allStations = await Station.find({
+    isDisabled: { $ne: true },
+    isHighResolution: { $ne: true }
+  })
+    .select('-data')
+    .populate({
+      path: 'dataNew',
+      options: { sort: { time: -1 }, limit: 1 }
+    })
+    .exec();
+
+  if (!allStations.length) {
+    logger.error('No stations found.', {
+      service: 'miss'
+    });
+    return;
+  }
+
+  const stations = [];
+  for (const s of allStations) {
+    if (!s.dataNew[0] || Date.now() - new Date(s.dataNew[0].time).getTime() > 10 * 60 * 1000) {
+      stations.push(s);
+    }
+  }
+
+  if (!stations.length) {
+    logger.info('Data is up to date.', {
+      service: 'miss'
+    });
+    return;
+  }
+
+  // group by type
+  const grouped = stations.reduce((acc, s) => {
+    acc[s.type] ??= [];
+    acc[s.type].push(s);
+    return acc;
+  }, {});
+
+  logger.info(`----- Station: scraping ${Object.keys(grouped).length} types -----`, {
+    service: 'miss'
+  });
+
+  // scrape concurrently per type
+  const jobs = Object.entries(grouped).map(async ([type, stations]) => {
+    try {
+      logger.info(`----- Station: scraping ${type}, ${stations.length} stations -----`, {
+        service: 'miss',
+        type: type
+      });
+
+      const scraper = scrapers[type];
+      if (scraper) {
+        await scraper(stations);
+        logger.info(`----- Station finished: ${type} -----`, {
+          service: 'miss',
+          type: type
+        });
+      } else {
+        logger.error(`Station scraper does not exist for: ${type}`, {
+          service: 'miss',
+          type: type
+        });
+      }
+    } catch (err) {
+      logger.error(`Station scraper ${type} failed: ${err.message}`, {
+        service: 'miss',
         type: type
       });
     }
