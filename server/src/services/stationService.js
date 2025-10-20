@@ -19,7 +19,7 @@ function cmp(a, b) {
 export async function processStationJson() {
   try {
     var date = getFlooredTime(10);
-    const stations = await Station.find({ isDisabled: { $ne: true } }, { data: 0 });
+    const stations = await Station.find({ isDisabled: { $ne: true } });
     const json = [];
     for (const s of stations) {
       let avg = s.currentAverage;
@@ -74,10 +74,7 @@ export async function processStationJson() {
 export async function processHighResolutionStationJson() {
   try {
     var date = getFlooredTime(2);
-    const stations = await Station.find(
-      { isHighResolution: true, isDisabled: { $ne: true } },
-      { data: 0 }
-    );
+    const stations = await Station.find({ isHighResolution: true, isDisabled: { $ne: true } });
     const json = [];
     for (const s of stations) {
       let avg = s.currentAverage;
@@ -140,9 +137,11 @@ function groupBy(xs, key) {
 }
 export async function checkForErrors() {
   try {
-    // import { StationData } from '../models/stationDataModel.js';
-    // await Station.find({ name: 'Rocky Gully' }, { data: 0 }).populate({ path: 'dataNew' })
-    const stations = await Station.find({ isDisabled: { $ne: true } });
+    const stations = await Station.find({ isDisabled: { $ne: true } })
+      .populate({
+        path: 'dataNew'
+      })
+      .exec();
     if (!stations.length) {
       logger.error('No stations found.', { service: 'errors' });
       return;
@@ -158,7 +157,9 @@ export async function checkForErrors() {
       let isTempError = true;
 
       // check last 6h data
-      const data = s.data.filter((x) => new Date(x.time) >= new Date(timeNow - 6 * 60 * 60 * 1000));
+      const data = s.dataNew.filter(
+        (x) => new Date(x.time) >= new Date(timeNow - 6 * 60 * 60 * 1000)
+      );
 
       if (data.length) {
         data.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()); // time desc
@@ -257,8 +258,7 @@ export async function updateKeys() {
     // const harvestStations = await Station.find({
     //   type: 'harvest',
     //   harvestCookie: { $ne: null }
-    // },
-    // { data: 0 });
+    // });
     // if (!harvestStations.length) {
     //   logger.error('Update keys: no harvest stations found.', { service: 'keys' });
     //   return ;
@@ -295,13 +295,10 @@ export async function updateKeys() {
     //   }
     // }
 
-    const weatherlinkStations = await Station.find(
-      {
-        type: 'wl',
-        weatherlinkCookie: { $ne: null }
-      },
-      { data: 0 }
-    );
+    const weatherlinkStations = await Station.find({
+      type: 'wl',
+      weatherlinkCookie: { $ne: null }
+    });
     if (!weatherlinkStations.length) {
       logger.error('Update keys: no weatherlink stations found.', { service: 'keys' });
       return;
@@ -335,25 +332,6 @@ export async function updateKeys() {
   } catch (error) {
     logger.error('An error occurred while updating keys', { service: 'keys' });
     logger.error(error, { service: 'keys' });
-    return;
-  }
-}
-
-export async function removeOldData() {
-  try {
-    const stations = await Station.find({});
-    if (!stations.length) {
-      logger.error('No stations found.', { service: 'cleanup' });
-      return;
-    }
-
-    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days
-    for (const s of stations) {
-      await Station.updateOne({ _id: s._id }, { $pull: { data: { time: { $lte: cutoff } } } });
-    }
-  } catch (error) {
-    logger.error('An error occurred while removing old data', { service: 'cleanup' });
-    logger.error(error, { service: 'cleanup' });
     return;
   }
 }

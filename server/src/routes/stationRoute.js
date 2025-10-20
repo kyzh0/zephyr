@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
     query.lastUpdate = { $gte: new Date(time * 1000) };
   }
 
-  let stations = await Station.find(query, { data: 0 }).sort(orderby);
+  let stations = await Station.find(query).sort(orderby);
 
   if (!isNaN(latitude) && !isNaN(longitude) && !isNaN(rad)) {
     stations = JSON.parse(JSON.stringify(stations)); // convert to plain js obj
@@ -213,7 +213,7 @@ router.get('/:id', async (req, res) => {
     return;
   }
 
-  const s = await Station.findOne({ _id: new ObjectId(id) }, { data: 0 });
+  const s = await Station.findOne({ _id: new ObjectId(id) });
   if (!s) {
     res.status(404).send();
     return;
@@ -233,7 +233,7 @@ router.patch('/:id', async (req, res) => {
 
   const { patch, remove } = req.body;
   try {
-    const station = await Station.findOne({ _id: new ObjectId(id) }, { data: 0 });
+    const station = await Station.findOne({ _id: new ObjectId(id) });
 
     for (const key of Object.keys(patch)) {
       station[key] = patch[key];
