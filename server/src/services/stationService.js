@@ -19,7 +19,7 @@ function cmp(a, b) {
 export async function processStationJson() {
   try {
     var date = getFlooredTime(10);
-    const stations = await Station.find({ isDisabled: { $ne: true } });
+    const stations = await Station.find({ isDisabled: { $ne: true } }).lean();
     const json = [];
     for (const s of stations) {
       let avg = s.currentAverage;
@@ -74,7 +74,10 @@ export async function processStationJson() {
 export async function processHighResolutionStationJson() {
   try {
     var date = getFlooredTime(2);
-    const stations = await Station.find({ isHighResolution: true, isDisabled: { $ne: true } });
+    const stations = await Station.find({
+      isHighResolution: true,
+      isDisabled: { $ne: true }
+    }).lean();
     const json = [];
     for (const s of stations) {
       let avg = s.currentAverage;
@@ -137,11 +140,9 @@ function groupBy(xs, key) {
 }
 export async function checkForErrors() {
   try {
-    const stations = await Station.find({ isDisabled: { $ne: true } })
-      .populate({
-        path: 'dataNew'
-      })
-      .exec();
+    const stations = await Station.find({ isDisabled: { $ne: true } }).populate({
+      path: 'dataNew'
+    });
     if (!stations.length) {
       logger.error('No stations found.', { service: 'errors' });
       return;

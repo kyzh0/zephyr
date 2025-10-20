@@ -68,8 +68,7 @@ export async function rerunScraper() {
     .populate({
       path: 'dataNew',
       options: { sort: { time: -1 }, limit: 1 }
-    })
-    .exec();
+    });
 
   if (!allStations.length) {
     logger.error('No stations found.', {

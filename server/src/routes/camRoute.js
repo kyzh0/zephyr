@@ -15,12 +15,12 @@ router.get('/', async (req, res) => {
     query.lastUpdate = { $gte: new Date(time * 1000) };
   }
 
-  const cams = await Cam.find(query, { images: 0 }).sort({ currentTime: 1 });
+  const cams = await Cam.find(query, { images: 0 }).sort({ currentTime: 1 }).lean();
   res.json(cams);
 });
 
 router.post('/', async (req, res) => {
-  const user = await User.findOne({ key: req.query.key });
+  const user = await User.findOne({ key: req.query.key }).lean();
   if (!user) {
     res.status(401).send();
     return;
@@ -51,7 +51,7 @@ router.get('/:id', async (req, res) => {
     return;
   }
 
-  const cam = await Cam.findOne({ _id: new ObjectId(id) }, { images: 0 });
+  const cam = await Cam.findOne({ _id: new ObjectId(id) }, { images: 0 }).lean();
   if (!cam) {
     res.status(404).send();
     return;

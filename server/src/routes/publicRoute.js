@@ -27,7 +27,7 @@ async function authenticateApiKey(apiKey) {
       error: 'API key is required.'
     };
   }
-  const client = await Client.findOne({ apiKey: apiKey });
+  const client = await Client.findOne({ apiKey: apiKey }).lean();
   if (!client) {
     logger.info('Invalid API key...');
     return {
@@ -89,10 +89,12 @@ router.get('/geojson', async (req, res) => {
       return;
     }
 
-    const stations = await Station.find({ isDisabled: { $ne: true } }).sort({
-      type: 1,
-      name: 1
-    });
+    const stations = await Station.find({ isDisabled: { $ne: true } })
+      .sort({
+        type: 1,
+        name: 1
+      })
+      .lean();
     if (!stations.length) {
       logger.error('No stations found.', { service: 'public' });
       res.status(500).json({ error: 'No stations found. Please contact the Zephyr admin.' });
@@ -189,7 +191,7 @@ router.get('/json-output', async (req, res) => {
       query.isHighResolution = true;
     }
 
-    const output = await Output.find(query).sort({ time: 1 });
+    const output = await Output.find(query).sort({ time: 1 }).lean();
     for (const o of output) {
       result.push({
         time: new Date(o.time).getTime() / 1000,

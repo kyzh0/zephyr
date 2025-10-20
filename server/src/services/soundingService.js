@@ -4,7 +4,7 @@ import { Sounding } from '../models/soundingModel.js';
 
 export async function removeOldSoundings() {
   try {
-    const soundings = await Sounding.find({});
+    const soundings = await Sounding.find().lean();
     if (!soundings.length) {
       logger.error('No soundings found.', { service: 'sounding' });
       return;
