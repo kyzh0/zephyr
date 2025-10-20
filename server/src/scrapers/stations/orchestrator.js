@@ -63,12 +63,10 @@ export async function rerunScraper() {
   const allStations = await Station.find({
     isDisabled: { $ne: true },
     isHighResolution: { $ne: true }
-  })
-    .select('-data')
-    .populate({
-      path: 'dataNew',
-      options: { sort: { time: -1 }, limit: 1 }
-    });
+  }).populate({
+    path: 'data',
+    options: { sort: { time: -1 }, limit: 1 }
+  });
 
   if (!allStations.length) {
     logger.error('No stations found.', {
@@ -79,7 +77,7 @@ export async function rerunScraper() {
 
   const stations = [];
   for (const s of allStations) {
-    if (!s.dataNew[0] || Date.now() - new Date(s.dataNew[0].time).getTime() > 10 * 60 * 1000) {
+    if (!s.data[0] || Date.now() - new Date(s.data[0].time).getTime() > 10 * 60 * 1000) {
       stations.push(s);
     }
   }
