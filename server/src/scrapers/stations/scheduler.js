@@ -5,7 +5,6 @@ import {
   checkForErrors,
   processHighResolutionStationJson,
   processStationJson,
-  removeOldData,
   updateKeys
 } from '../../services/stationService.js';
 
@@ -87,15 +86,5 @@ export async function startStationScheduler() {
     const ts = Date.now();
     await updateKeys();
     logger.info(`----- Update keys end - ${Date.now() - ts}ms elapsed. -----`, { service: 'keys' });
-  });
-
-  // cleanup
-  cron.schedule('5 0 * * *', async () => {
-    logger.info('----- Remove old data start -----', { service: 'cleanup' });
-    const ts = Date.now();
-    await removeOldData();
-    logger.info(`----- Remove old data end - ${Date.now() - ts}ms elapsed. -----`, {
-      service: 'cleanup'
-    });
   });
 }

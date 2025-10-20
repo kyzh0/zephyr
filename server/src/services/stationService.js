@@ -221,7 +221,8 @@ export async function checkForErrors() {
         'hw',
         'wswr',
         'wi',
-        'sp'
+        'sp',
+        'wl'
       ];
       for (const [key, value] of Object.entries(g)) {
         if (singleStations.includes(key) || value.length > 2) {
