@@ -33,7 +33,7 @@ export function getWindBearingFromDirection(direction) {
     case 'WNW':
       return 292.5;
     case 'NW':
-      return 325;
+      return 315;
     case 'NNW':
       return 337.5;
     default:
