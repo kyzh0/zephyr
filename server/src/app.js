@@ -8,10 +8,10 @@ import camRoute from './routes/camRoute.js';
 import soundingRoute from './routes/soundingRoute.js';
 import publicRoute from './routes/publicRoute.js';
 
+dotenv.config();
 const app = express();
 app.use(cors({ origin: [/zephyrapp\.nz$/, /^http(s)?:\/\/localhost:\d{4}.*$/] }));
 app.use(express.json());
-dotenv.config();
 
 // static files are served by caddy in prod
 if (process.env.NODE_ENV !== 'production') {
