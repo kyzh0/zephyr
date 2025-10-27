@@ -45,8 +45,8 @@ export async function runScraper() {
           type: type
         });
       }
-    } catch (err) {
-      logger.error(`Webcam scraper ${type} failed: ${err.message}`, {
+    } catch (error) {
+      logger.error(`Webcam scraper ${type} failed: ${error.message}`, {
         service: 'cam',
         type: type
       });

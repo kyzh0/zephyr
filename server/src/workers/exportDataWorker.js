@@ -150,7 +150,7 @@ async function exportData(unixFrom, unixTo, lat, lon, radius) {
     return `${process.env.FILE_SERVER_PREFIX}/${filePath.replace('public/', '')}`;
   } catch (error) {
     logger.error('Failed to save XLSX', { service: 'public' });
-    logger.error(error);
+    logger.error(error, { service: 'public' });
     return null;
   }
 }

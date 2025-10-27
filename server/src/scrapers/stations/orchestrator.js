@@ -48,8 +48,8 @@ export async function runScraper(highResolution) {
           type: type
         });
       }
-    } catch (err) {
-      logger.error(`Station scraper ${type} failed: ${err.message}`, {
+    } catch (error) {
+      logger.error(`Station scraper ${type} failed: ${error.message}`, {
         service: 'station',
         type: type
       });
@@ -121,8 +121,8 @@ export async function rerunScraper() {
           type: type
         });
       }
-    } catch (err) {
-      logger.error(`Station scraper ${type} failed: ${err.message}`, {
+    } catch (error) {
+      logger.error(`Station scraper ${type} failed: ${error.message}`, {
         service: 'miss',
         type: type
       });

@@ -331,7 +331,7 @@ export async function updateKeys() {
     }
   } catch (error) {
     logger.error('An error occurred while updating keys', { service: 'keys' });
-    logger.error(error, { service: 'keys' });
+    logger.error(error.message, { service: 'keys' });
     return;
   }
 }
