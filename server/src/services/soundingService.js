@@ -19,6 +19,6 @@ export async function removeOldSoundings() {
     }
   } catch (error) {
     logger.error('An error occured while removing old soundings', { service: 'sounding' });
-    logger.error(error);
+    logger.error(error, { service: 'sounding' });
   }
 }

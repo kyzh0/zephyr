@@ -24,9 +24,13 @@ export default async function scrapePortersData(stations) {
     const dir = 'public/temp/porters';
     await fs.mkdir(dir, { recursive: true });
     const worker = await createWorker('eng', 1, {
-      errorHandler: (err) => {
-        logger.warn(err);
-        return err;
+      errorHandler: (error) => {
+        logger.warn(error),
+          {
+            service: 'station',
+            type: 'porters'
+          };
+        return error;
       }
     });
 
@@ -295,7 +299,10 @@ export default async function scrapePortersData(stations) {
       service: 'station',
       type: 'porters'
     });
-    logger.warn(error);
+    logger.warn(error.message, {
+      service: 'station',
+      type: 'porters'
+    });
 
     for (const station of stations) {
       await processScrapedData(station, null, null, null, null, true);

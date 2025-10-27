@@ -38,7 +38,10 @@ export default async function scrapeHolfuyData(stations) {
       service: 'station',
       type: 'holfuy'
     });
-    logger.warn(error);
+    logger.warn(error.message, {
+      service: 'station',
+      type: 'holfuy'
+    });
 
     // try individually
     const limit = pLimit(5);

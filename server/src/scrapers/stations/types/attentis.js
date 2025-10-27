@@ -47,7 +47,10 @@ export default async function scrapeAttentisData(stations) {
       service: 'station',
       type: 'attentis'
     });
-    logger.warn(error);
+    logger.warn(error.message, {
+      service: 'station',
+      type: 'attentis'
+    });
 
     for (const station of stations) {
       await processScrapedData(station, null, null, null, null, true);

@@ -63,7 +63,10 @@ export default async function scrapeHarvestData(stations) {
       service: 'station',
       type: 'harvest'
     });
-    logger.warn(error);
+    logger.warn(error.message, {
+      service: 'station',
+      type: 'harvest'
+    });
 
     // try individually, ignore fenz API
     const limit = pLimit(5);

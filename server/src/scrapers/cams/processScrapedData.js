@@ -86,6 +86,6 @@ export default async function processScrapedData(cam, updated, base64) {
       `An error occured while saving image for ${cam.type}${cam.externalId ? ` - ${cam.externalId}` : ''}`,
       { service: 'cam', type: cam.type }
     );
-    logger.error(error);
+    logger.error(error, { service: 'cam', type: cam.type });
   }
 }

@@ -17,9 +17,9 @@ export async function removeOldImages() {
       await Cam.updateOne({ _id: c._id }, { $pull: { images: { time: { $lte: cutoff } } } });
     }
 
-    dir.files('public/cams', async (err, files) => {
-      if (err) {
-        throw err;
+    dir.files('public/cams', async (error, files) => {
+      if (error) {
+        throw error;
       }
       for (const file of files) {
         const stats = await fs.stat(file);
