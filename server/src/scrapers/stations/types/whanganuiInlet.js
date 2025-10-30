@@ -37,12 +37,8 @@ export default async function scrapeWhanganuiInletData(stations) {
       }
 
       if (skipUpdate) {
-        return {
-          windAverage,
-          windGust,
-          windBearing,
-          temperature
-        };
+        await processScrapedData(station, null, null, null, null);
+        return;
       }
 
       // wind avg + direction
