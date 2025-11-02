@@ -220,7 +220,6 @@ export async function checkForErrors() {
         'prime',
         'hw',
         'wswr',
-        'wi',
         'sp',
         'wl'
       ];
