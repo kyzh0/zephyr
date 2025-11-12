@@ -27,6 +27,7 @@ import scrapeWeatherProData from './types/weatherPro.js';
 import scrapeWeatherUndergroundData from './types/weatherUnderground.js';
 import scrapeWhanganuiInletData from './types/whanganuiInlet.js';
 import scrapeWindGuruData from './types/windGuru.js';
+import scrapeWindyData from './types/windy.js';
 import scrapeWowData from './types/wow.js';
 import scrapeWswrData from './types/wswr.js';
 
@@ -60,6 +61,7 @@ export default {
   wu: scrapeWeatherUndergroundData,
   wi: scrapeWhanganuiInletData,
   windguru: scrapeWindGuruData,
+  windy: scrapeWindyData,
   wow: scrapeWowData,
   wswr: scrapeWswrData
 };
