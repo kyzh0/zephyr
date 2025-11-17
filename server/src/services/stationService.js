@@ -5,6 +5,7 @@ import { getFlooredTime } from '../lib/utils.js';
 import logger from '../lib/logger.js';
 
 import { Station } from '../models/stationModel.js';
+import { StationData } from '../models/stationDataModel.js';
 import { Output } from '../models/outputModel.js';
 
 function cmp(a, b) {
@@ -140,9 +141,7 @@ function groupBy(xs, key) {
 }
 export async function checkForErrors() {
   try {
-    const stations = await Station.find({ isDisabled: { $ne: true } }).populate({
-      path: 'data'
-    });
+    const stations = await Station.find({ isDisabled: { $ne: true } }).lean();
     if (!stations.length) {
       logger.error('No stations found.', { service: 'errors' });
       return;
@@ -151,18 +150,28 @@ export async function checkForErrors() {
     const errors = [];
     const timeNow = Date.now();
 
-    for (const s of stations) {
+    // check last 6h data
+    const stationDataMap = await Promise.all(
+      stations.map((station) =>
+        StationData.find({
+          station: station._id,
+          time: { $gte: timeNow - 6 * 60 * 60 * 1000 }
+        })
+          .sort({ time: -1 })
+          .lean()
+          .then((data) => ({ station, data }))
+      )
+    );
+
+    const newOfflineIds = [];
+    const newErrorIds = [];
+    for (const { station, data } of stationDataMap) {
       let isDataError = true;
       let isWindError = true;
       let isBearingError = true;
       let isTempError = true;
 
-      // check last 6h data
-      const data = s.data.filter((x) => new Date(x.time) >= new Date(timeNow - 6 * 60 * 60 * 1000));
-
       if (data.length) {
-        data.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()); // time desc
-
         // check that data exists up to 60min before current time
         if (timeNow - new Date(data[0].time).getTime() <= 60 * 60 * 1000) {
           isDataError = false;
@@ -188,23 +197,25 @@ export async function checkForErrors() {
       }
 
       if (isDataError || isWindError) {
-        if (!s.isOffline) {
-          s.isOffline = true;
-          await s.save();
+        if (!station.isOffline) {
+          newOfflineIds.push(station._id);
           errors.push({
-            type: s.type,
-            msg: `${errorMsg}Name: ${s.name}\nURL: ${s.externalLink}\nDatabase ID: ${s._id}\n`
+            type: station.type,
+            msg: `${errorMsg}Name: ${station.name}\nURL: ${station.externalLink}\nDatabase ID: ${station._id}\n`
           });
         }
       }
 
       if (isDataError || isWindError || isBearingError || isTempError) {
-        if (!s.isError) {
-          s.isError = true;
-          await s.save();
+        if (!station.isError) {
+          newErrorIds.push(station._id);
         }
       }
     }
+
+    // bulk db updates
+    await Station.updateMany({ _id: { $in: newOfflineIds } }, { $set: { isOffline: true } });
+    await Station.updateMany({ _id: { $in: newErrorIds } }, { $set: { isError: true } });
 
     if (errors.length) {
       // send email if >2 stations of the same type went offline simultaneously
