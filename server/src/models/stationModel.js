@@ -59,5 +59,6 @@ schema.virtual('data', {
 
 schema.set('toObject', { virtuals: true });
 schema.set('toJSON', { virtuals: true });
+schema.index({ isDisabled: 1, isHighResolution: 1 });
 
 export const Station = mongoose.model('Station', schema);

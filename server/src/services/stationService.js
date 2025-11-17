@@ -268,10 +268,10 @@ export async function updateKeys() {
     // const harvestStations = await Station.find({
     //   type: 'harvest',
     //   harvestCookie: { $ne: null }
-    // });
+    // }).lean();
     // if (!harvestStations.length) {
     //   logger.error('Update keys: no harvest stations found.', { service: 'keys' });
-    //   return ;
+    //   return;
     // }
 
     // if (harvestStations.length == 2) {
@@ -285,9 +285,7 @@ export async function updateKeys() {
     //     {
     //       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     //       maxRedirects: 0,
-    //       validateStatus: (status) => {
-    //         return status == 302;
-    //       }
+    //       validateStatus: (status) => status == 302
     //     }
     //   );
 
@@ -296,11 +294,11 @@ export async function updateKeys() {
     //   if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
     //     const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
     //     if (cookie) {
-    //       for (const s of harvestStations) {
-    //         s.harvestCookie = cookie;
-    //         await s.save();
-    //       }
-    // logger.info('Keys updated: harvest', { service: 'keys' });
+    //       await Station.updateMany(
+    //         { _id: { $in: harvestStations.map((s) => s._id) } },
+    //         { $set: { harvestCookie: cookie } }
+    //       );
+    //       logger.info('Keys updated: harvest', { service: 'keys' });
     //     }
     //   }
     // }
@@ -308,7 +306,7 @@ export async function updateKeys() {
     const weatherlinkStations = await Station.find({
       type: 'wl',
       weatherlinkCookie: { $ne: null }
-    });
+    }).lean();
     if (!weatherlinkStations.length) {
       logger.error('Update keys: no weatherlink stations found.', { service: 'keys' });
       return;
@@ -331,10 +329,10 @@ export async function updateKeys() {
       if (cookies && cookies.length && cookies[0] && cookies[0].match(regex)) {
         const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
         if (cookie) {
-          for (const s of weatherlinkStations) {
-            s.weatherlinkCookie = cookie;
-            await s.save();
-          }
+          await Station.updateMany(
+            { _id: { $in: weatherlinkStations.map((s) => s._id) } },
+            { $set: { weatherlinkCookie: cookie } }
+          );
           logger.info('Keys updated: weatherlink', { service: 'keys' });
         }
       }
