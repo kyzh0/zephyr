@@ -178,7 +178,7 @@ router.get('/data', async (req, res) => {
     return;
   }
 
-  // calculate average for 30 min intervals
+  // calculate average for 30 min interval
   const result = [];
   for (const d of data) {
     let count = 0;
