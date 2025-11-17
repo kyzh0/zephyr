@@ -60,13 +60,18 @@ export async function runScraper(highResolution) {
 }
 
 export async function rerunScraper() {
-  const allStations = await Station.find({
-    isDisabled: { $ne: true },
-    isHighResolution: { $ne: true }
-  }).populate({
-    path: 'data',
-    options: { sort: { time: -1 }, limit: 1 }
-  });
+  const allStations = await Station.aggregate([
+    { $match: { isDisabled: { $ne: true }, isHighResolution: { $ne: true } } },
+    {
+      $lookup: {
+        from: 'stationdatas',
+        localField: '_id',
+        foreignField: 'station',
+        pipeline: [{ $sort: { time: -1 } }, { $limit: 1 }],
+        as: 'data'
+      }
+    }
+  ]);
 
   if (!allStations.length) {
     logger.error('No stations found.', {
