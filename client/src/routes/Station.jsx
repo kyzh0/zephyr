@@ -39,7 +39,7 @@ import Skeleton from '@mui/material/Skeleton';
 import { alpha } from '@mui/material';
 
 // WindCompass component
-function WindCompass({ bearing, validBearings, windSpeed, temperature, scaling, cookies }) {
+function WindCompass({ bearing, validBearings, scaling }) {
   const size = scaling * 180;
   const centerX = size / 2;
   const centerY = size / 2;
@@ -97,112 +97,83 @@ function WindCompass({ bearing, validBearings, windSpeed, temperature, scaling, 
   const validSectors = createValidBearingSectors();
 
   return (
-    <Stack direction="column" alignItems="center" spacing={1}>
-      <svg width={size} height={size} style={{ overflow: 'visible' }}>
-        {/* Background circle */}
-        <circle cx={centerX} cy={centerY} r={radius} fill="#c4ebfa" stroke="#333" strokeWidth="2" />
+    <svg width={size} height={size} style={{ overflow: 'visible' }}>
+      {/* Background circle */}
+      <circle cx={centerX} cy={centerY} r={radius} fill="#c4ebfa" stroke="#333" strokeWidth="2" />
 
-        {/* Valid bearing sectors */}
-        {validSectors.map((sector, index) => (
-          <path
-            key={index}
-            d={createSectorPath(sector.start, sector.end)}
-            fill="rgba(34, 139, 34, 0.46)"
-            stroke="none"
-          />
-        ))}
+      {/* Valid bearing sectors */}
+      {validSectors.map((sector, index) => (
+        <path
+          key={index}
+          d={createSectorPath(sector.start, sector.end)}
+          fill="rgba(34, 139, 34, 0.46)"
+          stroke="none"
+        />
+      ))}
 
-        {/* Compass marks */}
-        {[0, 90, 180, 270].map((angle) => {
-          const rad = ((angle - 90) * Math.PI) / 180;
-          const x1 = centerX + (radius - 8) * Math.cos(rad);
-          const y1 = centerY + (radius - 8) * Math.sin(rad);
-          const x2 = centerX + radius * Math.cos(rad);
-          const y2 = centerY + radius * Math.sin(rad);
+      {/* Compass marks */}
+      {[0, 90, 180, 270].map((angle) => {
+        const rad = ((angle - 90) * Math.PI) / 180;
+        const x1 = centerX + (radius - 8) * Math.cos(rad);
+        const y1 = centerY + (radius - 8) * Math.sin(rad);
+        const x2 = centerX + radius * Math.cos(rad);
+        const y2 = centerY + radius * Math.sin(rad);
 
-          return <line key={angle} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#333" strokeWidth="2" />;
-        })}
+        return <line key={angle} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#333" strokeWidth="2" />;
+      })}
 
-        {/* Cardinal direction labels */}
-        {[
-          { angle: 0, label: 'N' },
-          { angle: 90, label: 'E' },
-          { angle: 180, label: 'S' },
-          { angle: 270, label: 'W' }
-        ].map(({ angle, label }) => {
-          const rad = ((angle - 90) * Math.PI) / 180;
-          const x = centerX + (radius + 15) * Math.cos(rad);
-          const y = centerY + (radius + 15) * Math.sin(rad);
+      {/* Cardinal direction labels */}
+      {[
+        { angle: 0, label: 'N' },
+        { angle: 90, label: 'E' },
+        { angle: 180, label: 'S' },
+        { angle: 270, label: 'W' }
+      ].map(({ angle, label }) => {
+        const rad = ((angle - 90) * Math.PI) / 180;
+        const x = centerX + (radius + 15) * Math.cos(rad);
+        const y = centerY + (radius + 15) * Math.sin(rad);
 
-          return (
-            <text
-              key={angle}
-              x={x}
-              y={y}
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize={scaling * 14}
-              fontWeight="bold"
-              fill="#333"
-            >
-              {label}
-            </text>
-          );
-        })}
+        return (
+          <text
+            key={angle}
+            x={x}
+            y={y}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize={scaling * 14}
+            fontWeight="bold"
+            fill="#333"
+          >
+            {label}
+          </text>
+        );
+      })}
 
-        {/* Wind direction arrow */}
-        {bearing != null && (
-          <g>
-            {(() => {
-              // Calculate position at edge of circle
-              const bearingRad = ((bearing - 90) * Math.PI) / 180;
-              const edgeX = centerX + radius * Math.cos(bearingRad);
-              const edgeY = centerY + radius * Math.sin(bearingRad);
+      {/* Wind direction arrow */}
+      {bearing != null && (
+        <g>
+          {(() => {
+            // Calculate position at edge of circle
+            const bearingRad = ((bearing - 90) * Math.PI) / 180;
+            const edgeX = centerX + radius * Math.cos(bearingRad);
+            const edgeY = centerY + radius * Math.sin(bearingRad);
 
-              return (
-                <g transform={`translate(${edgeX}, ${edgeY}) rotate(${bearing + 180})`}>
-                  <polygon
-                    points="0,-20 5,5 0,0 -5,5"
-                    fill="#FFD700"
-                    stroke="#333"
-                    strokeWidth="1"
-                    transform={`scale(${scaling * 3})`}
-                  />
-                </g>
-              );
-            })()}
-          </g>
-        )}
-        <circle cx={centerX} cy={centerY} r="3" fill="#333" />
-      </svg>
-
-      {/* Wind speed display */}
-      <Typography
-        variant="h4"
-        sx={{
-          fontSize: `${scaling * 24}px`,
-          fontWeight: 'bold',
-          color: '#333'
-        }}
-      >
-        {windSpeed == null
-          ? '-'
-          : Math.round(cookies.unit === 'kt' ? windSpeed / 1.852 : windSpeed)}
-      </Typography>
-
-      {/* Temperature display */}
-      {temperature != null && (
-        <Typography
-          variant="body2"
-          sx={{
-            fontSize: `${scaling * 12}px`,
-            color: '#666'
-          }}
-        >
-          {Math.round(temperature * 10) / 10}°C
-        </Typography>
+            return (
+              <g transform={`translate(${edgeX}, ${edgeY}) rotate(${bearing + 180})`}>
+                <polygon
+                  points="0,-20 5,5 0,0 -5,5"
+                  fill="#FFD700"
+                  stroke="#333"
+                  strokeWidth="1"
+                  transform={`scale(${scaling * 3})`}
+                />
+              </g>
+            );
+          })()}
+        </g>
       )}
-    </Stack>
+      <circle cx={centerX} cy={centerY} r="3" fill="#333" />
+    </svg>
   );
 }
 
@@ -570,10 +541,7 @@ export default function Station() {
                       <WindCompass
                         bearing={station.currentBearing}
                         validBearings={station.validBearings}
-                        windSpeed={station.currentAverage || station.currentGust}
-                        temperature={station.currentTemperature}
                         scaling={scaling}
-                        cookies={cookies}
                       />
                     )}
                   <Table sx={{ width: '180px', ml: 3 }}>
