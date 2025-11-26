@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "scheduler": "node --max-old-space-size=14336 src/schedulerIndex.js",
+    "scheduler": "node --max-old-space-size=12288 src/schedulerIndex.js",
     "dev": "nodemon src/index.js & nodemon src/schedulerIndex.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

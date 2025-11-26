@@ -29,6 +29,7 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 - Real-time data - average wind speed, gust, direction, and temperature.
 - Webcams - live images from various cameras.
 - Interactive map - easy to use with intuitive colours and icons.
+- Filtering and history - a flexible way to interface with the data.
 - Charts and tables - a tidy representation of each station's data over time.
 - Live grid view - easy to integrate with XCTrack for in-flight updates.
 - RASP soudings - overlay of skew-T plots from [RASP](https://rasp.nz).
@@ -36,9 +37,10 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 - Help tab - provides a way for users to contact the developer.
 - Admin-only area - for adding new weather stations and viewing errors.
 - Error checker - scheduled function to identify issues with stations or the scraper.
+- API - endpoints for integration with external apps.
 
 <p align="center">
-  <img src = "https://i.imgur.com/CGOYE31.png" width=700>
+  <img src = "https://ibb.co/ycG7dm1J" width=700>
   <br/>
   Interactive map view
 </p>
@@ -96,7 +98,14 @@ $ cd ./server
 # install dependencies
 $ npm install
 
-# run the web server with nodemon
+# run the express server
+$ npm run start
+
+# run the scheduler
+$ npm run scheduler
+
+# OR
+# run both with nodemon
 $ npm run dev
 ```
 
