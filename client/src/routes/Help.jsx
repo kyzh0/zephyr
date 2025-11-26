@@ -112,8 +112,7 @@ export default function Help() {
                 <CheckCircleOutlineOutlinedIcon
                   sx={{ color: '#39b83f', width: '128px', height: '128px' }}
                 />
-                <Typography sx={{ fontSize: '24px', color: '#39b83f' }}>Success!</Typography>
-                <Typography sx={{ fontSize: '16px', mb: 2 }}>Thanks for your feedback.</Typography>
+                <Typography sx={{ fontSize: '16px', mt: 1 }}>Thanks for your feedback.</Typography>
               </Stack>
             ) : (
               <>
