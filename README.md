@@ -40,7 +40,7 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 - API - endpoints for integration with external apps.
 
 <p align="center">
-  <img src = "https://ibb.co/ycG7dm1J" width=700>
+  <img src = "https://i.ibb.co/21mHW0QB/Screenshot-2025-11-26-195536.png" width=700>
   <br/>
   Interactive map view
 </p>
