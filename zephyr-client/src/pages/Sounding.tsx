@@ -21,7 +21,7 @@ export default function Sounding() {
 
   useEffect(() => {
     if (!id) return;
-    (async () => {
+    void (async () => {
       const data = await getSoundingById(id);
       if (!data) return navigate("/");
       setSounding(data);

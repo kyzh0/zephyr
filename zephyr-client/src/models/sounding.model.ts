@@ -5,10 +5,10 @@ interface ISounding {
   location: ILocation;
   raspRegion: string;
   raspId: string;
-  images: Array<{
+  images: {
     time: Date;
     url: string;
-  }>;
+  }[];
 }
 
 export const RASP_REGIONS = [

@@ -9,6 +9,7 @@ import {
 } from "@/services/cam.service";
 import type { ICam } from "@/models/cam.model";
 import { getWebcamGeoJson } from "@/components/map";
+import { useNavigate } from "react-router-dom";
 
 const REFRESH_INTERVAL_SECONDS = 60;
 
@@ -17,7 +18,6 @@ interface UseWebcamMarkersOptions {
   isMapLoaded: boolean;
   isVisible: boolean;
   onRefresh?: (updatedIds: string[]) => void;
-  navigate: (path: string) => void;
 }
 
 export function useWebcamMarkers({
@@ -25,8 +25,8 @@ export function useWebcamMarkers({
   isMapLoaded,
   isVisible,
   onRefresh,
-  navigate,
 }: UseWebcamMarkersOptions) {
+  const navigate = useNavigate();
   const markersRef = useRef<HTMLDivElement[]>([]);
   const lastRefreshRef = useRef(0);
   const isVisibleRef = useRef(isVisible);
@@ -123,7 +123,7 @@ export function useWebcamMarkers({
   // Initialize webcams
   const initialize = useCallback(async () => {
     const geoJson = getWebcamGeoJson(await listCams());
-    if (!map.current || !geoJson || !geoJson.features.length) return;
+    if (!map.current || !geoJson?.features.length) return;
 
     const timestamp = Date.now();
     lastRefreshRef.current = timestamp;
@@ -144,7 +144,7 @@ export function useWebcamMarkers({
       markersRef.current.push(el);
       new mapboxgl.Marker(el)
         .setLngLat(f.geometry.coordinates)
-        .addTo(map.current!);
+        .addTo(map.current);
     }
   }, [map, createWebcamMarker]);
 
@@ -171,7 +171,7 @@ export function useWebcamMarkers({
     );
     let geoJson = getWebcamGeoJson(webcams);
 
-    if (!geoJson || !geoJson.features.length) {
+    if (!geoJson?.features.length) {
       geoJson = await checkMissedUpdates();
       if (geoJson) {
         const distinctTimestamps = [
@@ -232,7 +232,7 @@ export function useWebcamMarkers({
   // Initialize when map is loaded
   useEffect(() => {
     if (isMapLoaded) {
-      initialize();
+      void initialize();
     }
   }, [isMapLoaded, initialize]);
 
@@ -240,7 +240,7 @@ export function useWebcamMarkers({
   useEffect(() => {
     setVisibility(isVisible);
     if (isVisible) {
-      refresh();
+      void refresh();
     }
   }, [isVisible, setVisibility, refresh]);
 

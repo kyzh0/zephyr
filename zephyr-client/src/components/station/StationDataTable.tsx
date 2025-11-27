@@ -1,4 +1,3 @@
-import { forwardRef } from "react";
 import { cn, getWindColor, getWindDirectionFromBearing } from "@/lib/utils";
 import { getDirectionColor, convertWindSpeed, getUnit } from "./utils";
 import { DirectionArrow } from "@/components/ui/DirectionArrow";
@@ -10,10 +9,14 @@ interface StationDataTableProps {
   screenSize: ScreenSize;
 }
 
-export const StationDataTable = forwardRef<
-  HTMLTableRowElement,
-  StationDataTableProps
->(function StationDataTable({ tableData, validBearings, screenSize }, ref) {
+export const StationDataTable = function StationDataTable({
+  ref,
+  tableData,
+  validBearings,
+  screenSize,
+}: StationDataTableProps & {
+  ref?: React.RefObject<HTMLTableRowElement | null>;
+}) {
   const { bigScreen, tinyScreen } = screenSize;
   const unit = getUnit();
 
@@ -194,4 +197,4 @@ export const StationDataTable = forwardRef<
       </table>
     </div>
   );
-});
+};

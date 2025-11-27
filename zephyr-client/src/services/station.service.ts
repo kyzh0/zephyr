@@ -20,8 +20,7 @@ export async function listStations(includeDisabled: boolean) {
       url += "?includeDisabled=true";
     }
     const res = await fetch(url);
-    const data = await res.json();
-    return data as IStation[];
+    return (await res.json()) as IStation[];
   } catch (error) {
     console.error(error);
   }
@@ -41,8 +40,7 @@ export async function listStationsUpdatedSince(
       url += `&lat=${lat}&lon=${lon}&radius=${radius}`;
     }
     const res = await fetch(url);
-    const data = await res.json();
-    return data as IStation[];
+    return (await res.json()) as IStation[];
   } catch (error) {
     console.error(error);
   }
@@ -59,8 +57,7 @@ export async function listStationsWithinRadius(
         import.meta.env.VITE_API_PREFIX
       }/stations?lat=${lat}&lon=${lon}&radius=${radius}`
     );
-    const data = await res.json();
-    return data as IStation[];
+    return (await res.json()) as IStation[];
   } catch (error) {
     console.error(error);
   }
@@ -71,8 +68,7 @@ export async function listStationsWithErrors() {
     const res = await fetch(
       `${import.meta.env.VITE_API_PREFIX}/stations?err=${true}`
     );
-    const data = await res.json();
-    return data as IStation[];
+    return (await res.json()) as IStation[];
   } catch (error) {
     console.error(error);
   }
@@ -85,8 +81,7 @@ export async function loadStationData(id: string, isHighResolution: boolean) {
       url += "?hr=true";
     }
     const res = await fetch(url);
-    const data = await res.json();
-    return data as IStationData;
+    return (await res.json()) as IStationData;
   } catch (error) {
     console.error(error);
   }
@@ -99,8 +94,7 @@ export async function loadAllStationDataAtTimestamp(time: Date) {
         import.meta.env.VITE_API_PREFIX
       }/stations/data?time=${time.toISOString()}`
     );
-    const data = await res.json();
-    return data as IStationData[];
+    return (await res.json()) as IStationData[];
   } catch (error) {
     console.error(error);
   }
@@ -119,8 +113,7 @@ export async function addStation(station: INewStation) {
         body: JSON.stringify(station),
       }
     );
-    const data = await res.json();
-    return data as IStation;
+    return (await res.json()) as IStation;
   } catch (error) {
     console.error(error);
   }
@@ -142,8 +135,7 @@ export async function patchStation(
         body: JSON.stringify(updates),
       }
     );
-    const data = await res.json();
-    return data as IStation;
+    return (await res.json()) as IStation;
   } catch (error) {
     console.error(error);
   }

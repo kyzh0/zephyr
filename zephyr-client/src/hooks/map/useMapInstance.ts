@@ -30,9 +30,11 @@ export function useMapInstance({
   // Map initialization
   useEffect(() => {
     const evenDay = new Date().getDate() % 2 === 0;
-    mapboxgl.accessToken = evenDay
-      ? import.meta.env.VITE_MAPBOX_GL_KEY
-      : import.meta.env.VITE_MAPBOX_GL_KEY_BACKUP;
+    mapboxgl.accessToken = (
+      evenDay
+        ? import.meta.env.VITE_MAPBOX_GL_KEY
+        : import.meta.env.VITE_MAPBOX_GL_KEY_BACKUP
+    ) as string;
 
     if (map.current || !containerRef.current) return;
 

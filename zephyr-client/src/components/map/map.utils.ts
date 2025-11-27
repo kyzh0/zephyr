@@ -42,7 +42,7 @@ export function getArrowStyle(
 export function getStationGeoJson(
   stations: IStation[] | undefined
 ): GeoJson | null {
-  if (!stations || !stations.length) {
+  if (!stations?.length) {
     return null;
   }
 
@@ -52,8 +52,8 @@ export function getStationGeoJson(
   };
 
   for (const station of stations) {
-    let avg = station.currentAverage == null ? null : station.currentAverage;
-    const gust = station.currentGust == null ? null : station.currentGust;
+    let avg = station.currentAverage ?? null;
+    const gust = station.currentGust ?? null;
     if (avg == null && gust != null) {
       avg = gust;
     }
@@ -96,7 +96,7 @@ export function getStationGeoJson(
 }
 
 export function getWebcamGeoJson(webcams: ICam[] | undefined): GeoJson | null {
-  if (!webcams || !webcams.length) {
+  if (!webcams?.length) {
     return null;
   }
 
@@ -128,7 +128,7 @@ export function getWebcamGeoJson(webcams: ICam[] | undefined): GeoJson | null {
 export function getSoundingGeoJson(
   soundings: ISounding[] | undefined
 ): GeoJson | null {
-  if (!soundings || !soundings.length) {
+  if (!soundings?.length) {
     return null;
   }
 
@@ -147,7 +147,7 @@ export function getSoundingGeoJson(
 
     let url = "";
     let time: Date | null = null;
-    if (afterDates && afterDates.length) {
+    if (afterDates?.length) {
       url = afterDates[0].url;
       time = new Date(afterDates[0].time);
     }

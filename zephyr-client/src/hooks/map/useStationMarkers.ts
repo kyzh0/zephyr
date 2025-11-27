@@ -23,13 +23,13 @@ import {
   getElevationRotation,
   type StationProperties,
 } from "./station-marker.utils";
+import { useNavigate } from "react-router-dom";
 
 interface UseStationMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
   isMapLoaded: boolean;
   unit: WindUnit;
   onRefresh?: (updatedIds: string[]) => void;
-  navigate: (path: string) => void;
 }
 
 /**
@@ -231,8 +231,8 @@ export function useStationMarkers({
   isMapLoaded,
   unit,
   onRefresh,
-  navigate,
 }: UseStationMarkersOptions) {
+  const navigate = useNavigate();
   const markersRef = useRef<StationMarker[]>([]);
   const lastRefreshRef = useRef(0);
   const unitRef = useRef<WindUnit>(unit);
@@ -256,7 +256,7 @@ export function useStationMarkers({
         unitRef.current,
         (dbId) => {
           popup.remove();
-          navigate(`/stations/${dbId}`);
+          void navigate(`/stations/${dbId}`);
         },
         (p, show) => {
           if (show && map.current) p.addTo(map.current);
@@ -420,7 +420,7 @@ export function useStationMarkers({
 
   // Initialize when map loads
   useEffect(() => {
-    if (isMapLoaded) initialize();
+    if (isMapLoaded) void initialize();
   }, [isMapLoaded, initialize]);
 
   return { markers: markersRef, refresh };

@@ -15,7 +15,8 @@ interface DonateDialogProps {
 }
 
 export function DonateDialog({ open, onOpenChange }: DonateDialogProps) {
-  const bankAccount = import.meta.env.VITE_DONATION_BANK_ACCOUNT;
+  const bankAccount = (import.meta.env.VITE_DONATION_BANK_ACCOUNT ??
+    "00-0000-000000-000") as string;
 
   const handleCopy = async () => {
     if (bankAccount) {

@@ -5,8 +5,7 @@ export async function getSoundingById(id: string) {
     const res = await fetch(
       `${import.meta.env.VITE_API_PREFIX}/soundings/${id}`
     );
-    const data = await res.json();
-    return data as ISounding;
+    return (await res.json()) as ISounding;
   } catch (error) {
     console.error(error);
   }
@@ -15,8 +14,7 @@ export async function getSoundingById(id: string) {
 export async function listSoundings() {
   try {
     const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/soundings`);
-    const data = await res.json();
-    return data as ISounding[];
+    return (await res.json()) as ISounding[];
   } catch (error) {
     console.error(error);
   }
@@ -35,8 +33,7 @@ export async function addSounding(sounding: Partial<ISounding>) {
         body: JSON.stringify(sounding),
       }
     );
-    const data = await res.json();
-    return data as ISounding;
+    return (await res.json()) as ISounding;
   } catch (error) {
     console.error(error);
   }

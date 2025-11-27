@@ -4,6 +4,7 @@ import { formatInTimeZone } from "date-fns-tz";
 
 import { listSoundings } from "@/services/sounding.service";
 import { getSoundingGeoJson } from "@/components/map";
+import { useNavigate } from "react-router-dom";
 
 const REFRESH_INTERVAL_SECONDS = 60;
 
@@ -11,15 +12,14 @@ interface UseSoundingMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
   isMapLoaded: boolean;
   isVisible: boolean;
-  navigate: (path: string) => void;
 }
 
 export function useSoundingMarkers({
   map,
   isMapLoaded,
   isVisible,
-  navigate,
 }: UseSoundingMarkersOptions) {
+  const navigate = useNavigate();
   const markersRef = useRef<HTMLDivElement[]>([]);
   const lastRefreshRef = useRef(0);
   const isVisibleRef = useRef(isVisible);
@@ -79,7 +79,7 @@ export function useSoundingMarkers({
   // Initialize soundings
   const initialize = useCallback(async () => {
     const geoJson = getSoundingGeoJson(await listSoundings());
-    if (!map.current || !geoJson || !geoJson.features.length) return;
+    if (!map.current || !geoJson?.features.length) return;
 
     const timestamp = Date.now();
     lastRefreshRef.current = timestamp;
@@ -100,7 +100,7 @@ export function useSoundingMarkers({
       markersRef.current.push(el);
       new mapboxgl.Marker(el)
         .setLngLat(f.geometry.coordinates)
-        .addTo(map.current!);
+        .addTo(map.current);
     }
   }, [map, createSoundingMarker]);
 
@@ -130,7 +130,7 @@ export function useSoundingMarkers({
     lastRefreshRef.current = timestamp;
 
     const geoJson = getSoundingGeoJson(await listSoundings());
-    if (!geoJson || !geoJson.features.length) return;
+    if (!geoJson?.features.length) return;
 
     for (const item of markersRef.current) {
       const match = geoJson.features.find((f) => f.properties.dbId === item.id);
@@ -139,6 +139,7 @@ export function useSoundingMarkers({
       const currentTime = match.properties.currentTime as Date | null;
       const currentUrl = match.properties.currentUrl as string;
 
+      // eslint-disable-next-line react-hooks/immutability
       item.dataset.timestamp = String(timestamp);
 
       for (const child of Array.from(item.children)) {
@@ -158,6 +159,7 @@ export function useSoundingMarkers({
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {
     for (const marker of markersRef.current) {
+      // eslint-disable-next-line react-hooks/immutability
       marker.style.visibility = visible ? "visible" : "hidden";
     }
   }, []);

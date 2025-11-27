@@ -76,6 +76,7 @@ export function WindCompass({
       {/* Valid bearing sectors */}
       {validSectors.map((sector, index) => (
         <path
+          // eslint-disable-next-line react-x/no-array-index-key
           key={index}
           d={createSectorPath(sector.start, sector.end)}
           fill="rgba(34, 139, 34, 0.46)"

@@ -105,7 +105,7 @@ async function fetchElevation(
     const res = await fetch(
       `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`
     );
-    const data = await res.json();
+    const data = (await res.json()) as { elevation?: number[] };
     return data.elevation?.[0];
   } catch {
     return undefined;
@@ -127,6 +127,7 @@ export default function AdminAddStation() {
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const stationType = form.watch("type");
   const isSubmitting = form.formState.isSubmitting;
 
@@ -148,7 +149,7 @@ export default function AdminAddStation() {
     };
 
     if (values.type === "harvest") {
-      const v = values as z.infer<typeof harvestSchema>;
+      const v = values;
       station.externalId = `${v.externalId}_${v.harvestConfigId}`;
       station.harvestWindAverageId = `${v.harvestWindAvgGraphId}_${v.harvestWindAvgTraceId}`;
       station.harvestWindGustId = `${v.harvestWindGustGraphId}_${v.harvestWindGustTraceId}`;
@@ -157,7 +158,7 @@ export default function AdminAddStation() {
     }
 
     if (values.type === "gw") {
-      const v = values as z.infer<typeof gwSchema>;
+      const v = values;
       station.gwWindAverageFieldName = v.gwWindAvgFieldName;
       station.gwWindGustFieldName = v.gwWindGustFieldName;
       station.gwWindBearingFieldName = v.gwWindBearingFieldName;

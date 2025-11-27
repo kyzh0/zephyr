@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { useAppContext } from "@/context/AppContext";
@@ -22,7 +22,6 @@ import { toast } from "sonner";
 const REFRESH_INTERVAL_SECONDS = 60;
 
 export default function Map() {
-  const navigate = useNavigate();
   const { setRefreshedStations, setRefreshedWebcams } = useAppContext();
 
   // Map container ref
@@ -51,7 +50,6 @@ export default function Map() {
     isMapLoaded: isLoaded,
     unit,
     onRefresh: setRefreshedStations,
-    navigate,
   });
 
   // Initialize webcam markers
@@ -61,7 +59,6 @@ export default function Map() {
       isMapLoaded: isLoaded,
       isVisible: showWebcams,
       onRefresh: setRefreshedWebcams,
-      navigate,
     });
 
   // Initialize sounding markers
@@ -70,11 +67,10 @@ export default function Map() {
       map,
       isMapLoaded: isLoaded,
       isVisible: showSoundings,
-      navigate,
     });
 
   // Handle webcam toggle
-  const handleWebcamClick = useCallback(() => {
+  const handleWebcamClick = useCallback(async () => {
     if (showSoundings) {
       setShowSoundings(false);
       setSoundingVisibility(false);
@@ -83,7 +79,7 @@ export default function Map() {
     const newValue = !showWebcams;
     setShowWebcams(newValue);
     setWebcamVisibility(newValue);
-    if (newValue) refreshWebcams();
+    if (newValue) await refreshWebcams();
   }, [
     showWebcams,
     showSoundings,
@@ -93,7 +89,7 @@ export default function Map() {
   ]);
 
   // Handle sounding toggle
-  const handleSoundingClick = useCallback(() => {
+  const handleSoundingClick = useCallback(async () => {
     if (showWebcams) {
       setShowWebcams(false);
       setWebcamVisibility(false);
@@ -102,7 +98,7 @@ export default function Map() {
     const newValue = !showSoundings;
     setShowSoundings(newValue);
     setSoundingVisibility(newValue);
-    if (newValue) refreshSoundings();
+    if (newValue) await refreshSoundings();
   }, [
     showSoundings,
     showWebcams,
@@ -151,10 +147,10 @@ export default function Map() {
 
   // Refresh on visibility change
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      refreshStations();
-      refreshWebcams();
-      refreshSoundings();
+    const handleVisibilityChange = async () => {
+      await refreshStations();
+      await refreshWebcams();
+      await refreshSoundings();
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () =>

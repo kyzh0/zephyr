@@ -1,5 +1,4 @@
 import { createBrowserRouter, Outlet } from "react-router-dom";
-import { ErrorBoundary } from "./components/ErrorBoundary";
 
 // Import the route components we've created
 import Map from "./pages/Map";
@@ -19,7 +18,6 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <Outlet />,
-    errorElement: <ErrorBoundary />,
     children: [
       {
         path: "",

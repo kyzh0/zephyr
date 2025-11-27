@@ -24,7 +24,7 @@ export default function Webcam() {
 
   useEffect(() => {
     if (!id) return;
-    (async () => {
+    void (async () => {
       const cam = await getCamById(id);
       if (!cam) return navigate("/");
       setWebcam(cam);

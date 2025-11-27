@@ -68,7 +68,7 @@ export function SignInDialog({ open, onOpenChange }: SignInDialogProps) {
         return;
       }
 
-      const result = await response.json();
+      const result = (await response.json()) as { key: string };
 
       // Store the auth key
       localStorage.setItem("adminKey", result.key);
