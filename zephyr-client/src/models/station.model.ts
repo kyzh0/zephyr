@@ -31,6 +31,24 @@ interface IStation {
   weatherlinkCookie?: string;
 }
 
+interface INewStation {
+  name: string;
+  type: string;
+  coordinates: [number, number];
+  externalLink: string;
+  externalId: string;
+  elevation?: number;
+  validBearings?: string;
+  harvestWindAverageId?: string;
+  harvestWindGustId?: string;
+  harvestWindDirectionId?: string;
+  harvestTemperatureId?: string;
+  gwWindAverageFieldName?: string;
+  gwWindGustFieldName?: string;
+  gwWindBearingFieldName?: string;
+  gwTemperatureFieldName?: string;
+}
+
 export const STATION_TYPES = [
   { value: "harvest", label: "Harvest" },
   { value: "holfuy", label: "Holfuy" },
@@ -44,4 +62,4 @@ export const STATION_TYPES = [
   { value: "gw", label: "Greater Wellington" },
 ] as const;
 
-export type { IStation };
+export type { IStation, INewStation };

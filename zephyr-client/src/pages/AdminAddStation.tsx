@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { addStation } from "@/services/station.service";
-import { STATION_TYPES, type IStation } from "@/models/station.model";
+import { STATION_TYPES, type INewStation } from "@/models/station.model";
 import { toast } from "sonner";
 
 const coordinatesSchema = z.string().refine(
@@ -137,13 +137,10 @@ export default function AdminAddStation() {
       .map(Number);
     const elevation = await fetchElevation(lat, lon);
 
-    const station: Partial<IStation> = {
+    const station: INewStation = {
       name: values.name,
       type: values.type,
-      location: {
-        type: "Point",
-        coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6],
-      },
+      coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6],
       externalLink: values.externalLink,
       externalId: values.externalId,
       ...(elevation !== undefined && { elevation }),

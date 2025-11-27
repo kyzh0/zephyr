@@ -1,5 +1,5 @@
 import type { IStationData } from "@/models/station-data.model";
-import type { IStation } from "@/models/station.model";
+import type { INewStation, IStation } from "@/models/station.model";
 
 export async function getStationById(id: string) {
   try {
@@ -106,7 +106,7 @@ export async function loadAllStationDataAtTimestamp(time: Date) {
   }
 }
 
-export async function addStation(station: Partial<IStation>) {
+export async function addStation(station: INewStation) {
   try {
     const key = localStorage.getItem("adminKey") ?? "";
     const res = await fetch(
