@@ -445,7 +445,7 @@ export default function Station() {
   const tinyScreen = window.matchMedia('(max-height: 530px)').matches;
   const scaling = bigScreen ? 1 : tinyScreen ? 0.5 : 0.65;
   return (
-    <Modal open onClose={handleClose} disableAutoFocus={true} style={{ padding: '0.3rem' }}>
+    <Modal open onClose={handleClose} disableAutoFocus={true} style={{ padding: 4 }}>
       <Container
         component="main"
         maxWidth="xl"
