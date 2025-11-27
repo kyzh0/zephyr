@@ -27,14 +27,8 @@ import {
 } from "@/components/ui/form";
 
 const formSchema = z.object({
-  user_email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Email is not valid"),
-  message: z
-    .string()
-    .min(20, "Minimum 20 characters")
-    .max(5000, "Maximum 5000 characters"),
+  user_email: z.email("Email is not valid").min(1, "Email is required"),
+  message: z.string().min(1, "Message is required"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -159,15 +153,6 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
               >
                 {form.formState.isSubmitting ? "Sending..." : "Send"}
               </Button>
-
-              <div className="flex justify-end">
-                <Link
-                  to="/export-xlsx"
-                  className="text-xs text-muted-foreground hover:underline"
-                >
-                  Export XLSX
-                </Link>
-              </div>
             </form>
           </Form>
         )}
