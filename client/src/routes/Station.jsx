@@ -45,8 +45,6 @@ function WindCompass({ bearing, validBearings, scaling }) {
   const centerY = size / 2;
   const radius = size * 0.4;
 
-  console.log(bearing, validBearings);
-
   // Parse valid bearings to create sectors
   const createValidBearingSectors = () => {
     if (!validBearings) {
