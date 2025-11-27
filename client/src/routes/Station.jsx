@@ -1,4 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { formatInTimeZone } from 'date-fns-tz';
@@ -37,6 +38,152 @@ import Link from '@mui/material/Link';
 import Skeleton from '@mui/material/Skeleton';
 import { alpha } from '@mui/material';
 
+// WindCompass component
+function WindCompass({ bearing, validBearings, scaling }) {
+  const size = scaling * 180;
+  const centerX = size / 2;
+  const centerY = size / 2;
+  const radius = size * 0.4;
+
+  // Parse valid bearings to create sectors
+  const createValidBearingSectors = () => {
+    if (!validBearings) {
+      return [];
+    }
+
+    const sectors = [];
+    const pairs = validBearings.split(',');
+
+    for (const pair of pairs) {
+      const bearings = pair.split('-');
+      if (bearings.length === 2) {
+        const start = Number(bearings[0]);
+        const end = Number(bearings[1]);
+
+        if (start <= end) {
+          // Normal case: start to end
+          sectors.push({ start, end });
+        } else {
+          // Wrapping case: start to 360, then 0 to end
+          sectors.push({ start, end: 360 });
+          sectors.push({ start: 0, end });
+        }
+      }
+    }
+    return sectors;
+  };
+
+  const createSectorPath = (startAngle, endAngle) => {
+    const startRad = ((startAngle - 90) * Math.PI) / 180;
+    const endRad = ((endAngle - 90) * Math.PI) / 180;
+
+    const x1 = centerX + radius * Math.cos(startRad);
+    const y1 = centerY + radius * Math.sin(startRad);
+    const x2 = centerX + radius * Math.cos(endRad);
+    const y2 = centerY + radius * Math.sin(endRad);
+
+    const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
+
+    return [
+      `M ${centerX} ${centerY}`,
+      `L ${x1} ${y1}`,
+      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+      'Z'
+    ].join(' ');
+  };
+
+  const validSectors = createValidBearingSectors();
+
+  return (
+    <svg width={size} height={size} style={{ overflow: 'visible' }}>
+      {/* Background circle */}
+      <circle cx={centerX} cy={centerY} r={radius} fill="#c4ebfa" stroke="#333" strokeWidth="2" />
+
+      {/* Valid bearing sectors */}
+      {validSectors.map((sector, index) => (
+        <path
+          key={index}
+          d={createSectorPath(sector.start, sector.end)}
+          fill="rgba(34, 139, 34, 0.46)"
+          stroke="none"
+        />
+      ))}
+
+      {/* Compass marks */}
+      {[0, 90, 180, 270].map((angle) => {
+        const rad = ((angle - 90) * Math.PI) / 180;
+        const x1 = centerX + (radius - 8) * Math.cos(rad);
+        const y1 = centerY + (radius - 8) * Math.sin(rad);
+        const x2 = centerX + radius * Math.cos(rad);
+        const y2 = centerY + radius * Math.sin(rad);
+
+        return <line key={angle} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#333" strokeWidth="2" />;
+      })}
+
+      {/* Cardinal direction labels */}
+      {[
+        { angle: 0, label: 'N' },
+        { angle: 90, label: 'E' },
+        { angle: 180, label: 'S' },
+        { angle: 270, label: 'W' }
+      ].map(({ angle, label }) => {
+        const rad = ((angle - 90) * Math.PI) / 180;
+        const x = centerX + (radius + 15) * Math.cos(rad);
+        const y = centerY + (radius + 15) * Math.sin(rad);
+
+        return (
+          <text
+            key={angle}
+            x={x}
+            y={y}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize={scaling * 14}
+            fontWeight="bold"
+            fill="#333"
+          >
+            {label}
+          </text>
+        );
+      })}
+
+      {/* Wind direction arrow */}
+      {bearing != null && (
+        <g>
+          {(() => {
+            // Calculate position at edge of circle
+            const bearingRad = ((bearing - 90) * Math.PI) / 180;
+            const edgeX = centerX + radius * Math.cos(bearingRad);
+            const edgeY = centerY + radius * Math.sin(bearingRad);
+
+            return (
+              <g transform={`translate(${edgeX}, ${edgeY}) rotate(${bearing + 180})`}>
+                <polygon
+                  points="0,-20 5,5 0,0 -5,5"
+                  fill="#FFD700"
+                  stroke="#333"
+                  strokeWidth="1"
+                  transform={`scale(${scaling * 3})`}
+                />
+              </g>
+            );
+          })()}
+        </g>
+      )}
+      <circle cx={centerX} cy={centerY} r="3" fill="#333" />
+    </svg>
+  );
+}
+
+WindCompass.propTypes = {
+  bearing: PropTypes.number,
+  validBearings: PropTypes.string,
+  windSpeed: PropTypes.number,
+  temperature: PropTypes.number,
+  scaling: PropTypes.number.isRequired,
+  cookies: PropTypes.object.isRequired
+};
+
 function getDirectionColor(bearing, validBearings) {
   if (bearing != null && validBearings) {
     const pairs = validBearings.split(',');
@@ -62,17 +209,21 @@ function getDirectionColor(bearing, validBearings) {
 
 export default function Station() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { refreshedStations } = useContext(AppContext);
+  const [cookies] = useCookies();
+
   const [station, setStation] = useState(null);
   const [data, setData] = useState([]);
   const [tableData, setTableData] = useState([]);
   const [bearingPairCount, setBearingPairCount] = useState(0);
-  const tableRef = useRef(null);
-  const modalRef = useRef(null);
-  const { refreshedStations } = useContext(AppContext);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [cookies] = useCookies();
   const [hoveringOnInfoIcon, setHoveringOnInfoIcon] = useState(false);
   const [mouseCoords, setMouseCoords] = useState({ x: 0, y: 0 });
+
+  const tableRef = useRef(null);
+  const modalRef = useRef(null);
 
   async function fetchData() {
     try {
@@ -280,8 +431,6 @@ export default function Station() {
     };
   }, []);
 
-  const navigate = useNavigate();
-  const location = useLocation();
   function handleClose() {
     if (location.key === 'default') {
       navigate('/');
@@ -294,7 +443,7 @@ export default function Station() {
   const tinyScreen = window.matchMedia('(max-height: 530px)').matches;
   const scaling = bigScreen ? 1 : tinyScreen ? 0.5 : 0.65;
   return (
-    <Modal open onClose={handleClose} disableAutoFocus={true}>
+    <Modal open onClose={handleClose} disableAutoFocus={true} style={{ padding: 4 }}>
       <Container
         component="main"
         maxWidth="xl"
@@ -334,7 +483,7 @@ export default function Station() {
             direction="column"
             alignItems="center"
             sx={{
-              ...(tinyScreen && { overflowY: 'scroll' }),
+              overflowY: 'scroll',
               backgroundColor: 'white',
               padding: bigScreen ? '24px' : '12px',
               borderRadius: '8px'
@@ -387,40 +536,11 @@ export default function Station() {
                 >
                   {station.currentBearing != null &&
                     (station.currentAverage != null || station.currentGust != null) && (
-                      <Stack direction="column" justifyContent="center" alignItems="center">
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontSize: `${scaling * 16}px`,
-                            mb: 1
-                          }}
-                        >
-                          {getWindDirectionFromBearing(station.currentBearing)}
-                        </Typography>
-                        <Stack
-                          direction="row"
-                          justifyContent="center"
-                          alignItems="center"
-                          sx={{
-                            p: `${scaling * 8}px`,
-                            background: getDirectionColor(
-                              station.currentAverage == null && station.currentGust == null
-                                ? null
-                                : station.currentBearing,
-                              station.validBearings
-                            )
-                          }}
-                        >
-                          <img
-                            src="/arrow.png"
-                            style={{
-                              width: `${scaling * 48}px`,
-                              height: `${scaling * 48}px`,
-                              transform: `rotate(${Math.round(station.currentBearing)}deg)`
-                            }}
-                          />
-                        </Stack>
-                      </Stack>
+                      <WindCompass
+                        bearing={station.currentBearing}
+                        validBearings={station.validBearings}
+                        scaling={scaling}
+                      />
                     )}
                   <Table sx={{ width: '180px', ml: 3 }}>
                     <TableBody>
