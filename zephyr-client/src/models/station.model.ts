@@ -31,4 +31,17 @@ interface IStation {
   weatherlinkCookie?: string;
 }
 
+export const STATION_TYPES = [
+  { value: "harvest", label: "Harvest" },
+  { value: "holfuy", label: "Holfuy" },
+  { value: "metservice", label: "Metservice" },
+  { value: "wu", label: "Weather Underground" },
+  { value: "tempest", label: "Tempest" },
+  { value: "attentis", label: "Attentis" },
+  { value: "wow", label: "Met Office WOW" },
+  { value: "windguru", label: "Windguru" },
+  { value: "wp", label: "Weather Pro" },
+  { value: "gw", label: "Greater Wellington" },
+] as const;
+
 export type { IStation };

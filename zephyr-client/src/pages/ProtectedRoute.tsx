@@ -1,12 +1,18 @@
-import { Outlet, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 
 export default function ProtectedRoute() {
-  // TODO: Replace with actual authentication logic
-  const [isAuthenticated] = useState(false);
+  const navigate = useNavigate();
+  const adminKey = localStorage.getItem("adminKey");
 
-  if (!isAuthenticated) {
-    return <Navigate to="/admin/sign-in" replace />;
+  useEffect(() => {
+    if (!adminKey) {
+      navigate("/", { replace: true });
+    }
+  }, [adminKey, navigate]);
+
+  if (!adminKey) {
+    return null;
   }
 
   return <Outlet />;

@@ -106,8 +106,9 @@ export async function loadAllStationDataAtTimestamp(time: Date) {
   }
 }
 
-export async function addStation(station: Partial<IStation>, key: string) {
+export async function addStation(station: Partial<IStation>) {
   try {
+    const key = localStorage.getItem("adminKey") ?? "";
     const res = await fetch(
       `${import.meta.env.VITE_API_PREFIX}/stations?key=${key}`,
       {

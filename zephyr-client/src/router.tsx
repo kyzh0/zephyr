@@ -6,8 +6,13 @@ import Map from "./pages/Map";
 import Station from "./pages/Station";
 import Webcam from "./pages/Webcam";
 import Sounding from "./pages/Sounding";
-import AdminSignIn from "./pages/AdminSignIn";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminAddStation from "./pages/AdminAddStation";
+import AdminAddWebcam from "./pages/AdminAddWebcam";
+import AdminAddSounding from "./pages/AdminAddSounding";
+import AdminEditStationList from "./pages/AdminEditStationList";
+import AdminEditStation from "./pages/AdminEditStation";
+import AdminErrors from "./pages/AdminErrors";
 import ProtectedRoute from "./pages/ProtectedRoute";
 
 export const router = createBrowserRouter([
@@ -35,10 +40,6 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: "admin/sign-in",
-        element: <AdminSignIn />,
-      },
-      {
         path: "admin",
         element: <ProtectedRoute />,
         children: [
@@ -46,11 +47,30 @@ export const router = createBrowserRouter([
             path: "dashboard",
             element: <AdminDashboard />,
           },
-          // TODO: Add other admin routes as needed
-          // {
-          //   path: "add-station",
-          //   element: <AdminAddStation />,
-          // },
+          {
+            path: "add-station",
+            element: <AdminAddStation />,
+          },
+          {
+            path: "add-webcam",
+            element: <AdminAddWebcam />,
+          },
+          {
+            path: "add-sounding",
+            element: <AdminAddSounding />,
+          },
+          {
+            path: "edit-station-list",
+            element: <AdminEditStationList />,
+          },
+          {
+            path: "edit-station/:id",
+            element: <AdminEditStation />,
+          },
+          {
+            path: "errors",
+            element: <AdminErrors />,
+          },
         ],
       },
     ],

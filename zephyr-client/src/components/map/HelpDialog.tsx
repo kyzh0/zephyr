@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { SignInDialog } from "./SignInDialog";
 
 const formSchema = z.object({
   user_email: z.email("Email is not valid").min(1, "Email is required"),
@@ -40,6 +40,7 @@ interface HelpDialogProps {
 
 export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
   const [success, setSuccess] = useState(false);
+  const [signInOpen, setSignInOpen] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -70,26 +71,18 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
     }
   };
 
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      // Reset state when closing
-      setSuccess(false);
-      form.reset();
-    }
-    onOpenChange(isOpen);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center sm:text-center">
           <div className="flex justify-between items-start">
-            <Link
-              to="/admin/sign-in"
+            <button
+              type="button"
+              onClick={() => setSignInOpen(true)}
               className="text-xs text-transparent hover:text-transparent cursor-default select-none"
             >
               admin
-            </Link>
+            </button>
           </div>
           {!success && (
             <>
@@ -157,6 +150,8 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
           </Form>
         )}
       </DialogContent>
+
+      <SignInDialog open={signInOpen} onOpenChange={setSignInOpen} />
     </Dialog>
   );
 }

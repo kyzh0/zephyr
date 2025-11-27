@@ -1,5 +1,5 @@
 interface ILocation {
-  type: string;
+  type: "Point";
   coordinates: [number, number];
 }
 

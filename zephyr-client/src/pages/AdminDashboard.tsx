@@ -1,21 +1,55 @@
+import { useNavigate } from "react-router-dom";
+import { LogOut, Plus, AlertCircle, List } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+
+const MENU_ITEMS = [
+  { label: "Add New Station", path: "/admin/add-station", icon: Plus },
+  { label: "Add New Webcam", path: "/admin/add-webcam", icon: Plus },
+  { label: "Add New Sounding", path: "/admin/add-sounding", icon: Plus },
+  { label: "View Errors", path: "/admin/errors", icon: AlertCircle },
+  {
+    label: "View / Edit Stations",
+    path: "/admin/edit-station-list",
+    icon: List,
+  },
+] as const;
+
 export default function AdminDashboard() {
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    localStorage.removeItem("adminKey");
+    navigate("/");
+  };
+
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="p-4 bg-white rounded-lg shadow">
-          <h2 className="text-lg font-semibold">Stations</h2>
-          <p>Manage weather stations</p>
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <header className="border-b bg-white px-6 py-4 flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Admin Dashboard</h1>
+        <Button variant="ghost" size="sm" onClick={handleSignOut}>
+          <LogOut className="h-4 w-4 mr-2" />
+          Sign out
+        </Button>
+      </header>
+
+      {/* Main content */}
+      <main className="flex-1 p-6">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {MENU_ITEMS.map(({ label, path, icon: Icon }) => (
+            <Button
+              key={path}
+              variant="outline"
+              className="h-24 flex-col gap-2"
+              onClick={() => navigate(path)}
+            >
+              <Icon className="h-6 w-6" />
+              {label}
+            </Button>
+          ))}
         </div>
-        <div className="p-4 bg-white rounded-lg shadow">
-          <h2 className="text-lg font-semibold">Webcams</h2>
-          <p>Manage webcam feeds</p>
-        </div>
-        <div className="p-4 bg-white rounded-lg shadow">
-          <h2 className="text-lg font-semibold">Soundings</h2>
-          <p>Manage atmospheric soundings</p>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }
