@@ -669,7 +669,7 @@ export default function Station() {
                 <>
                   <TableContainer
                     component={Paper}
-                    sx={{ ...(tinyScreen && { minHeight: '122px' }) }}
+                    sx={{ minHeight: tinyScreen ? '122px' : '132px' }}
                   >
                     <Table sx={{ minWidth: '650px' }} size="small">
                       <TableBody>
