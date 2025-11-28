@@ -121,32 +121,29 @@ export function getWindIconDataUrl(
 ): string {
   const color = WIND_COLORS[colorName];
 
+  // Gold border for popular sites
   const goldBorderSvg =
     border !== "none"
       ? `
-    <path d="M15 100 Q5 80 5 50 Q5 20 25 8" fill="none" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
-    <path d="M85 100 Q95 80 95 50 Q95 20 75 8" fill="none" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
-    ${
-      border === "gold-valid"
-        ? `
-      <g transform="translate(50, 130)">
-        <circle cx="0" cy="0" r="10" fill="#FFD700"/>
-        <path d="M-5 0 L-2 4 L6 -4" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </g>
-    `
-        : ""
-    }
+    <path d="M15 85 Q5 65 5 45 Q5 20 25 8" fill="none" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+    <path d="M85 85 Q95 65 95 45 Q95 20 75 8" fill="none" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
   `
+      : "";
+
+  // Green tail for favorable wind direction
+  const tailSvg =
+    border === "gold-valid"
+      ? `<path d="M50 80 L50 130 L42 118 M50 130 L58 118" fill="none" stroke="#22c55e" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`
       : "";
 
   const shapeSvg =
     shape === "arrow"
       ? `<path d="M50 10 C30 10 15 30 15 50 C15 70 35 95 50 120 C65 95 85 70 85 50 C85 30 70 10 50 10 Z" fill="${color}" stroke="#333" stroke-width="2"/>
        <ellipse cx="50" cy="45" rx="25" ry="25" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`
-      : `<circle cx="50" cy="50" r="35" fill="${color}" stroke="#333" stroke-width="2"/>
-       <circle cx="50" cy="45" r="20" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`;
+      : `<circle cx="50" cy="50" r="30" fill="${color}" stroke="#333" stroke-width="2"/>
+       <circle cx="50" cy="46" r="16" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`;
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 144">${goldBorderSvg}${shapeSvg}</svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 144">${goldBorderSvg}${tailSvg}${shapeSvg}</svg>`;
 
   // Encode for use in CSS url()
   const encoded = encodeURIComponent(svg)

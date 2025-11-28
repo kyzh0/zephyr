@@ -122,7 +122,7 @@ export function HelpDialog({
         <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
           <div className="flex justify-end items-center">
             <WindIcon
-              shape="arrow"
+              shape="circle"
               border="none"
               color="#fbbf24"
               className="w-5 h-7 -rotate-45"
@@ -132,7 +132,7 @@ export function HelpDialog({
 
           <div className="flex justify-end items-center">
             <WindIcon
-              shape="arrow"
+              shape="circle"
               border="gold"
               color="#22c55e"
               className="w-5 h-7 -rotate-45"
@@ -142,7 +142,7 @@ export function HelpDialog({
 
           <div className="flex justify-end items-center">
             <WindIcon
-              shape="arrow"
+              shape="circle"
               border="gold-valid"
               color="#86efac"
               className="w-5 h-7 -rotate-45"
