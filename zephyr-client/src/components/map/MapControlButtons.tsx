@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   HelpCircle,
   Grid3X3,
@@ -9,95 +8,156 @@ import {
   Cctv,
 } from "lucide-react";
 import { DonateDialog } from "./DonateDialog";
-import { HelpDialog } from "./HelpDialog";
+import { HelpDialog, WELCOME_STORAGE_KEY } from "./HelpDialog";
 import { GridViewDialog } from "./GridViewDialog";
+import { HistorySlider } from "./HistorySlider";
+import { ElevationSlider } from "./ElevationSlider";
 import type { WindUnit } from "./map.types";
+import { Toggle } from "@/components/ui/toggle";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface MapControlButtonsProps {
-  showWebcams: boolean;
-  showSoundings: boolean;
   onWebcamClick: () => void;
   onSoundingClick: () => void;
-  isSatellite: boolean;
   onLayerToggle: () => void;
   unit: WindUnit;
   onUnitToggle: () => void;
+  historyOffset: number;
+  onHistoryChange: (offset: number) => void;
+  isHistoricData: boolean;
+  showElevation: boolean;
+  elevationFilter: number;
+  onToggleElevation: () => void;
+  onElevationChange: (value: number) => void;
 }
 
 export function MapControlButtons({
-  showWebcams,
-  showSoundings,
   onWebcamClick,
   onSoundingClick,
-  isSatellite,
   onLayerToggle,
   unit,
   onUnitToggle,
+  historyOffset,
+  onHistoryChange,
+  isHistoricData,
+  showElevation,
+  elevationFilter,
+  onToggleElevation,
+  onElevationChange,
 }: MapControlButtonsProps) {
   const [donateOpen, setDonateOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(
+    localStorage.getItem(WELCOME_STORAGE_KEY) !== "true"
+  );
   const [gridOpen, setGridOpen] = useState(false);
 
   return (
-    <div className="flex gap-2 items-center absolute top-2.5 left-2.5 z-50">
-      <Button variant="outline" size="icon" onClick={() => setHelpOpen(true)}>
-        <HelpCircle className="h-4 w-4" />
-      </Button>
+    <div className="flex gap-2 items-start absolute top-2.5 left-2.5 z-50">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="outline" size="sm" onClick={() => setHelpOpen(true)}>
+            <HelpCircle className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>View Help</TooltipContent>
+      </Tooltip>
       <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
-      <Button variant="outline" size="icon" onClick={() => setDonateOpen(true)}>
-        <HandHelping className="h-4 w-4 opacity-70" />
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setDonateOpen(true)}
+          >
+            <HandHelping className="h-4 w-4 opacity-70" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Donate to support Zephyr</TooltipContent>
+      </Tooltip>
       <DonateDialog open={donateOpen} onOpenChange={setDonateOpen} />
-      <Button
-        id="grid-button"
-        variant="outline"
-        size="icon"
-        onClick={() => setGridOpen(true)}
-      >
-        <Grid3X3 className="h-4 w-4 opacity-70" />
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setGridOpen(true)}
+            disabled={isHistoricData}
+          >
+            <Grid3X3 className="h-4 w-4 opacity-70" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Grid View of Nearby Weather Stations</TooltipContent>
+      </Tooltip>
       <GridViewDialog open={gridOpen} onOpenChange={setGridOpen} />
-      <Button
-        id="webcam-button"
-        variant="outline"
-        size="icon"
-        onClick={onWebcamClick}
-      >
-        <Cctv
-          className={`h-4 w-4 ${showWebcams ? "opacity-100" : "opacity-50"}`}
-        />
-      </Button>
-      <Button
-        id="sounding-button"
-        variant="outline"
-        size="icon"
-        onClick={onSoundingClick}
-      >
-        <TrendingUp
-          className={`h-4 w-4 -rotate-90 ${
-            showSoundings ? "opacity-100" : "opacity-70"
-          }`}
-        />
-      </Button>
-      <Button
-        id="layer-button"
-        variant="outline"
-        size="icon"
-        onClick={onLayerToggle}
-      >
-        <Layers
-          className={`h-4 w-4 ${isSatellite ? "opacity-100" : "opacity-70"}`}
-        />
-      </Button>
-      <Button
-        id="unit-button"
-        variant="outline"
-        size="icon"
-        onClick={onUnitToggle}
-        className="text-xs font-semibold"
-      >
-        {unit === "kt" ? "kt" : "km/h"}
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Toggle
+            variant="outline"
+            size="sm"
+            onClick={onWebcamClick}
+            disabled={isHistoricData}
+            className="bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+          >
+            <Cctv className="h-4 w-4 opacity-70" />
+          </Toggle>
+        </TooltipTrigger>
+        <TooltipContent>Show Webcams on Map</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Toggle
+            variant="outline"
+            size="sm"
+            onClick={onSoundingClick}
+            disabled={isHistoricData}
+            className="bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+          >
+            <TrendingUp className="h-4 w-4 opacity-70" />
+          </Toggle>
+        </TooltipTrigger>
+        <TooltipContent>Show Soundings on Map</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Toggle
+            variant="outline"
+            size="sm"
+            onClick={onLayerToggle}
+            className="bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+          >
+            <Layers className="h-4 w-4 opacity-70" />
+          </Toggle>
+        </TooltipTrigger>
+        <TooltipContent>Switch Map Layer</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Toggle
+            variant="outline"
+            size="sm"
+            onClick={onUnitToggle}
+            className="text-xs font-semibold bg-background"
+          >
+            {unit === "kt" ? "kt" : "km/h"}
+          </Toggle>
+        </TooltipTrigger>
+        <TooltipContent>Toggle Units</TooltipContent>
+      </Tooltip>
+      <ElevationSlider
+        showElevation={showElevation}
+        elevationFilter={elevationFilter}
+        onToggleElevation={onToggleElevation}
+        onElevationChange={onElevationChange}
+      />
+      <HistorySlider
+        historyOffset={historyOffset}
+        onHistoryChange={onHistoryChange}
+      />
     </div>
   );
 }

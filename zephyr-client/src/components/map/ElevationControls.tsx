@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Mountain } from "lucide-react";
 import { toast } from "sonner";
+import { Toggle } from "../ui/toggle";
 
 interface ElevationControlsProps {
   showElevation: boolean;
@@ -25,16 +25,16 @@ export function ElevationControls({
 
   return (
     <div className="absolute top-12 right-0.5 z-50 flex flex-col items-center gap-2">
-      <Button
+      <Toggle
         variant="outline"
-        size="icon"
-        className="w-[29px] h-[29px] bg-white shadow-[0_0_0_2px_rgba(0,0,0,0.1)]"
+        size="sm"
+        className="bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
         onClick={onToggleElevation}
       >
         <Mountain
           className={`h-4 w-4 ${showElevation ? "opacity-100" : "opacity-70"}`}
         />
-      </Button>
+      </Toggle>
       <div className="h-[60px] px-5">
         <Slider
           orientation="vertical"

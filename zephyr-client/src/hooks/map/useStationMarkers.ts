@@ -6,6 +6,7 @@ import {
   getStationById,
   listStations,
   listStationsUpdatedSince,
+  loadAllStationDataAtTimestamp,
 } from "@/services/station.service";
 import type { IStation } from "@/models/station.model";
 import {
@@ -243,7 +244,6 @@ export function useStationMarkers({
 
   // Create a station marker with popup
   const createStationMarker = useCallback(
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     (props: StationProperties, timestamp: number): StationMarker => {
       const popup = new mapboxgl.Popup({
         closeButton: false,
@@ -308,7 +308,6 @@ export function useStationMarkers({
   }, []);
 
   // Initialize all station markers
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const initialize = useCallback(async () => {
     const geoJson = getStationGeoJson(await listStations(false));
     if (!map.current || !geoJson?.features.length) return;
@@ -418,10 +417,137 @@ export function useStationMarkers({
     }
   }, [unit]);
 
+  // Render historical data at a specific timestamp
+  const renderHistoricalData = useCallback(
+    async (time: Date): Promise<void> => {
+      if (!markersRef.current.length) return;
+
+      const data = await loadAllStationDataAtTimestamp(time);
+      if (!data?.length) return;
+
+      // Update each marker with historical data
+      for (const item of markersRef.current) {
+        const stationData = data.find((d) => d.station === item.marker.id);
+
+        // Default values if no data found
+        const windAverage = stationData?.windAverage ?? null;
+        const windBearing = stationData?.windBearing ?? null;
+
+        const [bgImage, textColor] = getArrowStyle(
+          windAverage,
+          windBearing,
+          null, // validBearings not available in historical data
+          false // not offline
+        );
+
+        // eslint-disable-next-line react-hooks/immutability
+        item.marker.dataset.avg =
+          windAverage != null ? String(windAverage) : "";
+
+        for (const child of Array.from(item.marker.children)) {
+          const el = child as HTMLElement;
+
+          if (child.tagName === "SPAN") {
+            el.style.color = textColor;
+            if (windAverage != null) {
+              el.textContent = String(
+                convertWindSpeed(windAverage, unitRef.current)
+              );
+            } else {
+              el.textContent = "-";
+            }
+          } else if (child.tagName === "DIV") {
+            el.style.backgroundImage = bgImage;
+            el.style.transform =
+              windBearing != null
+                ? `rotate(${Math.round(windBearing)}deg)`
+                : "";
+          } else if (child.tagName === "svg") {
+            child.setAttribute(
+              "transform",
+              `rotate(${getElevationRotation(windBearing)})`
+            );
+          }
+        }
+      }
+    },
+    []
+  );
+
+  // Render current (live) data
+  const renderCurrentData = useCallback(async (): Promise<void> => {
+    if (!markersRef.current.length) return;
+
+    const stations = await listStations(false);
+    if (!stations?.length) return;
+
+    for (const item of markersRef.current) {
+      const station = stations.find((s) => s._id === item.marker.id);
+      if (!station) continue;
+
+      const props: StationProperties = {
+        dbId: station._id,
+        name: station.name,
+        elevation: station.elevation ?? 0,
+        currentAverage: station.currentAverage ?? null,
+        currentGust: station.currentGust ?? null,
+        currentBearing: station.currentBearing ?? null,
+        validBearings: station.validBearings ?? null,
+        isOffline: station.isOffline ?? false,
+      };
+
+      const [bgImage, textColor] = getArrowStyle(
+        props.currentAverage,
+        props.currentBearing,
+        props.validBearings,
+        props.isOffline
+      );
+
+      // eslint-disable-next-line react-hooks/immutability
+      item.marker.dataset.avg =
+        props.currentAverage != null ? String(props.currentAverage) : "";
+      item.marker.dataset.gust =
+        props.currentGust != null ? String(props.currentGust) : "";
+
+      for (const child of Array.from(item.marker.children)) {
+        const el = child as HTMLElement;
+
+        if (child.tagName === "SPAN") {
+          el.style.color = textColor;
+          el.textContent = formatMarkerText(
+            props.currentAverage,
+            props.isOffline,
+            unitRef.current,
+            convertWindSpeed
+          );
+        } else if (child.tagName === "DIV") {
+          el.style.backgroundImage = bgImage;
+          el.style.transform =
+            props.currentBearing != null
+              ? `rotate(${Math.round(props.currentBearing)}deg)`
+              : "";
+        } else if (child.tagName === "svg") {
+          child.setAttribute(
+            "transform",
+            `rotate(${getElevationRotation(props.currentBearing)})`
+          );
+        }
+      }
+
+      // Update popup
+      item.popup.setHTML(createPopupHtml(props, unitRef.current));
+    }
+  }, []);
+
   // Initialize when map loads
   useEffect(() => {
     if (isMapLoaded) void initialize();
   }, [isMapLoaded, initialize]);
 
-  return { markers: markersRef, refresh };
+  return {
+    markers: markersRef,
+    refresh,
+    renderHistoricalData,
+    renderCurrentData,
+  };
 }

@@ -5,7 +5,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useAppContext } from "@/context/AppContext";
 import {
   MapControlButtons,
-  ElevationControls,
   getStoredValue,
   setStoredValue,
 } from "@/components/map";
@@ -21,6 +20,22 @@ import { toast } from "sonner";
 
 const REFRESH_INTERVAL_SECONDS = 60;
 
+/**
+ * Calculate the snapshot time based on offset (in minutes from current time)
+ * Rounds to nearest 30-minute mark
+ */
+function getSnapshotTime(offset: number): Date {
+  const now = new Date();
+  const minutesPast30 = now.getMinutes() % 30;
+  const roundedTime = new Date(
+    now.getTime() -
+      (minutesPast30 - offset) * 60 * 1000 -
+      now.getSeconds() * 1000 -
+      now.getMilliseconds()
+  );
+  return roundedTime;
+}
+
 export default function Map() {
   const { setRefreshedStations, setRefreshedWebcams } = useAppContext();
 
@@ -34,6 +49,9 @@ export default function Map() {
   const [elevationFilter, setElevationFilter] = useState(0);
   const [isSatellite, setIsSatellite] = useState(false);
 
+  // History state
+  const [historyOffset, setHistoryOffset] = useState(0);
+
   // Unit state
   const [unit, setUnit] = useState<WindUnit>(() =>
     getStoredValue<WindUnit>("unit", "kmh")
@@ -45,7 +63,11 @@ export default function Map() {
   });
 
   // Initialize station markers
-  const { refresh: refreshStations } = useStationMarkers({
+  const {
+    refresh: refreshStations,
+    renderHistoricalData,
+    renderCurrentData,
+  } = useStationMarkers({
     map,
     isMapLoaded: isLoaded,
     unit,
@@ -128,9 +150,53 @@ export default function Map() {
     toast.info(`Switched to ${newUnit === "kmh" ? "km/h" : "knots"}`);
   }, [unit]);
 
-  // Auto-refresh interval
+  // Handle history offset change
+  const handleHistoryChange = useCallback(
+    async (offset: number) => {
+      // If entering history mode, hide webcams and soundings
+      if (offset < 0 && historyOffset === 0) {
+        if (showWebcams) {
+          setShowWebcams(false);
+          setWebcamVisibility(false);
+        }
+        if (showSoundings) {
+          setShowSoundings(false);
+          setSoundingVisibility(false);
+        }
+      }
+
+      setHistoryOffset(offset);
+
+      if (offset < 0) {
+        // Render historical data
+        const snapshotTime = getSnapshotTime(offset);
+        if (renderHistoricalData) {
+          await renderHistoricalData(snapshotTime);
+        }
+      } else {
+        // Render current data
+        if (renderCurrentData) {
+          await renderCurrentData();
+        }
+      }
+    },
+    [
+      historyOffset,
+      showWebcams,
+      showSoundings,
+      setWebcamVisibility,
+      setSoundingVisibility,
+      renderHistoricalData,
+      renderCurrentData,
+    ]
+  );
+
+  // Check if in history mode
+  const isHistoricData = historyOffset < 0;
+
+  // Auto-refresh interval (disabled when in history mode)
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || isHistoricData) return;
 
     const interval = setInterval(async () => {
       try {
@@ -143,7 +209,13 @@ export default function Map() {
     }, REFRESH_INTERVAL_SECONDS * 1000);
 
     return () => clearInterval(interval);
-  }, [isLoaded, refreshStations, refreshWebcams, refreshSoundings]);
+  }, [
+    isLoaded,
+    isHistoricData,
+    refreshStations,
+    refreshWebcams,
+    refreshSoundings,
+  ]);
 
   // Refresh on visibility change
   useEffect(() => {
@@ -177,17 +249,14 @@ export default function Map() {
   return (
     <div className="absolute top-0 left-0 h-dvh w-screen flex flex-col">
       <MapControlButtons
-        showWebcams={showWebcams}
-        showSoundings={showSoundings}
         onWebcamClick={handleWebcamClick}
         onSoundingClick={handleSoundingClick}
-        isSatellite={isSatellite}
         onLayerToggle={handleLayerToggle}
         unit={unit}
         onUnitToggle={handleUnitToggle}
-      />
-
-      <ElevationControls
+        historyOffset={historyOffset}
+        onHistoryChange={handleHistoryChange}
+        isHistoricData={isHistoricData}
         showElevation={showElevation}
         elevationFilter={elevationFilter}
         onToggleElevation={() => setShowElevation(!showElevation)}
