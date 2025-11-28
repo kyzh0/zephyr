@@ -1,15 +1,10 @@
 interface WindCompassProps {
   bearing: number | null | undefined;
   validBearings: string | undefined;
-  scaling: number;
 }
 
-export function WindCompass({
-  bearing,
-  validBearings,
-  scaling,
-}: WindCompassProps) {
-  const size = scaling * 180;
+export function WindCompass({ bearing, validBearings }: WindCompassProps) {
+  const size = 120;
   const centerX = size / 2;
   const centerY = size / 2;
   const radius = size * 0.4;
@@ -123,7 +118,7 @@ export function WindCompass({
             y={y}
             textAnchor="middle"
             dominantBaseline="central"
-            fontSize={scaling * 14}
+            fontSize={12}
             fontWeight="bold"
             fill="#333"
           >
@@ -151,7 +146,7 @@ export function WindCompass({
                   fill="#FFD700"
                   stroke="#333"
                   strokeWidth="1"
-                  transform={`scale(${scaling * 3})`}
+                  transform="scale(2)"
                 />
               </g>
             );

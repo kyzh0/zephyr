@@ -3,11 +3,9 @@ import { getWindColor } from "@/lib/utils";
 import type { IStation } from "@/models/station.model";
 import { WindCompass } from "./WindCompass";
 import { convertWindSpeed, formatTemperature, getUnit } from "./utils";
-import type { ScreenSize } from "./types";
 
 interface CurrentConditionsProps {
   station: IStation;
-  screenSize: ScreenSize;
   popupMessage?: string;
   hoveringOnInfoIcon: boolean;
   onInfoIconClick: (e: React.MouseEvent) => void;
@@ -16,12 +14,10 @@ interface CurrentConditionsProps {
 
 export function CurrentConditions({
   station,
-  screenSize,
   hoveringOnInfoIcon,
   onInfoIconClick,
   onInfoIconHover,
 }: CurrentConditionsProps) {
-  const { bigScreen, tinyScreen, scaling } = screenSize;
   const unit = getUnit();
 
   if (station.isOffline) {
@@ -29,18 +25,12 @@ export function CurrentConditions({
   }
 
   return (
-    <div
-      className={cn(
-        "flex w-full items-center justify-center gap-4",
-        bigScreen ? "p-2 pb-3" : "p-1 pb-2"
-      )}
-    >
+    <div className="flex w-full items-center justify-center gap-4 overflow-x-auto p-1 pb-2 sm:p-2 sm:pb-3">
       {station.currentBearing != null &&
         (station.currentAverage != null || station.currentGust != null) && (
           <WindCompass
             bearing={station.currentBearing}
             validBearings={station.validBearings}
-            scaling={scaling}
           />
         )}
 
@@ -54,11 +44,7 @@ export function CurrentConditions({
             </tr>
             <tr>
               <td
-                className={cn(
-                  "text-center",
-                  tinyScreen ? "text-lg" : "text-2xl",
-                  bigScreen ? "p-1" : "p-0"
-                )}
+                className="text-center p-0 sm:p-1 text-lg sm:text-2xl"
                 style={{
                   backgroundColor: getWindColor(station.currentAverage ?? null),
                 }}
@@ -66,23 +52,14 @@ export function CurrentConditions({
                 {convertWindSpeed(station.currentAverage, unit) ?? "-"}
               </td>
               <td
-                className={cn(
-                  "text-center",
-                  tinyScreen ? "text-lg" : "text-2xl",
-                  bigScreen ? "p-1" : "p-0"
-                )}
+                className="text-center p-0 sm:p-1 text-lg sm:text-2xl"
                 style={{
                   backgroundColor: getWindColor(station.currentGust ?? null),
                 }}
               >
                 {convertWindSpeed(station.currentGust, unit) ?? "-"}
               </td>
-              <td
-                className={cn(
-                  "p-0 text-center",
-                  tinyScreen ? "text-sm" : "text-base"
-                )}
-              >
+              <td className="p-0 text-center text-sm sm:text-base">
                 {formatTemperature(station.currentTemperature)}
               </td>
               {station.popupMessage && (
@@ -95,13 +72,9 @@ export function CurrentConditions({
                   <img
                     src="/caution.png"
                     className={cn(
-                      "transition-opacity",
+                      "transition-opacity w-8 h-8 sm:w-10 sm:h-10",
                       hoveringOnInfoIcon ? "opacity-30" : "opacity-100"
                     )}
-                    style={{
-                      width: scaling * 40,
-                      height: scaling * 40,
-                    }}
                     alt="Info"
                   />
                 </td>

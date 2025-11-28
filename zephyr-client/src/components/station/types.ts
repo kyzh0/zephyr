@@ -8,12 +8,5 @@ export interface ExtendedStationData extends IStationData {
   [key: `validBearings${number}`]: [number, number];
 }
 
-// Screen size context for responsive scaling
-export interface ScreenSize {
-  bigScreen: boolean;
-  tinyScreen: boolean;
-  scaling: number;
-}
-
 // Unit type for wind speed display
 export type WindUnit = "kt" | "kmh";

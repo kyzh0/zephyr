@@ -1,32 +1,24 @@
 import { cn, getWindColor, getWindDirectionFromBearing } from "@/lib/utils";
 import { getDirectionColor, convertWindSpeed, getUnit } from "./utils";
 import { DirectionArrow } from "@/components/ui/DirectionArrow";
-import type { ExtendedStationData, ScreenSize } from "./types";
+import type { ExtendedStationData } from "./types";
 
 interface StationDataTableProps {
   tableData: ExtendedStationData[];
   validBearings: string | undefined;
-  screenSize: ScreenSize;
 }
 
 export const StationDataTable = function StationDataTable({
   ref,
   tableData,
   validBearings,
-  screenSize,
 }: StationDataTableProps & {
   ref?: React.RefObject<HTMLTableRowElement | null>;
 }) {
-  const { bigScreen, tinyScreen } = screenSize;
   const unit = getUnit();
 
   return (
-    <div
-      className={cn(
-        "overflow-x-auto rounded-lg border bg-white",
-        tinyScreen && "min-h-[122px]"
-      )}
-    >
+    <div className="overflow-x-auto rounded-lg border bg-white min-h-[122px] sm:min-h-0">
       <table className="min-w-[650px] text-sm">
         <tbody>
           {/* Time row */}
@@ -36,9 +28,7 @@ export const StationDataTable = function StationDataTable({
               <td
                 key={String(d.time)}
                 className={cn(
-                  "text-center",
-                  bigScreen ? "p-0.5" : "px-0.5 py-0",
-                  tinyScreen ? "text-[10px]" : "text-xs",
+                  "text-center px-0.5 py-0 sm:p-0.5 text-[10px] sm:text-xs",
                   new Date(d.time).getMinutes() === 0 && "bg-gray-200"
                 )}
               >
@@ -49,23 +39,13 @@ export const StationDataTable = function StationDataTable({
 
           {/* Average row */}
           <tr>
-            <th
-              className={cn(
-                "sticky left-0 bg-white text-left",
-                tinyScreen && "text-xs",
-                bigScreen ? "p-0.5" : "py-0 pl-0.5 pr-0"
-              )}
-            >
+            <th className="sticky left-0 bg-white text-left text-xs sm:text-sm py-0 pl-0.5 pr-0 sm:p-0.5">
               Avg
             </th>
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
-                className={cn(
-                  "text-center",
-                  tinyScreen && "text-xs",
-                  bigScreen ? "p-0.5" : "p-0"
-                )}
+                className="text-center text-xs sm:text-sm p-0 sm:p-0.5"
                 style={{
                   backgroundColor: getWindColor(d.windAverage ?? null),
                 }}
@@ -77,23 +57,13 @@ export const StationDataTable = function StationDataTable({
 
           {/* Gust row */}
           <tr>
-            <th
-              className={cn(
-                "sticky left-0 bg-white text-left",
-                tinyScreen && "text-xs",
-                bigScreen ? "p-0.5" : "py-0 pl-0.5 pr-0"
-              )}
-            >
+            <th className="sticky left-0 bg-white text-left text-xs sm:text-sm py-0 pl-0.5 pr-0 sm:p-0.5">
               Gust
             </th>
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
-                className={cn(
-                  "text-center",
-                  tinyScreen && "text-xs",
-                  bigScreen ? "p-0.5" : "p-0"
-                )}
+                className="text-center text-xs sm:text-sm p-0 sm:p-0.5"
                 style={{
                   backgroundColor: getWindColor(d.windGust ?? null),
                 }}
@@ -109,11 +79,7 @@ export const StationDataTable = function StationDataTable({
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
-                className={cn(
-                  "text-center",
-                  tinyScreen && "text-[10px]",
-                  bigScreen ? "p-0.5" : "p-0"
-                )}
+                className="text-center text-[10px] sm:text-xs p-0 sm:p-0.5"
               >
                 {d.windBearing == null ||
                 (d.windAverage == null && d.windGust == null)
@@ -162,10 +128,7 @@ export const StationDataTable = function StationDataTable({
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
-                className={cn(
-                  "text-center text-[10px]",
-                  bigScreen ? "p-0.5" : "p-0"
-                )}
+                className="text-center text-[10px] p-0 sm:p-0.5"
               >
                 {d.windBearing == null ||
                 (d.windAverage == null && d.windGust == null)
@@ -181,11 +144,7 @@ export const StationDataTable = function StationDataTable({
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
-                className={cn(
-                  "text-center",
-                  tinyScreen ? "text-[8px]" : "text-[10px]",
-                  bigScreen ? "p-0.5" : "p-0"
-                )}
+                className="text-center text-[8px] sm:text-[10px] p-0 sm:p-0.5"
               >
                 {d.temperature == null
                   ? "-"

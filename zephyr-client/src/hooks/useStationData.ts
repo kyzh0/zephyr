@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatInTimeZone } from "date-fns-tz";
 import { getStationById, loadStationData } from "@/services/station.service";
@@ -6,6 +6,8 @@ import { useAppContext } from "@/context/AppContext";
 import type { IStation } from "@/models/station.model";
 import type { IStationData } from "@/models/station-data.model";
 import type { ExtendedStationData } from "@/components/station/types";
+
+export type TimeRange = "3" | "6" | "12" | "24";
 
 interface UseStationDataReturn {
   station: IStation | null;
@@ -15,17 +17,40 @@ interface UseStationDataReturn {
   isLoading: boolean;
 }
 
-export function useStationData(id: string | undefined): UseStationDataReturn {
+function filterByTimeRange<T extends { time: Date | string }>(
+  data: T[],
+  hours: TimeRange
+): T[] {
+  const hoursNum = parseInt(hours, 10);
+  const cutoffTime = Date.now() - hoursNum * 60 * 60 * 1000;
+  return data.filter((d) => new Date(d.time).getTime() >= cutoffTime);
+}
+
+export function useStationData(
+  id: string | undefined,
+  timeRange: TimeRange = "12"
+): UseStationDataReturn {
   const navigate = useNavigate();
   const { refreshedStations } = useAppContext();
 
   const [station, setStation] = useState<IStation | null>(null);
-  const [data, setData] = useState<ExtendedStationData[]>([]);
-  const [tableData, setTableData] = useState<ExtendedStationData[]>([]);
+  const [allData, setAllData] = useState<ExtendedStationData[]>([]);
+  const [allTableData, setAllTableData] = useState<ExtendedStationData[]>([]);
   const [bearingPairCount, setBearingPairCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const initialLoadRef = useRef(true);
+
+  // Filter data based on time range (memoized to prevent re-renders)
+  const data = useMemo(
+    () => filterByTimeRange(allData, timeRange),
+    [allData, timeRange]
+  );
+
+  const tableData = useMemo(
+    () => filterByTimeRange(allTableData, timeRange),
+    [allTableData, timeRange]
+  );
 
   async function fetchData() {
     if (!id) return;
@@ -92,17 +117,17 @@ export function useStationData(id: string | undefined): UseStationDataReturn {
         return extended;
       });
 
-      setData(extendedData);
+      setAllData(extendedData);
 
-      // show 36 records (last 6h) in table
+      // for non-high-res stations, table data is the same as chart data
       if (!s.isHighResolution) {
-        setTableData(extendedData.slice(Math.max(extendedData.length - 37, 0)));
+        setAllTableData(extendedData);
       }
 
       // calculate 10 min averages for high-res stations
       if (s.isHighResolution && extendedData.length) {
         const averagedData = calculateHighResAverages(extendedData, id);
-        setTableData(averagedData.slice(Math.max(averagedData.length - 37, 0)));
+        setAllTableData(averagedData);
       }
     } catch (error) {
       console.error(error);

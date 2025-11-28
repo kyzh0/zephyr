@@ -8,7 +8,7 @@ export { InfoPopup } from "./InfoPopup";
 export { Skeleton } from "./Skeleton";
 
 // Types
-export type { ExtendedStationData, ScreenSize, WindUnit } from "./types";
+export type { ExtendedStationData, WindUnit } from "./types";
 
 // Utils
 export {

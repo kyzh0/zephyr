@@ -1,3 +1,2 @@
-export { useStationData } from "./useStationData";
-export { useScreenSize } from "./useScreenSize";
+export { useStationData, type TimeRange } from "./useStationData";
 export { useMousePosition } from "./useMousePosition";
