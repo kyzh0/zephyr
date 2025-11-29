@@ -1,7 +1,13 @@
 export * from "./map.types";
 export * from "./map.utils";
-export * from "./wind-icon.utils";
-export { WindIcon } from "./WindIcon";
+export {
+  type IconShape,
+  type IconBorder,
+  type WindColorName,
+  getWindColor,
+  getTextColor,
+  getIconConfig,
+} from "./wind-icon.utils";
 export { MapControlButtons } from "./MapControlButtons";
 export { ElevationControls } from "./ElevationControls";
 export { ElevationSlider } from "./ElevationSlider";

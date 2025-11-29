@@ -27,7 +27,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { SignInDialog } from "./SignInDialog";
-import { WindIcon } from "./WindIcon";
 
 export const WELCOME_STORAGE_KEY = "zephyr-welcome-dismissed";
 
@@ -121,30 +120,27 @@ export function HelpDialog({
         {/* Guide content */}
         <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
           <div className="flex justify-end items-center">
-            <WindIcon
-              shape="circle"
-              border="none"
-              color="#fbbf24"
+            <img
+              src="/circle-yellow.png"
+              alt="Station marker"
               className="w-5 h-7 -rotate-45"
             />
           </div>
           <div className="flex items-center">Click a station for details</div>
 
           <div className="flex justify-end items-center">
-            <WindIcon
-              shape="circle"
-              border="gold"
-              color="#22c55e"
+            <img
+              src="/gold-circle-green.png"
+              alt="Popular site marker"
               className="w-5 h-7 -rotate-45"
             />
           </div>
           <div className="flex items-center">Popular sites are outlined</div>
 
           <div className="flex justify-end items-center">
-            <WindIcon
-              shape="circle"
-              border="gold-valid"
-              color="#86efac"
+            <img
+              src="/gold-valid-arrow-light-green.png"
+              alt="Favourable wind marker"
               className="w-5 h-7 -rotate-45"
             />
           </div>

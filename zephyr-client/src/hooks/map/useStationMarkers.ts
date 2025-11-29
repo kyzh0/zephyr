@@ -10,10 +10,10 @@ import {
 } from "@/services/station.service";
 import type { IStation } from "@/models/station.model";
 import {
-  getArrowStyle,
   getStationGeoJson,
   sortStationFeatures,
   convertWindSpeed,
+  getArrowStyle,
 } from "@/components/map";
 import type { StationMarker, WindUnit } from "@/components/map";
 import {
@@ -116,26 +116,23 @@ function createMarkerElement(
     validBearings,
     isOffline,
   } = props;
-  const [bgImage, textColor] = getArrowStyle(
+  const [img, textColor] = getArrowStyle(
     currentAverage,
     currentBearing,
     validBearings,
     isOffline
   );
 
-  // Arrow/circle icon
+  // Arrow icon (div with background image)
   const arrow = document.createElement("div");
-  arrow.className =
-    "absolute top-0 left-0 z-[5] w-full h-full cursor-pointer bg-contain bg-no-repeat bg-center origin-[50%_35%]";
-  arrow.style.backgroundImage = bgImage;
+  arrow.className = "marker-arrow";
   arrow.style.transform =
     currentBearing != null ? `rotate(${Math.round(currentBearing)}deg)` : "";
+  arrow.style.backgroundImage = img;
 
   // Wind speed text
   const text = document.createElement("span");
-  text.className =
-    "absolute top-0 left-0 z-[6] w-full h-1/2 cursor-pointer font-semibold text-sm text-center pt-[3px]";
-  text.style.fontFamily = "Arial, Helvetica, sans-serif";
+  text.className = "marker-text";
   text.style.color = textColor;
   text.textContent = formatMarkerText(
     currentAverage,
@@ -161,7 +158,7 @@ function createMarkerElement(
   // Container
   const container = document.createElement("div");
   container.id = dbId;
-  container.className = "marker absolute top-0 left-0 w-[25px] h-[36px]";
+  container.className = "marker";
   container.setAttribute("elevation", String(elevation));
   container.dataset.timestamp = String(timestamp);
   container.dataset.avg = currentAverage != null ? String(currentAverage) : "";
@@ -190,7 +187,7 @@ function updateMarkerElement(
     validBearings,
     isOffline,
   } = props;
-  const [bgImage, textColor] = getArrowStyle(
+  const [img, textColor] = getArrowStyle(
     currentAverage,
     currentBearing,
     validBearings,
@@ -202,9 +199,8 @@ function updateMarkerElement(
   marker.dataset.gust = currentGust != null ? String(currentGust) : "";
 
   for (const child of Array.from(marker.children)) {
-    const el = child as HTMLElement;
-
-    if (child.tagName === "SPAN") {
+    if (child.classList.contains("marker-text")) {
+      const el = child as HTMLElement;
       el.style.color = textColor;
       el.textContent = formatMarkerText(
         currentAverage,
@@ -212,13 +208,17 @@ function updateMarkerElement(
         unit,
         convertWindSpeed
       );
-    } else if (child.tagName === "DIV") {
-      el.style.backgroundImage = bgImage;
+    } else if (child.classList.contains("marker-arrow")) {
+      const el = child as HTMLElement;
+      el.style.backgroundImage = img;
       el.style.transform =
         currentBearing != null
           ? `rotate(${Math.round(currentBearing)}deg)`
           : "";
-    } else if (child.tagName === "svg") {
+    } else if (
+      child.tagName === "svg" &&
+      (child as SVGElement).classList.contains("marker-border")
+    ) {
       child.setAttribute(
         "transform",
         `rotate(${getElevationRotation(currentBearing)})`
@@ -391,7 +391,7 @@ export function useStationMarkers({
 
       // Update text
       for (const child of Array.from(item.marker.children)) {
-        if (child.tagName === "SPAN" && avg != null) {
+        if (child.classList.contains("marker-text") && avg != null) {
           child.textContent = String(convertWindSpeed(avg, unit));
         }
       }
@@ -433,7 +433,7 @@ export function useStationMarkers({
         const windAverage = stationData?.windAverage ?? null;
         const windBearing = stationData?.windBearing ?? null;
 
-        const [bgImage, textColor] = getArrowStyle(
+        const [img, textColor] = getArrowStyle(
           windAverage,
           windBearing,
           null, // validBearings not available in historical data
@@ -445,9 +445,8 @@ export function useStationMarkers({
           windAverage != null ? String(windAverage) : "";
 
         for (const child of Array.from(item.marker.children)) {
-          const el = child as HTMLElement;
-
-          if (child.tagName === "SPAN") {
+          if (child.classList.contains("marker-text")) {
+            const el = child as HTMLElement;
             el.style.color = textColor;
             if (windAverage != null) {
               el.textContent = String(
@@ -456,13 +455,17 @@ export function useStationMarkers({
             } else {
               el.textContent = "-";
             }
-          } else if (child.tagName === "DIV") {
-            el.style.backgroundImage = bgImage;
+          } else if (child.classList.contains("marker-arrow")) {
+            const el = child as HTMLElement;
+            el.style.backgroundImage = img;
             el.style.transform =
               windBearing != null
                 ? `rotate(${Math.round(windBearing)}deg)`
                 : "";
-          } else if (child.tagName === "svg") {
+          } else if (
+            child.tagName === "svg" &&
+            (child as SVGElement).classList.contains("marker-border")
+          ) {
             child.setAttribute(
               "transform",
               `rotate(${getElevationRotation(windBearing)})`
@@ -496,7 +499,7 @@ export function useStationMarkers({
         isOffline: station.isOffline ?? false,
       };
 
-      const [bgImage, textColor] = getArrowStyle(
+      const [img, textColor] = getArrowStyle(
         props.currentAverage,
         props.currentBearing,
         props.validBearings,
@@ -510,9 +513,8 @@ export function useStationMarkers({
         props.currentGust != null ? String(props.currentGust) : "";
 
       for (const child of Array.from(item.marker.children)) {
-        const el = child as HTMLElement;
-
-        if (child.tagName === "SPAN") {
+        if (child.classList.contains("marker-text")) {
+          const el = child as HTMLElement;
           el.style.color = textColor;
           el.textContent = formatMarkerText(
             props.currentAverage,
@@ -520,13 +522,17 @@ export function useStationMarkers({
             unitRef.current,
             convertWindSpeed
           );
-        } else if (child.tagName === "DIV") {
-          el.style.backgroundImage = bgImage;
+        } else if (child.classList.contains("marker-arrow")) {
+          const el = child as HTMLElement;
+          el.style.backgroundImage = img;
           el.style.transform =
             props.currentBearing != null
               ? `rotate(${Math.round(props.currentBearing)}deg)`
               : "";
-        } else if (child.tagName === "svg") {
+        } else if (
+          child.tagName === "svg" &&
+          (child as SVGElement).classList.contains("marker-border")
+        ) {
           child.setAttribute(
             "transform",
             `rotate(${getElevationRotation(props.currentBearing)})`

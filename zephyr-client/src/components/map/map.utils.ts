@@ -2,7 +2,7 @@ import type { IStation } from "@/models/station.model";
 import type { ICam } from "@/models/cam.model";
 import type { ISounding } from "@/models/sounding.model";
 import type { GeoJson, GeoJsonFeature, WindUnit } from "./map.types";
-import { getArrowStyleSvg } from "./wind-icon.utils";
+import { getArrowStyle as getArrowStylePng } from "./wind-icon.utils";
 
 // localStorage helpers
 export function getStoredValue<T>(key: string, defaultValue: T): T {
@@ -28,14 +28,14 @@ export function convertWindSpeed(speed: number, unit: WindUnit): number {
   return Math.round(unit === "kt" ? speed / 1.852 : speed);
 }
 
-// Arrow styling based on wind conditions - uses SVG data URLs instead of PNGs
+// Arrow styling based on wind conditions - uses PNG images
 export function getArrowStyle(
   avgWind: number | null,
   currentBearing: number | null,
   validBearings: string | null,
   isOffline: boolean | null
 ): [string, string] {
-  return getArrowStyleSvg(avgWind, currentBearing, validBearings, isOffline);
+  return getArrowStylePng(avgWind, currentBearing, validBearings, isOffline);
 }
 
 // GeoJSON generators
