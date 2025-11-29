@@ -6,6 +6,7 @@ import {
   Layers,
   HandHelping,
   Cctv,
+  LocateFixed,
 } from "lucide-react";
 import { DonateDialog } from "./DonateDialog";
 import { HelpDialog, WELCOME_STORAGE_KEY } from "./HelpDialog";
@@ -25,6 +26,7 @@ interface MapControlButtonsProps {
   onWebcamClick: () => void;
   onSoundingClick: () => void;
   onLayerToggle: () => void;
+  onLocateClick: () => void;
   unit: WindUnit;
   onUnitToggle: () => void;
   historyOffset: number;
@@ -40,6 +42,7 @@ export function MapControlButtons({
   onWebcamClick,
   onSoundingClick,
   onLayerToggle,
+  onLocateClick,
   unit,
   onUnitToggle,
   historyOffset,
@@ -57,7 +60,7 @@ export function MapControlButtons({
   const [gridOpen, setGridOpen] = useState(false);
 
   return (
-    <div className="flex gap-2 items-start absolute top-2.5 left-2.5 z-50">
+    <div className="flex flex-wrap gap-2 items-start absolute top-2.5 left-2.5 z-50">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="outline" size="sm" onClick={() => setHelpOpen(true)}>
@@ -134,6 +137,14 @@ export function MapControlButtons({
           </Toggle>
         </TooltipTrigger>
         <TooltipContent>Switch Map Layer</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="outline" size="sm" onClick={onLocateClick}>
+            <LocateFixed className="h-4 w-4 opacity-70" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Find My Location</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>

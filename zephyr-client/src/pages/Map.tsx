@@ -58,7 +58,7 @@ export default function Map() {
   );
 
   // Initialize map
-  const { map, isLoaded } = useMapInstance({
+  const { map, isLoaded, triggerGeolocate } = useMapInstance({
     containerRef: mapContainer,
   });
 
@@ -252,6 +252,8 @@ export default function Map() {
         onWebcamClick={handleWebcamClick}
         onSoundingClick={handleSoundingClick}
         onLayerToggle={handleLayerToggle}
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        onLocateClick={triggerGeolocate}
         unit={unit}
         onUnitToggle={handleUnitToggle}
         historyOffset={historyOffset}

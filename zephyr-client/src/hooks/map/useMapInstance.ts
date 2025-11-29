@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { getStoredValue, setStoredValue } from "@/components/map";
+import { toast } from "sonner";
 
 interface UseMapInstanceOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -12,6 +13,7 @@ interface UseMapInstanceOptions {
 interface UseMapInstanceReturn {
   map: React.RefObject<mapboxgl.Map | null>;
   isLoaded: boolean;
+  triggerGeolocate: () => void;
 }
 
 export function useMapInstance({
@@ -50,13 +52,6 @@ export function useMapInstance({
     map.current.dragRotate.disable();
     map.current.touchZoomRotate.disableRotation();
 
-    // Add geolocation control
-    map.current.addControl(
-      new mapboxgl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-      })
-    );
-
     map.current.on("load", () => {
       setIsLoaded(true);
       onLoad?.();
@@ -77,5 +72,23 @@ export function useMapInstance({
     posInitRef.current = true;
   }, [lon, lat, zoom]);
 
-  return { map, isLoaded };
+  // Trigger geolocation programmatically
+  const triggerGeolocate = useCallback(() => {
+    if (!map.current) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        map.current?.flyTo({
+          center: [position.coords.longitude, position.coords.latitude],
+          zoom: 12,
+        });
+      },
+      (error) => {
+        toast.error("Geolocation error: " + error.message);
+      },
+      { enableHighAccuracy: true }
+    );
+  }, []);
+
+  return { map, isLoaded, triggerGeolocate };
 }
