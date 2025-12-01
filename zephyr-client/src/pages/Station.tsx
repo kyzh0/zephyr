@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatInTimeZone } from "date-fns-tz";
-import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
 import { getStationTypeName } from "@/lib/utils";
@@ -35,23 +34,19 @@ export default function Station() {
 
   const [timeRange, setTimeRange] = useState<TimeRange>("12");
 
-  const { station, data, tableData, bearingPairCount, isRefreshing } =
-    useStationData(id, timeRange);
+  const { station, data, tableData, bearingPairCount } = useStationData(
+    id,
+    timeRange
+  );
   const mouseCoords = useMousePosition();
 
   const [hoveringOnInfoIcon, setHoveringOnInfoIcon] = useState(false);
+  const [secondsSinceUpdate, setSecondsSinceUpdate] = useState<number | null>(
+    null
+  );
 
   const tableRef = useRef<HTMLTableRowElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const wasRefreshingRef = useRef(false);
-
-  // Show toast when refresh completes
-  useEffect(() => {
-    if (wasRefreshingRef.current && !isRefreshing) {
-      toast.success("Data updated", { duration: 2000 });
-    }
-    wasRefreshingRef.current = isRefreshing;
-  }, [isRefreshing]);
 
   // Auto-scroll table to latest data
   useEffect(() => {
@@ -67,12 +62,31 @@ export default function Station() {
     }
   }, [data]);
 
+  // Update seconds since last update
+  useEffect(() => {
+    if (!station?.lastUpdate) return;
+
+    const updateSeconds = () => {
+      const seconds = Math.floor(
+        (Date.now() - new Date(station.lastUpdate).getTime()) / 1000
+      );
+      setSecondsSinceUpdate(seconds);
+    };
+
+    updateSeconds();
+    const interval = setInterval(updateSeconds, 1000);
+    return () => clearInterval(interval);
+  }, [station?.lastUpdate]);
+
   // Shared header content
   const headerContent = station ? (
     <div className="flex flex-col items-center">
-      <span className="text-lg sm:text-xl font-semibold">{station.name}</span>
-      <span className="text-muted-foreground text-xs sm:text-sm font-normal">
-        Elevation {station.elevation}m
+      <span className="text-base sm:text-xl font-semibold leading-tight">
+        {station.name}
+      </span>
+      <span className="text-muted-foreground text-[10px] sm:text-sm font-normal">
+        Elevation {station.elevation}m • Updated{" "}
+        {secondsSinceUpdate !== null ? `${secondsSinceUpdate}s ago` : "..."}
       </span>
     </div>
   ) : (
@@ -108,18 +122,38 @@ export default function Station() {
       {/* Data table and charts */}
       {station ? (
         station.isOffline ? null : data.length > 0 && tableData.length > 0 ? (
-          <div className="mt-4 space-y-4">
-            <div className="flex flex-row items-center justify-end mb-2 text-sm text-muted-foreground gap-4">
+          <div className="mt-2 sm:mt-4 space-y-2 sm:space-y-4">
+            <div className="flex flex-row items-center justify-end mb-1 sm:mb-2 text-xs sm:text-sm text-muted-foreground gap-2 sm:gap-4">
               Showing data for last{" "}
               <Tabs
                 value={timeRange}
                 onValueChange={(v) => setTimeRange(v as TimeRange)}
               >
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="24">24h</TabsTrigger>
-                  <TabsTrigger value="12">12h</TabsTrigger>
-                  <TabsTrigger value="6">6h</TabsTrigger>
-                  <TabsTrigger value="3">3h</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-4 h-7 sm:h-9">
+                  <TabsTrigger
+                    value="24"
+                    className="text-xs sm:text-sm px-2 sm:px-3"
+                  >
+                    24h
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="12"
+                    className="text-xs sm:text-sm px-2 sm:px-3"
+                  >
+                    12h
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="6"
+                    className="text-xs sm:text-sm px-2 sm:px-3"
+                  >
+                    6h
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="3"
+                    className="text-xs sm:text-sm px-2 sm:px-3"
+                  >
+                    3h
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -147,7 +181,7 @@ export default function Station() {
 
       {/* Footer */}
       {station && (
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-2 sm:mt-4 flex items-center justify-between">
           <p className="text-[10px] sm:text-sm text-muted-foreground">
             Updated{" "}
             {formatInTimeZone(
@@ -174,8 +208,8 @@ export default function Station() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-background border-b px-4 py-3">
-          <div className="flex items-center gap-3">
+        <div className="sticky top-0 z-10 bg-background border-b px-2 sm:px-4 py-2 sm:py-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button
               variant="ghost"
               size="icon"
@@ -191,7 +225,7 @@ export default function Station() {
         {/* Body */}
         <div
           ref={containerRef}
-          className="flex-1 overflow-y-auto px-4 py-4"
+          className="flex-1 overflow-y-auto px-2 sm:px-4 py-2 sm:py-4"
           onClick={() => setHoveringOnInfoIcon(false)}
         >
           {bodyContent}

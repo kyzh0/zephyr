@@ -1,10 +1,15 @@
 interface WindCompassProps {
   bearing: number | null | undefined;
   validBearings: string | undefined;
+  isMobile?: boolean;
 }
 
-export function WindCompass({ bearing, validBearings }: WindCompassProps) {
-  const size = 120;
+export function WindCompass({
+  bearing,
+  validBearings,
+  isMobile = false,
+}: WindCompassProps) {
+  const size = isMobile ? 90 : 120;
   const centerX = size / 2;
   const centerY = size / 2;
   const radius = size * 0.4;
@@ -101,31 +106,32 @@ export function WindCompass({ bearing, validBearings }: WindCompassProps) {
       })}
 
       {/* Cardinal direction labels */}
-      {[
-        { angle: 0, label: "N" },
-        { angle: 90, label: "E" },
-        { angle: 180, label: "S" },
-        { angle: 270, label: "W" },
-      ].map(({ angle, label }) => {
-        const rad = ((angle - 90) * Math.PI) / 180;
-        const x = centerX + (radius + 15) * Math.cos(rad);
-        const y = centerY + (radius + 15) * Math.sin(rad);
+      {!isMobile &&
+        [
+          { angle: 0, label: "N" },
+          { angle: 90, label: "E" },
+          { angle: 180, label: "S" },
+          { angle: 270, label: "W" },
+        ].map(({ angle, label }) => {
+          const rad = ((angle - 90) * Math.PI) / 180;
+          const x = centerX + (radius + 15) * Math.cos(rad);
+          const y = centerY + (radius + 15) * Math.sin(rad);
 
-        return (
-          <text
-            key={angle}
-            x={x}
-            y={y}
-            textAnchor="middle"
-            dominantBaseline="central"
-            fontSize={12}
-            fontWeight="bold"
-            fill="#333"
-          >
-            {label}
-          </text>
-        );
-      })}
+          return (
+            <text
+              key={angle}
+              x={x}
+              y={y}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize={12}
+              fontWeight="bold"
+              fill="#333"
+            >
+              {label}
+            </text>
+          );
+        })}
 
       {/* Wind direction arrow */}
       {bearing != null && (
