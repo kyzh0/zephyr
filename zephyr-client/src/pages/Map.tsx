@@ -252,7 +252,6 @@ export default function Map() {
         onWebcamClick={handleWebcamClick}
         onSoundingClick={handleSoundingClick}
         onLayerToggle={handleLayerToggle}
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         onLocateClick={triggerGeolocate}
         unit={unit}
         onUnitToggle={handleUnitToggle}
