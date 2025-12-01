@@ -1,10 +1,5 @@
 import { useState } from "react";
-import { Cctv, CheckCircle, Grid3X3, Mountain, TrendingUp } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "sonner";
-import emailjs from "@emailjs/browser";
+import { Cctv, Grid3X3, Mountain, TrendingUp, Mail } from "lucide-react";
 
 import {
   Dialog,
@@ -14,19 +9,10 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { SignInDialog } from "./SignInDialog";
+import { ContactDialog } from "./ContactDialog";
 
 export const WELCOME_STORAGE_KEY = "zephyr-welcome-dismissed";
 
@@ -34,13 +20,6 @@ function shouldShowWelcome(): boolean {
   const dismissed = localStorage.getItem(WELCOME_STORAGE_KEY);
   return !dismissed;
 }
-
-const formSchema = z.object({
-  user_email: z.email("Email is not valid").min(1, "Email is required"),
-  message: z.string().min(1, "Message is required"),
-});
-
-type FormValues = z.infer<typeof formSchema>;
 
 interface HelpDialogProps {
   open?: boolean;
@@ -52,19 +31,11 @@ export function HelpDialog({
   onOpenChange,
 }: HelpDialogProps) {
   const [internalOpen, setInternalOpen] = useState(shouldShowWelcome);
-  const [dontShowAgain, setDontShowAgain] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(true);
   const [signInOpen, setSignInOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
   const isOpen = controlledOpen ?? internalOpen;
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      user_email: "",
-      message: "",
-    },
-  });
 
   const handleOpenChange = (open: boolean) => {
     if (!open && dontShowAgain) {
@@ -74,30 +45,9 @@ export function HelpDialog({
     onOpenChange?.(open);
   };
 
-  const onSubmit = async (data: FormValues) => {
-    try {
-      await emailjs.send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID as string,
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string,
-        {
-          user_email: data.user_email,
-          message: data.message,
-        },
-        { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string }
-      );
-
-      setSuccess(true);
-      toast.success("Thanks for your feedback!");
-      form.reset();
-    } catch (error) {
-      toast.error("Something went wrong, please try again.");
-      console.error(error);
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader className="text-center sm:text-center">
           <div className="flex justify-between items-start">
             <button
@@ -171,76 +121,20 @@ export function HelpDialog({
           <div className="flex items-center">RASP Skew-T soundings</div>
         </div>
 
-        {/* Contact form */}
-        <div className="border-t pt-4 mt-2">
-          {success ? (
-            <div className="flex flex-col items-center justify-center py-4">
-              <CheckCircle className="h-16 w-16 text-green-500" />
-              <p className="mt-2 text-sm">Thanks for your feedback!</p>
-            </div>
-          ) : (
-            <>
-              <p className="text-sm text-muted-foreground mb-3">
-                Got feedback, or want a weather station added?
-              </p>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-3"
-                >
-                  <FormField
-                    control={form.control}
-                    name="user_email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            autoComplete="email"
-                            placeholder="your@email.com"
-                            className="h-9"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Message</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            rows={2}
-                            placeholder="Your message..."
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={form.formState.isSubmitting}
-                  >
-                    {form.formState.isSubmitting ? "Sending..." : "Send"}
-                  </Button>
-                </form>
-              </Form>
-            </>
-          )}
+        {/* Contact link */}
+        <div className="pt-4 border-t">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => setContactOpen(true)}
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            Contact Us
+          </Button>
         </div>
 
         {/* Footer with checkbox */}
-        <div className="flex items-center justify-between pt-2 border-t">
+        <div className="flex items-center justify-between pt-4 border-t">
           <div className="flex items-center space-x-2">
             <Checkbox
               id="dontShowAgain"
@@ -261,6 +155,7 @@ export function HelpDialog({
       </DialogContent>
 
       <SignInDialog open={signInOpen} onOpenChange={setSignInOpen} />
+      <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />
     </Dialog>
   );
 }
