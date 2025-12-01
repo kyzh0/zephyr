@@ -15,6 +15,7 @@ interface UseStationDataReturn {
   tableData: ExtendedStationData[];
   bearingPairCount: number;
   isLoading: boolean;
+  isRefreshing: boolean;
 }
 
 function filterByTimeRange<T extends { time: Date | string }>(
@@ -38,6 +39,7 @@ export function useStationData(
   const [allTableData, setAllTableData] = useState<ExtendedStationData[]>([]);
   const [bearingPairCount, setBearingPairCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const initialLoadRef = useRef(true);
 
@@ -52,11 +54,15 @@ export function useStationData(
     [allTableData, timeRange]
   );
 
-  async function fetchData() {
+  async function fetchData(isRefresh = false) {
     if (!id) return;
 
     try {
-      setIsLoading(true);
+      if (isRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
       const s = await getStationById(id);
       if (!s) {
         navigate("/");
@@ -133,6 +139,7 @@ export function useStationData(
       console.error(error);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   }
 
@@ -151,11 +158,30 @@ export function useStationData(
       return;
     }
 
-    fetchData();
+    fetchData(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, refreshedStations]);
 
-  return { station, data, tableData, bearingPairCount, isLoading };
+  // Auto-refresh every minute
+  useEffect(() => {
+    if (!id || !station || station.isOffline) return;
+
+    const intervalId = setInterval(() => {
+      void fetchData(true);
+    }, 60 * 1000);
+
+    return () => clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, station?.isOffline]);
+
+  return {
+    station,
+    data,
+    tableData,
+    bearingPairCount,
+    isLoading,
+    isRefreshing,
+  };
 }
 
 /**

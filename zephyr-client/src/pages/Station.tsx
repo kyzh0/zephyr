@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatInTimeZone } from "date-fns-tz";
+import { toast } from "sonner";
 
 import { getStationTypeName } from "@/lib/utils";
 import { useStationData, useMousePosition, type TimeRange } from "@/hooks";
@@ -26,16 +27,23 @@ export default function Station() {
 
   const [timeRange, setTimeRange] = useState<TimeRange>("12");
 
-  const { station, data, tableData, bearingPairCount } = useStationData(
-    id,
-    timeRange
-  );
+  const { station, data, tableData, bearingPairCount, isRefreshing } =
+    useStationData(id, timeRange);
   const mouseCoords = useMousePosition();
 
   const [hoveringOnInfoIcon, setHoveringOnInfoIcon] = useState(false);
 
   const tableRef = useRef<HTMLTableRowElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const wasRefreshingRef = useRef(false);
+
+  // Show toast when refresh completes
+  useEffect(() => {
+    if (wasRefreshingRef.current && !isRefreshing) {
+      toast.success("Data updated", { duration: 2000 });
+    }
+    wasRefreshingRef.current = isRefreshing;
+  }, [isRefreshing]);
 
   // Auto-scroll table to latest data
   useEffect(() => {

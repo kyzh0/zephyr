@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 
 import { getWindDirectionFromBearing } from "@/lib/utils";
@@ -237,6 +237,7 @@ export function useStationMarkers({
   const markersRef = useRef<StationMarker[]>([]);
   const lastRefreshRef = useRef(0);
   const unitRef = useRef<WindUnit>(unit);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     unitRef.current = unit;
@@ -337,6 +338,7 @@ export function useStationMarkers({
     if (timestamp - lastRefreshRef.current < REFRESH_INTERVAL_MS) return;
 
     lastRefreshRef.current = timestamp;
+    setIsRefreshing(true);
 
     // Find newest marker timestamp
     const newestTimestamp = Math.max(
@@ -376,6 +378,7 @@ export function useStationMarkers({
       updatedIds.push(item.marker.id);
     }
 
+    setIsRefreshing(false);
     onRefresh?.(updatedIds);
   }, [checkMissedUpdates, updateStationMarker, onRefresh]);
 
@@ -550,10 +553,22 @@ export function useStationMarkers({
     if (isMapLoaded) void initialize();
   }, [isMapLoaded, initialize]);
 
+  // Auto-refresh every minute
+  useEffect(() => {
+    if (!isMapLoaded) return;
+
+    const intervalId = setInterval(() => {
+      void refresh();
+    }, REFRESH_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [isMapLoaded, refresh]);
+
   return {
     markers: markersRef,
     refresh,
     renderHistoricalData,
     renderCurrentData,
+    isRefreshing,
   };
 }
