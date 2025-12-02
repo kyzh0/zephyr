@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { formatInTimeZone } from "date-fns-tz";
 import { ArrowLeft } from "lucide-react";
 
-import { getStationTypeName } from "@/lib/utils";
+import { getMinutesAgo, getStationTypeName } from "@/lib/utils";
 import {
   useStationData,
   useMousePosition,
@@ -41,9 +41,6 @@ export default function Station() {
   const mouseCoords = useMousePosition();
 
   const [hoveringOnInfoIcon, setHoveringOnInfoIcon] = useState(false);
-  const [secondsSinceUpdate, setSecondsSinceUpdate] = useState<number | null>(
-    null
-  );
 
   const tableRef = useRef<HTMLTableRowElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,22 +59,6 @@ export default function Station() {
     }
   }, [data]);
 
-  // Update seconds since last update
-  useEffect(() => {
-    if (!station?.lastUpdate) return;
-
-    const updateSeconds = () => {
-      const seconds = Math.floor(
-        (Date.now() - new Date(station.lastUpdate).getTime()) / 1000
-      );
-      setSecondsSinceUpdate(seconds);
-    };
-
-    updateSeconds();
-    const interval = setInterval(updateSeconds, 1000);
-    return () => clearInterval(interval);
-  }, [station?.lastUpdate]);
-
   // Shared header content
   const headerContent = station ? (
     <div className="flex flex-col items-center">
@@ -86,7 +67,9 @@ export default function Station() {
       </span>
       <span className="text-muted-foreground text-[10px] sm:text-sm font-normal">
         Elevation {station.elevation}m • Updated{" "}
-        {secondsSinceUpdate !== null ? `${secondsSinceUpdate}s ago` : "..."}
+        {station.lastUpdate
+          ? `${getMinutesAgo(new Date(station.lastUpdate))}`
+          : ""}
       </span>
     </div>
   ) : (
@@ -165,12 +148,10 @@ export default function Station() {
               />
             </div>
             <WindSpeedChart data={data} />
-            <div className="overflow-x-auto">
-              <WindDirectionChart
-                data={data}
-                bearingPairCount={bearingPairCount}
-              />
-            </div>
+            <WindDirectionChart
+              data={data}
+              bearingPairCount={bearingPairCount}
+            />
           </div>
         ) : (
           <Skeleton width="100%" height={400} className="mt-4" />
@@ -189,6 +170,9 @@ export default function Station() {
               "Pacific/Auckland",
               "HH:mm"
             )}
+            {" ("}
+            {getMinutesAgo(new Date(station.lastUpdate))}
+            {")"}
           </p>
           <a
             href={station.externalLink}

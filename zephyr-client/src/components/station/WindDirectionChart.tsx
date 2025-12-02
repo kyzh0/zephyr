@@ -44,7 +44,7 @@ export function WindDirectionChart({
   bearingPairCount,
 }: WindDirectionChartProps) {
   return (
-    <div className="h-[20vh] min-h-[120px] min-w-[650px]">
+    <div className="h-[20vh] min-h-[120px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
