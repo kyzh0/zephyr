@@ -89,6 +89,7 @@ export default function Map() {
       map,
       isMapLoaded: isLoaded,
       isVisible: showSoundings,
+      isHistoricData: historyOffset < 0,
     });
 
   // Handle webcam toggle

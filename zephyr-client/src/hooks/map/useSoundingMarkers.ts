@@ -12,12 +12,14 @@ interface UseSoundingMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
   isMapLoaded: boolean;
   isVisible: boolean;
+  isHistoricData: boolean;
 }
 
 export function useSoundingMarkers({
   map,
   isMapLoaded,
   isVisible,
+  isHistoricData,
 }: UseSoundingMarkersOptions) {
   const navigate = useNavigate();
   const markersRef = useRef<HTMLDivElement[]>([]);
@@ -106,6 +108,7 @@ export function useSoundingMarkers({
 
   // Refresh soundings
   const refresh = useCallback(async () => {
+    if (isHistoricData) return;
     if (document.visibilityState !== "visible") return;
     if (!isVisibleRef.current) return;
     if (!markersRef.current.length) return;
@@ -154,7 +157,7 @@ export function useSoundingMarkers({
         }
       }
     }
-  }, []);
+  }, [isHistoricData]);
 
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {
