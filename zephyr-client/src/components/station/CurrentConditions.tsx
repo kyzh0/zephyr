@@ -27,7 +27,7 @@ export function CurrentConditions({
   }
 
   return (
-    <div className="flex w-full items-center justify-center gap-2 sm:gap-4 overflow-x-auto p-0.5 pb-1 sm:p-2 sm:pb-3">
+    <div className="flex w-full items-center justify-center gap-2 sm:gap-4 overflow-x-auto p-0.5 pb-1 sm:p-2 sm:pb-3 flex-grow">
       {station.currentBearing != null &&
         (station.currentAverage != null || station.currentGust != null) && (
           <WindCompass

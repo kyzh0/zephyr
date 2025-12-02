@@ -165,3 +165,8 @@
   width: 30px;
   height: 30px;
 }
+
+/* Webcam and sounding overlays */
+.webcam {
+  z-index: 10;
+}

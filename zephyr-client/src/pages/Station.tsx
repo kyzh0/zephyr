@@ -122,7 +122,7 @@ export default function Station() {
       {/* Data table and charts */}
       {station ? (
         station.isOffline ? null : data.length > 0 && tableData.length > 0 ? (
-          <div className="mt-2 sm:mt-4 space-y-2 sm:space-y-4">
+          <div className="mt-2 sm:mt-4 space-y-2 sm:space-y-4 flex-grow">
             <div className="flex flex-row items-center justify-end mb-1 sm:mb-2 text-xs sm:text-sm text-muted-foreground gap-2 sm:gap-4">
               Showing data for last{" "}
               <Tabs
@@ -225,7 +225,7 @@ export default function Station() {
         {/* Body */}
         <div
           ref={containerRef}
-          className="flex-1 overflow-y-auto px-2 sm:px-4 py-2 sm:py-4"
+          className="flex-1 overflow-y-auto px-2 sm:px-4 py-2 sm:py-4 flex flex-col justify-between gap-2 sm:gap-4"
           onClick={() => setHoveringOnInfoIcon(false)}
         >
           {bodyContent}
