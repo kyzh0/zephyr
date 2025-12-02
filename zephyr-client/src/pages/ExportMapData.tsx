@@ -325,7 +325,7 @@ export default function ExportMapData() {
                   min={10}
                   max={100}
                   step={10}
-                  value={[field.value]}
+                  value={[field.value ?? 50]}
                   onValueChange={(v) => field.onChange(v[0])}
                 />
               </FormControl>
