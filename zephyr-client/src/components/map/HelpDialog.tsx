@@ -55,7 +55,8 @@ export function HelpDialog({
             <Button
               variant="link"
               onClick={() => setSignInOpen(true)}
-              className="text-xs text-transparent hover:text-transparent cursor-default select-none"
+              className="text-xs text-transparent hover:text-transparent cursor-default select-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              tabIndex={-1}
             >
               admin
             </Button>

@@ -81,6 +81,7 @@ export function HistorySlider({
             size="sm"
             onClick={handleToggle}
             disabled={disabled}
+            className="h-9 w-9"
           >
             <History className="h-4 w-4 opacity-70" />
           </Button>

@@ -69,6 +69,7 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={() => setHelpOpen(true)}
+              className="h-9 w-9"
             >
               <HelpCircle className="h-4 w-4" />
             </Button>
@@ -82,6 +83,7 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={() => setDonateOpen(true)}
+              className="h-9 w-9"
             >
               <HandHelping className="h-4 w-4 opacity-70" />
             </Button>
@@ -96,6 +98,7 @@ export function MapControlButtons({
               size="sm"
               onClick={() => setGridOpen(true)}
               disabled={isHistoricData}
+              className="h-9 w-9"
             >
               <Grid3X3 className="h-4 w-4 opacity-70" />
             </Button>
@@ -110,7 +113,7 @@ export function MapControlButtons({
               size="sm"
               onClick={onWebcamClick}
               disabled={isHistoricData}
-              className="bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+              className="h-9 w-9 bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
             >
               <Cctv className="h-4 w-4 opacity-70" />
             </Toggle>
@@ -124,7 +127,7 @@ export function MapControlButtons({
               size="sm"
               onClick={onSoundingClick}
               disabled={isHistoricData}
-              className="bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+              className="h-9 w-9 bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
             >
               <TrendingUp className="h-4 w-4 opacity-70" />
             </Toggle>
@@ -145,7 +148,7 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={onUnitToggle}
-              className="text-xs font-semibold bg-background min-w-10"
+              className="h-9 w-9 text-xs font-semibold bg-background"
             >
               {unit === "kt" ? "kt" : "km/h"}
             </Toggle>
@@ -158,7 +161,7 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={onLayerToggle}
-              className="text-xs font-semibold bg-background min-w-10"
+              className="h-9 w-9 text-xs font-semibold bg-background"
             >
               <Layers className="h-4 w-4 opacity-70" />
             </Toggle>
@@ -171,7 +174,7 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={onLocateClick}
-              className=" min-w-10"
+              className="h-9 w-9"
             >
               <LocateFixed className="h-4 w-4 opacity-70" />
             </Button>

@@ -53,7 +53,7 @@ export function ElevationSlider({
             size="sm"
             onClick={handleExpand}
             disabled={disabled}
-            className={isFilterActive ? "border-blue-500" : ""}
+            className={isFilterActive ? "border-blue-500 h-9 w-9" : "h-9 w-9"}
           >
             <Mountain
               className={`h-4 w-4 ${
