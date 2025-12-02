@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   HelpCircle,
   Grid3X3,
@@ -7,6 +8,7 @@ import {
   HandHelping,
   Cctv,
   LocateFixed,
+  History,
 } from "lucide-react";
 import { DonateDialog } from "./DonateDialog";
 import { HelpDialog, WELCOME_STORAGE_KEY } from "./HelpDialog";
@@ -21,6 +23,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  getRecentStations,
+  RECENT_STATIONS_UPDATED_EVENT,
+  type RecentStation,
+} from "@/services/recentStations.service";
 
 interface MapControlButtonsProps {
   onWebcamClick: () => void;
@@ -53,11 +60,45 @@ export function MapControlButtons({
   onToggleElevation,
   onElevationChange,
 }: MapControlButtonsProps) {
+  const navigate = useNavigate();
   const [donateOpen, setDonateOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(
     localStorage.getItem(WELCOME_STORAGE_KEY) !== "true"
   );
   const [gridOpen, setGridOpen] = useState(false);
+  const [recentStations, setRecentStations] = useState<RecentStation[]>([]);
+
+  // Load recent stations on mount and when localStorage changes
+  useEffect(() => {
+    const loadRecentStations = () => {
+      setRecentStations(getRecentStations());
+    };
+
+    loadRecentStations();
+
+    // Listen for storage changes (in case another tab updates)
+    window.addEventListener("storage", loadRecentStations);
+
+    // Listen for custom event when recent stations are updated
+    window.addEventListener(RECENT_STATIONS_UPDATED_EVENT, loadRecentStations);
+
+    // Also refresh when the component becomes visible again
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadRecentStations();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("storage", loadRecentStations);
+      window.removeEventListener(
+        RECENT_STATIONS_UPDATED_EVENT,
+        loadRecentStations
+      );
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   return (
     <>
@@ -188,6 +229,38 @@ export function MapControlButtons({
           onElevationChange={onElevationChange}
         />
       </div>
+
+      {/* Bottom left - Recent Stations */}
+      {recentStations.length > 0 && (
+        <div className="absolute bottom-2.5 left-2.5 z-50">
+          <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-[200px]">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1">
+              <History className="h-3 w-3" />
+              <span>Recent Stations</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              {recentStations.map((station) => {
+                const displayName =
+                  station.name.length > 14
+                    ? `${station.name.slice(0, 7)}...${station.name.slice(-5)}`
+                    : station.name;
+                return (
+                  <Button
+                    key={station.id}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/stations/${station.id}`)}
+                    className="h-7 justify-start text-xs font-normal px-2 truncate"
+                    title={station.name}
+                  >
+                    {displayName}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { addRecentStation } from "@/services/recentStations.service";
 
 export default function Station() {
   const { id } = useParams<{ id: string }>();
@@ -58,6 +59,13 @@ export default function Station() {
       containerRef.current.scroll(0, 0);
     }
   }, [data]);
+
+  // Track recently viewed station
+  useEffect(() => {
+    if (station && id) {
+      addRecentStation(id, station.name);
+    }
+  }, [station, id]);
 
   // Shared header content
   const headerContent = station ? (

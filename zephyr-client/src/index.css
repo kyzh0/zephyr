@@ -170,3 +170,7 @@
 .webcam {
   z-index: 10;
 }
+
+.mapboxgl-ctrl-logo {
+    display: none !important;
+}
