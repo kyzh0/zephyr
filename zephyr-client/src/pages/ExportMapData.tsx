@@ -38,6 +38,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { toast } from "sonner";
 
 const DEFAULT_LON = 172.5;
 const DEFAULT_LAT = -42;
@@ -288,10 +289,13 @@ export default function ExportMapData() {
       a.href = url;
       a.target = "_blank";
       a.click();
+      toast.success("Export started. Check your downloads.");
+      handleClose();
     } catch (error) {
       setLoading(false);
       console.error(error);
       setErrorMsg("Something went wrong");
+      toast.error("Something went wrong");
     }
   }
 
