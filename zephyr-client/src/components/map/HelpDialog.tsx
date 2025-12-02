@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Cctv, Grid3X3, Mountain, TrendingUp, Mail } from "lucide-react";
 
 import {
@@ -30,6 +31,7 @@ export function HelpDialog({
   open: controlledOpen,
   onOpenChange,
 }: HelpDialogProps) {
+  const navigate = useNavigate();
   const [internalOpen, setInternalOpen] = useState(shouldShowWelcome);
   const [dontShowAgain, setDontShowAgain] = useState(true);
   const [signInOpen, setSignInOpen] = useState(false);
@@ -50,13 +52,13 @@ export function HelpDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="text-center sm:text-center">
           <div className="flex justify-between items-start">
-            <button
-              type="button"
+            <Button
+              variant="link"
               onClick={() => setSignInOpen(true)}
               className="text-xs text-transparent hover:text-transparent cursor-default select-none"
             >
               admin
-            </button>
+            </Button>
           </div>
           <div className="flex justify-center mb-2">
             <img src="/logo192.png" className="w-16 h-16" alt="Zephyr Logo" />
@@ -122,10 +124,10 @@ export function HelpDialog({
         </div>
 
         {/* Contact link */}
-        <div className="pt-4 border-t">
+        <div className="pt-4 border-t flex flex-col justify-between items-stretch">
           <Button
             variant="outline"
-            className="w-full"
+            className="flex-1 ml-4"
             onClick={() => setContactOpen(true)}
           >
             <Mail className="h-4 w-4 mr-2" />
@@ -147,6 +149,16 @@ export function HelpDialog({
             >
               Don't show again on startup
             </Label>
+            <Button
+              variant="link"
+              className="text-xs text-muted-foreground cursor-pointer"
+              onClick={() => {
+                handleOpenChange(false);
+                navigate("/export-map-data");
+              }}
+            >
+              Export Data
+            </Button>
           </div>
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
             Close

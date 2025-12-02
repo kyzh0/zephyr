@@ -5,6 +5,7 @@ import MapWrapper from "./pages/MapWrapper";
 import Station from "./pages/Station";
 import Webcam from "./pages/Webcam";
 import Sounding from "./pages/Sounding";
+import ExportMapData from "./pages/ExportMapData";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAddStation from "./pages/AdminAddStation";
 import AdminAddWebcam from "./pages/AdminAddWebcam";
@@ -40,6 +41,10 @@ export const router = createBrowserRouter([
           {
             path: "soundings/:id",
             element: <Sounding />,
+          },
+          {
+            path: "export-map-data",
+            element: <ExportMapData />,
           },
         ],
       },
