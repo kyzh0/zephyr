@@ -1,0 +1,83 @@
+name: "Deploy Application"
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  configure-deployment:
+    name: Check for changes and set environment
+    runs-on: ubuntu-latest
+    outputs:
+      backend_changed: ${{ steps.configure-deployment.outputs.backend_changed }}
+      frontend_changed: ${{ steps.configure-deployment.outputs.frontend_changed }}
+      environment: ${{ steps.configure-deployment.outputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Configure deployment
+        id: configure-deployment
+        uses: ./.github/actions/configure-deployment
+
+  build-and-deploy-client:
+    name: "Build and deploy client"
+    needs: configure-deployment
+    if: needs.configure-deployment.outputs.frontend_changed == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.configure-deployment.outputs.environment }}
+    defaults:
+      run:
+        working-directory: "client"
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+
+      - name: Create .env file
+        run: |
+          echo "VITE_MAPBOX_GL_KEY=${{ secrets.MAPBOX_GL_KEY }}" >> .env
+          echo "VITE_MAPBOX_GL_KEY_BACKUP=${{ secrets.MAPBOX_GL_KEY_BACKUP }}" >> .env
+          echo "VITE_EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}" >> .env
+          echo "VITE_EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}" >> .env
+          echo "VITE_EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}" >> .env
+          echo "VITE_DONATION_BANK_ACCOUNT=${{ env.DONATION_BANK_ACCOUNT }}" >> .env
+          echo "VITE_API_PREFIX=${{ env.API_PREFIX }}" >> .env
+          echo "VITE_FILE_SERVER_PREFIX=${{ env.FILE_SERVER_PREFIX }}" >> .env
+
+      - name: Build client
+        run: |
+          # npm i
+          # npm run build
+          mkdir dist
+          touch ./dist/test.txt
+
+      - name: Deploy client
+        if: github.event_name == 'push'
+        uses: easingthemes/ssh-deploy@v5.1.0
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SOURCE: "client/dist/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: ${{ secrets.REMOTE_TARGET }}
+          EXCLUDE: "/dist/, /node_modules/"
+          SCRIPT_BEFORE: ls
+          SCRIPT_BEFORE_REQUIRED: true
+          SCRIPT_AFTER: |
+            # todo: clear volume files
+            docker container create --name temp -v zephyr_caddy_srv:/data busybox
+            docker cp ./dist/. temp:/data
+            docker rm temp
+          SCRIPT_AFTER_REQUIRED: true

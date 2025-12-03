@@ -1,0 +1,48 @@
+name: "Configure Deployment"
+description: "Check for changes and set environment"
+
+outputs:
+  backend_changed:
+    description: "Is backend changed?"
+    value: ${{ steps.changes.outputs.backend_changed }}
+  frontend_changed:
+    description: "Is frontend changed?"
+    value: ${{ steps.changes.outputs.frontend_changed }}
+  environment:
+    description: "environment to deploy to"
+    value: ${{ steps.environment.outputs.environment }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check for changes
+      id: changes
+      run: |
+        backend_changed=false
+        frontend_changed=false
+
+        git diff --quiet HEAD^ HEAD server/ || backend_changed=true
+        git diff --quiet HEAD^ HEAD client/ || frontend_changed=true
+
+        echo "backend_changed=$backend_changed" >> $GITHUB_OUTPUT
+        echo "frontend_changed=$frontend_changed" >> $GITHUB_OUTPUT
+      shell: bash
+    - name: Set environment
+      id: environment
+      run: |
+        BRANCH_NAME=""
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          BRANCH_NAME=${{ github.base_ref }}
+        else
+          BRANCH_NAME=${{ github.ref }}
+        fi
+                
+        if [[ "$BRANCH_NAME" == "main" || "$BRANCH_NAME" == "refs/heads/main" ]]; then
+          echo "environment=production" >> $GITHUB_OUTPUT
+        elif [[ "$BRANCH_NAME" == "develop" || "$BRANCH_NAME" == "refs/heads/develop" ]]; then
+          echo "environment=staging" >> $GITHUB_OUTPUT
+        else 
+          echo "Unknown branch name: $BRANCH_NAME"
+          exit 1
+        fi
+      shell: bash
