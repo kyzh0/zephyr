@@ -8,7 +8,7 @@ export async function runScraper(highResolution) {
     query.isHighResolution = true;
   }
 
-  const stations = await Station.find(query);
+  const stations = await Station.find(query).lean();
   if (!stations.length) {
     logger.error('No stations found.', {
       service: 'station'
