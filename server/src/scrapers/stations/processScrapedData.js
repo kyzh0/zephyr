@@ -1,5 +1,6 @@
 import { getFlooredTime } from '../../lib/utils.js';
 import { validateStationData } from '../../validators/stationValidator.js';
+import { Station } from '../../models/stationModel.js';
 import { StationData } from '../../models/stationDataModel.js';
 import logger from '../../lib/logger.js';
 
@@ -55,7 +56,18 @@ export default async function processScrapedData(
   ) {
     station.isError = false;
   }
-  await station.save();
+  await Station.updateOne(
+    { _id: station._id },
+    {
+      lastUpdate: station.lastUpdate,
+      currentAverage: station.currentAverage,
+      currentGust: station.currentGust,
+      currentBearing: station.currentBearing,
+      currentTemperature: station.currentTemperature,
+      isOffline: station.isOffline,
+      isError: station.isError
+    }
+  );
 
   if (!suppressLog) {
     logger.info(
