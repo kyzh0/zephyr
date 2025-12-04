@@ -21,6 +21,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DirectionArrow } from "../ui/DirectionArrow";
 
 interface StationWithDistance extends IStation {
   distance?: number;
@@ -62,12 +63,13 @@ export function GridViewDialog({ open, onOpenChange }: GridViewDialogProps) {
               (station) =>
                 ({
                   ...station,
-                  distance: getDistance(
-                    pos.coords.latitude,
-                    pos.coords.longitude,
-                    station.location.coordinates[1],
-                    station.location.coordinates[0]
-                  ),
+                  distance:
+                    getDistance(
+                      pos.coords.latitude,
+                      pos.coords.longitude,
+                      station.location.coordinates[1],
+                      station.location.coordinates[0]
+                    ) / 1000, // convert to km,
                 } as StationWithDistance)
             )
           );
@@ -176,11 +178,30 @@ export function GridViewDialog({ open, onOpenChange }: GridViewDialogProps) {
                         ? "-"
                         : convertWindSpeed(s.currentGust, unit)}
                     </p>
-                    <p className="text-sm">
-                      {getWindDirectionFromBearing(s.currentBearing ?? -1)}
-                    </p>
+                    <div className="flex justify-center gap-2">
+                      {s.currentBearing == null ? (
+                        "-"
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          <DirectionArrow
+                            className="h-4 w-4"
+                            style={{
+                              transform: `rotate(${Math.round(
+                                180 + s.currentBearing
+                              )}deg)`,
+                            }}
+                          />
+                        </div>
+                      )}
+                      <p className="text-sm">
+                        {getWindDirectionFromBearing(s.currentBearing ?? -1)}
+                      </p>
+                    </div>
                     <p className="text-xs text-muted-foreground">
-                      {s.distance} km
+                      {s.distance?.toLocaleString(undefined, {
+                        maximumFractionDigits: 0,
+                      })}{" "}
+                      km away
                     </p>
                   </button>
                 );
