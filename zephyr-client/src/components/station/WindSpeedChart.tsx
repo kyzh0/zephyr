@@ -17,7 +17,7 @@ interface WindSpeedChartProps {
 
 const chartStyle = {
   fontSize: "12px",
-  fontWeight: 400,
+  fontWeight: 200,
   fontFamily: "Arial",
 };
 

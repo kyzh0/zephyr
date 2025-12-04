@@ -211,7 +211,7 @@ export const getMinutesAgo = (date: Date): string => {
   const diff = new Date().getTime() - date.getTime();
   const minutes = Math.floor(diff / (1000 * 60));
   if (minutes < 1) {
-    return "less than a min ago";
+    return "just now";
   } else if (minutes === 1) {
     return "1 minute ago";
   } else {

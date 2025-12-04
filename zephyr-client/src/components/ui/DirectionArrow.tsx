@@ -4,21 +4,19 @@ interface DirectionArrowProps {
 }
 
 /**
- * Simple directional arrow SVG - replaces arrow.png
+ * Simple directional arrow SVG
  * Points upward by default, rotate to show wind direction
+ * Uses the same arrow shape as WindCompass
  */
 export function DirectionArrow({ className, style }: DirectionArrowProps) {
   return (
     <svg
-      viewBox="0 0 24 24"
+      viewBox="-7 -20 14 25"
       className={className}
       style={style}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        d="M12 2 L4 14 L10 14 L10 22 L14 22 L14 14 L20 14 Z"
-        fill="currentColor"
-      />
+      <polygon points="0,-20 7,5 0,0 -7,5" fill="currentColor" />
     </svg>
   );
 }

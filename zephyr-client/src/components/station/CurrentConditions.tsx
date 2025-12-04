@@ -1,7 +1,7 @@
+import { useRef, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { getWindColor } from "@/lib/utils";
 import type { IStation } from "@/models/station.model";
-import { useIsMobile } from "@/hooks";
 import { WindCompass } from "./WindCompass";
 import { convertWindSpeed, formatTemperature, getUnit } from "./utils";
 
@@ -20,20 +20,43 @@ export function CurrentConditions({
   onInfoIconHover,
 }: CurrentConditionsProps) {
   const unit = getUnit();
-  const isMobile = useIsMobile();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setContainerSize({ width, height });
+        console.log("Container size:", width, height);
+      }
+    });
+
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, []);
 
   if (station.isOffline) {
     return <p className="mt-2 text-center text-red-500">Station is offline.</p>;
   }
 
   return (
-    <div className="flex w-full items-center justify-center gap-2 sm:gap-4 overflow-x-auto p-0.5 pb-1 sm:p-2 sm:pb-3 flex-grow">
+    <div
+      ref={containerRef}
+      className="flex w-full items-center justify-center gap-2 sm:gap-4 overflow-x-auto flex-grow"
+    >
       {station.currentBearing != null &&
         (station.currentAverage != null || station.currentGust != null) && (
           <WindCompass
             bearing={station.currentBearing}
             validBearings={station.validBearings}
-            isMobile={isMobile}
+            containerSize={containerSize}
           />
         )}
 

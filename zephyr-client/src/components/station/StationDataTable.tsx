@@ -18,7 +18,7 @@ export const StationDataTable = function StationDataTable({
   const unit = getUnit();
 
   return (
-    <div className="overflow-x-auto rounded-lg border bg-white min-h-[122px] sm:min-h-0">
+    <div className="overflow-x-auto rounded-lg border bg-white sm:min-h-0">
       <table className="min-w-[650px] text-sm">
         <tbody>
           {/* Time row */}
@@ -40,7 +40,7 @@ export const StationDataTable = function StationDataTable({
 
           {/* Average row */}
           <tr>
-            <th className="sticky left-0 bg-white text-left text-xs sm:text-sm py-0 pl-0.5 pr-0 sm:p-0.5">
+            <th className="sticky left-0 bg-white text-left text-xs sm:text-sm py-0 pl-0.5 pr-0.5 sm:p-0.8">
               Avg
             </th>
             {tableData.map((d) => (
@@ -58,7 +58,7 @@ export const StationDataTable = function StationDataTable({
 
           {/* Gust row */}
           <tr>
-            <th className="sticky left-0 bg-white text-left text-xs sm:text-sm py-0 pl-0.5 pr-0 sm:p-0.5">
+            <th className="sticky left-0 bg-white text-left text-xs sm:text-sm py-0 pl-0.5 pr-0.5 sm:p-0.8">
               Gust
             </th>
             {tableData.map((d) => (
@@ -92,7 +92,7 @@ export const StationDataTable = function StationDataTable({
 
           {/* Direction arrow row */}
           <tr>
-            <th className="sticky left-0 bg-white" />
+            <th className="sticky left-0 bg-white z-10" />
             {tableData.map((d) => (
               <td
                 key={String(d.time)}

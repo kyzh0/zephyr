@@ -113,7 +113,7 @@ export default function Station() {
       {/* Data table and charts */}
       {station ? (
         station.isOffline ? null : data.length > 0 && tableData.length > 0 ? (
-          <div className="mt-2 sm:mt-4 space-y-2 sm:space-y-4 flex-grow">
+          <div className="space-y-2 sm:space-y-4">
             <div className="flex flex-row items-center justify-end mb-1 sm:mb-2 text-xs sm:text-sm text-muted-foreground gap-2 sm:gap-4">
               Showing data for last{" "}
               <Tabs
@@ -170,7 +170,7 @@ export default function Station() {
 
       {/* Footer */}
       {station && (
-        <div className="mt-2 sm:mt-4 flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <p className="text-xs sm:text-sm text-muted-foreground">
             Updated{" "}
             {formatInTimeZone(
@@ -200,7 +200,7 @@ export default function Station() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-background p-4">
+        <div className="sticky top-0 z-10 bg-background p-4 pb-0">
           <div className="flex items-center gap-2 sm:gap-3">
             <Button
               variant="ghost"
