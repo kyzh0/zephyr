@@ -41,13 +41,15 @@ export function CurrentConditions({
         <table className="w-[150px] sm:w-[180px]">
           <tbody>
             <tr>
-              <td className="p-0 text-center text-[9px] sm:text-[10px]">Avg</td>
-              <td className="p-0 text-center text-[9px] sm:text-[10px]">
+              <td className="p-0 text-center text-muted-foreground text-xs sm:text-sm">
+                Avg
+              </td>
+              <td className="p-0 text-center text-muted-foreground text-xs sm:text-sm">
                 Gust
               </td>
-              <td className="p-0 text-center text-[9px] sm:text-[10px]" />
+              <td className="p-0 text-center text-muted-foreground text-xs sm:text-sm" />
             </tr>
-            <tr>
+            <tr className="h-12 sm:h-15">
               <td
                 className="text-center p-0 sm:p-1 text-base sm:text-2xl"
                 style={{
@@ -64,7 +66,7 @@ export function CurrentConditions({
               >
                 {convertWindSpeed(station.currentGust, unit) ?? "-"}
               </td>
-              <td className="p-0 text-center text-xs sm:text-base">
+              <td className="p-0 text-center text-sm sm:text-base">
                 {formatTemperature(station.currentTemperature)}
               </td>
               {station.popupMessage && (
@@ -86,7 +88,7 @@ export function CurrentConditions({
               )}
             </tr>
             <tr>
-              <td colSpan={2} className="text-center text-[9px] sm:text-[10px]">
+              <td colSpan={2} className="text-center text-xs sm:text-sm">
                 {unit === "kt" ? "kt" : "km/h"}
               </td>
               <td />

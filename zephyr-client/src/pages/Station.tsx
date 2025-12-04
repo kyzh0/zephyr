@@ -73,7 +73,7 @@ export default function Station() {
       <span className="text-base sm:text-xl font-semibold leading-tight">
         {station.name}
       </span>
-      <span className="text-muted-foreground text-[10px] sm:text-sm font-normal">
+      <span className="text-muted-foreground text-xs sm:text-sm font-normal">
         Elevation {station.elevation}m • Updated{" "}
         {station.lastUpdate
           ? `${getMinutesAgo(new Date(station.lastUpdate))}`
@@ -171,7 +171,7 @@ export default function Station() {
       {/* Footer */}
       {station && (
         <div className="mt-2 sm:mt-4 flex items-center justify-between">
-          <p className="text-[10px] sm:text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Updated{" "}
             {formatInTimeZone(
               new Date(station.lastUpdate),
@@ -186,7 +186,7 @@ export default function Station() {
             href={station.externalLink}
             target="_blank"
             rel="noreferrer"
-            className="text-sm text-muted-foreground hover:underline"
+            className="text-xs sm:text-sm text-muted-foreground underline"
           >
             Source: {getStationTypeName(station.type)}
           </a>
@@ -200,7 +200,7 @@ export default function Station() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-background border-b px-2 sm:px-4 py-2 sm:py-3">
+        <div className="sticky top-0 z-10 bg-background p-4">
           <div className="flex items-center gap-2 sm:gap-3">
             <Button
               variant="ghost"

@@ -28,8 +28,9 @@ export const StationDataTable = function StationDataTable({
               <td
                 key={String(d.time)}
                 className={cn(
-                  "text-center px-0.5 py-0 sm:p-0.5 text-[10px] sm:text-xs",
-                  new Date(d.time).getMinutes() === 0 && "bg-gray-200"
+                  "text-center text-muted-foreground px-0.5 py-0 sm:p-0.5 text-xs sm:text-sm",
+                  new Date(d.time).getMinutes() === 0 &&
+                    "bg-gray-300 text-color-base"
                 )}
               >
                 {d.timeLabel}
@@ -79,7 +80,7 @@ export const StationDataTable = function StationDataTable({
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
-                className="text-center text-[10px] sm:text-xs p-0 sm:p-0.5"
+                className="text-center text-muted-foreground text-xs sm:text-sm p-0 sm:p-0.5"
               >
                 {d.windBearing == null ||
                 (d.windAverage == null && d.windGust == null)
@@ -113,7 +114,9 @@ export const StationDataTable = function StationDataTable({
                     <DirectionArrow
                       className="h-4 w-4"
                       style={{
-                        transform: `rotate(${Math.round(d.windBearing)}deg)`,
+                        transform: `rotate(${Math.round(
+                          180 + d.windBearing
+                        )}deg)`,
                       }}
                     />
                   </div>
@@ -128,7 +131,7 @@ export const StationDataTable = function StationDataTable({
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
-                className="text-center text-[10px] p-0 sm:p-0.5"
+                className="text-center text-muted-foreground text-xs sm:text-sm p-0 sm:p-0.5"
               >
                 {d.windBearing == null ||
                 (d.windAverage == null && d.windGust == null)
@@ -144,7 +147,7 @@ export const StationDataTable = function StationDataTable({
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
-                className="text-center text-[8px] sm:text-[10px] p-0 sm:p-0.5"
+                className="text-center text-muted-foreground text-xs sm:text-sm p-0 sm:p-0.5"
               >
                 {d.temperature == null
                   ? "-"

@@ -122,7 +122,7 @@ export function HistorySlider({
             </Button>
 
             <div className="text-center min-w-[140px]">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">
                 Snapshot
               </p>
               <p className="text-sm font-medium">
