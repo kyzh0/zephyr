@@ -34,7 +34,6 @@ export function CurrentConditions({
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
         setContainerSize({ width, height });
-        console.log("Container size:", width, height);
       }
     });
 
@@ -49,7 +48,7 @@ export function CurrentConditions({
   return (
     <div
       ref={containerRef}
-      className="flex w-full items-center justify-center gap-2 sm:gap-4 overflow-x-auto flex-grow"
+      className="flex w-full items-center justify-center gap-2 sm:gap-4 overflow-x-auto flex-grow min-h-[10vw]"
     >
       {station.currentBearing != null &&
         (station.currentAverage != null || station.currentGust != null) && (
