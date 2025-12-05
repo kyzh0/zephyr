@@ -10,8 +10,7 @@ import {
 import type { ICam } from "@/models/cam.model";
 import { getWebcamGeoJson } from "@/components/map";
 import { useNavigate } from "react-router-dom";
-
-const REFRESH_INTERVAL_SECONDS = 60;
+import { REFRESH_INTERVAL_MS } from "@/lib/utils";
 
 interface UseWebcamMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -105,7 +104,7 @@ export function useWebcamMarkers({
     const min = sorted[0];
     const secondMin = sorted[1];
 
-    if (secondMin - min <= 1.1 * REFRESH_INTERVAL_SECONDS * 1000) return null;
+    if (secondMin - min <= 1.1 * REFRESH_INTERVAL_MS) return null;
 
     const cams: ICam[] = [];
     const oldestMarkers = markersRef.current.filter(
@@ -155,8 +154,7 @@ export function useWebcamMarkers({
     if (!markersRef.current.length) return;
 
     let timestamp = Date.now();
-    if (timestamp - lastRefreshRef.current < REFRESH_INTERVAL_SECONDS * 1000)
-      return;
+    if (timestamp - lastRefreshRef.current < REFRESH_INTERVAL_MS) return;
 
     lastRefreshRef.current = timestamp;
 

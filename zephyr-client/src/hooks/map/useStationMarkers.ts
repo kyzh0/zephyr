@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 
-import { getWindDirectionFromBearing } from "@/lib/utils";
+import { getWindDirectionFromBearing, REFRESH_INTERVAL_MS } from "@/lib/utils";
 import {
   getStationById,
   listStations,
@@ -17,7 +17,6 @@ import {
 } from "@/components/map";
 import type { StationMarker, WindUnit } from "@/components/map";
 import {
-  REFRESH_INTERVAL_MS,
   extractStationProperties,
   formatMarkerText,
   getElevationDashArray,

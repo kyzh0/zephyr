@@ -5,8 +5,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { listSoundings } from "@/services/sounding.service";
 import { getSoundingGeoJson } from "@/components/map";
 import { useNavigate } from "react-router-dom";
-
-const REFRESH_INTERVAL_SECONDS = 60;
+import { REFRESH_INTERVAL_MS } from "@/lib/utils";
 
 interface UseSoundingMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -114,8 +113,7 @@ export function useSoundingMarkers({
     if (!markersRef.current.length) return;
 
     const timestamp = Date.now();
-    if (timestamp - lastRefreshRef.current < REFRESH_INTERVAL_SECONDS * 1000)
-      return;
+    if (timestamp - lastRefreshRef.current < REFRESH_INTERVAL_MS) return;
 
     // Check if not refreshed in 1h, or passing 30 min mark
     let nowMins = new Date().getUTCMinutes();

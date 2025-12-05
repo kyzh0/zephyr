@@ -5,8 +5,6 @@ const ELEVATION_THRESHOLDS = [250, 500, 750, 1000, 1250, 1500] as const;
 const ELEVATION_SEGMENT_SIZE = 30;
 const ELEVATION_ROTATION_OFFSET = 127;
 
-export const REFRESH_INTERVAL_MS = 60 * 1000;
-
 export interface StationProperties {
   dbId: string;
   name: string;

@@ -17,8 +17,7 @@ import {
   useSoundingMarkers,
 } from "@/hooks/map";
 import { toast } from "sonner";
-
-const REFRESH_INTERVAL_SECONDS = 60;
+import { REFRESH_INTERVAL_MS } from "@/lib/utils";
 
 /**
  * Calculate the snapshot time based on offset (in minutes from current time)
@@ -207,7 +206,7 @@ export default function Map() {
       } catch {
         clearInterval(interval);
       }
-    }, REFRESH_INTERVAL_SECONDS * 1000);
+    }, REFRESH_INTERVAL_MS);
 
     return () => clearInterval(interval);
   }, [
