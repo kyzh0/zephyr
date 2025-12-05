@@ -103,9 +103,12 @@ export default function Map() {
     }
 
     // ignore if iframe
+    /*
     if (window.self === window.top && !cookies.visited) {
+      console.log('Navigating to welcome page');
       navigate('welcome');
     }
+      */
 
     if (cookies.unit) {
       unitRef.current = cookies.unit === 'kt' ? 'kt' : 'kmh';

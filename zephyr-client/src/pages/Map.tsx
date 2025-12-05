@@ -1,0 +1,271 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Outlet } from "react-router-dom";
+import "mapbox-gl/dist/mapbox-gl.css";
+
+import { useAppContext } from "@/context/AppContext";
+import {
+  MapControlButtons,
+  getStoredValue,
+  setStoredValue,
+} from "@/components/map";
+import type { WindUnit } from "@/components/map";
+
+import {
+  useMapInstance,
+  useStationMarkers,
+  useWebcamMarkers,
+  useSoundingMarkers,
+} from "@/hooks/map";
+import { toast } from "sonner";
+import { REFRESH_INTERVAL_MS } from "@/lib/utils";
+
+/**
+ * Calculate the snapshot time based on offset (in minutes from current time)
+ * Rounds to nearest 30-minute mark
+ */
+function getSnapshotTime(offset: number): Date {
+  const now = new Date();
+  const minutesPast30 = now.getMinutes() % 30;
+  const roundedTime = new Date(
+    now.getTime() -
+      (minutesPast30 - offset) * 60 * 1000 -
+      now.getSeconds() * 1000 -
+      now.getMilliseconds()
+  );
+  return roundedTime;
+}
+
+export default function Map() {
+  const { setRefreshedStations, setRefreshedWebcams } = useAppContext();
+
+  // Map container ref
+  const mapContainer = useRef<HTMLDivElement>(null);
+
+  // UI state
+  const [showWebcams, setShowWebcams] = useState(false);
+  const [showSoundings, setShowSoundings] = useState(false);
+  const [showElevation, setShowElevation] = useState(false);
+  const [elevationFilter, setElevationFilter] = useState(0);
+  const [isSatellite, setIsSatellite] = useState(false);
+
+  // History state
+  const [historyOffset, setHistoryOffset] = useState(0);
+
+  // Unit state
+  const [unit, setUnit] = useState<WindUnit>(() =>
+    getStoredValue<WindUnit>("unit", "kmh")
+  );
+
+  // Initialize map
+  const { map, isLoaded, triggerGeolocate } = useMapInstance({
+    containerRef: mapContainer,
+  });
+
+  // Initialize station markers
+  const {
+    refresh: refreshStations,
+    renderHistoricalData,
+    renderCurrentData,
+  } = useStationMarkers({
+    map,
+    isMapLoaded: isLoaded,
+    unit,
+    onRefresh: setRefreshedStations,
+  });
+
+  // Initialize webcam markers
+  const { refresh: refreshWebcams, setVisibility: setWebcamVisibility } =
+    useWebcamMarkers({
+      map,
+      isMapLoaded: isLoaded,
+      isVisible: showWebcams,
+      onRefresh: setRefreshedWebcams,
+    });
+
+  // Initialize sounding markers
+  const { refresh: refreshSoundings, setVisibility: setSoundingVisibility } =
+    useSoundingMarkers({
+      map,
+      isMapLoaded: isLoaded,
+      isVisible: showSoundings,
+      isHistoricData: historyOffset < 0,
+    });
+
+  // Handle webcam toggle
+  const handleWebcamClick = useCallback(async () => {
+    if (showSoundings) {
+      setShowSoundings(false);
+      setSoundingVisibility(false);
+    }
+
+    const newValue = !showWebcams;
+    setShowWebcams(newValue);
+    setWebcamVisibility(newValue);
+    if (newValue) await refreshWebcams();
+  }, [
+    showWebcams,
+    showSoundings,
+    setWebcamVisibility,
+    setSoundingVisibility,
+    refreshWebcams,
+  ]);
+
+  // Handle sounding toggle
+  const handleSoundingClick = useCallback(async () => {
+    if (showWebcams) {
+      setShowWebcams(false);
+      setWebcamVisibility(false);
+    }
+
+    const newValue = !showSoundings;
+    setShowSoundings(newValue);
+    setSoundingVisibility(newValue);
+    if (newValue) await refreshSoundings();
+  }, [
+    showSoundings,
+    showWebcams,
+    setSoundingVisibility,
+    setWebcamVisibility,
+    refreshSoundings,
+  ]);
+
+  // Handle layer toggle (outdoors <-> satellite)
+  const handleLayerToggle = useCallback(() => {
+    if (!map.current) return;
+    const newValue = !isSatellite;
+    setIsSatellite(newValue);
+    map.current.setStyle(
+      newValue
+        ? "mapbox://styles/mapbox/satellite-streets-v11"
+        : "mapbox://styles/mapbox/outdoors-v11"
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSatellite, map.current]);
+
+  // Handle unit toggle
+  const handleUnitToggle = useCallback(() => {
+    const newUnit = unit === "kmh" ? "kt" : "kmh";
+    setUnit(newUnit);
+    setStoredValue("unit", newUnit);
+    toast.info(`Switched to ${newUnit === "kmh" ? "km/h" : "knots"}`);
+  }, [unit]);
+
+  // Handle history offset change
+  const handleHistoryChange = useCallback(
+    async (offset: number) => {
+      // If entering history mode, hide webcams and soundings
+      if (offset < 0 && historyOffset === 0) {
+        if (showWebcams) {
+          setShowWebcams(false);
+          setWebcamVisibility(false);
+        }
+        if (showSoundings) {
+          setShowSoundings(false);
+          setSoundingVisibility(false);
+        }
+      }
+
+      setHistoryOffset(offset);
+
+      if (offset < 0) {
+        // Render historical data
+        const snapshotTime = getSnapshotTime(offset);
+        if (renderHistoricalData) {
+          await renderHistoricalData(snapshotTime);
+        }
+      } else {
+        // Render current data
+        if (renderCurrentData) {
+          await renderCurrentData();
+        }
+      }
+    },
+    [
+      historyOffset,
+      showWebcams,
+      showSoundings,
+      setWebcamVisibility,
+      setSoundingVisibility,
+      renderHistoricalData,
+      renderCurrentData,
+    ]
+  );
+
+  // Check if in history mode
+  const isHistoricData = historyOffset < 0;
+
+  // Auto-refresh interval (disabled when in history mode)
+  useEffect(() => {
+    if (!isLoaded || isHistoricData) return;
+
+    const interval = setInterval(async () => {
+      try {
+        await refreshStations();
+        await refreshWebcams();
+        await refreshSoundings();
+      } catch {
+        clearInterval(interval);
+      }
+    }, REFRESH_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [
+    isLoaded,
+    isHistoricData,
+    refreshStations,
+    refreshWebcams,
+    refreshSoundings,
+  ]);
+
+  // Refresh on visibility change
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      await refreshStations();
+      await refreshWebcams();
+      await refreshSoundings();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [refreshStations, refreshWebcams, refreshSoundings]);
+
+  // Show/hide elevation borders
+  useEffect(() => {
+    const borders = document.querySelectorAll("svg.marker-border");
+    borders.forEach((b) => {
+      b.classList.toggle("hidden", !showElevation);
+    });
+  }, [showElevation]);
+
+  // Filter by elevation
+  useEffect(() => {
+    const markers = document.querySelectorAll("div.marker");
+    markers.forEach((m) => {
+      const elevation = Number(m.getAttribute("elevation"));
+      m.classList.toggle("hidden", elevation < elevationFilter);
+    });
+  }, [elevationFilter]);
+
+  return (
+    <div className="absolute top-0 left-0 h-dvh w-screen flex flex-col">
+      <MapControlButtons
+        onWebcamClick={handleWebcamClick}
+        onSoundingClick={handleSoundingClick}
+        onLayerToggle={handleLayerToggle}
+        onLocateClick={triggerGeolocate}
+        unit={unit}
+        onUnitToggle={handleUnitToggle}
+        historyOffset={historyOffset}
+        onHistoryChange={handleHistoryChange}
+        isHistoricData={isHistoricData}
+        showElevation={showElevation}
+        elevationFilter={elevationFilter}
+        onToggleElevation={() => setShowElevation(!showElevation)}
+        onElevationChange={setElevationFilter}
+      />
+
+      <div ref={mapContainer} className="w-full h-full" />
+      <Outlet />
+    </div>
+  );
+}
