@@ -249,6 +249,7 @@ export function useStationMarkers({
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
+        offset: [0, -15],
       }).setHTML(createPopupHtml(props, unitRef.current));
 
       const marker = createMarkerElement(
