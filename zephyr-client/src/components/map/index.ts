@@ -12,3 +12,4 @@ export { MapControlButtons } from "./MapControlButtons";
 export { ElevationControls } from "./ElevationControls";
 export { ElevationSlider } from "./ElevationSlider";
 export { HistorySlider } from "./HistorySlider";
+export { SearchBar } from "./SearchBar";

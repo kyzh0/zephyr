@@ -15,6 +15,7 @@ import { HelpDialog, WELCOME_STORAGE_KEY } from "./HelpDialog";
 import { GridViewDialog } from "./GridViewDialog";
 import { HistorySlider } from "./HistorySlider";
 import { ElevationSlider } from "./ElevationSlider";
+import { SearchBar } from "./SearchBar";
 import type { WindUnit } from "./map.types";
 import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,7 @@ export function MapControlButtons({
     <>
       {/* Top left - horizontal row */}
       <div className="flex flex-wrap gap-2 items-start absolute top-2.5 left-2.5 z-50">
+        <SearchBar />
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
