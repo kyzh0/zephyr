@@ -33,7 +33,7 @@ export default function Station() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  const [timeRange, setTimeRange] = useState<TimeRange>("12");
+  const [timeRange, setTimeRange] = useState<TimeRange>("6");
 
   const { station, data, tableData, bearingPairCount } = useStationData(
     id,
@@ -70,7 +70,7 @@ export default function Station() {
   // Shared header content
   const headerContent = station ? (
     <div className="flex flex-col items-center">
-      <span className="text-base sm:text-xl font-semibold leading-tight">
+      <span className="text-lg sm:text-xl font-semibold leading-tight">
         {station.name}
       </span>
       <span className="text-muted-foreground text-xs sm:text-sm font-normal">
@@ -113,48 +113,34 @@ export default function Station() {
       {/* Data table and charts */}
       {station ? (
         station.isOffline ? null : data.length > 0 && tableData.length > 0 ? (
-          <div className="space-y-2 sm:space-y-4">
-            <div className="flex flex-row items-center justify-end mb-1 sm:mb-2 text-xs sm:text-sm text-muted-foreground gap-2 sm:gap-4">
+          <div className="space-y-1 sm:space-y-4">
+            <div className="flex flex-row items-center justify-end text-xs sm:text-sm text-muted-foreground gap-2 sm:gap-4">
               Showing data for last{" "}
               <Tabs
                 value={timeRange}
                 onValueChange={(v) => setTimeRange(v as TimeRange)}
               >
                 <TabsList className="grid w-full grid-cols-4 h-7 sm:h-9">
-                  <TabsTrigger
-                    value="24"
-                    className="text-xs sm:text-sm px-2 sm:px-3"
-                  >
+                  <TabsTrigger value="24" className="text-xs sm:text-sm">
                     24h
                   </TabsTrigger>
-                  <TabsTrigger
-                    value="12"
-                    className="text-xs sm:text-sm px-2 sm:px-3"
-                  >
+                  <TabsTrigger value="12" className="text-xs sm:text-sm">
                     12h
                   </TabsTrigger>
-                  <TabsTrigger
-                    value="6"
-                    className="text-xs sm:text-sm px-2 sm:px-3"
-                  >
+                  <TabsTrigger value="6" className="text-xs sm:text-sm">
                     6h
                   </TabsTrigger>
-                  <TabsTrigger
-                    value="3"
-                    className="text-xs sm:text-sm px-2 sm:px-3"
-                  >
+                  <TabsTrigger value="3" className="text-xs sm:text-sm">
                     3h
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
-            <div className="overflow-x-auto">
-              <StationDataTable
-                ref={tableRef}
-                tableData={tableData}
-                validBearings={station.validBearings}
-              />
-            </div>
+            <StationDataTable
+              ref={tableRef}
+              tableData={tableData}
+              validBearings={station.validBearings}
+            />
             <WindSpeedChart data={data} />
             <WindDirectionChart
               data={data}

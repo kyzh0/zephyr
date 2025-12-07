@@ -48,7 +48,7 @@ export function CurrentConditions({
   return (
     <div
       ref={containerRef}
-      className="flex w-full items-center justify-center gap-2 sm:gap-4 overflow-x-auto flex-grow min-h-[10vw]"
+      className="flex w-full items-center justify-center gap-6 sm:gap-8 overflow-x-auto flex-grow min-h-[10vw]"
     >
       {station.currentBearing != null &&
         (station.currentAverage != null || station.currentGust != null) && (
@@ -58,66 +58,63 @@ export function CurrentConditions({
             containerSize={containerSize}
           />
         )}
-
-      <div className="ml-1 sm:ml-3">
-        <table className="w-[150px] sm:w-[180px]">
-          <tbody>
-            <tr>
-              <td className="p-0 text-center text-muted-foreground text-xs sm:text-sm">
-                Avg
-              </td>
-              <td className="p-0 text-center text-muted-foreground text-xs sm:text-sm">
-                Gust
-              </td>
-              <td className="p-0 text-center text-muted-foreground text-xs sm:text-sm" />
-            </tr>
-            <tr className="h-12 sm:h-15">
+      <table>
+        <tbody>
+          <tr>
+            <td className="p-0 text-center text-muted-foreground text-xs sm:text-sm px-2">
+              Avg
+            </td>
+            <td className="p-0 text-center text-muted-foreground text-xs sm:text-sm px-2">
+              Gust
+            </td>
+            <td className="p-0 text-center text-muted-foreground text-xs sm:text-sm px-2" />
+          </tr>
+          <tr className="h-15 sm:h-20">
+            <td
+              className="text-center p-0 sm:p-1 text-xl sm:text-2xl"
+              style={{
+                backgroundColor: getWindColor(station.currentAverage ?? null),
+              }}
+            >
+              {convertWindSpeed(station.currentAverage, unit) ?? "-"}
+            </td>
+            <td
+              className="text-center p-0 sm:p-1 text-xl sm:text-2xl"
+              style={{
+                backgroundColor: getWindColor(station.currentGust ?? null),
+              }}
+            >
+              {convertWindSpeed(station.currentGust, unit) ?? "-"}
+            </td>
+            <td className="p-0 text-center text-sm sm:text-base px-2">
+              {formatTemperature(station.currentTemperature)}
+            </td>
+            {station.popupMessage && (
               <td
-                className="text-center p-0 sm:p-1 text-base sm:text-2xl"
-                style={{
-                  backgroundColor: getWindColor(station.currentAverage ?? null),
-                }}
+                className="cursor-pointer p-0 pl-0.5 sm:pl-1"
+                onClick={onInfoIconClick}
+                onMouseOver={() => onInfoIconHover(true)}
+                onMouseOut={() => onInfoIconHover(false)}
               >
-                {convertWindSpeed(station.currentAverage, unit) ?? "-"}
+                <img
+                  src="/caution.png"
+                  className={cn(
+                    "transition-opacity w-6 h-6 sm:w-10 sm:h-10",
+                    hoveringOnInfoIcon ? "opacity-30" : "opacity-100"
+                  )}
+                  alt="Info"
+                />
               </td>
-              <td
-                className="text-center p-0 sm:p-1 text-base sm:text-2xl"
-                style={{
-                  backgroundColor: getWindColor(station.currentGust ?? null),
-                }}
-              >
-                {convertWindSpeed(station.currentGust, unit) ?? "-"}
-              </td>
-              <td className="p-0 text-center text-sm sm:text-base">
-                {formatTemperature(station.currentTemperature)}
-              </td>
-              {station.popupMessage && (
-                <td
-                  className="cursor-pointer p-0 pl-0.5 sm:pl-1"
-                  onClick={onInfoIconClick}
-                  onMouseOver={() => onInfoIconHover(true)}
-                  onMouseOut={() => onInfoIconHover(false)}
-                >
-                  <img
-                    src="/caution.png"
-                    className={cn(
-                      "transition-opacity w-6 h-6 sm:w-10 sm:h-10",
-                      hoveringOnInfoIcon ? "opacity-30" : "opacity-100"
-                    )}
-                    alt="Info"
-                  />
-                </td>
-              )}
-            </tr>
-            <tr>
-              <td colSpan={2} className="text-center text-xs sm:text-sm">
-                {unit === "kt" ? "kt" : "km/h"}
-              </td>
-              <td />
-            </tr>
-          </tbody>
-        </table>
-      </div>
+            )}
+          </tr>
+          <tr>
+            <td colSpan={2} className="text-center text-xs sm:text-sm">
+              {unit === "kt" ? "kt" : "km/h"}
+            </td>
+            <td />
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }
