@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
+import L from "leaflet";
 
 import { getWindDirectionFromBearing, REFRESH_INTERVAL_MS } from "@/lib/utils";
 import {
@@ -26,7 +26,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 interface UseStationMarkersOptions {
-  map: React.RefObject<mapboxgl.Map | null>;
+  map: React.RefObject<L.Map | null>;
   isMapLoaded: boolean;
   unit: WindUnit;
   onRefresh?: (updatedIds: string[]) => void;
@@ -103,8 +103,8 @@ function createMarkerElement(
   timestamp: number,
   unit: WindUnit,
   onNavigate: (dbId: string) => void,
-  onHover: (popup: mapboxgl.Popup, show: boolean) => void,
-  popup: mapboxgl.Popup
+  onHover: (popup: L.Popup, show: boolean) => void,
+  popup: L.Popup
 ): HTMLDivElement {
   const {
     dbId,
@@ -244,12 +244,17 @@ export function useStationMarkers({
 
   // Create a station marker with popup
   const createStationMarker = useCallback(
-    (props: StationProperties, timestamp: number): StationMarker => {
-      const popup = new mapboxgl.Popup({
+    (
+      props: StationProperties,
+      timestamp: number,
+      coordinates: [number, number]
+    ): StationMarker => {
+      const popup = L.popup({
         closeButton: false,
+        autoClose: false,
         closeOnClick: false,
         offset: [0, -15],
-      }).setHTML(createPopupHtml(props, unitRef.current));
+      }).setContent(createPopupHtml(props, unitRef.current));
 
       const marker = createMarkerElement(
         props,
@@ -260,13 +265,26 @@ export function useStationMarkers({
           void navigate(`/stations/${dbId}`);
         },
         (p, show) => {
-          if (show && map.current) p.addTo(map.current);
-          else p.remove();
+          if (show && map.current) {
+            p.setLatLng([coordinates[1], coordinates[0]]).openOn(map.current);
+          } else {
+            p.remove();
+          }
         },
         popup
       );
 
-      return { marker, popup };
+      // Create Leaflet marker with custom divIcon
+      const leafletMarker = L.marker([coordinates[1], coordinates[0]], {
+        icon: L.divIcon({
+          html: marker,
+          className: "leaflet-marker-icon",
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+        }),
+      });
+
+      return { marker, leafletMarker, popup };
     },
     [navigate, map]
   );
@@ -275,7 +293,7 @@ export function useStationMarkers({
   const updateStationMarker = useCallback(
     (item: StationMarker, props: StationProperties, timestamp: number) => {
       updateMarkerElement(item.marker, props, timestamp, unitRef.current);
-      item.popup.setHTML(createPopupHtml(props, unitRef.current));
+      item.popup.setContent(createPopupHtml(props, unitRef.current));
     },
     []
   );
@@ -319,13 +337,14 @@ export function useStationMarkers({
 
     for (const feature of geoJson.features) {
       const props = extractStationProperties(feature.properties);
-      const { marker, popup } = createStationMarker(props, timestamp);
+      const { marker, leafletMarker, popup } = createStationMarker(
+        props,
+        timestamp,
+        feature.geometry.coordinates
+      );
 
-      markersRef.current.push({ marker, popup });
-      new mapboxgl.Marker(marker)
-        .setLngLat(feature.geometry.coordinates)
-        .setPopup(popup)
-        .addTo(map.current);
+      markersRef.current.push({ marker, leafletMarker, popup });
+      leafletMarker.addTo(map.current);
     }
   }, [map, createStationMarker]);
 
@@ -399,7 +418,7 @@ export function useStationMarkers({
         }
       }
 
-      // Update popup
+      // Update popup content
       const unitLabel = unit === "kt" ? "kt" : "km/h";
       let windText = avg != null ? String(convertWindSpeed(avg, unit)) : "";
       if (avg != null && gust != null) {
@@ -407,15 +426,13 @@ export function useStationMarkers({
       }
       windText += ` ${unitLabel}`;
 
-      const popupContent = item.popup
-        .getElement()
-        ?.querySelector(".mapboxgl-popup-content");
-      if (popupContent) {
-        const html = popupContent.innerHTML.replace(
+      const currentContent = item.popup.getContent();
+      if (typeof currentContent === "string") {
+        const html = currentContent.replace(
           /(\d+\s-\s\d+\s|\d+\s)(km\/h|kt)/g,
           windText
         );
-        item.popup.setHTML(html);
+        item.popup.setContent(html);
       }
     }
   }, [unit]);
@@ -544,7 +561,7 @@ export function useStationMarkers({
       }
 
       // Update popup
-      item.popup.setHTML(createPopupHtml(props, unitRef.current));
+      item.popup.setContent(createPopupHtml(props, unitRef.current));
     }
   }, []);
 

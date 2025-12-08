@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 import { CalendarIcon, Loader2 } from "lucide-react";
@@ -101,72 +101,60 @@ interface MapViewProps {
 
 function MapView({ onCoordinatesChange, radiusKm }: MapViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const marker = useRef<mapboxgl.Marker | null>(null);
+  const map = useRef<L.Map | null>(null);
+  const marker = useRef<L.Marker | null>(null);
+  const circle = useRef<L.Circle | null>(null);
   const markerCoords = useRef<{ lng: number; lat: number } | null>(null);
   const radiusRef = useRef<number | null>(null);
-  const circleSourceId = "circle-radius";
 
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_GL_KEY as string;
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/outdoors-v11",
-      center: [172.5, -41],
-      zoom: 4.3,
+    // LINZ API key
+    const LINZ_API_KEY = import.meta.env.VITE_LINZ_API_KEY as string;
+    const LINZ_TOPO_URL = `https://basemaps.linz.govt.nz/v1/tiles/topographic/WebMercatorQuad/{z}/{x}/{y}.webp?api=${LINZ_API_KEY}`;
+
+    map.current = L.map(mapContainer.current, {
+      center: [-41, 172.5],
+      zoom: 5,
     });
 
-    map.current.on("load", () => {
+    L.tileLayer(LINZ_TOPO_URL, {
+      attribution: '© <a href="https://www.linz.govt.nz/">LINZ</a> CC BY 4.0',
+      maxZoom: 18,
+    }).addTo(map.current);
+
+    // Default marker and circle
+    marker.current = L.marker([DEFAULT_LAT, DEFAULT_LON]).addTo(map.current);
+    markerCoords.current = { lng: DEFAULT_LON, lat: DEFAULT_LAT };
+
+    // Add circle
+    circle.current = L.circle([DEFAULT_LAT, DEFAULT_LON], {
+      radius: DEFAULT_RADIUS * 1000, // Convert km to meters
+      color: "#0074D9",
+      fillColor: "#0074D9",
+      fillOpacity: 0.2,
+    }).addTo(map.current);
+
+    map.current.on("click", (e: L.LeafletMouseEvent) => {
       if (!map.current) return;
 
-      // Add circle source
-      map.current.addSource(circleSourceId, {
-        type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: [],
-        },
-      });
-
-      map.current.addLayer({
-        id: circleSourceId,
-        type: "fill",
-        source: circleSourceId,
-        layout: {},
-        paint: {
-          "fill-color": "#0074D9",
-          "fill-opacity": 0.2,
-        },
-      });
-
-      // Default marker and circle
-      marker.current = new mapboxgl.Marker()
-        .setLngLat([DEFAULT_LON, DEFAULT_LAT])
-        .addTo(map.current);
-      markerCoords.current = { lng: DEFAULT_LON, lat: DEFAULT_LAT };
-
-      updateCircle(DEFAULT_LON, DEFAULT_LAT, DEFAULT_RADIUS);
-    });
-
-    map.current.on("click", (e) => {
-      if (!map.current) return;
-
-      const { lng, lat } = e.lngLat;
+      const { lng, lat } = e.latlng;
       markerCoords.current = { lng, lat };
 
       if (marker.current) {
-        marker.current.setLngLat([lng, lat]);
+        marker.current.setLatLng([lat, lng]);
       } else {
-        marker.current = new mapboxgl.Marker()
-          .setLngLat([lng, lat])
-          .addTo(map.current);
+        marker.current = L.marker([lat, lng]).addTo(map.current);
+      }
+
+      if (circle.current) {
+        circle.current.setLatLng([lat, lng]);
       }
 
       const r = radiusRef.current ?? radiusKm;
-      if (r > 0) {
-        updateCircle(lng, lat, r);
+      if (r > 0 && circle.current) {
+        circle.current.setRadius(r * 1000);
       }
 
       onCoordinatesChange({ lng, lat });
@@ -180,45 +168,13 @@ function MapView({ onCoordinatesChange, radiusKm }: MapViewProps) {
 
   // Update circle when radius changes
   useEffect(() => {
-    if (!map.current || !markerCoords.current) return;
+    if (!map.current || !circle.current) return;
 
-    const { lng, lat } = markerCoords.current;
     if (radiusKm > 0) {
       radiusRef.current = radiusKm;
-      updateCircle(lng, lat, radiusKm);
+      circle.current.setRadius(radiusKm * 1000);
     }
   }, [radiusKm]);
-
-  function updateCircle(lng: number, lat: number, radius: number) {
-    if (!map.current) return;
-
-    const source = map.current?.getSource(circleSourceId);
-    if (source?.type !== "geojson") return;
-
-    // Create circle polygon using simple math (approximate)
-    const points = 64;
-    const km = radius;
-    const coordinates: [number, number][] = [];
-
-    for (let i = 0; i <= points; i++) {
-      const angle = (i / points) * 2 * Math.PI;
-      const dx = km / (111.32 * Math.cos((lat * Math.PI) / 180));
-      const dy = km / 110.574;
-      coordinates.push([
-        lng + dx * Math.cos(angle),
-        lat + dy * Math.sin(angle),
-      ]);
-    }
-
-    source.setData({
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "Polygon",
-        coordinates: [coordinates],
-      },
-    });
-  }
 
   return (
     <div

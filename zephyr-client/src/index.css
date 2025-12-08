@@ -171,6 +171,30 @@
   z-index: 10;
 }
 
-.mapboxgl-ctrl-logo {
-    display: none !important;
+/* Leaflet custom marker styles */
+.leaflet-marker-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-webcam-icon,
+.leaflet-sounding-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Hide default Leaflet marker shadow */
+.leaflet-marker-shadow {
+  display: none;
+}
+
+/* Ensure popups appear above markers */
+.leaflet-popup {
+  z-index: 1000;
+}
+
+/* Style Leaflet attribution */
+.leaflet-control-attribution {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.8) !important;
 }

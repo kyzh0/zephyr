@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
-import "mapbox-gl/dist/mapbox-gl.css";
 
 import { useAppContext } from "@/context/AppContext";
 import {
@@ -57,7 +56,7 @@ export default function Map() {
   );
 
   // Initialize map
-  const { map, isLoaded, triggerGeolocate } = useMapInstance({
+  const { map, isLoaded, triggerGeolocate, setMapStyle } = useMapInstance({
     containerRef: mapContainer,
   });
 
@@ -129,18 +128,12 @@ export default function Map() {
     refreshSoundings,
   ]);
 
-  // Handle layer toggle (outdoors <-> satellite)
+  // Handle layer toggle (topo <-> satellite)
   const handleLayerToggle = useCallback(() => {
-    if (!map.current) return;
     const newValue = !isSatellite;
     setIsSatellite(newValue);
-    map.current.setStyle(
-      newValue
-        ? "mapbox://styles/mapbox/satellite-streets-v11"
-        : "mapbox://styles/mapbox/outdoors-v11"
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSatellite, map.current]);
+    setMapStyle(newValue ? "satellite" : "topo");
+  }, [isSatellite, setMapStyle]);
 
   // Handle unit toggle
   const handleUnitToggle = useCallback(() => {

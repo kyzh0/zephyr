@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import mapboxgl from "mapbox-gl";
+import L from "leaflet";
 import { formatInTimeZone } from "date-fns-tz";
 
 import { listSoundings } from "@/services/sounding.service";
@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { REFRESH_INTERVAL_MS } from "@/lib/utils";
 
 interface UseSoundingMarkersOptions {
-  map: React.RefObject<mapboxgl.Map | null>;
+  map: React.RefObject<L.Map | null>;
   isMapLoaded: boolean;
   isVisible: boolean;
   isHistoricData: boolean;
@@ -21,7 +21,9 @@ export function useSoundingMarkers({
   isHistoricData,
 }: UseSoundingMarkersOptions) {
   const navigate = useNavigate();
-  const markersRef = useRef<HTMLDivElement[]>([]);
+  const markersRef = useRef<
+    { element: HTMLDivElement; leafletMarker: L.Marker }[]
+  >([]);
   const lastRefreshRef = useRef(0);
   const isVisibleRef = useRef(isVisible);
 
@@ -98,10 +100,22 @@ export function useSoundingMarkers({
         currentUrl,
         timestamp
       );
-      markersRef.current.push(el);
-      new mapboxgl.Marker(el)
-        .setLngLat(f.geometry.coordinates)
-        .addTo(map.current);
+
+      // Create Leaflet marker with custom divIcon
+      const leafletMarker = L.marker(
+        [f.geometry.coordinates[1], f.geometry.coordinates[0]],
+        {
+          icon: L.divIcon({
+            html: el,
+            className: "leaflet-sounding-icon",
+            iconSize: [150, 100],
+            iconAnchor: [75, 50],
+          }),
+        }
+      );
+
+      markersRef.current.push({ element: el, leafletMarker });
+      leafletMarker.addTo(map.current);
     }
   }, [map, createSoundingMarker]);
 
@@ -134,16 +148,18 @@ export function useSoundingMarkers({
     if (!geoJson?.features.length) return;
 
     for (const item of markersRef.current) {
-      const match = geoJson.features.find((f) => f.properties.dbId === item.id);
+      const match = geoJson.features.find(
+        (f) => f.properties.dbId === item.element.id
+      );
       if (!match) continue;
 
       const currentTime = match.properties.currentTime as Date | null;
       const currentUrl = match.properties.currentUrl as string;
 
       // eslint-disable-next-line react-hooks/immutability
-      item.dataset.timestamp = String(timestamp);
+      item.element.dataset.timestamp = String(timestamp);
 
-      for (const child of Array.from(item.children)) {
+      for (const child of Array.from(item.element.children)) {
         if ((child as HTMLElement).className === "webcam-img") {
           (child as HTMLImageElement).src = currentUrl
             ? `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${currentUrl}`
@@ -161,7 +177,7 @@ export function useSoundingMarkers({
   const setVisibility = useCallback((visible: boolean) => {
     for (const marker of markersRef.current) {
       // eslint-disable-next-line react-hooks/immutability
-      marker.style.visibility = visible ? "visible" : "hidden";
+      marker.element.style.visibility = visible ? "visible" : "hidden";
     }
   }, []);
 

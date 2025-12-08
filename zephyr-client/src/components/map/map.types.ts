@@ -1,6 +1,9 @@
+import type L from "leaflet";
+
 export interface StationMarker {
   marker: HTMLDivElement;
-  popup: mapboxgl.Popup;
+  leafletMarker: L.Marker;
+  popup: L.Popup;
 }
 
 export interface GeoJsonFeature {

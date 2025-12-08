@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import mapboxgl from "mapbox-gl";
+import L from "leaflet";
 import { formatInTimeZone } from "date-fns-tz";
 
 import {
@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { REFRESH_INTERVAL_MS } from "@/lib/utils";
 
 interface UseWebcamMarkersOptions {
-  map: React.RefObject<mapboxgl.Map | null>;
+  map: React.RefObject<L.Map | null>;
   isMapLoaded: boolean;
   isVisible: boolean;
   onRefresh?: (updatedIds: string[]) => void;
@@ -26,7 +26,9 @@ export function useWebcamMarkers({
   onRefresh,
 }: UseWebcamMarkersOptions) {
   const navigate = useNavigate();
-  const markersRef = useRef<HTMLDivElement[]>([]);
+  const markersRef = useRef<
+    { element: HTMLDivElement; leafletMarker: L.Marker }[]
+  >([]);
   const lastRefreshRef = useRef(0);
   const isVisibleRef = useRef(isVisible);
 
@@ -96,7 +98,7 @@ export function useWebcamMarkers({
     ReturnType<typeof getWebcamGeoJson>
   > => {
     const distinctTimestamps = [
-      ...new Set(markersRef.current.map((m) => m.dataset.timestamp)),
+      ...new Set(markersRef.current.map((m) => m.element.dataset.timestamp)),
     ];
     if (distinctTimestamps.length < 2) return null;
 
@@ -108,11 +110,11 @@ export function useWebcamMarkers({
 
     const cams: ICam[] = [];
     const oldestMarkers = markersRef.current.filter(
-      (m) => Number(m.dataset.timestamp) === min
+      (m) => Number(m.element.dataset.timestamp) === min
     );
 
     for (const m of oldestMarkers) {
-      const cam = await getCamById(m.id);
+      const cam = await getCamById(m.element.id);
       if (cam) cams.push(cam);
     }
 
@@ -140,10 +142,22 @@ export function useWebcamMarkers({
         currentUrl,
         timestamp
       );
-      markersRef.current.push(el);
-      new mapboxgl.Marker(el)
-        .setLngLat(f.geometry.coordinates)
-        .addTo(map.current);
+
+      // Create Leaflet marker with custom divIcon
+      const leafletMarker = L.marker(
+        [f.geometry.coordinates[1], f.geometry.coordinates[0]],
+        {
+          icon: L.divIcon({
+            html: el,
+            className: "leaflet-webcam-icon",
+            iconSize: [150, 100],
+            iconAnchor: [75, 50],
+          }),
+        }
+      );
+
+      markersRef.current.push({ element: el, leafletMarker });
+      leafletMarker.addTo(map.current);
     }
   }, [map, createWebcamMarker]);
 
@@ -159,13 +173,14 @@ export function useWebcamMarkers({
     lastRefreshRef.current = timestamp;
 
     const newestMarker = markersRef.current.reduce((prev, current) =>
-      Number(prev.dataset.timestamp) > Number(current.dataset.timestamp)
+      Number(prev.element.dataset.timestamp) >
+      Number(current.element.dataset.timestamp)
         ? prev
         : current
     );
 
     const webcams = await listCamsUpdatedSince(
-      Math.round(Number(newestMarker.dataset.timestamp) / 1000)
+      Math.round(Number(newestMarker.element.dataset.timestamp) / 1000)
     );
     let geoJson = getWebcamGeoJson(webcams);
 
@@ -173,7 +188,9 @@ export function useWebcamMarkers({
       geoJson = await checkMissedUpdates();
       if (geoJson) {
         const distinctTimestamps = [
-          ...new Set(markersRef.current.map((m) => m.dataset.timestamp)),
+          ...new Set(
+            markersRef.current.map((m) => m.element.dataset.timestamp)
+          ),
         ];
         const sorted = distinctTimestamps.map(Number).sort((a, b) => a - b);
         if (sorted.length >= 2) timestamp = sorted[1];
@@ -183,7 +200,9 @@ export function useWebcamMarkers({
 
     const updatedIds: string[] = [];
     for (const item of markersRef.current) {
-      const match = geoJson.features.find((f) => f.properties.dbId === item.id);
+      const match = geoJson.features.find(
+        (f) => f.properties.dbId === item.element.id
+      );
       if (!match) continue;
 
       const currentTime = match.properties.currentTime as Date;
@@ -191,9 +210,9 @@ export function useWebcamMarkers({
       const isStale = timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000;
 
       // eslint-disable-next-line react-hooks/immutability
-      item.dataset.timestamp = String(timestamp);
+      item.element.dataset.timestamp = String(timestamp);
 
-      for (const child of Array.from(item.children)) {
+      for (const child of Array.from(item.element.children)) {
         if ((child as HTMLElement).className === "webcam-img") {
           (child as HTMLImageElement).src = isStale
             ? ""
@@ -213,7 +232,7 @@ export function useWebcamMarkers({
         }
       }
 
-      updatedIds.push(item.id);
+      updatedIds.push(item.element.id);
     }
 
     onRefresh?.(updatedIds);
@@ -223,7 +242,7 @@ export function useWebcamMarkers({
   const setVisibility = useCallback((visible: boolean) => {
     for (const marker of markersRef.current) {
       // eslint-disable-next-line react-hooks/immutability
-      marker.style.visibility = visible ? "visible" : "hidden";
+      marker.element.style.visibility = visible ? "visible" : "hidden";
     }
   }, []);
 
