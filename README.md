@@ -7,14 +7,13 @@
 </p>
 
 <p align="center">
- <a href="https://www.zephyrapp.nz/">https://www.zephyrapp.nz/</a> 
+ <a href="https://zephyrapp.nz/">zephyrapp.nz</a> 
 </p>
 
 ## Table of Contents
 
 - [Introduction](#introduction)
 - [Features](#features)
-- [Technologies](#technologies)
 - [Setup](#setup)
 - [Contribute](#contribute)
 - [Acknowledgements](#acknowledgements)
@@ -22,58 +21,39 @@
 
 ## Introduction
 
-Zephyr is an interactive weather map aimed towards paraglider pilots in New Zealand, scraping real-time data from various stations across the country.
+Zephyr is an interactive weather map aimed towards paraglider pilots in New Zealand, scraping real-time data from various stations across the country. The frontend is build on React, TypeScript, and Vite, while the backend is built with NodeJS, Express, and MongoDB.
 
 ## Features
 
 - Real-time data - average wind speed, gust, direction, and temperature.
-- Webcams - live images from various cameras.
 - Interactive map - easy to use with intuitive colours and icons.
 - Filtering and history - a flexible way to interface with the data.
 - Charts and tables - a tidy representation of each station's data over time.
 - Live grid view - easy to integrate with XCTrack for in-flight updates.
+- Webcams - live images from various cameras.
 - RASP soudings - overlay of skew-T plots from [RASP](https://rasp.nz).
 - Mobile-first design - scalable across different screen sizes.
-- Help tab - provides a way for users to contact the developer.
+- Help tab - provides information and a way for users to contact the developer.
 - Admin-only area - for adding new weather stations and viewing errors.
 - Error checker - scheduled function to identify issues with stations or the scraper.
 - API - endpoints for integration with external apps.
+- Export - data is preserved and can be exported for analysis.
 
 <p align="center">
-  <img src = "https://i.ibb.co/21mHW0QB/Screenshot-2025-11-26-195536.png" width=700>
+  <img src = "https://i.postimg.cc/RCyCtyQX/Untitled.png" width=200>
   <br/>
   Interactive map view
 </p>
 <p align="center">
-  <img src = "https://i.imgur.com/QdaaxCb.png" width=700>
+  <img src = "https://i.postimg.cc/pTkZ7KkH/Untitled.png" width=200>
   <br/>
-  Tables and graphs
+  Station data
 </p>
 <p align="center">
-  <img src = "https://i.imgur.com/hK6Dyg6.png" width=300>
+  <img src = "https://i.imgur.com/hK6Dyg6.png" width=200>
   <br/>
-  Live grid view on mobile
+  Live grid view
 </p>
-
-## Technologies
-
-### Frontend
-
-- React
-- MUI
-- Mapbox GL
-- Recharts
-
-### Backend
-
-- Node JS
-- Express
-- MongoDB
-
-### Deployment
-
-- Docker Compose
-- Caddy
 
 ## Setup
 
@@ -92,16 +72,10 @@ Follow the instructions in `.env.example`, `client/.env.example`, and `server/.e
 ### Server
 
 ```
-# go to directory
 $ cd ./server
+$ npm i
 
-# install dependencies
-$ npm install
-
-# run the express server
 $ npm run start
-
-# run the scheduler
 $ npm run scheduler
 
 # OR
@@ -109,35 +83,16 @@ $ npm run scheduler
 $ npm run dev
 ```
 
-#### Deploy
-
-```
-# from root directory
-$ docker compose --build -d
-```
-
 ### Client
 
 ```
-# go to directory
 $ cd ./client
+$ npm i
 
-# install dependencies
-$ npm install
+$ npm run dev
 
-# run the web app
-$ npm run start
-```
-
-#### Deploy
-
-```
-# from client directory
-$ docker compose --build -d
-
-# wait for build to complete, then copy build files to caddy container
-$ docker container run --rm -i -v client_build:/from -v zephyr_caddy_srv:/to \
-  alpine ash -c "rm -rf /to/*; cp -r /from/* /to; rm -rf /from/*"
+# build to 'dist' folder
+$ npm run build
 ```
 
 ## Contribute
@@ -146,7 +101,7 @@ Spotted a bug, or got a new feature in mind? Open a new [issue](https://github.c
 
 ## Acknowledgements
 
-Thanks to Jonas Yang for providing the icons and logo design.
+Thanks to James Bayly for his efforts on modernising the frontend, and Jonas Yang for providing the logo design.
 
 ## License
 
