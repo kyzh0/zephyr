@@ -1,4 +1,7 @@
-import type { IStationData } from "@/models/station-data.model";
+import type {
+  IHistoricalStationData,
+  IStationData,
+} from "@/models/station-data.model";
 import type { INewStation, IStation } from "@/models/station.model";
 
 export async function getStationById(id: string) {
@@ -94,7 +97,10 @@ export async function loadAllStationDataAtTimestamp(time: Date) {
         import.meta.env.VITE_API_PREFIX
       }/stations/data?time=${time.toISOString()}`
     );
-    return (await res.json()) as IStationData[];
+    return (await res.json()) as {
+      time: string;
+      values: IHistoricalStationData[];
+    };
   } catch (error) {
     console.error(error);
   }

@@ -243,7 +243,7 @@ function calculateHighResAverages(
               : calculatedBearing
             : undefined,
         temperature: temperature ?? undefined,
-        station: stationId,
+        _id: stationId,
         timeLabel: formatInTimeZone(
           new Date(timeValue),
           "Pacific/Auckland",
@@ -305,7 +305,7 @@ function calculateHighResAverages(
               : calculatedBearing
             : undefined,
         temperature: temperature ?? undefined,
-        station: stationId,
+        _id: stationId,
         timeLabel: formatInTimeZone(time, "Pacific/Auckland", "HH:mm"),
         windAverageKt: avg == null ? null : Math.round(avg / 1.852),
         windGustKt: maxGust == null ? null : Math.round(maxGust / 1.852),

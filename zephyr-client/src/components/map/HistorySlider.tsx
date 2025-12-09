@@ -96,8 +96,8 @@ export function HistorySlider({
       {/* Slider */}
       <div className="flex items-center gap-2">
         <Slider
-          value={[historyOffset]}
-          onValueChange={handleSliderChange}
+          defaultValue={[historyOffset]}
+          onValueCommit={handleSliderChange}
           min={-10080} // 7 days in minutes
           max={0}
           step={30}
@@ -107,67 +107,51 @@ export function HistorySlider({
       </div>
 
       {/* Controls and time display */}
-      {historyOffset < 0 ? (
-        <div className="flex items-center justify-between">
-          <div className="w-6" /> {/* Spacer for alignment */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLeftClick}
-              className="h-6 w-6"
-              disabled={historyOffset <= -10080}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-
-            <div className="text-center min-w-[140px]">
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                Snapshot
-              </p>
-              <p className="text-sm font-medium">
-                {formatInTimeZone(
-                  snapshotTime,
-                  "Pacific/Auckland",
-                  "EEE dd MMM HH:mm"
-                )}
-              </p>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleRightClick}
-              className="h-6 w-6"
-              disabled={historyOffset >= 0}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+      <div className="flex items-center justify-between">
+        <div className="w-6" /> {/* Spacer for alignment */}
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleClose}
+            onClick={handleLeftClick}
             className="h-6 w-6"
+            disabled={historyOffset <= -10080}
           >
-            <X className="h-3 w-3" />
+            <ChevronLeft className="h-4 w-4" />
           </Button>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            Drag slider to view history
-          </span>
+
+          <div className="text-center min-w-[140px]">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">
+              Historic Data
+            </p>
+            <p className="text-sm font-medium">
+              {formatInTimeZone(
+                snapshotTime,
+                "Pacific/Auckland",
+                "EEE dd MMM HH:mm"
+              )}
+            </p>
+          </div>
+
           <Button
             variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(false)}
-            className="h-6 text-xs"
+            size="icon"
+            onClick={handleRightClick}
+            className="h-6 w-6"
+            disabled={historyOffset >= 0}
           >
-            Close
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-      )}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleClose}
+          className="h-6 w-6"
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      </div>
     </div>
   );
 }
