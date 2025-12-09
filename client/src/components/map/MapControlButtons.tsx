@@ -104,8 +104,8 @@ export function MapControlButtons({
   return (
     <>
       {/* Top left - horizontal row */}
-      <div className="flex flex-wrap gap-2 items-start absolute top-2.5 left-2.5 z-50">
-        <SearchBar />
+      <div className="flex flex-wrap gap-2 items-start absolute top-2.5 left-2.5 z-50 right-14">
+        <SearchBar disabled={isHistoricData} />
         <Tooltip>
           <TooltipTrigger asChild>
             <Button

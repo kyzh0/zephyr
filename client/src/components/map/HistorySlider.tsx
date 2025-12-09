@@ -92,7 +92,7 @@ export function HistorySlider({
   }
 
   return (
-    <div className="flex flex-col gap-2 bg-background border rounded-md p-2 shadow-sm min-w-[280px]">
+    <div className="flex flex-col gap-2 bg-background border rounded-md p-2 shadow-sm min-w-[180px]">
       {/* Slider */}
       <div className="flex items-center gap-2">
         <Slider
