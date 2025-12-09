@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { X, History } from "lucide-react";
+import { formatInTimeZone } from "date-fns-tz";
 
 import { useAppContext } from "@/context/AppContext";
 import {
@@ -242,6 +244,11 @@ export default function Map() {
 
   return (
     <div className="absolute top-0 left-0 h-dvh w-screen flex flex-col">
+      {/* Red border overlay when in history mode */}
+      {isHistoricData && (
+        <div className="absolute inset-0 border-4 border-red-500 pointer-events-none z-40" />
+      )}
+
       <MapControlButtons
         onWebcamClick={handleWebcamClick}
         onSoundingClick={handleSoundingClick}
@@ -259,6 +266,31 @@ export default function Map() {
       />
 
       <div ref={mapContainer} className="w-full h-full" />
+
+      {/* History mode indicator */}
+      {isHistoricData && (
+        <div className="absolute bottom-4 z-50 flex justify-center w-full px-4">
+          <div className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-full shadow-lg">
+            <History className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              Viewing Historic Data for{" "}
+              {formatInTimeZone(
+                getSnapshotTime(historyOffset),
+                "Pacific/Auckland",
+                "dd MMM HH:mm"
+              )}
+            </span>
+            <button
+              onClick={() => handleHistoryChange(0)}
+              className="ml-1 hover:bg-red-600 rounded-full p-0.5 transition-colors"
+              aria-label="Exit history mode"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <Outlet />
     </div>
   );
