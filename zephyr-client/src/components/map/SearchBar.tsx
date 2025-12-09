@@ -9,9 +9,10 @@ import { cn } from "@/lib/utils";
 
 interface SearchBarProps {
   className?: string;
+  disabled: boolean;
 }
 
-export function SearchBar({ className }: SearchBarProps) {
+export function SearchBar({ className, disabled }: SearchBarProps) {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [query, setQuery] = useState("");
@@ -139,6 +140,7 @@ export function SearchBar({ className }: SearchBarProps) {
           size="sm"
           onClick={handleToggle}
           className="h-9 w-9 p-0 shrink-0"
+          disabled={disabled}
         >
           <Search className="h-4 w-4 opacity-70" />
         </Button>
