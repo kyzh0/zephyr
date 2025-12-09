@@ -112,6 +112,7 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={() => setHelpOpen(true)}
+              disabled={isHistoricData}
               className="h-9 w-9"
             >
               <HelpCircle className="h-4 w-4" />
@@ -126,6 +127,7 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={() => setDonateOpen(true)}
+              disabled={isHistoricData}
               className="h-9 w-9"
             >
               <HandHelping className="h-4 w-4 opacity-70" />
@@ -232,8 +234,8 @@ export function MapControlButtons({
         />
       </div>
 
-      {/* Bottom left - Recent Stations */}
-      {recentStations.length > 0 && (
+      {/* Bottom left - Recent Stations (hidden in history mode) */}
+      {recentStations.length > 0 && !isHistoricData && (
         <div className="absolute bottom-2.5 left-2.5 z-50">
           <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-[200px]">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1">

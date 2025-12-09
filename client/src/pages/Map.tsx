@@ -66,6 +66,7 @@ export default function Map() {
     refresh: refreshStations,
     renderHistoricalData,
     renderCurrentData,
+    setInteractive: setStationMarkersInteractive,
   } = useStationMarkers({
     map,
     isMapLoaded: isLoaded,
@@ -153,39 +154,32 @@ export default function Map() {
   // Handle history offset change
   const handleHistoryChange = useCallback(
     async (offset: number) => {
-      // If entering history mode, hide webcams and soundings
-      if (offset < 0 && historyOffset === 0) {
-        if (showWebcams) {
-          setShowWebcams(false);
-          setWebcamVisibility(false);
-        }
-        if (showSoundings) {
-          setShowSoundings(false);
-          setSoundingVisibility(false);
-        }
+      const enteringHistoryMode = offset < 0 && historyOffset === 0;
+      const exitingHistoryMode = offset === 0 && historyOffset < 0;
+
+      if (enteringHistoryMode) {
+        setShowWebcams(false);
+        setWebcamVisibility(false);
+        setShowSoundings(false);
+        setSoundingVisibility(false);
+        setStationMarkersInteractive(false);
+      } else if (exitingHistoryMode) {
+        setStationMarkersInteractive(true);
       }
 
       setHistoryOffset(offset);
 
       if (offset < 0) {
-        // Render historical data
-        const snapshotTime = getSnapshotTime(offset);
-        if (renderHistoricalData) {
-          await renderHistoricalData(snapshotTime);
-        }
+        await renderHistoricalData?.(getSnapshotTime(offset));
       } else {
-        // Render current data
-        if (renderCurrentData) {
-          await renderCurrentData();
-        }
+        await renderCurrentData?.();
       }
     },
     [
       historyOffset,
-      showWebcams,
-      showSoundings,
       setWebcamVisibility,
       setSoundingVisibility,
+      setStationMarkersInteractive,
       renderHistoricalData,
       renderCurrentData,
     ]

@@ -9,6 +9,7 @@ import {
   loadAllStationDataAtTimestamp,
 } from "@/services/station.service";
 import type { IStation } from "@/models/station.model";
+import type { IHistoricalStationData } from "@/models/station-data.model";
 import {
   getStationGeoJson,
   sortStationFeatures,
@@ -426,21 +427,24 @@ export function useStationMarkers({
       if (!markersRef.current.length) return;
 
       const data = await loadAllStationDataAtTimestamp(time);
-      if (!data?.length) return;
+      if (!data?.values?.length) return;
 
       // Update each marker with historical data
       for (const item of markersRef.current) {
-        const stationData = data.find((d) => d.station === item.marker.id);
+        const stationData = data.values.find(
+          (d: IHistoricalStationData) => d.id === item.marker.id
+        );
 
-        // Default values if no data found
+        // Use data if found, otherwise show empty state
         const windAverage = stationData?.windAverage ?? null;
         const windBearing = stationData?.windBearing ?? null;
+        const validBearings = stationData?.validBearings ?? null;
 
         const [img, textColor] = getArrowStyle(
           windAverage,
           windBearing,
-          null, // validBearings not available in historical data
-          false // not offline
+          validBearings,
+          false // not offline in history mode
         );
 
         // eslint-disable-next-line react-hooks/immutability
@@ -451,13 +455,10 @@ export function useStationMarkers({
           if (child.classList.contains("marker-text")) {
             const el = child as HTMLElement;
             el.style.color = textColor;
-            if (windAverage != null) {
-              el.textContent = String(
-                convertWindSpeed(windAverage, unitRef.current)
-              );
-            } else {
-              el.textContent = "-";
-            }
+            el.textContent =
+              windAverage != null
+                ? String(convertWindSpeed(windAverage, unitRef.current))
+                : "-";
           } else if (child.classList.contains("marker-arrow")) {
             const el = child as HTMLElement;
             el.style.backgroundImage = img;
@@ -479,6 +480,15 @@ export function useStationMarkers({
     },
     []
   );
+
+  // Set marker interactivity (enable/disable click handlers)
+  const setInteractive = useCallback((interactive: boolean) => {
+    for (const item of markersRef.current) {
+      // eslint-disable-next-line react-hooks/immutability
+      item.marker.style.pointerEvents = interactive ? "auto" : "none";
+      item.marker.style.cursor = interactive ? "pointer" : "default";
+    }
+  }, []);
 
   // Render current (live) data
   const renderCurrentData = useCallback(async (): Promise<void> => {
@@ -569,6 +579,7 @@ export function useStationMarkers({
     refresh,
     renderHistoricalData,
     renderCurrentData,
+    setInteractive,
     isRefreshing,
   };
 }
