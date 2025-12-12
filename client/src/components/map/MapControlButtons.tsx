@@ -44,6 +44,8 @@ interface MapControlButtonsProps {
   elevationFilter: number;
   onToggleElevation: () => void;
   onElevationChange: (value: number) => void;
+  minimizeRecents: boolean;
+  onRecentsToggle: () => void;
 }
 
 export function MapControlButtons({
@@ -60,6 +62,8 @@ export function MapControlButtons({
   elevationFilter,
   onToggleElevation,
   onElevationChange,
+  minimizeRecents,
+  onRecentsToggle,
 }: MapControlButtonsProps) {
   const navigate = useNavigate();
   const [donateOpen, setDonateOpen] = useState(false);
@@ -68,7 +72,6 @@ export function MapControlButtons({
   );
   const [gridOpen, setGridOpen] = useState(false);
   const [recentStations, setRecentStations] = useState<RecentStation[]>([]);
-  const [recentStationsMinimized, setRecentStationsMinimized] = useState(false);
 
   // Load recent stations on mount and when localStorage changes
   useEffect(() => {
@@ -238,13 +241,13 @@ export function MapControlButtons({
       {/* Bottom left - Recent Stations (hidden in history mode) */}
       {recentStations.length > 0 && !isHistoricData && (
         <div className="absolute bottom-2.5 left-2.5 z-50">
-          {recentStationsMinimized ? (
+          {minimizeRecents ? (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setRecentStationsMinimized(false)}
+                  onClick={onRecentsToggle}
                   className="h-9 w-9"
                 >
                   <History className="h-4 w-4 opacity-70" />
@@ -256,7 +259,7 @@ export function MapControlButtons({
             <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-[200px]">
               <div
                 className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors"
-                onClick={() => setRecentStationsMinimized(true)}
+                onClick={onRecentsToggle}
                 title="Click to minimize"
               >
                 <History className="h-3 w-3" />
