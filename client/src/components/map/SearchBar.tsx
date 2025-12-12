@@ -132,14 +132,15 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
       <div
         className={cn(
           "flex items-center bg-background border rounded-md shadow-sm transition-all duration-200",
-          isExpanded ? "w-[200px] sm:w-[250px]" : "w-9"
+          isExpanded ? "w-[200px] sm:w-[250px]" : "w-9",
+          disabled ? "opacity-50 pointer-events-none" : ""
         )}
       >
         <Button
           variant="ghost"
           size="sm"
           onClick={handleToggle}
-          className="h-9 w-9 p-0 shrink-0"
+          className="h-9 w-9"
           disabled={disabled}
         >
           <Search className="h-4 w-4 opacity-70" />

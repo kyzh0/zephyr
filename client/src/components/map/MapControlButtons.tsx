@@ -68,6 +68,7 @@ export function MapControlButtons({
   );
   const [gridOpen, setGridOpen] = useState(false);
   const [recentStations, setRecentStations] = useState<RecentStation[]>([]);
+  const [recentStationsMinimized, setRecentStationsMinimized] = useState(false);
 
   // Load recent stations on mount and when localStorage changes
   useEffect(() => {
@@ -115,7 +116,7 @@ export function MapControlButtons({
               disabled={isHistoricData}
               className="h-9 w-9"
             >
-              <HelpCircle className="h-4 w-4" />
+              <HelpCircle className="h-4 w-4 opacity-70" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>View Help</TooltipContent>
@@ -237,32 +238,54 @@ export function MapControlButtons({
       {/* Bottom left - Recent Stations (hidden in history mode) */}
       {recentStations.length > 0 && !isHistoricData && (
         <div className="absolute bottom-2.5 left-2.5 z-50">
-          <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-[200px]">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1">
-              <History className="h-3 w-3" />
-              <span>Recent Stations</span>
+          {recentStationsMinimized ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setRecentStationsMinimized(false)}
+                  className="h-9 w-9"
+                >
+                  <History className="h-4 w-4 opacity-70" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Show Recent Stations</TooltipContent>
+            </Tooltip>
+          ) : (
+            <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-[200px]">
+              <div
+                className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors"
+                onClick={() => setRecentStationsMinimized(true)}
+                title="Click to minimize"
+              >
+                <History className="h-3 w-3" />
+                <span>Recent Stations</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                {recentStations.map((station) => {
+                  const displayName =
+                    station.name.length > 14
+                      ? `${station.name.slice(0, 7)}...${station.name.slice(
+                          -5
+                        )}`
+                      : station.name;
+                  return (
+                    <Button
+                      key={station.id}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/stations/${station.id}`)}
+                      className="h-7 justify-start text-xs font-normal px-2 truncate"
+                      title={station.name}
+                    >
+                      {displayName}
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              {recentStations.map((station) => {
-                const displayName =
-                  station.name.length > 14
-                    ? `${station.name.slice(0, 7)}...${station.name.slice(-5)}`
-                    : station.name;
-                return (
-                  <Button
-                    key={station.id}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate(`/stations/${station.id}`)}
-                    className="h-7 justify-start text-xs font-normal px-2 truncate"
-                    title={station.name}
-                  >
-                    {displayName}
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
+          )}
         </div>
       )}
     </>
