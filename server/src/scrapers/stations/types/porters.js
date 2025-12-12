@@ -1,6 +1,8 @@
 import fs from 'fs/promises';
 import sharp from 'sharp';
 import { createWorker } from 'tesseract.js';
+import { fromZonedTime } from 'date-fns-tz';
+import { parse } from 'date-fns';
 import httpClient from '../../../lib/httpClient.js';
 import processScrapedData from '../processScrapedData.js';
 import logger from '../../../lib/logger.js';
@@ -35,241 +37,330 @@ export default async function scrapePortersData(stations) {
     });
 
     // BASE AREA WEATHER STATION
-    // avg
+    //time
     let croppedBuf = await sharp(imgBuff)
       .extract({
-        left: 195,
-        top: 7115,
-        width: 70,
-        height: 20
+        left: 198,
+        top: 6938,
+        width: 225,
+        height: 15
       })
       .toBuffer();
-    let path = `${dir}/portersbaseavg.jpg`;
+    let path = `${dir}/portersbasetime.jpg`;
     await fs.writeFile(path, croppedBuf);
 
-    const reg = /[^0-9.]/g;
     let ret = await worker.recognize(path);
-    let textAvg = ret.data.text.replace(reg, '');
+    let textTime = ret.data.text
+      .replace('Monday,', '')
+      .replace('Tuesday,', '')
+      .replace('Wednesday,', '')
+      .replace('Thursday,', '')
+      .replace('Friday,', '')
+      .replace('Saturday,', '')
+      .replace('Sunday,', '')
+      .trim();
+    let time = fromZonedTime(
+      parse(textTime, 'dd MMMM yyyy hh:mm:ss aaaa', new Date()),
+      'Pacific/Auckland'
+    );
 
-    // gust
-    croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: 195,
-        top: 7155,
-        width: 70,
-        height: 20
-      })
-      .toBuffer();
-    path = `${dir}/portersbasegust.jpg`;
-    await fs.writeFile(path, croppedBuf);
+    if (time && Date.now() - time.getTime() < 30 * 60 * 1000) {
+      // avg
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 195,
+          top: 7115,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/portersbaseavg.jpg`;
+      await fs.writeFile(path, croppedBuf);
 
-    ret = await worker.recognize(path);
-    let textGust = ret.data.text.replace(reg, '');
+      const reg = /[^0-9.]/g;
+      ret = await worker.recognize(path);
+      let textAvg = ret.data.text.replace(reg, '');
 
-    windAverage = isNaN(textAvg) ? 0 : Number(textAvg);
-    windGust = isNaN(textGust) ? 0 : Number(textGust);
-    if (windGust < windAverage) {
-      windGust = null;
-    } // sometimes ocr fails for gust PORTERS BASE
+      // gust
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 195,
+          top: 7155,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/portersbasegust.jpg`;
+      await fs.writeFile(path, croppedBuf);
 
-    // direction
-    croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: 275,
-        top: 7115,
-        width: 70,
-        height: 20
-      })
-      .toBuffer();
-    path = `${dir}/portersbasedir.jpg`;
-    await fs.writeFile(path, croppedBuf);
+      ret = await worker.recognize(path);
+      let textGust = ret.data.text.replace(reg, '');
 
-    ret = await worker.recognize(path);
-    windBearing = Number(ret.data.text.slice(0, 3).replace(reg, ''));
+      windAverage = isNaN(textAvg) ? 0 : Number(textAvg);
+      windGust = isNaN(textGust) ? 0 : Number(textGust);
+      if (windGust < windAverage) {
+        windGust = null;
+      } // sometimes ocr fails for gust PORTERS BASE
 
-    // temperature
-    croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: 195,
-        top: 7018,
-        width: 70,
-        height: 20
-      })
-      .toBuffer();
-    path = `${dir}/portersbasetemp.jpg`;
-    await fs.writeFile(path, croppedBuf);
+      // direction
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 275,
+          top: 7115,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/portersbasedir.jpg`;
+      await fs.writeFile(path, croppedBuf);
 
-    ret = await worker.recognize(path);
-    let textTemperature = ret.data.text.replace(reg, '');
-    if (textTemperature.length && !textTemperature.includes('.')) {
-      // sometimes ocr misses a .
-      // temperature is always 1dp here
-      textTemperature = `${textTemperature.slice(0, -1)}.${textTemperature.slice(-1)}`;
-    }
-    temperature = Number(textTemperature);
-    result.push({
-      id: 'base',
-      data: {
-        windAverage,
-        windGust,
-        windBearing,
-        temperature
+      ret = await worker.recognize(path);
+      windBearing = Number(ret.data.text.slice(0, 3).replace(reg, ''));
+
+      // temperature
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 195,
+          top: 7018,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/portersbasetemp.jpg`;
+      await fs.writeFile(path, croppedBuf);
+
+      ret = await worker.recognize(path);
+      let textTemperature = ret.data.text.replace(reg, '');
+      if (textTemperature.length && !textTemperature.includes('.')) {
+        // sometimes ocr misses a .
+        // temperature is always 1dp here
+        textTemperature = `${textTemperature.slice(0, -1)}.${textTemperature.slice(-1)}`;
       }
-    });
+      temperature = Number(textTemperature);
+      result.push({
+        id: 'base',
+        data: {
+          windAverage,
+          windGust,
+          windBearing,
+          temperature
+        }
+      });
+    }
 
     // T-BAR 2 WEATHER STATION
-    // avg
+    //time
     croppedBuf = await sharp(imgBuff)
       .extract({
         left: 478,
-        top: 7112,
-        width: 70,
-        height: 20
+        top: 6937,
+        width: 225,
+        height: 15
       })
       .toBuffer();
-    path = `${dir}/porterstbaravg.jpg`;
+    path = `${dir}/porterstbartime.jpg`;
     await fs.writeFile(path, croppedBuf);
 
     ret = await worker.recognize(path);
-    textAvg = ret.data.text.replace(reg, '');
+    textTime = ret.data.text
+      .replace('Monday,', '')
+      .replace('Tuesday,', '')
+      .replace('Wednesday,', '')
+      .replace('Thursday,', '')
+      .replace('Friday,', '')
+      .replace('Saturday,', '')
+      .replace('Sunday,', '')
+      .trim();
+    time = fromZonedTime(
+      parse(textTime, 'dd MMMM yyyy hh:mm:ss aaaa', new Date()),
+      'Pacific/Auckland'
+    );
 
-    // gust
-    croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: 478,
-        top: 7152,
-        width: 70,
-        height: 20
-      })
-      .toBuffer();
-    path = `${dir}/porterstbargust.jpg`;
-    await fs.writeFile(path, croppedBuf);
+    if (time && Date.now() - time.getTime() < 30 * 60 * 1000) {
+      // avg
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 478,
+          top: 7112,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/porterstbaravg.jpg`;
+      await fs.writeFile(path, croppedBuf);
 
-    ret = await worker.recognize(path);
-    textGust = ret.data.text.replace(reg, '');
+      const reg = /[^0-9.]/g;
+      ret = await worker.recognize(path);
+      let textAvg = ret.data.text.replace(reg, '');
 
-    windAverage = isNaN(textAvg) ? 0 : Number(textAvg);
-    windGust = isNaN(textGust) ? 0 : Number(textGust);
+      // gust
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 478,
+          top: 7152,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/porterstbargust.jpg`;
+      await fs.writeFile(path, croppedBuf);
 
-    // direction
-    croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: 558,
-        top: 7113,
-        width: 70,
-        height: 20
-      })
-      .toBuffer();
-    path = `${dir}/porterstbardir.jpg`;
-    await fs.writeFile(path, croppedBuf);
+      ret = await worker.recognize(path);
+      let textGust = ret.data.text.replace(reg, '');
 
-    ret = await worker.recognize(path);
-    windBearing = Number(ret.data.text.slice(0, 3).replace(reg, ''));
+      windAverage = isNaN(textAvg) ? 0 : Number(textAvg);
+      windGust = isNaN(textGust) ? 0 : Number(textGust);
 
-    // temperature
-    croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: 478,
-        top: 7018,
-        width: 70,
-        height: 20
-      })
-      .toBuffer();
-    path = `${dir}/porterstbartemp.jpg`;
-    await fs.writeFile(path, croppedBuf);
+      // direction
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 558,
+          top: 7113,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/porterstbardir.jpg`;
+      await fs.writeFile(path, croppedBuf);
 
-    ret = await worker.recognize(path);
-    textTemperature = ret.data.text.replace(reg, '');
-    if (textTemperature.length && !textTemperature.includes('.')) {
-      textTemperature = `${textTemperature.slice(0, -1)}.${textTemperature.slice(-1)}`;
-    }
-    temperature = Number(textTemperature);
-    result.push({
-      id: 'tbar',
-      data: {
-        windAverage,
-        windGust,
-        windBearing,
-        temperature
+      ret = await worker.recognize(path);
+      windBearing = Number(ret.data.text.slice(0, 3).replace(reg, ''));
+
+      // temperature
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 478,
+          top: 7018,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/porterstbartemp.jpg`;
+      await fs.writeFile(path, croppedBuf);
+
+      ret = await worker.recognize(path);
+      let textTemperature = ret.data.text.replace(reg, '');
+      if (textTemperature.length && !textTemperature.includes('.')) {
+        textTemperature = `${textTemperature.slice(0, -1)}.${textTemperature.slice(-1)}`;
       }
-    });
+      temperature = Number(textTemperature);
+      result.push({
+        id: 'tbar',
+        data: {
+          windAverage,
+          windGust,
+          windBearing,
+          temperature
+        }
+      });
+    }
 
     // RIDGELINE WEATHER STATION
-    // avg
+    //time
     croppedBuf = await sharp(imgBuff)
       .extract({
-        left: 760,
-        top: 7112,
-        width: 70,
-        height: 20
+        left: 751,
+        top: 6937,
+        width: 225,
+        height: 15
       })
       .toBuffer();
-    path = `${dir}/portersridgelineavg.jpg`;
+    path = `${dir}/portersridgelinetime.jpg`;
     await fs.writeFile(path, croppedBuf);
 
     ret = await worker.recognize(path);
-    textAvg = ret.data.text.replace(reg, '');
+    textTime = ret.data.text
+      .replace('Monday,', '')
+      .replace('Tuesday,', '')
+      .replace('Wednesday,', '')
+      .replace('Thursday,', '')
+      .replace('Friday,', '')
+      .replace('Saturday,', '')
+      .replace('Sunday,', '')
+      .trim();
+    time = fromZonedTime(
+      parse(textTime, 'dd MMMM yyyy hh:mm:ss aaaa', new Date()),
+      'Pacific/Auckland'
+    );
 
-    // gust
-    croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: 760,
-        top: 7152,
-        width: 70,
-        height: 20
-      })
-      .toBuffer();
-    path = `${dir}/portersridgelinegust.jpg`;
-    await fs.writeFile(path, croppedBuf);
+    if (time && Date.now() - time.getTime() < 30 * 60 * 1000) {
+      // avg
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 760,
+          top: 7112,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/portersridgelineavg.jpg`;
+      await fs.writeFile(path, croppedBuf);
 
-    ret = await worker.recognize(path);
-    textGust = ret.data.text.replace(reg, '');
+      const reg = /[^0-9.]/g;
+      ret = await worker.recognize(path);
+      let textAvg = ret.data.text.replace(reg, '');
 
-    windAverage = isNaN(textAvg) ? 0 : Number(textAvg);
-    windGust = isNaN(textGust) ? 0 : Number(textGust);
+      // gust
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 760,
+          top: 7152,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/portersridgelinegust.jpg`;
+      await fs.writeFile(path, croppedBuf);
 
-    // direction
-    croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: 842,
-        top: 7111,
-        width: 70,
-        height: 20
-      })
-      .toBuffer();
-    path = `${dir}/portersridgelinedir.jpg`;
-    await fs.writeFile(path, croppedBuf);
+      ret = await worker.recognize(path);
+      let textGust = ret.data.text.replace(reg, '');
 
-    ret = await worker.recognize(path);
-    windBearing = Number(ret.data.text.slice(0, 3).replace(reg, ''));
+      windAverage = isNaN(textAvg) ? 0 : Number(textAvg);
+      windGust = isNaN(textGust) ? 0 : Number(textGust);
 
-    // temperature
-    croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: 760,
-        top: 7018,
-        width: 70,
-        height: 20
-      })
-      .toBuffer();
-    path = `${dir}/portersridgelinetemp.jpg`;
-    await fs.writeFile(path, croppedBuf);
+      // direction
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 842,
+          top: 7111,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/portersridgelinedir.jpg`;
+      await fs.writeFile(path, croppedBuf);
 
-    ret = await worker.recognize(path);
-    textTemperature = ret.data.text.replace(reg, '');
-    if (textTemperature.length && !textTemperature.includes('.')) {
-      textTemperature = `${textTemperature.slice(0, -1)}.${textTemperature.slice(-1)}`;
-    }
-    temperature = Number(textTemperature);
-    result.push({
-      id: 'ridgeline',
-      data: {
-        windAverage,
-        windGust,
-        windBearing,
-        temperature
+      ret = await worker.recognize(path);
+      windBearing = Number(ret.data.text.slice(0, 3).replace(reg, ''));
+
+      // temperature
+      croppedBuf = await sharp(imgBuff)
+        .extract({
+          left: 760,
+          top: 7018,
+          width: 70,
+          height: 20
+        })
+        .toBuffer();
+      path = `${dir}/portersridgelinetemp.jpg`;
+      await fs.writeFile(path, croppedBuf);
+
+      ret = await worker.recognize(path);
+      let textTemperature = ret.data.text.replace(reg, '');
+      if (textTemperature.length && !textTemperature.includes('.')) {
+        textTemperature = `${textTemperature.slice(0, -1)}.${textTemperature.slice(-1)}`;
       }
-    });
+      temperature = Number(textTemperature);
+      result.push({
+        id: 'ridgeline',
+        data: {
+          windAverage,
+          windGust,
+          windBearing,
+          temperature
+        }
+      });
+    }
 
     // cleanup
     await worker.terminate();
