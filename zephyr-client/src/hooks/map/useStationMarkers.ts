@@ -3,12 +3,10 @@ import mapboxgl from "mapbox-gl";
 
 import { getWindDirectionFromBearing, REFRESH_INTERVAL_MS } from "@/lib/utils";
 import {
-  getStationById,
   listStations,
   listStationsUpdatedSince,
   loadAllStationDataAtTimestamp,
 } from "@/services/station.service";
-import type { IStation } from "@/models/station.model";
 import type { IHistoricalStationData } from "@/models/station-data.model";
 import {
   getStationGeoJson,
@@ -25,10 +23,13 @@ import {
   type StationProperties,
 } from "./station-marker.utils";
 import { useNavigate } from "react-router-dom";
+import type { IStation } from "@/models/station.model";
+import { toast } from "sonner";
 
 interface UseStationMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
   isMapLoaded: boolean;
+  isHistoricData: boolean;
   unit: WindUnit;
   onRefresh?: (updatedIds: string[]) => void;
 }
@@ -230,6 +231,7 @@ function updateMarkerElement(
 export function useStationMarkers({
   map,
   isMapLoaded,
+  isHistoricData,
   unit,
   onRefresh,
 }: UseStationMarkersOptions) {
@@ -237,11 +239,42 @@ export function useStationMarkers({
   const markersRef = useRef<StationMarker[]>([]);
   const lastRefreshRef = useRef(0);
   const unitRef = useRef<WindUnit>(unit);
+  const refreshAbortController = useRef<AbortController | null>(null);
+
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [stations, setStations] = useState<IStation[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     unitRef.current = unit;
   }, [unit]);
+
+  // Cleanup abort controller on unmount
+  useEffect(() => {
+    return () => {
+      refreshAbortController.current?.abort();
+    };
+  }, []);
+
+  // Wrapper for async operations with error handling
+  const withErrorHandling = useCallback(
+    async <T>(
+      operation: () => Promise<T>,
+      errorMessage: string
+    ): Promise<T | null> => {
+      try {
+        setError(null);
+        return await operation();
+      } catch (err) {
+        console.error(errorMessage, err);
+        setError(err instanceof Error ? err.message : errorMessage);
+        toast.error(err instanceof Error ? err.message : errorMessage);
+        return null;
+      }
+    },
+    []
+  );
 
   // Create a station marker with popup
   const createStationMarker = useCallback(
@@ -281,42 +314,33 @@ export function useStationMarkers({
     []
   );
 
-  // Check for stations that may have been missed
-  const checkMissedUpdates = useCallback(async () => {
-    const timestamps = [
-      ...new Set(
-        markersRef.current.map((m) => Number(m.marker.dataset.timestamp))
-      ),
-    ];
-    if (timestamps.length < 2) return null;
-
-    timestamps.sort((a, b) => a - b);
-    const [oldest, secondOldest] = timestamps;
-
-    // Only check if there's a significant gap
-    if (secondOldest - oldest <= REFRESH_INTERVAL_MS * 1.1) return null;
-
-    const staleMarkers = markersRef.current.filter(
-      (m) => Number(m.marker.dataset.timestamp) === oldest
-    );
-
-    const stations: IStation[] = [];
-    for (const m of staleMarkers) {
-      const station = await getStationById(m.marker.id);
-      if (station) stations.push(station);
-    }
-
-    return getStationGeoJson(stations);
-  }, []);
-
   // Initialize all station markers
   const initialize = useCallback(async () => {
-    const geoJson = getStationGeoJson(await listStations(false));
-    if (!map.current || !geoJson?.features.length) return;
+    if (isInitialized || !map.current) return;
+
+    const allStations = await withErrorHandling(
+      () => listStations(false),
+      "Failed to load stations"
+    );
+
+    if (!allStations?.length) {
+      setIsInitialized(true);
+      return;
+    }
+
+    setStations(allStations);
+    const geoJson = getStationGeoJson(allStations);
+    if (!geoJson?.features.length) {
+      setIsInitialized(true);
+      return;
+    }
 
     const timestamp = Date.now();
     lastRefreshRef.current = timestamp;
     sortStationFeatures(geoJson.features);
+
+    // Clear existing markers
+    markersRef.current = [];
 
     for (const feature of geoJson.features) {
       const props = extractStationProperties(feature.properties);
@@ -328,60 +352,91 @@ export function useStationMarkers({
         .setPopup(popup)
         .addTo(map.current);
     }
-  }, [map, createStationMarker]);
+
+    setIsInitialized(true);
+  }, [map, createStationMarker, withErrorHandling, isInitialized]);
 
   // Refresh updated stations
   const refresh = useCallback(async () => {
-    if (document.visibilityState !== "visible" || !markersRef.current.length)
-      return;
+    // We don't update map when showing historical data
+    if (isHistoricData) return;
 
-    let timestamp = Date.now();
+    if (
+      document.visibilityState !== "visible" ||
+      !markersRef.current.length ||
+      isRefreshing
+    ) {
+      return;
+    }
+
+    const timestamp = Date.now();
     if (timestamp - lastRefreshRef.current < REFRESH_INTERVAL_MS) return;
+
+    // Cancel any ongoing refresh
+    refreshAbortController.current?.abort();
+    refreshAbortController.current = new AbortController();
 
     lastRefreshRef.current = timestamp;
     setIsRefreshing(true);
 
-    // Find newest marker timestamp
-    const newestTimestamp = Math.max(
-      ...markersRef.current.map((m) => Number(m.marker.dataset.timestamp))
-    );
+    try {
+      // Find newest marker timestamp
+      const newestTimestamp =
+        stations.length > 0
+          ? Math.max(
+              ...stations.map((s) => new Date(s.lastUpdate).getTime() || 0)
+            )
+          : 0;
 
-    // Fetch stations updated since then
-    const stations = await listStationsUpdatedSince(
-      Math.round(newestTimestamp / 1000)
-    );
-    let geoJson = getStationGeoJson(stations);
-
-    // Check for missed updates if no new data
-    if (!geoJson?.features.length) {
-      geoJson = await checkMissedUpdates();
-      if (!geoJson) return;
-
-      // Use second-oldest timestamp for missed updates
-      const timestamps = [
-        ...new Set(
-          markersRef.current.map((m) => Number(m.marker.dataset.timestamp))
-        ),
-      ];
-      timestamps.sort((a, b) => a - b);
-      if (timestamps.length >= 2) timestamp = timestamps[1];
-    }
-
-    const updatedIds: string[] = [];
-    for (const item of markersRef.current) {
-      const feature = geoJson.features.find(
-        (f) => f.properties.dbId === item.marker.id
+      // Fetch stations updated since then
+      const updatedStations = await withErrorHandling(
+        () => listStationsUpdatedSince(Math.round(newestTimestamp / 1000)),
+        "Failed to refresh station data"
       );
-      if (!feature) continue;
 
-      const props = extractStationProperties(feature.properties);
-      updateStationMarker(item, props, timestamp);
-      updatedIds.push(item.marker.id);
+      if (refreshAbortController.current?.signal.aborted) {
+        return;
+      }
+
+      if (!updatedStations) {
+        return;
+      }
+
+      const geoJson = getStationGeoJson(updatedStations);
+
+      if (!geoJson?.features.length) {
+        return;
+      }
+
+      const updatedIds: string[] = [];
+      for (const item of markersRef.current) {
+        const feature = geoJson.features.find(
+          (f) => f.properties.dbId === item.marker.id
+        );
+        if (!feature) continue;
+
+        const props = extractStationProperties(feature.properties);
+        updateStationMarker(item, props, timestamp);
+        updatedIds.push(item.marker.id);
+      }
+
+      onRefresh?.(updatedIds);
+    } catch (err) {
+      console.error("Failed to refresh station markers", err);
+      toast.error(
+        err instanceof Error ? err.message : "Failed to refresh station markers"
+      );
+    } finally {
+      // Ensure isRefreshing is always set to false
+      setIsRefreshing(false);
     }
-
-    setIsRefreshing(false);
-    onRefresh?.(updatedIds);
-  }, [checkMissedUpdates, updateStationMarker, onRefresh]);
+  }, [
+    stations,
+    onRefresh,
+    updateStationMarker,
+    withErrorHandling,
+    isRefreshing,
+  ]);
 
   // Update all markers when unit changes
   useEffect(() => {
@@ -426,7 +481,10 @@ export function useStationMarkers({
     async (time: Date): Promise<void> => {
       if (!markersRef.current.length) return;
 
-      const data = await loadAllStationDataAtTimestamp(time);
+      const data = await withErrorHandling(
+        () => loadAllStationDataAtTimestamp(time),
+        "Failed to load historical data"
+      );
       if (!data?.values?.length) return;
 
       // Update each marker with historical data
@@ -447,7 +505,6 @@ export function useStationMarkers({
           false // not offline in history mode
         );
 
-        // eslint-disable-next-line react-hooks/immutability
         item.marker.dataset.avg =
           windAverage != null ? String(windAverage) : "";
 
@@ -478,13 +535,12 @@ export function useStationMarkers({
         }
       }
     },
-    []
+    [withErrorHandling]
   );
 
   // Set marker interactivity (enable/disable click handlers)
   const setInteractive = useCallback((interactive: boolean) => {
     for (const item of markersRef.current) {
-      // eslint-disable-next-line react-hooks/immutability
       item.marker.style.pointerEvents = interactive ? "auto" : "none";
       item.marker.style.cursor = interactive ? "pointer" : "default";
     }
@@ -494,8 +550,13 @@ export function useStationMarkers({
   const renderCurrentData = useCallback(async (): Promise<void> => {
     if (!markersRef.current.length) return;
 
-    const stations = await listStations(false);
+    const stations = await withErrorHandling(
+      () => listStations(false),
+      "Failed to load current station data"
+    );
     if (!stations?.length) return;
+
+    setStations(stations);
 
     for (const item of markersRef.current) {
       const station = stations.find((s) => s._id === item.marker.id);
@@ -519,7 +580,6 @@ export function useStationMarkers({
         props.isOffline
       );
 
-      // eslint-disable-next-line react-hooks/immutability
       item.marker.dataset.avg =
         props.currentAverage != null ? String(props.currentAverage) : "";
       item.marker.dataset.gust =
@@ -556,12 +616,14 @@ export function useStationMarkers({
       // Update popup
       item.popup.setHTML(createPopupHtml(props, unitRef.current));
     }
-  }, []);
+  }, [withErrorHandling]);
 
   // Initialize when map loads
   useEffect(() => {
-    if (isMapLoaded) void initialize();
-  }, [isMapLoaded, initialize]);
+    if (isMapLoaded && !isInitialized) {
+      void initialize();
+    }
+  }, [isMapLoaded, isInitialized, initialize]);
 
   // Auto-refresh every minute
   useEffect(() => {
@@ -572,7 +634,7 @@ export function useStationMarkers({
     }, REFRESH_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [isMapLoaded, refresh]);
+  }, [isHistoricData, isMapLoaded, refresh]);
 
   return {
     markers: markersRef,
@@ -581,5 +643,7 @@ export function useStationMarkers({
     renderCurrentData,
     setInteractive,
     isRefreshing,
+    error,
+    isInitialized,
   };
 }

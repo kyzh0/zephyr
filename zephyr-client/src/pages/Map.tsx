@@ -72,6 +72,7 @@ export default function Map() {
   } = useStationMarkers({
     map,
     isMapLoaded: isLoaded,
+    isHistoricData: historyOffset < 0,
     unit,
     onRefresh: setRefreshedStations,
   });
