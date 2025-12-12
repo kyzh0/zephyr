@@ -136,7 +136,7 @@ export function HelpDialog({
           className="flex-1 text-xs sm:text-sm"
           onClick={() => setContactOpen(true)}
         >
-          <Mail className="pt-2 sm:pt-4 h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+          <Mail className="h-3 w-3 sm:h-4 sm:w-4" />
           Contact Us
         </Button>
 

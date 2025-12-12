@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { X, History } from "lucide-react";
+import { History } from "lucide-react";
 import { formatInTimeZone } from "date-fns-tz";
 
 import { useAppContext } from "@/context/AppContext";
@@ -281,13 +281,6 @@ export default function Map() {
                 "dd MMM HH:mm"
               )}
             </span>
-            <button
-              onClick={() => handleHistoryChange(0)}
-              className="ml-1 hover:bg-red-600 rounded-full p-0.5 transition-colors"
-              aria-label="Exit history mode"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
         </div>
       )}
