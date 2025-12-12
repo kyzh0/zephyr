@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { formatInTimeZone } from "date-fns-tz";
-import { X, ChevronLeft, ChevronRight, History } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Hourglass } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import {
@@ -83,7 +83,7 @@ export function HistorySlider({
             disabled={disabled}
             className="h-9 w-9"
           >
-            <History className="h-4 w-4 opacity-70" />
+            <Hourglass className="h-4 w-4 opacity-70" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>View Historical Data</TooltipContent>
