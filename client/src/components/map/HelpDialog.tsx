@@ -153,8 +153,10 @@ export function HelpDialog({
               htmlFor="dontShowAgain"
               className="text-xs sm:text-sm text-muted-foreground cursor-pointer"
             >
-              Don't show again on startup
+              Hide on startup
             </Label>
+          </div>
+          <div className="flex items-center space-x-1 sm:space-x-2">
             <Button
               variant="link"
               className="text-xs text-muted-foreground cursor-pointer px-1 sm:px-2"
@@ -165,14 +167,14 @@ export function HelpDialog({
             >
               Export Data
             </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              className="text-xs sm:text-sm px-2 sm:px-4"
+            >
+              Close
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            className="text-xs sm:text-sm px-2 sm:px-4"
-          >
-            Close
-          </Button>
         </div>
       </DialogContent>
 
