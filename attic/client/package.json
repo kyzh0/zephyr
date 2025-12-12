@@ -1,0 +1,68 @@
+{
+  "name": "zephyr",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emailjs/browser": "^4.3.3",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^5.15.12",
+    "@mui/lab": "^5.0.0-alpha.168",
+    "@mui/material": "^5.18.0",
+    "@mui/x-date-pickers": "^6.19.9",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@turf/turf": "^7.2.0",
+    "axios": "^1.6.7",
+    "date-fns": "^2.30.0",
+    "date-fns-tz": "^2.0.1",
+    "fuse.js": "^7.1.0",
+    "geofire-common": "^6.0.0",
+    "mapbox-gl": "^3.2.0",
+    "react": "^18.2.0",
+    "react-cookie": "^7.1.0",
+    "react-dom": "^18.2.0",
+    "react-responsive-carousel": "^3.2.23",
+    "react-router-dom": "^6.22.3",
+    "react-scripts": "5.0.1",
+    "recharts": "^2.12.3",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "react-scripts eject",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ./**/*.{js,jsx,ts,tsx,css,md,json} --config ./.prettierrc.json"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@craco/craco": "^7.1.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react": "^7.34.0",
+    "prettier": "^3.2.5"
+  }
+}

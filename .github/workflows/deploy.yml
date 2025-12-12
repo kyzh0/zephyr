@@ -1,0 +1,181 @@
+name: "Deploy Application"
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  configure-deployment:
+    name: Check for changes and set environment
+    runs-on: ubuntu-latest
+    outputs:
+      backend_changed: ${{ steps.configure-deployment.outputs.backend_changed }}
+      frontend_changed: ${{ steps.configure-deployment.outputs.frontend_changed }}
+      environment: ${{ steps.configure-deployment.outputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Configure deployment
+        id: configure-deployment
+        uses: ./.github/actions/configure-deployment
+
+  build-and-deploy-frontend:
+    name: "Build (and deploy) frontend"
+    needs: configure-deployment
+    if: needs.configure-deployment.outputs.frontend_changed == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.configure-deployment.outputs.environment }}
+    defaults:
+      run:
+        working-directory: "client"
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+
+      - name: Create .env file
+        run: |
+          echo "VITE_MAPBOX_GL_KEY=${{ secrets.MAPBOX_GL_KEY }}" >> .env
+          echo "VITE_MAPBOX_GL_KEY_BACKUP=${{ secrets.MAPBOX_GL_KEY_BACKUP }}" >> .env
+          echo "VITE_EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}" >> .env
+          echo "VITE_EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}" >> .env
+          echo "VITE_EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}" >> .env
+          echo "VITE_DONATION_BANK_ACCOUNT=${{ vars.DONATION_BANK_ACCOUNT }}" >> .env
+          echo "VITE_API_PREFIX=${{ vars.API_PREFIX }}" >> .env
+          echo "VITE_FILE_SERVER_PREFIX=${{ vars.FILE_SERVER_PREFIX }}" >> .env
+
+      - name: Build client
+        run: |
+          npm i
+          npm run build
+
+      - name: Deploy client
+        if: github.event_name == 'push'
+        uses: easingthemes/ssh-deploy@v5.1.0
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SOURCE: "client/dist/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: /home/${{ secrets.REMOTE_USER }}/dist/
+          EXCLUDE: "/dist/, /node_modules/"
+          SCRIPT_BEFORE: ls
+          SCRIPT_BEFORE_REQUIRED: true
+          SCRIPT_AFTER: |
+            # docker container run --rm -i -v zephyr_caddy_srv:/data alpine ash -c "rm -rf /data/*"
+            docker container create --name temp -v zephyr_caddy_srv:/data hello-world
+            docker cp ./dist/. temp:/data
+            docker rm temp
+            rm -rf ./dist
+          SCRIPT_AFTER_REQUIRED: true
+
+  # build-push-image:
+  #   needs: configure-deployment
+  #   if: needs.configure-deployment.outputs.backend_changed == 'true'
+  #   runs-on: ubuntu-latest
+
+  #   outputs:
+  #     date: ${{ steps.date.outputs.date }}
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Get current date
+  #       id: date
+  #       run: echo "::set-output name=date::$(date +%s)"
+  #     - name: Build the Docker image
+  #       run: docker build . --file Dockerfile  --tag ghcr.io/replace-me-org/replace-me-image-name:${{ steps.date.outputs.date }}
+  #     - name: Login to GitHub Container Registry
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Push the Docker image to the GitHub registry
+  #       run: docker push ghcr.io/replace-me-org/replace-me-image-name:${{ steps.date.outputs.date }}
+
+  # deploy-docker-backend:
+  #   name: "Lint and deploy backend"
+  #   needs: configure-deployment
+  #   if: needs.configure-deployment.outputs.backend_changed == 'true'
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: ${{ needs.configure-deployment.outputs.environment }}
+  #   defaults:
+  #     run:
+  #       working-directory: "server"
+
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #     - uses: actions/setup-node@v6
+  #       with:
+  #         node-version: 24
+  #         cache: "npm"
+  #         cache-dependency-path: server/package-lock.json
+
+  #     - name: Lint
+  #       if: github.event_name == 'push'
+  #       uses: appleboy/ssh-action@v1.2.4
+  #       with:
+  #         host: ${{ secrets.REMOTE_HOST }}
+  #         username: ${{ secrets.REMOTE_USER }}
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         script: |
+  #           cd /home/${{ secrets.REMOTE_USER }}/projects/zephyr
+  #           git fetch
+  #           git checkout ${{ github.ref_name }}
+  #           git pull
+  #           cp ${{ env.CADDYFILE_NAME }} Caddyfile
+  #           docker compose down
+  #           docker compose up --build -d
+
+  #     - name: Create .env file
+  #       run: |
+  #         echo "DB_CONNECTION_STRING=${{ secrets.DB_CONNECTION_STRING }}" >> .env
+  #         echo "SEQ_INGESTION_URL=${{ env.SEQ_INGESTION_URL }}" >> .env
+  #         echo "FILE_SERVER_PREFIX=${{ env.FILE_SERVER_PREFIX }}" >> .env
+  #         echo "ATTENTIS_KEY=${{ secrets.ATTENTIS_KEY }}" >> .env
+  #         echo "WUNDERGROUND_KEY=${{ secrets.WUNDERGROUND_KEY }}" >> .env
+  #         echo "TEMPEST_KEY=${{ secrets.TEMPEST_KEY }}" >> .env
+  #         echo "SOFAROCEAN_KEY=${{ secrets.SOFAROCEAN_KEY }}" >> .env
+  #         echo "HOLFUY_KEY=${{ secrets.HOLFUY_KEY }}" >> .env
+  #         echo "HARVEST_FENZ_KEY=${{ secrets.HARVEST_FENZ_KEY }}" >> .env
+  #         echo "WINDGURU_KEY=${{ secrets.WINDGURU_KEY }}" >> .env
+  #         echo "HARVEST_REALJOURNEYS_USERNAME=${{ secrets.HARVEST_REALJOURNEYS_USERNAME }}" >> .env
+  #         echo "HARVEST_REALJOURNEYS_PASSWORD=${{ secrets.HARVEST_REALJOURNEYS_PASSWORD }}" >> .env
+  #         echo "PREDICTWIND_KEY=${{ secrets.PREDICTWIND_KEY }}" >> .env
+  #         echo "ECOWITT_API_KEY=${{ secrets.ECOWITT_API_KEY }}" >> .env
+  #         echo "ECOWITT_APPLICATION_KEY=${{ secrets.ECOWITT_APPLICATION_KEY }}" >> .env
+  #         echo "WEATHERLINK_USERNAME=${{ secrets.WEATHERLINK_USERNAME }}" >> .env
+  #         echo "WEATHERLINK_PASSWORD=${{ secrets.WEATHERLINK_PASSWORD }}" >> .env
+  #         echo "EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}" >> .env
+  #         echo "EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE1_ID }}" >> .env
+  #         echo "EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}" >> .env
+  #         echo "EMAILJS_PRIVATE_KEY=${{ secrets.EMAILJS_PRIVATE_KEY }}" >> .env
+
+  #     - name: Deploy
+  #       if: github.event_name == 'push'
+  #       uses: appleboy/ssh-action@v1.2.4
+  #       with:
+  #         host: ${{ secrets.REMOTE_HOST }}
+  #         username: ${{ secrets.REMOTE_USER }}
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         script: |
+  #           cd /home/${{ secrets.REMOTE_USER }}/projects/zephyr
+  #           git fetch
+  #           git checkout ${{ github.ref_name }}
+  #           git pull
+  #           cp ${{ env.CADDYFILE_NAME }} Caddyfile
+  #           docker compose down
+  #           docker compose up --build -d
