@@ -32,7 +32,7 @@ runs:
       run: |
         BRANCH_NAME=""
         if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-          BRANCH_NAME=${{ github.base_ref }}
+          BRANCH_NAME=develop
         else
           BRANCH_NAME=${{ github.ref }}
         fi

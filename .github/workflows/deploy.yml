@@ -27,7 +27,7 @@ jobs:
         uses: ./.github/actions/configure-deployment
 
   build-and-deploy-frontend:
-    name: "Build and deploy frontend"
+    name: "Build (and deploy) frontend"
     needs: configure-deployment
     if: needs.configure-deployment.outputs.frontend_changed == 'true'
     runs-on: ubuntu-latest
