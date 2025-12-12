@@ -58,6 +58,11 @@ export default function Map() {
     getStoredValue<WindUnit>("unit", "kmh")
   );
 
+  // Recent stations state
+  const [minimizeRecents, setMinimizeRecents] = useState(() =>
+    getStoredValue("minimizeRecents", false)
+  );
+
   // Initialize map
   const { map, isLoaded, triggerGeolocate } = useMapInstance({
     containerRef: mapContainer,
@@ -188,6 +193,13 @@ export default function Map() {
     ]
   );
 
+  // Handle recent stations toggle
+  const handleRecentsToggle = useCallback(() => {
+    const newValue = !minimizeRecents;
+    setMinimizeRecents(newValue);
+    setStoredValue("minimizeRecents", newValue);
+  }, [minimizeRecents]);
+
   // Check if in history mode
   const isHistoricData = historyOffset < 0;
 
@@ -264,6 +276,8 @@ export default function Map() {
         elevationFilter={elevationFilter}
         onToggleElevation={() => setShowElevation(!showElevation)}
         onElevationChange={setElevationFilter}
+        minimizeRecents={minimizeRecents}
+        onRecentsToggle={handleRecentsToggle}
       />
 
       <div ref={mapContainer} className="w-full h-full" />
