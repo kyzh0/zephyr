@@ -50,15 +50,9 @@ export default async function scrapePortersData(stations) {
     await fs.writeFile(path, croppedBuf);
 
     let ret = await worker.recognize(path);
-    let textTime = ret.data.text
-      .replace('Monday,', '')
-      .replace('Tuesday,', '')
-      .replace('Wednesday,', '')
-      .replace('Thursday,', '')
-      .replace('Friday,', '')
-      .replace('Saturday,', '')
-      .replace('Sunday,', '')
-      .trim();
+    let timeStrStart = ret.data.text.indexOf(', ') + 2;
+    let timeStrEnd = ret.data.text.indexOf('m.') + 2;
+    let textTime = ret.data.text.substring(timeStrStart, timeStrEnd).trim();
     let time = fromZonedTime(
       parse(textTime, 'dd MMMM yyyy hh:mm:ss aaaa', new Date()),
       'Pacific/Auckland'
@@ -162,15 +156,9 @@ export default async function scrapePortersData(stations) {
     await fs.writeFile(path, croppedBuf);
 
     ret = await worker.recognize(path);
-    textTime = ret.data.text
-      .replace('Monday,', '')
-      .replace('Tuesday,', '')
-      .replace('Wednesday,', '')
-      .replace('Thursday,', '')
-      .replace('Friday,', '')
-      .replace('Saturday,', '')
-      .replace('Sunday,', '')
-      .trim();
+    timeStrStart = ret.data.text.indexOf(', ') + 2;
+    timeStrEnd = ret.data.text.indexOf('m.') + 2;
+    textTime = ret.data.text.substring(timeStrStart, timeStrEnd).trim();
     time = fromZonedTime(
       parse(textTime, 'dd MMMM yyyy hh:mm:ss aaaa', new Date()),
       'Pacific/Auckland'
@@ -269,15 +257,9 @@ export default async function scrapePortersData(stations) {
     await fs.writeFile(path, croppedBuf);
 
     ret = await worker.recognize(path);
-    textTime = ret.data.text
-      .replace('Monday,', '')
-      .replace('Tuesday,', '')
-      .replace('Wednesday,', '')
-      .replace('Thursday,', '')
-      .replace('Friday,', '')
-      .replace('Saturday,', '')
-      .replace('Sunday,', '')
-      .trim();
+    timeStrStart = ret.data.text.indexOf(', ') + 2;
+    timeStrEnd = ret.data.text.indexOf('m.') + 2;
+    textTime = ret.data.text.substring(timeStrStart, timeStrEnd).trim();
     time = fromZonedTime(
       parse(textTime, 'dd MMMM yyyy hh:mm:ss aaaa', new Date()),
       'Pacific/Auckland'
