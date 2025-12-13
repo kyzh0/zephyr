@@ -1,3 +1,6 @@
+import { getStoredValue } from "../map";
+import type { WindUnit } from "./types";
+
 /**
  * Get direction color based on whether the bearing is within valid bearing ranges
  */
@@ -30,9 +33,8 @@ export function getDirectionColor(
 /**
  * Get unit preference from localStorage
  */
-export function getUnit(): "kt" | "kmh" {
-  const unit = localStorage.getItem("unit");
-  return unit === "kt" ? "kt" : "kmh";
+export function getUnit(): WindUnit {
+  return getStoredValue<WindUnit>("unit", "kmh");
 }
 
 /**
@@ -40,7 +42,7 @@ export function getUnit(): "kt" | "kmh" {
  */
 export function convertWindSpeed(
   speed: number | null | undefined,
-  unit: "kt" | "kmh"
+  unit: WindUnit
 ): number | null {
   if (speed == null) return null;
   return Math.round(unit === "kt" ? speed / 1.852 : speed);
