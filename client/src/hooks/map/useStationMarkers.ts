@@ -436,6 +436,7 @@ export function useStationMarkers({
     updateStationMarker,
     withErrorHandling,
     isRefreshing,
+    isHistoricData,
   ]);
 
   // Update all markers when unit changes

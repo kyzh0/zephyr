@@ -42,7 +42,7 @@ export async function loadCamImages(id: string) {
 
 export async function addCam(cam: Partial<ICam>) {
   try {
-    const key = localStorage.getItem("adminKey") ?? "";
+    const key = sessionStorage.getItem("adminKey") ?? "";
     const res = await fetch(
       `${import.meta.env.VITE_API_PREFIX}/cams?key=${key}`,
       {

@@ -19,7 +19,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
 
   const handleSignOut = () => {
-    localStorage.removeItem("adminKey");
+    sessionStorage.removeItem("adminKey");
     navigate("/");
   };
 

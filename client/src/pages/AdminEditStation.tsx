@@ -64,7 +64,7 @@ export default function AdminEditStation() {
         }
       }
 
-      const adminKey = localStorage.getItem("adminKey") ?? "";
+      const adminKey = sessionStorage.getItem("adminKey") ?? "";
       await patchStation(
         id!,
         { patch, remove } as unknown as Partial<IStation>,
