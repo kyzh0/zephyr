@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Video, Grid3X3, Mountain, TrendingUp, Mail } from "lucide-react";
+import { Camera, Grid3X3, Mountain, TrendingUp, Mail } from "lucide-react";
 
 import {
   Dialog,
@@ -108,7 +108,7 @@ export function HelpDialog({
           </div>
 
           <div className="flex justify-end items-center">
-            <Video className="w-5 h-5 sm:w-6 sm:h-6" />
+            <Camera className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div className="flex items-center">Webcam overlay</div>
 
