@@ -6,7 +6,7 @@ import {
   TrendingUp,
   Layers,
   HandHelping,
-  Video,
+  Camera,
   LocateFixed,
   History,
 } from "lucide-react";
@@ -164,7 +164,7 @@ export function MapControlButtons({
               disabled={isHistoricData}
               className="h-9 w-9 bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
             >
-              <Video className="h-4 w-4 opacity-70" />
+              <Camera className="h-4 w-4 opacity-70" />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>Show Webcams on Map</TooltipContent>
