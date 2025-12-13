@@ -18,7 +18,9 @@ import { ContactDialog } from "./ContactDialog";
 export const WELCOME_STORAGE_KEY = "zephyr-welcome-dismissed";
 
 function shouldShowWelcome(): boolean {
-  const dismissed = localStorage.getItem(WELCOME_STORAGE_KEY);
+  const dismissed =
+    window.self !== window.top || // Dismiss if iframe
+    localStorage.getItem(WELCOME_STORAGE_KEY) === "true";
   return !dismissed;
 }
 

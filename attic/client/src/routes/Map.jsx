@@ -102,14 +102,6 @@ export default function Map() {
       setCookies('zoom', window.innerWidth > 1000 ? 5.1 : 4.3, cookiesOptions);
     }
 
-    // ignore if iframe
-    /*
-    if (window.self === window.top && !cookies.visited) {
-      console.log('Navigating to welcome page');
-      navigate('welcome');
-    }
-      */
-
     if (cookies.unit) {
       unitRef.current = cookies.unit === 'kt' ? 'kt' : 'kmh';
     }

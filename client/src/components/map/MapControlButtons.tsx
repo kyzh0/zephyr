@@ -68,7 +68,8 @@ export function MapControlButtons({
   const navigate = useNavigate();
   const [donateOpen, setDonateOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(
-    localStorage.getItem(WELCOME_STORAGE_KEY) !== "true"
+    window.self === window.top && // don't show if iframe
+      localStorage.getItem(WELCOME_STORAGE_KEY) !== "true"
   );
   const [gridOpen, setGridOpen] = useState(false);
   const [recentStations, setRecentStations] = useState<RecentStation[]>([]);
