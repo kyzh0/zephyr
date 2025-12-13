@@ -3,7 +3,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 
 export default function ProtectedRoute() {
   const navigate = useNavigate();
-  const adminKey = localStorage.getItem("adminKey");
+  const adminKey = sessionStorage.getItem("adminKey");
 
   useEffect(() => {
     if (!adminKey) {

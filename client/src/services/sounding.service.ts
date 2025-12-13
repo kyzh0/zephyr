@@ -22,7 +22,7 @@ export async function listSoundings() {
 
 export async function addSounding(sounding: Partial<ISounding>) {
   try {
-    const key = localStorage.getItem("adminKey") ?? "";
+    const key = sessionStorage.getItem("adminKey") ?? "";
     const res = await fetch(
       `${import.meta.env.VITE_API_PREFIX}/soundings?key=${key}`,
       {

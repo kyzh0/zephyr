@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +40,13 @@ export function SignInDialog({ open, onOpenChange }: SignInDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const key = sessionStorage.getItem("adminKey");
+    if (open && key?.length) {
+      navigate("/admin/dashboard");
+    }
+  }, [open, navigate]);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -71,7 +78,7 @@ export function SignInDialog({ open, onOpenChange }: SignInDialogProps) {
       const result = (await response.json()) as { key: string };
 
       // Store the auth key
-      localStorage.setItem("adminKey", result.key);
+      sessionStorage.setItem("adminKey", result.key);
 
       toast.success("Signed in successfully");
       form.reset();
