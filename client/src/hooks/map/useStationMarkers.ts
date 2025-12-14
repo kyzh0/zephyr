@@ -164,6 +164,11 @@ function createMarkerElement(
   container.dataset.timestamp = String(timestamp);
   container.dataset.avg = currentAverage != null ? String(currentAverage) : "";
   container.dataset.gust = currentGust != null ? String(currentGust) : "";
+  container.dataset.name = props.name;
+  container.dataset.bearing =
+    currentBearing != null ? String(currentBearing) : "";
+  container.dataset.isOffline = String(isOffline || false);
+  container.dataset.validBearings = validBearings || "";
 
   container.appendChild(arrow);
   container.appendChild(text);
@@ -198,6 +203,10 @@ function updateMarkerElement(
   marker.dataset.timestamp = String(timestamp);
   marker.dataset.avg = currentAverage != null ? String(currentAverage) : "";
   marker.dataset.gust = currentGust != null ? String(currentGust) : "";
+  marker.dataset.name = props.name;
+  marker.dataset.bearing = currentBearing != null ? String(currentBearing) : "";
+  marker.dataset.isOffline = String(props.isOffline || false);
+  marker.dataset.validBearings = props.validBearings || "";
 
   for (const child of Array.from(marker.children)) {
     if (child.classList.contains("marker-text")) {
@@ -448,6 +457,13 @@ export function useStationMarkers({
         item.marker.dataset.gust === ""
           ? null
           : Number(item.marker.dataset.gust);
+      const bearing =
+        item.marker.dataset.bearing === ""
+          ? null
+          : Number(item.marker.dataset.bearing);
+      const name = item.marker.dataset.name || "";
+      const isOffline = item.marker.dataset.isOffline === "true";
+      const validBearings = item.marker.dataset.validBearings || null;
 
       // Update text
       for (const child of Array.from(item.marker.children)) {
@@ -456,24 +472,18 @@ export function useStationMarkers({
         }
       }
 
-      // Update popup
-      const unitLabel = unit === "kt" ? "kt" : "km/h";
-      let windText = avg != null ? String(convertWindSpeed(avg, unit)) : "";
-      if (avg != null && gust != null) {
-        windText += ` - ${convertWindSpeed(gust, unit)}`;
-      }
-      windText += ` ${unitLabel}`;
-
-      const popupContent = item.popup
-        .getElement()
-        ?.querySelector(".mapboxgl-popup-content");
-      if (popupContent) {
-        const html = popupContent.innerHTML.replace(
-          /(\d+\s-\s\d+\s|\d+\s)(km\/h|kt)/g,
-          windText
-        );
-        item.popup.setHTML(html);
-      }
+      // Regenerate popup with proper data
+      const stationProps: StationProperties = {
+        dbId: item.marker.id,
+        name,
+        elevation: Number(item.marker.getAttribute("elevation")),
+        currentAverage: avg,
+        currentGust: gust,
+        currentBearing: bearing,
+        validBearings,
+        isOffline,
+      };
+      item.popup.setHTML(createPopupHtml(stationProps, unit));
     }
   }, [unit]);
 
