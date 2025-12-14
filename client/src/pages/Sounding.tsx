@@ -23,7 +23,7 @@ export default function Sounding() {
     if (!id) return;
     void (async () => {
       const data = await getSoundingById(id);
-      if (!data) return navigate("/");
+      if (!data) return navigate(-1);
       setSounding(data);
 
       if (!data.images?.length) return;
@@ -52,7 +52,7 @@ export default function Sounding() {
     : "";
 
   return (
-    <Dialog open onOpenChange={() => navigate("/")}>
+    <Dialog open onOpenChange={() => navigate(-1)}>
       <DialogContent className="max-w-3xl p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-base sm:text-lg">

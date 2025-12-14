@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { listStationsWithinRadius } from "@/services/station.service";
@@ -7,10 +7,14 @@ import {
   getWindColor,
   getWindDirectionFromBearing,
 } from "@/lib/utils";
-import { convertWindSpeed, getStoredValue } from "./map.utils";
-import type { WindUnit } from "./map.types";
+import { convertWindSpeed, getStoredValue } from "@/components/map/map.utils";
+import type { WindUnit } from "@/components/map/map.types";
 import type { IStation } from "@/models/station.model";
 
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DirectionArrow } from "@/components/ui/DirectionArrow";
 import {
   Dialog,
   DialogContent,
@@ -18,93 +22,81 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Skeleton } from "@/components/ui/skeleton";
-import { DirectionArrow } from "../ui/DirectionArrow";
 
 interface StationWithDistance extends IStation {
   distance?: number;
 }
 
-interface GridViewDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export function GridViewDialog({ open, onOpenChange }: GridViewDialogProps) {
+export default function GridView() {
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState("");
   const [data, setData] = useState<StationWithDistance[]>([]);
-  const [hasFetched, setHasFetched] = useState(false);
   const [radius, setRadius] = useState(() => 50);
   const [threshold, setThreshold] = useState(() => 0);
 
   const unit = getStoredValue<WindUnit>("unit", "kmh");
 
-  const fetchData = (r: number) => {
+  const fetchData = useCallback((r: number) => {
     setLoading(true);
     setError("");
-    setHasFetched(true);
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        const stations = await listStationsWithinRadius(
-          pos.coords.latitude,
-          pos.coords.longitude,
-          r
-        );
-
-        if (stations?.length) {
-          setData(
-            stations.map(
-              (station) =>
-                ({
-                  ...station,
-                  distance:
-                    getDistance(
-                      pos.coords.latitude,
-                      pos.coords.longitude,
-                      station.location.coordinates[1],
-                      station.location.coordinates[0]
-                    ) / 1000, // convert to km,
-                } as StationWithDistance)
-            )
+        try {
+          const stations = await listStationsWithinRadius(
+            pos.coords.latitude,
+            pos.coords.longitude,
+            r
           );
-        } else {
-          setError(`No stations found within ${r}km`);
+
+          if (stations?.length) {
+            setData(
+              stations.map(
+                (station) =>
+                  ({
+                    ...station,
+                    distance:
+                      getDistance(
+                        pos.coords.latitude,
+                        pos.coords.longitude,
+                        station.location.coordinates[1],
+                        station.location.coordinates[0]
+                      ) / 1000, // convert to km,
+                  } as StationWithDistance)
+              )
+            );
+          } else {
+            setError(`No stations found within ${r}km`);
+          }
+        } catch {
+          setError("Failed to load stations");
+        } finally {
+          setLoading(false);
         }
-        setLoading(false);
       },
       () => {
         setError("Please grant location permissions");
         setLoading(false);
       }
     );
-  };
+  }, []);
 
-  const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen && !hasFetched) {
-      fetchData(radius);
-    }
-    onOpenChange(isOpen);
-  };
+  useEffect(() => {
+    fetchData(radius);
+  }, [fetchData, radius]);
 
   const handleRadiusChange = (value: number) => {
     setRadius(value);
-    fetchData(value);
   };
 
   const filteredData = data.filter(
     (s) => !s.isOffline && (s.currentAverage ?? 0) >= threshold
   );
 
-  handleOpenChange(open);
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open onOpenChange={() => navigate(-1)}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Nearby Stations</DialogTitle>
@@ -160,7 +152,6 @@ export function GridViewDialog({ open, onOpenChange }: GridViewDialogProps) {
                     type="button"
                     key={s._id}
                     onClick={() => {
-                      onOpenChange(false);
                       navigate(`/stations/${s._id}`);
                     }}
                     className="rounded-lg p-2 text-center transition-colors hover:opacity-80"

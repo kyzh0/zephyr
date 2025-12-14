@@ -20,7 +20,7 @@ export default function AdminDashboard() {
 
   const handleSignOut = () => {
     sessionStorage.removeItem("adminKey");
-    navigate("/");
+    navigate(-1);
   };
 
   return (
