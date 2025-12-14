@@ -65,7 +65,7 @@ export function useStationData(
       }
       const s = await getStationById(id);
       if (!s) {
-        navigate("/");
+        navigate(-1);
         return;
       }
       setStation(s);
