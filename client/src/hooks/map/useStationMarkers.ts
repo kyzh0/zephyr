@@ -167,8 +167,8 @@ function createMarkerElement(
   container.dataset.name = props.name;
   container.dataset.bearing =
     currentBearing != null ? String(currentBearing) : "";
-  container.dataset.isOffline = String(isOffline || false);
-  container.dataset.validBearings = validBearings || "";
+  container.dataset.isOffline = String(isOffline ?? false);
+  container.dataset.validBearings = validBearings ?? "";
 
   container.appendChild(arrow);
   container.appendChild(text);
@@ -205,8 +205,8 @@ function updateMarkerElement(
   marker.dataset.gust = currentGust != null ? String(currentGust) : "";
   marker.dataset.name = props.name;
   marker.dataset.bearing = currentBearing != null ? String(currentBearing) : "";
-  marker.dataset.isOffline = String(props.isOffline || false);
-  marker.dataset.validBearings = props.validBearings || "";
+  marker.dataset.isOffline = String(props.isOffline ?? false);
+  marker.dataset.validBearings = props.validBearings ?? "";
 
   for (const child of Array.from(marker.children)) {
     if (child.classList.contains("marker-text")) {
@@ -461,9 +461,9 @@ export function useStationMarkers({
         item.marker.dataset.bearing === ""
           ? null
           : Number(item.marker.dataset.bearing);
-      const name = item.marker.dataset.name || "";
+      const name = item.marker.dataset.name ?? "";
       const isOffline = item.marker.dataset.isOffline === "true";
-      const validBearings = item.marker.dataset.validBearings || null;
+      const validBearings = item.marker.dataset.validBearings ?? null;
 
       // Update text
       for (const child of Array.from(item.marker.children)) {

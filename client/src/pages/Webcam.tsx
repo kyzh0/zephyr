@@ -26,7 +26,7 @@ export default function Webcam() {
     if (!id) return;
     void (async () => {
       const cam = await getCamById(id);
-      if (!cam) return navigate("/");
+      if (!cam) return navigate(-1);
       setWebcam(cam);
 
       const stale =
@@ -46,7 +46,7 @@ export default function Webcam() {
   }, [id, navigate]);
 
   return (
-    <Dialog open onOpenChange={() => navigate("/")}>
+    <Dialog open onOpenChange={() => navigate(-1)}>
       <DialogContent className="max-w-4xl p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-base sm:text-lg">

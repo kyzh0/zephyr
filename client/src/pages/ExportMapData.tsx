@@ -300,7 +300,7 @@ export default function ExportMapData() {
   }
 
   function handleClose() {
-    navigate("/");
+    navigate(-1);
   }
 
   const formContent = (

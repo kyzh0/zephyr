@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { DonateDialog } from "./DonateDialog";
 import { HelpDialog, WELCOME_STORAGE_KEY } from "./HelpDialog";
-import { GridViewDialog } from "./GridViewDialog";
 import { HistorySlider } from "./HistorySlider";
 import { ElevationSlider } from "./ElevationSlider";
 import { SearchBar } from "./SearchBar";
@@ -71,7 +70,6 @@ export function MapControlButtons({
     window.self === window.top && // don't show if iframe
       localStorage.getItem(WELCOME_STORAGE_KEY) !== "true"
   );
-  const [gridOpen, setGridOpen] = useState(false);
   const [recentStations, setRecentStations] = useState<RecentStation[]>([]);
 
   // Load recent stations on mount and when localStorage changes
@@ -146,7 +144,7 @@ export function MapControlButtons({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setGridOpen(true)}
+              onClick={() => navigate("/grid")}
               disabled={isHistoricData}
               className="h-9 w-9"
             >
@@ -155,7 +153,6 @@ export function MapControlButtons({
           </TooltipTrigger>
           <TooltipContent>Grid View of Nearby Weather Stations</TooltipContent>
         </Tooltip>
-        <GridViewDialog open={gridOpen} onOpenChange={setGridOpen} />
         <Tooltip>
           <TooltipTrigger asChild>
             <Toggle
