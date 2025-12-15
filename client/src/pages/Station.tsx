@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatInTimeZone } from "date-fns-tz";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 
 import { getMinutesAgo, getStationTypeName } from "@/lib/utils";
 import {
   useStationData,
   useMousePosition,
   useIsMobile,
+  useNearbyWebcams,
   type TimeRange,
 } from "@/hooks";
 import {
@@ -24,6 +25,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { addRecentStation } from "@/services/recentStations.service";
@@ -41,7 +47,14 @@ export default function Station() {
   );
   const mouseCoords = useMousePosition();
 
+  const { webcams } = useNearbyWebcams({
+    latitude: station?.location.coordinates[0] ?? 0,
+    longitude: station?.location.coordinates[1] ?? 0,
+    maxDistance: 10000, // 10km
+  });
+
   const [hoveringOnInfoIcon, setHoveringOnInfoIcon] = useState(false);
+  const [webcamsOpen, setWebcamsOpen] = useState(false);
 
   const tableRef = useRef<HTMLTableRowElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -152,6 +165,49 @@ export default function Station() {
         )
       ) : (
         <Skeleton width="100%" height={400} className="mt-4" />
+      )}
+
+      {/* Nearby Webcams */}
+      {station && webcams.length > 0 && (
+        <Collapsible open={webcamsOpen} onOpenChange={setWebcamsOpen}>
+          <CollapsibleTrigger
+            className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 mt-6 ${
+              webcamsOpen ? "bg-transparent" : "bg-accent"
+            }`}
+          >
+            <span>Nearby Webcams ({webcams.length} within 10km)</span>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${
+                webcamsOpen ? "rotate-180" : ""
+              }`}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
+            {webcams.map((webcam) => (
+              <div
+                key={webcam._id}
+                className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
+                onClick={() => navigate(`/webcams/${webcam._id}`)}
+              >
+                <div className="flex flex-row items-end gap-1">
+                  <span className="font-medium text-sm">{webcam.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {(webcam.distance / 1000).toFixed(1)}km away
+                  </span>
+                </div>
+                {webcam.currentUrl && (
+                  <img
+                    src={`${import.meta.env.VITE_FILE_SERVER_PREFIX}/${
+                      webcam.currentUrl
+                    }`}
+                    alt={webcam.name}
+                    className="h-12 w-20 md:h-20 md:w-30 object-cover rounded"
+                  />
+                )}
+              </div>
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
       )}
 
       {/* Footer */}
