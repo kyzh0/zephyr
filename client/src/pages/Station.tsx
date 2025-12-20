@@ -163,8 +163,8 @@ export default function Station() {
             {station && webcams.length > 0 && (
               <Collapsible open={webcamsOpen} onOpenChange={setWebcamsOpen}>
                 <CollapsibleTrigger
-                  className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3${
-                    webcamsOpen ? "bg-transparent" : "bg-accent mb-4"
+                  className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
+                    webcamsOpen ? "bg-transparent" : "bg-muted mb-4"
                   }`}
                 >
                   <span>Nearby Webcams ({webcams.length} within 10km)</span>
