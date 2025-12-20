@@ -61,15 +61,19 @@ export default function Station() {
 
   // Auto-scroll table to latest data
   useEffect(() => {
-    if (!tableRef.current) return;
+    if (!tableRef.current || !containerRef.current) return;
 
+    // First, ensure container is at top
+    containerRef.current.scroll(0, 0);
+
+    // Then scroll table horizontally to latest data
     const lastCell = tableRef.current.querySelector("td:last-child");
     if (lastCell) {
-      lastCell.scrollIntoView({ behavior: "smooth", inline: "end" });
-    }
-
-    if (containerRef.current) {
-      containerRef.current.scroll(0, 0);
+      lastCell.scrollIntoView({
+        behavior: "smooth",
+        inline: "end",
+        block: "nearest",
+      });
     }
   }, [data]);
 
