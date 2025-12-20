@@ -159,55 +159,57 @@ export default function Station() {
               data={data}
               bearingPairCount={bearingPairCount}
             />
+            {/* Nearby Webcams */}
+            {station && webcams.length > 0 && (
+              <Collapsible open={webcamsOpen} onOpenChange={setWebcamsOpen}>
+                <CollapsibleTrigger
+                  className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3${
+                    webcamsOpen ? "bg-transparent" : "bg-accent mb-4"
+                  }`}
+                >
+                  <span>Nearby Webcams ({webcams.length} within 10km)</span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${
+                      webcamsOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
+                  {webcams.map((webcam) => (
+                    <div
+                      key={webcam._id}
+                      className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
+                      onClick={() => navigate(`/webcams/${webcam._id}`)}
+                    >
+                      <div className="flex flex-row items-end gap-1">
+                        <span className="font-medium text-sm">
+                          {webcam.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {(webcam.distance / 1000).toFixed(1)}km away
+                        </span>
+                      </div>
+                      {webcam.currentUrl && (
+                        <img
+                          src={`${import.meta.env.VITE_FILE_SERVER_PREFIX}/${
+                            webcam.currentUrl
+                          }`}
+                          alt={webcam.name}
+                          loading="lazy"
+                          className="h-12 w-20 md:h-20 md:w-30 lg:w-80 lg:h-50 object-cover rounded"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            )}
           </div>
         ) : (
           <Skeleton width="100%" height={400} className="mt-4" />
         )
       ) : (
         <Skeleton width="100%" height={400} className="mt-4" />
-      )}
-
-      {/* Nearby Webcams */}
-      {station && webcams.length > 0 && (
-        <Collapsible open={webcamsOpen} onOpenChange={setWebcamsOpen}>
-          <CollapsibleTrigger
-            className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 mt-6 ${
-              webcamsOpen ? "bg-transparent" : "bg-accent"
-            }`}
-          >
-            <span>Nearby Webcams ({webcams.length} within 10km)</span>
-            <ChevronDown
-              className={`h-4 w-4 transition-transform ${
-                webcamsOpen ? "rotate-180" : ""
-              }`}
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
-            {webcams.map((webcam) => (
-              <div
-                key={webcam._id}
-                className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
-                onClick={() => navigate(`/webcams/${webcam._id}`)}
-              >
-                <div className="flex flex-row items-end gap-1">
-                  <span className="font-medium text-sm">{webcam.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {(webcam.distance / 1000).toFixed(1)}km away
-                  </span>
-                </div>
-                {webcam.currentUrl && (
-                  <img
-                    src={`${import.meta.env.VITE_FILE_SERVER_PREFIX}/${
-                      webcam.currentUrl
-                    }`}
-                    alt={webcam.name}
-                    className="h-12 w-20 md:h-20 md:w-30 object-cover rounded"
-                  />
-                )}
-              </div>
-            ))}
-          </CollapsibleContent>
-        </Collapsible>
       )}
 
       {/* Footer */}

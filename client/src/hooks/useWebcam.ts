@@ -8,7 +8,7 @@ interface UseWebcamOptions {
   autoLoad?: boolean;
 }
 
-interface UseWebcamResult {
+export interface UseWebcamResult {
   webcam: ICam | null;
   images: ICamImage[];
   isLoading: boolean;
@@ -157,7 +157,7 @@ interface WebcamWithDistance extends ICam {
   distance: number; // distance in meters
 }
 
-interface UseNearbyWebcamsResult {
+export interface UseNearbyWebcamsResult {
   webcams: WebcamWithDistance[];
   isLoading: boolean;
   error: Error | null;

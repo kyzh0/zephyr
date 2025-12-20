@@ -36,7 +36,7 @@ export default function Webcam() {
 
   return (
     <Dialog open onOpenChange={() => navigate(-1)}>
-      <DialogContent className="max-w-4xl p-4 sm:p-6">
+      <DialogContent className="sm:max-w-6xl w-[95vw] max-h-[90vh] p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-base sm:text-lg">
             {webcam?.name ?? (
@@ -57,6 +57,7 @@ export default function Webcam() {
                   images[index].url
                 }`}
                 alt={webcam.name}
+                loading="lazy"
                 className="w-full max-h-[60vh] object-contain"
               />
               <div className="flex items-center gap-2 sm:gap-4">

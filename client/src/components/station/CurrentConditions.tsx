@@ -102,6 +102,7 @@ export function CurrentConditions({
                     "transition-opacity w-6 h-6 sm:w-10 sm:h-10",
                     hoveringOnInfoIcon ? "opacity-30" : "opacity-100"
                   )}
+                  loading="lazy"
                   alt="Info"
                 />
               </td>
