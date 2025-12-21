@@ -61,15 +61,19 @@ export default function Station() {
 
   // Auto-scroll table to latest data
   useEffect(() => {
-    if (!tableRef.current) return;
+    if (!tableRef.current || !containerRef.current) return;
 
+    // First, ensure container is at top
+    containerRef.current.scroll(0, 0);
+
+    // Then scroll table horizontally to latest data
     const lastCell = tableRef.current.querySelector("td:last-child");
     if (lastCell) {
-      lastCell.scrollIntoView({ behavior: "smooth", inline: "end" });
-    }
-
-    if (containerRef.current) {
-      containerRef.current.scroll(0, 0);
+      lastCell.scrollIntoView({
+        behavior: "smooth",
+        inline: "end",
+        block: "nearest",
+      });
     }
   }, [data]);
 
@@ -181,8 +185,8 @@ export default function Station() {
                       className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
                       onClick={() => navigate(`/webcams/${webcam._id}`)}
                     >
-                      <div className="flex flex-row items-end gap-1">
-                        <span className="font-medium text-sm">
+                      <div className="flex flex-col sm:flex-row items-center sm:items-end gap-1">
+                        <span className="text-xs sm:text-sm font-medium">
                           {webcam.name}
                         </span>
                         <span className="text-xs text-muted-foreground">
