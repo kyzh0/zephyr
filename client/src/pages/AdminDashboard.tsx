@@ -7,10 +7,16 @@ const MENU_ITEMS = [
   { label: "Add New Station", path: "/admin/add-station", icon: Plus },
   { label: "Add New Webcam", path: "/admin/add-webcam", icon: Plus },
   { label: "Add New Sounding", path: "/admin/add-sounding", icon: Plus },
+  { label: "Add New Site", path: "/admin/add-site", icon: Plus },
   { label: "View Errors", path: "/admin/errors", icon: AlertCircle },
   {
     label: "View / Edit Stations",
     path: "/admin/edit-station-list",
+    icon: List,
+  },
+  {
+    label: "View / Edit Sites",
+    path: "/admin/edit-site-list",
     icon: List,
   },
 ] as const;

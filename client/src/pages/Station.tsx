@@ -8,9 +8,12 @@ import {
   useStationData,
   useMousePosition,
   useIsMobile,
-  useNearbyWebcams,
   type TimeRange,
 } from "@/hooks";
+import {
+  useNearbyWebcams,
+  type UseNearbyWebcamsResult,
+} from "@/hooks/useWebcam";
 import {
   CurrentConditions,
   StationDataTable,
@@ -47,7 +50,7 @@ export default function Station() {
   );
   const mouseCoords = useMousePosition();
 
-  const { webcams } = useNearbyWebcams({
+  const { webcams }: UseNearbyWebcamsResult = useNearbyWebcams({
     latitude: station?.location.coordinates[0] ?? 0,
     longitude: station?.location.coordinates[1] ?? 0,
     maxDistance: 10000, // 10km
@@ -181,7 +184,7 @@ export default function Station() {
                 <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
                   {webcams.map((webcam) => (
                     <div
-                      key={webcam._id}
+                      key={String(webcam._id)}
                       className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
                       onClick={() => navigate(`/webcams/${webcam._id}`)}
                     >
