@@ -75,6 +75,7 @@ export default function Sounding() {
                 src={`${import.meta.env.VITE_FILE_SERVER_PREFIX}/${
                   images[index].url
                 }`}
+                loading="lazy"
                 alt={sounding.name}
                 className="w-full max-h-[65vh] object-contain"
               />

@@ -6,29 +6,23 @@ interface IStation {
   type: string;
   location: ILocation;
   externalLink: string;
-  externalId?: string;
-  lastUpdate: Date;
+  externalId: string;
   currentAverage?: number;
   currentGust?: number;
   currentBearing?: number;
   currentTemperature?: number;
-  elevation?: number;
+  elevation: number;
+  lastUpdate: string;
+  __v?: number;
   validBearings?: string;
-  popupMessage?: string;
-  isHighResolution?: boolean;
-  isError?: boolean;
-  isOffline?: boolean;
-  isDisabled?: boolean;
-  harvestWindAverageId?: string;
-  harvestWindGustId?: string;
-  harvestWindDirectionId?: string;
+  isError: boolean;
+  isOffline: boolean;
+  isHighResolution: boolean;
   harvestTemperatureId?: string;
-  harvestCookie?: string;
-  gwWindAverageFieldName?: string;
-  gwWindGustFieldName?: string;
-  gwWindBearingFieldName?: string;
-  gwTemperatureFieldName?: string;
-  weatherlinkCookie?: string;
+  harvestWindAverageId?: string;
+  harvestWindDirectionId?: string;
+  harvestWindGustId?: string;
+  popupMessage?: string;
 }
 
 interface INewStation {

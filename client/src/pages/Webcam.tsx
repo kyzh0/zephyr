@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getCamById, loadCamImages } from "@/services/cam.service";
-import type { ICam, ICamImage } from "@/models/cam.model";
+import { useWebcam } from "@/hooks";
 import { getWebcamTypeName } from "@/lib/utils";
 import { formatInTimeZone } from "date-fns-tz";
 import {
@@ -17,37 +16,27 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 export default function Webcam() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [webcam, setWebcam] = useState<ICam | null>(null);
-  const [images, setImages] = useState<ICamImage[]>([]);
+  const { webcam, images, isStale, error } = useWebcam({ id });
   const [index, setIndex] = useState(0);
-  const [isStale, setIsStale] = useState(false);
 
+  // Set index to last image when images load
   useEffect(() => {
-    if (!id) return;
-    void (async () => {
-      const cam = await getCamById(id);
-      if (!cam) return navigate(-1);
-      setWebcam(cam);
+    if (images.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIndex(images.length - 1);
+    }
+  }, [images]);
 
-      const stale =
-        Date.now() - new Date(cam.currentTime).getTime() >= 86400000;
-      setIsStale(stale);
-      if (stale) return;
-
-      const imgs = await loadCamImages(id);
-      if (imgs) {
-        imgs.sort(
-          (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
-        );
-        setImages(imgs);
-        setIndex(imgs.length - 1);
-      }
-    })();
-  }, [id, navigate]);
+  // Navigate back if webcam not found
+  useEffect(() => {
+    if (error) {
+      navigate(-1);
+    }
+  }, [error, navigate]);
 
   return (
     <Dialog open onOpenChange={() => navigate(-1)}>
-      <DialogContent className="max-w-4xl p-4 sm:p-6">
+      <DialogContent className="sm:max-w-6xl w-[95vw] max-h-[90vh] p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-base sm:text-lg">
             {webcam?.name ?? (
@@ -68,6 +57,7 @@ export default function Webcam() {
                   images[index].url
                 }`}
                 alt={webcam.name}
+                loading="lazy"
                 className="w-full max-h-[60vh] object-contain"
               />
               <div className="flex items-center gap-2 sm:gap-4">
