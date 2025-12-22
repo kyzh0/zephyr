@@ -5,6 +5,7 @@ import MapWrapper from "./pages/MapWrapper";
 import Station from "./pages/Station";
 import Webcam from "./pages/Webcam";
 import Sounding from "./pages/Sounding";
+import Site from "./pages/Site";
 import GridView from "./pages/GridView";
 import ExportMapData from "./pages/ExportMapData";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -42,6 +43,10 @@ export const router = createBrowserRouter([
           {
             path: "soundings/:id",
             element: <Sounding />,
+          },
+          {
+            path: "sites/:id",
+            element: <Site />,
           },
           {
             path: "grid",
