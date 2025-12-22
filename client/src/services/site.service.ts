@@ -34,6 +34,7 @@ export async function addSite(site: Partial<ISite>) {
     return (await res.json()) as ISite;
   } catch (error) {
     console.error(error);
+    throw error;
   }
 }
 
@@ -46,7 +47,7 @@ export async function patchSite(
     const res = await fetch(
       `${import.meta.env.VITE_API_PREFIX}/sites/${id}?key=${key}`,
       {
-        method: "PATCH",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -56,6 +57,7 @@ export async function patchSite(
     return (await res.json()) as ISite;
   } catch (error) {
     console.error(error);
+    throw error;
   }
 }
 
@@ -70,5 +72,6 @@ export async function deleteSite(id: string, key: string) {
     return (await res.json()) as { success: boolean };
   } catch (error) {
     console.error(error);
+    throw error;
   }
 }

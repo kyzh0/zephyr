@@ -58,13 +58,13 @@ router.post('/', async (req, res) => {
     return;
   }
   if (
-    !landingLocation ||
+    landingLocation && (
     !landingLocation.coordinates ||
     landingLocation.coordinates.length !== 2 ||
     landingLocation.coordinates[0] < -180 ||
     landingLocation.coordinates[0] > 180 ||
     landingLocation.coordinates[1] < -90 ||
-    landingLocation.coordinates[1] > 90
+    landingLocation.coordinates[1] > 90)
   ) {
     res.status(400).json({ error: 'Landing location is not valid' });
     return;
@@ -236,7 +236,7 @@ router.put('/:id', async (req, res) => {
     site.rating = rating;
   }
   if (validBearings) {
-    site.rating = rating;
+    site.validBearings = validBearings;
   }
   if (elevation) {
     site.elevation = elevation;

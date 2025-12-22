@@ -29,7 +29,8 @@ import {
 import { getSiteById, patchSite } from "@/services/site.service";
 import type { ISite } from "@/models/site.model";
 
-const RATING_OPTIONS = ["PG1", "PG2", "PG3", "PG4", "HG1", "HG2", "HG3", "N/A"];
+const PG_RATING_OPTIONS = ["PG1", "PG2", "PG3", "PG4", "UNKNOWN"];
+const HG_RATING_OPTIONS = ["HG1", "HG2", "HG3", "UNKNOWN"];
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -61,14 +62,14 @@ const formSchema = z.object({
   landingCoordinates: coordinatesSchema,
   paraglidingRating: z.string().min(1, "Required"),
   hangGlidingRating: z.string().min(1, "Required"),
-  siteGuideURL: z.string().url("Enter a valid URL").or(z.literal("")),
+  siteGuideURL: z.url("Enter a valid URL"),
   validBearings: bearingsSchema,
   elevation: z.string().regex(/^$|^\d+$/, "Must be a number"),
-  radio: z.string(),
-  description: z.string(),
-  mandatoryNotices: z.string(),
-  airspaceNotices: z.string(),
-  landingNotices: z.string(),
+  description: z.string().min(1, "Description is required"),
+  radio: z.string().optional(),
+  mandatoryNotices: z.string().optional(),
+  airspaceNotices: z.string().optional(),
+  landingNotices: z.string().optional(),
   isDisabled: z.boolean(),
 });
 
@@ -110,7 +111,7 @@ export default function AdminEditSite() {
       hangGlidingRating: "",
       siteGuideURL: "",
       validBearings: "",
-      elevation: "",
+      elevation: "0",
       radio: "",
       description: "",
       mandatoryNotices: "",
@@ -124,7 +125,7 @@ export default function AdminEditSite() {
 
   useEffect(() => {
     if (!id) {
-      navigate("/admin/edit-site-list");
+      navigate("/admin/sites");
       return;
     }
 
@@ -138,9 +139,9 @@ export default function AdminEditSite() {
           landingCoordinates: formatCoordinates(data.landingLocation),
           paraglidingRating: data.rating?.paragliding ?? "",
           hangGlidingRating: data.rating?.hangGliding ?? "",
-          siteGuideURL: data.siteGuideURL ?? "",
-          validBearings: data.validBearings ?? "",
+          siteGuideURL: data.siteGuideUrl ?? "",
           elevation: data.elevation?.toString() ?? "",
+          validBearings: data.validBearings ?? "",
           radio: data.radio ?? "",
           description: data.description ?? "",
           mandatoryNotices: data.mandatoryNotices ?? "",
@@ -163,7 +164,8 @@ export default function AdminEditSite() {
         paragliding: values.paraglidingRating,
         hangGliding: values.hangGlidingRating,
       },
-      siteGuideURL: values.siteGuideURL,
+      siteGuideUrl: values.siteGuideURL,
+      elevation: parseInt(values.elevation, 10),
       radio: values.radio,
       description: values.description,
       mandatoryNotices: values.mandatoryNotices,
@@ -186,14 +188,14 @@ export default function AdminEditSite() {
       updates.validBearings = values.validBearings;
     }
 
-    if (values.elevation) {
-      updates.elevation = parseInt(values.elevation, 10);
-    }
-
     const adminKey = sessionStorage.getItem("adminKey") ?? "";
-    await patchSite(id!, updates, adminKey);
-    toast.success("Site updated");
-    navigate("/admin/edit-site-list");
+    try {
+      await patchSite(id!, updates, adminKey);
+      toast.success("Site updated");
+      navigate(`/admin/sites/${id}`);
+    } catch (error) {
+      toast.error("Failed to update site: " + (error as Error).message);
+    }
   }
 
   return (
@@ -202,7 +204,7 @@ export default function AdminEditSite() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/admin/edit-site-list")}
+          onClick={() => navigate("/admin/sites")}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -256,7 +258,7 @@ export default function AdminEditSite() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {RATING_OPTIONS.map((rating) => (
+                            {PG_RATING_OPTIONS.map((rating) => (
                               <SelectItem key={rating} value={rating}>
                                 {rating}
                               </SelectItem>
@@ -284,7 +286,7 @@ export default function AdminEditSite() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {RATING_OPTIONS.map((rating) => (
+                            {HG_RATING_OPTIONS.map((rating) => (
                               <SelectItem key={rating} value={rating}>
                                 {rating}
                               </SelectItem>
@@ -402,12 +404,12 @@ export default function AdminEditSite() {
 
                 <FormField
                   control={form.control}
-                  name="radio"
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Radio Frequency</FormLabel>
+                      <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea {...field} rows={2} />
+                        <Textarea {...field} rows={4} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -416,12 +418,12 @@ export default function AdminEditSite() {
 
                 <FormField
                   control={form.control}
-                  name="description"
+                  name="radio"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Radio Frequency - Optional</FormLabel>
                       <FormControl>
-                        <Textarea {...field} rows={4} />
+                        <Textarea {...field} rows={2} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -438,7 +440,7 @@ export default function AdminEditSite() {
                   name="mandatoryNotices"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mandatory Notices</FormLabel>
+                      <FormLabel>Mandatory Notices - Optional</FormLabel>
                       <FormControl>
                         <Textarea {...field} rows={4} />
                       </FormControl>
@@ -452,7 +454,7 @@ export default function AdminEditSite() {
                   name="airspaceNotices"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Airspace Notices</FormLabel>
+                      <FormLabel>Airspace Notices - Optional</FormLabel>
                       <FormControl>
                         <Textarea {...field} rows={4} />
                       </FormControl>
@@ -466,7 +468,7 @@ export default function AdminEditSite() {
                   name="landingNotices"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Landing Notices</FormLabel>
+                      <FormLabel>Landing Notices - Optional</FormLabel>
                       <FormControl>
                         <Textarea {...field} rows={4} />
                       </FormControl>
@@ -476,7 +478,11 @@ export default function AdminEditSite() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isSubmitting || !form.formState.isDirty}
+              >
                 {isSubmitting && (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 )}

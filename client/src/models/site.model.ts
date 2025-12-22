@@ -9,7 +9,7 @@ export interface ISite {
     paragliding: string;
     hangGliding: string;
   };
-  siteGuideURL: string;
+  siteGuideUrl: string;
   validBearings?: string;
   elevation?: number;
   radio: string;
