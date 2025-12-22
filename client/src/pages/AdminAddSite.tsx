@@ -28,7 +28,8 @@ import {
 import { addSite } from "@/services/site.service";
 import type { ISite } from "@/models/site.model";
 
-const RATING_OPTIONS = ["PG1", "PG2", "PG3", "PG4", "HG1", "HG2", "HG3", "N/A"];
+const PG_RATING_OPTIONS = ["PG1", "PG2", "PG3", "PG4", "UNKNOWN"];
+const HG_RATING_OPTIONS = ["HG1", "HG2", "HG3", "UNKNOWN"];
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -78,14 +79,14 @@ const formSchema = z.object({
   landingCoordinates: optionalCoordinatesSchema,
   paraglidingRating: z.string().min(1, "Required"),
   hangGlidingRating: z.string().min(1, "Required"),
-  siteGuideURL: z.string().url("Enter a valid URL").or(z.literal("")),
+  siteGuideURL: z.url("Enter a valid URL"),
   validBearings: bearingsSchema,
   elevation: z.string().regex(/^$|^\d+$/, "Must be a number"),
-  radio: z.string(),
-  description: z.string(),
-  mandatoryNotices: z.string(),
-  airspaceNotices: z.string(),
-  landingNotices: z.string(),
+  description: z.string().min(1, "Description is required"),
+  radio: z.string().optional(),
+  mandatoryNotices: z.string().optional(),
+  airspaceNotices: z.string().optional(),
+  landingNotices: z.string().optional(),
   isDisabled: z.boolean(),
 });
 
@@ -102,21 +103,6 @@ function parseCoordinates(
   };
 }
 
-async function fetchElevation(
-  lat: number,
-  lon: number
-): Promise<number | undefined> {
-  try {
-    const res = await fetch(
-      `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`
-    );
-    const data = (await res.json()) as { elevation?: number[] };
-    return data.elevation?.[0];
-  } catch {
-    return undefined;
-  }
-}
-
 export default function AdminAddSite() {
   const navigate = useNavigate();
 
@@ -130,7 +116,7 @@ export default function AdminAddSite() {
       hangGlidingRating: "",
       siteGuideURL: "",
       validBearings: "",
-      elevation: "",
+      elevation: "0",
       radio: "",
       description: "",
       mandatoryNotices: "",
@@ -146,18 +132,6 @@ export default function AdminAddSite() {
     const takeoff = parseCoordinates(values.takeoffCoordinates);
     if (!takeoff) return;
 
-    // Auto-fetch elevation if not provided
-    let elevation: number | undefined;
-    if (values.elevation) {
-      elevation = parseInt(values.elevation, 10);
-    } else {
-      const [lat, lon] = values.takeoffCoordinates
-        .replace(/\s/g, "")
-        .split(",")
-        .map(Number);
-      elevation = await fetchElevation(lat, lon);
-    }
-
     const site: Partial<ISite> = {
       name: values.name,
       takeoffLocation: takeoff,
@@ -165,7 +139,8 @@ export default function AdminAddSite() {
         paragliding: values.paraglidingRating,
         hangGliding: values.hangGlidingRating,
       },
-      siteGuideURL: values.siteGuideURL,
+      elevation: parseInt(values.elevation, 10),
+      siteGuideUrl: values.siteGuideURL,
       radio: values.radio,
       description: values.description,
       mandatoryNotices: values.mandatoryNotices,
@@ -183,13 +158,13 @@ export default function AdminAddSite() {
       site.validBearings = values.validBearings;
     }
 
-    if (elevation !== undefined) {
-      site.elevation = elevation;
+    try {
+      const res = await addSite(site);
+      toast.success("Site added successfully");
+      navigate(res ? `/admin/sites/${res._id}` : "/admin/sites");
+    } catch (error) {
+      toast.error(`Failed to add site: ${(error as Error).message}`);
     }
-
-    await addSite(site);
-    toast.success("Site added successfully");
-    navigate("/admin/dashboard");
   }
 
   return (
@@ -246,7 +221,7 @@ export default function AdminAddSite() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {RATING_OPTIONS.map((rating) => (
+                          {PG_RATING_OPTIONS.map((rating) => (
                             <SelectItem key={rating} value={rating}>
                               {rating}
                             </SelectItem>
@@ -274,7 +249,7 @@ export default function AdminAddSite() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {RATING_OPTIONS.map((rating) => (
+                          {HG_RATING_OPTIONS.map((rating) => (
                             <SelectItem key={rating} value={rating}>
                               {rating}
                             </SelectItem>
@@ -349,13 +324,9 @@ export default function AdminAddSite() {
                   name="elevation"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Elevation (m) - Optional</FormLabel>
+                      <FormLabel>Elevation (m)</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          placeholder="Auto-fetched if empty"
-                        />
+                        <Input {...field} type="number" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -387,9 +358,23 @@ export default function AdminAddSite() {
                 name="siteGuideURL"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Site Guide URL - Optional</FormLabel>
+                    <FormLabel>Site Guide URL</FormLabel>
                     <FormControl>
                       <Input {...field} type="url" placeholder="https://" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={4} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -404,20 +389,6 @@ export default function AdminAddSite() {
                     <FormLabel>Radio Frequency - Optional</FormLabel>
                     <FormControl>
                       <Textarea {...field} rows={2} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description - Optional</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} rows={4} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

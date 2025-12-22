@@ -12,11 +12,8 @@ import AdminAddStation from "./pages/AdminAddStation";
 import AdminAddWebcam from "./pages/AdminAddWebcam";
 import AdminAddSounding from "./pages/AdminAddSounding";
 import AdminAddSite from "./pages/AdminAddSite";
-import AdminEditStationList from "./pages/AdminEditStationList";
 import AdminEditStation from "./pages/AdminEditStation";
-import AdminEditSiteList from "./pages/AdminEditSiteList";
 import AdminEditSite from "./pages/AdminEditSite";
-import AdminErrors from "./pages/AdminErrors";
 import ProtectedRoute from "./pages/ProtectedRoute";
 
 export const router = createBrowserRouter([
@@ -65,40 +62,44 @@ export const router = createBrowserRouter([
             element: <AdminDashboard />,
           },
           {
-            path: "add-station",
+            path: "stations",
+            element: <AdminDashboard tab="stations" />,
+          },
+          {
+            path: "webcams",
+            element: <AdminDashboard tab="webcams" />,
+          },
+          {
+            path: "soundings",
+            element: <AdminDashboard tab="soundings" />,
+          },
+          {
+            path: "sites",
+            element: <AdminDashboard tab="sites" />,
+          },
+          {
+            path: "stations/add",
             element: <AdminAddStation />,
           },
           {
-            path: "add-webcam",
+            path: "webcams/add",
             element: <AdminAddWebcam />,
           },
           {
-            path: "add-sounding",
+            path: "soundings/add",
             element: <AdminAddSounding />,
           },
           {
-            path: "add-site",
+            path: "sites/add",
             element: <AdminAddSite />,
           },
           {
-            path: "edit-station-list",
-            element: <AdminEditStationList />,
-          },
-          {
-            path: "edit-station/:id",
+            path: "stations/:id",
             element: <AdminEditStation />,
           },
           {
-            path: "edit-site-list",
-            element: <AdminEditSiteList />,
-          },
-          {
-            path: "edit-site/:id",
+            path: "sites/:id",
             element: <AdminEditSite />,
-          },
-          {
-            path: "errors",
-            element: <AdminErrors />,
           },
         ],
       },
