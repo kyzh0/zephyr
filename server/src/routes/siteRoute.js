@@ -38,7 +38,8 @@ router.post('/', async (req, res) => {
     description,
     mandatoryNotices,
     airspaceNotices,
-    landingNotices
+    landingNotices,
+    isDisabled
   } = req.body;
 
   if (!name) {
@@ -58,13 +59,13 @@ router.post('/', async (req, res) => {
     return;
   }
   if (
-    landingLocation && (
-    !landingLocation.coordinates ||
-    landingLocation.coordinates.length !== 2 ||
-    landingLocation.coordinates[0] < -180 ||
-    landingLocation.coordinates[0] > 180 ||
-    landingLocation.coordinates[1] < -90 ||
-    landingLocation.coordinates[1] > 90)
+    landingLocation &&
+    (!landingLocation.coordinates ||
+      landingLocation.coordinates.length !== 2 ||
+      landingLocation.coordinates[0] < -180 ||
+      landingLocation.coordinates[0] > 180 ||
+      landingLocation.coordinates[1] < -90 ||
+      landingLocation.coordinates[1] > 90)
   ) {
     res.status(400).json({ error: 'Landing location is not valid' });
     return;
@@ -111,6 +112,9 @@ router.post('/', async (req, res) => {
   }
   if (landingNotices) {
     site.landingNotices = landingNotices;
+  }
+  if (isDisabled) {
+    site.isDisabled = true;
   }
 
   try {
