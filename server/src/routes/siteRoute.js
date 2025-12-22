@@ -234,9 +234,13 @@ router.put('/:id', async (req, res) => {
   }
   if (siteGuideUrl) {
     site.rating = rating;
+  } else {
+    delete site.rating;
   }
   if (validBearings) {
     site.validBearings = validBearings;
+  } else {
+    delete site.validBearings;
   }
   if (elevation) {
     site.elevation = elevation;
