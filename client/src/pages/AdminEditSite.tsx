@@ -3,13 +3,25 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CoordinatesPicker } from "@/components/ui/coordinates-picker";
 import {
   Form,
   FormControl,
@@ -19,18 +31,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { getSiteById, patchSite } from "@/services/site.service";
+import { deleteSite, getSiteById, patchSite } from "@/services/site.service";
 import type { ISite } from "@/models/site.model";
-
-const PG_RATING_OPTIONS = ["PG1", "PG2", "PG3", "PG4", "UNKNOWN"];
-const HG_RATING_OPTIONS = ["HG1", "HG2", "HG3", "UNKNOWN"];
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -50,11 +52,19 @@ const coordinatesSchema = z.string().refine(
   { message: "Enter valid coordinates: latitude, longitude" }
 );
 
-const bearingsSchema = z
-  .string()
-  .regex(/^$|^[0-9]{3}-[0-9]{3}(,[0-9]{3}-[0-9]{3})*$/, {
-    message: "Format: 000-090,180-270",
-  });
+const bearingsSchema = z.string().refine(
+  (val) => {
+    if (!val.trim()) return true;
+    const ranges = val.split(",");
+    const rangePattern = /^[0-9]{3}-[0-9]{3}$/;
+    return ranges.every((range) => {
+      if (!rangePattern.test(range)) return false;
+      const [start, end] = range.split("-").map(Number);
+      return start >= 0 && start <= 360 && end >= 0 && end <= 360;
+    });
+  },
+  { message: "Format: 270-010,090-180 (bearings 0-360)" }
+);
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -155,6 +165,23 @@ export default function AdminEditSite() {
     load();
   }, [id, navigate, form]);
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  async function handleDelete() {
+    if (!id) return;
+
+    setIsDeleting(true);
+    const adminKey = sessionStorage.getItem("adminKey") ?? "";
+    try {
+      await deleteSite(id, adminKey);
+      toast.success("Site deleted");
+      navigate("/admin/sites");
+    } catch (error) {
+      toast.error("Failed to delete site: " + (error as Error).message);
+      setIsDeleting(false);
+    }
+  }
+
   async function onSubmit(values: FormValues) {
     if (!site) return;
 
@@ -182,6 +209,8 @@ export default function AdminEditSite() {
     const landing = parseCoordinates(values.landingCoordinates);
     if (landing) {
       updates.landingLocation = landing;
+    } else {
+      updates.landingLocation = updates.takeoffLocation;
     }
 
     if (values.validBearings) {
@@ -208,10 +237,41 @@ export default function AdminEditSite() {
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-xl font-semibold">Edit Site</h1>
           {site && <p className="text-sm text-muted-foreground">{site.name}</p>}
         </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm" disabled={isDeleting}>
+              {isDeleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              <span className="ml-2 hidden sm:inline">Delete</span>
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Site</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{site?.name}"? This action
+                cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                type="button"
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </header>
 
       <main className="flex-1 p-6">
@@ -248,23 +308,9 @@ export default function AdminEditSite() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Paragliding Rating</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select rating" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {PG_RATING_OPTIONS.map((rating) => (
-                              <SelectItem key={rating} value={rating}>
-                                {rating}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <Input {...field} placeholder="e.g. PG2" />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -276,23 +322,9 @@ export default function AdminEditSite() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Hang Gliding Rating</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select rating" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {HG_RATING_OPTIONS.map((rating) => (
-                              <SelectItem key={rating} value={rating}>
-                                {rating}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <Input {...field} placeholder="e.g. HG2" />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -331,6 +363,13 @@ export default function AdminEditSite() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Takeoff Coordinates (lat, lon)</FormLabel>
+                      <FormDescription>
+                        Click on the map to set the takeoff location
+                      </FormDescription>
+                      <CoordinatesPicker
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                       <FormControl>
                         <Input {...field} placeholder="-41.2865, 174.7762" />
                       </FormControl>
