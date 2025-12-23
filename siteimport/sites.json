@@ -1,8 +1,10 @@
 [
   {
     "name": "Duders Peninsula",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 20 hours",
       "hangGliding": "HG Intermediate"
@@ -18,8 +20,10 @@
   },
   {
     "name": "Fort Takapuna",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 20 hours",
       "hangGliding": "HG Intermediate + 20 hours + Cliff Launch"
@@ -35,8 +39,10 @@
   },
   {
     "name": "Glover Park",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 20 hours",
       "hangGliding": "HG Intermediate + 20 hours + Cliff Launch"
@@ -52,8 +58,10 @@
   },
   {
     "name": "Karekare",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 60 hours",
       "hangGliding": "HG Intermediate + Cliff Launch"
@@ -69,8 +77,10 @@
   },
   {
     "name": "Karioitahi - High Side",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": ""
@@ -86,8 +96,10 @@
   },
   {
     "name": "Karioitahi - Club Sites",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 20 hours",
       "hangGliding": "HG Intermediate"
@@ -103,8 +115,10 @@
   },
   {
     "name": "Karioitahi - Hamilton's Gap",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "",
       "hangGliding": ""
@@ -120,8 +134,10 @@
   },
   {
     "name": "Karioitahi - Maioro Club Site (Low Side)",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Novice"
@@ -137,8 +153,10 @@
   },
   {
     "name": "Kennedy Park",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 30 hours",
       "hangGliding": "HG Intermediate"
@@ -154,8 +172,10 @@
   },
   {
     "name": "Mangawhai Heads",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Intermediate"
@@ -171,8 +191,10 @@
   },
   {
     "name": "Muriwai - Maukatia (Maori Bay)",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Novice"
@@ -188,8 +210,10 @@
   },
   {
     "name": "Muriwai - NW Face",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 (lower TO: PG2 + 60 hours)",
       "hangGliding": "HG Novice"
@@ -205,8 +229,10 @@
   },
   {
     "name": "Muriwai - Rimmer Road",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Beginner"
@@ -222,8 +248,10 @@
   },
   {
     "name": "Muriwai - Southern Private Ramp",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 60 hours",
       "hangGliding": "HG Advanced"
@@ -239,8 +267,10 @@
   },
   {
     "name": "Musick Point",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 60 hours",
       "hangGliding": "HG Intermediate + 20 hours + Cliff Launch"
@@ -256,8 +286,10 @@
   },
   {
     "name": "North Head / Maungauika",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 20 hours",
       "hangGliding": "HG Intermediate"
@@ -273,8 +305,10 @@
   },
   {
     "name": "Pakiri",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "",
       "hangGliding": ""
@@ -290,8 +324,10 @@
   },
   {
     "name": "Piha - North",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 60 hours",
       "hangGliding": "N/A"
@@ -307,8 +343,10 @@
   },
   {
     "name": "Piha - South",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG3",
       "hangGliding": "HG Intermediate + 20 hours"
@@ -324,8 +362,10 @@
   },
   {
     "name": "Port Waikato",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "Dunes: HG Beginner; Top Launch: HG Novice; Lower Launch: HG Intermediate + 20 hours + Cliff Launch"
@@ -341,8 +381,10 @@
   },
   {
     "name": "Puketutu",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 60 hours",
       "hangGliding": "HG Advanced"
@@ -358,8 +400,10 @@
   },
   {
     "name": "Takapuna Grammar",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 60 hours",
       "hangGliding": "HG Advanced"
@@ -375,8 +419,10 @@
   },
   {
     "name": "Tawharanui",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Intermediate"
@@ -392,8 +438,10 @@
   },
   {
     "name": "Te Arai Point",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "",
       "hangGliding": "HG Intermediate"
@@ -409,8 +457,10 @@
   },
   {
     "name": "Te Maire (Ripiro Beach)",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "",
       "hangGliding": ""
@@ -426,8 +476,10 @@
   },
   {
     "name": "Whangaparaoa - Army Bay",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 20 hours",
       "hangGliding": "N/A"
@@ -443,8 +495,10 @@
   },
   {
     "name": "Whangaparaoa - Matakatia Bay",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "",
       "hangGliding": ""
@@ -460,8 +514,10 @@
   },
   {
     "name": "Whangaparaoa - Lookout Ridge",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "N/A"
@@ -477,8 +533,10 @@
   },
   {
     "name": "Whangaparaoa - Te Haruhi Bay",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 30 hours",
       "hangGliding": "HG Intermediate"
@@ -494,8 +552,10 @@
   },
   {
     "name": "Whangaparaoa - Tiri Channel",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 20 hours",
       "hangGliding": "N/A"
@@ -511,8 +571,10 @@
   },
   {
     "name": "Bridge's Hill",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 60 hours (to be reviewed)",
       "hangGliding": "HG Advanced"
@@ -528,8 +590,10 @@
   },
   {
     "name": "Dill's Hill",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "",
       "hangGliding": ""
@@ -545,8 +609,10 @@
   },
   {
     "name": "Five Fingers",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 60 hours",
       "hangGliding": "HG Intermediate"
@@ -562,8 +628,10 @@
   },
   {
     "name": "Gubb's Farm",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2 + 60 hours",
       "hangGliding": "HG Intermediate"
@@ -579,8 +647,10 @@
   },
   {
     "name": "Kaimai Range",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Intermediate"
@@ -596,8 +666,10 @@
   },
   {
     "name": "Moirs Hill",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Intermediate"
@@ -613,8 +685,10 @@
   },
   {
     "name": "Mt William",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG3",
       "hangGliding": "N/A"
@@ -630,8 +704,10 @@
   },
   {
     "name": "Paeroas",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Intermediate"
@@ -647,8 +723,14 @@
   },
   {
     "name": "Barnicoat",
-    "takeoffLocation": "-41.34322010035545,173.253573910888",
-    "landingLocation": "-41.32250898279254,173.23277167601702",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [173.253573910888, -41.34322010035545]
+    },
+    "landingLocation": {
+      "type": "Point",
+      "coordinates": [173.23277167601702, -41.32250898279254]
+    },
     "rating": {
       "paragliding": "PG1/PG2",
       "hangGliding": "?"
@@ -664,8 +746,14 @@
   },
   {
     "name": "Inwoods",
-    "takeoffLocation": "-41.57215185043673,172.93679990710527",
-    "landingLocation": "-41.59418008776619,172.90156798955636",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.93679990710527, -41.57215185043673]
+    },
+    "landingLocation": {
+      "type": "Point",
+      "coordinates": [172.90156798955636, -41.59418008776619]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "INT"
@@ -681,8 +769,14 @@
   },
   {
     "name": "Mount Murchison",
-    "takeoffLocation": "-41.729703,172.499378",
-    "landingLocation": "-41.699897,172.463650",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.499378, -41.729703]
+    },
+    "landingLocation": {
+      "type": "Point",
+      "coordinates": [172.46365, -41.699897]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "?"
@@ -698,8 +792,10 @@
   },
   {
     "name": "Riwaka",
-    "takeoffLocation": "-41.026335694406676,172.8794932870903",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.8794932870903, -41.026335694406676]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "?"
@@ -715,8 +811,14 @@
   },
   {
     "name": "Takaka",
-    "takeoffLocation": "-41.02556827626293,172.860851396251",
-    "landingLocation": "-41.0383538543176,172.83453749735565",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.860851396251, -41.02556827626293]
+    },
+    "landingLocation": {
+      "type": "Point",
+      "coordinates": [172.83453749735565, -41.0383538543176]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "NOV"
@@ -732,8 +834,10 @@
   },
   {
     "name": "Sherry River",
-    "takeoffLocation": "-41.425954557759574,172.67397796490204",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.67397796490204, -41.425954557759574]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "NOV"
@@ -749,8 +853,10 @@
   },
   {
     "name": "Allandale",
-    "takeoffLocation": "-43.643,172.625",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.625, -43.643]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -766,8 +872,10 @@
   },
   {
     "name": "Barnett Park",
-    "takeoffLocation": "-43.588,172.729",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.729, -43.588]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": ""
@@ -783,8 +891,10 @@
   },
   {
     "name": "Castle Rock",
-    "takeoffLocation": "-43.589,172.698",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.698, -43.589]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -800,8 +910,10 @@
   },
   {
     "name": "Mt Cheeseman Ski Field",
-    "takeoffLocation": "-43.156,171.671",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [171.671, -43.156]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -817,8 +929,10 @@
   },
   {
     "name": "Gondola",
-    "takeoffLocation": "-43.589,172.716",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.716, -43.589]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -834,8 +948,10 @@
   },
   {
     "name": "John Britten Reserve",
-    "takeoffLocation": "-43.583,172.725",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.725, -43.583]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -851,8 +967,10 @@
   },
   {
     "name": "Little River",
-    "takeoffLocation": "-43.815,172.801",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.801, -43.815]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -868,8 +986,10 @@
   },
   {
     "name": "Scarborough Cliffs",
-    "takeoffLocation": "-43.578,172.775",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.775, -43.578]
+    },
     "rating": {
       "paragliding": "PG3",
       "hangGliding": "HG Advanced"
@@ -885,8 +1005,10 @@
   },
   {
     "name": "Taylor's Mistake",
-    "takeoffLocation": "-43.585,172.766",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.766, -43.585]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -902,8 +1024,10 @@
   },
   {
     "name": "Towers",
-    "takeoffLocation": "-43.588,172.727",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.727, -43.588]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": ""
@@ -919,8 +1043,10 @@
   },
   {
     "name": "Bridge Hill",
-    "takeoffLocation": "-43.156,171.717",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [171.717, -43.156]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -936,8 +1062,10 @@
   },
   {
     "name": "Helicopter Hill",
-    "takeoffLocation": "-43.14,171.729",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [171.729, -43.14]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -953,8 +1081,10 @@
   },
   {
     "name": "Magic Mountain",
-    "takeoffLocation": "-44.454,169.745",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [169.745, -44.454]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -970,8 +1100,10 @@
   },
   {
     "name": "Round Top",
-    "takeoffLocation": "-43.491,171.707",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [171.707, -43.491]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -987,8 +1119,10 @@
   },
   {
     "name": "Upper Cass",
-    "takeoffLocation": "-43.588,172.726",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [172.726, -43.588]
+    },
     "rating": {
       "paragliding": "PG2",
       "hangGliding": "HG Advanced"
@@ -1004,8 +1138,10 @@
   },
   {
     "name": "Skyline Gondola",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "",
       "hangGliding": ""
@@ -1021,8 +1157,10 @@
   },
   {
     "name": "Coronet Peak",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "",
       "hangGliding": ""
@@ -1038,8 +1176,10 @@
   },
   {
     "name": "Crown Terrace",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "",
       "hangGliding": ""
@@ -1055,8 +1195,10 @@
   },
   {
     "name": "Treble Cone",
-    "takeoffLocation": "",
-    "landingLocation": "",
+    "takeoffLocation": {
+      "type": "Point",
+      "coordinates": [174.7762, -41.2865]
+    },
     "rating": {
       "paragliding": "",
       "hangGliding": ""
