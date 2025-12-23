@@ -63,13 +63,10 @@ export async function patchSite(
 
 export async function deleteSite(id: string, key: string) {
   try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_PREFIX}/sites/${id}?key=${key}`,
-      {
-        method: "DELETE",
-      }
-    );
-    return (await res.json()) as { success: boolean };
+    await fetch(`${import.meta.env.VITE_API_PREFIX}/sites/${id}?key=${key}`, {
+      method: "DELETE",
+    });
+    return { success: true };
   } catch (error) {
     console.error(error);
     throw error;

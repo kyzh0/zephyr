@@ -4,7 +4,7 @@ import sys
 from typing import Optional
 
 # Configuration
-API_BASE_URL = "http://localhost:3000/api"  # Adjust this to your API URL
+API_BASE_URL = "https://api.test.zephyrapp.nz"  # Adjust this to your API URL
 SITES_FILE = "sites.json"
 
 

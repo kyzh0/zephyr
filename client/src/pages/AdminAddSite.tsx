@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CoordinatesPicker } from "@/components/ui/coordinates-picker";
 import {
   Form,
   FormControl,
@@ -18,18 +19,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { addSite } from "@/services/site.service";
 import type { ISite } from "@/models/site.model";
-
-const PG_RATING_OPTIONS = ["PG1", "PG2", "PG3", "PG4", "UNKNOWN"];
-const HG_RATING_OPTIONS = ["HG1", "HG2", "HG3", "UNKNOWN"];
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -67,11 +58,19 @@ const optionalCoordinatesSchema = z.string().refine(
   { message: "Enter valid coordinates: latitude, longitude" }
 );
 
-const bearingsSchema = z
-  .string()
-  .regex(/^$|^[0-9]{3}-[0-9]{3}(,[0-9]{3}-[0-9]{3})*$/, {
-    message: "Format: 000-090,180-270",
-  });
+const bearingsSchema = z.string().refine(
+  (val) => {
+    if (!val.trim()) return true;
+    const ranges = val.split(",");
+    const rangePattern = /^[0-9]{3}-[0-9]{3}$/;
+    return ranges.every((range) => {
+      if (!rangePattern.test(range)) return false;
+      const [start, end] = range.split("-").map(Number);
+      return start >= 0 && start <= 360 && end >= 0 && end <= 360;
+    });
+  },
+  { message: "Format: 270-010,090-180 (bearings 0-360)" }
+);
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -152,6 +151,8 @@ export default function AdminAddSite() {
     const landing = parseCoordinates(values.landingCoordinates);
     if (landing) {
       site.landingLocation = landing;
+    } else {
+      site.landingLocation = takeoff;
     }
 
     if (values.validBearings) {
@@ -211,23 +212,9 @@ export default function AdminAddSite() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Paragliding Rating</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select rating" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {PG_RATING_OPTIONS.map((rating) => (
-                            <SelectItem key={rating} value={rating}>
-                              {rating}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g. PG2" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -239,23 +226,9 @@ export default function AdminAddSite() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Hang Gliding Rating</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select rating" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {HG_RATING_OPTIONS.map((rating) => (
-                            <SelectItem key={rating} value={rating}>
-                              {rating}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g. HG2" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -294,6 +267,13 @@ export default function AdminAddSite() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Takeoff Coordinates (lat, lon)</FormLabel>
+                    <FormDescription>
+                      Click on the map to set the takeoff location
+                    </FormDescription>
+                    <CoordinatesPicker
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
                     <FormControl>
                       <Input {...field} placeholder="-41.2865, 174.7762" />
                     </FormControl>

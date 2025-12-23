@@ -139,7 +139,7 @@ export default function Site() {
                 {site.takeoffLocation.coordinates[1].toFixed(5)}
               </p>
             </div>
-            {site.landingLocation && (
+            {site.landingLocation?.coordinates?.length === 2 && (
               <div>
                 <h3 className="font-semibold text-sm mb-1">
                   Landing Coordinates
