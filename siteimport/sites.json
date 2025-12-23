@@ -1,0 +1,1073 @@
+[
+  {
+    "name": "Duders Peninsula",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 20 hours",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-duders",
+    "validBearings": "338-360,0-22,113-157",
+    "elevation": 85,
+    "radio": "Channel 20 - 476.900MHz.\nClose enough to Fort Takapuna to hear schools operating on channels 10 and 26.",
+    "description": "Regional park site with two launches (north face and south-east face). Easy access and a good option for lower-time pilots when conditions suit.\nExpect rotor if wind is too far off-axis, and pay attention to true wind direction over the water.",
+    "mandatoryNotices": "Kauri dieback: use the cleaning station and stay on the tracks.\nNo bottom landing.\nPark gate may close at 7pm and can be locked. If locked in, call Auckland Council 09 301 0101.",
+    "airspaceNotices": "No restrictions.",
+    "landingNotices": "Top land at take-off, or land in the park near the car park and toilets."
+  },
+  {
+    "name": "Fort Takapuna",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 20 hours",
+      "hangGliding": "HG Intermediate + 20 hours + Cliff Launch"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-fort-takapuna",
+    "validBearings": "338-360,0-67",
+    "elevation": 37,
+    "radio": "Channel 20 - 476.900MHz.\nClose enough to Duders Peninsula to hear schools operating on channels 10 and 26.",
+    "description": "Classic coastal cliff launch above Takapuna. Suits N to NE airflow.\nBusy public area: manage launch and ground handling carefully, and stay clear of people and the walking tracks.\nLand on Takapuna Beach when suitable.",
+    "mandatoryNotices": "None listed.",
+    "airspaceNotices": "Within VFR Transit Lane T159 Whangaparaoa (height restriction 1200 ft ASL).\nOn the edge of Whenuapai MBZ (ceiling 2500 ft ASL). Do not fly inland of the cliffs unless operating with an airband radio.",
+    "landingNotices": "Land on Takapuna Beach. Avoid situations where you are forced to land in restricted areas below the cliff, especially at high tide."
+  },
+  {
+    "name": "Glover Park",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 20 hours",
+      "hangGliding": "HG Intermediate + 20 hours + Cliff Launch"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-glover-park",
+    "validBearings": "68-112",
+    "elevation": 24,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Small Whangaparaoa coastal site best in easterly winds. Suitable for short ridge-soaring sessions.\nBe mindful of rotor and turbulence near trees when the wind is not cleanly on.",
+    "mandatoryNotices": "None listed.",
+    "airspaceNotices": "Within VFR Transit Lane T159 Whangaparaoa (height restriction 1200 ft ASL).\nOn the edge of Whenuapai MBZ (ceiling 2500 ft ASL). Do not fly inland of the cliffs unless operating with an airband radio.",
+    "landingNotices": ""
+  },
+  {
+    "name": "Karekare",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 60 hours",
+      "hangGliding": "HG Intermediate + Cliff Launch"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-karekare",
+    "validBearings": "225-315",
+    "elevation": 100,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Coastal soaring on the west coast at Karekare with both hang gliding and paragliding options. The main paragliding take-off is a grassy area about 1 km north of the car park at roughly 100 m ASL, with a straightforward launch and small ridge to work. A separate steep dune launch is used for hang gliders. Best in onshore winds with a westerly component (SW to NW). Suitable for intermediate pilots; conditions can be strong and rough, and landing is on the beach.",
+    "mandatoryNotices": "Do not fly if the wind is too strong or from further north than NW.\nThere is significant rotor near the point at the north end of the beach (a previous fatality). Do not fly or land near this area.\nThe hang glider take-off is not suitable for paragliders due to rotor close to the edge.",
+    "airspaceNotices": "Located in CTA/C with a flight ceiling of 2,500 ft ASL.",
+    "landingNotices": "Land on the beach."
+  },
+  {
+    "name": "Karioitahi - High Side",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/karioitahi-high-side",
+    "validBearings": "203-293",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.\nIf schools are operating, they are normally on Channels 10, 26 or 27.",
+    "description": "High-side paragliding launch at Karioitahi, typically used for top-landing practice and ridge-soaring. Launch is near the toilet block; take-off is sloped and can be affected by turbulence and venturi effects near gaps. Works best in winds from SSW through WNW. Landing is usually a top landing near launch or a beach landing. This is a paid, managed site requiring club subscription and NZHGPA membership.",
+    "mandatoryNotices": "Subscription required (Auckland or Waikato club).\nYou must be an NZHGPA member.\nNo landing within 50 m of the grassy de-rigging area.\nDo not low-fly over horses on the beach.",
+    "airspaceNotices": "Outer CTA/C with a height restriction of 2,500 ft ASL.\nThis reduces to 1,500 ft ASL approximately 8 km north, over Waiuku behind and east of Kariotahi.",
+    "landingNotices": "Top landing is possible.\nBeach landings are possible but watch for beach traffic.\nAvoid landing close to the de-rigging area (keep 50 m clear)."
+  },
+  {
+    "name": "Karioitahi - Club Sites",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 20 hours",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-kariotahi",
+    "validBearings": "225-270",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.\nIf schools are operating, they are normally on Channels 10 and 26.",
+    "description": "Karioitahi club sites accessed via Castaways Resort, with a short walk to the cliff and ridge. This area includes multiple launches and is the most accessible hang gliding site at Karioitahi. Best in SW to W winds. Landing is on the beach. Access is controlled with a locked gate and sign-in process, and visiting pilots must meet club subscription requirements.",
+    "mandatoryNotices": "Access is through Castaways Resort with a locked gate.\nObtain the gate lock combination from the site monitor and lock the gate behind you.\nSign in at the gate.\nMaximum access road speed is 10 km/h.\nYou must be a Waikato Club member, or have purchased a subscription to Auckland club sites.",
+    "airspaceNotices": "Located just within CTA/C with a height restriction of 2,500 ft ASL.",
+    "landingNotices": "Land on the beach."
+  },
+  {
+    "name": "Karioitahi - Hamilton's Gap",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-hamiltons-gap",
+    "validBearings": "225-225",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Small coastal soaring site at Hamilton's Gap, Karioitahi. A simple beach-landing site that works in South West winds. No specific restrictions or cautions are listed in the guide, but access is sensitive with adjacent landowners.",
+    "mandatoryNotices": "The farmer to the left of the gap is not keen on unauthorised access.\nContact the site monitor before using the site.",
+    "airspaceNotices": "Located in CTA/C with a height restriction of 1,500 ft ASL.",
+    "landingNotices": "Landing is on the beach."
+  },
+  {
+    "name": "Karioitahi - Maioro Club Site (Low Side)",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Novice"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-maioro",
+    "validBearings": "203-315",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.\nIf schools are operating, they are normally on Channels 10, 26 or 27.",
+    "description": "Club training site on the coast about 5 km south of the Karioitahi car park, accessed by driving down the beach. A large landing zone makes it suitable for training and novice progression, but it is still a coastal site with strong wind potential. Works in NW through W to SW and SSW conditions. 4WD access is required and the site operates under very sensitive landowner permission.",
+    "mandatoryNotices": "Do not advertise the exact location.\nThe owner permits occasional club fly-ins only and there is no consent for general open use.\nAccess is by beach only, not via the road through the owner's property.\n4WD only. Drive with caution and respect other beach users.\nExpect training operations with beginners; keep clear of streamers and student groups.",
+    "airspaceNotices": "Located in the outer perimeter of CTA/C with a height restriction of 2,500 ft ASL.\nThis reduces to 1,500 ft ASL approximately 8 km north over Waiuku, behind and east of Kariotahi.",
+    "landingNotices": "Large landing zone. Avoid interfering with training operations."
+  },
+  {
+    "name": "Kennedy Park",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 30 hours",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-kennedy-park",
+    "validBearings": "45-90",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Coastal ridge soaring site on Auckland’s North Shore between Campbell Bay and Castor Bay. The paragliding launch is behind a combination-locked gate, with an alternative bowl launch in strong winds. Best in East and North East winds. Paragliders often land on the beach below when tides permit, or top-land near the Pohutukawa trees. Hang gliders typically land on Milford Beach.",
+    "mandatoryNotices": "The gate must be left locked. Obtain the gate code from the site monitor.\nIf you open the gate, shut it after use and prevent the public walking through.\nThe stairs down to the beach have been badly damaged (Cyclone Gabrielle 2023) with no direct access from the beach back to the top.\nBetween mid and high tide there are very limited beach landing options.\nIf the wind increases, there may be no alternative landing except a long glide to Milford Beach.",
+    "airspaceNotices": "Located within VFR Transit Lane T159 Whangaparaoa (height restriction 1,200 ft ASL).\nOn the edge of Whenuapai MBZ with a height restriction of 2,500 ft ASL.\nDo not fly inland of the cliffs and beach unless using an airband radio.",
+    "landingNotices": "Paragliders: beach below is safest if tides permit; top landing is possible but keep clear of the area where the grassy slope drops away.\nHang gliders: Milford Beach."
+  },
+  {
+    "name": "Mangawhai Heads",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-mangawhai-heads",
+    "validBearings": "45-90",
+    "elevation": 49,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Coastal ridge soaring site at Mangawhai Heads. Access is via the walking track, passing a concrete water tank, then following the track north to a grassy crown roughly 160 ft (about 49 m) above the beach. Best in North East and East winds. Landing is on the beach, subject to council and wildlife restrictions. Be alert for wind wrapping around the ridge if the wind is off to the south.",
+    "mandatoryNotices": "No access is permitted through Bream Tail farm; the farmer is hostile.\nCouncil prohibits landing in the public beach area for 300 m in front of the Surf Lifesaving Club when any public are present.\nThe dunes south of the river mouth are a protected Bird Sanctuary and are off limits.\nDo not smoke here due to high fire risk.",
+    "airspaceNotices": "Flight ceiling 6,500 ft ASL.\nImmediately south near the river edge is Restricted Area R106 (Tara Iti Fairy Tern) from surface to 1,000 ft ASL. Do not enter.",
+    "landingNotices": "Beach landing only.\nDo not land in the 300 m public area in front of the Surf Lifesaving Club when the public are present.\nDo not land in the Bird Sanctuary (dunes south of the river mouth)."
+  },
+  {
+    "name": "Muriwai - Maukatia (Maori Bay)",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Novice"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-muriwai-maori-bay",
+    "validBearings": "203-247,248-292",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Muriwai cliff and beach site at Maukatia (Maori Bay). Suitable for ridge soaring in SW to W conditions.\nBeach landing is the primary option; some top landing may be possible depending on conditions.",
+    "mandatoryNotices": "",
+    "airspaceNotices": "Flight ceiling noted as 2000 ft ASL in the site guide.",
+    "landingNotices": "Land on the beach (primary)."
+  },
+  {
+    "name": "Muriwai - NW Face",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 (lower TO: PG2 + 60 hours)",
+      "hangGliding": "HG Novice"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-muriwai-north-west-face",
+    "validBearings": "293-337",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Muriwai NW Face is a small coastal soaring site with high public visibility. Best in NW winds.\nStrictly manage where you fly and land due to sensitive wildlife and public access.",
+    "mandatoryNotices": "No low-level flying by the gannets, the lookout or the paths.\nDo not land or handle gliders on the dunes in front of the NW face.\nKeep well clear of the gannet colony to avoid disturbance (including your shadow).",
+    "airspaceNotices": "",
+    "landingNotices": "Beach landing only. Beach landing is restricted during Dec to Feb when the beach below the NW face is closed to vehicle traffic to 500 m north of Motutara Road.\nNo landing/handling on the dunes in front of the NW face."
+  },
+  {
+    "name": "Muriwai - Rimmer Road",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Beginner"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-rimmer-road",
+    "validBearings": "203-247,248-292",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Dune and beach flying area at Muriwai, historically used for early hang gliding training and now mainly paragliding in stronger conditions.\nPrimary landing is on the beach.",
+    "mandatoryNotices": "Public access via Rimmer Road is closed (public access easement closed).\nFollow the access conditions for Woodhill Forest and use the approved access routes.",
+    "airspaceNotices": "Within CTA/C with a ceiling of 2500 ft ASL.\nOther Muriwai sites are within VFR Transit Lane T158 Te Henga (ceiling 2000 ft ASL).",
+    "landingNotices": "Land on the beach. Watch for vehicles and other beach users."
+  },
+  {
+    "name": "Muriwai - Southern Private Ramp",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 60 hours",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-muriwai-southern-private",
+    "validBearings": "203-247",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Private ramp site at the southern end of the Muriwai cliffs, used in SW conditions.\nHigh consequence if you cannot reach Muriwai Beach, as there is no bottom landing at the site.",
+    "mandatoryNotices": "Avoid overflying the nearby private property.\nTreat the area in front of the launch as a transit area: gain height promptly and do not dwell low.",
+    "airspaceNotices": "Within VFR Transit Lane T158 Te Henga (ceiling 2000 ft ASL). No access to airspace behind the cliffs (Class D controlled airspace, and MBZ).",
+    "landingNotices": "No bottom landing. You must be able to reach Muriwai Beach."
+  },
+  {
+    "name": "Musick Point",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 60 hours",
+      "hangGliding": "HG Intermediate + 20 hours + Cliff Launch"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-music-point",
+    "validBearings": "338-360,0-67",
+    "elevation": 24,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Coastal cliff site at Musick Point, best when the wind is from the north to north-east.\nLanding options are tide-dependent and can be nil around high tide.",
+    "mandatoryNotices": "Gate is locked each evening (time shown on the sign board).",
+    "airspaceNotices": "Within VFR Mandatory Broadcast Zone (MBZ) 120.4, with a height ceiling of 1500 ft ASL.\nAuckland City MBZ height limit 1500 ft ASL. Do not fly unless operating with an airband radio.",
+    "landingNotices": "No bottom landing at all 2 hours either side of high tide."
+  },
+  {
+    "name": "North Head / Maungauika",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 20 hours",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-north-head",
+    "validBearings": "338-360,0-157",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.\nClose enough to Duders Peninsula to hear schools operating on channels 10 and 26.",
+    "description": "Devonport coastal site with multiple potential take-off areas. Works with N to NE winds, and also E to SE.\nExpect busy public access, and manage your flight path to avoid people and sensitive areas.",
+    "mandatoryNotices": "None listed.",
+    "airspaceNotices": "",
+    "landingNotices": "Main landing is Cheltenham Beach. Top landing on take-off is also possible.\nBeach landing area can be limited at high tide."
+  },
+  {
+    "name": "Pakiri",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-pakiri",
+    "validBearings": "338-360,0-67",
+    "elevation": null,
+    "radio": "",
+    "description": "Coastal cliff site with council-imposed access and operating conditions.\nWind directions stated as north and north-east. Landing options are constrained by local rules.",
+    "mandatoryNotices": "Council conditions (as listed in the site guide):\n- Park outside the gate. Access the park and take-off on foot.\n- No launch or landing on the pā site.\n- Walk back via the approved route (no walking along the cliff face).\n- Groups limited to 15 people.\n- 26/02/2024 update: beach landing is no longer permitted.",
+    "airspaceNotices": "",
+    "landingNotices": "Top landing available. Beach landing is stated as no longer permitted (26/02/2024 update)."
+  },
+  {
+    "name": "Piha - North",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 60 hours",
+      "hangGliding": "N/A"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/piha-north",
+    "validBearings": "158-247",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "North Piha is a coastal site with lots of room to land on the beach below.\nSuitable wind directions are south and south-west.\nAccess and take-off are on private property, so permission is required.",
+    "mandatoryNotices": "Take-off is on private property and permission is required. Preferred access is via the site monitor (see the official guide).",
+    "airspaceNotices": "Lion Rock is the airspace border.\nHeight ceiling north of Lion Rock over North Piha take-off is 2000 ft ASL; south of Lion Rock is 2500 ft ASL.",
+    "landingNotices": "Land on the beach below launch."
+  },
+  {
+    "name": "Piha - South",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG3",
+      "hangGliding": "HG Intermediate + 20 hours"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-piha-south",
+    "validBearings": "248-292",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "South Piha is a west-facing coastal site with a beach landing.\nThe guide warns this site can be in rotor and is not recommended in strong winds or when the wind is more than about 15 degrees off straight in.",
+    "mandatoryNotices": "Do not launch if the wind is more than 15 degrees south of straight in due to rotor.\nNot recommended above 15 knots.\nStrongly recommended not to fly this site alone.",
+    "airspaceNotices": "Lion Rock is the airspace border.\nHeight ceiling north of Lion Rock is 2000 ft ASL; south is 2500 ft ASL. This drops to 1500 ft ASL at Whatipu (north side of the Manukau Harbour entrance).",
+    "landingNotices": "Land on the beach. Expect a long glide from launch to the landing area."
+  },
+  {
+    "name": "Port Waikato",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "Dunes: HG Beginner; Top Launch: HG Novice; Lower Launch: HG Intermediate + 20 hours + Cliff Launch"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-port-waikato",
+    "validBearings": "270-360",
+    "elevation": 91,
+    "radio": "Channel 20 - 476.900MHz.\nThis site is close enough to Maioro to potentially hear schools on Channels 10 and 26.",
+    "description": "Coastal site at Port Waikato with two cliff launches and occasional dune launching on strong days. The lower launch (about 100 ft ASL) is for hang gliders only; the top launch (about 300 ft ASL) is further up the track. Best in North through West winds, with the lower launch limited to W through NW. Landing is on the beach; tide and beach use can limit options.",
+    "mandatoryNotices": "The lower launch is unsuitable for paragliders.\nHigh tide can restrict beach landing options. Land outside the flagged swimming area and away from crowds.\nTake care when soaring in the bowl south of the top take-off as wind switches can put one side in rotor.",
+    "airspaceNotices": "Located just within the boundary of CTA/C with a height restriction of 2,500 ft.",
+    "landingNotices": "Land on the beach. High tide reduces landing options; avoid the flagged swimming area and crowds."
+  },
+  {
+    "name": "Puketutu",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 60 hours",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/inland-cross-country/flying-site-puketutu",
+    "validBearings": "270-360,0-45",
+    "elevation": 375,
+    "radio": "Channel 20 - 476.900MHz.\nIf schools are operating, they are normally on Channels 10 and 26.",
+    "description": "Inland cross-country site on the Bombay Hills with a launch height of 1,230 ft ASL (about 375 m) and about 450 ft AGL. Works in North, North East, West and North West conditions. The terrain is a series of spurs and gullies with limited easy bottom-landing options and additional hazards such as olive trees, towers, aerials and suspended wires. Suitable for experienced pilots.",
+    "mandatoryNotices": "Always obtain permission before flying.\nKeep the number of people on site minimal (around six people total) and limit vehicle use.\nDo not fly if there is a lot of stock on the flying face.\nA padlock restricts access at the gate; contact the site monitors for access.\nRespect gates and minimise landowner impact.",
+    "airspaceNotices": "Located in GAA G275 with a height restriction of 4,500 ft ASL.\nArea just north is GAA G276 with a height restriction of 3,500 ft ASL (can be opened to 4,500 ft with ATC approval).\nDirectly south, Mercer MBZ has its northern boundary at SH2.",
+    "landingNotices": "Bottom landing options are limited.\nBeware olive trees, towers, aerials and suspended wires."
+  },
+  {
+    "name": "Takapuna Grammar",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 60 hours",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-takapuna-grammar",
+    "validBearings": "23-67",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Coastal site adjacent to Takapuna Grammar, listed for north-east winds.\nLanding options can be limited at high tide, so plan conservatively.",
+    "mandatoryNotices": "No flying during school hours.",
+    "airspaceNotices": "",
+    "landingNotices": "Landing below the cliff can be restricted or nil at high tide.\nBest landing noted as the bottom of the cliff about 200 m north of the launch, or Narrow Neck Beach when wind is from the north-east."
+  },
+  {
+    "name": "Tawharanui",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-tawharanui",
+    "validBearings": "203-247",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Coastal site within Tawharanui Regional Park, listed for south-west winds.\nBeach landing below the launch can be limited at high tide.",
+    "mandatoryNotices": "Check with the ranger at the first house on the left as you enter the park.",
+    "airspaceNotices": "",
+    "landingNotices": "Landing on the beach below the launch is limited at high tide.\nAlternative landing is between the lagoon and the car parking."
+  },
+  {
+    "name": "Te Arai Point",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-te-arai-point",
+    "validBearings": "338-360,0-157",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Coastal site with a range of workable wind directions from north through to south-east.\nLanding options include top landings or beach landings to the north or south, depending on conditions.",
+    "mandatoryNotices": "See access conditions in the official guide.",
+    "airspaceNotices": "",
+    "landingNotices": "Top landing possible. Beach landings possible to the north or south (per the site guide)."
+  },
+  {
+    "name": "Te Maire (Ripiro Beach)",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-te-maire",
+    "validBearings": "203-247",
+    "elevation": null,
+    "radio": "",
+    "description": "Ridge-soaring site on Ripiro Beach. The guide describes a long coastal ridge with multiple potential sections to fly.\nWind direction listed as south-west.",
+    "mandatoryNotices": "A nearby homeowner requests pilots do not fly past at window level.\nIf flying past, cross higher to respect privacy.",
+    "airspaceNotices": "",
+    "landingNotices": ""
+  },
+  {
+    "name": "Whangaparaoa - Army Bay",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 20 hours",
+      "hangGliding": "N/A"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-whangaparaoa-army-bay",
+    "validBearings": "338-360,0-22",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Whangaparaoa coastal site listed for northerly winds. See the official guide for landing and access details.",
+    "mandatoryNotices": "See access conditions in the official guide.",
+    "airspaceNotices": "",
+    "landingNotices": ""
+  },
+  {
+    "name": "Whangaparaoa - Matakatia Bay",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-matakatia-bay",
+    "validBearings": "68-157",
+    "elevation": null,
+    "radio": "",
+    "description": "Public reserve take-off on Tiri Road (between houses 75 and 77). Best flown in ESE conditions.\nLanding options include the south-west end of the bay or top landing at take-off.",
+    "mandatoryNotices": "",
+    "airspaceNotices": "",
+    "landingNotices": "Land at the south-west end of the bay, or top land at take-off (per the site guide)."
+  },
+  {
+    "name": "Whangaparaoa - Lookout Ridge",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "N/A"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-whangaparaoa-lookout-ridge",
+    "validBearings": "113-157",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Whangaparaoa coastal site listed for south-east winds.\nLanding is in paddocks near the beach, with hazards from trees and people.",
+    "mandatoryNotices": "See access conditions in the official guide.",
+    "airspaceNotices": "",
+    "landingNotices": "Landing is in paddocks near the beach. Watch for trees and people."
+  },
+  {
+    "name": "Whangaparaoa - Te Haruhi Bay",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 30 hours",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-whangaparaoa-te-haruhi-bay",
+    "validBearings": "180-225",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Coastal ridge soaring site behind Te Haruhi Bay in Shakespeare Regional Park (Whangaparaoa Peninsula). Walk-in access from Te Haruhi Bay via the Tiritiri track and a short turn-off to launch. A relatively small face, so numbers should be limited (no more than two hang gliders). Best in South and South West winds and typically requires a reasonably strong wind. Landing options are constrained by public beach use and wildlife protection.",
+    "mandatoryNotices": "Landing on the beach in front of the main public area (mid and western end) is not permitted.\nBetween 1 September and 28 February, nesting birds are present. Avoid low overflying and landings on the beach above the high water mark; prefer top landings, slope landings, or land below the high water mark.\nNo dogs or pets are permitted in the regional park.",
+    "airspaceNotices": "Flight ceiling 2,500 ft ASL.",
+    "landingNotices": "Recommended landing is the eastern end of the beach, or the middle paddock adjacent to parked vehicles.\nDo not land in the main public beach area.\nApply nesting-bird precautions between 1 September and 28 February."
+  },
+  {
+    "name": "Whangaparaoa - Tiri Channel",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 20 hours",
+      "hangGliding": "N/A"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/coastal-soaring/flying-site-whangaparaoa-tiri-channel",
+    "validBearings": "45-135",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Coastal paragliding site in Shakespeare Regional Park facing the Tiri Channel. Access is a 12 to 15 minute walk from parking near the campground, then up the ridge. Works best in easterlies (NE through E to SE). Lift can be low and close to the take-off, and the usable lift band may be small in off-angle winds. Top landings near take-off are the norm; beach landings are only practical around low tide.",
+    "mandatoryNotices": "The area to the left (north) is NZDF land and is now the permanent NZD130 danger area. If live firing is occurring, red or orange flags will be flying. Avoid the danger area.\nBetween 1 September and 28 February, nesting birds are present. Avoid low flying and landings on the beach above the high water mark.\nNo dogs or pets are permitted in the regional park.",
+    "airspaceNotices": "Flight ceiling 2,500 ft ASL.\nThe northern half of the ridge is within NZD130 (surface to 1,200 ft).",
+    "landingNotices": "Top landings are suited within about 50 m behind the take-off.\nBeach landing is possible around low tide (about ±3 hours). At high tide, expect to get wet if landing on the beach."
+  },
+  {
+    "name": "Bridge's Hill",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 60 hours (to be reviewed)",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/inland-cross-country/flying-site-bridges-hill",
+    "validBearings": "113-180",
+    "elevation": 274,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Inland cross-country site with a committing launch and strong potential for long flights. A South East site working from East-Southeast through to South. Take-off is at about 900 ft ASL (about 274 m). Landing is generally on the flats below, but conditions can change quickly if a sea breeze pushes up the valley.",
+    "mandatoryNotices": "If flying for the first time, contact the site monitor.\nAlways call at the farmhouse before proceeding to the site.\nVehicle access to launch is not currently possible; expect a walk of about 2 km from parking to take-off (allow 50 to 60 minutes).\nWhen low in the valley, watch for a sea breeze pushing in and a wind change to SW with turbulence.",
+    "airspaceNotices": "Near the edge of CTA and within GAA NZG153 with a height restriction of 3,500 ft ASL immediately above launch.\nNZG153 can be opened to 4,500 ft ASL via the ATC Duty Manager.\nNorth of the line between Five Fingers and Dill's Hill, the height restriction is 4,500 ft ASL.",
+    "landingNotices": "Landing areas are on flats below. Watch for temporary electric fences."
+  },
+  {
+    "name": "Dill's Hill",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/inland-cross-country/flying-site-dills",
+    "validBearings": "45-45",
+    "elevation": 213,
+    "radio": "Channel 20 - 476.900MHz.\nIf schools are operating, they are normally on Channels 10 and 26.",
+    "description": "Inland thermic site west of Warkworth with a North East aspect. Take-off is about 700 ft ASL (about 213 m), roughly 400 ft above the landing paddocks, reached via a clay access track that is only suitable for 4WD in dry conditions. Bottom landings are in several paddocks straight out in front. The site requires careful landowner coordination for access and retrieval.",
+    "mandatoryNotices": "Site closed for lambing every year between mid-August and the end of September. Check with the site monitor.\nCoordinate landowner notification via the site monitor (landowners prefer a single point of contact).\nLeave gates as found and re-connect electric fences exactly.\n4WD only. In wet conditions, do not drive up the tracks; carry equipment instead of damaging the access.",
+    "airspaceNotices": "Below CTA/C with a VFR ceiling of 4,500 ft ASL.\nKaipara Flats airfield is almost directly in front (NE); be aware of aircraft movements and possible parachute activity.\nFor XC to the SW, NZG153 Waitoki (ceiling 3,500 ft) starts about 0.4 km south of launch and can be opened to 4,500 ft with ATC approval.\nWest of SH16 the ceiling is 2,500 ft ASL (boundary is the main transmission line east of SH16).",
+    "landingNotices": "Use the bottom landing paddocks straight out in front.\nBeware streams and gullies, and stock (including bulls).\nIf wind is off to the ESE the landing can be turbulent.\nHG top landing is possible but do not go behind the crest."
+  },
+  {
+    "name": "Five Fingers",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 60 hours",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/inland-cross-country/flying-site-five-fingers",
+    "validBearings": "225-270",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Inland site on SH16 north of Kaukapakapa (identified on topo maps as Mt Taranaki). There is now only one launch, on top of the hill, as lower launches have been lost to pine growth. Best in South West to West winds. Landing is in the official paddock behind the wool shed (with a larger paddock nearby usable only if clear of stock). Expect rough air and turbulence if wind is not straight in.",
+    "mandatoryNotices": "Do not low-fly over or land on properties south of the access track.\nDo not land in the official landing areas if horses are present.\nObjections from nearby residents due to disturbance to animals could lead to site closure; minimise impact.\nLeave all gates as found and do not cut up tracks if the ground is wet and soft.",
+    "airspaceNotices": "Located below CTA/C and G151 with a VFR height restriction above launch of 3,500 ft ASL.\nNear the boundary: immediately to the north and north east the ceiling raises to 4,500 ft ASL.\nAdvise North Shore airfield prior to flying.",
+    "landingNotices": "Official landing is the small paddock behind the wool shed.\nThe larger paddock north of the track may be used only if no stock are present.\nDo not land in these areas if horses are present."
+  },
+  {
+    "name": "Gubb's Farm",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2 + 60 hours",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/inland-cross-country/flying-site-gubbs-farm",
+    "validBearings": "315-315",
+    "elevation": null,
+    "radio": "Channel 20 - 476.900MHz.",
+    "description": "Inland ridge site facing North West. It needs a fair amount of wind to stay aloft and can be rough. The guide notes it has been flown very little by paragliders and is not often flown by hang gliders, so local experience is limited. Suitable for intermediate pilots, but expect the possibility of turbulence.",
+    "mandatoryNotices": "Before flying, approach the farmer and site monitor.\nFarmer details: Mrs Lewis, 09 422 4923.\nBefore flying, Kaipara Flats airfield must be advised of your presence.",
+    "airspaceNotices": "Located in the outer perimeter of CTA/C with a height restriction of 4,500 ft ASL.",
+    "landingNotices": "Landing is not specified in the site guide."
+  },
+  {
+    "name": "Kaimai Range",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/inland-cross-country/kaimai-range",
+    "validBearings": "",
+    "elevation": null,
+    "radio": "None.",
+    "description": "Inland cross-country site on the Kaimai Range, managed as a Waikato Club site. Access is highly sensitive and controlled via a locked gate and nominated key holders. Entry is through an active quarrying operation and private farmland, and strict protocols apply. This is a serious site with additional constraints on where you may land along the range.",
+    "mandatoryNotices": "Access is through an active quarry and private farm.\n4WD vehicles only. Foot traffic on the access road is not permitted (no walking to launch).\nA locked gate restricts entry to key holders only. Key holders manage payment of the mandatory daily access fee.\nThere are multiple farms and areas along the range where landing is not welcome. Treat these as crossings and ensure ample height and alternative landings.\nLoad the Waikato club special OpenAir airspace file onto your instrument before flying here.",
+    "airspaceNotices": "The guide references a Waikato club OpenAir file showing special restricted zones for this site.\nUse it as part of your airspace and landowner-avoidance planning.",
+    "landingNotices": "Landing is sensitive along the range.\nAvoid farms and areas where landing is not welcome, even if they look like good LZs."
+  },
+  {
+    "name": "Moirs Hill",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/inland-cross-country/flying-site-moirs-hill",
+    "validBearings": "180-270",
+    "elevation": 299,
+    "radio": "Channel 20 - 476.900MHz.\nIf schools are operating, they are normally on Channels 10 and 26.",
+    "description": "Auckland’s primary cross-country site with strong thermic potential. Take-off is at 980 ft ASL (about 299 m), around 800 ft above the landing paddock. Works in West, South West and South winds and can be rough in a westerly. Landing is in a valley and requires careful wind assessment; easterly conditions are not flyable. Top landing is possible but tight and can be very thermic.",
+    "mandatoryNotices": "All access requires pre-approval from the Farm Manager via the Site Monitor. Approved access is confirmed on the Auckland PG WhatsApp group.\nKauri dieback precautions: clean footwear before entering the track, keep to the track, and do not detour into bush.\nWalking track is closed for lambing from 1 August to 30 September.\nHunters may be operating in the Waihunga/Moir Hill Reserve.",
+    "airspaceNotices": "Below class C and within GAA NZG152 (Moir Hill), NZG153 (Waitoki) and NZG157 (North Shore).\nCeiling immediately above launch is 3,500 ft ASL, or 4,500 ft when NZG152 is opened.\nTo open NZG152, phone ATC Duty Manager 03 358 1694, identify with your NZHGPA PIN, and set an auto-deactivate time (or close it when finished).",
+    "landingNotices": "Only land in the official bottom landing area unless it is an emergency.\nNo low flying over stock. No slope landing in areas with stock.\nValley wind often differs from launch; use an aircraft-style approach to assess wind direction."
+  },
+  {
+    "name": "Mt William",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG3",
+      "hangGliding": "N/A"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/inland-cross-country/flying-site-mt-william",
+    "validBearings": "135-180",
+    "elevation": 322,
+    "radio": "Channel 20 - 476.900MHz.\nIf schools are operating, they are normally on Channels 10 and 26.",
+    "description": "Inland site at Bombay (south of Auckland) on a scenic reserve run as a working farm. The top is steep and rocky, so the recommended paragliding take-off is a flat grass outcrop about 200 m south of the trig, with the PG take-off around 1,056 ft ASL (about 322 m). Best in South East to South winds. Landing is in paddocks, but recent planting of olive trees further limits options. This site is rarely flown and is for skilled pilots only.",
+    "mandatoryNotices": "Working farm: usually closed during lambing. Check current closures.\nThe site is rarely flown, has no site monitor, and conditions or access may differ from this guide. Seek current local advice.\nThe area below take-off is mostly bush. Ensure conditions and your competence are sufficient to reach clear ground.",
+    "airspaceNotices": "Located in GAA G275 with a height restriction of 4,500 ft ASL.\nArea just north is GAA G276 with a height restriction of 3,500 ft ASL (can be opened to 4,500 ft with ATC approval).\nDirectly south of Puketutu, Mercer MBZ has its northern boundary at SH2.",
+    "landingNotices": "Landing is in paddocks. Olive trees have been planted, reducing landing options."
+  },
+  {
+    "name": "Paeroas",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Intermediate"
+    },
+    "siteGuideUrl": "https://www.cloudbase.org.nz/site-guide/inland-cross-country/flying-site-paeroas",
+    "validBearings": "",
+    "elevation": 900,
+    "radio": "None.",
+    "description": "Premier North Island inland flying site (Waikato Club), used for multiple HG and PG nationals. Launch is at 2,950 ft (900 m) with about 500 m vertical from top to bottom, and enough space for multiple gliders and two simultaneous launches. Excellent for high thermic flights and cross-country. Landing is typically in paddocks on the hillside of the road in front of launch and slightly to the right, with power lines nearby.",
+    "mandatoryNotices": "4WD vehicles only.\nAll first-time pilots must be accompanied by an affiliated NZHGPA member familiar with site protocol.\nLog vehicle registration and entry time at the farm entrance, and log an exit time when leaving.\nTwo locked gates can only be unlocked by an affiliated NZHGPA member familiar with site protocol. A further lock above the midway landing paddocks must be closed and locked every time.\nKeep speed low to reduce dust. Maximum road speed is 30 kph, and less in places.\nIf you might use the landing paddocks near the road, phone the owners (Sheryll and Steve) on (07) 333 1543 beforehand.\nBeware power lines on the opposite side of the road.",
+    "airspaceNotices": "Usual ceiling is 4,500 ft.\nTo raise the airspace from 4,500 ft to 5,500 ft, contact the Airspace duty officer in Christchurch and ask for G459 to be opened (and set an auto-deactivate time at Civil Evening Twilight).\nIf flying finishes early, contact the duty officer and deactivate G459.",
+    "landingNotices": "Landing paddocks are on the hillside of the road in front of launch and slightly to the right.\nIf schools are operating there will be a windsock on the fence beside the road.\nBeware power lines on the opposite side of the road.\nPhone the owners before using the landing paddocks near the road."
+  },
+  {
+    "name": "Barnicoat",
+    "takeoffLocation": "-41.34322010035545,173.253573910888",
+    "landingLocation": "-41.32250898279254,173.23277167601702",
+    "rating": {
+      "paragliding": "PG1/PG2",
+      "hangGliding": "?"
+    },
+    "siteGuideUrl": "https://thgpc.org.nz/index.php?page=barnicoat",
+    "validBearings": "330-360,0-10",
+    "elevation": 640,
+    "radio": "Carry a UHF radio while flying.\nIf intending to land at Ngawhatu Sportsfield, set UHF to 477.250 with CTSS 123.",
+    "description": "The most popular and most sensitive THGPC site. Launch above Nelson with the official landing at Ngawhatu Sportsfield inside the Nelson Airport control zone. Expect thermals with ridge runs to the north and south, and potential XC to the north-east, east and south. Conditions can strengthen quickly with valley wind and sea breeze in summer, and landing options are limited over the back and to the south.",
+    "mandatoryNotices": "Mandatory: complete the online induction before flying.\nIf landing at Ngawhatu Sportsfield you must:\n- Call Nelson Control Tower before launching to open the airspace, and record the time airspace is open until (chalkboard or club WhatsApp)\n- Carry a correctly set altimeter\n- Carry a UHF radio set to 477.250 with CTSS 123\nDo not land at Ngawhatu unless all requirements are met. Otherwise use the bombout.\nFirst flights are strongly advised with a local pilot.\nHazards: strong valley wind and sea breeze in summer; high voltage power lines near the Ngawhatu LZ approach; limited landing options over the back and to the south.",
+    "airspaceNotices": "Above take-off: limited to 5,500 ft AMSL, dropping to 3,500 ft AMSL to the north.\nControlled airspace to the west.\nNgawhatu Sportsfield is in the Nelson Airport control zone and requires compliance with the memorandum of understanding and induction process.",
+    "landingNotices": "Official landing and meeting place (Ngawhatu Park): -41.32250898279254,173.23277167601702.\nBombout (ridge line at the base of the hill below launch): -41.33218627271693,173.24498520108938.\nWatch for high voltage power lines when approaching the Ngawhatu Sportsfield area."
+  },
+  {
+    "name": "Inwoods",
+    "takeoffLocation": "-41.57215185043673,172.93679990710527",
+    "landingLocation": "-41.59418008776619,172.90156798955636",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "INT"
+    },
+    "siteGuideUrl": "https://thgpc.org.nz/index.php?page=inwoods",
+    "validBearings": "225-248,0-23",
+    "elevation": 1051,
+    "radio": "",
+    "description": "A primarily cross-country site about 14 km south of Belgrove. Typical launch directions are SW to WSW and N to NNE. Often used to start XC flights towards St Arnaud, with the sea breeze sometimes assisting progress. Access is via a public forestry road and conditions can become challenging as the sea breeze arrives and builds, especially in valleys and exposed faces.",
+    "mandatoryNotices": "Fire risk: the area can be closed during high fire danger.\nAccess: Nelson Forests Limited normally requires road users to drive under 40 kph, use headlights, and carry a shovel and fire extinguisher.\nSea breeze: usually arrives by midday and can build in strength, becoming turbulent and difficult for paragliders. Do not assume you will be able to push upwind to a safe landing once it strengthens.\nAvoid flying behind or up-valley of a line from Gordons Knob to Blue Glen Spur. Pilots have been forced into isolated terrain in the Upper Motueka River Gorge with poor communications and difficult rescue.\nHazards: high tension power lines and other power lines near some landing options; injuries have occurred attempting to land near Blue Glen Spur and the Upper Motueka River Flats in the sea breeze.",
+    "airspaceNotices": "From take-off until reaching the Motueka River (including Gordon’s Knob): remain below 6,500 ft.\nAfter crossing the Motueka River: 7,500 ft.\nAfter reaching Beebys Range: 8,500 ft.\nBy the final peak of Beebys Range towards St Arnaud: uncontrolled airspace with maximum altitude 9,500 ft.",
+    "landingNotices": "Inwoods Lookout is primarily an XC site.\nLanding options include logging sites within reach of launch.\nAn authorised landing area is on farmland by the buildings adjacent to the Motueka River (via Flannigans Rd), usually reachable by paraglider when the assisting sea breeze is present.\nIn SW wind, landing in the Wai-iti river farmlands may be necessary for both hang gliders and paragliders.\nSome farmland landings have no formal arrangement: choose a safe landing that does not create problems for farmers or landowners."
+  },
+  {
+    "name": "Mount Murchison",
+    "takeoffLocation": "-41.729703,172.499378",
+    "landingLocation": "-41.699897,172.463650",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "?"
+    },
+    "siteGuideUrl": "https://thgpc.org.nz/index.php?page=mtmurchison",
+    "validBearings": "0-360",
+    "elevation": 1460,
+    "radio": "Coordination and briefings are communicated via the club WhatsApp group (meet times, weather and routes).",
+    "description": "High alpine tussock launch about 16 km north-east of Murchison, generally used as a starting point for XC but also suitable for local flights. The set-up area slopes in all directions, allowing launch in most winds, but the site is not normally flown in a south-east wind. Dust devils are not uncommon on launch and landing options are limited if you get low to the north-east of launch.",
+    "mandatoryNotices": "Access is highly sensitive.\nNo hike and fly or privately organised access. Club-organised groups only.\nAccess crosses a farm, then a 4WD communications track, then Department of Conservation land.\nThe road is steep: a 4WD is required and the driver must be competent descending long steep grades. Vehicles with low range are preferred.\nHazards: large communication tower on top; dust devils on launch; avoid getting low to the north-east of launch where landing options are limited.\nNot normally flown in a south-east wind.",
+    "airspaceNotices": "Class G uncontrolled airspace.",
+    "landingNotices": "Landing coordinate provided: -41.699897,172.463650.\nAvoid getting low to the north-east of launch as landing options are limited."
+  },
+  {
+    "name": "Riwaka",
+    "takeoffLocation": "-41.026335694406676,172.8794932870903",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "?"
+    },
+    "siteGuideUrl": "https://thgpc.org.nz/index.php?page=riwaka",
+    "validBearings": "68-113",
+    "elevation": 900,
+    "radio": "Tasman CFZ frequency is 123.7.\nA nearby Mandatory Broadcast Zone (MBZ) around Motueka Airfield extends into the foothills. Enter the MBZ only with an aircraft band radio on 123.7 and a pilot radio operator endorsement. Airband radio is not compulsory in a CFZ.",
+    "description": "Takaka Hill site near State Highway 60, typically flown in ENE to ESE. The page focuses on access, airspace and landing options rather than local soaring. Several paddock landings are described, including a bombout near the Riwaka Resurgence carpark and approved landings further down-valley. Respect landowners’ privacy and follow site notification and toileting requirements.",
+    "mandatoryNotices": "Landowner conditions of use apply.\nNotification is required for large groups, vehicles left on site, or working bees.\nText landowners prior to launch (include number of pilots and vehicle details): Denise 021 270 1873 or Jason 020 4035 5396.\nAvoid overflying the dwellings marked on the site map.\nA toilet has been installed by THGPA. It is the only permissible location for toileting on the property.",
+    "airspaceNotices": "Uncontrolled Class G up to 9,500 ft.\nThere is a Mandatory Broadcast Zone (MBZ) around Motueka Airfield that extends into the Takaka and North-West Ranges foothills. Enter the MBZ only with an aircraft band radio on 123.7 and a pilot radio operator endorsement.\nThe launch and likely flight area fall within the Tasman CFZ (123.7).",
+    "landingNotices": "Bombout is immediately after the Riwaka Resurgence carpark: -41.034398112982565,172.9032099974244.\nBombout has two hay paddocks. Avoid the paddock with the longest grass (likely paddock 1 before Christmas, paddock 2 after Christmas).\nMid-valley approved landing (SW side of the road/river, access via a bridge): -41.04111264176698,172.91047634022996.\nRiwaka Valley Left Branch LZ: text Hugh Drummond 027 528 9878 if there is a possibility of landing there. GPS: -41.049984005,172.9203718262.\nWhen landing on farmland: avoid disturbing stock and leave gates as found."
+  },
+  {
+    "name": "Takaka",
+    "takeoffLocation": "-41.02556827626293,172.860851396251",
+    "landingLocation": "-41.0383538543176,172.83453749735565",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "NOV"
+    },
+    "siteGuideUrl": "https://thgpc.org.nz/index.php?page=takaka",
+    "validBearings": "225-248",
+    "elevation": 900,
+    "radio": "A Mandatory Broadcast Zone (MBZ) around Motueka Airfield extends into the foothills. Enter the MBZ only with an aircraft band radio on 123.7 and a pilot radio operator endorsement.",
+    "description": "Light-wind thermal site in the Upper Takaka Valley. On very good days, cross-country flights to the south and north are possible. In winter the prevailing SW wind is usually stronger here than at other Nelson and Tasman sites. In other seasons conditions are often best in the morning. In summer, advancing sea breezes can break up thermals and make conditions very turbulent.",
+    "mandatoryNotices": "Launch and landing can be affected by thermic wind changes, dust devils and turbulence, especially in summer and stronger winds. Conditions on launch can go tailwind suddenly and for extended periods.\nPower line hazards exist, including a difficult-to-see single-span line (about 400 m) between Harwoods Lookout on Hwy 60 and the radio masts.\nLanding area winds: anabatic sea breeze is common and can come across or diagonally down the field. With a strong SW wind or towards evening, a catabatic SW wind can remain or return and create difficult ground effect for hang glider landings due to the down-sloping terrain. In these circumstances other fields further towards Takaka may be safer for hang gliders.\nSite relationship: if livestock are grazing and a gate to the road is open, please shut it and notify Nigel Harwood (027) 425 7004.\nReport and resolve any landowner issues via the THGPC Sites Officer or a senior THGPC pilot.",
+    "airspaceNotices": "Uncontrolled Class G up to 9,500 ft.\nMotueka Airfield is 8.33 nautical miles south-east of launch. The Motueka MBZ extends into the foothills: enter only with aircraft band radio on 123.7 and a pilot radio operator endorsement.",
+    "landingNotices": "Main landing zone is a very long field, sometimes used by agricultural aircraft for aerial fertiliser spreading. A second field at the northern end is also used.\nLeave gates as found. If unsure, or if livestock are present and a gate to the road is open, shut it and notify Nigel Harwood 027 425 7004."
+  },
+  {
+    "name": "Sherry River",
+    "takeoffLocation": "-41.425954557759574,172.67397796490204",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "NOV"
+    },
+    "siteGuideUrl": "https://thgpc.org.nz/index.php?page=sherry",
+    "validBearings": "45-135",
+    "elevation": 941,
+    "radio": "",
+    "description": "Light-wind thermal site in the Sherry River Valley. Launch access is via a 4WD forestry track through a locked gate with controlled key access. Landings are on Orchard Creek Road, with two designated landing fields available (west and east) and landowner notification required before use.",
+    "mandatoryNotices": "Access is controlled.\nArrange launch access the night before with Geoff Profitt (03 522 4583).\nArrange landing access with the relevant landowners:\n- West landing: Steve and Julie Campbell +6421541086\n- East landing: Bill Anglesey +6421704960\nTwo landowners require notification by text the night before.\nFollow landowner instructions and treat the site as access-sensitive.",
+    "airspaceNotices": "Uncontrolled Class G up to 9,500 ft.",
+    "landingNotices": "Two designated landing fields:\n- West landing: -41.41144882638199,172.71191334052926\n- East landing: -41.41015123148145,172.7149003112896\nNotify the landowners by text the night before.\nLandings are on Orchard Creek Road."
+  },
+  {
+    "name": "Allandale",
+    "takeoffLocation": "-43.643,172.625",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/allandale",
+    "validBearings": "45-90",
+    "elevation": null,
+    "radio": "",
+    "description": "Port Hills launch accessed from Summit Road, used mainly in a NE to ENE. A popular hang gliding and speed wing site; in a typical summer sea breeze it is often too windy for paragliders. When conditions suit, ridge soaring is possible 1 to 2 km along the summit ridge and XC is possible before the sea breeze arrives. Top landing is possible, but avoid drifting downwind of take-off as rotor develops quickly.",
+    "mandatoryNotices": "Rotor risk: do not fly downwind of the take-off area.\nEmergency-only LZ: the bottom landing paddocks next to Bamford Road should only be used in an emergency. If you land there, make an effort to contact the landowners (Living Springs) and notify the club sites officer.\nLambing in spring may cause a temporary site closure.\nWind station near take-off (via the Holfuy app).",
+    "airspaceNotices": "Behind take-off, airspace limits you to 1500 ft.",
+    "landingNotices": "Top landing: possible for PG and HG.\nBottom landing: Allandale Domain is for advanced pilots; tree line rotor can affect the approach. Novice PG pilots may manage only in nil to very light winds with good canopy control.\nBamford Road paddocks: emergency use only."
+  },
+  {
+    "name": "Barnett Park",
+    "takeoffLocation": "-43.588,172.729",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/barnett-park",
+    "validBearings": "23-67",
+    "elevation": null,
+    "radio": "",
+    "description": "Very light-wind glide site off Summit Road, giving a long scenic flight down into Barnett Park. Take-off requires a committed forward launch and a clean line through a gap in large pine trees. In anything more than very light wind, turbulence can be severe from the trees, the valley, and at landing.",
+    "mandatoryNotices": "Very light winds only.\nPowerlines: large powerlines cross the valley about halfway down. Stay close to the Mt Pleasant (left) ridge line and be ready to slope land if you cannot clear them safely.\nAvoid flying if a sports game is in progress at Barnett Park.\nTake-off: generally forward launch only; set up close to the fence line to line up the tree gap.",
+    "airspaceNotices": "",
+    "landingNotices": "Land at Barnett Park. Do not land if a sports game is in progress."
+  },
+  {
+    "name": "Castle Rock",
+    "takeoffLocation": "-43.589,172.698",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/castle-rock",
+    "validBearings": "338-360,0-22",
+    "elevation": null,
+    "radio": "",
+    "description": "Walk-in Port Hills site with a small rocky take-off below the trig. North-facing and typically flown in light winds as a thermic site, with triggers on the spur leading up to the launch. With height, pilots can work along the summit ridge or consider harbour crossings in suitable conditions.",
+    "mandatoryNotices": "Access: Summit Road is closed between the Gondola station and Rapaki track, so you must walk in.\nTake-off is small and rocky, with room for only one launch at a time.\nBe wary of the NE sea breeze arriving; both bottom LZs can become turbulent.\nDo not fly in a NW unless you are sure the NW is below 20 km/h at all altitudes.\nDo not land in the marked no-land area near Heathcote Valley Riding School, due to risk to horses and riders.",
+    "airspaceNotices": "",
+    "landingNotices": "Top landing: possible in light winds at Upper Cass.\nBottom landing options:\n1) Heathcote Domain (Cricket Pavilion) - small and not suitable for hang gliders, and do not land during sports matches.\n2) Ferrymead Domain - preferred for hang gliders.\nCaution: both LZs can be turbulent when the NE arrives."
+  },
+  {
+    "name": "Mt Cheeseman Ski Field",
+    "takeoffLocation": "-43.156,171.671",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/cheeseman-ski-field",
+    "validBearings": "68-112",
+    "elevation": null,
+    "radio": "",
+    "description": "Alpine east-facing site providing some of the easiest access into the Craigieburn ranges and a strong base for XC. Launch options include the main car park, a nearby hairpin, and a higher scree launch. Conditions can be strongly thermic and turbulent, and wind changes can arrive through the Craigieburn bowl.",
+    "mandatoryNotices": "Cheeseman Road special access (from October 2025): the club has access to a gate key. Complete the online induction to join the Road Access WhatsApp group to request the lockbox combination.\nParking: vehicles should be left at Texas Flat. Do not drive higher than the main ski field car park (do not drive to or above the ski lodge).\nMain car park can be turbulent; dust devils and thermals can trigger there in summer, so avoid lingering clipped in.\nDo not fly in a strong SW, W, or NW. Take-off becomes lee-side and can be very turbulent.\nAlpine hazards: be current and carry appropriate safety equipment; personal locator beacons are highly recommended.",
+    "airspaceNotices": "Airspace: 9500 ft above Craigieburn Range, lowering to 7500 ft at Torlesse Range when flying towards Springfield. Check the VNC.",
+    "landingNotices": "Bottom landing options:\n1) Texas Flat (closest) - shallow slope and tussocks can make HG landings technical.\n2) Castle Hill Village Golf Course (common HG LZ) - better approach; flags and the irrigation pond can help read wind.\nAdditional options listed in the guide include the Cheeseman access road, plateau (Hog’s Back track), and others."
+  },
+  {
+    "name": "Gondola",
+    "takeoffLocation": "-43.589,172.716",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/gondola",
+    "validBearings": "338-360,0-67",
+    "elevation": null,
+    "radio": "",
+    "description": "Port Hills launch near the Christchurch gondola, facing north to north-east and typically flown in light winds. The rocks and cliffs below can generate thermals, making it a useful starting point for ridge flying and harbour crossings. Conditions can change rapidly when the NE sea breeze arrives.",
+    "mandatoryNotices": "If using the gondola for access, be prepared to show NZHGPA membership or you may be refused entry.\nTake-off from the track and be airborne well before the 10 m cliff to Summit Road.\nDo not fly within 100 m of the gondola buildings or cables, and avoid flying close to the cars or cable.\nMonitor the NE sea breeze carefully; it can curl in low while you are still in light winds aloft.\nDo not land in the marked no-land area near Heathcote Valley Riding School, due to risk to horses and riders.",
+    "airspaceNotices": "If conditions suit, consider activating G853 to increase the altitude limit to 5500 ft.",
+    "landingNotices": "Top landing: possible in light winds, best at the saddle.\nBottom landing options:\n1) Heathcote Domain (near tunnel entrance) - small, not suitable for hang gliders, and do not land during sports matches.\n2) Ferrymead Domain - best option for hang gliders.\nCaution: both bottom LZs can be turbulent when the NE arrives."
+  },
+  {
+    "name": "John Britten Reserve",
+    "takeoffLocation": "-43.583,172.725",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/john-britten-reserve",
+    "validBearings": "293-337",
+    "elevation": null,
+    "radio": "",
+    "description": "Large, flat tussock launch area on the Port Hills, facing NW and suited to light-wind, thermic flying. Similar in character to the Gondola, but the NW-facing rocky outcrops tend to work better later in the day. With the right conditions it can be possible to soar a long section of the ridge towards Ferrymead.",
+    "mandatoryNotices": "Light winds only.\nAirspace limit drops to 1500 ft near the Ferrymead bridge when ridge soaring.\nDo not fly in a NW unless you are sure the NW is below 20 km/h at all altitudes.\nDo not land in the marked no-land area near Heathcote Valley Riding School, due to risk to horses and riders.",
+    "airspaceNotices": "Airspace altitude limit drops to 1500 ft at the Ferrymead bridge.",
+    "landingNotices": "Top landing at take-off is possible. Bottom landing options are the same as for the Gondola and Castle Rock."
+  },
+  {
+    "name": "Little River",
+    "takeoffLocation": "-43.815,172.801",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/little-river",
+    "validBearings": "338-360,0-22",
+    "elevation": null,
+    "radio": "",
+    "description": "North-facing Port Hills site above Little River and one of the club’s best local XC launches. Best in light thermic conditions, with controlled airspace starting high. Despite good height above the valley, it can be easy to bomb out, so make the first climb count. Strong influence from the NE sea breeze means the usable flying window can be short in summer.",
+    "mandatoryNotices": "Site closure: the page states Little River is closed for lambing until September 30.\nLandowner permission: you must contact the owner of the bottom landing paddocks before flying if you may land there. Text Kinloch Station manager Joe on 021 277 1188 before 9 pm the night before flying.\nDo not fly here if you have not made contact, unless you are certain you will not land in the paddocks.\nDo not fly directly over any houses.\nNo schools or commercial tandems to fly at Little River.\nBe cautious of power lines near landing paddocks.",
+    "airspaceNotices": "Controlled airspace does not start until 9500 ft.",
+    "landingNotices": "PGs normally land LZ1 and HGs LZ2. If paddocks have livestock, use an adjacent paddock on the same side of the road.\nBe cautious of power lines running through adjacent paddocks.\nLanding paddock access requires contacting the landowner as noted above."
+  },
+  {
+    "name": "Scarborough Cliffs",
+    "takeoffLocation": "-43.578,172.775",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG3",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/scarborough-cliffs",
+    "validBearings": "23-112",
+    "elevation": null,
+    "radio": "",
+    "description": "Advanced coastal cliff soaring site near Sumner, generally flown by soaring down from Taylor’s Mistake and returning for landing. The cliff edge provides strong lift in the right E to NE conditions, but the take-off is close to a sharp edge with rotor.",
+    "mandatoryNotices": "Cliff-edge rotor: you must have the wing positively flying before approaching the edge.\nDo not attempt take-off if you are not confident you can stay up.\nSIV manoeuvres must not be performed at the cliffs (per NZHGPA OPM).\nTop paddock landing is becoming unavailable: trees were planted in 2020 and the guide states no landing options can be expected there by 2025.",
+    "airspaceNotices": "",
+    "landingNotices": "Possible (but diminishing) top paddock landing south of take-off, with expected turbulence from the cliff edge.\nPreferred landings: Taylor’s Mistake Beach or the normal Taylor’s Mistake LZ.\nAlternative: Sumner Beach (requires soaring to Cave Rock); the guide advises leaving with at least 800 ft above Whitewash head and avoiding drift downwind on the beach."
+  },
+  {
+    "name": "Taylor's Mistake",
+    "takeoffLocation": "-43.585,172.766",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/taylors-mistake",
+    "validBearings": "45-90",
+    "elevation": null,
+    "radio": "Recommended: Channel 40 (477.400MHz).",
+    "description": "The club’s most heavily used coastal site, typically flown year-round in the NE sea breeze. The main launch is beside the car park, with an additional ‘gut’ take-off used in lighter winds. In summer, thermals mixing with the sea breeze can create turbulence, so good judgement is required in stronger conditions.",
+    "mandatoryNotices": "When schools are operating (weekends, public holidays, and after 5 pm weekdays):\n- Make a loud call of “Launching” before take-off.\n- Schools launch from the left side; keep the right side available for pilots about to launch.\n- Keep the area between the launch and top landing clear when tandems are operating.\nWires: avoid the telephone wires and poles adjacent to Summit Road.\nWind strength is the main hazard. In strong winds, it is often safer to top land at TO1 and avoid compression in the gut and the bottom LZ.\nModel aircraft operate near the quarry and use the gully for take-off and landing, so remain vigilant and avoid sudden dynamic manoeuvres when close.\nShare safely with hang gliders: keep clear of the hang glider take-off corridor and never top land directly in front of a hang glider preparing to launch.\nNW in Canterbury can be unpredictable, even if it reads NE at the site.",
+    "airspaceNotices": "Uncontrolled airspace up to 3500 ft AGL. GAA853 may be available on ATC approval up to 5500 ft AGL.",
+    "landingNotices": "Top landing: generally straightforward for PG at TO1 and TO2; more technical for HG due to slope.\nMain bottom landing (LZ1): grassy paddocks behind the beach car park.\nBeach landing: PG only, away from crowds.\nBottom landing discipline: after landing, move quickly off to the left to pack; no ground handling in the bottom landing area."
+  },
+  {
+    "name": "Towers",
+    "takeoffLocation": "-43.588,172.727",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/towers",
+    "validBearings": "203-247",
+    "elevation": null,
+    "radio": "",
+    "description": "Short SW-facing Port Hills ridge site used in a dying southerly. Ridge soaring is possible and it can be thermic, but landing options are limited, so it suits pilots who are confident top landing in variable lift.",
+    "mandatoryNotices": "Only fly this SW site in a dying southerly.\nThere is no real bottom landing.\nTop landing requires a good level of skill, as lift can drop off suddenly and you may only get one safe chance.\nIf attempting the Lyttelton Sports Grounds at Naval Point, beware turbulence from tall trees around the field.",
+    "airspaceNotices": "",
+    "landingNotices": "No reliable bottom landing.\nPossible options: the saddle before the Gondola, or with sufficient height the Lyttelton Sports Grounds at Naval Point.\nTop landing is the normal plan, but requires competence."
+  },
+  {
+    "name": "Bridge Hill",
+    "takeoffLocation": "-43.156,171.717",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/other-sites",
+    "validBearings": "68-157",
+    "elevation": null,
+    "radio": "",
+    "description": "Small E to SE facing site off SH73 with modest height above the landing. Often used for short flights when there is soarable wind on the face or as a convenient option compared with longer walk-in sites.",
+    "mandatoryNotices": "Landing near SH73 has multiple adjacent power lines. If you are not comfortable with their proximity, choose a landing spot west of SH73.\nLimited height above landing (about 100 m) and limited XC potential.",
+    "airspaceNotices": "",
+    "landingNotices": "Main landing is next to SH73 opposite the access road turn-off.\nBe very careful of multiple adjacent power lines. Consider landing west of SH73 if needed."
+  },
+  {
+    "name": "Helicopter Hill",
+    "takeoffLocation": "-43.14,171.729",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/other-sites",
+    "validBearings": "113-157",
+    "elevation": null,
+    "radio": "",
+    "description": "Steep walk-in thermic site accessed from the Craigieburn Ski Field road, launching from the SE face. Historically used before Cheeseman became easier to access. If you climb out, the flying advice is similar to Cheeseman.",
+    "mandatoryNotices": "Light winds only.\nSteep hike required from the access road.\nBottom landing is beside SH73 and powerlines run through the landing area.\nIf low, do not commit on a glide towards Lake Pearson: SH73 passes through a gorge with no landing options.",
+    "airspaceNotices": "",
+    "landingNotices": "Bottom landing is next to SH73 near the ski field road turn-off. Avoid the powerlines running through the landing area."
+  },
+  {
+    "name": "Magic Mountain",
+    "takeoffLocation": "-44.454,169.745",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/other-sites",
+    "validBearings": "",
+    "elevation": null,
+    "radio": "",
+    "description": "Site details are by arrangement. The guide directs pilots to contact the listed local contact for wind direction, access, parking, landing, and flying notes.",
+    "mandatoryNotices": "For wind direction, access, parking, landing, and flying details, contact Bill Degan on 03 326 6411 or 021 247 2676.",
+    "airspaceNotices": "",
+    "landingNotices": ""
+  },
+  {
+    "name": "Round Top",
+    "takeoffLocation": "-43.491,171.707",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/other-sites",
+    "validBearings": "68-157",
+    "elevation": null,
+    "radio": "",
+    "description": "E to SE facing site near Windwhistle with 4WD access through farmland. Can be thermic and offers good terrain clearance for long glides, but access is strictly by prior permission and the site is near high power transmitters.",
+    "mandatoryNotices": "Access is through Long Spur farm: you must contact Gerald (03 318 6802) or his son (027 444 4227) for prior permission.\nTake-off is owned by the King family: you must also contact Fraser (021 505 620) for permission (call first, text only if no answer).\nTemporary closure can occur in spring due to lambing.\nAccess track should only be used by 4WD vehicles, and lift sharing is encouraged to minimise disruption.\nLZ1 has power lines running through it. Avoid paddocks with livestock and horses.\nHigh power transmitters are present; the guide notes the hazard is unknown but likely undesirable.",
+    "airspaceNotices": "",
+    "landingNotices": "You can land straight in front (half way down) and walk back up if flying again.\nThere are many paddocks available: avoid livestock and horses.\nLZ1 is closest but has power lines. LZ2 is safer but requires altitude to reach from take-off."
+  },
+  {
+    "name": "Upper Cass",
+    "takeoffLocation": "-43.588,172.726",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "PG2",
+      "hangGliding": "HG Advanced"
+    },
+    "siteGuideUrl": "https://www.chgpc.org.nz/other-sites",
+    "validBearings": "203-247",
+    "elevation": null,
+    "radio": "",
+    "description": "Walk-in SW-facing Port Hills site with generally light wind conditions, with potential to soar the SW ridge immediately south of take-off. Vehicle access is currently unavailable due to Summit Road closure.",
+    "mandatoryNotices": "No current vehicle access due to Summit Road closure. Walk in from the gondola or from the start of the road closure at the top of the Rapaki track.\nLight winds site.",
+    "airspaceNotices": "",
+    "landingNotices": "Bottom landing is at the Lyttelton sports fields at Naval Point. Top landing is also possible if soaring."
+  },
+  {
+    "name": "Skyline Gondola",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://southernclub.co.nz/skyline-gondola/",
+    "validBearings": "",
+    "elevation": null,
+    "radio": "For sign-off: at least 3 flights with an Accredited Southern Club Instructor on radio from the Gondola.",
+    "description": "Lift-accessed launch above Queenstown village. Extremely sensitive site close to built-up areas and controlled airspace, operated under a Memorandum of Understanding (MOU) and pilot accreditation. Winds can change quickly, especially with the southerly and swirling westerlies or northerlies on take-off. Landing options are limited and public safety is critical, so treat this as a demanding site and seek local advice before your first flight.",
+    "mandatoryNotices": "Restricted flying site: flying here is a privilege, not a right.\nIt is illegal to fly without accreditation and current NZHGPA membership.\nYou must carry a text-receivable NZ mobile number and be logged into the site system (select ‘air’ before flying and ‘ground’ after landing). If the airspace is closed you will be texted and you have 15 minutes to land.\nPrerequisites include a minimum of 80 logged flights total, or at least 3 flights with an Accredited Southern Club Instructor on radio from the Gondola.\nKnow the airspace boundaries (vertical and horizontal). Flying beyond Shotover Street is prohibited.\nDo not use the lower Eastern ‘G-Force’ take-off. Solo take-offs are a short hike up the hill.\nCheck landing field availability before launch. The Rec Ground may be unavailable during events.\nDo not fly in strong winds. Monitor wind signs on Lake Wakatipu and be aware of the leeside northerly.",
+    "airspaceNotices": "Airspace is defined by GAA G756 and is very small.\nMaximum altitude: 4,500 ft.\nStay within the G756 boundaries both vertically and horizontally.\nDo not fly closer than 200 m to the Skyline buildings, Luge, or gondola cables.\nFlying beyond Shotover Street is prohibited.",
+    "landingNotices": "Recreational pilots land mainly at the Rec Ground (rugby field), and occasionally at Warrens Park.\nOnly commercial tandems (G-Force) land at the Primary School.\nThe Primary School is not an option for recreational pilots except for an emergency.\nPrior to take-off, confirm the Rec Ground is available. Do not endanger the public when landing. Watch for obstacles."
+  },
+  {
+    "name": "Coronet Peak",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://southernclub.co.nz/coronet-peak/",
+    "validBearings": "",
+    "elevation": 1135,
+    "radio": "",
+    "description": "Queenstown’s main mountain site with two primary take-offs (Carpark #4 and Rocky Gully) and a dedicated landing field known as the Flight Park. It is one of the more flyable sites in the region due to mountain protection, but it sits in strictly constrained airspace near Queenstown Airport. Conditions can change rapidly, particularly in NorWester flows and strong southerlies, so get a local briefing and stay conservative.",
+    "mandatoryNotices": "Meet at the Flight Park landing field for a lift to take-off and a local briefing where possible.\nAirspace is strict and close: stay within G755 boundaries and follow the published limits.\nTwo main take-offs: Carpark #4 (1,135 m) and Rocky Gully (1,180 m). Rocky Gully requires awareness of the glide to the Flight Park (about 3 km).\nThe Carpark take-off is not suitable for speed wings due to the glide required to reach the Flight Park.\nWatch for rapid changes, including the “NorWester” switch and strong southerly sea-breeze influence.\nIn winter, chairlift access requires a special chairlift certification. The ski-field is sensitive to low flying.\nFor summer summit flying: keep at least 50 m vertically or horizontally from lift cables and follow the summer flying guidelines.\nBe considerate of neighbouring properties, avoid overflying houses and horses.",
+    "airspaceNotices": "G755 General Aviation Area within the Queenstown Tower Control Zone.\nCeiling: 5,500 ft AMSL (note the summit is about 1,650 m / 5,400 ft).\nDo not fly south of Malaghans Road.\nWestern boundary is defined by the hairpins on the Coronet access road.\nDo not fly further east than the forestry block ridge (refer to the airspace map in the site guide).",
+    "landingNotices": "Primary landing field: the Flight Park (north side of Malaghans Road).\nThe Flight Park is the only permissible place to land except for emergencies.\nLanding fees apply. There is a cafe and a collection box.\nHigh traffic area: novice, experienced, tandem and hang glider pilots. Use the dedicated pack-up zone by the cafe.\nSome local landowners oppose landings. Any emergency out-landings must be reported to a local SHGPGC pilot."
+  },
+  {
+    "name": "Crown Terrace",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://southernclub.co.nz/crown-terrace/",
+    "validBearings": "",
+    "elevation": 640,
+    "radio": "",
+    "description": "North-west facing terrace site best known for ridge soaring, with thermalling possible but tightly constrained by nearby airspace. The weather here can be unpredictable and can build strong quickly, so treat it as a demanding site and get a briefing from an experienced local pilot. There are upper and lower launch options and top landing is generally preferred.",
+    "mandatoryNotices": "Airspace is tight: do not fly outside the GAA boundaries (G753/G758) and do not cross State Highway 6 unless to land.\nLaunch height is about 2,100 ft. You must be below take-off height before crossing SH6 toward the landing.\nThe terrace is known for sudden strong, gusty conditions. Look for indicators on Lake Hayes and in the trees and be briefed by a local.\nDo not block the access road. Do not drive along the private access road past the take-offs. Use the designated parking area.\nDo not fly over adjacent residential properties.\nIf crops or stock are present in top landing areas, minimise damage and disturbance.\nDo not smoke due to fire risk. Take all rubbish away.\nThis is a sensitive, threatened site due to past inconsiderate activity.",
+    "airspaceNotices": "Airspace confines are defined by G753 and G758.\nMain altitude limit: 3,000 ft AMSL (G753).\nG758 (max altitude 2,100 ft) enables access to the landing field across the road and left of take-off.\nDo not fly over or cross State Highway 6 unless to land.\nOutside the GAA boundary is the Queenstown Control Zone (CTR).\nThe main flight path for civil aircraft landing to the west in Queenstown is close to the south.",
+    "landingNotices": "Top landing is preferred.\nYou can land on the launch platform or in the marked green ‘triangle’ behind the fence (note potential turbulence in the triangle).\nIf you cannot land, do not take off.\nBottom landings are sensitive and strictly limited. Use only the designated areas.\nPublic land along Whitechapel Road may be used, but can be turbulent in valley wind.\nA quarry near the Crown Range intersection must be strictly avoided due to explosives and heavy machinery.\nOnly the authorised field near the highway is permitted for that option. Other fields previously used are no longer available.\nHazard: power lines run from near the driveway access down to the base of the hill."
+  },
+  {
+    "name": "Treble Cone",
+    "takeoffLocation": "",
+    "landingLocation": "",
+    "rating": {
+      "paragliding": "",
+      "hangGliding": ""
+    },
+    "siteGuideUrl": "https://southernclub.co.nz/treble-cone/",
+    "validBearings": "",
+    "elevation": 1750,
+    "radio": "Airband radios are encouraged.\nGeneral Southern Alps frequency: 119.20.\nWanaka airport frequency: 120.10 (changes as you cross the Motatapu River).",
+    "description": "Primary Wanaka flying site and one of the best Southern-region launches for cross-country, with generally good terrain and road retrieves. The site faces north-east and can start thermalling early, but this is mountain flying and can be cold and turbulent. Expect complex valley, lake and seabreeze influences, and be especially cautious in lee-side westerly or northwesterly conditions. The area is busy with light aircraft and helicopters, so good lookout and radio use are strongly encouraged.",
+    "mandatoryNotices": "Access is via a working farm and a dirt road. Follow all signage and closures, drive to conditions, and close gates behind you.\nSummer access requires a gate code (refer to Treble Cone for the current code).\nBe prepared for unmarked road hazards and for snow, ice and rockfall (chains must be carried).\nThis is lee-side in prevailing westerlies. In stronger winds or a building northwesterly, expect lee turbulence and potentially unpleasant air.\nAir traffic is common, including scenic flights and helicopters. Maintain a strong lookout and listen out on airband.\nA helicopter operation is based on the valley floor left of launch, with frequent low-level traffic.\nA commercial Via Ferrata operation uses helicopter pick-ups near the waterfalls south of take-off: keep clear when this is happening.\nDo not smoke at take-off, landing, or on a farmer’s field.\nDo not drive on a farmer’s fields without permission. Leave all gates as you find them.\nHazard: a power cable runs from the valley floor up to the ski resort above launch with long spans.",
+    "airspaceNotices": "No significant airspace immediately surrounding the site.\nAirspace above launch is 13,500 ft and reduces to 9,500 ft toward Wanaka.\nUncontrolled Wanaka airport lies to the south-east, with skydiving operations and a low flying training area.\nLight aircraft and helicopters commonly transit the region, especially the Matukituki and Motatapu valleys.\nHelicopter traffic associated with local operations may be below 1,000 ft near the base area and may track along the face.",
+    "landingNotices": "Primary landing is the ‘L’ shaped field with windsocks beside the access road (where cars park).\nThe field slopes away from the mountain toward the main-road arch, which is not obvious from the air.\nExpect thermic conditions in the landing area. Use a cautious approach.\nDo not land on the road or carpark.\nDo not land in nearby paddocks except for emergencies. If you do, use gates to exit and do not climb fences.\nThe surrounding farm is a deer farm. Avoid low flying over deer and avoid landing near deer or stags."
+  }
+]
