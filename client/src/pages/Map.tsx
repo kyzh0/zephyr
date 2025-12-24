@@ -76,7 +76,6 @@ export default function Map() {
     renderCurrentData,
     setInteractive: setStationMarkersInteractive,
   } = useStationMarkers({
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     map,
     isMapLoaded: isLoaded,
     isHistoricData: historyOffset < 0,
@@ -87,7 +86,6 @@ export default function Map() {
   // Initialize webcam markers
   const { refresh: refreshWebcams, setVisibility: setWebcamVisibility } =
     useWebcamMarkers({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       map,
       isMapLoaded: isLoaded,
       isVisible: showWebcams,
@@ -97,7 +95,6 @@ export default function Map() {
   // Initialize sounding markers
   const { refresh: refreshSoundings, setVisibility: setSoundingVisibility } =
     useSoundingMarkers({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       map,
       isMapLoaded: isLoaded,
       isVisible: showSoundings,
@@ -106,7 +103,6 @@ export default function Map() {
 
   // Initialize site markers
   useSiteMarkers({
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     map,
     isMapLoaded: isLoaded,
     isVisible: true, // Always show sites
@@ -155,7 +151,6 @@ export default function Map() {
     if (!map.current) return;
     const newValue = !isSatellite;
     setIsSatellite(newValue);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     map.current.setStyle(
       newValue
         ? "mapbox://styles/mapbox/satellite-streets-v11"

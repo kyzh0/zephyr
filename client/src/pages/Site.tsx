@@ -27,6 +27,21 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
+import {
+  useNearbyWebcams,
+  type UseNearbyWebcamsResult,
+} from "@/hooks/useWebcam";
+import {
+  useNearbyStations,
+  type UseNearbyStationsResult,
+} from "@/hooks/useStations";
+import { handleError } from "@/lib/utils";
 
 export default function Site() {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +50,8 @@ export default function Site() {
   const [site, setSite] = useState<ISite | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [webcamsOpen, setWebcamsOpen] = useState(false);
+  const [stationsOpen, setStationsOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -49,9 +66,7 @@ export default function Site() {
         }
         setSite(data);
       } catch (err) {
-        setError(
-          err instanceof Error ? err : new Error("Failed to fetch site")
-        );
+        setError(handleError(err, "Failed to load site details"));
       } finally {
         setIsLoading(false);
       }
@@ -59,6 +74,18 @@ export default function Site() {
 
     void fetchSite();
   }, [id]);
+
+  const { webcams }: UseNearbyWebcamsResult = useNearbyWebcams({
+    latitude: site?.takeoffLocation.coordinates[1] ?? 0,
+    longitude: site?.takeoffLocation.coordinates[0] ?? 0,
+    maxDistance: 10000, // 10km
+  });
+
+  const { stations }: UseNearbyStationsResult = useNearbyStations({
+    latitude: site?.takeoffLocation.coordinates[1] ?? 0,
+    longitude: site?.takeoffLocation.coordinates[0] ?? 0,
+    maxDistance: 10000, // 10km
+  });
 
   // Navigate back if site not found
   useEffect(() => {
@@ -243,6 +270,90 @@ export default function Site() {
                 </ItemActions>
               </a>
             </Item>
+          )}
+
+          {/* Nearby Stations */}
+          {site && stations.length > 0 && (
+            <Collapsible open={stationsOpen} onOpenChange={setStationsOpen}>
+              <CollapsibleTrigger
+                className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
+                  stationsOpen ? "bg-transparent" : "bg-muted mb-4"
+                }`}
+              >
+                <span>
+                  Nearby Weather Stations ({stations.length} within 10km)
+                </span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${
+                    stationsOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
+                {stations.map((station) => (
+                  <div
+                    key={String(station._id)}
+                    className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
+                    onClick={() => navigate(`/stations/${station._id}`)}
+                  >
+                    <div className="flex flex-col sm:flex-row items-center sm:items-end gap-1">
+                      <span className="text-xs sm:text-sm font-medium">
+                        {station.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {(station.distance / 1000).toFixed(1)}km away
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+
+          {/* Nearby Webcams */}
+          {site && webcams.length > 0 && (
+            <Collapsible open={webcamsOpen} onOpenChange={setWebcamsOpen}>
+              <CollapsibleTrigger
+                className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
+                  webcamsOpen ? "bg-transparent" : "bg-muted mb-4"
+                }`}
+              >
+                <span>Nearby Webcams ({webcams.length} within 10km)</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${
+                    webcamsOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
+                {webcams.map((webcam) => (
+                  <div
+                    key={String(webcam._id)}
+                    className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
+                    onClick={() => navigate(`/webcams/${webcam._id}`)}
+                  >
+                    <div className="flex flex-col sm:flex-row items-center sm:items-end gap-1">
+                      <span className="text-xs sm:text-sm font-medium">
+                        {webcam.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {(webcam.distance / 1000).toFixed(1)}km away
+                      </span>
+                    </div>
+                    {webcam.currentUrl && (
+                      <img
+                        src={`${import.meta.env.VITE_FILE_SERVER_PREFIX}/${
+                          webcam.currentUrl
+                        }`}
+                        alt={webcam.name}
+                        loading="lazy"
+                        className="h-12 w-20 md:h-20 md:w-30 lg:w-80 lg:h-50 object-cover rounded"
+                      />
+                    )}
+                  </div>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
           )}
         </div>
       ) : null}

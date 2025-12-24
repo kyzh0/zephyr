@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 
-import { listSites } from "@/services/site.service";
 import { getSiteGeoJson } from "@/components/map";
 import { useNavigate } from "react-router-dom";
+import { useSites } from "../useSites";
 
 interface UseSiteMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -17,6 +17,7 @@ export function useSiteMarkers({
   isVisible,
 }: UseSiteMarkersOptions) {
   const navigate = useNavigate();
+  const { sites, isLoading: sitesLoading } = useSites();
   const markersRef = useRef<
     { marker: HTMLDivElement; popup: mapboxgl.Popup }[]
   >([]);
@@ -74,12 +75,12 @@ export function useSiteMarkers({
   );
 
   // Initialize sites
-  const initialize = useCallback(async () => {
-    if (!map.current) return;
+  const initialize = useCallback(() => {
+    if (!map.current || sitesLoading || !sites?.length) return;
 
     // Also try to load real sites from API
     try {
-      const geoJson = getSiteGeoJson(await listSites());
+      const geoJson = getSiteGeoJson(sites);
 
       if (geoJson?.features.length) {
         for (const f of geoJson.features) {
@@ -104,7 +105,7 @@ export function useSiteMarkers({
         ? "visible"
         : "hidden";
     }
-  }, [map, createSiteMarker]);
+  }, [map, sites, sitesLoading, createSiteMarker]);
 
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {
