@@ -229,44 +229,39 @@ export default function Station() {
       )}
 
       {/* Nearby Sites */}
-      {station && sites?.length > 0 ? (
-        <>
-          <p>Sites</p>
-          <Collapsible open={sitesOpen} onOpenChange={setSitesOpen}>
-            <CollapsibleTrigger
-              className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
-                sitesOpen ? "bg-transparent" : "bg-muted mb-4"
+      {station && sites?.length > 0 && (
+        <Collapsible open={sitesOpen} onOpenChange={setSitesOpen}>
+          <CollapsibleTrigger
+            className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
+              sitesOpen ? "bg-transparent" : "bg-muted mb-4"
+            }`}
+          >
+            <span>Nearby Sites ({sites.length} within 5km)</span>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${
+                sitesOpen ? "rotate-180" : ""
               }`}
-            >
-              <span>Nearby Sites ({sites.length} within 5km)</span>
-              <ChevronDown
-                className={`h-4 w-4 transition-transform ${
-                  sitesOpen ? "rotate-180" : ""
-                }`}
-              />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
-              {sites.map((site) => (
-                <div
-                  key={String(site._id)}
-                  className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
-                  onClick={() => navigate(`/sites/${site._id}`)}
-                >
-                  <div className="flex flex-col sm:flex-row items-center sm:items-end gap-1">
-                    <span className="text-xs sm:text-sm font-medium">
-                      {site.name}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {(site.distance / 1000).toFixed(1)}km away
-                    </span>
-                  </div>
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
+            {sites.map((site) => (
+              <div
+                key={String(site._id)}
+                className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
+                onClick={() => navigate(`/sites/${site._id}`)}
+              >
+                <div className="flex flex-col sm:flex-row items-center sm:items-end gap-1">
+                  <span className="text-xs sm:text-sm font-medium">
+                    {site.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {(site.distance / 1000).toFixed(1)}km away
+                  </span>
                 </div>
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
-        </>
-      ) : (
-        <p>No sites</p>
+              </div>
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
       )}
 
       {/* Footer */}
