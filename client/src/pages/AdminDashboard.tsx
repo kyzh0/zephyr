@@ -14,14 +14,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { listStations } from "@/services/station.service";
-import { listCams } from "@/services/cam.service";
 import { listSoundings } from "@/services/sounding.service";
-import { listSites } from "@/services/site.service";
 import type { IStation } from "@/models/station.model";
-import type { ICam } from "@/models/cam.model";
 import type { ISounding } from "@/models/sounding.model";
-import type { ISite } from "@/models/site.model";
 import { getMinutesAgo } from "@/lib/utils";
+import { useSites, useWebcams } from "@/hooks";
 
 interface AdminDashboardProps {
   tab?: "stations" | "webcams" | "soundings" | "sites";
@@ -31,6 +28,7 @@ export default function AdminDashboard({
   tab = "stations",
 }: AdminDashboardProps) {
   const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState(tab);
 
   // Stations state
@@ -40,8 +38,7 @@ export default function AdminDashboard({
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
 
   // Webcams state
-  const [webcams, setWebcams] = useState<ICam[]>([]);
-  const [webcamsLoading, setWebcamsLoading] = useState(true);
+  const { webcams, isLoading: webcamsLoading } = useWebcams();
   const [webcamSearch, setWebcamSearch] = useState("");
 
   // Soundings state
@@ -50,8 +47,7 @@ export default function AdminDashboard({
   const [soundingSearch, setSoundingSearch] = useState("");
 
   // Sites state
-  const [sites, setSites] = useState<ISite[]>([]);
-  const [sitesLoading, setSitesLoading] = useState(true);
+  const { sites, isLoading: sitesLoading } = useSites();
   const [siteSearch, setSiteSearch] = useState("");
 
   useEffect(() => {
@@ -64,30 +60,12 @@ export default function AdminDashboard({
   }, []);
 
   useEffect(() => {
-    async function loadWebcams() {
-      const data = await listCams();
-      if (data?.length) setWebcams(data);
-      setWebcamsLoading(false);
-    }
-    loadWebcams();
-  }, []);
-
-  useEffect(() => {
     async function loadSoundings() {
       const data = await listSoundings();
       if (data?.length) setSoundings(data);
       setSoundingsLoading(false);
     }
     loadSoundings();
-  }, []);
-
-  useEffect(() => {
-    async function loadSites() {
-      const data = await listSites();
-      if (data?.length) setSites(data);
-      setSitesLoading(false);
-    }
-    loadSites();
   }, []);
 
   const filteredStations = useMemo(() => {
@@ -108,7 +86,7 @@ export default function AdminDashboard({
   }, [stations]);
 
   const filteredWebcams = useMemo(() => {
-    if (!webcams.length) return [];
+    if (!webcams?.length) return [];
     if (!webcamSearch.trim()) return webcams;
     const query = webcamSearch.toLowerCase();
     return webcams.filter((w) => w.name.toLowerCase().includes(query));
@@ -122,7 +100,7 @@ export default function AdminDashboard({
   }, [soundings, soundingSearch]);
 
   const filteredSites = useMemo(() => {
-    if (!sites.length) return [];
+    if (!sites?.length) return [];
     if (!siteSearch.trim()) return sites;
     const query = siteSearch.toLowerCase();
     return sites.filter((s) => s.name.toLowerCase().includes(query));
@@ -287,7 +265,7 @@ export default function AdminDashboard({
                         Loading...
                       </TableCell>
                     </TableRow>
-                  ) : filteredWebcams.length === 0 ? (
+                  ) : !filteredWebcams?.length ? (
                     <TableRow>
                       <TableCell colSpan={2} className="text-muted-foreground">
                         No webcams found
@@ -414,7 +392,7 @@ export default function AdminDashboard({
                         Loading...
                       </TableCell>
                     </TableRow>
-                  ) : filteredSites.length === 0 ? (
+                  ) : !filteredSites?.length ? (
                     <TableRow>
                       <TableCell colSpan={2} className="text-muted-foreground">
                         No sites found

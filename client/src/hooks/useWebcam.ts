@@ -1,7 +1,40 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { getCamById, loadCamImages, listCams } from "@/services/cam.service";
 import type { ICam, ICamImage } from "@/models/cam.model";
-import { getDistance } from "@/lib/utils";
+import { getDistance, handleError } from "@/lib/utils";
+
+// Hook for managing async data fetching with loading/error states
+const useAsyncData = <T>(
+  fetchFn: () => Promise<T>,
+  initialData: T,
+  autoFetch = true
+) => {
+  const [data, setData] = useState<T>(initialData);
+  const [isLoading, setIsLoading] = useState(autoFetch); // Start loading if autoFetch is true
+  const [error, setError] = useState<Error | null>(null);
+
+  const refetch = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await fetchFn();
+      setData(result);
+    } catch (err) {
+      setError(handleError(err, "Operation failed"));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchFn]);
+
+  useEffect(() => {
+    if (autoFetch) {
+      void refetch();
+    }
+  }, [autoFetch, refetch]);
+
+  return { data, isLoading, error, refetch };
+};
 
 interface UseWebcamOptions {
   id?: string;
@@ -47,7 +80,7 @@ export function useWebcam({
         setImages(imgs);
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to load images"));
+      setError(handleError(err, "Failed to load webcam images"));
     }
   }, [id, webcam]);
 
@@ -81,9 +114,7 @@ export function useWebcam({
         }
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch webcam")
-      );
+      setError(handleError(err, "Failed to load webcam data"));
     } finally {
       setIsLoading(false);
     }
@@ -112,31 +143,12 @@ export function useWebcam({
  * @returns List of all webcams with loading and error states
  */
 export function useWebcams() {
-  const [webcams, setWebcams] = useState<ICam[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const cams = await listCams();
-      if (cams) {
-        setWebcams(cams);
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch webcams")
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refetch();
-  }, [refetch]);
+  const {
+    data: webcams,
+    isLoading,
+    error,
+    refetch,
+  } = useAsyncData(listCams, []);
 
   return {
     webcams,
@@ -179,34 +191,19 @@ export function useNearbyWebcams({
   maxDistance = 50000,
   limit,
 }: UseNearbyWebcamsOptions): UseNearbyWebcamsResult {
-  const [allWebcams, setAllWebcams] = useState<ICam[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const cams = await listCams();
-      if (cams) {
-        setAllWebcams(cams);
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch webcams")
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refetch();
-  }, [refetch]);
+  const { webcams: allWebcams, isLoading, error, refetch } = useWebcams();
 
   // Filter and sort webcams by distance
   const nearbyWebcams = useMemo(() => {
+    // Don't compute if webcams haven't loaded yet or coordinates are invalid
+    if (
+      isLoading ||
+      !allWebcams?.length ||
+      (latitude === 0 && longitude === 0)
+    ) {
+      return [];
+    }
+
     const webcamsWithDistance: WebcamWithDistance[] = allWebcams
       .map((cam) => {
         const distance = getDistance(
@@ -224,7 +221,7 @@ export function useNearbyWebcams({
       .sort((a, b) => a.distance - b.distance);
 
     return limit ? webcamsWithDistance.slice(0, limit) : webcamsWithDistance;
-  }, [allWebcams, latitude, longitude, maxDistance, limit]);
+  }, [allWebcams, latitude, longitude, maxDistance, limit, isLoading]);
 
   return {
     webcams: nearbyWebcams,
