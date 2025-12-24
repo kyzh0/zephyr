@@ -43,42 +43,14 @@ export function useSiteMarkers({
       const el = document.createElement("div");
       el.id = dbId;
       el.className =
-        "site-marker bg-white p-1 rounded-lg cursor-pointer shadow-sm hover:shadow-lg transition-all hover:scale-110";
+        "site-marker bg-white p-1 rounded-full cursor-pointer shadow-sm hover:shadow-lg transition-shadow";
       el.style.visibility = "hidden";
+      el.style.zIndex = "1";
 
-      // Create SVG flag icon (Lucide Flag icon)
-      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svg.setAttribute("width", "20");
-      svg.setAttribute("height", "20");
-      svg.setAttribute("viewBox", "0 0 24 24");
-      svg.setAttribute("fill", "none");
-      svg.setAttribute("stroke", "currentColor");
-      svg.setAttribute("stroke-width", "2");
-      svg.setAttribute("stroke-linecap", "round");
-      svg.setAttribute("stroke-linejoin", "round");
-      svg.style.color = "#2563eb"; // blue-600
-
-      const path = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "path"
-      );
-      path.setAttribute(
-        "d",
-        "M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"
-      );
-
-      const line = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "line"
-      );
-      line.setAttribute("x1", "4");
-      line.setAttribute("x2", "4");
-      line.setAttribute("y1", "22");
-      line.setAttribute("y2", "15");
-
-      svg.appendChild(path);
-      svg.appendChild(line);
-      el.appendChild(svg);
+      // Create paragliding SVG icon
+      const icon = document.createElement("div");
+      icon.className = "site-marker-icon";
+      el.appendChild(icon);
 
       // Event handlers
       const handleClick = () => {

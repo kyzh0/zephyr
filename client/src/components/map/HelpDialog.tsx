@@ -110,6 +110,13 @@ export function HelpDialog({
           </div>
 
           <div className="flex justify-end items-center">
+            <img src="/site.svg" alt="Site marker" className="w-6 h-8" />
+          </div>
+          <div className="flex items-center">
+            View information about a flying site
+          </div>
+
+          <div className="flex justify-end items-center">
             <Camera className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div className="flex items-center">Webcam overlay</div>
