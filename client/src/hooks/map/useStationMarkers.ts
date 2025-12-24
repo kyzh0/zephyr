@@ -169,6 +169,7 @@ function createMarkerElement(
     currentBearing != null ? String(currentBearing) : "";
   container.dataset.isOffline = String(isOffline ?? false);
   container.dataset.validBearings = validBearings ?? "";
+  container.style.zIndex = "2";
 
   container.appendChild(arrow);
   container.appendChild(text);

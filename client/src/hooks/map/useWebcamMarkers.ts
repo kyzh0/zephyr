@@ -78,6 +78,7 @@ export function useWebcamMarkers({
       const el = document.createElement("div");
       el.style.backgroundColor = "white";
       el.style.visibility = "hidden";
+      el.style.zIndex = "4";
       el.id = dbId;
       el.className = "webcam py-[18px] px-2 rounded-lg cursor-pointer";
       el.dataset.timestamp = String(timestamp);
