@@ -31,7 +31,9 @@ import {
 
 interface MapControlButtonsProps {
   onWebcamClick: () => void;
+  showWebcams: boolean;
   onSoundingClick: () => void;
+  showSoundings: boolean;
   onLayerToggle: () => void;
   onLocateClick: () => void;
   unit: WindUnit;
@@ -45,11 +47,15 @@ interface MapControlButtonsProps {
   onElevationChange: (value: number) => void;
   minimizeRecents: boolean;
   onRecentsToggle: () => void;
+  onToggleSites?: () => void;
+  showSites?: boolean;
 }
 
 export function MapControlButtons({
   onWebcamClick,
+  showWebcams,
   onSoundingClick,
+  showSoundings,
   onLayerToggle,
   onLocateClick,
   unit,
@@ -63,6 +69,8 @@ export function MapControlButtons({
   onElevationChange,
   minimizeRecents,
   onRecentsToggle,
+  onToggleSites,
+  showSites,
 }: MapControlButtonsProps) {
   const navigate = useNavigate();
   const [donateOpen, setDonateOpen] = useState(false);
@@ -159,8 +167,9 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={onWebcamClick}
+              pressed={showWebcams}
               disabled={isHistoricData}
-              className="h-9 w-9 bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+              className="h-9 w-9 bg-background data-[state=on]:bg-blue-500"
             >
               <Camera className="h-4 w-4 opacity-70" />
             </Toggle>
@@ -172,9 +181,28 @@ export function MapControlButtons({
             <Toggle
               variant="outline"
               size="sm"
+              onClick={onToggleSites}
+              pressed={showSites}
+              className="h-9 w-9 bg-background data-[state=on]:bg-blue-500"
+            >
+              <img
+                src="./site.svg"
+                alt="Sites"
+                className="h-4 w-4 opacity-70"
+              />
+            </Toggle>
+          </TooltipTrigger>
+          <TooltipContent>Show Sites on Map</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Toggle
+              variant="outline"
+              size="sm"
               onClick={onSoundingClick}
+              pressed={showSoundings}
               disabled={isHistoricData}
-              className="h-9 w-9 bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+              className="h-9 w-9 bg-background data-[state=on]:bg-blue-500"
             >
               <TrendingUp className="h-4 w-4 opacity-70" />
             </Toggle>
@@ -292,3 +320,4 @@ export function MapControlButtons({
     </>
   );
 }
+export default MapControlButtons;
