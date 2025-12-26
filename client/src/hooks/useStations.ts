@@ -87,7 +87,7 @@ interface UseNearbyStationsOptions {
   limit?: number; // max number of results
 }
 
-interface StationWithDistance extends IStation {
+export interface StationWithDistance extends IStation {
   distance: number; // distance in meters
 }
 
@@ -103,14 +103,14 @@ export interface UseNearbyStationsResult {
  * @param options - Configuration options
  * @param options.latitude - Center point latitude
  * @param options.longitude - Center point longitude
- * @param options.maxDistance - Maximum distance in meters (default: 10000m / 10km)
+ * @param options.maxDistance - Maximum distance in meters (default: 5000m / 10km)
  * @param options.limit - Maximum number of results to return
  * @returns Nearby stations sorted by distance with loading and error states
  */
 export function useNearbyStations({
   latitude,
   longitude,
-  maxDistance = 10000,
+  maxDistance = 5000,
   limit,
 }: UseNearbyStationsOptions): UseNearbyStationsResult {
   const { stations: allStations, isLoading, error, refetch } = useStations();

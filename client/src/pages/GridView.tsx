@@ -1,20 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { listStationsWithinRadius } from "@/services/station.service";
-import {
-  getDistance,
-  getWindColor,
-  getWindDirectionFromBearing,
-} from "@/lib/utils";
-import { convertWindSpeed, getStoredValue } from "@/components/map/map.utils";
+import { getStoredValue } from "@/components/map/map.utils";
 import type { WindUnit } from "@/components/map/map.types";
-import type { IStation } from "@/models/station.model";
+import { useNearbyStations } from "@/hooks";
 
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DirectionArrow } from "@/components/ui/DirectionArrow";
 import {
   Dialog,
   DialogContent,
@@ -22,76 +14,40 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-interface StationWithDistance extends IStation {
-  distance?: number;
-}
+import { StationPreview } from "@/components/station/StationPreview";
 
 export default function GridView() {
   const navigate = useNavigate();
-
-  const [loading, setLoading] = useState(true); // Start with loading true
-  const [error, setError] = useState("");
-  const [data, setData] = useState<StationWithDistance[]>([]);
-  const [radius, setRadius] = useState(() => 50);
-  const [threshold, setThreshold] = useState(() => 0);
-
+  const [radius, setRadius] = useState(50);
+  const [threshold, setThreshold] = useState(0);
   const unit = getStoredValue<WindUnit>("unit", "kmh");
 
-  const fetchData = useCallback((r: number) => {
-    setLoading(true);
-    setError("");
-
+  // Get user's location (fallback to 0,0 if not available)
+  const [coords, setCoords] = useState<{ lat: number; lng: number }>({
+    lat: 0,
+    lng: 0,
+  });
+  React.useEffect(() => {
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const stations = await listStationsWithinRadius(
-            pos.coords.latitude,
-            pos.coords.longitude,
-            r
-          );
-
-          if (stations?.length) {
-            setData(
-              stations.map(
-                (station) =>
-                  ({
-                    ...station,
-                    distance:
-                      getDistance(
-                        pos.coords.latitude,
-                        pos.coords.longitude,
-                        station.location.coordinates[1],
-                        station.location.coordinates[0]
-                      ) / 1000, // convert to km,
-                  } as StationWithDistance)
-              )
-            );
-          } else {
-            setError(`No stations found within ${r}km`);
-          }
-        } catch {
-          setError("Failed to load stations");
-        } finally {
-          setLoading(false);
-        }
-      },
-      () => {
-        setError("Please grant location permissions");
-        setLoading(false);
-      }
+      (pos) =>
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setCoords({ lat: 0, lng: 0 })
     );
   }, []);
 
-  useEffect(() => {
-    fetchData(radius);
-  }, [fetchData, radius]);
+  const {
+    stations,
+    isLoading: loading,
+    error,
+  } = useNearbyStations({
+    latitude: coords.lat,
+    longitude: coords.lng,
+    maxDistance: radius * 1000,
+  });
 
-  const handleRadiusChange = (value: number) => {
-    setRadius(value);
-  };
+  const handleRadiusChange = (value: number) => setRadius(value);
 
-  const filteredData = data.filter(
+  const filteredData = stations.filter(
     (s) => !s.isOffline && (s.currentAverage ?? 0) >= threshold
   );
 
@@ -102,7 +58,7 @@ export default function GridView() {
           <DialogTitle>Nearby Stations</DialogTitle>
           <DialogDescription>
             Showing stations within {radius}km • Unit:{" "}
-            {unit === "kt" ? "kt" : "km/h"}
+            {unit === "kt" ? "kt" : "kmh"}
           </DialogDescription>
         </DialogHeader>
 
@@ -122,7 +78,7 @@ export default function GridView() {
               Threshold:{" "}
               {unit === "kt"
                 ? `${Math.round(threshold / 1.852)} kt`
-                : `${threshold} km/h`}
+                : `${threshold} kmh`}
             </Label>
             <Slider
               value={[threshold]}
@@ -137,66 +93,16 @@ export default function GridView() {
           {loading && <Skeleton className="h-40 w-full" />}
 
           {error && (
-            <p className="text-center text-sm text-destructive py-4">{error}</p>
+            <p className="text-center text-sm text-destructive py-4">
+              {error.message || String(error)}
+            </p>
           )}
 
           {!loading && !error && (
             <div className="grid grid-cols-3 gap-2">
-              {filteredData.map((s) => {
-                const color =
-                  s.currentAverage != null
-                    ? getWindColor(s.currentAverage + 10)
-                    : undefined;
-                return (
-                  <button
-                    type="button"
-                    key={s._id}
-                    onClick={() => {
-                      navigate(`/stations/${s._id}`);
-                    }}
-                    className="rounded-lg p-2 text-center transition-colors hover:opacity-80"
-                    style={{
-                      backgroundColor: color ?? "hsl(var(--muted))",
-                    }}
-                  >
-                    <p className="truncate text-xs">{s.name}</p>
-                    <p className="text-lg font-medium">
-                      {s.currentAverage == null
-                        ? "-"
-                        : convertWindSpeed(s.currentAverage, unit)}
-                      {" | "}
-                      {s.currentGust == null
-                        ? "-"
-                        : convertWindSpeed(s.currentGust, unit)}
-                    </p>
-                    <div className="flex justify-center gap-2">
-                      {s.currentBearing == null ? (
-                        "-"
-                      ) : (
-                        <div className="flex items-center justify-center">
-                          <DirectionArrow
-                            className="h-4 w-4"
-                            style={{
-                              transform: `rotate(${Math.round(
-                                180 + s.currentBearing
-                              )}deg)`,
-                            }}
-                          />
-                        </div>
-                      )}
-                      <p className="text-sm">
-                        {getWindDirectionFromBearing(s.currentBearing ?? -1)}
-                      </p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {s.distance?.toLocaleString(undefined, {
-                        maximumFractionDigits: 0,
-                      })}{" "}
-                      km away
-                    </p>
-                  </button>
-                );
-              })}
+              {filteredData.map((station) => (
+                <StationPreview key={station._id} station={station} />
+              ))}
             </div>
           )}
         </div>

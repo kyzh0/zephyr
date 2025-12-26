@@ -37,6 +37,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { addRecentStation } from "@/services/recentStations.service";
+import { WebcamPreview } from "@/components/webcam/WebcamPreview";
 
 export default function Station() {
   const { id } = useParams<{ id: string }>();
@@ -54,7 +55,6 @@ export default function Station() {
   const { webcams }: UseNearbyWebcamsResult = useNearbyWebcams({
     latitude: station?.location.coordinates[0] ?? 0,
     longitude: station?.location.coordinates[1] ?? 0,
-    maxDistance: 5000, // 5km
   });
 
   const { sites }: UseNearbySitesResult = useNearbySites({
@@ -199,30 +199,13 @@ export default function Station() {
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
             {webcams.map((webcam) => (
-              <div
-                key={String(webcam._id)}
-                className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
-                onClick={() => navigate(`/webcams/${webcam._id}`)}
-              >
-                <div className="flex flex-col sm:flex-row items-center sm:items-end gap-1">
-                  <span className="text-xs sm:text-sm font-medium">
-                    {webcam.name}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {(webcam.distance / 1000).toFixed(1)}km away
-                  </span>
-                </div>
-                {webcam.currentUrl && (
-                  <img
-                    src={`${import.meta.env.VITE_FILE_SERVER_PREFIX}/${
-                      webcam.currentUrl
-                    }`}
-                    alt={webcam.name}
-                    loading="lazy"
-                    className="h-12 w-20 md:h-20 md:w-30 lg:w-80 lg:h-50 object-cover rounded"
-                  />
-                )}
-              </div>
+              <WebcamPreview
+                key={webcam._id}
+                _id={webcam._id}
+                name={webcam.name}
+                distance={webcam.distance}
+                currentUrl={webcam.currentUrl}
+              />
             ))}
           </CollapsibleContent>
         </Collapsible>

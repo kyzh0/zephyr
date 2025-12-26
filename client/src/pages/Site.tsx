@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSiteById } from "@/services/site.service";
+import { StationPreview } from "@/components/station/StationPreview";
+
 import {
   Dialog,
   DialogContent,
@@ -42,6 +44,7 @@ import {
   type UseNearbyStationsResult,
 } from "@/hooks/useStations";
 import { handleError } from "@/lib/utils";
+import { WebcamPreview } from "@/components/webcam/WebcamPreview";
 
 export default function Site() {
   const { id } = useParams<{ id: string }>();
@@ -76,15 +79,13 @@ export default function Site() {
   }, [id]);
 
   const { webcams }: UseNearbyWebcamsResult = useNearbyWebcams({
-    latitude: site?.takeoffLocation.coordinates[1] ?? 0,
-    longitude: site?.takeoffLocation.coordinates[0] ?? 0,
-    maxDistance: 10000, // 10km
+    latitude: site?.takeoffLocation.coordinates[0] ?? 0,
+    longitude: site?.takeoffLocation.coordinates[1] ?? 0,
   });
 
   const { stations }: UseNearbyStationsResult = useNearbyStations({
-    latitude: site?.takeoffLocation.coordinates[1] ?? 0,
-    longitude: site?.takeoffLocation.coordinates[0] ?? 0,
-    maxDistance: 10000, // 10km
+    latitude: site?.takeoffLocation.coordinates[0] ?? 0,
+    longitude: site?.takeoffLocation.coordinates[1] ?? 0,
   });
 
   // Navigate back if site not found
@@ -291,20 +292,7 @@ export default function Site() {
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
                 {stations.map((station) => (
-                  <div
-                    key={String(station._id)}
-                    className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
-                    onClick={() => navigate(`/stations/${station._id}`)}
-                  >
-                    <div className="flex flex-col sm:flex-row items-center sm:items-end gap-1">
-                      <span className="text-xs sm:text-sm font-medium">
-                        {station.name}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {(station.distance / 1000).toFixed(1)}km away
-                      </span>
-                    </div>
-                  </div>
+                  <StationPreview key={String(station._id)} station={station} />
                 ))}
               </CollapsibleContent>
             </Collapsible>
@@ -327,30 +315,14 @@ export default function Site() {
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
                 {webcams.map((webcam) => (
-                  <div
-                    key={String(webcam._id)}
-                    className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
+                  <WebcamPreview
+                    key={webcam._id}
+                    _id={webcam._id}
+                    name={webcam.name}
+                    distance={webcam.distance}
+                    currentUrl={webcam.currentUrl}
                     onClick={() => navigate(`/webcams/${webcam._id}`)}
-                  >
-                    <div className="flex flex-col sm:flex-row items-center sm:items-end gap-1">
-                      <span className="text-xs sm:text-sm font-medium">
-                        {webcam.name}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {(webcam.distance / 1000).toFixed(1)}km away
-                      </span>
-                    </div>
-                    {webcam.currentUrl && (
-                      <img
-                        src={`${import.meta.env.VITE_FILE_SERVER_PREFIX}/${
-                          webcam.currentUrl
-                        }`}
-                        alt={webcam.name}
-                        loading="lazy"
-                        className="h-12 w-20 md:h-20 md:w-30 lg:w-80 lg:h-50 object-cover rounded"
-                      />
-                    )}
-                  </div>
+                  />
                 ))}
               </CollapsibleContent>
             </Collapsible>
