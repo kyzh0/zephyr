@@ -3,38 +3,31 @@ import { getCamById, loadCamImages, listCams } from "@/services/cam.service";
 import type { ICam, ICamImage } from "@/models/cam.model";
 import { getDistance, handleError } from "@/lib/utils";
 
-// Hook for managing async data fetching with loading/error states
-const useAsyncData = <T>(
-  fetchFn: () => Promise<T>,
-  initialData: T,
-  autoFetch = true
-) => {
-  const [data, setData] = useState<T>(initialData);
-  const [isLoading, setIsLoading] = useState(autoFetch); // Start loading if autoFetch is true
-  const [error, setError] = useState<Error | null>(null);
+// Module-level singleton cache for webcams
+let cachedWebcams: ICam[] | null = null;
+let cachedWebcamsError: Error | null = null;
+let cachedWebcamsLoading = false;
+let webcamsListeners: (() => void)[] = [];
 
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+async function fetchWebcamsAndNotify() {
+  cachedWebcamsLoading = true;
+  notifyWebcamsListeners();
+  try {
+    const result = await listCams();
+    cachedWebcams = result ?? [];
+    cachedWebcamsError = null;
+  } catch (err) {
+    cachedWebcamsError = handleError(err, "Operation failed");
+    cachedWebcams = [];
+  } finally {
+    cachedWebcamsLoading = false;
+    notifyWebcamsListeners();
+  }
+}
 
-    try {
-      const result = await fetchFn();
-      setData(result);
-    } catch (err) {
-      setError(handleError(err, "Operation failed"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [fetchFn]);
-
-  useEffect(() => {
-    if (autoFetch) {
-      void refetch();
-    }
-  }, [autoFetch, refetch]);
-
-  return { data, isLoading, error, refetch };
-};
+function notifyWebcamsListeners() {
+  webcamsListeners.forEach((fn) => fn());
+}
 
 interface UseWebcamOptions {
   id?: string;
@@ -143,17 +136,32 @@ export function useWebcam({
  * @returns List of all webcams with loading and error states
  */
 export function useWebcams() {
-  const {
-    data: webcams,
-    isLoading,
-    error,
-    refetch,
-  } = useAsyncData(listCams, []);
+  const [, forceUpdate] = useState(0);
+
+  // Subscribe to cache updates
+  useEffect(() => {
+    const update = () => forceUpdate((n) => n + 1);
+    webcamsListeners.push(update);
+    return () => {
+      webcamsListeners = webcamsListeners.filter((fn) => fn !== update);
+    };
+  }, []);
+
+  // Fetch once if needed
+  useEffect(() => {
+    if (cachedWebcams === null && !cachedWebcamsLoading) {
+      fetchWebcamsAndNotify();
+    }
+  }, []);
+
+  const refetch = useCallback(async () => {
+    await fetchWebcamsAndNotify();
+  }, []);
 
   return {
-    webcams,
-    isLoading,
-    error,
+    webcams: cachedWebcams ?? [],
+    isLoading: cachedWebcamsLoading || cachedWebcams === null,
+    error: cachedWebcamsError,
     refetch,
   };
 }

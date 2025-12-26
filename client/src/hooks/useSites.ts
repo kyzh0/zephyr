@@ -3,38 +3,31 @@ import { listSites } from "@/services/site.service";
 import type { ISite } from "@/models/site.model";
 import { getDistance, handleError } from "@/lib/utils";
 
-// Hook for managing async data fetching with loading/error states
-const useAsyncData = <T>(
-  fetchFn: () => Promise<T>,
-  initialData: T,
-  autoFetch = true
-) => {
-  const [data, setData] = useState<T>(initialData);
-  const [isLoading, setIsLoading] = useState(autoFetch); // Start loading if autoFetch is true
-  const [error, setError] = useState<Error | null>(null);
+// Module-level singleton cache for sites
+let cachedSites: ISite[] | null = null;
+let cachedError: Error | null = null;
+let cachedLoading = false;
+let listeners: (() => void)[] = [];
 
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+async function fetchSitesAndNotify() {
+  cachedLoading = true;
+  notifyListeners();
+  try {
+    const result = await listSites();
+    cachedSites = result ?? [];
+    cachedError = null;
+  } catch (err) {
+    cachedError = handleError(err, "Operation failed");
+    cachedSites = [];
+  } finally {
+    cachedLoading = false;
+    notifyListeners();
+  }
+}
 
-    try {
-      const result = await fetchFn();
-      setData(result ?? initialData);
-    } catch (err) {
-      setError(handleError(err, "Operation failed"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [fetchFn, initialData]);
-
-  useEffect(() => {
-    if (autoFetch) {
-      void refetch();
-    }
-  }, [autoFetch, refetch]);
-
-  return { data, isLoading, error, refetch };
-};
+function notifyListeners() {
+  listeners.forEach((fn) => fn());
+}
 
 interface UseSitesOptions {
   autoLoad?: boolean;
@@ -56,17 +49,32 @@ export interface UseSitesResult {
 export function useSites({
   autoLoad = true,
 }: UseSitesOptions = {}): UseSitesResult {
-  const {
-    data: sites,
-    isLoading,
-    error,
-    refetch,
-  } = useAsyncData(listSites, [] as ISite[], autoLoad);
+  const [, forceUpdate] = useState(0);
+
+  // Subscribe to cache updates
+  useEffect(() => {
+    const update = () => forceUpdate((n) => n + 1);
+    listeners.push(update);
+    return () => {
+      listeners = listeners.filter((fn) => fn !== update);
+    };
+  }, []);
+
+  // Fetch once if needed
+  useEffect(() => {
+    if (autoLoad && cachedSites === null && !cachedLoading) {
+      fetchSitesAndNotify();
+    }
+  }, [autoLoad]);
+
+  const refetch = useCallback(async () => {
+    await fetchSitesAndNotify();
+  }, []);
 
   return {
-    sites: sites ?? [],
-    isLoading,
-    error,
+    sites: cachedSites ?? [],
+    isLoading: cachedLoading || cachedSites === null,
+    error: cachedError,
     refetch,
   };
 }
