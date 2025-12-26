@@ -189,14 +189,14 @@ export interface UseNearbyWebcamsResult {
  * @param options - Configuration options
  * @param options.latitude - Center point latitude
  * @param options.longitude - Center point longitude
- * @param options.maxDistance - Maximum distance in meters (default: 50000m / 50km)
+ * @param options.maxDistance - Maximum distance in meters (default: 5000m / 5km)
  * @param options.limit - Maximum number of results to return
  * @returns Nearby webcams sorted by distance with loading and error states
  */
 export function useNearbyWebcams({
   latitude,
   longitude,
-  maxDistance = 50000,
+  maxDistance = 5000,
   limit,
 }: UseNearbyWebcamsOptions): UseNearbyWebcamsResult {
   const { webcams: allWebcams, isLoading, error, refetch } = useWebcams();

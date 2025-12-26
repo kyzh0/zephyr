@@ -102,14 +102,14 @@ export interface UseNearbySitesResult {
  * @param options - Configuration options
  * @param options.latitude - Center point latitude
  * @param options.longitude - Center point longitude
- * @param options.maxDistance - Maximum distance in meters (default: 10000m / 10km)
+ * @param options.maxDistance - Maximum distance in meters (default: 5000m / 10km)
  * @param options.limit - Maximum number of results to return
  * @returns Nearby sites sorted by distance with loading and error states
  */
 export function useNearbySites({
   latitude,
   longitude,
-  maxDistance = 10000,
+  maxDistance = 5000,
   limit,
 }: UseNearbySitesOptions): UseNearbySitesResult {
   const { sites: allSites, isLoading, error, refetch } = useSites();
