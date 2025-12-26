@@ -20,39 +20,62 @@ export interface UseStationsResult {
  * @param options.autoLoad - Whether to automatically load stations (default: true)
  * @returns All stations with loading and error states
  */
+
+// Module-level singleton cache for stations
+let cachedStations: IStation[] | null = null;
+let cachedStationsError: Error | null = null;
+let cachedStationsLoading = false;
+let stationsListeners: (() => void)[] = [];
+
+async function fetchStationsAndNotify() {
+  cachedStationsLoading = true;
+  notifyStationsListeners();
+  try {
+    const result = await listStations(false);
+    cachedStations = result ?? [];
+    cachedStationsError = null;
+  } catch (err) {
+    cachedStationsError = handleError(err, "Failed to load stations");
+    cachedStations = [];
+  } finally {
+    cachedStationsLoading = false;
+    notifyStationsListeners();
+  }
+}
+
+function notifyStationsListeners() {
+  stationsListeners.forEach((fn) => fn());
+}
+
 export function useStations({
   autoLoad = true,
 }: UseStationsOptions = {}): UseStationsResult {
-  const [stations, setStations] = useState<IStation[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [, forceUpdate] = useState(0);
 
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const fetchedStations = await listStations(false);
-      if (fetchedStations) {
-        setStations(fetchedStations);
-      }
-    } catch (err) {
-      setError(handleError(err, "Failed to load stations"));
-    } finally {
-      setIsLoading(false);
-    }
+  // Subscribe to cache updates
+  useEffect(() => {
+    const update = () => forceUpdate((n) => n + 1);
+    stationsListeners.push(update);
+    return () => {
+      stationsListeners = stationsListeners.filter((fn) => fn !== update);
+    };
   }, []);
 
+  // Fetch once if needed
   useEffect(() => {
-    if (autoLoad) {
-      void refetch();
+    if (autoLoad && cachedStations === null && !cachedStationsLoading) {
+      fetchStationsAndNotify();
     }
-  }, [autoLoad, refetch]);
+  }, [autoLoad]);
+
+  const refetch = useCallback(async () => {
+    await fetchStationsAndNotify();
+  }, []);
 
   return {
-    stations,
-    isLoading,
-    error,
+    stations: cachedStations ?? [],
+    isLoading: cachedStationsLoading || cachedStations === null,
+    error: cachedStationsError,
     refetch,
   };
 }

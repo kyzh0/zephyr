@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { formatInTimeZone } from "date-fns-tz";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 
@@ -54,7 +54,7 @@ export default function Station() {
   const { webcams }: UseNearbyWebcamsResult = useNearbyWebcams({
     latitude: station?.location.coordinates[0] ?? 0,
     longitude: station?.location.coordinates[1] ?? 0,
-    maxDistance: 10000, // 10km
+    maxDistance: 5000, // 5km
   });
 
   const { sites }: UseNearbySitesResult = useNearbySites({
@@ -190,7 +190,7 @@ export default function Station() {
               webcamsOpen ? "bg-transparent" : "bg-muted mb-4"
             }`}
           >
-            <span>Nearby Webcams ({webcams.length} within 10km)</span>
+            <span>Nearby Webcams ({webcams.length} within 5km)</span>
             <ChevronDown
               className={`h-4 w-4 transition-transform ${
                 webcamsOpen ? "rotate-180" : ""
@@ -243,23 +243,19 @@ export default function Station() {
               }`}
             />
           </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
-            {sites.map((site) => (
-              <div
-                key={String(site._id)}
-                className="flex flex-col items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
-                onClick={() => navigate(`/sites/${site._id}`)}
-              >
-                <div className="flex flex-col sm:flex-row items-center sm:items-end gap-1">
-                  <span className="text-xs sm:text-sm font-medium">
-                    {site.name}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {(site.distance / 1000).toFixed(1)}km away
-                  </span>
-                </div>
-              </div>
-            ))}
+          <CollapsibleContent>
+            <ul className="list-disc list-inside ml-8">
+              {sites.map((site) => (
+                <li key={String(site._id)}>
+                  <Link
+                    to={`/sites/${site._id}`}
+                    className="underline cursor-pointer hover:text-blue-600"
+                  >
+                    {site.name} ({(site.distance / 1000).toFixed(1)}km away)
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </CollapsibleContent>
         </Collapsible>
       )}
