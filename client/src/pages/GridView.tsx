@@ -27,11 +27,17 @@ export default function GridView() {
     lat: 0,
     lng: 0,
   });
+  const [locationError, setLocationError] = useState(false);
   React.useEffect(() => {
     navigator.geolocation.getCurrentPosition(
-      (pos) =>
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => setCoords({ lat: 0, lng: 0 })
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationError(false);
+      },
+      () => {
+        setCoords({ lat: 0, lng: 0 });
+        setLocationError(true);
+      }
     );
   }, []);
 
@@ -40,8 +46,8 @@ export default function GridView() {
     isLoading: loading,
     error,
   } = useNearbyStations({
-    latitude: coords.lat,
-    longitude: coords.lng,
+    lat: coords.lat,
+    lon: coords.lng,
     maxDistance: radius * 1000,
   });
 
@@ -92,13 +98,34 @@ export default function GridView() {
         <div className="flex-1 overflow-y-auto">
           {loading && <Skeleton className="h-40 w-full" />}
 
-          {error && (
+          {locationError && (
+            <div className="flex flex-col items-center justify-center h-40">
+              <p className="text-center text-sm text-destructive py-4">
+                Location permission is required to show nearby stations.
+                <br />
+                Please enable location access in your browser settings.
+              </p>
+            </div>
+          )}
+
+          {!loading && !locationError && error && (
             <p className="text-center text-sm text-destructive py-4">
               {error.message || String(error)}
             </p>
           )}
 
-          {!loading && !error && (
+          {!loading &&
+            !locationError &&
+            !error &&
+            filteredData.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-40">
+                <p className="text-center text-muted-foreground py-4">
+                  No stations found for your location and filters.
+                </p>
+              </div>
+            )}
+
+          {!loading && !locationError && !error && filteredData.length > 0 && (
             <div className="grid grid-cols-3 gap-2">
               {filteredData.map((station) => (
                 <StationPreview key={station._id} station={station} />

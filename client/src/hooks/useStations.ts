@@ -81,8 +81,8 @@ export function useStations({
 }
 
 interface UseNearbyStationsOptions {
-  latitude: number;
-  longitude: number;
+  lon: number;
+  lat: number;
   maxDistance?: number; // in meters, default 10km
   limit?: number; // max number of results
 }
@@ -108,8 +108,8 @@ export interface UseNearbyStationsResult {
  * @returns Nearby stations sorted by distance with loading and error states
  */
 export function useNearbyStations({
-  latitude,
-  longitude,
+  lon,
+  lat,
   maxDistance = 5000,
   limit,
 }: UseNearbyStationsOptions): UseNearbyStationsResult {
@@ -120,8 +120,8 @@ export function useNearbyStations({
     const stationsWithDistance: StationWithDistance[] = allStations
       .map((station) => {
         const distance = getDistance(
-          latitude,
-          longitude,
+          lon,
+          lat,
           station.location.coordinates[0],
           station.location.coordinates[1]
         );
@@ -134,7 +134,7 @@ export function useNearbyStations({
       .sort((a, b) => a.distance - b.distance);
 
     return limit ? stationsWithDistance.slice(0, limit) : stationsWithDistance;
-  }, [allStations, latitude, longitude, maxDistance, limit]);
+  }, [allStations, lon, lat, maxDistance, limit]);
 
   return {
     stations: nearbyStations,

@@ -84,8 +84,8 @@ export default function Site() {
   });
 
   const { stations }: UseNearbyStationsResult = useNearbyStations({
-    latitude: site?.takeoffLocation.coordinates[0] ?? 0,
-    longitude: site?.takeoffLocation.coordinates[1] ?? 0,
+    lat: site?.takeoffLocation.coordinates[0] ?? 0,
+    lon: site?.takeoffLocation.coordinates[1] ?? 0,
   });
 
   // Navigate back if site not found
