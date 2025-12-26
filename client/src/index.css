@@ -183,3 +183,7 @@
 .mapboxgl-ctrl-logo {
     display: none !important;
 }
+
+.mapboxgl-popup {
+  z-index: 10000 !important;
+}
