@@ -45,8 +45,15 @@ export default function Map() {
   const mapContainer = useRef<HTMLDivElement>(null);
 
   // UI state
-  const [showWebcams, setShowWebcams] = useState(false);
-  const [showSoundings, setShowSoundings] = useState(false);
+  const [showWebcams, setShowWebcams] = useState(() =>
+    getStoredValue("showWebcams", false)
+  );
+  const [showSoundings, setShowSoundings] = useState(() =>
+    getStoredValue("showSoundings", false)
+  );
+  const [showSites, setShowSites] = useState(() =>
+    getStoredValue("showSites", true)
+  );
   const [showElevation, setShowElevation] = useState(false);
   const [elevationFilter, setElevationFilter] = useState(0);
   const [isSatellite, setIsSatellite] = useState(false);
@@ -102,21 +109,31 @@ export default function Map() {
     });
 
   // Initialize site markers
-  useSiteMarkers({
+  const { setVisibility: setSiteVisibility } = useSiteMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: true, // Always show sites
+    isVisible: showSites,
   });
+
+  // Handle site toggle
+  const handleSitesToggle = useCallback(() => {
+    const newValue = !showSites;
+    setShowSites(newValue);
+    setStoredValue("showSites", newValue);
+    setSiteVisibility(newValue);
+  }, [showSites, setSiteVisibility]);
 
   // Handle webcam toggle
   const handleWebcamClick = useCallback(async () => {
     if (showSoundings) {
       setShowSoundings(false);
+      setStoredValue("showSoundings", false);
       setSoundingVisibility(false);
     }
 
     const newValue = !showWebcams;
     setShowWebcams(newValue);
+    setStoredValue("showWebcams", newValue);
     setWebcamVisibility(newValue);
     if (newValue) await refreshWebcams();
   }, [
@@ -131,11 +148,13 @@ export default function Map() {
   const handleSoundingClick = useCallback(async () => {
     if (showWebcams) {
       setShowWebcams(false);
+      setStoredValue("showWebcams", false);
       setWebcamVisibility(false);
     }
 
     const newValue = !showSoundings;
     setShowSoundings(newValue);
+    setStoredValue("showSoundings", newValue);
     setSoundingVisibility(newValue);
     if (newValue) await refreshSoundings();
   }, [
@@ -272,7 +291,9 @@ export default function Map() {
 
       <MapControlButtons
         onWebcamClick={handleWebcamClick}
+        showWebcams={showWebcams}
         onSoundingClick={handleSoundingClick}
+        showSoundings={showSoundings}
         onLayerToggle={handleLayerToggle}
         onLocateClick={triggerGeolocate}
         unit={unit}
@@ -286,6 +307,8 @@ export default function Map() {
         onElevationChange={setElevationFilter}
         minimizeRecents={minimizeRecents}
         onRecentsToggle={handleRecentsToggle}
+        onToggleSites={handleSitesToggle}
+        showSites={showSites}
       />
 
       <div ref={mapContainer} className="w-full h-full" />

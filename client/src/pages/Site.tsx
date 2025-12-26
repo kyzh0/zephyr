@@ -158,26 +158,6 @@ export default function Site() {
 
           {/* Site Details Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <h3 className="font-semibold text-sm mb-1">
-                Takeoff Coordinates
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {site.takeoffLocation.coordinates[0].toFixed(5)},{" "}
-                {site.takeoffLocation.coordinates[1].toFixed(5)}
-              </p>
-            </div>
-            {site.landingLocation?.coordinates?.length === 2 && (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">
-                  Landing Coordinates
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {site.landingLocation.coordinates[0].toFixed(5)},{" "}
-                  {site.landingLocation.coordinates[1].toFixed(5)}
-                </p>
-              </div>
-            )}
             {site.elevation && (
               <div>
                 <h3 className="font-semibold text-sm mb-1">Elevation</h3>
