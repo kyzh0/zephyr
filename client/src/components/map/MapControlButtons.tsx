@@ -174,7 +174,9 @@ export function MapControlButtons({
               <Camera className="h-4 w-4 opacity-70" />
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent>Show Webcams on Map</TooltipContent>
+          <TooltipContent>
+            {showWebcams ? "Hide" : "Show"} Webcams on Map
+          </TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -192,7 +194,9 @@ export function MapControlButtons({
               />
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent>Show Sites on Map</TooltipContent>
+          <TooltipContent>
+            {showSites ? "Hide" : "Show"} Sites on Map
+          </TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -207,7 +211,9 @@ export function MapControlButtons({
               <TrendingUp className="h-4 w-4 opacity-70" />
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent>Show Soundings on Map</TooltipContent>
+          <TooltipContent>
+            {showSoundings ? "Hide" : "Show"} Soundings on Map
+          </TooltipContent>
         </Tooltip>
         <HistorySlider
           historyOffset={historyOffset}
@@ -228,7 +234,9 @@ export function MapControlButtons({
               {unit === "kt" ? "kt" : "km/h"}
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent side="left">Toggle Units</TooltipContent>
+          <TooltipContent side="left">
+            Change unit to {unit === "kt" ? "km/h" : "kt"}
+          </TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -279,7 +287,9 @@ export function MapControlButtons({
                   <History className="h-4 w-4 opacity-70" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Show Recent Stations</TooltipContent>
+              <TooltipContent>
+                {minimizeRecents ? "Show" : "Hide"} Recent Stations
+              </TooltipContent>
             </Tooltip>
           ) : (
             <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-[200px]">
