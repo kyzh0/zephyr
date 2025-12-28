@@ -45,6 +45,7 @@ import {
 } from "@/hooks/useStations";
 import { handleError } from "@/lib/utils";
 import { WebcamPreview } from "@/components/webcam/WebcamPreview";
+import { WindCompass } from "@/components/station";
 
 export default function Site() {
   const { id } = useParams<{ id: string }>();
@@ -158,21 +159,22 @@ export default function Site() {
 
           {/* Site Details Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {site.elevation && (
+            {site.elevation ? (
               <div>
                 <h3 className="font-semibold text-sm mb-1">Elevation</h3>
                 <p className="text-sm text-muted-foreground">
                   {site.elevation}m
                 </p>
               </div>
-            )}
+            ) : null}
 
             {site.validBearings && (
               <div>
-                <h3 className="font-semibold text-sm mb-1">Valid Bearings</h3>
-                <p className="text-sm text-muted-foreground">
-                  {site.validBearings}
-                </p>
+                <h3 className="font-semibold text-sm">Valid Bearings</h3>
+                <WindCompass
+                  bearing={undefined}
+                  validBearings={site.validBearings}
+                />
               </div>
             )}
 
