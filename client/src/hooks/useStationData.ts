@@ -37,7 +37,7 @@ export function useStationData(
   const [station, setStation] = useState<IStation | null>(null);
   const [allData, setAllData] = useState<ExtendedStationData[]>([]);
   const [allTableData, setAllTableData] = useState<ExtendedStationData[]>([]);
-  const [bearingPairCount, setBearingPairCount] = useState(0);
+  // const [bearingPairCount, setBearingPairCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -114,7 +114,7 @@ export function useStationData(
         };
 
         if (validBearings.length) {
-          setBearingPairCount(validBearings.length);
+          // setBearingPairCount(validBearings.length);
           validBearings.forEach((vb, i) => {
             extended[`validBearings${i}`] = vb;
           });
@@ -178,7 +178,7 @@ export function useStationData(
     station,
     data,
     tableData,
-    bearingPairCount,
+    bearingPairCount: 0,
     isLoading,
     isRefreshing,
   };
