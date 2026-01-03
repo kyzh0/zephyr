@@ -276,7 +276,14 @@ export default function Station() {
 
   // Desktop: Dialog overlay
   return (
-    <Dialog open onOpenChange={() => navigate(-1)}>
+    <Dialog
+      open
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          navigate(-1);
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="sticky pb-2">
           <DialogTitle className="text-center">{headerContent}</DialogTitle>
