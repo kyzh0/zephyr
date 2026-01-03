@@ -1,39 +1,45 @@
 import { useEffect, useRef } from "react";
 
-interface MousePositionRef {
-  current: { x: number; y: number };
-}
-
 interface InfoPopupProps {
   message: string;
-  mouseRef: MousePositionRef;
 }
 
-export function InfoPopup({ message, mouseRef }: InfoPopupProps) {
+export function InfoPopup({ message }: InfoPopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let rafId: number;
+    const el = popupRef.current;
+    if (!el) return;
 
-    const updatePosition = () => {
-      if (!popupRef.current) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = e.clientX;
+      const y = e.clientY;
 
-      const { x, y } = mouseRef.current;
+      const width = el.offsetWidth;
+      const windowWidth = window.innerWidth;
 
-      popupRef.current.style.transform = `translate(${x}px, ${y + 20}px)`;
+      let left: number;
 
-      rafId = requestAnimationFrame(updatePosition);
+      // If centering on cursor would push it off the right edge
+      if (x + width / 2 > windowWidth) {
+        left = (windowWidth - width) / 2;
+      } else {
+        left = x - width / 2;
+      }
+
+      el.style.left = `${left}px`;
+      el.style.top = `${y + 20}px`;
     };
 
-    rafId = requestAnimationFrame(updatePosition);
-
-    return () => cancelAnimationFrame(rafId);
-  }, [mouseRef]);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   return (
     <div
       ref={popupRef}
-      className="absolute z-[100] min-w-[40vh] -translate-x-[70%] rounded-lg border bg-pink-50 p-4 shadow-lg"
+      className="absolute z-[100] min-w-[40vh] rounded-lg border bg-pink-50 p-4 shadow-lg"
+      style={{ left: "50%", transform: "translateX(-50%)" }}
     >
       <h2 className="mb-2 text-center text-lg font-bold">INFO</h2>
       <p className="text-center text-sm">{message}</p>

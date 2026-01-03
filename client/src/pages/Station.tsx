@@ -82,17 +82,6 @@ export default function Station() {
     }
   }, [station, id]);
 
-  // Track mouse coords for info popup
-  const mouseRef = useRef({ x: 0, y: 0 });
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      mouseRef.current.x = e.clientX;
-      mouseRef.current.y = e.clientY;
-    };
-    window.addEventListener("mousemove", handler);
-    return () => window.removeEventListener("mousemove", handler);
-  }, []);
-
   // Shared header content
   const headerContent = station ? (
     <div className="flex flex-col items-center">
@@ -118,7 +107,7 @@ export default function Station() {
     <>
       {/* Info popup */}
       {hoveringOnInfoIcon && station?.popupMessage && (
-        <InfoPopup message={station.popupMessage} mouseRef={mouseRef} />
+        <InfoPopup message={station.popupMessage} />
       )}
 
       {/* Current conditions */}
