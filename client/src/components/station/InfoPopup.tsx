@@ -6,7 +6,7 @@ interface InfoPopupProps {
 export function InfoPopup({ message, mouseCoords }: InfoPopupProps) {
   return (
     <div
-      className="absolute z-[100] min-w-[40vh] -translate-x-[70%] rounded-lg border bg-pink-50 p-4 shadow-lg"
+      className="pointer-events-none absolute z-[100] min-w-[40vh] -translate-x-[70%] rounded-lg border bg-pink-50 p-4 shadow-lg"
       style={{
         top: mouseCoords.y + 20,
         left: mouseCoords.x,

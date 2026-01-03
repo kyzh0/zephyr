@@ -6,7 +6,7 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 import { getMinutesAgo, getStationTypeName } from "@/lib/utils";
 import {
   useStationData,
-  // useMousePosition,
+  useMousePosition,
   useIsMobile,
   useNearbyWebcams,
   type TimeRange,
@@ -16,7 +16,7 @@ import {
   StationDataTable,
   WindSpeedChart,
   WindDirectionChart,
-  // InfoPopup,
+  InfoPopup,
   Skeleton,
 } from "@/components/station";
 import {
@@ -45,7 +45,7 @@ export default function Station() {
     id,
     timeRange
   );
-  // const mouseCoords = useMousePosition();
+  const mouseCoords = useMousePosition();
 
   const { webcams } = useNearbyWebcams({
     latitude: station?.location.coordinates[0] ?? 0,
@@ -108,9 +108,9 @@ export default function Station() {
   const bodyContent = (
     <>
       {/* Info popup */}
-      {/* {hoveringOnInfoIcon && station?.popupMessage && (
+      {hoveringOnInfoIcon && station?.popupMessage && (
         <InfoPopup message={station.popupMessage} mouseCoords={mouseCoords} />
-      )} */}
+      )}
 
       {/* Current conditions */}
       {station ? (
