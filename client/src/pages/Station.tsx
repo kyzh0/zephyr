@@ -6,7 +6,7 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 import { getMinutesAgo, getStationTypeName } from "@/lib/utils";
 import {
   useStationData,
-  useMousePosition,
+  // useMousePosition,
   useIsMobile,
   useNearbyWebcams,
   type TimeRange,
@@ -16,7 +16,7 @@ import {
   StationDataTable,
   WindSpeedChart,
   WindDirectionChart,
-  InfoPopup,
+  // InfoPopup,
   Skeleton,
 } from "@/components/station";
 import {
@@ -45,7 +45,7 @@ export default function Station() {
     id,
     timeRange
   );
-  const mouseCoords = useMousePosition();
+  // const mouseCoords = useMousePosition();
 
   const { webcams } = useNearbyWebcams({
     latitude: station?.location.coordinates[0] ?? 0,
@@ -108,9 +108,9 @@ export default function Station() {
   const bodyContent = (
     <>
       {/* Info popup */}
-      {hoveringOnInfoIcon && station?.popupMessage && (
+      {/* {hoveringOnInfoIcon && station?.popupMessage && (
         <InfoPopup message={station.popupMessage} mouseCoords={mouseCoords} />
-      )}
+      )} */}
 
       {/* Current conditions */}
       {station ? (
@@ -276,14 +276,7 @@ export default function Station() {
 
   // Desktop: Dialog overlay
   return (
-    <Dialog
-      open
-      onOpenChange={(isOpen) => {
-        if (!isOpen) {
-          navigate(-1);
-        }
-      }}
-    >
+    <Dialog open onOpenChange={() => navigate(-1)}>
       <DialogContent className="sm:max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="sticky pb-2">
           <DialogTitle className="text-center">{headerContent}</DialogTitle>
