@@ -6,7 +6,6 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 import { getMinutesAgo, getStationTypeName } from "@/lib/utils";
 import {
   useStationData,
-  useMousePosition,
   useIsMobile,
   useNearbyWebcams,
   type TimeRange,
@@ -45,7 +44,6 @@ export default function Station() {
     id,
     timeRange
   );
-  const mouseCoords = useMousePosition();
 
   const { webcams } = useNearbyWebcams({
     latitude: station?.location.coordinates[0] ?? 0,
@@ -109,7 +107,7 @@ export default function Station() {
     <>
       {/* Info popup */}
       {hoveringOnInfoIcon && station?.popupMessage && (
-        <InfoPopup message={station.popupMessage} mouseCoords={mouseCoords} />
+        <InfoPopup message={station.popupMessage} />
       )}
 
       {/* Current conditions */}
