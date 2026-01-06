@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Grid3X3, Mountain, TrendingUp, Mail } from "lucide-react";
+import { Camera, Grid3X3, Mountain } from "lucide-react";
 
 import {
   Dialog,
@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { SignInDialog } from "./SignInDialog";
-import { ContactDialog } from "./ContactDialog";
 
 export const WELCOME_STORAGE_KEY = "zephyr-welcome-dismissed";
 
@@ -37,7 +36,6 @@ export function HelpDialog({
   const [internalOpen, setInternalOpen] = useState(shouldShowWelcome);
   const [dontShowAgain, setDontShowAgain] = useState(true);
   const [signInOpen, setSignInOpen] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
 
   const isOpen = controlledOpen ?? internalOpen;
 
@@ -51,7 +49,7 @@ export function HelpDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto pb-2">
         <DialogHeader className="text-center sm:text-center">
           <div className="hidden sm:flex justify-between items-start">
             <Button
@@ -74,7 +72,7 @@ export function HelpDialog({
             Welcome to Zephyr
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
-            Live weather data for paragliding and hang gliding in New Zealand
+            Live weather data for free flying in New Zealand.
           </DialogDescription>
         </DialogHeader>
 
@@ -127,20 +125,14 @@ export function HelpDialog({
           <div className="flex items-center">Live grid view</div>
 
           <div className="flex justify-end items-center">
-            <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
+            <img
+              src="sounding.svg"
+              alt="Sounding icon"
+              className="w-5 h-5 sm:w-6 sm:h-6"
+            />
           </div>
           <div className="flex items-center">RASP Skew-T soundings</div>
         </div>
-
-        {/* Contact link */}
-        <Button
-          variant="outline"
-          className="flex-1 text-xs sm:text-sm"
-          onClick={() => setContactOpen(true)}
-        >
-          <Mail className="h-3 w-3 sm:h-4 sm:w-4" />
-          Contact Us
-        </Button>
 
         {/* Footer with checkbox */}
         <div className="flex items-center justify-between pt-2 sm:pt-4 border-t">
@@ -169,19 +161,11 @@ export function HelpDialog({
             >
               Export Data
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              className="text-xs sm:text-sm px-2 sm:px-4"
-            >
-              Close
-            </Button>
           </div>
         </div>
       </DialogContent>
 
       <SignInDialog open={signInOpen} onOpenChange={setSignInOpen} />
-      <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />
     </Dialog>
   );
 }
