@@ -80,7 +80,7 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md pb-2">
         <DialogHeader className="text-center sm:text-center">
           <DialogTitle className="text-xl">Contact Us</DialogTitle>
           <DialogDescription>
@@ -91,14 +91,12 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
         {success ? (
           <div className="flex flex-col items-center justify-center py-6">
             <CheckCircle className="h-16 w-16 text-green-500" />
-            <p className="mt-2 text-sm">Thanks for your feedback!</p>
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => handleOpenChange(false)}
-            >
-              Close
-            </Button>
+            <p className="mt-2 text-sm text-center">
+              Thanks for your feedback!
+            </p>
+            <p className="mt-2 text-sm text-center">
+              Please consider making a donation to support our project.
+            </p>
           </div>
         ) : (
           <Form {...form}>
