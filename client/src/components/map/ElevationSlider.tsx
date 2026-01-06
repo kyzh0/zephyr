@@ -54,26 +54,22 @@ export function ElevationSlider({
       </PopoverTrigger>
 
       <PopoverContent className="p-0 mr-2 w-50" align="start" sideOffset={4}>
-        <div className="flex flex-col gap-2 bg-background border rounded-md p-2 shadow-sm min-w-[200px]">
+        <div className="flex flex-col gap-4 bg-background border rounded-md p-2 shadow-sm min-w-[200px]">
           <div className="text-xs text-muted-foreground">
             {elevationFilter > 0
               ? `Showing stations above ${elevationFilter}m`
               : "Showing all elevations"}
           </div>
 
-          <div className="flex items-center gap-2 px-1">
-            <span className="text-xs text-muted-foreground w-4">0</span>
-            <Slider
-              value={[elevationFilter]}
-              onValueChange={handleSliderChange}
-              min={0}
-              max={1500}
-              step={250}
-              className="flex-1"
-              disabled={disabled}
-            />
-            <span className="text-xs text-muted-foreground w-8">1500m</span>
-          </div>
+          <Slider
+            value={[elevationFilter]}
+            onValueChange={handleSliderChange}
+            min={0}
+            max={1500}
+            step={250}
+            className="flex-1"
+            disabled={disabled}
+          />
 
           {/* Borders toggle */}
           <Toggle
