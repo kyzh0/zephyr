@@ -92,13 +92,9 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
           <div className="flex flex-col items-center justify-center py-6">
             <CheckCircle className="h-16 w-16 text-green-500" />
             <p className="mt-2 text-sm">Thanks for your feedback!</p>
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => handleOpenChange(false)}
-            >
-              Close
-            </Button>
+            <p className="mt-2 text-sm">
+              Please consider making a donation to support our project.
+            </p>
           </div>
         ) : (
           <Form {...form}>

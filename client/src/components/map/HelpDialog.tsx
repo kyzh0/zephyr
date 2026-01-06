@@ -72,7 +72,7 @@ export function HelpDialog({
             Welcome to Zephyr
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
-            Live weather data for paragliding and hang gliding in New Zealand
+            Live weather data for free flying in New Zealand.
           </DialogDescription>
         </DialogHeader>
 
