@@ -1,13 +1,13 @@
 import { useState, useCallback } from "react";
-import { Mountain } from "lucide-react";
+import { CircleDashed, Mountain } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 
 interface ElevationSliderProps {
   showElevation: boolean;
@@ -33,81 +33,49 @@ export function ElevationSlider({
     [onElevationChange]
   );
 
-  const handleExpand = useCallback(() => {
-    setIsExpanded(true);
-  }, []);
-
-  const handleClose = useCallback(() => {
-    setIsExpanded(false);
-  }, []);
-
   // Determine if filter is active (has a value > 0)
   const isFilterActive = elevationFilter > 0;
 
-  if (!isExpanded) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExpand}
-            disabled={disabled}
-            className={isFilterActive ? "border-blue-500 h-9 w-9" : "h-9 w-9"}
-          >
-            <Mountain
-              className={`h-4 w-4 ${
-                isFilterActive ? "fill-blue-500 stroke-blue-500" : "opacity-70"
-              }`}
-            />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          {isFilterActive
-            ? `Elevation filter: ${elevationFilter}m+`
-            : "Elevation Controls"}
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-2 bg-background border rounded-md p-2 shadow-sm min-w-[200px]">
-      {/* Header with close button */}
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-muted-foreground">
-          {elevationFilter > 0
-            ? `Showing stations above ${elevationFilter}m`
-            : "Showing all elevations"}
-        </span>
+    <Popover open={isExpanded} onOpenChange={setIsExpanded}>
+      <PopoverTrigger asChild>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
-          onClick={handleClose}
-          className="h-6 text-xs"
-        >
-          Hide
-        </Button>
-      </div>
-
-      {/* Slider */}
-      <div className="flex items-center gap-2 px-1">
-        <span className="text-xs text-muted-foreground w-4">0</span>
-        <Slider
-          value={[elevationFilter]}
-          onValueChange={handleSliderChange}
-          min={0}
-          max={1500}
-          step={250}
-          className="flex-1"
           disabled={disabled}
-        />
-        <span className="text-xs text-muted-foreground w-8">1500m</span>
-      </div>
+          className="h-9 w-9"
+        >
+          <Mountain
+            className={`h-4 w-4 ${
+              isFilterActive ? "fill-blue-500 stroke-blue-500" : "opacity-70"
+            }`}
+          />
+        </Button>
+      </PopoverTrigger>
 
-      {/* Borders toggle */}
-      <Tooltip>
-        <TooltipTrigger asChild>
+      <PopoverContent className="p-0 mr-2 w-50" align="start" sideOffset={4}>
+        <div className="flex flex-col gap-2 bg-background border rounded-md p-2 shadow-sm min-w-[200px]">
+          <div className="text-xs text-muted-foreground">
+            {elevationFilter > 0
+              ? `Showing stations above ${elevationFilter}m`
+              : "Showing all elevations"}
+          </div>
+
+          <div className="flex items-center gap-2 px-1">
+            <span className="text-xs text-muted-foreground w-4">0</span>
+            <Slider
+              value={[elevationFilter]}
+              onValueChange={handleSliderChange}
+              min={0}
+              max={1500}
+              step={250}
+              className="flex-1"
+              disabled={disabled}
+            />
+            <span className="text-xs text-muted-foreground w-8">1500m</span>
+          </div>
+
+          {/* Borders toggle */}
           <Toggle
             variant="outline"
             size="sm"
@@ -115,19 +83,15 @@ export function ElevationSlider({
             onClick={onToggleElevation}
             className="w-full text-xs data-[state=on]:border-blue-500"
           >
-            <Mountain
+            <CircleDashed
               className={`h-4 w-4 mr-2 ${
                 showElevation ? "fill-blue-500 stroke-blue-500" : "opacity-70"
               }`}
             />
             {showElevation ? "Borders on" : "Borders off"}
           </Toggle>
-        </TooltipTrigger>
-        <TooltipContent>
-          Shows borders around clusters of stations meeting the elevation
-          criteria.
-        </TooltipContent>
-      </Tooltip>
-    </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
