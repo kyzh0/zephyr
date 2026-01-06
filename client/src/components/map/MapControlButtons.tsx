@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  Menu,
   HelpCircle,
   Grid3X3,
   Layers,
@@ -8,9 +9,16 @@ import {
   Camera,
   LocateFixed,
   History,
+  Mail,
 } from "lucide-react";
-import { DonateDialog } from "./DonateDialog";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { HelpDialog, WELCOME_STORAGE_KEY } from "./HelpDialog";
+import { DonateDialog } from "./DonateDialog";
+import { ContactDialog } from "./ContactDialog";
 import { HistorySlider } from "./HistorySlider";
 import { ElevationSlider } from "./ElevationSlider";
 import { SearchBar } from "./SearchBar";
@@ -64,11 +72,13 @@ export function MapControlButtons({
   onRecentsToggle,
 }: MapControlButtonsProps) {
   const navigate = useNavigate();
-  const [donateOpen, setDonateOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(
     window.self === window.top && // don't show if iframe
       localStorage.getItem(WELCOME_STORAGE_KEY) !== "true"
   );
+  const [donateOpen, setDonateOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [recentStations, setRecentStations] = useState<RecentStation[]>([]);
 
   // Load recent stations on mount and when localStorage changes
@@ -107,37 +117,51 @@ export function MapControlButtons({
     <>
       {/* Top left - horizontal row */}
       <div className="flex flex-wrap gap-2 items-start absolute top-2.5 left-2.5 z-50 right-14">
+        <Popover open={menuOpen} onOpenChange={setMenuOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-9 w-9">
+              <Menu className="h-4 w-4 opacity-70" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" sideOffset={4} className="p-1 w-auto">
+            <div className="flex flex-col gap-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="justify-start"
+                onClick={() => {
+                  setHelpOpen(true);
+                }}
+              >
+                <HelpCircle className="h-4 w-4 opacity-70" />
+                Help
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="justify-start"
+                onClick={() => {
+                  setDonateOpen(true);
+                }}
+              >
+                <HandHelping className="h-4 w-4 opacity-70" />
+                Donate
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="justify-start"
+                onClick={() => {
+                  setContactOpen(true);
+                }}
+              >
+                <Mail className="h-4 w-4 opacity-70" />
+                Contact
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
         <SearchBar disabled={isHistoricData} />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setHelpOpen(true)}
-              disabled={isHistoricData}
-              className="h-9 w-9"
-            >
-              <HelpCircle className="h-4 w-4 opacity-70" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>View Help</TooltipContent>
-        </Tooltip>
-        <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDonateOpen(true)}
-              disabled={isHistoricData}
-              className="h-9 w-9"
-            >
-              <HandHelping className="h-4 w-4 opacity-70" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Donate to support Zephyr</TooltipContent>
-        </Tooltip>
-        <DonateDialog open={donateOpen} onOpenChange={setDonateOpen} />
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -238,6 +262,11 @@ export function MapControlButtons({
           onElevationChange={onElevationChange}
         />
       </div>
+
+      {/* Dialogs */}
+      <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
+      <DonateDialog open={donateOpen} onOpenChange={setDonateOpen} />
+      <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />
 
       {/* Bottom left - Recent Stations (hidden in history mode) */}
       {recentStations.length > 0 && !isHistoricData && (
