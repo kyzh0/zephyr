@@ -223,6 +223,7 @@ export async function checkForErrors() {
       const g = groupBy(errors, 'type');
       const singleStations = [
         'lpc',
+        'levin',
         'mpyc',
         'mfhb',
         'mrc',

@@ -52,8 +52,8 @@ export const STATION_TYPES = [
   { value: "attentis", label: "Attentis" },
   { value: "wow", label: "Met Office WOW" },
   { value: "windguru", label: "Windguru" },
-  { value: "wp", label: "Weather Pro" },
-  { value: "gw", label: "Greater Wellington" },
+  { value: "windy", label: "Windy" },
+  { value: "wl", label: "Weatherlink" },
 ] as const;
 
 export type { IStation, INewStation };

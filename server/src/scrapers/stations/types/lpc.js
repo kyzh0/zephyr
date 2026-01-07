@@ -24,7 +24,7 @@ export default async function scrapeLpcData(stations) {
         `&toDate_Utc=${encodeURIComponent(dateTo)}` +
         '&qaStatusesString=*',
       {
-        headers: { 'x-grafana-org-id': 338, Connection: 'keep-alive' }
+        headers: { 'x-grafana-org-id': 338 }
       }
     );
 
