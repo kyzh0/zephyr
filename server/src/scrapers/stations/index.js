@@ -8,6 +8,7 @@ import scrapeHarvestData from './types/harvest.js';
 import scrapeHbrcData from './types/hbrc.js';
 import scrapeHolfuyData from './types/holfuy.js';
 import scrapeHuttWeatherData from './types/huttWeather.js';
+import scrapeLevinMacData from './types/levinMac.js';
 import scrapeLpcData from './types/lpc.js';
 import scrapeMetserviceData from './types/metservice.js';
 import scrapeMfhbData from './types/mfhb.js';
@@ -42,6 +43,7 @@ export default {
   hbrc: scrapeHbrcData,
   holfuy: scrapeHolfuyData,
   hw: scrapeHuttWeatherData,
+  levin: scrapeLevinMacData,
   lpc: scrapeLpcData,
   metservice: scrapeMetserviceData,
   mfhb: scrapeMfhbData,

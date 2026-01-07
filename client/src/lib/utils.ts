@@ -69,6 +69,8 @@ export const getStationTypeName = (code: string) => {
       return "Mt Pleasant Yacht Club";
     case "lpc":
       return "Lyttelton Port Company";
+    case "levin":
+      return "Ecowitt";
     case "mrc":
       return "Mountain Research Centre";
     case "mfhb":
