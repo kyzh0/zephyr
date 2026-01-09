@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 
-import { getWindDirectionFromBearing, REFRESH_INTERVAL_MS } from "@/lib/utils";
+import {
+  getWindDirectionFromBearing,
+  handleError,
+  REFRESH_INTERVAL_MS,
+} from "@/lib/utils";
 import {
   listStations,
   listStationsUpdatedSince,
@@ -169,6 +173,7 @@ function createMarkerElement(
     currentBearing != null ? String(currentBearing) : "";
   container.dataset.isOffline = String(isOffline ?? false);
   container.dataset.validBearings = validBearings ?? "";
+  container.style.zIndex = "2";
 
   container.appendChild(arrow);
   container.appendChild(text);
@@ -277,8 +282,8 @@ export function useStationMarkers({
         return await operation();
       } catch (err) {
         console.error(errorMessage, err);
-        setError(err instanceof Error ? err.message : errorMessage);
-        toast.error(err instanceof Error ? err.message : errorMessage);
+        setError(handleError(err, errorMessage).message);
+        toast.error(handleError(err, errorMessage).message);
         return null;
       }
     },
@@ -433,7 +438,7 @@ export function useStationMarkers({
     } catch (err) {
       console.error("Failed to refresh station markers", err);
       toast.error(
-        err instanceof Error ? err.message : "Failed to refresh station markers"
+        handleError(err, "Failed to refresh station markers").message
       );
     } finally {
       // Ensure isRefreshing is always set to false

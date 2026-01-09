@@ -21,7 +21,7 @@ export default function AdminEditStation() {
 
   useEffect(() => {
     if (!id) {
-      navigate("/admin/edit-station-list");
+      navigate("/admin/stations");
       return;
     }
 
@@ -71,7 +71,7 @@ export default function AdminEditStation() {
         adminKey
       );
       toast.success("Station updated");
-      navigate("/admin/edit-station-list");
+      navigate("/admin/stations");
     } catch {
       setError("Invalid JSON data");
     } finally {
@@ -85,7 +85,7 @@ export default function AdminEditStation() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/admin/edit-station-list")}
+          onClick={() => navigate("/admin/stations")}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>

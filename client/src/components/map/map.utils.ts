@@ -1,6 +1,7 @@
 import type { IStation } from "@/models/station.model";
 import type { ICam } from "@/models/cam.model";
 import type { ISounding } from "@/models/sounding.model";
+import type { ISite } from "@/models/site.model";
 import type { GeoJson, GeoJsonFeature, WindUnit } from "./map.types";
 import { getArrowStyle as getArrowStylePng } from "./wind-icon.utils";
 
@@ -62,7 +63,7 @@ export function getStationGeoJson(
       type: "Feature",
       properties: {
         name: station.name,
-        dbId: (station as IStation & { _id: string })._id,
+        dbId: station._id,
         elevation: station.elevation,
         currentAverage: avg,
         currentGust: gust,
@@ -110,7 +111,7 @@ export function getWebcamGeoJson(webcams: ICam[] | undefined): GeoJson | null {
       type: "Feature",
       properties: {
         name: cam.name,
-        dbId: (cam as ICam & { _id: string })._id,
+        dbId: cam._id,
         currentTime: new Date(cam.currentTime),
         currentUrl: cam.currentUrl,
       },
@@ -161,6 +162,37 @@ export function getSoundingGeoJson(
         currentUrl: url,
       },
       geometry: s.location as { type: string; coordinates: [number, number] },
+    };
+    geoJson.features.push(feature);
+  }
+
+  return geoJson;
+}
+
+export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
+  if (!sites?.length) {
+    return null;
+  }
+
+  const geoJson: GeoJson = {
+    type: "FeatureCollection",
+    features: [],
+  };
+
+  for (const site of sites) {
+    // Skip disabled sites
+    if (site.isDisabled) continue;
+
+    const feature: GeoJsonFeature = {
+      type: "Feature",
+      properties: {
+        name: site.name,
+        dbId: site._id,
+      },
+      geometry: site.takeoffLocation as {
+        type: string;
+        coordinates: [number, number];
+      },
     };
     geoJson.features.push(feature);
   }

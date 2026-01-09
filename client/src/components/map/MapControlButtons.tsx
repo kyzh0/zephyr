@@ -38,7 +38,9 @@ import {
 
 interface MapControlButtonsProps {
   onWebcamClick: () => void;
+  showWebcams: boolean;
   onSoundingClick: () => void;
+  showSoundings: boolean;
   onLayerToggle: () => void;
   onLocateClick: () => void;
   unit: WindUnit;
@@ -52,11 +54,15 @@ interface MapControlButtonsProps {
   onElevationChange: (value: number) => void;
   minimizeRecents: boolean;
   onRecentsToggle: () => void;
+  onToggleSites?: () => void;
+  showSites?: boolean;
 }
 
 export function MapControlButtons({
   onWebcamClick,
+  showWebcams,
   onSoundingClick,
+  showSoundings,
   onLayerToggle,
   onLocateClick,
   unit,
@@ -70,6 +76,8 @@ export function MapControlButtons({
   onElevationChange,
   minimizeRecents,
   onRecentsToggle,
+  onToggleSites,
+  showSites,
 }: MapControlButtonsProps) {
   const navigate = useNavigate();
   const [helpOpen, setHelpOpen] = useState(
@@ -182,13 +190,36 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={onWebcamClick}
+              pressed={showWebcams}
               disabled={isHistoricData}
-              className="h-9 w-9 bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+              className="h-9 w-9 bg-background data-[state=on]:bg-blue-500"
             >
               <Camera className="h-4 w-4 opacity-70" />
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent>Show Webcams on Map</TooltipContent>
+          <TooltipContent>
+            {showWebcams ? "Hide" : "Show"} Webcams on Map
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Toggle
+              variant="outline"
+              size="sm"
+              onClick={onToggleSites}
+              pressed={showSites}
+              className="h-9 w-9 bg-background data-[state=on]:bg-blue-500"
+            >
+              <img
+                src="./site.svg"
+                alt="Sites"
+                className="h-4 w-4 opacity-70"
+              />
+            </Toggle>
+          </TooltipTrigger>
+          <TooltipContent>
+            {showSites ? "Hide" : "Show"} Sites on Map
+          </TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -196,8 +227,9 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={onSoundingClick}
+              pressed={showSoundings}
               disabled={isHistoricData}
-              className="h-9 w-9 bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+              className="h-9 w-9 bg-background data-[state=on]:bg-blue-500"
             >
               <img
                 src="sounding.svg"
@@ -206,7 +238,9 @@ export function MapControlButtons({
               />
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent>Show Soundings on Map</TooltipContent>
+          <TooltipContent>
+            {showSoundings ? "Hide" : "Show"} Soundings on Map
+          </TooltipContent>
         </Tooltip>
         <HistorySlider
           historyOffset={historyOffset}
@@ -227,7 +261,9 @@ export function MapControlButtons({
               {unit === "kt" ? "kt" : "km/h"}
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent side="left">Toggle Units</TooltipContent>
+          <TooltipContent side="left">
+            Change unit to {unit === "kt" ? "km/h" : "kt"}
+          </TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -283,7 +319,9 @@ export function MapControlButtons({
                   <History className="h-4 w-4 opacity-70" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Show Recent Stations</TooltipContent>
+              <TooltipContent>
+                {minimizeRecents ? "Show" : "Hide"} Recent Stations
+              </TooltipContent>
             </Tooltip>
           ) : (
             <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-[200px]">
@@ -324,3 +362,4 @@ export function MapControlButtons({
     </>
   );
 }
+export default MapControlButtons;
