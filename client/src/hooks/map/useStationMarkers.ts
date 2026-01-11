@@ -35,6 +35,7 @@ interface UseStationMarkersOptions {
   isMapLoaded: boolean;
   isHistoricData: boolean;
   unit: WindUnit;
+  isVisible: boolean;
   onRefresh?: (updatedIds: string[]) => void;
 }
 
@@ -247,8 +248,15 @@ export function useStationMarkers({
   isMapLoaded,
   isHistoricData,
   unit,
+  isVisible,
   onRefresh,
 }: UseStationMarkersOptions) {
+  const isVisibleRef = useRef(isVisible);
+
+  // Keep visibility ref in sync
+  useEffect(() => {
+    isVisibleRef.current = isVisible;
+  }, [isVisible]);
   const navigate = useNavigate();
   const markersRef = useRef<StationMarker[]>([]);
   const lastRefreshRef = useRef(0);
@@ -652,12 +660,26 @@ export function useStationMarkers({
     return () => clearInterval(intervalId);
   }, [isHistoricData, isMapLoaded, refresh]);
 
+  // Toggle visibility
+  const setVisibility = useCallback((visible: boolean) => {
+    for (const item of markersRef.current) {
+      // eslint-disable-next-line react-hooks/immutability
+      item.marker.style.visibility = visible ? "visible" : "hidden";
+    }
+  }, []);
+
+  // Update visibility when prop changes
+  useEffect(() => {
+    setVisibility(isVisible);
+  }, [isVisible, setVisibility]);
+
   return {
     markers: markersRef,
     refresh,
     renderHistoricalData,
     renderCurrentData,
     setInteractive,
+    setVisibility,
     isRefreshing,
     error,
     isInitialized,

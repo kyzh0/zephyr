@@ -23,6 +23,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getRecentStations,
   RECENT_STATIONS_UPDATED_EVENT,
@@ -47,8 +48,8 @@ interface MapControlButtonsProps {
   onElevationChange: (value: number) => void;
   minimizeRecents: boolean;
   onRecentsToggle: () => void;
-  onToggleSites?: () => void;
-  showSites?: boolean;
+  showSites: boolean;
+  onToggleSites: () => void;
 }
 
 export function MapControlButtons({
@@ -70,7 +71,6 @@ export function MapControlButtons({
   minimizeRecents,
   onRecentsToggle,
   onToggleSites,
-  showSites,
 }: MapControlButtonsProps) {
   const navigate = useNavigate();
   const [donateOpen, setDonateOpen] = useState(false);
@@ -79,6 +79,12 @@ export function MapControlButtons({
       localStorage.getItem(WELCOME_STORAGE_KEY) !== "true"
   );
   const [recentStations, setRecentStations] = useState<RecentStation[]>([]);
+  const [activeTab, setActiveTab] = useState<"stations" | "sites">("stations");
+
+  const onChangeTab = (value: "stations" | "sites") => {
+    setActiveTab(value);
+    onToggleSites();
+  };
 
   // Load recent stations on mount and when localStorage changes
   useEffect(() => {
@@ -184,35 +190,6 @@ export function MapControlButtons({
             <Toggle
               variant="outline"
               size="sm"
-              onClick={onToggleSites}
-              className="h-9 w-9 bg-background"
-            >
-              <img
-                src="./site.svg"
-                alt="Sites"
-                className={`h-4 w-4 opacity-70 ${
-                  showSites ? "filter-blue" : ""
-                }`}
-                style={
-                  showSites
-                    ? {
-                        filter:
-                          "invert(32%) sepia(98%) saturate(749%) hue-rotate(183deg) brightness(97%) contrast(101%)",
-                      }
-                    : {}
-                }
-              />
-            </Toggle>
-          </TooltipTrigger>
-          <TooltipContent>
-            {showSites ? "Hide" : "Show"} Sites on Map
-          </TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Toggle
-              variant="outline"
-              size="sm"
               onClick={onSoundingClick}
               disabled={isHistoricData}
               className={`h-9 w-9 bg-background ${
@@ -230,6 +207,20 @@ export function MapControlButtons({
           historyOffset={historyOffset}
           onHistoryChange={onHistoryChange}
         />
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => onChangeTab(value as "stations" | "sites")}
+          className="h-9"
+        >
+          <TabsList className="h-9">
+            <TabsTrigger value="stations" className="h-8">
+              Stations
+            </TabsTrigger>
+            <TabsTrigger value="sites" className="h-8">
+              Sites
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Top right - vertical column */}
