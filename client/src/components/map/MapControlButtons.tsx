@@ -167,9 +167,10 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={onWebcamClick}
-              pressed={showWebcams}
               disabled={isHistoricData}
-              className="h-9 w-9 bg-background data-[state=on]:bg-blue-500"
+              className={`h-9 w-9 bg-background ${
+                showWebcams ? "*:[svg]:stroke-blue-500" : ""
+              }`}
             >
               <Camera className="h-4 w-4 opacity-70" />
             </Toggle>
@@ -184,13 +185,22 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={onToggleSites}
-              pressed={showSites}
-              className="h-9 w-9 bg-background data-[state=on]:bg-blue-500"
+              className="h-9 w-9 bg-background"
             >
               <img
                 src="./site.svg"
                 alt="Sites"
-                className="h-4 w-4 opacity-70"
+                className={`h-4 w-4 opacity-70 ${
+                  showSites ? "filter-blue" : ""
+                }`}
+                style={
+                  showSites
+                    ? {
+                        filter:
+                          "invert(32%) sepia(98%) saturate(749%) hue-rotate(183deg) brightness(97%) contrast(101%)",
+                      }
+                    : {}
+                }
               />
             </Toggle>
           </TooltipTrigger>
@@ -204,9 +214,10 @@ export function MapControlButtons({
               variant="outline"
               size="sm"
               onClick={onSoundingClick}
-              pressed={showSoundings}
               disabled={isHistoricData}
-              className="h-9 w-9 bg-background data-[state=on]:bg-blue-500"
+              className={`h-9 w-9 bg-background ${
+                showSoundings ? "*:[svg]:stroke-blue-500" : ""
+              }`}
             >
               <TrendingUp className="h-4 w-4 opacity-70" />
             </Toggle>
