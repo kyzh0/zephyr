@@ -1,8 +1,8 @@
 import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 
-import { Cam, type CamImage } from '../models/camModel';
-import { User } from '../models/userModel';
+import { Cam, type CamImage } from '@/models/camModel';
+import { User } from '@/models/userModel';
 
 const router = express.Router();
 

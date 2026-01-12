@@ -1,0 +1,89 @@
+import sharp from 'sharp';
+import md5 from 'md5';
+import fs from 'node:fs/promises';
+
+import logger from '@/lib/logger';
+import { Cam, type CamDoc, type CamImage } from '@/models/camModel';
+
+const NO_EMBEDDED_TIMESTAMP_TYPES = new Set<string>([
+  'qa',
+  'wa',
+  'cgc',
+  'ch',
+  'cwu',
+  'ap',
+  'hutt',
+  'ts',
+  'snowgrass'
+]);
+
+export default async function processScrapedData(
+  cam: CamDoc,
+  updated: Date | null,
+  base64: string | null
+): Promise<void> {
+  try {
+    if (!updated || !base64) {
+      logger.info(
+        `${cam.type} image update skipped${cam.externalId ? ` - ${cam.externalId}` : ''}`,
+        { service: 'cam', type: cam.type }
+      );
+      return;
+    }
+
+    const imgBuff = Buffer.from(base64, 'base64');
+
+    const img: Partial<CamImage> & { time: Date } = {
+      time: updated
+    };
+
+    // for types that don't have embedded timestamps, check for duplicate image
+    if (NO_EMBEDDED_TIMESTAMP_TYPES.has(cam.type)) {
+      img.hash = md5(imgBuff);
+      img.fileSize = imgBuff.length;
+
+      if (cam.images.length) {
+        const latestImg = cam.images.reduce((prev, current) =>
+          prev && new Date(prev.time) > new Date(current.time) ? prev : current
+        );
+
+        if (latestImg && latestImg.fileSize === img.fileSize && latestImg.hash === img.hash) {
+          logger.info(
+            `${cam.type} image update skipped${cam.externalId ? ` - ${cam.externalId}` : ''}`,
+            { service: 'cam', type: cam.type }
+          );
+          return;
+        }
+      }
+    }
+
+    const dir = `public/cams/${cam.type}/${cam._id.toString()}`;
+    await fs.mkdir(dir, { recursive: true });
+
+    const resizedBuf = await sharp(imgBuff).resize({ width: 600 }).toBuffer();
+    const filePath = `${dir}/${updated.toISOString()}.jpg`;
+    await fs.writeFile(filePath, resizedBuf);
+
+    img.url = filePath.replace('public/', '');
+
+    // update cam (current state)
+    cam.lastUpdate = new Date();
+    cam.currentTime = updated;
+    cam.currentUrl = img.url;
+    await cam.save();
+
+    // add image (append to array)
+    await Cam.updateOne({ _id: cam._id }, { $push: { images: img } });
+
+    logger.info(`${cam.type} image updated${cam.externalId ? ` - ${cam.externalId}` : ''}`, {
+      service: 'cam',
+      type: cam.type
+    });
+  } catch (error: unknown) {
+    logger.error(
+      `An error occured while saving image for ${cam.type}${cam.externalId ? ` - ${cam.externalId}` : ''}`,
+      { service: 'cam', type: cam.type }
+    );
+    logger.error(String(error), { service: 'cam', type: cam.type });
+  }
+}

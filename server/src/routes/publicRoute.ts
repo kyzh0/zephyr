@@ -4,10 +4,10 @@ import { Worker } from 'node:worker_threads';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import logger from '../lib/logger';
-import { Client } from '../models/clientModel';
-import { Station } from '../models/stationModel';
-import { Output, OutputAttrs } from '../models/outputModel';
+import logger from '@/lib/logger';
+import { Client } from '@/models/clientModel';
+import { Station } from '@/models/stationModel';
+import { Output, OutputAttrs } from '@/models/outputModel';
 
 import * as XLSX from 'xlsx';
 import * as fs from 'node:fs';

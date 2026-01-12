@@ -18,7 +18,7 @@ export type CamAttrs = {
   location: CamLocation;
   externalLink: string;
   externalId?: string;
-  lastUpdate?: Date;
+  lastUpdate: Date;
   currentTime?: Date;
   currentUrl?: string;
   images: CamImage[];
@@ -46,7 +46,7 @@ const camSchema = new mongoose.Schema<CamAttrs>(
     externalLink: { type: String, required: true },
     externalId: { type: String },
 
-    lastUpdate: { type: Date, default: Date.now },
+    lastUpdate: { type: Date, default: Date.now, required: true },
     currentTime: { type: Date, default: Date.now },
 
     currentUrl: { type: String },

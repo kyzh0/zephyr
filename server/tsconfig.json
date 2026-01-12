@@ -16,6 +16,11 @@
     "noEmit": true,
     "types": ["node"],
 
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
     /* Migration mode (so TS can compile JS while converting) */
     "allowJs": true,
     "checkJs": false

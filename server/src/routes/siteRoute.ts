@@ -1,8 +1,8 @@
 import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 
-import { User } from '../models/userModel';
-import { Site, SiteDoc, type GeoPoint, type SiteRating } from '../models/siteModel';
+import { User } from '@/models/userModel';
+import { Site, SiteDoc, type GeoPoint, type SiteRating } from '@/models/siteModel';
 
 const router = express.Router();
 

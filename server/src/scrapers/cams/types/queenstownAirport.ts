@@ -1,17 +1,20 @@
 import pLimit from 'p-limit';
-import httpClient from '../../../lib/httpClient.js';
-import processScrapedData from '../processScrapedData.js';
-import logger from '../../../lib/logger.js';
 
-export default async function scrapeWanakaAirportData(cams) {
+import httpClient from '@/lib/httpClient';
+import processScrapedData from '@/scrapers/cams/processScrapedData';
+import logger from '@/lib/logger';
+
+import type { CamDoc } from '@/models/camModel';
+
+export default async function scrapeQueenstownAirportData(cams: CamDoc[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(
     cams.map((cam) =>
       limit(async () => {
         try {
-          let updated = null;
-          let base64 = null;
+          let updated: Date | null = null;
+          let base64: string | null = null;
 
           const dateTimeFormat = new Intl.DateTimeFormat('en-NZ', {
             year: 'numeric',
@@ -22,6 +25,7 @@ export default async function scrapeWanakaAirportData(cams) {
             hour12: false,
             timeZone: 'Pacific/Auckland'
           });
+
           const parts = dateTimeFormat.formatToParts(new Date());
 
           let year = '';
@@ -29,6 +33,7 @@ export default async function scrapeWanakaAirportData(cams) {
           let day = '';
           let hour = '';
           let minute = '';
+
           for (const p of parts) {
             switch (p.type) {
               case 'year':
@@ -49,22 +54,22 @@ export default async function scrapeWanakaAirportData(cams) {
             }
           }
 
-          const response = await httpClient.get(
-            `https://www.wanakaairport.com/WebCam/${cam.externalId}.jpg?dt=${year}-${month}-${day}-${hour}-${minute}`,
-            {
-              responseType: 'arraybuffer'
-            }
+          const response = await httpClient.get<ArrayBuffer>(
+            `https://www.queenstownairport.co.nz/WebCam/${cam.externalId}.jpg?dt=${year}-${month}-${day}-${hour}-${minute}`,
+            { responseType: 'arraybuffer' }
           );
-          if (response.status == 200 && response.headers['content-type'] === 'image/jpeg') {
-            base64 = Buffer.from(response.data, 'binary').toString('base64');
+
+          const contentType = response.headers['content-type'];
+          if (response.status === 200 && contentType === 'image/jpeg') {
+            base64 = Buffer.from(response.data).toString('base64');
             updated = new Date();
           }
 
           await processScrapedData(cam, updated, base64);
-        } catch (error) {
-          logger.warn(`wanaka airport error - ${cam.externalId}`, {
+        } catch {
+          logger.warn(`queenstown airport error - ${cam.externalId}`, {
             service: 'cam',
-            type: 'wa'
+            type: 'qa'
           });
         }
       })

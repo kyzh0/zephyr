@@ -2,9 +2,9 @@ import express, { type Request, type Response } from 'express';
 import * as geofire from 'geofire-common';
 import { ObjectId } from 'mongodb';
 
-import { Station, StationAttrs } from '../models/stationModel';
-import { StationData } from '../models/stationDataModel';
-import { User } from '../models/userModel';
+import { Station, StationAttrs } from '@/models/stationModel';
+import { StationData } from '@/models/stationDataModel';
+import { User } from '@/models/userModel';
 import { FilterQuery } from 'mongoose';
 
 const router = express.Router();
