@@ -15,10 +15,10 @@ export type StationAttrs = {
 
   lastUpdate: Date;
 
-  currentAverage?: number;
-  currentGust?: number;
-  currentBearing?: number;
-  currentTemperature?: number;
+  currentAverage?: number | null;
+  currentGust?: number | null;
+  currentBearing?: number | null;
+  currentTemperature?: number | null;
 
   elevation: number;
   validBearings?: string;
