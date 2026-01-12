@@ -2,14 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-import authRoute from './routes/authRoute.js';
-import stationRoute from './routes/stationRoute.js';
-import camRoute from './routes/camRoute.js';
-import soundingRoute from './routes/soundingRoute.js';
-import publicRoute from './routes/publicRoute.js';
-import siteRoute from './routes/siteRoute.js';
+import authRoute from './routes/authRoute';
+import stationRoute from './routes/stationRoute';
+import camRoute from './routes/camRoute';
+import soundingRoute from './routes/soundingRoute';
+import publicRoute from './routes/publicRoute';
+import siteRoute from './routes/siteRoute';
 
 dotenv.config();
+
 const app = express();
 app.use(cors({ origin: [/zephyrapp\.nz$/, /^http(s)?:\/\/localhost:\d{4}.*$/] }));
 app.use(express.json());
