@@ -1,2 +1,9 @@
 node_modules
-npm-debug.log
+dist
+.git
+.gitignore
+*.log
+.DS_Store
+.vscode
+coverage
+public/temp
