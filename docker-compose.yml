@@ -4,7 +4,11 @@ services:
       context: ./server
     mem_limit: 4g
     restart: unless-stopped
-    env_file: ./.env
+    env_file:
+      - ./server/.env
+    environment:
+      - NODE_PORT=${NODE_PORT}
+      - SEQ_INGESTION_URL=${SEQ_INGESTION_URL}
     depends_on:
       - mongodb
       - seq
@@ -14,10 +18,14 @@ services:
   scheduler:
     build:
       context: ./server
-    command: ["node", "dist/schedulerIndex.js"]
+    command: ["node", "--max-old-space-size=12288", "dist/schedulerIndex.js"]
     mem_limit: 14g
     restart: unless-stopped
-    env_file: ./.env
+    env_file:
+      - ./server/.env
+    environment:
+      - NODE_PORT=${NODE_PORT}
+      - SEQ_INGESTION_URL=${SEQ_INGESTION_URL}
     depends_on:
       - mongodb
       - seq
