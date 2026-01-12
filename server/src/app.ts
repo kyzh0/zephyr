@@ -16,7 +16,7 @@ app.use(cors({ origin: [/zephyrapp\.nz$/, /^http(s)?:\/\/localhost:\d{4}.*$/] })
 app.use(express.json());
 
 // static files are served by caddy in prod
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'staging') {
   app.use(express.static('public'));
 }
 

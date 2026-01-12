@@ -20,8 +20,6 @@ RUN npm prune --omit=dev
 FROM node:lts-alpine AS runtime
 WORKDIR /app
 
-ENV NODE_ENV=production
-
 # only what we need at runtime
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules

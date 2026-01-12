@@ -8,6 +8,7 @@ services:
       - ./server/.env
     environment:
       - NODE_PORT=${NODE_PORT}
+      - NODE_ENV=${NODE_ENV}
       - SEQ_INGESTION_URL=${SEQ_INGESTION_URL}
     depends_on:
       - mongodb
@@ -25,6 +26,7 @@ services:
       - ./server/.env
     environment:
       - NODE_PORT=${NODE_PORT}
+      - NODE_ENV=${NODE_ENV}
       - SEQ_INGESTION_URL=${SEQ_INGESTION_URL}
     depends_on:
       - mongodb
