@@ -80,9 +80,8 @@ export default async function scrapeLpcData(stations: WithId<StationAttrs>[]): P
     // values[1] is temperature array
     const temps = Array.isArray(values) && values.length >= 2 ? (values[1] as unknown) : null;
     if (Array.isArray(temps) && temps.length) {
-      const t0 = temps[0];
-      temperature = typeof t0 === 'number' ? t0 : Number(t0);
-      if (Number.isNaN(temperature)) temperature = null;
+      const temp = Number(temps[0]);
+      if (temps[0] !== null && Number.isFinite(temp)) temperature = temp;
     }
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);

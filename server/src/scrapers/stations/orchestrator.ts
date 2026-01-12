@@ -1,3 +1,5 @@
+import { FilterQuery } from 'mongoose';
+
 import scrapers, { type StationScraperType, type StationScraper } from './index';
 import logger from '@/lib/logger';
 import { Station, type StationAttrs } from '@/models/stationModel';
@@ -6,7 +8,7 @@ import type { WithId } from '@/types/mongoose';
 type GroupedStations = Record<StationScraperType | string, WithId<StationAttrs>[]>;
 
 export async function runScraper(highResolution: boolean): Promise<void> {
-  const query: Record<string, unknown> = {
+  const query: FilterQuery<StationAttrs> = {
     isHighResolution: { $ne: true },
     isDisabled: { $ne: true }
   };

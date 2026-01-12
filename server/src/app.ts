@@ -8,6 +8,7 @@ import camRoute from './routes/camRoute';
 import soundingRoute from './routes/soundingRoute';
 import publicRoute from './routes/publicRoute';
 import siteRoute from './routes/siteRoute';
+import { runScraper } from './scrapers/stations/orchestrator';
 
 dotenv.config();
 
@@ -19,6 +20,10 @@ app.use(express.json());
 if (process.env.NODE_ENV !== 'production') {
   app.use(express.static('public'));
 }
+
+app.get('/test', async () => {
+  await runScraper(false);
+});
 
 // routes
 app.use('/auth', authRoute);

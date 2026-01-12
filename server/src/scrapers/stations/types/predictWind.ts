@@ -39,11 +39,16 @@ export default async function scrapePredictWindData(
           const match = data?.samples?.find((s) => s.id.toString() === station.externalId);
 
           if (match) {
-            if (match.tws && Number.isFinite(match.tws))
-              windAverage = Math.round(match.tws * 1.852 * 100) / 100;
-            if (match.gust && Number.isFinite(match.gust))
-              windGust = Math.round(match.gust * 1.852 * 100) / 100;
-            if (match.twd && Number.isFinite(match.twd)) windBearing = match.twd;
+            const avg = Number(match.tws);
+            if (match.tws !== null && Number.isFinite(avg))
+              windAverage = Math.round(avg * 1.852 * 100) / 100;
+
+            const gust = Number(match.gust);
+            if (match.gust !== null && Number.isFinite(gust))
+              windGust = Math.round(gust * 1.852 * 100) / 100;
+
+            const dir = Number(match.twd);
+            if (match.twd !== null && Number.isFinite(dir)) windBearing = dir;
           }
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);

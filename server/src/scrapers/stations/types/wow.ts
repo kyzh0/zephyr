@@ -45,14 +45,20 @@ export default async function scrapeWowData(stations: WithId<StationAttrs>[]): P
             const time = new Date(d.ReportEndDateTime);
             // only update if data is <20min old
             if (!Number.isNaN(time.getTime()) && Date.now() - time.getTime() < 20 * 60 * 1000) {
-              if (d.windSpeed_MetrePerSecond && Number.isFinite(d.windSpeed_MetrePerSecond))
-                windAverage = d.windSpeed_MetrePerSecond * 3.6; // m/s -> km/h
-              if (d.windGust_MetrePerSecond && Number.isFinite(d.windGust_MetrePerSecond))
-                windGust = d.windGust_MetrePerSecond * 3.6;
-              if (d.windDirection && Number.isFinite(d.windDirection))
-                windBearing = d.windDirection;
-              if (d.dryBulbTemperature_Celsius && Number.isFinite(d.dryBulbTemperature_Celsius))
-                temperature = d.dryBulbTemperature_Celsius;
+              const avg = Number(d.windSpeed_MetrePerSecond);
+              if (d.windSpeed_MetrePerSecond !== null && Number.isFinite(avg))
+                windAverage = avg * 3.6; // m/s -> km/h
+
+              const gust = Number(d.windGust_MetrePerSecond);
+              if (d.windGust_MetrePerSecond !== null && Number.isFinite(gust))
+                windGust = gust * 3.6;
+
+              const dir = Number(d.windDirection);
+              if (d.windDirection !== null && Number.isFinite(dir)) windBearing = dir;
+
+              const temp = Number(d.dryBulbTemperature_Celsius);
+              if (d.dryBulbTemperature_Celsius !== null && Number.isFinite(temp))
+                temperature = temp;
             }
           }
 

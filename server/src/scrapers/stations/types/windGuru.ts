@@ -36,14 +36,19 @@ export default async function scrapeWindGuruData(stations: WithId<StationAttrs>[
           );
 
           if (data) {
-            if (data.wind_avg && Number.isFinite(data.wind_avg))
-              windAverage = Math.round(data.wind_avg * 1.852 * 100) / 100;
-            if (data.wind_max && Number.isFinite(data.wind_max))
-              windGust = Math.round(data.wind_max * 1.852 * 100) / 100;
-            if (data.wind_direction && Number.isFinite(data.wind_direction))
-              windBearing = data.wind_direction;
-            if (data.temperature && Number.isFinite(data.temperature))
-              temperature = data.temperature;
+            const avg = Number(data.wind_avg);
+            if (data.wind_avg !== null && Number.isFinite(avg))
+              windAverage = Math.round(avg * 1.852 * 100) / 100;
+
+            const gust = Number(data.wind_max);
+            if (data.wind_max !== null && Number.isFinite(gust))
+              windGust = Math.round(gust * 1.852 * 100) / 100;
+
+            const dir = Number(data.wind_direction);
+            if (data.wind_direction !== null && Number.isFinite(dir)) windBearing = dir;
+
+            const temp = Number(data.temperature);
+            if (data.temperature !== null && Number.isFinite(temp)) temperature = temp;
           }
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);

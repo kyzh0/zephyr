@@ -45,9 +45,12 @@ export default async function scrapeAucklandCouncilData(
             const isFresh = Number.isFinite(unix) && Date.now() - unix * 1000 < 40 * 60 * 1000;
 
             if (d.invalid === '0' && isFresh) {
-              if (typeof d.Uw === 'number') windAverage = d.Uw * 3.6; // m/s -> km/h
-              if (typeof d.Uwdir === 'number') windBearing = d.Uwdir;
-              if (typeof d.Tp === 'number') temperature = d.Tp;
+              const avg = Number(d.Uw);
+              if (avg !== null && Number.isFinite(avg)) windAverage = avg * 3.6; // m/s -> km/h
+              const dir = Number(d.Uwdir);
+              if (dir !== null && Number.isFinite(dir)) windBearing = dir;
+              const temp = Number(d.Tp);
+              if (temp !== null && Number.isFinite(temp)) temperature = temp;
             }
           }
 

@@ -1,7 +1,8 @@
 import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
+import { FilterQuery } from 'mongoose';
 
-import { Cam, type CamImage } from '@/models/camModel';
+import { Cam, CamAttrs, type CamImage } from '@/models/camModel';
 import { User } from '@/models/userModel';
 
 const router = express.Router();
@@ -30,21 +31,13 @@ type CamImagesAggResult = {
   images: CamImage[];
 };
 
-function parseUnixSeconds(value: unknown): number | null {
-  if (typeof value !== 'string') return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
-}
-
 router.get(
   '/',
   async (req: Request<Record<string, never>, unknown, unknown, CamsListQuery>, res: Response) => {
-    const time = parseUnixSeconds(req.query.unixTimeFrom);
+    const time = Number(req.query.unixTimeFrom);
 
-    const query: Record<string, unknown> = {};
-    if (time !== null) {
-      query.lastUpdate = { $gte: new Date(time * 1000) };
-    }
+    const query: FilterQuery<CamAttrs> = {};
+    if (time) query.lastUpdate = { $gte: new Date(time * 1000) };
 
     const cams = await Cam.find(query, { images: 0 }).sort({ currentTime: 1 }).lean();
     res.json(cams);

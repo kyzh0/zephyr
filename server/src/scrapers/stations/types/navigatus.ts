@@ -10,18 +10,18 @@ import type { StationAttrs } from '@/models/stationModel';
 import type { WithId } from '@/types/mongoose';
 
 type OmaramaResponse = {
-  average_speed?: number;
-  max_gust?: number;
-  average_dir?: number;
-  wind_data?: { temperature?: number | null };
+  average_speed?: number | string;
+  max_gust?: number | string;
+  average_dir?: number | string;
+  wind_data?: { temperature?: number | string | null };
 };
 
 type SlopehillResponse = {
   date_local: string; // "yyyy-MM-dd HH:mm:ss"
-  wind_speed?: number;
-  wind_gust?: number;
-  wind_direction?: number;
-  air_temperature?: number;
+  wind_speed?: number | string;
+  wind_gust?: number | string;
+  wind_direction?: number | string;
+  air_temperature?: number | string;
 };
 
 function navigatusDirToBearing(dir: string): number | null {
@@ -116,16 +116,19 @@ export default async function scrapeNavigatusData(stations: WithId<StationAttrs>
             );
 
             if (data) {
-              if (typeof data.average_speed === 'number') {
-                windAverage = Math.round(data.average_speed * 1.852 * 100) / 100; // kt -> km/h
-              }
-              if (typeof data.max_gust === 'number') {
-                windGust = Math.round(data.max_gust * 1.852 * 100) / 100;
-              }
-              if (typeof data.average_dir === 'number') {
-                windBearing = data.average_dir;
-              }
-              temperature = data.wind_data?.temperature ?? null;
+              const avg = Number(data.average_speed);
+              if (data.average_speed !== null && Number.isFinite(avg))
+                windAverage = Math.round(avg * 1.852 * 100) / 100; // kt -> km/h
+
+              const gust = Number(data.max_gust);
+              if (data.max_gust !== null && Number.isFinite(gust))
+                windGust = Math.round(gust * 1.852 * 100) / 100;
+
+              const dir = Number(data.average_dir);
+              if (data.average_dir !== null && Number.isFinite(dir)) windBearing = dir;
+
+              const temp = Number(data.wind_data?.temperature);
+              if (data.wind_data?.temperature !== null && Number.isFinite(temp)) temperature = temp;
             }
           } else if (id === 'SLOPEHILL') {
             const { data } = await httpClient.get<SlopehillResponse>(
@@ -140,14 +143,19 @@ export default async function scrapeNavigatusData(stations: WithId<StationAttrs>
 
               // skip if data older than 20 min
               if (Date.now() - lastUpdate.getTime() < 20 * 60 * 1000) {
-                if (typeof data.wind_speed === 'number') {
-                  windAverage = Math.round(data.wind_speed * 1.852 * 100) / 100;
-                }
-                if (typeof data.wind_gust === 'number') {
-                  windGust = Math.round(data.wind_gust * 1.852 * 100) / 100;
-                }
-                windBearing = data.wind_direction ?? null;
-                temperature = data.air_temperature ?? null;
+                const avg = Number(data.wind_speed);
+                if (data.wind_speed !== null && Number.isFinite(avg))
+                  windAverage = Math.round(avg * 1.852 * 100) / 100; // kt -> km/h
+
+                const gust = Number(data.wind_gust);
+                if (data.wind_gust !== null && Number.isFinite(gust))
+                  windGust = Math.round(gust * 1.852 * 100) / 100;
+
+                const dir = Number(data.wind_direction);
+                if (data.wind_direction !== null && Number.isFinite(dir)) windBearing = dir;
+
+                const temp = Number(data.air_temperature);
+                if (data.air_temperature !== null && Number.isFinite(temp)) temperature = temp;
               }
             }
           }

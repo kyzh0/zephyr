@@ -1,8 +1,9 @@
 import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
+import { FilterQuery } from 'mongoose';
 
 import { User } from '@/models/userModel';
-import { Site, SiteDoc, type GeoPoint, type SiteRating } from '@/models/siteModel';
+import { Site, SiteAttrs, SiteDoc, type GeoPoint, type SiteRating } from '@/models/siteModel';
 
 const router = express.Router();
 
@@ -28,14 +29,13 @@ type SiteBody = {
 
 function isValidLonLat(coords: unknown): coords is [number, number] {
   if (!Array.isArray(coords) || coords.length !== 2) return false;
-  const [lng, lat] = coords;
+  const lon = Number(coords[0]);
+  const lat = Number(coords[1]);
   return (
-    typeof lng === 'number' &&
-    typeof lat === 'number' &&
-    Number.isFinite(lng) &&
+    Number.isFinite(lon) &&
     Number.isFinite(lat) &&
-    lng >= -180 &&
-    lng <= 180 &&
+    lon >= -180 &&
+    lon <= 180 &&
     lat >= -90 &&
     lat <= 90
   );
@@ -50,10 +50,8 @@ router.get(
   ) => {
     const { includeDisabled } = req.query;
 
-    const query: Record<string, unknown> = {};
-    if (String(includeDisabled).toLowerCase() !== 'true') {
-      query.isDisabled = { $ne: true };
-    }
+    const query: FilterQuery<SiteAttrs> = {};
+    if (String(includeDisabled).toLowerCase() !== 'true') query.isDisabled = { $ne: true };
 
     const sites = await Site.find(query).lean();
     res.json(sites);

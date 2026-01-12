@@ -7,6 +7,8 @@
     "start": "node dist/index.js",
     "scheduler": "node --max-old-space-size=12288 dist/schedulerIndex.js",
     "dev": "concurrently -k \"tsup --watch\" \"nodemon --watch dist dist/index.js\" \"nodemon --watch dist dist/schedulerIndex.js\"",
+    "dev:server": "node --inspect --enable-source-maps --watch node_modules/tsx/dist/cli.mjs src/index.ts",
+    "dev:scheduler": "node --inspect --enable-source-maps --watch node_modules/tsx/dist/cli.mjs src/schedulerIndex.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ./**/*.{js,jsx,ts,tsx,css,md,json} --config ./.prettierrc.json"

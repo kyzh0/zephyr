@@ -42,10 +42,11 @@ export default async function scrapeMpycData(stations: WithId<StationAttrs>[]): 
       if (gustKt != null) windGust = Math.round(gustKt * 1.852 * 100) / 100;
 
       const bearing = Number(data.current.winddir_formatted);
-      if (Number.isFinite(bearing)) windBearing = bearing;
+      if (data.current.winddir_formatted !== null && Number.isFinite(bearing))
+        windBearing = bearing;
 
       const temp = Number(data.current.outTemp_formatted);
-      if (Number.isFinite(temp)) temperature = temp;
+      if (data.current.outTemp_formatted !== null && Number.isFinite(temp)) temperature = temp;
     }
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
