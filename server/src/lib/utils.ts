@@ -1,4 +1,4 @@
-export function getWindBearingFromDirection(direction) {
+export function getWindBearingFromDirection(direction?: string | null): number {
   if (!direction) {
     return 0;
   }
@@ -41,14 +41,18 @@ export function getWindBearingFromDirection(direction) {
   }
 }
 
-export function getFlooredTime(interval) {
+export function getFlooredTime(interval: number): Date {
+  if (!Number.isFinite(interval) || interval <= 0) {
+    return new Date();
+  }
+
   // floor data timestamp to "interval" mins
   let date = new Date();
   let rem = date.getMinutes() % interval;
   if (rem > 0) {
     date = new Date(date.getTime() - rem * 60 * 1000);
   }
-  rem = date.getSeconds() % 60;
+  rem = date.getSeconds();
   if (rem > 0) {
     date = new Date(date.getTime() - rem * 1000);
   }
