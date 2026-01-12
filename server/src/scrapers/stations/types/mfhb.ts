@@ -2,7 +2,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type MfhbResponse = {
   wind?: number | null;
@@ -10,7 +11,7 @@ type MfhbResponse = {
   temperature?: number | null;
 };
 
-export default async function scrapeMfhbData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeMfhbData(stations: WithId<StationAttrs>[]): Promise<void> {
   const station = stations[0];
   if (!station) return;
 

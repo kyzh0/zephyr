@@ -1,4 +1,5 @@
-import type { StationDoc } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
+import { type StationAttrs } from '@/models/stationModel';
 
 import scrapeAttentisData from './types/attentis';
 import scrapeAucklandCouncilData from './types/aucklandCouncil';
@@ -34,7 +35,7 @@ import scrapeWindyData from './types/windy';
 import scrapeWowData from './types/wow';
 import scrapeWswrData from './types/wswr';
 
-export type StationScraper = (stations: StationDoc[]) => Promise<void>;
+export type StationScraper = (stations: WithId<StationAttrs>[]) => Promise<void>;
 
 const scrapers = {
   attentis: scrapeAttentisData,

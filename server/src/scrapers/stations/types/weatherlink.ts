@@ -4,7 +4,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type WeatherLinkSensorDataType = {
   sensorDataName: string;
@@ -24,7 +25,9 @@ type WeatherLinkResponse = {
   oMaiaData?: WeatherLinkMaiaItem[];
 };
 
-export default async function scrapeWeatherLinkData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeWeatherLinkData(
+  stations: WithId<StationAttrs>[]
+): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(

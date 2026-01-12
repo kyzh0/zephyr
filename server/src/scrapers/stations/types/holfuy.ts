@@ -4,7 +4,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type HolfuyBulkMeasurement = {
   stationId: string | number;
@@ -27,14 +28,14 @@ type HolfuyStationResponse = {
   temperature?: number | null;
 };
 
-export default async function scrapeHolfuyData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeHolfuyData(stations: WithId<StationAttrs>[]): Promise<void> {
   try {
     // bulk scrape
     const { data } = await httpClient.get<HolfuyBulkResponse>(
       `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
     );
 
-    const individualScrapeStations: StationDoc[] = [];
+    const individualScrapeStations: WithId<StationAttrs>[] = [];
 
     for (const station of stations) {
       const d = data.measurements.find((x) => x.stationId.toString() === station.externalId);
@@ -71,7 +72,7 @@ export default async function scrapeHolfuyData(stations: StationDoc[]): Promise<
   }
 }
 
-async function scrapeHolfuyStation(station: StationDoc): Promise<void> {
+async function scrapeHolfuyStation(station: WithId<StationAttrs>): Promise<void> {
   try {
     let windAverage: number | null = null;
     let windGust: number | null = null;

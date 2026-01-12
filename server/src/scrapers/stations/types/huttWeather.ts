@@ -2,9 +2,12 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
-export default async function scrapeHuttWeatherData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeHuttWeatherData(
+  stations: WithId<StationAttrs>[]
+): Promise<void> {
   const station = stations[0];
   if (!station) return;
 

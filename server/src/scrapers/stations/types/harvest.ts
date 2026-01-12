@@ -4,7 +4,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type HarvestSite = { site_id: string };
 type HarvestSiteListResponse = {
@@ -27,7 +28,7 @@ type HarvestGraphResponse =
   | Array<{ data?: HarvestGraphPoint[] }>
   | Record<string, HarvestGraphSeries | undefined>;
 
-export default async function scrapeHarvestData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeHarvestData(stations: WithId<StationAttrs>[]): Promise<void> {
   try {
     // use API for FENZ stations
     const fenzIds: string[] = [];
@@ -53,8 +54,8 @@ export default async function scrapeHarvestData(stations: StationDoc[]): Promise
       }
     }
 
-    const fenzStations: StationDoc[] = [];
-    const otherStations: StationDoc[] = [];
+    const fenzStations: WithId<StationAttrs>[] = [];
+    const otherStations: WithId<StationAttrs>[] = [];
 
     for (const station of stations) {
       const sid = (station.externalId ?? '').split('_')[0];
@@ -89,7 +90,7 @@ export default async function scrapeHarvestData(stations: StationDoc[]): Promise
   }
 }
 
-async function scrapeFenzHarvestStation(station: StationDoc): Promise<void> {
+async function scrapeFenzHarvestStation(station: WithId<StationAttrs>): Promise<void> {
   try {
     let windAverage: number | null = null;
     let windGust: number | null = null;
@@ -214,7 +215,7 @@ function extractHarvestGraphPoints(data: HarvestGraphResponse): HarvestGraphPoin
   return d?.length ? d : null;
 }
 
-async function scrapeHarvestStation(station: StationDoc): Promise<void> {
+async function scrapeHarvestStation(station: WithId<StationAttrs>): Promise<void> {
   let ids = (station.externalId ?? '').split('_');
   if (ids.length !== 2) {
     logger.error(

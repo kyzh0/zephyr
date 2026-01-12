@@ -5,7 +5,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type WowObservation = {
   ReportEndDateTime: string;
@@ -19,7 +20,7 @@ type WowResponse = {
   Observations?: WowObservation[];
 };
 
-export default async function scrapeWowData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeWowData(stations: WithId<StationAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(

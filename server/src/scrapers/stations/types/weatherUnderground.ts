@@ -4,7 +4,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type WUObservationMetric = {
   windSpeed?: number | null;
@@ -21,7 +22,9 @@ type WUResponse = {
   observations?: WUObservation[];
 };
 
-export default async function scrapeWeatherUndergroundData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeWeatherUndergroundData(
+  stations: WithId<StationAttrs>[]
+): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(

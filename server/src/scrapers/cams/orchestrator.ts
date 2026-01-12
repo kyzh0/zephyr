@@ -1,13 +1,14 @@
 import scrapers, { type CamScraperType, type CamScraper } from './index';
 import logger from '@/lib/logger';
-import { Cam, type CamDoc } from '@/models/camModel';
+import { Cam, CamAttrs } from '@/models/camModel';
+import { WithId } from '@/types/mongoose';
 
-type GroupedCams = Record<CamScraperType | string, CamDoc[]>;
+type GroupedCams = Record<CamScraperType | string, WithId<CamAttrs>[]>;
 
 export async function runScraper(): Promise<void> {
   const query = { isDisabled: { $ne: true } };
 
-  const cams = await Cam.find(query);
+  const cams = await Cam.find(query).lean<WithId<CamAttrs>[]>();
   if (!cams.length) {
     logger.error('No webcams found.', { service: 'cam' });
     return;

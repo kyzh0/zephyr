@@ -4,9 +4,10 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/cams/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { CamDoc } from '@/models/camModel';
+import { type CamAttrs } from '@/models/camModel';
+import { type WithId } from '@/types/mongoose';
 
-export default async function scrapeCgcData(cams: CamDoc[]): Promise<void> {
+export default async function scrapeCgcData(cams: WithId<CamAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(

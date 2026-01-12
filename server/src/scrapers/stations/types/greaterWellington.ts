@@ -5,7 +5,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 function extractLastI1Number(xml: string): number | null {
   const matches = xml.match(/<I1>\d+.?\d*<\/I1>/g);
@@ -16,7 +17,9 @@ function extractLastI1Number(xml: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-export default async function scrapeGreaterWellingtonData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeGreaterWellingtonData(
+  stations: WithId<StationAttrs>[]
+): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(

@@ -2,7 +2,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type AttentisReading = {
   wind_speed?: number | null;
@@ -27,7 +28,7 @@ type StationResult = {
   };
 };
 
-export default async function scrapeAttentisData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeAttentisData(stations: WithId<StationAttrs>[]): Promise<void> {
   try {
     const result: StationResult[] = [];
 

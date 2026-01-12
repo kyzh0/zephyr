@@ -4,20 +4,23 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type PredictWindSample = {
   id: string | number;
-  tws?: number; // true wind speed (kt)
+  tws?: number; // true wind speed kt
   gust?: number;
-  twd?: number; // true wind direction (deg)
+  twd?: number; // true wind direction
 };
 
 type PredictWindResponse = {
   samples: PredictWindSample[];
 };
 
-export default async function scrapePredictWindData(stations: StationDoc[]): Promise<void> {
+export default async function scrapePredictWindData(
+  stations: WithId<StationAttrs>[]
+): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(

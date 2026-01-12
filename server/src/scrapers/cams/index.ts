@@ -1,4 +1,5 @@
-import type { CamDoc } from '@/models/camModel';
+import { type WithId } from '@/types/mongoose';
+import { type CamAttrs } from '@/models/camModel';
 
 import scrapeArthursPassData from './types/arthursPass';
 import scrapeCamFtpData from './types/camFtp';
@@ -15,7 +16,7 @@ import scrapeSnowgrassData from './types/snowgrass';
 import scrapeTaylorsSurfData from './types/taylorsSurf';
 import scrapeWanakaAirportData from './types/wanakaAirport';
 
-export type CamScraper = (cams: CamDoc[]) => Promise<void>;
+export type CamScraper = (cams: WithId<CamAttrs>[]) => Promise<void>;
 
 const scrapers = {
   ap: scrapeArthursPassData,

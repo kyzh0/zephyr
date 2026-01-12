@@ -5,9 +5,10 @@ import { fromZonedTime } from 'date-fns-tz';
 
 import httpClient from '@/lib/httpClient';
 import logger from '@/lib/logger';
-import { Sounding, type SoundingDoc } from '@/models/soundingModel';
+import { Sounding, type SoundingAttrs } from '@/models/soundingModel';
+import { WithId } from '@/types/mongoose';
 
-export default async function scrapeRaspData(soundings: SoundingDoc[]): Promise<void> {
+export default async function scrapeRaspData(soundings: WithId<SoundingAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(

@@ -8,7 +8,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type PorterResult = {
   id: string;
@@ -58,7 +59,7 @@ function maybeFixOneDp(s: string): string {
   return s;
 }
 
-export default async function scrapePortersData(stations: StationDoc[]): Promise<void> {
+export default async function scrapePortersData(stations: WithId<StationAttrs>[]): Promise<void> {
   try {
     const result: PorterResult[] = [];
 

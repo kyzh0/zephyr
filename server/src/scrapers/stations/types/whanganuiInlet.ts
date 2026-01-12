@@ -6,9 +6,12 @@ import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 import { getWindBearingFromDirection } from '@/lib/utils';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
-export default async function scrapeWhanganuiInletData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeWhanganuiInletData(
+  stations: WithId<StationAttrs>[]
+): Promise<void> {
   const station = stations[0];
   if (!station) return;
 

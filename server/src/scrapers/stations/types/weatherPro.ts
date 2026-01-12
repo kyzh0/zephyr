@@ -4,7 +4,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 function extractNumber(html: string, startStr: string, endStr: string): number | null {
   const i = html.indexOf(startStr);
@@ -17,7 +18,9 @@ function extractNumber(html: string, startStr: string, endStr: string): number |
   return Number.isNaN(n) ? null : n;
 }
 
-export default async function scrapeWeatherProData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeWeatherProData(
+  stations: WithId<StationAttrs>[]
+): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(

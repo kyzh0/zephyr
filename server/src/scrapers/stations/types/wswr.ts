@@ -2,7 +2,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type WswrRow = {
   record_time: string; // e.g. "2026-01-12T01:23:45"
@@ -14,7 +15,7 @@ type WswrRow = {
 
 type WswrResponse = WswrRow[];
 
-export default async function scrapeWswrData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeWswrData(stations: WithId<StationAttrs>[]): Promise<void> {
   const station = stations[0];
   if (!station) return;
 

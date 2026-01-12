@@ -6,7 +6,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 const REG_NUM = /[^0-9.]/g;
 
@@ -22,7 +23,7 @@ async function ocr(
   return ret.data.text;
 }
 
-export default async function scrapePrimePortData(stations: StationDoc[]): Promise<void> {
+export default async function scrapePrimePortData(stations: WithId<StationAttrs>[]): Promise<void> {
   const station = stations[0];
   if (!station) return;
 

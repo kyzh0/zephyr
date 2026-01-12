@@ -5,7 +5,8 @@ import axios from 'axios';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type HilltopPoint = { t: string; v: string | number };
 type HilltopResponse = { Data?: HilltopPoint[] };
@@ -20,7 +21,7 @@ function getFreshValue(point: HilltopPoint | undefined): number | null {
   return Number(point.v);
 }
 
-export default async function scrapeHbrcData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeHbrcData(stations: WithId<StationAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(

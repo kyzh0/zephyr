@@ -1,11 +1,12 @@
 import logger from '@/lib/logger';
 import scrapeRaspData from './types/rasp';
-import { Sounding } from '@/models/soundingModel';
+import { Sounding, type SoundingAttrs } from '@/models/soundingModel';
+import { type WithId } from '@/types/mongoose';
 
 export async function runScraper(): Promise<void> {
   const query = { isDisabled: { $ne: true } };
 
-  const soundings = await Sounding.find(query);
+  const soundings = await Sounding.find(query).lean<WithId<SoundingAttrs>[]>();
   if (!soundings.length) {
     logger.error('No soundings found.', { service: 'sounding' });
     return;

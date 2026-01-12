@@ -3,7 +3,8 @@ import md5 from 'md5';
 import fs from 'node:fs/promises';
 
 import logger from '@/lib/logger';
-import { Cam, type CamDoc, type CamImage } from '@/models/camModel';
+import { Cam, type CamAttrs, type CamImage } from '@/models/camModel';
+import { type WithId } from '@/types/mongoose';
 
 const NO_EMBEDDED_TIMESTAMP_TYPES = new Set<string>([
   'qa',
@@ -18,7 +19,7 @@ const NO_EMBEDDED_TIMESTAMP_TYPES = new Set<string>([
 ]);
 
 export default async function processScrapedData(
-  cam: CamDoc,
+  cam: WithId<CamAttrs>,
   updated: Date | null,
   base64: string | null
 ): Promise<void> {
@@ -67,10 +68,14 @@ export default async function processScrapedData(
     img.url = filePath.replace('public/', '');
 
     // update cam (current state)
-    cam.lastUpdate = new Date();
-    cam.currentTime = updated;
-    cam.currentUrl = img.url;
-    await cam.save();
+    await Cam.updateOne(
+      { _id: cam._id },
+      {
+        lastUpdate: new Date(),
+        currentTime: updated,
+        currentUrl: img.url
+      }
+    );
 
     // add image (append to array)
     await Cam.updateOne({ _id: cam._id }, { $push: { images: img } });

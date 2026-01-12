@@ -4,7 +4,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 type CentrePortBaringHeadRow = {
   speed_kn: number;
@@ -18,7 +19,9 @@ type CentrePortGenericRow = {
   WindDir_01MnAvg: string | number;
 };
 
-export default async function scrapeCentrePortData(stations: StationDoc[]): Promise<void> {
+export default async function scrapeCentrePortData(
+  stations: WithId<StationAttrs>[]
+): Promise<void> {
   const limit = pLimit(5);
 
   const dateFrom = new Date(Date.now() - 720 * 60 * 1000); // current time - 12h

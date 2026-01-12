@@ -4,7 +4,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import type { StationDoc } from '@/models/stationModel';
+import { type StationAttrs } from '@/models/stationModel';
+import { type WithId } from '@/types/mongoose';
 
 function extractSeriesValue(html: string, seriesName: string): number | null {
   const nameTag = `<p class="seriesName">${seriesName}</p>`;
@@ -22,7 +23,7 @@ function extractSeriesValue(html: string, seriesName: string): number | null {
   return Number.isNaN(n) ? null : n;
 }
 
-export default async function scrapePortOtagoData(stations: StationDoc[]): Promise<void> {
+export default async function scrapePortOtagoData(stations: WithId<StationAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(
