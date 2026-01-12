@@ -1,8 +1,7 @@
 import express, { type Request, type Response } from 'express';
 import { formatInTimeZone } from 'date-fns-tz';
 import { Worker } from 'node:worker_threads';
-import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { FilterQuery } from 'mongoose';
 
 import logger from '@/lib/logger';
 import { Client } from '@/models/clientModel';
@@ -11,11 +10,7 @@ import { Output, OutputAttrs } from '@/models/outputModel';
 
 import * as XLSX from 'xlsx';
 import * as fs from 'node:fs';
-import { FilterQuery } from 'mongoose';
 XLSX.set_fs(fs);
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
@@ -123,12 +118,12 @@ function runExportDataWorker(
   lat: number,
   lon: number,
   radius: number
-): Promise<string> {
+): Promise<string | null> {
   return new Promise((resolve, reject) => {
-    // NOTE: keep .js here because workers run from built JS in dist/
-    const workerPath = path.resolve(__dirname, '../workers/exportDataWorker.js');
+    // keep .js here because workers run from built JS in dist/
+    const workerUrl = new URL('./workers/exportDataWorker.js', import.meta.url);
 
-    const worker = new Worker(pathToFileURL(workerPath), {
+    const worker = new Worker(workerUrl, {
       workerData: { unixFrom, unixTo, lat, lon, radius }
     });
 
@@ -184,7 +179,8 @@ router.get(
         });
       }
     } catch (error) {
-      logger.error(String(error), { service: 'public' });
+      const msg = error instanceof Error ? error.message : String(error);
+      logger.error(msg, { service: 'public' });
     }
 
     res.json(geoJson);
@@ -242,7 +238,8 @@ router.get(
         });
       }
     } catch (error) {
-      logger.error(String(error), { service: 'public' });
+      const msg = error instanceof Error ? error.message : String(error);
+      logger.error(msg, { service: 'public' });
     }
 
     res.json(result);
@@ -287,7 +284,8 @@ router.post(
       const url = await runExportDataWorker(unixFrom, unixTo, lat, lon, radius);
       res.json({ url });
     } catch (error) {
-      logger.error(String(error), { service: 'public' });
+      const msg = error instanceof Error ? error.message : String(error);
+      logger.error(msg, { service: 'public' });
       res.status(500).json({ error: 'Something went wrong...' });
     }
   }

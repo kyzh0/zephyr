@@ -1,14 +1,15 @@
 import cron from 'node-cron';
-import { runScraper } from './orchestrator.js';
-import logger from '../../lib/logger.js';
-import { removeOldSoundings } from '../../services/soundingService.js';
 
-export async function startSoundingScheduler() {
+import { runScraper } from './orchestrator';
+import logger from '@/lib/logger';
+import { removeOldSoundings } from '@/services/soundingService';
+
+export async function startSoundingScheduler(): Promise<void> {
   logger.info('----- Initialising sounding scheduler -----', {
     service: 'sounding'
   });
 
-  // soundings - at 0730 NZT
+  // soundings - at 07:30 NZT
   cron.schedule(
     '30 7 * * *',
     async () => {
@@ -21,9 +22,7 @@ export async function startSoundingScheduler() {
       await runScraper();
       logger.info(
         `----- Update soundings end - ${Math.floor((Date.now() - ts) / 1000)}s elapsed. -----`,
-        {
-          service: 'sounding'
-        }
+        { service: 'sounding' }
       );
     },
     { timezone: 'Pacific/Auckland' }

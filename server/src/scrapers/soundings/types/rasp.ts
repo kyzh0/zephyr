@@ -1,12 +1,13 @@
 import pLimit from 'p-limit';
 import sharp from 'sharp';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { fromZonedTime } from 'date-fns-tz';
-import httpClient from '../../../lib/httpClient.js';
-import logger from '../../../lib/logger.js';
-import { Sounding } from '../../../models/soundingModel.js';
 
-export default async function scrapeRaspData(soundings) {
+import httpClient from '@/lib/httpClient';
+import logger from '@/lib/logger';
+import { Sounding, type SoundingDoc } from '@/models/soundingModel';
+
+export default async function scrapeRaspData(soundings: SoundingDoc[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(
@@ -18,11 +19,13 @@ export default async function scrapeRaspData(soundings) {
           day: 'numeric',
           timeZone: 'Pacific/Auckland'
         });
+
         const parts = dateTimeFormat.formatToParts(new Date());
 
         let year = '';
         let month = '';
         let day = '';
+
         for (const p of parts) {
           switch (p.type) {
             case 'year':
@@ -41,47 +44,38 @@ export default async function scrapeRaspData(soundings) {
           const hr = i.toString().padStart(2, '0');
 
           try {
-            const response = await httpClient.get(
+            const response = await httpClient.get<ArrayBuffer>(
               `http://rasp.nz/rasp/regions/${sounding.raspRegion}/${year}/${year}${month}${day}/sounding${sounding.raspId}.curr.${hr}00lst.w2.png`,
-              {
-                responseType: 'arraybuffer'
-              }
+              { responseType: 'arraybuffer' }
             );
-            const base64 = Buffer.from(response.data, 'binary').toString('base64');
-            const imgBuff = Buffer.from(base64, 'base64');
+
+            const imgBuff = Buffer.from(response.data);
             const resizedBuf = await sharp(imgBuff).resize({ width: 600 }).toBuffer();
 
             const timeStr = `${year}-${month}-${day}T${hr}:00:00`;
-            const path = `public/soundings/${sounding.raspRegion}/${sounding.raspId}/${timeStr}.png`;
-            await fs.writeFile(path, resizedBuf);
+            const filePath = `public/soundings/${sounding.raspRegion}/${sounding.raspId}/${timeStr}.png`;
+
+            await fs.mkdir(`public/soundings/${sounding.raspRegion}/${sounding.raspId}`, {
+              recursive: true
+            });
+
+            await fs.writeFile(filePath, resizedBuf);
 
             const img = {
               time: fromZonedTime(timeStr, 'Pacific/Auckland'),
-              url: path.replace('public/', '')
+              url: filePath.replace('public/', '')
             };
 
-            // add image
-            await Sounding.updateOne(
-              { _id: sounding._id },
-              {
-                $push: {
-                  images: img
-                }
-              }
-            );
+            await Sounding.updateOne({ _id: sounding._id }, { $push: { images: img } });
 
             logger.info(
               `rasp sounding updated - ${sounding.raspRegion} - ${sounding.raspId} - ${hr}`,
-              {
-                service: 'sounding'
-              }
+              { service: 'sounding' }
             );
-          } catch (error) {
+          } catch {
             logger.warn(
               `rasp soundings error - ${sounding.raspRegion} - ${sounding.raspId} - ${hr}`,
-              {
-                service: 'sounding'
-              }
+              { service: 'sounding' }
             );
           }
         }

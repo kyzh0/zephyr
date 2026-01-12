@@ -79,11 +79,13 @@ export default async function processScrapedData(
       service: 'cam',
       type: cam.type
     });
-  } catch (error: unknown) {
+  } catch (error) {
     logger.error(
       `An error occured while saving image for ${cam.type}${cam.externalId ? ` - ${cam.externalId}` : ''}`,
       { service: 'cam', type: cam.type }
     );
-    logger.error(String(error), { service: 'cam', type: cam.type });
+
+    const msg = error instanceof Error ? error.message : String(error);
+    logger.error(msg, { service: 'cam', type: cam.type });
   }
 }

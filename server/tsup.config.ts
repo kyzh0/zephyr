@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/schedulerIndex.ts'],
+  entry: ['src/index.ts', 'src/schedulerIndex.ts', 'src/workers/exportDataWorker.ts'],
   format: ['esm'],
   target: 'es2023',
   platform: 'node',

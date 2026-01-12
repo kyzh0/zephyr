@@ -38,7 +38,7 @@ export async function runScraper(): Promise<void> {
       } else {
         logger.error(`Webcam scraper does not exist for: ${type}`, { service: 'cam', type });
       }
-    } catch (error: unknown) {
+    } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logger.error(`Webcam scraper ${type} failed: ${message}`, { service: 'cam', type });
     }
