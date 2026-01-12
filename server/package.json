@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "scheduler": "node --max-old-space-size=12288 src/schedulerIndex.js",
-    "dev": "nodemon src/index.js & nodemon src/schedulerIndex.js",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "scheduler": "node --max-old-space-size=12288 dist/schedulerIndex.js",
+    "dev": "concurrently -k \"tsup --watch\" \"nodemon --watch dist dist/index.js\" \"nodemon --watch dist dist/schedulerIndex.js\"",
+    "dev:server": "node --inspect --enable-source-maps --watch node_modules/tsx/dist/cli.mjs src/index.ts",
+    "dev:scheduler": "node --inspect --enable-source-maps --watch node_modules/tsx/dist/cli.mjs src/schedulerIndex.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ./**/*.{js,jsx,ts,tsx,css,md,json} --config ./.prettierrc.json"
@@ -18,7 +21,7 @@
     "date-fns": "^3.6.0",
     "date-fns-tz": "^3.1.3",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "express": "^5.2.1",
     "geofire-common": "^6.0.0",
     "md5": "^2.3.0",
     "mongoose": "^8.3.3",
@@ -32,11 +35,25 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.1.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/md5": "^2.3.6",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.0.6",
+    "@types/node-cron": "^3.0.11",
+    "@types/node-dir": "^0.0.37",
+    "@typescript-eslint/eslint-plugin": "^8.52.0",
+    "@typescript-eslint/parser": "^8.52.0",
+    "concurrently": "^9.2.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "globals": "^15.1.0",
     "nodemon": "^3.1.0",
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
