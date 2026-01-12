@@ -5,8 +5,8 @@ import processScrapedData from '@/scrapers/stations/processScrapedData';
 import { getWindBearingFromDirection } from '@/lib/utils';
 import logger from '@/lib/logger';
 
-import { type StationAttrs } from '@/models/stationModel';
-import { type WithId } from '@/types/mongoose';
+import type { StationAttrs } from '@/models/stationModel';
+import type { WithId } from '@/types/mongoose';
 
 export default async function scrapeCwuData(stations: WithId<StationAttrs>[]): Promise<void> {
   const limit = pLimit(5);

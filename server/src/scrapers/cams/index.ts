@@ -1,5 +1,5 @@
-import { type WithId } from '@/types/mongoose';
-import { type CamAttrs } from '@/models/camModel';
+import type { WithId } from '@/types/mongoose';
+import type { CamAttrs } from '@/models/camModel';
 
 import scrapeArthursPassData from './types/arthursPass';
 import scrapeCamFtpData from './types/camFtp';

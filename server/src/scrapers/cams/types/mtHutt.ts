@@ -4,8 +4,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/cams/processScrapedData';
 import logger from '@/lib/logger';
 
-import { type CamAttrs } from '@/models/camModel';
-import { type WithId } from '@/types/mongoose';
+import type { CamAttrs } from '@/models/camModel';
+import type { WithId } from '@/types/mongoose';
 
 export default async function scrapeMtHuttData(cams: WithId<CamAttrs>[]): Promise<void> {
   const limit = pLimit(5);

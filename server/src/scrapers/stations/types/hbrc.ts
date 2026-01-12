@@ -5,8 +5,8 @@ import axios from 'axios';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import { type StationAttrs } from '@/models/stationModel';
-import { type WithId } from '@/types/mongoose';
+import type { StationAttrs } from '@/models/stationModel';
+import type { WithId } from '@/types/mongoose';
 
 type HilltopPoint = { t: string; v: string | number };
 type HilltopResponse = { Data?: HilltopPoint[] };

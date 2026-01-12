@@ -2,8 +2,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import { type StationAttrs } from '@/models/stationModel';
-import { type WithId } from '@/types/mongoose';
+import type { StationAttrs } from '@/models/stationModel';
+import type { WithId } from '@/types/mongoose';
 
 type WswrRow = {
   record_time: string; // e.g. "2026-01-12T01:23:45"

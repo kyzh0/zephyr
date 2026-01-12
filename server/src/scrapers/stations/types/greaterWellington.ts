@@ -5,8 +5,8 @@ import httpClient from '@/lib/httpClient';
 import processScrapedData from '@/scrapers/stations/processScrapedData';
 import logger from '@/lib/logger';
 
-import { type StationAttrs } from '@/models/stationModel';
-import { type WithId } from '@/types/mongoose';
+import type { StationAttrs } from '@/models/stationModel';
+import type { WithId } from '@/types/mongoose';
 
 function extractLastI1Number(xml: string): number | null {
   const matches = xml.match(/<I1>\d+.?\d*<\/I1>/g);

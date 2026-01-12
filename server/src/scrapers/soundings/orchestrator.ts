@@ -1,7 +1,7 @@
 import logger from '@/lib/logger';
 import scrapeRaspData from './types/rasp';
 import { Sounding, type SoundingAttrs } from '@/models/soundingModel';
-import { type WithId } from '@/types/mongoose';
+import type { WithId } from '@/types/mongoose';
 
 export async function runScraper(): Promise<void> {
   const query = { isDisabled: { $ne: true } };

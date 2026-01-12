@@ -4,8 +4,8 @@ import { Station } from '@/models/stationModel';
 import { StationData } from '@/models/stationDataModel';
 import logger from '@/lib/logger';
 
-import { type StationAttrs } from '@/models/stationModel';
-import { type WithId } from '@/types/mongoose';
+import type { StationAttrs } from '@/models/stationModel';
+import type { WithId } from '@/types/mongoose';
 
 export default async function processScrapedData(
   station: WithId<StationAttrs>,

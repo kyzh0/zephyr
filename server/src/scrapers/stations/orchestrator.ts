@@ -1,7 +1,7 @@
 import scrapers, { type StationScraperType, type StationScraper } from './index';
 import logger from '@/lib/logger';
 import { Station, type StationAttrs } from '@/models/stationModel';
-import { type WithId } from '@/types/mongoose';
+import type { WithId } from '@/types/mongoose';
 
 type GroupedStations = Record<StationScraperType | string, WithId<StationAttrs>[]>;
 

@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 
 import logger from '@/lib/logger';
 import { Cam, type CamAttrs, type CamImage } from '@/models/camModel';
-import { type WithId } from '@/types/mongoose';
+import type { WithId } from '@/types/mongoose';
 
 const NO_EMBEDDED_TIMESTAMP_TYPES = new Set<string>([
   'qa',

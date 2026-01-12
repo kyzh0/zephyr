@@ -1,5 +1,5 @@
-import { type WithId } from '@/types/mongoose';
-import { type StationAttrs } from '@/models/stationModel';
+import type { WithId } from '@/types/mongoose';
+import type { StationAttrs } from '@/models/stationModel';
 
 import scrapeAttentisData from './types/attentis';
 import scrapeAucklandCouncilData from './types/aucklandCouncil';
