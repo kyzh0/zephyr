@@ -14,7 +14,7 @@ services:
   scheduler:
     build:
       context: ./server
-    command: npm run scheduler
+    command: ["node", "dist/schedulerIndex.js"]
     mem_limit: 14g
     restart: unless-stopped
     env_file: ./.env
