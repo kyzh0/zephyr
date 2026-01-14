@@ -101,4 +101,4 @@ Thanks to James Bayly for his efforts on modernising the frontend, and Jonas Yan
 
 ## License
 
-[MIT © 2024 Kyle Zhou](https://github.com/kyzh0/zephyr/blob/main/LICENSE.md)
+[MIT © 2026 Kyle Zhou](https://github.com/kyzh0/zephyr/blob/main/LICENSE.md)
