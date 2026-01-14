@@ -7,7 +7,6 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env
-      - ./apps/api/.env
     depends_on:
       - mongodb
       - seq
