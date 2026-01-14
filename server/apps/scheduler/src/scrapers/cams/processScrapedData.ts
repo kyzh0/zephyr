@@ -65,13 +65,11 @@ export default async function processScrapedData(
 
     img.url = filePath.replace('public/', '');
 
-    // add image (append to array)
-    await Cam.updateOne({ _id: cam._id, __v: cam.__v }, { $push: { images: img } });
-
-    // update cam (current state)
+    // add image + update cam
     await Cam.updateOne(
       { _id: cam._id, __v: cam.__v },
       {
+        $push: { images: img },
         $set: {
           lastUpdate: new Date(),
           currentTime: updated,
