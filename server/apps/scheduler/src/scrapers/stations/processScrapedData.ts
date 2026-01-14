@@ -54,15 +54,18 @@ export default async function processScrapedData(
   }
 
   await Station.updateOne(
-    { _id: station._id },
+    { _id: station._id, __v: station.__v },
     {
-      lastUpdate: station.lastUpdate,
-      currentAverage: station.currentAverage,
-      currentGust: station.currentGust,
-      currentBearing: station.currentBearing,
-      currentTemperature: station.currentTemperature,
-      isOffline: station.isOffline,
-      isError: station.isError
+      $set: {
+        lastUpdate: station.lastUpdate,
+        currentAverage: station.currentAverage,
+        currentGust: station.currentGust,
+        currentBearing: station.currentBearing,
+        currentTemperature: station.currentTemperature,
+        isOffline: station.isOffline,
+        isError: station.isError
+      },
+      $inc: { __v: 1 }
     }
   );
 

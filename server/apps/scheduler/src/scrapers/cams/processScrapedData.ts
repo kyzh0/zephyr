@@ -65,18 +65,21 @@ export default async function processScrapedData(
 
     img.url = filePath.replace('public/', '');
 
+    // add image (append to array)
+    await Cam.updateOne({ _id: cam._id, __v: cam.__v }, { $push: { images: img } });
+
     // update cam (current state)
     await Cam.updateOne(
-      { _id: cam._id },
+      { _id: cam._id, __v: cam.__v },
       {
-        lastUpdate: new Date(),
-        currentTime: updated,
-        currentUrl: img.url
+        $set: {
+          lastUpdate: new Date(),
+          currentTime: updated,
+          currentUrl: img.url
+        },
+        $inc: { __v: 1 }
       }
     );
-
-    // add image (append to array)
-    await Cam.updateOne({ _id: cam._id }, { $push: { images: img } });
 
     logger.info(`${cam.type} image updated${cam.externalId ? ` - ${cam.externalId}` : ''}`, {
       service: 'cam',

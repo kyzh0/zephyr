@@ -41,50 +41,55 @@ export type StationAttrs = {
 
 export type StationDoc = HydratedDocument<StationAttrs>;
 
-const stationSchema = new mongoose.Schema<StationAttrs>({
-  name: { type: String, required: true },
-  type: { type: String, required: true },
+const stationSchema = new mongoose.Schema<StationAttrs>(
+  {
+    name: { type: String, required: true },
+    type: { type: String, required: true },
 
-  location: {
-    type: { type: String, required: true, enum: ['Point'] },
-    coordinates: {
-      type: [Number],
-      required: true
-    }
+    location: {
+      type: { type: String, required: true, enum: ['Point'] },
+      coordinates: {
+        type: [Number],
+        required: true
+      }
+    },
+
+    externalLink: { type: String, required: true },
+    externalId: { type: String },
+
+    lastUpdate: { type: Date, default: Date.now, required: true },
+
+    currentAverage: { type: Number },
+    currentGust: { type: Number },
+    currentBearing: { type: Number },
+    currentTemperature: { type: Number },
+
+    elevation: { type: Number },
+    validBearings: { type: String },
+    popupMessage: { type: String },
+
+    isHighResolution: { type: Boolean },
+    isError: { type: Boolean },
+    isOffline: { type: Boolean },
+    isDisabled: { type: Boolean },
+
+    harvestWindAverageId: { type: String },
+    harvestWindGustId: { type: String },
+    harvestWindDirectionId: { type: String },
+    harvestTemperatureId: { type: String },
+    harvestCookie: { type: String },
+
+    gwWindAverageFieldName: { type: String },
+    gwWindGustFieldName: { type: String },
+    gwWindBearingFieldName: { type: String },
+    gwTemperatureFieldName: { type: String },
+
+    weatherlinkCookie: { type: String }
   },
-
-  externalLink: { type: String, required: true },
-  externalId: { type: String },
-
-  lastUpdate: { type: Date, default: Date.now, required: true },
-
-  currentAverage: { type: Number },
-  currentGust: { type: Number },
-  currentBearing: { type: Number },
-  currentTemperature: { type: Number },
-
-  elevation: { type: Number },
-  validBearings: { type: String },
-  popupMessage: { type: String },
-
-  isHighResolution: { type: Boolean },
-  isError: { type: Boolean },
-  isOffline: { type: Boolean },
-  isDisabled: { type: Boolean },
-
-  harvestWindAverageId: { type: String },
-  harvestWindGustId: { type: String },
-  harvestWindDirectionId: { type: String },
-  harvestTemperatureId: { type: String },
-  harvestCookie: { type: String },
-
-  gwWindAverageFieldName: { type: String },
-  gwWindGustFieldName: { type: String },
-  gwWindBearingFieldName: { type: String },
-  gwTemperatureFieldName: { type: String },
-
-  weatherlinkCookie: { type: String }
-});
+  {
+    optimisticConcurrency: true
+  }
+);
 
 stationSchema.virtual('data', {
   ref: 'StationData',

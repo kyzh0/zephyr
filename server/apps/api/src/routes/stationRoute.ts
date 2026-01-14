@@ -338,8 +338,12 @@ router.patch(
         station.set(key, undefined);
       }
 
-      await station.save();
-      res.json(station);
+      try {
+        await station.save();
+        res.json(station);
+      } catch (err) {
+        res.status(500).json(err);
+      }
     } catch {
       res.status(400).send();
     }

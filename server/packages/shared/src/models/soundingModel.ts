@@ -16,27 +16,32 @@ export type SoundingAttrs = {
 
 export type SoundingDoc = HydratedDocument<SoundingAttrs>;
 
-const soundingSchema = new mongoose.Schema<SoundingAttrs>({
-  name: { type: String, required: true },
+const soundingSchema = new mongoose.Schema<SoundingAttrs>(
+  {
+    name: { type: String, required: true },
 
-  location: {
-    type: { type: String, required: true, enum: ['Point'] },
-    coordinates: {
-      type: [Number],
-      required: true
-    }
+    location: {
+      type: { type: String, required: true, enum: ['Point'] },
+      coordinates: {
+        type: [Number],
+        required: true
+      }
+    },
+
+    raspRegion: { type: String, required: true },
+    raspId: { type: String, required: true },
+
+    images: [
+      {
+        time: { type: Date, required: true },
+        url: { type: String, required: true }
+      }
+    ]
   },
-
-  raspRegion: { type: String, required: true },
-  raspId: { type: String, required: true },
-
-  images: [
-    {
-      time: { type: Date, required: true },
-      url: { type: String, required: true }
-    }
-  ]
-});
+  {
+    optimisticConcurrency: true
+  }
+);
 
 export const Sounding: Model<SoundingAttrs> = mongoose.model<SoundingAttrs>(
   'Sounding',

@@ -61,8 +61,7 @@ const camSchema = new mongoose.Schema<CamAttrs>(
     ]
   },
   {
-    // timestamps: false,
-    // optimisticConcurrency: true
+    optimisticConcurrency: true
   }
 );
 
