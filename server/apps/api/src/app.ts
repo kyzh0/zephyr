@@ -9,14 +9,17 @@ import soundingRoute from './routes/soundingRoute';
 import publicRoute from './routes/publicRoute';
 import siteRoute from './routes/siteRoute';
 
-dotenv.config();
+const { NODE_ENV } = process.env;
+if (NODE_ENV !== 'production' && NODE_ENV !== 'staging') {
+  dotenv.config();
+}
 
 const app = express();
 app.use(cors({ origin: [/zephyrapp\.nz$/, /^http(s)?:\/\/localhost:\d{4}.*$/] }));
 app.use(express.json());
 
 // static files are served by caddy in prod
-if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'staging') {
+if (NODE_ENV !== 'production' && NODE_ENV !== 'staging') {
   app.use(express.static('public'));
 }
 

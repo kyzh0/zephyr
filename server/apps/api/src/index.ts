@@ -4,9 +4,11 @@ import dotenv from 'dotenv';
 import app from './app';
 import { logger } from '@zephyr/shared';
 
-dotenv.config({ path: new URL('../../../.env', import.meta.url).pathname });
+const { NODE_ENV, DB_CONNECTION_STRING, NODE_PORT } = process.env;
 
-const { DB_CONNECTION_STRING, NODE_PORT } = process.env;
+if (NODE_ENV !== 'production' && NODE_ENV !== 'staging') {
+  dotenv.config({ path: new URL('../../../.env', import.meta.url).pathname });
+}
 
 if (!DB_CONNECTION_STRING) {
   logger.error('DB_CONNECTION_STRING is not set');

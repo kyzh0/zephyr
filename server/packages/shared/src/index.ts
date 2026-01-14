@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: new URL('../../../.env', import.meta.url).pathname });
+if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'staging') {
+  dotenv.config({ path: new URL('../../../.env', import.meta.url).pathname });
+}
 
 export * from './lib/httpClient';
 export * from './lib/logger';
