@@ -67,19 +67,15 @@ The `server` app requires [MongoDB](https://www.mongodb.com/docs/manual/installa
 
 ### Initialise Environment Variables
 
-Follow the instructions in `.env.example`, `client/.env.example`, and `server/.env.example` to set up your own environment variables.
+Follow the instructions in `client/.env.example`, and `server/.env.example` to set up your own environment variables.
 
 ### Server
 
 ```
 $ cd ./server
-$ npm i
+$ pnpm i
 
-$ npm run start
-$ npm run scheduler
-
-# OR
-# run both with nodemon
+$ npm run build
 $ npm run dev
 ```
 
@@ -91,7 +87,7 @@ $ npm i
 
 $ npm run dev
 
-# build to 'dist' folder
+# build to dist/
 $ npm run build
 ```
 
