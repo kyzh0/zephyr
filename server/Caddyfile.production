@@ -1,5 +1,5 @@
 api.zephyrapp.nz {
-	reverse_proxy server:{$NODE_PORT}
+	reverse_proxy api:{$NODE_PORT}
 }
 
 zephyrapp.nz www.zephyrapp.nz {

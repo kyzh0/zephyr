@@ -1,5 +1,5 @@
 api.test.zephyrapp.nz {
-	reverse_proxy server:{$NODE_PORT}
+	reverse_proxy api:{$NODE_PORT}
 }
 
 test.zephyrapp.nz {
