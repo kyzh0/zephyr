@@ -23,23 +23,14 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @zephyr/shared build
 RUN pnpm --filter @zephyr/scheduler build
 
-# Prune to production deps only (smaller runtime)
-RUN CI=true pnpm prune --prod
+# Create a portable prod bundle that includes workspace deps
+RUN pnpm --filter @zephyr/scheduler --prod deploy /prod/scheduler
 
 
 # ---------- runtime stage ----------
 FROM node:24-alpine AS runtime
 WORKDIR /app
 
-# Copy build output + package.json
-COPY --from=build /app/apps/scheduler/dist ./dist
-COPY --from=build /app/apps/scheduler/package.json ./package.json
+COPY --from=build /prod/scheduler ./
 
-# Copy pruned deps
-COPY --from=build /app/node_modules ./node_modules
-
-# Copy shared workspace package
-COPY --from=build /app/packages/shared/package.json ./node_modules/@zephyr/shared/package.json
-COPY --from=build /app/packages/shared/dist ./node_modules/@zephyr/shared/dist
-
-CMD ["node", "dist/index.js"]
+CMD ["node", "--max-old-space-size=10240", "dist/index.js"]

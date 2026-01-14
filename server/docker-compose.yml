@@ -18,7 +18,6 @@ services:
     build:
       context: .
       dockerfile: apps/scheduler/Dockerfile
-    command: ['node', '--max-old-space-size=10240', 'dist/index.js']
     mem_limit: 12g
     restart: unless-stopped
     env_file:
