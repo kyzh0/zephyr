@@ -16,15 +16,9 @@ COPY tsup.config.base.ts ./tsup.config.base.ts
 COPY packages ./packages
 COPY apps ./apps
 
-# Install workspace deps
-RUN pnpm install --frozen-lockfile
-
 # Build shared + scheduler
 RUN pnpm --filter @zephyr/shared build
 RUN pnpm --filter @zephyr/scheduler build
-
-# Prune to production deps only (smaller runtime)
-RUN pnpm prune --prod
 
 
 # ---------- runtime stage ----------
@@ -35,8 +29,8 @@ WORKDIR /app
 COPY --from=build /app/apps/scheduler/dist ./dist
 COPY --from=build /app/apps/scheduler/package.json ./package.json
 
-# Copy pruned deps
-COPY --from=build /app/node_modules ./node_modules
+# Install prod deps only
+RUN pnpm install --prod --frozen-lockfile
 
 # Copy shared workspace package
 COPY --from=build /app/packages/shared/package.json ./node_modules/@zephyr/shared/package.json
