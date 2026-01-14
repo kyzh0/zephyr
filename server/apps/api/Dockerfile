@@ -16,6 +16,9 @@ COPY tsup.config.base.ts ./tsup.config.base.ts
 COPY packages ./packages
 COPY apps ./apps
 
+# Install workspace deps
+RUN pnpm install
+
 # Build shared + api
 RUN pnpm --filter @zephyr/shared build
 RUN pnpm --filter @zephyr/api build
