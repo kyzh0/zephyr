@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Configure deployment
         id: configure-deployment
         uses: ./.github/actions/configure-deployment
@@ -81,101 +81,153 @@ jobs:
             rm -rf ./dist
           SCRIPT_AFTER_REQUIRED: true
 
-  # build-push-image:
-  #   needs: configure-deployment
-  #   if: needs.configure-deployment.outputs.backend_changed == 'true'
-  #   runs-on: ubuntu-latest
+  build-push-backend:
+    name: Build & push api + scheduler
+    needs: configure-deployment
+    if: needs.configure-deployment.outputs.backend_changed == 'true' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
-  #   outputs:
-  #     date: ${{ steps.date.outputs.date }}
+    outputs:
+      image_tag: ${{ steps.tag.outputs.tag }}
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Get current date
-  #       id: date
-  #       run: echo "::set-output name=date::$(date +%s)"
-  #     - name: Build the Docker image
-  #       run: docker build . --file Dockerfile  --tag ghcr.io/replace-me-org/replace-me-image-name:${{ steps.date.outputs.date }}
-  #     - name: Login to GitHub Container Registry
-  #       uses: docker/login-action@v2
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-  #     - name: Push the Docker image to the GitHub registry
-  #       run: docker push ghcr.io/replace-me-org/replace-me-image-name:${{ steps.date.outputs.date }}
+    steps:
+      - uses: actions/checkout@v6
 
-  # deploy-docker-backend:
-  #   name: "Lint and deploy backend"
-  #   needs: configure-deployment
-  #   if: needs.configure-deployment.outputs.backend_changed == 'true'
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: ${{ needs.configure-deployment.outputs.environment }}
-  #   defaults:
-  #     run:
-  #       working-directory: "server"
+      - name: Compute image tag
+        id: tag
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          BRANCH="${GITHUB_REF_NAME}"
+          echo "tag=${BRANCH}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
 
-  #   steps:
-  #     - uses: actions/checkout@v6
-  #     - uses: actions/setup-node@v6
-  #       with:
-  #         node-version: 24
-  #         cache: "npm"
-  #         cache-dependency-path: server/package-lock.json
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-  #     - name: Lint
-  #       if: github.event_name == 'push'
-  #       uses: appleboy/ssh-action@v1.2.4
-  #       with:
-  #         host: ${{ secrets.REMOTE_HOST }}
-  #         username: ${{ secrets.REMOTE_USER }}
-  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
-  #         script: |
-  #           cd /home/${{ secrets.REMOTE_USER }}/projects/zephyr
-  #           git fetch
-  #           git checkout ${{ github.ref_name }}
-  #           git pull
-  #           cp ${{ env.CADDYFILE_NAME }} Caddyfile
-  #           docker compose down
-  #           docker compose up --build -d
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  #     - name: Create .env file
-  #       run: |
-  #         echo "DB_CONNECTION_STRING=${{ secrets.DB_CONNECTION_STRING }}" >> .env
-  #         echo "SEQ_INGESTION_URL=${{ env.SEQ_INGESTION_URL }}" >> .env
-  #         echo "FILE_SERVER_PREFIX=${{ env.FILE_SERVER_PREFIX }}" >> .env
-  #         echo "ATTENTIS_KEY=${{ secrets.ATTENTIS_KEY }}" >> .env
-  #         echo "WUNDERGROUND_KEY=${{ secrets.WUNDERGROUND_KEY }}" >> .env
-  #         echo "TEMPEST_KEY=${{ secrets.TEMPEST_KEY }}" >> .env
-  #         echo "SOFAROCEAN_KEY=${{ secrets.SOFAROCEAN_KEY }}" >> .env
-  #         echo "HOLFUY_KEY=${{ secrets.HOLFUY_KEY }}" >> .env
-  #         echo "HARVEST_FENZ_KEY=${{ secrets.HARVEST_FENZ_KEY }}" >> .env
-  #         echo "WINDGURU_KEY=${{ secrets.WINDGURU_KEY }}" >> .env
-  #         echo "HARVEST_REALJOURNEYS_USERNAME=${{ secrets.HARVEST_REALJOURNEYS_USERNAME }}" >> .env
-  #         echo "HARVEST_REALJOURNEYS_PASSWORD=${{ secrets.HARVEST_REALJOURNEYS_PASSWORD }}" >> .env
-  #         echo "PREDICTWIND_KEY=${{ secrets.PREDICTWIND_KEY }}" >> .env
-  #         echo "ECOWITT_API_KEY=${{ secrets.ECOWITT_API_KEY }}" >> .env
-  #         echo "ECOWITT_APPLICATION_KEY=${{ secrets.ECOWITT_APPLICATION_KEY }}" >> .env
-  #         echo "WEATHERLINK_USERNAME=${{ secrets.WEATHERLINK_USERNAME }}" >> .env
-  #         echo "WEATHERLINK_PASSWORD=${{ secrets.WEATHERLINK_PASSWORD }}" >> .env
-  #         echo "EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}" >> .env
-  #         echo "EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE1_ID }}" >> .env
-  #         echo "EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}" >> .env
-  #         echo "EMAILJS_PRIVATE_KEY=${{ secrets.EMAILJS_PRIVATE_KEY }}" >> .env
+      - name: Build & push API
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/apps/api/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/zephyr-api:${{ steps.tag.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/zephyr-api:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-  #     - name: Deploy
-  #       if: github.event_name == 'push'
-  #       uses: appleboy/ssh-action@v1.2.4
-  #       with:
-  #         host: ${{ secrets.REMOTE_HOST }}
-  #         username: ${{ secrets.REMOTE_USER }}
-  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
-  #         script: |
-  #           cd /home/${{ secrets.REMOTE_USER }}/projects/zephyr
-  #           git fetch
-  #           git checkout ${{ github.ref_name }}
-  #           git pull
-  #           cp ${{ env.CADDYFILE_NAME }} Caddyfile
-  #           docker compose down
-  #           docker compose up --build -d
+      - name: Build & push Scheduler
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/apps/scheduler/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/zephyr-scheduler:${{ steps.tag.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/zephyr-scheduler:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-backend:
+    name: Deploy backend to VM
+    needs: [configure-deployment, build-push-backend]
+    if: needs.configure-deployment.outputs.backend_changed == 'true' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.configure-deployment.outputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Copy Caddyfile for environment
+        run: |
+          ENV="${{ needs.configure-deployment.outputs.environment }}"
+          cp "server/deploy/Caddyfile.${ENV}" server/deploy/Caddyfile
+
+      - name: Upload deploy bundle
+        uses: easingthemes/ssh-deploy@v5.1.0
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SOURCE: "server/deploy/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: /home/${{ secrets.REMOTE_USER }}/zephyr-deploy/
+          ARGS: "-rlgoDzvc --delete"
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.4
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            cd /home/${{ secrets.REMOTE_USER }}/zephyr-deploy
+
+            # root .env
+            cat > .env <<'EOF'
+            MONGO_USER=${{ secrets.MONGO_USER }}
+            MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
+            MONGO_LOCAL_PORT=${{ vars.MONGO_LOCAL_PORT }}
+            MONGO_DOCKER_PORT=${{ vars.MONGO_DOCKER_PORT }}
+            DB_CONNECTION_STRING=${{ secrets.DB_CONNECTION_STRING }}
+
+            NODE_PORT=${{ vars.NODE_PORT }}
+            NODE_ENV=${{ needs.configure-deployment.outputs.environment }}
+
+            SEQ_LOCAL_PORT=${{ vars.SEQ_LOCAL_PORT }}
+            SEQ_DOCKER_PORT=${{ vars.SEQ_DOCKER_PORT }}
+            SEQ_INGESTION_LOCAL_PORT=${{ vars.SEQ_INGESTION_LOCAL_PORT }}
+            SEQ_INGESTION_DOCKER_PORT=${{ vars.SEQ_INGESTION_DOCKER_PORT }}
+            SEQ_INGESTION_URL=${{ vars.SEQ_INGESTION_URL }}
+            SEQ_INITIAL_PASSWORD=${{ secrets.SEQ_INITIAL_PASSWORD }}
+
+            FILE_SERVER_PREFIX=${{ vars.FILE_SERVER_PREFIX }}
+            EOF
+
+            # scheduler .env
+            mkdir -p apps/scheduler
+            cat > apps/scheduler/.env <<'EOF'
+            ATTENTIS_KEY=${{ secrets.ATTENTIS_KEY }}
+            WUNDERGROUND_KEY=${{ secrets.WUNDERGROUND_KEY }}
+            TEMPEST_KEY=${{ secrets.TEMPEST_KEY }}
+            SOFAROCEAN_KEY=${{ secrets.SOFAROCEAN_KEY }}
+
+            HOLFUY_KEY=${{ secrets.HOLFUY_KEY }}
+            HARVEST_FENZ_KEY=${{ secrets.HARVEST_FENZ_KEY }}
+            WINDGURU_KEY=${{ secrets.WINDGURU_KEY }}
+            HARVEST_REALJOURNEYS_USERNAME=${{ secrets.HARVEST_REALJOURNEYS_USERNAME }}
+            HARVEST_REALJOURNEYS_PASSWORD=${{ secrets.HARVEST_REALJOURNEYS_PASSWORD }}
+
+            PREDICTWIND_KEY=${{ secrets.PREDICTWIND_KEY }}
+            ECOWITT_API_KEY=${{ secrets.ECOWITT_API_KEY }}
+            ECOWITT_APPLICATION_KEY=${{ secrets.ECOWITT_APPLICATION_KEY }}
+            WEATHERLINK_USERNAME=${{ secrets.WEATHERLINK_USERNAME }}
+            WEATHERLINK_PASSWORD=${{ secrets.WEATHERLINK_PASSWORD }}
+
+            EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}
+            EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}
+            EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}
+            EMAILJS_PRIVATE_KEY=${{ secrets.EMAILJS_PRIVATE_KEY }}
+            EOF
+
+            # tags for docker-compose.yml
+            export GHCR_OWNER="${{ github.repository_owner }}"
+            export IMAGE_TAG="${{ needs.build-push-backend.outputs.image_tag }}"
+
+            # Login to GHCR
+            echo "${{ secrets.GHCR_READ_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+
+            docker compose pull api scheduler
+            docker compose up -d --remove-orphans
+            docker image prune -f
