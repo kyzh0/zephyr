@@ -1,0 +1,89 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    mem_limit: 6g
+    restart: unless-stopped
+    env_file:
+      - ./.env
+      - ./apps/api/.env
+    depends_on:
+      - mongodb
+      - seq
+    volumes:
+      # API writes into /app/public so caddy can serve it via shared volume
+      - caddy_fs:/app/public/
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: apps/scheduler/Dockerfile
+    command: ['node', '--max-old-space-size=10240', 'dist/index.js']
+    mem_limit: 12g
+    restart: unless-stopped
+    env_file:
+      - ./.env
+      - ./apps/scheduler/.env
+    depends_on:
+      - mongodb
+      - seq
+    volumes:
+      - caddy_fs:/app/public/
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    ports:
+      - '${MONGO_LOCAL_PORT}:${MONGO_DOCKER_PORT}'
+    ulimits:
+      nproc: 64000
+      nofile: 64000
+    volumes:
+      - mongo:/data/db
+
+  seq:
+    container_name: seq
+    image: datalust/seq:latest
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_INGESTION_URL=${SEQ_INGESTION_URL}
+      - SEQ_FIRSTRUN_ADMINPASSWORD=${SEQ_INITIAL_PASSWORD}
+    ports:
+      - '${SEQ_LOCAL_PORT}:${SEQ_DOCKER_PORT}'
+      - '${SEQ_INGESTION_LOCAL_PORT}:${SEQ_INGESTION_DOCKER_PORT}'
+    volumes:
+      - logs:/data
+
+  caddy:
+    container_name: caddy
+    image: caddy:alpine
+    restart: unless-stopped
+    environment:
+      - NODE_PORT=${NODE_PORT}
+      - SEQ_PORT=${SEQ_DOCKER_PORT}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - $PWD/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_fs:/var/www
+      - caddy_srv:/srv
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+
+volumes:
+  mongo:
+  logs:
+  caddy_fs:
+  caddy_srv:
+  caddy_data:
+  caddy_config:

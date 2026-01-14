@@ -1,59 +1,41 @@
 {
-  "name": "zephyr-server",
-  "version": "0.1.0",
-  "main": "index.js",
+  "name": "zephyr-workspace",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "build": "tsup",
-    "start": "node dist/index.js",
-    "scheduler": "node --max-old-space-size=12288 dist/schedulerIndex.js",
-    "dev": "concurrently -k \"tsup --watch\" \"nodemon --watch dist dist/index.js\" \"nodemon --watch dist dist/schedulerIndex.js\"",
-    "dev:server": "node --inspect --enable-source-maps --watch node_modules/tsx/dist/cli.mjs src/index.ts",
-    "dev:scheduler": "node --inspect --enable-source-maps --watch node_modules/tsx/dist/cli.mjs src/schedulerIndex.ts",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write ./**/*.{js,jsx,ts,tsx,css,md,json} --config ./.prettierrc.json"
-  },
-  "type": "module",
-  "dependencies": {
-    "@datalust/winston-seq": "^2.0.0",
-    "axios": "^1.6.8",
-    "cors": "^2.8.5",
-    "date-fns": "^3.6.0",
-    "date-fns-tz": "^3.1.3",
-    "dotenv": "^16.4.5",
-    "express": "^5.2.1",
-    "geofire-common": "^6.0.0",
-    "md5": "^2.3.0",
-    "mongoose": "^8.3.3",
-    "node-cron": "^3.0.3",
-    "node-dir": "^0.1.17",
-    "p-limit": "^7.1.1",
-    "sharp": "^0.33.3",
-    "tesseract.js": "^6.0.1",
-    "winston": "^3.13.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "dev:api": "pnpm --filter @zephyr/api dev",
+    "dev:scheduler": "pnpm --filter @zephyr/scheduler dev",
+    "build:api": "pnpm --filter @zephyr/api build",
+    "build:scheduler": "pnpm --filter @zephyr/scheduler build",
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "format": "prettier -w .",
+    "clean": "pnpm -r clean"
   },
   "devDependencies": {
-    "@eslint/js": "^9.1.1",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/md5": "^2.3.6",
-    "@types/morgan": "^1.9.10",
-    "@types/node": "^25.0.6",
-    "@types/node-cron": "^3.0.11",
-    "@types/node-dir": "^0.0.37",
-    "@typescript-eslint/eslint-plugin": "^8.52.0",
-    "@typescript-eslint/parser": "^8.52.0",
-    "concurrently": "^9.2.1",
-    "eslint": "^8.57.0",
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^20.0.0",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
-    "globals": "^15.1.0",
-    "nodemon": "^3.1.0",
-    "prettier": "^3.2.5",
+    "globals": "^17.0.0",
+    "prettier": "^3.7.4",
     "tsup": "^8.5.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
-  }
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.53.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "typescript": "5.9.3",
+      "tsup": "8.5.1"
+    },
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "tesseract.js"
+    ]
+  },
+  "packageManager": "pnpm@10.28.0"
 }

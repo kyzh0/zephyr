@@ -1,6 +1,7 @@
 dist/
 node_modules/
-public/*
+public/
 *.log
 .env
 eng.traineddata
+*.sh

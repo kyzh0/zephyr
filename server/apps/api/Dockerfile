@@ -1,0 +1,43 @@
+# ---------- build stage ----------
+FROM node:24-alpine AS build
+WORKDIR /app
+
+# Enable pnpm via corepack (uses "packageManager" from package.json)
+RUN corepack enable
+
+# Copy workspace manifests first for better caching
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# Copy workspace source
+COPY packages ./packages
+COPY apps ./apps
+
+# Install workspace deps
+RUN pnpm install --frozen-lockfile
+
+# Build shared + api
+RUN pnpm --filter @zephyr/shared build
+RUN pnpm --filter @zephyr/api build
+
+# Prune to production deps only (smaller runtime)
+RUN pnpm prune --prod
+
+
+# ---------- runtime stage ----------
+FROM node:24-alpine AS runtime
+WORKDIR /app
+
+# Copy build output + package.json
+COPY --from=build /app/apps/api/dist ./dist
+COPY --from=build /app/apps/api/package.json ./package.json
+
+# Copy pruned deps
+COPY --from=build /app/node_modules ./node_modules
+
+# Copy shared workspace package
+COPY --from=build /app/packages/shared/package.json ./node_modules/@zephyr/shared/package.json
+COPY --from=build /app/packages/shared/dist ./node_modules/@zephyr/shared/dist
+
+EXPOSE 5000
+
+CMD ["node", "dist/index.js"]
