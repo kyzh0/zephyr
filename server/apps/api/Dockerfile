@@ -17,11 +17,14 @@ COPY packages ./packages
 COPY apps ./apps
 
 # Install workspace deps
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
 # Build shared + api
 RUN pnpm --filter @zephyr/shared build
 RUN pnpm --filter @zephyr/api build
+
+# Prune to production deps only (smaller runtime)
+RUN CI=true pnpm prune --prod
 
 
 # ---------- runtime stage ----------
@@ -32,8 +35,8 @@ WORKDIR /app
 COPY --from=build /app/apps/api/dist ./dist
 COPY --from=build /app/apps/api/package.json ./package.json
 
-# Install prod deps only
-RUN pnpm install --prod --frozen-lockfile
+# Copy pruned deps
+COPY --from=build /app/node_modules ./node_modules
 
 # Copy shared workspace package
 COPY --from=build /app/packages/shared/package.json ./node_modules/@zephyr/shared/package.json
