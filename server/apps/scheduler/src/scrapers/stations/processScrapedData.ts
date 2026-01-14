@@ -41,12 +41,12 @@ export default async function processScrapedData(
   await d.save();
 
   // save station flags
-  const isOffline = data.windAverage != null || data.windGust != null;
+  const isOffline = data.windAverage == null && data.windGust == null;
   const isError =
-    data.windAverage != null &&
-    data.windGust != null &&
-    data.windBearing != null &&
-    data.temperature != null;
+    data.windAverage == null ||
+    data.windGust == null ||
+    data.windBearing == null ||
+    data.temperature == null;
 
   await Station.updateOne(
     { _id: station._id, __v: station.__v },
