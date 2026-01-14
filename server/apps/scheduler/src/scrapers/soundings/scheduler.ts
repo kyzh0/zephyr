@@ -9,9 +9,9 @@ export async function startSoundingScheduler(): Promise<void> {
     service: 'sounding'
   });
 
-  // soundings - at 07:30 NZT
+  // soundings - at 08:00 NZT
   cron.schedule(
-    '30 7 * * *',
+    '0 8 * * *',
     async () => {
       logger.info('----- Remove old soundings start -----', { service: 'sounding' });
       await removeOldSoundings();
