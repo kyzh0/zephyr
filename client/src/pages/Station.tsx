@@ -4,11 +4,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 
 import { getMinutesAgo, getStationTypeName } from "@/lib/utils";
-import {
-  useStationData,
-  useIsMobile,
-  type TimeRange,
-} from "@/hooks";
+import { useStationData, useIsMobile, type TimeRange } from "@/hooks";
 import {
   useNearbyWebcams,
   type UseNearbyWebcamsResult,
@@ -259,7 +255,7 @@ export default function Station() {
             href={station.externalLink}
             target="_blank"
             rel="noreferrer"
-            className="text-xs sm:text-sm text-muted-foreground underline"
+            className="text-xs sm:text-sm text-muted-foreground hover:underline"
           >
             Source: {getStationTypeName(station.type)}
           </a>

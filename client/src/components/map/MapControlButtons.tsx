@@ -216,14 +216,14 @@ export function MapControlButtons({
               onClick={onSoundingClick}
               disabled={isHistoricData}
               className={`h-9 w-9 bg-background ${
-                showSoundings ? "*:[svg]:stroke-blue-500" : ""
+                showSoundings ? "fill-blue-500" : ""
               }`}
             >
-              <img
-                src="sounding.svg"
-                alt="Sounding Icon"
-                className="h-4 w-4 opacity-70"
-              />
+              <svg viewBox="0 0 18 18" className="h-4 w-4 opacity-70">
+                <g transform="rotate(-90, 9, 9)">
+                  <path d="m18,2.47l-9,6.53l-4.38,-4.38l-4.62,3.38l0,-2.48l4.83,-3.52l4.38,4.38l8.79,-6.38m0,12l-4.7,0l-4.17,3.34l-6.13,-5.93l-3,2.13l0,2.46l2.8,-2l6.2,6l5,-4l4,0l0,-2z" />
+                </g>
+              </svg>
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>
