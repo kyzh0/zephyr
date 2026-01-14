@@ -19,7 +19,7 @@ try {
   await mongoose.connect(DB_CONNECTION_STRING);
 
   const port = NODE_PORT ? Number(NODE_PORT) : 5000;
-  app.listen(port, () => logger.info(`-Server running on port ${port}`));
+  app.listen(port, () => logger.info(`Server running on port ${port}`));
 } catch (error) {
   logger.error(error);
   process.exit(1);
