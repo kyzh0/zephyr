@@ -64,7 +64,13 @@ export default async function scrapeRaspData(soundings: WithId<SoundingAttrs>[])
               url: filePath.replace('public/', '')
             };
 
-            await Sounding.updateOne({ _id: sounding._id }, { $push: { images: img } });
+            await Sounding.updateOne(
+              { _id: sounding._id, __v: sounding.__v },
+              {
+                $push: { images: img },
+                $inc: { __v: 1 }
+              }
+            );
 
             logger.info(
               `rasp sounding updated - ${sounding.raspRegion} - ${sounding.raspId} - ${hr}`,

@@ -29,42 +29,47 @@ export type SiteAttrs = {
 
 export type SiteDoc = HydratedDocument<SiteAttrs>;
 
-const siteSchema = new mongoose.Schema<SiteAttrs>({
-  name: { type: String, required: true },
+const siteSchema = new mongoose.Schema<SiteAttrs>(
+  {
+    name: { type: String, required: true },
 
-  takeoffLocation: {
-    type: { type: String, required: true, enum: ['Point'] },
-    coordinates: {
-      type: [Number]
-    }
+    takeoffLocation: {
+      type: { type: String, required: true, enum: ['Point'] },
+      coordinates: {
+        type: [Number]
+      }
+    },
+
+    landingLocation: {
+      type: { type: String, required: true, enum: ['Point'] },
+      coordinates: {
+        type: [Number]
+      }
+    },
+
+    rating: {
+      paragliding: { type: String },
+      hangGliding: { type: String }
+    },
+
+    siteGuideUrl: { type: String, required: true },
+    validBearings: { type: String },
+
+    elevation: { type: Number, required: true },
+
+    radio: { type: String },
+    description: { type: String, required: true },
+
+    mandatoryNotices: { type: String },
+    airspaceNotices: { type: String },
+    landingNotices: { type: String },
+
+    isDisabled: { type: Boolean }
   },
-
-  landingLocation: {
-    type: { type: String, required: true, enum: ['Point'] },
-    coordinates: {
-      type: [Number]
-    }
-  },
-
-  rating: {
-    paragliding: { type: String },
-    hangGliding: { type: String }
-  },
-
-  siteGuideUrl: { type: String, required: true },
-  validBearings: { type: String },
-
-  elevation: { type: Number, required: true },
-
-  radio: { type: String },
-  description: { type: String, required: true },
-
-  mandatoryNotices: { type: String },
-  airspaceNotices: { type: String },
-  landingNotices: { type: String },
-
-  isDisabled: { type: Boolean }
-});
+  {
+    optimisticConcurrency: true
+  }
+);
 
 siteSchema.index({ name: 1 });
 

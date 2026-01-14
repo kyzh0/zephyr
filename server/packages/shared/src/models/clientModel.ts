@@ -14,16 +14,21 @@ export type ClientAttrs = {
 
 export type ClientDoc = HydratedDocument<ClientAttrs>;
 
-const clientSchema = new mongoose.Schema<ClientAttrs>({
-  name: { type: String, required: true },
-  apiKey: { type: String, required: true },
-  monthlyLimit: { type: Number, required: true },
-  usage: [
-    {
-      month: { type: String, required: true },
-      apiCalls: { type: Number, required: true }
-    }
-  ]
-});
+const clientSchema = new mongoose.Schema<ClientAttrs>(
+  {
+    name: { type: String, required: true },
+    apiKey: { type: String, required: true },
+    monthlyLimit: { type: Number, required: true },
+    usage: [
+      {
+        month: { type: String, required: true },
+        apiCalls: { type: Number, required: true }
+      }
+    ]
+  },
+  {
+    optimisticConcurrency: true
+  }
+);
 
 export const Client: Model<ClientAttrs> = mongoose.model<ClientAttrs>('Client', clientSchema);

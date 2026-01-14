@@ -244,8 +244,12 @@ router.put(
     site.landingNotices = landingNotices ?? undefined;
     site.isDisabled = isDisabled ?? undefined;
 
-    await site.save();
-    res.json(site);
+    try {
+      await site.save();
+      res.json(site);
+    } catch (err) {
+      res.status(500).json(err);
+    }
   }
 );
 

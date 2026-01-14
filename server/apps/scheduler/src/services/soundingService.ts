@@ -11,7 +11,13 @@ export async function removeOldSoundings(): Promise<void> {
 
     for (const s of soundings) {
       // remove old images (DB)
-      await Sounding.updateOne({ _id: s._id }, { $set: { images: [] } });
+      await Sounding.updateOne(
+        { _id: s._id, __v: s.__v },
+        {
+          $set: { images: [] },
+          $inc: { __v: 1 }
+        }
+      );
 
       // remove + recreate directory
       const directory = `public/soundings/${s.raspRegion}/${s.raspId}`;

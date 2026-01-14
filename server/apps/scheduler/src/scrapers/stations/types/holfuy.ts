@@ -26,27 +26,31 @@ type HolfuyStationResponse = {
 
 export default async function scrapeHolfuyData(stations: WithId<StationAttrs>[]): Promise<void> {
   try {
-    // bulk scrape
-    const { data } = await httpClient.get<HolfuyBulkResponse>(
-      `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
-    );
-
     const individualScrapeStations: WithId<StationAttrs>[] = [];
 
-    for (const station of stations) {
-      const d = data.measurements.find((x) => x.stationId.toString() === station.externalId);
+    if (process.env.HOLFUY_KEY) {
+      // bulk scrape
+      const { data } = await httpClient.get<HolfuyBulkResponse>(
+        `https://api.holfuy.com/live/?pw=${process.env.HOLFUY_KEY}&m=JSON&tu=C&su=km/h&s=all`
+      );
 
-      if (d) {
-        await processScrapedData(
-          station,
-          d.wind?.speed ?? null,
-          d.wind?.gust ?? null,
-          d.wind?.direction ?? null,
-          d.temperature ?? null
-        );
-      } else {
-        individualScrapeStations.push(station);
+      for (const station of stations) {
+        const d = data.measurements.find((x) => x.stationId.toString() === station.externalId);
+
+        if (d) {
+          await processScrapedData(
+            station,
+            d.wind?.speed ?? null,
+            d.wind?.gust ?? null,
+            d.wind?.direction ?? null,
+            d.temperature ?? null
+          );
+        } else {
+          individualScrapeStations.push(station);
+        }
       }
+    } else {
+      individualScrapeStations.push(...stations);
     }
 
     // individual scrape

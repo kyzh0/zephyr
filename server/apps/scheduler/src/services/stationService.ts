@@ -3,7 +3,15 @@ import { formatInTimeZone } from 'date-fns-tz';
 import axios from 'axios';
 import { ObjectId } from 'mongodb';
 
-import { logger, getFlooredTime, Station, StationData, Output } from '@zephyr/shared';
+import {
+  logger,
+  getFlooredTime,
+  Station,
+  StationData,
+  Output,
+  WithId,
+  StationAttrs
+} from '@zephyr/shared';
 
 type StationJsonRow = {
   id: string;
@@ -193,8 +201,8 @@ export async function checkForErrors(): Promise<void> {
       })
     );
 
-    const newOfflineIds: ObjectId[] = [];
-    const newErrorIds: ObjectId[] = [];
+    const newOfflineStations: WithId<StationAttrs>[] = [];
+    const newErrorStations: WithId<StationAttrs>[] = [];
 
     for (const { station, data } of stationDataMap) {
       let isDataError = true;
@@ -230,7 +238,7 @@ export async function checkForErrors(): Promise<void> {
 
       if (isDataError || isWindError) {
         if (!station.isOffline) {
-          newOfflineIds.push(station._id);
+          newOfflineStations.push(station);
           errors.push({
             type: station.type,
             msg: `${errorMsg}Name: ${station.name}\nURL: ${station.externalLink}\nDatabase ID: ${station._id}\n`
@@ -240,14 +248,31 @@ export async function checkForErrors(): Promise<void> {
 
       if (isDataError || isWindError || isBearingError || isTempError) {
         if (!station.isError) {
-          newErrorIds.push(station._id);
+          newErrorStations.push(station);
         }
       }
     }
 
-    // bulk db updates
-    await Station.updateMany({ _id: { $in: newOfflineIds } }, { $set: { isOffline: true } });
-    await Station.updateMany({ _id: { $in: newErrorIds } }, { $set: { isError: true } });
+    // manual occ enforcement
+    for (const s of newOfflineStations) {
+      await Station.updateOne(
+        { _id: s._id, __v: s.__v },
+        {
+          $set: { isOffline: true },
+          $inc: { __v: 1 }
+        }
+      );
+    }
+
+    for (const s of newErrorStations) {
+      await Station.updateOne(
+        { _id: s._id, __v: s.__v },
+        {
+          $set: { isError: true },
+          $inc: { __v: 1 }
+        }
+      );
+    }
 
     if (errors.length) {
       // send email if >2 stations of the same type went offline simultaneously
@@ -339,10 +364,15 @@ export async function updateKeys(): Promise<void> {
     //   if (cookies?.length && cookies[0] && cookies[0].match(regex)) {
     //     const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
     //     if (cookie) {
-    //       await Station.updateMany(
-    //         { _id: { $in: harvestStations.map((s) => s._id) } },
-    //         { $set: { harvestCookie: cookie } }
-    //       );
+    //        for (const s of harvestStations) {
+    //           await Station.updateOne(
+    //            { _id: s._id, __v: s.__v },
+    //            {
+    //              $set: { harvestCookie: cookie },
+    //              $inc: { __v: 1 }
+    //            }
+    //          );
+    //       }
     //       logger.info('Keys updated: harvest', { service: 'keys' });
     //     }
     //   }
@@ -374,10 +404,15 @@ export async function updateKeys(): Promise<void> {
     if (cookies?.length && cookies[0] && cookies[0].match(regex)) {
       const cookie = cookies[0].slice(0, cookies[0].indexOf('; '));
       if (cookie) {
-        await Station.updateMany(
-          { _id: { $in: weatherlinkStations.map((s) => s._id) } },
-          { $set: { weatherlinkCookie: cookie } }
-        );
+        for (const s of weatherlinkStations) {
+          await Station.updateOne(
+            { _id: s._id, __v: s.__v },
+            {
+              $set: { weatherlinkCookie: cookie },
+              $inc: { __v: 1 }
+            }
+          );
+        }
         logger.info('Keys updated: weatherlink', { service: 'keys' });
       }
     }

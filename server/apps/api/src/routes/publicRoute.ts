@@ -87,19 +87,20 @@ async function authenticateApiKey(key: string | undefined): Promise<AuthResult> 
     }
 
     await Client.updateOne(
-      { _id: client._id, 'usage.month': currentMonth },
-      { $inc: { 'usage.$.apiCalls': 1 } }
+      { _id: client._id, __v: client.__v, 'usage.month': currentMonth },
+      { $inc: { 'usage.$.apiCalls': 1, __v: 1 } }
     );
   } else {
     await Client.updateOne(
-      { _id: client._id },
+      { _id: client._id, __v: client.__v },
       {
         $push: {
           usage: {
             month: currentMonth,
             apiCalls: 1
           }
-        }
+        },
+        $inc: { __v: 1 }
       }
     );
   }
