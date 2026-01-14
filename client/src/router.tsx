@@ -5,15 +5,16 @@ import MapWrapper from "./pages/MapWrapper";
 import Station from "./pages/Station";
 import Webcam from "./pages/Webcam";
 import Sounding from "./pages/Sounding";
+import Site from "./pages/Site";
 import GridView from "./pages/GridView";
 import ExportMapData from "./pages/ExportMapData";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAddStation from "./pages/AdminAddStation";
 import AdminAddWebcam from "./pages/AdminAddWebcam";
 import AdminAddSounding from "./pages/AdminAddSounding";
-import AdminEditStationList from "./pages/AdminEditStationList";
+import AdminAddSite from "./pages/AdminAddSite";
 import AdminEditStation from "./pages/AdminEditStation";
-import AdminErrors from "./pages/AdminErrors";
+import AdminEditSite from "./pages/AdminEditSite";
 import ProtectedRoute from "./pages/ProtectedRoute";
 
 export const router = createBrowserRouter([
@@ -44,6 +45,10 @@ export const router = createBrowserRouter([
             element: <Sounding />,
           },
           {
+            path: "sites/:id",
+            element: <Site />,
+          },
+          {
             path: "grid",
             element: <GridView />,
           },
@@ -62,28 +67,44 @@ export const router = createBrowserRouter([
             element: <AdminDashboard />,
           },
           {
-            path: "add-station",
+            path: "stations",
+            element: <AdminDashboard tab="stations" />,
+          },
+          {
+            path: "webcams",
+            element: <AdminDashboard tab="webcams" />,
+          },
+          {
+            path: "soundings",
+            element: <AdminDashboard tab="soundings" />,
+          },
+          {
+            path: "sites",
+            element: <AdminDashboard tab="sites" />,
+          },
+          {
+            path: "stations/add",
             element: <AdminAddStation />,
           },
           {
-            path: "add-webcam",
+            path: "webcams/add",
             element: <AdminAddWebcam />,
           },
           {
-            path: "add-sounding",
+            path: "soundings/add",
             element: <AdminAddSounding />,
           },
           {
-            path: "edit-station-list",
-            element: <AdminEditStationList />,
+            path: "sites/add",
+            element: <AdminAddSite />,
           },
           {
-            path: "edit-station/:id",
+            path: "stations/:id",
             element: <AdminEditStation />,
           },
           {
-            path: "errors",
-            element: <AdminErrors />,
+            path: "sites/:id",
+            element: <AdminEditSite />,
           },
         ],
       },

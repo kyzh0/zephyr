@@ -2,15 +2,12 @@ import { useCallback, useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import { formatInTimeZone } from "date-fns-tz";
 
-import {
-  getCamById,
-  listCams,
-  listCamsUpdatedSince,
-} from "@/services/cam.service";
+import { getCamById, listCamsUpdatedSince } from "@/services/cam.service";
 import type { ICam } from "@/models/cam.model";
 import { getWebcamGeoJson } from "@/components/map";
 import { useNavigate } from "react-router-dom";
 import { REFRESH_INTERVAL_MS } from "@/lib/utils";
+import { useWebcams } from "@/hooks";
 
 interface UseWebcamMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -29,6 +26,8 @@ export function useWebcamMarkers({
   const markersRef = useRef<HTMLDivElement[]>([]);
   const lastRefreshRef = useRef(0);
   const isVisibleRef = useRef(isVisible);
+
+  const { webcams, isLoading: webcamsLoading } = useWebcams();
 
   // Keep visibility ref in sync
   useEffect(() => {
@@ -78,6 +77,7 @@ export function useWebcamMarkers({
       const el = document.createElement("div");
       el.style.backgroundColor = "white";
       el.style.visibility = "hidden";
+      el.style.zIndex = "4";
       el.id = dbId;
       el.className = "webcam py-[18px] px-2 rounded-lg cursor-pointer";
       el.dataset.timestamp = String(timestamp);
@@ -120,9 +120,11 @@ export function useWebcamMarkers({
   }, []);
 
   // Initialize webcams
-  const initialize = useCallback(async () => {
-    const geoJson = getWebcamGeoJson(await listCams());
-    if (!map.current || !geoJson?.features.length) return;
+  const initialize = useCallback(() => {
+    if (!map.current || webcamsLoading || !webcams?.length) return;
+
+    const geoJson = getWebcamGeoJson(webcams);
+    if (!geoJson?.features.length) return;
 
     const timestamp = Date.now();
     lastRefreshRef.current = timestamp;
@@ -145,7 +147,7 @@ export function useWebcamMarkers({
         .setLngLat(f.geometry.coordinates)
         .addTo(map.current);
     }
-  }, [map, createWebcamMarker]);
+  }, [map, createWebcamMarker, webcams, webcamsLoading]);
 
   // Refresh webcams
   const refresh = useCallback(async () => {
@@ -229,10 +231,10 @@ export function useWebcamMarkers({
 
   // Initialize when map is loaded
   useEffect(() => {
-    if (isMapLoaded) {
-      void initialize();
+    if (isMapLoaded && !webcamsLoading && webcams?.length) {
+      initialize();
     }
-  }, [isMapLoaded, initialize]);
+  }, [isMapLoaded, initialize, webcamsLoading, webcams]);
 
   // Update visibility when prop changes
   useEffect(() => {

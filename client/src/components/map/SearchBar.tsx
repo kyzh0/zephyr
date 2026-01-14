@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, X } from "lucide-react";
+import { Search, X, Camera } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { listStations } from "@/services/station.service";
+import { listCams } from "@/services/cam.service";
 import type { IStation } from "@/models/station.model";
+import type { ISite } from "@/models/site.model";
+import type { ICam } from "@/models/cam.model";
+import { useSites } from "@/hooks/useSites";
 import { cn } from "@/lib/utils";
 
 interface SearchBarProps {
@@ -12,28 +16,39 @@ interface SearchBarProps {
   disabled: boolean;
 }
 
+type SearchResult =
+  | { type: "station"; item: IStation }
+  | { type: "site"; item: ISite }
+  | { type: "webcam"; item: ICam };
+
 export function SearchBar({ className, disabled }: SearchBarProps) {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<IStation[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [stations, setStations] = useState<IStation[]>([]);
+  const [webcams, setWebcams] = useState<ICam[]>([]);
+  const { sites } = useSites();
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Load stations on mount
+  // Load stations and webcams on mount
   useEffect(() => {
-    const loadStations = async () => {
-      const data = await listStations(false);
-      if (data) {
-        setStations(data);
+    const loadData = async () => {
+      const stationsData = await listStations(false);
+      if (stationsData) {
+        setStations(stationsData);
+      }
+      const webcamsData = await listCams();
+      if (webcamsData) {
+        setWebcams(webcamsData);
       }
     };
-    void loadStations();
+    void loadData();
   }, []);
 
-  // Filter stations based on query
+  // Filter stations, webcams, and sites based on query
   useEffect(() => {
     if (!query.trim()) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -43,12 +58,32 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
     }
 
     const lowerQuery = query.toLowerCase();
-    const filtered = stations
+
+    // Filter stations
+    const filteredStations: SearchResult[] = stations
       .filter((station) => station.name.toLowerCase().includes(lowerQuery))
-      .slice(0, 5);
-    setResults(filtered);
+      .map((station) => ({ type: "station" as const, item: station }));
+
+    // Filter sites
+    const filteredSites: SearchResult[] = sites
+      .filter(
+        (site) =>
+          !site.isDisabled && site.name.toLowerCase().includes(lowerQuery)
+      )
+      .map((site) => ({ type: "site" as const, item: site }));
+
+    const filteredWebcams: SearchResult[] = webcams
+      .filter((cam) => cam.name.toLowerCase().includes(lowerQuery))
+      .map((cam) => ({ type: "webcam" as const, item: cam }));
+
+    // Combine and limit results
+    const combined = [...filteredStations, ...filteredSites, ...filteredWebcams]
+      .sort((a, b) => a.item.name.localeCompare(b.item.name))
+      .slice(0, 8);
+
+    setResults(combined);
     setSelectedIndex(-1);
-  }, [query, stations]);
+  }, [query, stations, sites, webcams]);
 
   // Focus input when expanded
   useEffect(() => {
@@ -93,12 +128,18 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
   }, []);
 
   const handleResultClick = useCallback(
-    (stationId: string) => {
+    (result: SearchResult) => {
       setIsExpanded(false);
       setQuery("");
       setResults([]);
       setSelectedIndex(-1);
-      navigate(`/stations/${stationId}`);
+      if (result.type === "station") {
+        navigate(`/stations/${result.item._id}`);
+      } else if (result.type === "site") {
+        navigate(`/sites/${result.item._id}`);
+      } else {
+        navigate(`/webcams/${result.item._id}`);
+      }
     },
     [navigate]
   );
@@ -121,7 +162,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
       } else if (e.key === "Enter" && results.length > 0) {
         e.preventDefault();
         const index = selectedIndex >= 0 ? selectedIndex : 0;
-        handleResultClick(results[index]._id);
+        handleResultClick(results[index]);
       }
     },
     [results, selectedIndex, handleResultClick]
@@ -151,7 +192,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
             <Input
               ref={inputRef}
               type="text"
-              placeholder="Search stations..."
+              placeholder="Search stations, sites & webcams..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -174,16 +215,31 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
       {/* Search Results Dropdown */}
       {isExpanded && results.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg overflow-hidden z-50">
-          {results.map((station, index) => (
+          {results.map((result, index) => (
             <button
-              key={station._id}
-              onClick={() => handleResultClick(station._id)}
+              key={`${result.type}-${result.item._id}`}
+              onClick={() => handleResultClick(result)}
               className={cn(
                 "w-full px-3 py-2 text-left text-sm transition-colors truncate",
                 index === selectedIndex ? "bg-accent" : "hover:bg-accent/50"
               )}
             >
-              {station.name}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center w-6 h-6 shrink-0">
+                  {result.type === "station" ? (
+                    <img
+                      src="/gold-valid-arrow-light-green.png"
+                      alt="Station"
+                      className="w-4 h-6 -rotate-45"
+                    />
+                  ) : result.type === "site" ? (
+                    <img src="/site.svg" alt="Site" className="w-6 h-6" />
+                  ) : (
+                    <Camera className="w-5 h-5" />
+                  )}
+                </div>
+                <span className="truncate">{result.item.name}</span>
+              </div>
             </button>
           ))}
         </div>
@@ -193,7 +249,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
       {isExpanded && query.trim() && results.length === 0 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg overflow-hidden z-50">
           <div className="px-3 py-2 text-sm text-muted-foreground">
-            No stations found
+            No results found
           </div>
         </div>
       )}

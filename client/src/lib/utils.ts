@@ -7,6 +7,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Common error handling utility
+export const handleError = (err: unknown, defaultMessage: string): Error => {
+  return err instanceof Error ? err : new Error(defaultMessage);
+};
+
 export const getWindDirectionFromBearing = (bearing: number) => {
   if (bearing < 0) {
     return "";
@@ -218,6 +223,10 @@ export const getMinutesAgo = (date: Date): string => {
     return "just now";
   } else if (minutes === 1) {
     return "1 minute ago";
+  } else if (minutes > 60 * 24) {
+    return `Over ${Math.floor(minutes / (60 * 24))} days ago`;
+  } else if (minutes > 60) {
+    return `Over ${Math.floor(minutes / 60)} hours ago`;
   } else {
     return `${minutes} minutes ago`;
   }

@@ -66,17 +66,6 @@ export async function listStationsWithinRadius(
   }
 }
 
-export async function listStationsWithErrors() {
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_PREFIX}/stations?err=${true}`
-    );
-    return (await res.json()) as IStation[];
-  } catch (error) {
-    console.error(error);
-  }
-}
-
 export async function loadStationData(id: string, isHighResolution: boolean) {
   try {
     let url = `${import.meta.env.VITE_API_PREFIX}/stations/${id}/data`;

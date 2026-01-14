@@ -30,6 +30,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getRecentStations,
   RECENT_STATIONS_UPDATED_EVENT,
@@ -38,7 +39,9 @@ import {
 
 interface MapControlButtonsProps {
   onWebcamClick: () => void;
+  showWebcams: boolean;
   onSoundingClick: () => void;
+  showSoundings: boolean;
   onLayerToggle: () => void;
   onLocateClick: () => void;
   unit: WindUnit;
@@ -52,11 +55,15 @@ interface MapControlButtonsProps {
   onElevationChange: (value: number) => void;
   minimizeRecents: boolean;
   onRecentsToggle: () => void;
+  showSites: boolean;
+  onToggleSites: () => void;
 }
 
 export function MapControlButtons({
   onWebcamClick,
+  showWebcams,
   onSoundingClick,
+  showSoundings,
   onLayerToggle,
   onLocateClick,
   unit,
@@ -70,6 +77,7 @@ export function MapControlButtons({
   onElevationChange,
   minimizeRecents,
   onRecentsToggle,
+  onToggleSites,
 }: MapControlButtonsProps) {
   const navigate = useNavigate();
   const [helpOpen, setHelpOpen] = useState(
@@ -80,6 +88,12 @@ export function MapControlButtons({
   const [contactOpen, setContactOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [recentStations, setRecentStations] = useState<RecentStation[]>([]);
+  const [activeTab, setActiveTab] = useState<"stations" | "sites">("stations");
+
+  const onChangeTab = (value: "stations" | "sites") => {
+    setActiveTab(value);
+    onToggleSites();
+  };
 
   // Load recent stations on mount and when localStorage changes
   useEffect(() => {
@@ -183,12 +197,16 @@ export function MapControlButtons({
               size="sm"
               onClick={onWebcamClick}
               disabled={isHistoricData}
-              className="h-9 w-9 bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+              className={`h-9 w-9 bg-background ${
+                showWebcams ? "*:[svg]:stroke-blue-500" : ""
+              }`}
             >
               <Camera className="h-4 w-4 opacity-70" />
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent>Show Webcams on Map</TooltipContent>
+          <TooltipContent>
+            {showWebcams ? "Hide" : "Show"} Webcams on Map
+          </TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -197,7 +215,9 @@ export function MapControlButtons({
               size="sm"
               onClick={onSoundingClick}
               disabled={isHistoricData}
-              className="h-9 w-9 bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+              className={`h-9 w-9 bg-background ${
+                showSoundings ? "*:[svg]:stroke-blue-500" : ""
+              }`}
             >
               <img
                 src="sounding.svg"
@@ -206,12 +226,28 @@ export function MapControlButtons({
               />
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent>Show Soundings on Map</TooltipContent>
+          <TooltipContent>
+            {showSoundings ? "Hide" : "Show"} Soundings on Map
+          </TooltipContent>
         </Tooltip>
         <HistorySlider
           historyOffset={historyOffset}
           onHistoryChange={onHistoryChange}
         />
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => onChangeTab(value as "stations" | "sites")}
+          className="h-9"
+        >
+          <TabsList className="h-9">
+            <TabsTrigger value="stations" className="h-8">
+              Stations
+            </TabsTrigger>
+            <TabsTrigger value="sites" className="h-8">
+              Sites
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Top right - vertical column */}
@@ -227,7 +263,9 @@ export function MapControlButtons({
               {unit === "kt" ? "kt" : "km/h"}
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent side="left">Toggle Units</TooltipContent>
+          <TooltipContent side="left">
+            Change unit to {unit === "kt" ? "km/h" : "kt"}
+          </TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -283,7 +321,9 @@ export function MapControlButtons({
                   <History className="h-4 w-4 opacity-70" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Show Recent Stations</TooltipContent>
+              <TooltipContent>
+                {minimizeRecents ? "Show" : "Hide"} Recent Stations
+              </TooltipContent>
             </Tooltip>
           ) : (
             <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-[200px]">
@@ -324,3 +364,4 @@ export function MapControlButtons({
     </>
   );
 }
+export default MapControlButtons;
