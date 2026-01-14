@@ -14,17 +14,8 @@
     "resolveJsonModule": true,
 
     "noEmit": true,
-    "types": ["node"],
-
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    },
-
-    /* Migration mode (so TS can compile JS while converting) */
-    "allowJs": true,
-    "checkJs": false
+    "types": ["node"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["apps/**/*", "packages/**/*"],
+  "exclude": ["node_modules", "**/dist", "**/build"]
 }

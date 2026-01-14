@@ -1,0 +1,29 @@
+{
+  "name": "@zephyr/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@datalust/winston-seq": "^3.0.1",
+    "axios": "^1.13.2",
+    "dotenv": "^17.2.3",
+    "mongoose": "^9.1.3",
+    "winston": "^3.19.0"
+  },
+  "packageManager": "pnpm@10.28.0"
+}

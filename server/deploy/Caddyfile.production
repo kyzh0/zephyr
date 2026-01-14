@@ -1,0 +1,19 @@
+api.zephyrapp.nz {
+	reverse_proxy api:{$NODE_PORT}
+}
+
+zephyrapp.nz www.zephyrapp.nz {
+	root * /srv
+	encode gzip
+	try_files {path} /index.html
+	file_server
+}
+
+fs.zephyrapp.nz {
+	root * /var/www
+	file_server
+}
+
+logs.zephyrapp.nz {
+	reverse_proxy seq:{$SEQ_PORT}
+}
