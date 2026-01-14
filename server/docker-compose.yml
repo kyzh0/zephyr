@@ -1,3 +1,4 @@
+name: zephyr
 services:
   api:
     build:
@@ -30,7 +31,6 @@ services:
       - caddy_fs:/app/public/
 
   mongodb:
-    container_name: mongodb
     image: mongo:latest
     restart: unless-stopped
     env_file: ./.env
@@ -46,7 +46,6 @@ services:
       - mongo:/data/db
 
   seq:
-    container_name: seq
     image: datalust/seq:latest
     restart: unless-stopped
     environment:
@@ -60,7 +59,6 @@ services:
       - logs:/data
 
   caddy:
-    container_name: caddy
     image: caddy:alpine
     restart: unless-stopped
     environment:
