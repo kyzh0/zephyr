@@ -8,6 +8,10 @@ RUN corepack enable
 # Copy workspace manifests first for better caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
+# root configs needed by tsup/tsconfig extends
+COPY tsconfig.json ./
+COPY tsup.config.base.ts ./tsup.config.base.ts
+
 # Copy workspace source
 COPY packages ./packages
 COPY apps ./apps
