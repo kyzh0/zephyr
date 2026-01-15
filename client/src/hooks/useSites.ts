@@ -126,8 +126,8 @@ export function useNearbySites({
         const distance = getDistance(
           latitude,
           longitude,
-          site.takeoffLocation.coordinates[0], // lat
-          site.takeoffLocation.coordinates[1] // lng
+          site.location.coordinates[0], // lat
+          site.location.coordinates[1] // lng
         );
         return {
           ...site,

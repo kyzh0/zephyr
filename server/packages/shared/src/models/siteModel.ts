@@ -8,8 +8,7 @@ export type SiteRating = {
 
 export type SiteAttrs = {
   name: string;
-  takeoffLocation?: GeoPoint;
-  landingLocation?: GeoPoint;
+  location: GeoPoint;
 
   rating?: SiteRating;
 
@@ -33,18 +32,12 @@ const siteSchema = new mongoose.Schema<SiteAttrs>(
   {
     name: { type: String, required: true },
 
-    takeoffLocation: {
+    location: {
       type: { type: String, required: true, enum: ['Point'] },
       coordinates: {
         type: [Number]
-      }
-    },
-
-    landingLocation: {
-      type: { type: String, required: true, enum: ['Point'] },
-      coordinates: {
-        type: [Number]
-      }
+      },
+      required: true
     },
 
     rating: {

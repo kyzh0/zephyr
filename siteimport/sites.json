@@ -1,7 +1,7 @@
 [
   {
     "name": "Duders Peninsula",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -20,7 +20,7 @@
   },
   {
     "name": "Fort Takapuna",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -39,7 +39,7 @@
   },
   {
     "name": "Glover Park",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -58,7 +58,7 @@
   },
   {
     "name": "Karekare",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -77,7 +77,7 @@
   },
   {
     "name": "Karioitahi - High Side",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -96,7 +96,7 @@
   },
   {
     "name": "Karioitahi - Club Sites",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -115,7 +115,7 @@
   },
   {
     "name": "Karioitahi - Hamilton's Gap",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -134,7 +134,7 @@
   },
   {
     "name": "Karioitahi - Maioro Club Site (Low Side)",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -153,7 +153,7 @@
   },
   {
     "name": "Kennedy Park",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -172,7 +172,7 @@
   },
   {
     "name": "Mangawhai Heads",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -191,7 +191,7 @@
   },
   {
     "name": "Muriwai - Maukatia (Maori Bay)",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -210,7 +210,7 @@
   },
   {
     "name": "Muriwai - NW Face",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -229,7 +229,7 @@
   },
   {
     "name": "Muriwai - Rimmer Road",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -248,7 +248,7 @@
   },
   {
     "name": "Muriwai - Southern Private Ramp",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -267,7 +267,7 @@
   },
   {
     "name": "Musick Point",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -286,7 +286,7 @@
   },
   {
     "name": "North Head / Maungauika",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -305,7 +305,7 @@
   },
   {
     "name": "Pakiri",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -324,7 +324,7 @@
   },
   {
     "name": "Piha - North",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -343,7 +343,7 @@
   },
   {
     "name": "Piha - South",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -362,7 +362,7 @@
   },
   {
     "name": "Port Waikato",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -381,7 +381,7 @@
   },
   {
     "name": "Puketutu",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -400,7 +400,7 @@
   },
   {
     "name": "Takapuna Grammar",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -419,7 +419,7 @@
   },
   {
     "name": "Tawharanui",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -438,7 +438,7 @@
   },
   {
     "name": "Te Arai Point",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -457,7 +457,7 @@
   },
   {
     "name": "Te Maire (Ripiro Beach)",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -476,7 +476,7 @@
   },
   {
     "name": "Whangaparaoa - Army Bay",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -495,7 +495,7 @@
   },
   {
     "name": "Whangaparaoa - Matakatia Bay",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -514,7 +514,7 @@
   },
   {
     "name": "Whangaparaoa - Lookout Ridge",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -533,7 +533,7 @@
   },
   {
     "name": "Whangaparaoa - Te Haruhi Bay",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -552,7 +552,7 @@
   },
   {
     "name": "Whangaparaoa - Tiri Channel",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -571,7 +571,7 @@
   },
   {
     "name": "Bridge's Hill",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -590,7 +590,7 @@
   },
   {
     "name": "Dill's Hill",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -609,7 +609,7 @@
   },
   {
     "name": "Five Fingers",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -628,7 +628,7 @@
   },
   {
     "name": "Gubb's Farm",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -647,7 +647,7 @@
   },
   {
     "name": "Kaimai Range",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -666,7 +666,7 @@
   },
   {
     "name": "Moirs Hill",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -685,7 +685,7 @@
   },
   {
     "name": "Mt William",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -704,7 +704,7 @@
   },
   {
     "name": "Paeroas",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -723,13 +723,9 @@
   },
   {
     "name": "Barnicoat",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [173.253573910888, -41.34322010035545]
-    },
-    "landingLocation": {
-      "type": "Point",
-      "coordinates": [173.23277167601702, -41.32250898279254]
     },
     "rating": {
       "paragliding": "PG1/PG2",
@@ -746,13 +742,9 @@
   },
   {
     "name": "Inwoods",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.93679990710527, -41.57215185043673]
-    },
-    "landingLocation": {
-      "type": "Point",
-      "coordinates": [172.90156798955636, -41.59418008776619]
     },
     "rating": {
       "paragliding": "PG2",
@@ -769,13 +761,9 @@
   },
   {
     "name": "Mount Murchison",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.499378, -41.729703]
-    },
-    "landingLocation": {
-      "type": "Point",
-      "coordinates": [172.46365, -41.699897]
     },
     "rating": {
       "paragliding": "PG2",
@@ -792,7 +780,7 @@
   },
   {
     "name": "Riwaka",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.8794932870903, -41.026335694406676]
     },
@@ -811,13 +799,9 @@
   },
   {
     "name": "Takaka",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.860851396251, -41.02556827626293]
-    },
-    "landingLocation": {
-      "type": "Point",
-      "coordinates": [172.83453749735565, -41.0383538543176]
     },
     "rating": {
       "paragliding": "PG2",
@@ -834,7 +818,7 @@
   },
   {
     "name": "Sherry River",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.67397796490204, -41.425954557759574]
     },
@@ -853,7 +837,7 @@
   },
   {
     "name": "Allandale",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.625, -43.643]
     },
@@ -872,7 +856,7 @@
   },
   {
     "name": "Barnett Park",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.729, -43.588]
     },
@@ -891,7 +875,7 @@
   },
   {
     "name": "Castle Rock",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.698, -43.589]
     },
@@ -910,7 +894,7 @@
   },
   {
     "name": "Mt Cheeseman Ski Field",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [171.671, -43.156]
     },
@@ -929,7 +913,7 @@
   },
   {
     "name": "Gondola",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.716, -43.589]
     },
@@ -948,7 +932,7 @@
   },
   {
     "name": "John Britten Reserve",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.725, -43.583]
     },
@@ -967,7 +951,7 @@
   },
   {
     "name": "Little River",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.801, -43.815]
     },
@@ -986,7 +970,7 @@
   },
   {
     "name": "Scarborough Cliffs",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.775, -43.578]
     },
@@ -1005,7 +989,7 @@
   },
   {
     "name": "Taylor's Mistake",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.766, -43.585]
     },
@@ -1024,7 +1008,7 @@
   },
   {
     "name": "Towers",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.727, -43.588]
     },
@@ -1043,7 +1027,7 @@
   },
   {
     "name": "Bridge Hill",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [171.717, -43.156]
     },
@@ -1062,7 +1046,7 @@
   },
   {
     "name": "Helicopter Hill",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [171.729, -43.14]
     },
@@ -1081,7 +1065,7 @@
   },
   {
     "name": "Magic Mountain",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [169.745, -44.454]
     },
@@ -1100,7 +1084,7 @@
   },
   {
     "name": "Round Top",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [171.707, -43.491]
     },
@@ -1119,7 +1103,7 @@
   },
   {
     "name": "Upper Cass",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [172.726, -43.588]
     },
@@ -1138,7 +1122,7 @@
   },
   {
     "name": "Skyline Gondola",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -1157,7 +1141,7 @@
   },
   {
     "name": "Coronet Peak",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -1176,7 +1160,7 @@
   },
   {
     "name": "Crown Terrace",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },
@@ -1195,7 +1179,7 @@
   },
   {
     "name": "Treble Cone",
-    "takeoffLocation": {
+    "location": {
       "type": "Point",
       "coordinates": [174.7762, -41.2865]
     },

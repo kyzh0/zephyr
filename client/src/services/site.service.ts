@@ -9,9 +9,11 @@ export const getSiteById = async (id: string) => {
   }
 };
 
-export const listSites = async () => {
+export const listSites = async (includeDisabled?: boolean) => {
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/sites`);
+    let url = `${import.meta.env.VITE_API_PREFIX}/sites`;
+    if (includeDisabled) url += "?includeDisabled=true";
+    const res = await fetch(url);
     return (await res.json()) as ISite[];
   } catch (error) {
     console.error(error);

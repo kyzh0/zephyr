@@ -40,24 +40,6 @@ const coordinatesSchema = z.string().refine(
   { message: "Enter valid coordinates: latitude, longitude" }
 );
 
-const optionalCoordinatesSchema = z.string().refine(
-  (val) => {
-    if (!val.trim()) return true;
-    const parts = val.replace(/\s/g, "").split(",");
-    if (parts.length !== 2) return false;
-    const [lat, lon] = parts.map(Number);
-    return (
-      !isNaN(lat) &&
-      !isNaN(lon) &&
-      lat >= -90 &&
-      lat <= 90 &&
-      lon >= -180 &&
-      lon <= 180
-    );
-  },
-  { message: "Enter valid coordinates: latitude, longitude" }
-);
-
 const bearingsSchema = z.string().refine(
   (val) => {
     if (!val.trim()) return true;
@@ -74,8 +56,7 @@ const bearingsSchema = z.string().refine(
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  takeoffCoordinates: coordinatesSchema,
-  landingCoordinates: optionalCoordinatesSchema,
+  coordinates: coordinatesSchema,
   paraglidingRating: z.string().min(1, "Required"),
   hangGlidingRating: z.string().min(1, "Required"),
   siteGuideURL: z.url("Enter a valid URL"),
@@ -109,8 +90,7 @@ export default function AdminAddSite() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      takeoffCoordinates: "",
-      landingCoordinates: "",
+      coordinates: "",
       paraglidingRating: "",
       hangGlidingRating: "",
       siteGuideURL: "",
@@ -128,12 +108,12 @@ export default function AdminAddSite() {
   const isSubmitting = form.formState.isSubmitting;
 
   async function onSubmit(values: FormValues) {
-    const takeoff = parseCoordinates(values.takeoffCoordinates);
-    if (!takeoff) return;
+    const location = parseCoordinates(values.coordinates);
+    if (!location) return;
 
     const site: Partial<ISite> = {
       name: values.name,
-      takeoffLocation: takeoff,
+      location: location,
       rating: {
         paragliding: values.paraglidingRating,
         hangGliding: values.hangGlidingRating,
@@ -147,13 +127,6 @@ export default function AdminAddSite() {
       landingNotices: values.landingNotices,
       isDisabled: values.isDisabled,
     };
-
-    const landing = parseCoordinates(values.landingCoordinates);
-    if (landing) {
-      site.landingLocation = landing;
-    } else {
-      site.landingLocation = takeoff;
-    }
 
     if (values.validBearings) {
       site.validBearings = values.validBearings;
@@ -263,33 +236,17 @@ export default function AdminAddSite() {
 
               <FormField
                 control={form.control}
-                name="takeoffCoordinates"
+                name="coordinates"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Takeoff Coordinates (lat, lon)</FormLabel>
+                    <FormLabel>Coordinates (lat, lon)</FormLabel>
                     <FormDescription>
-                      Click on the map to set the takeoff location
+                      Click on the map to set the location
                     </FormDescription>
                     <CoordinatesPicker
                       value={field.value}
                       onChange={field.onChange}
                     />
-                    <FormControl>
-                      <Input {...field} placeholder="-41.2865, 174.7762" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="landingCoordinates"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Landing Coordinates (lat, lon) - Optional
-                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="-41.2865, 174.7762" />
                     </FormControl>

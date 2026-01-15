@@ -12,8 +12,7 @@ type IdParams = { id: string };
 
 type SiteBody = {
   name?: string;
-  takeoffLocation?: GeoPoint;
-  landingLocation?: GeoPoint;
+  location?: GeoPoint;
   rating?: SiteRating;
   siteGuideUrl?: string;
   validBearings?: string;
@@ -73,8 +72,7 @@ router.post(
 
     const {
       name,
-      takeoffLocation,
-      landingLocation,
+      location,
       rating,
       siteGuideUrl,
       validBearings,
@@ -92,13 +90,8 @@ router.post(
       return;
     }
 
-    if (takeoffLocation && !isValidLonLat(takeoffLocation.coordinates)) {
-      res.status(400).json({ error: 'Takeoff location is not valid' });
-      return;
-    }
-
-    if (landingLocation && !isValidLonLat(landingLocation.coordinates)) {
-      res.status(400).json({ error: 'Landing location is not valid' });
+    if (location && !isValidLonLat(location.coordinates)) {
+      res.status(400).json({ error: 'Location is not valid' });
       return;
     }
 
@@ -119,8 +112,7 @@ router.post(
 
     const site: SiteDoc = new Site({
       name,
-      takeoffLocation,
-      landingLocation,
+      location,
       siteGuideUrl,
       validBearings,
       elevation,
@@ -186,8 +178,7 @@ router.put(
 
     const {
       name,
-      takeoffLocation,
-      landingLocation,
+      location,
       rating,
       siteGuideUrl,
       validBearings,
@@ -205,13 +196,8 @@ router.put(
       return;
     }
 
-    if (takeoffLocation && !isValidLonLat(takeoffLocation.coordinates)) {
-      res.status(400).json({ error: 'Takeoff location is not valid' });
-      return;
-    }
-
-    if (landingLocation && !isValidLonLat(landingLocation.coordinates)) {
-      res.status(400).json({ error: 'Landing location is not valid' });
+    if (!location || !isValidLonLat(location.coordinates)) {
+      res.status(400).json({ error: 'Location is not valid' });
       return;
     }
 
@@ -231,8 +217,7 @@ router.put(
     }
 
     site.name = name;
-    site.takeoffLocation = takeoffLocation;
-    site.landingLocation = landingLocation;
+    site.location = location;
     site.rating = rating ?? undefined;
     site.siteGuideUrl = siteGuideUrl;
     site.validBearings = validBearings ?? undefined;

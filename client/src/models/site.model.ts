@@ -3,8 +3,7 @@ import type { ILocation } from "./location.model";
 export interface ISite {
   _id: string;
   name: string;
-  takeoffLocation: ILocation;
-  landingLocation: ILocation;
+  location: ILocation;
   rating: {
     paragliding: string;
     hangGliding: string;

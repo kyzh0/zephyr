@@ -68,8 +68,7 @@ const bearingsSchema = z.string().refine(
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  takeoffCoordinates: coordinatesSchema,
-  landingCoordinates: coordinatesSchema,
+  coordinates: coordinatesSchema,
   paraglidingRating: z.string().min(1, "Required"),
   hangGlidingRating: z.string().min(1, "Required"),
   siteGuideURL: z.url("Enter a valid URL"),
@@ -115,8 +114,7 @@ export default function AdminEditSite() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      takeoffCoordinates: "",
-      landingCoordinates: "",
+      coordinates: "",
       paraglidingRating: "",
       hangGlidingRating: "",
       siteGuideURL: "",
@@ -145,8 +143,7 @@ export default function AdminEditSite() {
         setSite(data);
         form.reset({
           name: data.name ?? "",
-          takeoffCoordinates: formatCoordinates(data.takeoffLocation),
-          landingCoordinates: formatCoordinates(data.landingLocation),
+          coordinates: formatCoordinates(data.location),
           paraglidingRating: data.rating?.paragliding ?? "",
           hangGlidingRating: data.rating?.hangGliding ?? "",
           siteGuideURL: data.siteGuideUrl ?? "",
@@ -201,16 +198,9 @@ export default function AdminEditSite() {
       isDisabled: values.isDisabled,
     };
 
-    const takeoff = parseCoordinates(values.takeoffCoordinates);
-    if (takeoff) {
-      updates.takeoffLocation = takeoff;
-    }
-
-    const landing = parseCoordinates(values.landingCoordinates);
-    if (landing) {
-      updates.landingLocation = landing;
-    } else {
-      updates.landingLocation = updates.takeoffLocation;
+    const location = parseCoordinates(values.coordinates);
+    if (location) {
+      updates.location = location;
     }
 
     if (values.validBearings) {
@@ -359,31 +349,17 @@ export default function AdminEditSite() {
 
                 <FormField
                   control={form.control}
-                  name="takeoffCoordinates"
+                  name="coordinates"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Takeoff Coordinates (lat, lon)</FormLabel>
+                      <FormLabel>Coordinates (lat, lon)</FormLabel>
                       <FormDescription>
-                        Click on the map to set the takeoff location
+                        Click on the map to set the location
                       </FormDescription>
                       <CoordinatesPicker
                         value={field.value}
                         onChange={field.onChange}
                       />
-                      <FormControl>
-                        <Input {...field} placeholder="-41.2865, 174.7762" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="landingCoordinates"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Landing Coordinates (lat, lon)</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="-41.2865, 174.7762" />
                       </FormControl>

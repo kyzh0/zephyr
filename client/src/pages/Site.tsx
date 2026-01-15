@@ -80,13 +80,13 @@ export default function Site() {
   }, [id]);
 
   const { webcams }: UseNearbyWebcamsResult = useNearbyWebcams({
-    latitude: site?.takeoffLocation.coordinates[0] ?? 0,
-    longitude: site?.takeoffLocation.coordinates[1] ?? 0,
+    latitude: site?.location.coordinates[0] ?? 0,
+    longitude: site?.location.coordinates[1] ?? 0,
   });
 
   const { stations }: UseNearbyStationsResult = useNearbyStations({
-    lat: site?.takeoffLocation.coordinates[0] ?? 0,
-    lon: site?.takeoffLocation.coordinates[1] ?? 0,
+    lat: site?.location.coordinates[0] ?? 0,
+    lon: site?.location.coordinates[1] ?? 0,
   });
 
   // Navigate back if site not found
@@ -105,8 +105,8 @@ export default function Site() {
         {site?.name}
       </span>
       <span className="font-thin text-[10px] sm:text-xs mb-1">
-        [ {site?.takeoffLocation.coordinates[1].toFixed(3)},
-        {site?.takeoffLocation.coordinates[0].toFixed(3)} ] {site?.elevation}m
+        [ {site?.location.coordinates[1].toFixed(3)},
+        {site?.location.coordinates[0].toFixed(3)} ] {site?.elevation}m
       </span>
     </div>
   );

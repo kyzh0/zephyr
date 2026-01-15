@@ -38,7 +38,7 @@ export function useSiteMarkers({
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
-        offset: [0, 0],
+        offset: [0, -15],
       }).setHTML(`<p align="center"><strong>${name}</strong></p>`);
 
       const el = document.createElement("div");

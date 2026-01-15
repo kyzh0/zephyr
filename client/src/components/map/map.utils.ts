@@ -189,7 +189,7 @@ export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
         name: site.name,
         dbId: site._id,
       },
-      geometry: site.takeoffLocation as {
+      geometry: site.location as {
         type: string;
         coordinates: [number, number];
       },

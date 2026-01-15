@@ -21,10 +21,12 @@ import {
 } from "@/components/ui/table";
 import { listStations } from "@/services/station.service";
 import { listSoundings } from "@/services/sounding.service";
+import { listSites } from "@/services/site.service";
 import type { IStation } from "@/models/station.model";
 import type { ISounding } from "@/models/sounding.model";
 import { getMinutesAgo } from "@/lib/utils";
-import { useSites, useWebcams } from "@/hooks";
+import { useWebcams } from "@/hooks";
+import type { ISite } from "@/models/site.model";
 
 interface AdminDashboardProps {
   tab?: "stations" | "webcams" | "soundings" | "sites";
@@ -53,7 +55,7 @@ export default function AdminDashboard({
   const [soundingSearch, setSoundingSearch] = useState("");
 
   // Sites state
-  const { sites, isLoading: sitesLoading } = useSites();
+  const [sites, setSites] = useState<ISite[]>([]);
   const [siteSearch, setSiteSearch] = useState("");
 
   useEffect(() => {
@@ -74,14 +76,34 @@ export default function AdminDashboard({
     loadSoundings();
   }, []);
 
+  useEffect(() => {
+    async function loadSites() {
+      const data = await listSites(true);
+      if (data?.length) setSites(data);
+      setStationsLoading(false);
+    }
+    loadSites();
+  }, []);
+
   const filteredStations = useMemo(() => {
     if (!stations.length) return [];
     let filtered = stations;
+    filtered.sort((a, b) => {
+      const disabledDiff =
+        Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
+      if (disabledDiff !== 0) return disabledDiff;
+      return a.name.localeCompare(b.name);
+    });
+
     if (showErrorsOnly) {
       filtered = filtered
         .filter((s) => s.isError)
         .sort((a, b) => {
-          const offlineDiff = Number(b.isOffline) - Number(a.isOffline);
+          const disabledDiff =
+            Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
+          if (disabledDiff !== 0) return disabledDiff;
+          const offlineDiff =
+            Number(Boolean(b.isOffline)) - Number(Boolean(a.isOffline));
           if (offlineDiff !== 0) return offlineDiff;
           return a.name.localeCompare(b.name);
         });
@@ -113,9 +135,19 @@ export default function AdminDashboard({
 
   const filteredSites = useMemo(() => {
     if (!sites?.length) return [];
-    if (!siteSearch.trim()) return sites;
-    const query = siteSearch.toLowerCase();
-    return sites.filter((s) => s.name.toLowerCase().includes(query));
+
+    let filtered = sites;
+    if (siteSearch.trim())
+      filtered = filtered.filter((s) =>
+        s.name.toLowerCase().includes(siteSearch.toLowerCase())
+      );
+
+    return filtered.sort((a, b) => {
+      const disabledDiff =
+        Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
+      if (disabledDiff !== 0) return disabledDiff;
+      return a.name.localeCompare(b.name);
+    });
   }, [sites, siteSearch]);
 
   const handleSignOut = () => {
@@ -411,13 +443,7 @@ export default function AdminDashboard({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sitesLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={2} className="text-muted-foreground">
-                        Loading...
-                      </TableCell>
-                    </TableRow>
-                  ) : !filteredSites?.length ? (
+                  {!filteredSites?.length ? (
                     <TableRow>
                       <TableCell colSpan={2} className="text-muted-foreground">
                         No sites found
@@ -435,7 +461,7 @@ export default function AdminDashboard({
                         </TableCell>
                         <TableCell>
                           {site.isDisabled ? (
-                            <span className="text-destructive">Disabled</span>
+                            <span>Disabled</span>
                           ) : (
                             <span className="text-green-600">Active</span>
                           )}
