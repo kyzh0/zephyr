@@ -188,6 +188,7 @@ export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
       properties: {
         name: site.name,
         dbId: site._id,
+        validBearings: site.validBearings,
       },
       geometry: site.location as {
         type: string;

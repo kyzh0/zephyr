@@ -10,6 +10,7 @@ import type { ISite } from "@/models/site.model";
 import type { ICam } from "@/models/cam.model";
 import { useSites } from "@/hooks/useSites";
 import { cn } from "@/lib/utils";
+import { SiteMarker } from "./SiteMarker";
 
 interface SearchBarProps {
   className?: string;
@@ -192,7 +193,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
             <Input
               ref={inputRef}
               type="text"
-              placeholder="Search stations, sites & webcams..."
+              placeholder="Search stations, sites & cams"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -233,7 +234,11 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
                       className="w-4 h-6 -rotate-45"
                     />
                   ) : result.type === "site" ? (
-                    <img src="/site.svg" alt="Site" className="w-6 h-6" />
+                    <SiteMarker
+                      validBearings={result.item.validBearings}
+                      size={24}
+                      borderWidth={4}
+                    />
                   ) : (
                     <Camera className="w-5 h-5" />
                   )}

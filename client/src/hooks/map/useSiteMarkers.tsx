@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import mapboxgl from "mapbox-gl";
-
+import { SiteMarker } from "@/components/map/SiteMarker";
 import { getSiteGeoJson } from "@/components/map";
 import { useNavigate } from "react-router-dom";
 import { useSites } from "../useSites";
@@ -32,7 +33,8 @@ export function useSiteMarkers({
   const createSiteMarker = useCallback(
     (
       dbId: string,
-      name: string
+      name: string,
+      validBearings?: string
     ): { marker: HTMLDivElement; popup: mapboxgl.Popup } => {
       // Create popup
       const popup = new mapboxgl.Popup({
@@ -43,15 +45,14 @@ export function useSiteMarkers({
 
       const el = document.createElement("div");
       el.id = dbId;
-      el.className =
-        "site-marker bg-white p-1 rounded-full cursor-pointer shadow-sm hover:shadow-lg transition-shadow";
+      el.className = "site-marker cursor-pointer";
       el.style.visibility = "hidden";
       el.style.zIndex = "1";
 
-      // Create paragliding SVG icon
-      const icon = document.createElement("div");
-      icon.className = "site-marker-icon";
-      el.appendChild(icon);
+      // Render the SiteMarker component to HTML
+      el.innerHTML = renderToStaticMarkup(
+        <SiteMarker validBearings={validBearings} />
+      );
 
       // Event handlers
       const handleClick = () => {
@@ -86,8 +87,11 @@ export function useSiteMarkers({
         for (const f of geoJson.features) {
           const name = f.properties.name as string;
           const dbId = f.properties.dbId as string;
+          const validBearings = f.properties.validBearings as
+            | string
+            | undefined;
 
-          const { marker, popup } = createSiteMarker(dbId, name);
+          const { marker, popup } = createSiteMarker(dbId, name, validBearings);
           markersRef.current.push({ marker, popup });
           new mapboxgl.Marker(marker)
             .setLngLat(f.geometry.coordinates)

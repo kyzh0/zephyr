@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { SignInDialog } from "./SignInDialog";
+import { SiteMarker } from "./SiteMarker";
 
 export const WELCOME_STORAGE_KEY = "zephyr-welcome-dismissed";
 
@@ -108,10 +109,10 @@ export function HelpDialog({
           </div>
 
           <div className="flex justify-center items-center">
-            <img src="/site.svg" alt="Site marker" className="w-6 h-8" />
+            <SiteMarker validBearings="45-140" size={40} borderWidth={5} />
           </div>
           <div className="flex items-center">
-            View information about a flying site
+            View information about a flying site, including flying direction
           </div>
 
           <div className="flex justify-center items-center">
