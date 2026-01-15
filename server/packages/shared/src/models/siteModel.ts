@@ -35,9 +35,9 @@ const siteSchema = new mongoose.Schema<SiteAttrs>(
     location: {
       type: { type: String, required: true, enum: ['Point'] },
       coordinates: {
-        type: [Number]
-      },
-      required: true
+        type: [Number],
+        required: true
+      }
     },
 
     rating: {
