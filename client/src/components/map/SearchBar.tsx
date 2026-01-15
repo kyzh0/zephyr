@@ -179,20 +179,15 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
           disabled ? "opacity-50 pointer-events-none" : ""
         )}
       >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleToggle}
-              className="h-9 w-9"
-              disabled={disabled}
-            >
-              <Search className="h-4 w-4 opacity-70" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Search stations, sites & cams</TooltipContent>
-        </Tooltip>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleToggle}
+          className="h-9 w-9"
+          disabled={disabled}
+        >
+          <Search className="h-4 w-4 opacity-70" />
+        </Button>
 
         {isExpanded && (
           <>
