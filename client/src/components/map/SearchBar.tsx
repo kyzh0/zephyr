@@ -11,6 +11,7 @@ import type { ICam } from "@/models/cam.model";
 import { useSites } from "@/hooks/useSites";
 import { cn } from "@/lib/utils";
 import { SiteMarker } from "./SiteMarker";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface SearchBarProps {
   className?: string;
@@ -178,15 +179,20 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
           disabled ? "opacity-50 pointer-events-none" : ""
         )}
       >
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleToggle}
-          className="h-9 w-9"
-          disabled={disabled}
-        >
-          <Search className="h-4 w-4 opacity-70" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleToggle}
+              className="h-9 w-9"
+              disabled={disabled}
+            >
+              <Search className="h-4 w-4 opacity-70" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Search stations, sites & cams</TooltipContent>
+        </Tooltip>
 
         {isExpanded && (
           <>
