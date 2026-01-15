@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Plus, Search, AlertCircle } from "lucide-react";
+import {
+  LogOut,
+  Plus,
+  Search,
+  AlertCircle,
+  SquareArrowOutUpRight,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,7 +78,13 @@ export default function AdminDashboard({
     if (!stations.length) return [];
     let filtered = stations;
     if (showErrorsOnly) {
-      filtered = filtered.filter((s) => s.isError);
+      filtered = filtered
+        .filter((s) => s.isError)
+        .sort((a, b) => {
+          const offlineDiff = Number(b.isOffline) - Number(a.isOffline);
+          if (offlineDiff !== 0) return offlineDiff;
+          return a.name.localeCompare(b.name);
+        });
     }
     if (stationSearch.trim()) {
       const query = stationSearch.toLowerCase();
@@ -181,7 +193,7 @@ export default function AdminDashboard({
                     <TableHead>Name</TableHead>
                     <TableHead className="w-[100px]">Type</TableHead>
                     <TableHead className="w-[100px]">Status</TableHead>
-                    <TableHead className="w-[100px]">Up</TableHead>
+                    <TableHead className="w-[40px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -211,18 +223,31 @@ export default function AdminDashboard({
                         </TableCell>
                         <TableCell>{station.type}</TableCell>
                         <TableCell>
-                          {station.isError ? (
-                            <span className="text-destructive">Error</span>
+                          {station.isDisabled ? (
+                            <span>Disabled</span>
+                          ) : station.isOffline ? (
+                            <span className="text-destructive">Offline</span>
+                          ) : station.isError ? (
+                            <span className="text-orange-600">Error</span>
                           ) : (
                             <span className="text-green-600">OK</span>
                           )}
                         </TableCell>
                         <TableCell>
-                          {station.isOffline ? (
-                            <span className="text-destructive">Offline</span>
-                          ) : (
-                            <span className="text-green-600">Online</span>
-                          )}
+                          <Button
+                            variant={"ghost"}
+                            className="cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(
+                                station.externalLink,
+                                "_blank",
+                                "noopener,noreferrer"
+                              );
+                            }}
+                          >
+                            <SquareArrowOutUpRight className="h-4 w-4" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))
