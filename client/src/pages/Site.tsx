@@ -100,9 +100,15 @@ export default function Site() {
   const headerContent = isLoading ? (
     <Skeleton className="h-7 w-48 mx-auto" />
   ) : (
-    <span className="text-lg sm:text-xl font-semibold leading-tight">
-      {site?.name}
-    </span>
+    <div className="grid grid-cols-1">
+      <span className="text-lg sm:text-xl font-semibold leading-tight">
+        {site?.name}
+      </span>
+      <span className="font-thin text-[10px] sm:text-xs mb-1">
+        [ {site?.takeoffLocation.coordinates[1].toFixed(3)},
+        {site?.takeoffLocation.coordinates[0].toFixed(3)} ] {site?.elevation}m
+      </span>
+    </div>
   );
 
   // Shared body content
@@ -160,17 +166,18 @@ export default function Site() {
           {/* Site Details Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {site.elevation ? (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">Elevation</h3>
-                <p className="text-sm text-muted-foreground">
-                  {site.elevation}m
-                </p>
+              <div className="flex items-center">
+                <div>
+                  <h3 className="font-semibold text-sm mb-1">Elevation</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {site.elevation}m
+                  </p>
+                </div>
               </div>
             ) : null}
 
             {site.validBearings && (
-              <div>
-                <h3 className="font-semibold text-sm">Valid Bearings</h3>
+              <div className="flex justify-center items-center">
                 <WindCompass
                   bearing={undefined}
                   validBearings={site.validBearings}
@@ -179,34 +186,40 @@ export default function Site() {
             )}
 
             {site.radio && (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">Radio</h3>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {site.radio}
-                </p>
+              <div className="flex items-center">
+                <div>
+                  <h3 className="font-semibold text-sm mb-1">Radio</h3>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {site.radio}
+                  </p>
+                </div>
               </div>
             )}
 
             {(site.rating.paragliding || site.rating.hangGliding) && (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">Rating Required</h3>
-                <div className="text-sm text-muted-foreground">
-                  {site.rating.paragliding && (
-                    <div>
-                      PG:{" "}
-                      {site.rating.paragliding === "UNKNOWN"
-                        ? "Unknown"
-                        : site.rating.paragliding}
-                    </div>
-                  )}
-                  {site.rating.hangGliding && (
-                    <div>
-                      HG:{" "}
-                      {site.rating.hangGliding === "UNKNOWN"
-                        ? "Unknown"
-                        : site.rating.hangGliding}
-                    </div>
-                  )}
+              <div className="flex items-center">
+                <div>
+                  <h3 className="font-semibold text-sm mb-1">
+                    Rating Required
+                  </h3>
+                  <div className="text-sm text-muted-foreground">
+                    {site.rating.paragliding && (
+                      <div>
+                        PG:{" "}
+                        {site.rating.paragliding === "UNKNOWN"
+                          ? "Unknown"
+                          : site.rating.paragliding}
+                      </div>
+                    )}
+                    {site.rating.hangGliding && (
+                      <div>
+                        HG:{" "}
+                        {site.rating.hangGliding === "UNKNOWN"
+                          ? "Unknown"
+                          : site.rating.hangGliding}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
