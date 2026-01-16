@@ -19,7 +19,7 @@ export function WindCompass({
       const availableHeight = containerSize.height - 20; // Some vertical padding
 
       // Use the smaller of available width/height, with min/max constraints
-      const minSize = 90;
+      const minSize = 40;
       const maxSize = 160;
 
       const calculatedSize = Math.min(availableWidth, availableHeight);

@@ -12,9 +12,12 @@ export interface ISite {
   validBearings?: string;
   elevation?: number;
   radio: string;
+  summary: string;
+  hazards: string;
   description: string;
   mandatoryNotices: string;
   airspaceNotices: string;
   landingNotices: string;
   isDisabled: boolean;
+  __v: number;
 }

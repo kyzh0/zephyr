@@ -69,12 +69,14 @@ const bearingsSchema = z.string().refine(
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   coordinates: coordinatesSchema,
-  paraglidingRating: z.string().min(1, "Required"),
-  hangGlidingRating: z.string().min(1, "Required"),
+  paraglidingRating: z.string().optional(),
+  hangGlidingRating: z.string().optional(),
   siteGuideURL: z.url("Enter a valid URL"),
   validBearings: bearingsSchema,
   elevation: z.string().regex(/^$|^\d+$/, "Must be a number"),
-  description: z.string().min(1, "Description is required"),
+  summary: z.string().min(1, "Description is required"),
+  hazards: z.string().optional(),
+  description: z.string().optional(),
   radio: z.string().optional(),
   mandatoryNotices: z.string().optional(),
   airspaceNotices: z.string().optional(),
@@ -121,6 +123,8 @@ export default function AdminEditSite() {
       validBearings: "",
       elevation: "0",
       radio: "",
+      summary: "",
+      hazards: "",
       description: "",
       mandatoryNotices: "",
       airspaceNotices: "",
@@ -150,6 +154,8 @@ export default function AdminEditSite() {
           elevation: data.elevation?.toString() ?? "",
           validBearings: data.validBearings ?? "",
           radio: data.radio ?? "",
+          summary: data.summary ?? "",
+          hazards: data.hazards ?? "",
           description: data.description ?? "",
           mandatoryNotices: data.mandatoryNotices ?? "",
           airspaceNotices: data.airspaceNotices ?? "",
@@ -184,19 +190,25 @@ export default function AdminEditSite() {
 
     const updates: Partial<ISite> = {
       name: values.name,
-      rating: {
-        paragliding: values.paraglidingRating,
-        hangGliding: values.hangGlidingRating,
-      },
       siteGuideUrl: values.siteGuideURL,
       elevation: parseInt(values.elevation, 10),
       radio: values.radio,
+      summary: values.summary,
+      hazards: values.hazards,
       description: values.description,
       mandatoryNotices: values.mandatoryNotices,
       airspaceNotices: values.airspaceNotices,
       landingNotices: values.landingNotices,
       isDisabled: values.isDisabled,
+      __v: site.__v,
     };
+
+    if (values.paraglidingRating || values.hangGlidingRating) {
+      updates.rating = {
+        paragliding: values.paraglidingRating ?? "Unknown",
+        hangGliding: values.hangGlidingRating ?? "Unknown",
+      };
+    }
 
     const location = parseCoordinates(values.coordinates);
     if (location) {
@@ -211,7 +223,7 @@ export default function AdminEditSite() {
     try {
       await patchSite(id!, updates, adminKey);
       toast.success("Site updated");
-      navigate(`/admin/sites/${id}`);
+      navigate(`/admin/sites`);
     } catch (error) {
       toast.error("Failed to update site: " + (error as Error).message);
     }
@@ -411,6 +423,34 @@ export default function AdminEditSite() {
                       <FormLabel>Site Guide URL</FormLabel>
                       <FormControl>
                         <Input {...field} type="url" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="summary"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Summary</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} rows={4} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="hazards"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hazards</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} rows={4} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

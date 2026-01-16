@@ -109,11 +109,9 @@ export function HelpDialog({
           </div>
 
           <div className="flex justify-center items-center">
-            <SiteMarker validBearings="45-140" size={40} borderWidth={5} />
+            <SiteMarker validBearings="45-140" size={30} borderWidth={5} />
           </div>
-          <div className="flex items-center">
-            View information about a flying site, including flying direction
-          </div>
+          <div className="flex items-center">PG / HG site info</div>
 
           <div className="flex justify-center items-center">
             <Camera className="w-5 h-5 sm:w-6 sm:h-6" />

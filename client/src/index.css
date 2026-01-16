@@ -128,15 +128,6 @@
   height: 36px;
 }
 
-.site-marker-icon {
-  width: 25px;
-  height: 25px;
-  display: block;
-  background-color: black;
-  mask: url("/site.svg") center / contain no-repeat;
-  -webkit-mask: url("/site.svg") center / contain no-repeat;
-}
-
 .site-marker {
   transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
 }
@@ -190,7 +181,7 @@
 }
 
 .mapboxgl-ctrl-logo {
-    display: none !important;
+  display: none !important;
 }
 
 .mapboxgl-popup {

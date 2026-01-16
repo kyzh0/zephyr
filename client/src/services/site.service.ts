@@ -23,17 +23,13 @@ export const listSites = async (includeDisabled?: boolean) => {
 export async function addSite(site: Partial<ISite>) {
   try {
     const key = sessionStorage.getItem("adminKey") ?? "";
-    const res = await fetch(
-      `${import.meta.env.VITE_API_PREFIX}/sites?key=${key}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(site),
-      }
-    );
-    return (await res.json()) as ISite;
+    await fetch(`${import.meta.env.VITE_API_PREFIX}/sites?key=${key}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(site),
+    });
   } catch (error) {
     console.error(error);
     throw error;
@@ -46,17 +42,13 @@ export async function patchSite(
   key: string
 ) {
   try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_PREFIX}/sites/${id}?key=${key}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updates),
-      }
-    );
-    return (await res.json()) as ISite;
+    await fetch(`${import.meta.env.VITE_API_PREFIX}/sites/${id}?key=${key}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updates),
+    });
   } catch (error) {
     console.error(error);
     throw error;

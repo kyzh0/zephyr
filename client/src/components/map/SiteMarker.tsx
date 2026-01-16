@@ -12,7 +12,7 @@ interface SiteMarkerProps {
  */
 export const SiteMarker = ({
   validBearings,
-  size = 60,
+  size = 50,
   borderWidth = 15,
 }: SiteMarkerProps): ReactNode => {
   // Parse validBearings to calculate the arc
@@ -114,28 +114,20 @@ export const SiteMarker = ({
           viewBox={`0 0 ${size} ${size}`}
           style={{ transform: "rotate(0deg)" }}
         >
-          <path d={arcPath} fill="#04ff00" fillOpacity="0.9" />
+          <path d={arcPath} fill="#FFA930" fillOpacity="0.9" />
         </svg>
       )}
 
       {/* Circle container with site logo */}
       <div
-        className="absolute inset-0 rounded-full bg-white shadow-sm flex items-center justify-center overflow-hidden"
+        className="absolute inset-0 rounded-full border-2 border-black overflow-hidden flex items-center justify-center bg-white"
         style={{
           margin: borderWidth,
           width: size - borderWidth * 2,
           height: size - borderWidth * 2,
         }}
       >
-        {/* Site icon using CSS mask */}
-        <div
-          className="w-full h-full"
-          style={{
-            backgroundColor: "black",
-            mask: 'url("/site.svg") center / 70% no-repeat',
-            WebkitMask: 'url("/site.svg") center / 70% no-repeat',
-          }}
-        />
+        <img src="/kea.png" className="w-[60%] h-[60%] object-contain" />
       </div>
     </div>
   );

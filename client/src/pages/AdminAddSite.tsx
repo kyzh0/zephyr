@@ -57,12 +57,14 @@ const bearingsSchema = z.string().refine(
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   coordinates: coordinatesSchema,
-  paraglidingRating: z.string().min(1, "Required"),
-  hangGlidingRating: z.string().min(1, "Required"),
+  paraglidingRating: z.string().optional(),
+  hangGlidingRating: z.string().optional(),
   siteGuideURL: z.url("Enter a valid URL"),
   validBearings: bearingsSchema,
   elevation: z.string().regex(/^$|^\d+$/, "Must be a number"),
-  description: z.string().min(1, "Description is required"),
+  summary: z.string().min(1, "Summary is required"),
+  hazards: z.string().optional(),
+  description: z.string().optional(),
   radio: z.string().optional(),
   mandatoryNotices: z.string().optional(),
   airspaceNotices: z.string().optional(),
@@ -97,6 +99,8 @@ export default function AdminAddSite() {
       validBearings: "",
       elevation: "0",
       radio: "",
+      summary: "",
+      hazards: "",
       description: "",
       mandatoryNotices: "",
       airspaceNotices: "",
@@ -114,13 +118,11 @@ export default function AdminAddSite() {
     const site: Partial<ISite> = {
       name: values.name,
       location: location,
-      rating: {
-        paragliding: values.paraglidingRating,
-        hangGliding: values.hangGlidingRating,
-      },
       elevation: parseInt(values.elevation, 10),
       siteGuideUrl: values.siteGuideURL,
       radio: values.radio,
+      summary: values.summary,
+      hazards: values.hazards,
       description: values.description,
       mandatoryNotices: values.mandatoryNotices,
       airspaceNotices: values.airspaceNotices,
@@ -128,14 +130,21 @@ export default function AdminAddSite() {
       isDisabled: values.isDisabled,
     };
 
+    if (values.paraglidingRating || values.hangGlidingRating) {
+      site.rating = {
+        paragliding: values.paraglidingRating ?? "Unknown",
+        hangGliding: values.hangGlidingRating ?? "Unknown",
+      };
+    }
+
     if (values.validBearings) {
       site.validBearings = values.validBearings;
     }
 
     try {
-      const res = await addSite(site);
+      await addSite(site);
       toast.success("Site added successfully");
-      navigate(res ? `/admin/sites/${res._id}` : "/admin/sites");
+      navigate("/admin/sites");
     } catch (error) {
       toast.error(`Failed to add site: ${(error as Error).message}`);
     }
@@ -298,6 +307,34 @@ export default function AdminAddSite() {
                     <FormLabel>Site Guide URL</FormLabel>
                     <FormControl>
                       <Input {...field} type="url" placeholder="https://" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="summary"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Summary</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={4} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="hazards"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hazards</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={4} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

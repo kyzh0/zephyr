@@ -20,7 +20,7 @@ import {
 import { useState } from "react";
 import type { ISite } from "@/models/site.model";
 import { useIsMobile } from "@/hooks";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Item,
   ItemActions,
@@ -104,6 +104,7 @@ export default function Site() {
       <span className="text-lg sm:text-xl font-semibold leading-tight">
         {site?.name}
       </span>
+
       <span className="font-thin text-[10px] sm:text-xs mb-1">
         [ {site?.location.coordinates[1].toFixed(3)},
         {site?.location.coordinates[0].toFixed(3)} ] {site?.elevation}m
@@ -121,27 +122,26 @@ export default function Site() {
           <Skeleton className="h-16 w-full" />
         </div>
       ) : site ? (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {/* Notices */}
           {site.mandatoryNotices && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="py-2">
               <AlertCircleIcon />
-              <AlertTitle>Mandatory Notices</AlertTitle>
               <AlertDescription className="text-sm text-muted-foreground whitespace-pre-wrap">
                 {site.mandatoryNotices}
               </AlertDescription>
             </Alert>
           )}
 
-          {/* External Link */}
           {site.siteGuideUrl && (
-            <Item variant="outline" size="sm" asChild>
+            <Item variant="outline" size="sm" asChild className="py-2">
               <a href={site.siteGuideUrl} target="_blank" rel="noreferrer">
                 <ItemMedia>
                   <ExternalLink className="h-4 w-4" />
                 </ItemMedia>
                 <ItemContent>
                   <ItemTitle>View the official site guide.</ItemTitle>
+                  <ItemDescription>For up to date information</ItemDescription>
                 </ItemContent>
                 <ItemActions>
                   <ChevronRightIcon className="size-4" />
@@ -149,10 +149,6 @@ export default function Site() {
               </a>
             </Item>
           )}
-
-          <h2 className="text-lg sm:text-xl font-semibold leading-tight mt-4 sm:mt-6">
-            Site Details
-          </h2>
 
           {/* Description */}
           {site.description && (
@@ -165,26 +161,6 @@ export default function Site() {
 
           {/* Site Details Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {site.elevation ? (
-              <div className="flex items-center">
-                <div>
-                  <h3 className="font-semibold text-sm mb-1">Elevation</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {site.elevation}m
-                  </p>
-                </div>
-              </div>
-            ) : null}
-
-            {site.validBearings && (
-              <div className="flex justify-center items-center">
-                <WindCompass
-                  bearing={undefined}
-                  validBearings={site.validBearings}
-                />
-              </div>
-            )}
-
             {site.radio && (
               <div className="flex items-center">
                 <div>
@@ -196,27 +172,25 @@ export default function Site() {
               </div>
             )}
 
-            {(site.rating.paragliding || site.rating.hangGliding) && (
+            {(site.rating?.paragliding || site.rating?.hangGliding) && (
               <div className="flex items-center">
                 <div>
-                  <h3 className="font-semibold text-sm mb-1">
-                    Rating Required
-                  </h3>
+                  <h3 className="font-semibold text-sm mb-1">Site Rating</h3>
                   <div className="text-sm text-muted-foreground">
-                    {site.rating.paragliding && (
+                    {site.rating?.paragliding && (
                       <div>
                         PG:{" "}
-                        {site.rating.paragliding === "UNKNOWN"
+                        {site.rating?.paragliding === "UNKNOWN"
                           ? "Unknown"
-                          : site.rating.paragliding}
+                          : site.rating?.paragliding}
                       </div>
                     )}
-                    {site.rating.hangGliding && (
+                    {site.rating?.hangGliding && (
                       <div>
                         HG:{" "}
-                        {site.rating.hangGliding === "UNKNOWN"
+                        {site.rating?.hangGliding === "UNKNOWN"
                           ? "Unknown"
-                          : site.rating.hangGliding}
+                          : site.rating?.hangGliding}
                       </div>
                     )}
                   </div>
@@ -245,27 +219,6 @@ export default function Site() {
                 {site.landingNotices}
               </p>
             </div>
-          )}
-
-          {/* External Link */}
-          {site.siteGuideUrl && (
-            <Item variant="outline" size="sm" asChild>
-              <a href={site.siteGuideUrl} target="_blank" rel="noreferrer">
-                <ItemMedia>
-                  <ExternalLink className="h-4 w-4" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>View the official site guide.</ItemTitle>
-                  <ItemDescription>
-                    Zephyr is not an official site guide, and the information
-                    here may be outdated.
-                  </ItemDescription>
-                </ItemContent>
-                <ItemActions>
-                  <ChevronRightIcon className="size-4" />
-                </ItemActions>
-              </a>
-            </Item>
           )}
 
           {/* Nearby Stations */}
@@ -342,12 +295,23 @@ export default function Site() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex-1 text-center pr-10">{headerContent}</div>
+            <div className="flex w-full text-center justify-evenly">
+              {headerContent}
+              {site?.validBearings && (
+                <div className="flex justify-center items-center">
+                  <WindCompass
+                    bearing={undefined}
+                    validBearings={site.validBearings}
+                    containerSize={{ width: 24, height: 24 }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
+        <div className="flex-1 overflow-y-auto px-4 py-4 pt-1 flex flex-col gap-4">
           {bodyContent}
         </div>
       </div>
@@ -359,7 +323,20 @@ export default function Site() {
     <Dialog open onOpenChange={() => navigate(-1)}>
       <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="pb-2">
-          <DialogTitle className="text-center">{headerContent}</DialogTitle>
+          <DialogTitle className="text-center">
+            <div className="flex w-full justify-center">
+              {site?.validBearings && (
+                <div className="flex justify-center items-center mr-8">
+                  <WindCompass
+                    bearing={undefined}
+                    validBearings={site.validBearings}
+                    containerSize={{ width: 24, height: 24 }}
+                  />
+                </div>
+              )}
+              {headerContent}
+            </div>
+          </DialogTitle>
         </DialogHeader>
 
         <div className="overflow-y-auto flex-1 p-1">{bodyContent}</div>
