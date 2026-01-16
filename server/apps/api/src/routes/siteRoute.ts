@@ -63,9 +63,10 @@ router.post(
       validBearings,
       elevation,
       radio,
-      summary,
+      landingSummary,
       hazards,
       description,
+      access,
       mandatoryNotices,
       airspaceNotices,
       landingNotices,
@@ -92,8 +93,8 @@ router.post(
       return;
     }
 
-    if (!summary) {
-      res.status(400).json({ error: 'Summary is required' });
+    if (!landingSummary) {
+      res.status(400).json({ error: 'Landing Summary is required' });
       return;
     }
 
@@ -104,9 +105,10 @@ router.post(
       validBearings,
       elevation,
       radio,
-      summary,
+      landingSummary,
       hazards,
       description,
+      access,
       mandatoryNotices,
       airspaceNotices,
       landingNotices,
@@ -162,9 +164,10 @@ router.put(
       validBearings,
       elevation,
       radio,
-      summary,
+      landingSummary,
       hazards,
       description,
+      access,
       mandatoryNotices,
       airspaceNotices,
       landingNotices,
@@ -211,8 +214,8 @@ router.put(
       return;
     }
 
-    if (!summary) {
-      res.status(400).json({ error: 'Summary is required' });
+    if (!landingSummary) {
+      res.status(400).json({ error: 'Landing Summary is required' });
       return;
     }
 
@@ -223,9 +226,10 @@ router.put(
     site.validBearings = validBearings ?? undefined;
     site.elevation = elevation;
     site.radio = radio ?? undefined;
-    site.summary = summary;
+    site.landingSummary = landingSummary;
     site.hazards = hazards;
     site.description = description;
+    site.access = access;
     site.mandatoryNotices = mandatoryNotices ?? undefined;
     site.airspaceNotices = airspaceNotices ?? undefined;
     site.landingNotices = landingNotices ?? undefined;

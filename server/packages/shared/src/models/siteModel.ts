@@ -17,9 +17,10 @@ export type SiteAttrs = {
   elevation: number;
 
   radio?: string;
-  summary: string;
+  landingSummary: string;
   hazards?: string;
   description?: string;
+  access?: string;
 
   mandatoryNotices?: string;
   airspaceNotices?: string;
@@ -53,9 +54,10 @@ const siteSchema = new mongoose.Schema<SiteAttrs>(
     elevation: { type: Number, required: true },
 
     radio: { type: String },
-    summary: { type: String, required: true },
+    landingSummary: { type: String, required: true },
     hazards: { type: String },
     description: { type: String },
+    access: { type: String },
 
     mandatoryNotices: { type: String },
     airspaceNotices: { type: String },

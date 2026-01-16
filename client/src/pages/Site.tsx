@@ -13,6 +13,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
   AlertCircleIcon,
+  TriangleAlertIcon,
+  PlaneLanding,
   ArrowLeft,
   ChevronRightIcon,
   ExternalLink,
@@ -133,6 +135,7 @@ export default function Site() {
             </Alert>
           )}
 
+          {/* Site Guide */}
           {site.siteGuideUrl && (
             <Item variant="outline" size="sm" asChild className="py-2">
               <a href={site.siteGuideUrl} target="_blank" rel="noreferrer">
@@ -150,6 +153,26 @@ export default function Site() {
             </Item>
           )}
 
+          {/* Hazards */}
+          {site.hazards && (
+            <Alert className="py-2 text-orange-600">
+              <TriangleAlertIcon />
+              <AlertDescription className="text-sm text-orange-600 whitespace-pre-wrap">
+                {site.hazards}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Landing Summary */}
+          {site.landingSummary && (
+            <Alert className="py-2">
+              <PlaneLanding />
+              <AlertDescription className="text-sm whitespace-pre-wrap">
+                {site.landingSummary}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Description */}
           {site.description && (
             <div>
@@ -160,66 +183,72 @@ export default function Site() {
           )}
 
           {/* Site Details Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {site.radio && (
-              <div className="flex items-center">
-                <div>
-                  <h3 className="font-semibold text-sm mb-1">Radio</h3>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {site.radio}
-                  </p>
-                </div>
+          <div className="grid grid-cols-1 gap-3 mt-4">
+            {/* Access */}
+            {site.access && (
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Access</h3>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {site.access}
+                </p>
               </div>
             )}
 
+            {/* Landing */}
+            {site.landingNotices && (
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Landing</h3>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {site.landingNotices}
+                </p>
+              </div>
+            )}
+
+            {/* Airspace */}
+            {site.airspaceNotices && (
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Airspace</h3>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {site.airspaceNotices}
+                </p>
+              </div>
+            )}
+
+            {/* Radio */}
+            {site.radio && (
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Radio</h3>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {site.radio}
+                </p>
+              </div>
+            )}
+
+            {/* Rating */}
             {(site.rating?.paragliding || site.rating?.hangGliding) && (
-              <div className="flex items-center">
-                <div>
-                  <h3 className="font-semibold text-sm mb-1">Site Rating</h3>
-                  <div className="text-sm text-muted-foreground">
-                    {site.rating?.paragliding && (
-                      <div>
-                        PG:{" "}
-                        {site.rating?.paragliding === "UNKNOWN"
-                          ? "Unknown"
-                          : site.rating?.paragliding}
-                      </div>
-                    )}
-                    {site.rating?.hangGliding && (
-                      <div>
-                        HG:{" "}
-                        {site.rating?.hangGliding === "UNKNOWN"
-                          ? "Unknown"
-                          : site.rating?.hangGliding}
-                      </div>
-                    )}
-                  </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Site Rating</h3>
+                <div className="text-sm text-muted-foreground">
+                  {site.rating?.paragliding && (
+                    <div>
+                      PG:{" "}
+                      {site.rating?.paragliding === "UNKNOWN"
+                        ? "Unknown"
+                        : site.rating?.paragliding}
+                    </div>
+                  )}
+                  {site.rating?.hangGliding && (
+                    <div>
+                      HG:{" "}
+                      {site.rating?.hangGliding === "UNKNOWN"
+                        ? "Unknown"
+                        : site.rating?.hangGliding}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
           </div>
-
-          <h2 className="text-lg sm:text-xl font-semibold leading-tight mt-4 sm:mt-6">
-            Notices
-          </h2>
-
-          {site.airspaceNotices && (
-            <div>
-              <h3 className="font-semibold text-sm mb-1">Airspace Notices</h3>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {site.airspaceNotices}
-              </p>
-            </div>
-          )}
-
-          {site.landingNotices && (
-            <div>
-              <h3 className="font-semibold text-sm mb-1">Landing Notices</h3>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {site.landingNotices}
-              </p>
-            </div>
-          )}
 
           {/* Nearby Stations */}
           {site && stations.length > 0 && (
@@ -311,7 +340,7 @@ export default function Site() {
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 pt-1 flex flex-col gap-4">
+        <div className="flex-1 overflow-y-auto px-4 pt-1 flex flex-col gap-4">
           {bodyContent}
         </div>
       </div>

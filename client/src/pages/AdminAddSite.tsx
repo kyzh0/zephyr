@@ -62,9 +62,10 @@ const formSchema = z.object({
   siteGuideURL: z.url("Enter a valid URL"),
   validBearings: bearingsSchema,
   elevation: z.string().regex(/^$|^\d+$/, "Must be a number"),
-  summary: z.string().min(1, "Summary is required"),
+  landingSummary: z.string().min(1, "Landing summary is required"),
   hazards: z.string().optional(),
   description: z.string().optional(),
+  access: z.string().optional(),
   radio: z.string().optional(),
   mandatoryNotices: z.string().optional(),
   airspaceNotices: z.string().optional(),
@@ -99,7 +100,8 @@ export default function AdminAddSite() {
       validBearings: "",
       elevation: "0",
       radio: "",
-      summary: "",
+      landingSummary: "",
+      access: "",
       hazards: "",
       description: "",
       mandatoryNotices: "",
@@ -121,9 +123,10 @@ export default function AdminAddSite() {
       elevation: parseInt(values.elevation, 10),
       siteGuideUrl: values.siteGuideURL,
       radio: values.radio,
-      summary: values.summary,
+      landingSummary: values.landingSummary,
       hazards: values.hazards,
       description: values.description,
+      access: values.access,
       mandatoryNotices: values.mandatoryNotices,
       airspaceNotices: values.airspaceNotices,
       landingNotices: values.landingNotices,
@@ -315,10 +318,10 @@ export default function AdminAddSite() {
 
               <FormField
                 control={form.control}
-                name="summary"
+                name="landingSummary"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Summary</FormLabel>
+                    <FormLabel>Landing Summary</FormLabel>
                     <FormControl>
                       <Textarea {...field} rows={4} />
                     </FormControl>
@@ -347,6 +350,20 @@ export default function AdminAddSite() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={4} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="access"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Access</FormLabel>
                     <FormControl>
                       <Textarea {...field} rows={4} />
                     </FormControl>

@@ -74,9 +74,10 @@ const formSchema = z.object({
   siteGuideURL: z.url("Enter a valid URL"),
   validBearings: bearingsSchema,
   elevation: z.string().regex(/^$|^\d+$/, "Must be a number"),
-  summary: z.string().min(1, "Description is required"),
+  landingSummary: z.string().min(1, "Description is required"),
   hazards: z.string().optional(),
   description: z.string().optional(),
+  access: z.string().optional(),
   radio: z.string().optional(),
   mandatoryNotices: z.string().optional(),
   airspaceNotices: z.string().optional(),
@@ -123,9 +124,10 @@ export default function AdminEditSite() {
       validBearings: "",
       elevation: "0",
       radio: "",
-      summary: "",
+      landingSummary: "",
       hazards: "",
       description: "",
+      access: "",
       mandatoryNotices: "",
       airspaceNotices: "",
       landingNotices: "",
@@ -154,9 +156,10 @@ export default function AdminEditSite() {
           elevation: data.elevation?.toString() ?? "",
           validBearings: data.validBearings ?? "",
           radio: data.radio ?? "",
-          summary: data.summary ?? "",
+          landingSummary: data.landingSummary ?? "",
           hazards: data.hazards ?? "",
           description: data.description ?? "",
+          access: data.access ?? "",
           mandatoryNotices: data.mandatoryNotices ?? "",
           airspaceNotices: data.airspaceNotices ?? "",
           landingNotices: data.landingNotices ?? "",
@@ -193,9 +196,10 @@ export default function AdminEditSite() {
       siteGuideUrl: values.siteGuideURL,
       elevation: parseInt(values.elevation, 10),
       radio: values.radio,
-      summary: values.summary,
+      landingSummary: values.landingSummary,
       hazards: values.hazards,
       description: values.description,
+      access: values.access,
       mandatoryNotices: values.mandatoryNotices,
       airspaceNotices: values.airspaceNotices,
       landingNotices: values.landingNotices,
@@ -431,10 +435,10 @@ export default function AdminEditSite() {
 
                 <FormField
                   control={form.control}
-                  name="summary"
+                  name="landingSummary"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Summary</FormLabel>
+                      <FormLabel>Landing Summary</FormLabel>
                       <FormControl>
                         <Textarea {...field} rows={4} />
                       </FormControl>
@@ -463,6 +467,20 @@ export default function AdminEditSite() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} rows={4} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="access"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Access</FormLabel>
                       <FormControl>
                         <Textarea {...field} rows={4} />
                       </FormControl>
