@@ -368,6 +368,9 @@ export function useStationMarkers({
       const props = extractStationProperties(feature.properties);
       const { marker, popup } = createStationMarker(props, timestamp);
 
+      // Set initial visibility based on isVisible prop
+      marker.style.visibility = isVisibleRef.current ? "visible" : "hidden";
+
       markersRef.current.push({ marker, popup });
       new mapboxgl.Marker(marker)
         .setLngLat(feature.geometry.coordinates)

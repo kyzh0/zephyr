@@ -56,8 +56,8 @@ interface MapControlButtonsProps {
   onElevationChange: (value: number) => void;
   minimizeRecents: boolean;
   onRecentsToggle: () => void;
-  showSites: boolean;
-  onToggleSites: () => void;
+  viewMode: "sites" | "stations";
+  onToggleViewMode: (value: "sites" | "stations") => void;
 }
 
 export function MapControlButtons({
@@ -78,7 +78,8 @@ export function MapControlButtons({
   onElevationChange,
   minimizeRecents,
   onRecentsToggle,
-  onToggleSites,
+  viewMode,
+  onToggleViewMode,
 }: MapControlButtonsProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -90,12 +91,6 @@ export function MapControlButtons({
   const [contactOpen, setContactOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [recentStations, setRecentStations] = useState<RecentStation[]>([]);
-  const [activeTab, setActiveTab] = useState<"stations" | "sites">("stations");
-
-  const onChangeTab = (value: "stations" | "sites") => {
-    setActiveTab(value);
-    onToggleSites();
-  };
 
   // Load recent stations on mount and when localStorage changes
   useEffect(() => {
@@ -134,9 +129,9 @@ export function MapControlButtons({
     <div className="flex flex-col gap-0">
       <div className="px-2 py-1.5">
         <Tabs
-          value={activeTab}
+          value={viewMode}
           onValueChange={(value) => {
-            onChangeTab(value as "stations" | "sites");
+            onToggleViewMode(value as "stations" | "sites");
             setMenuOpen(false);
           }}
           className="h-9"
@@ -368,9 +363,9 @@ export function MapControlButtons({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Tabs
-                  value={activeTab}
+                  value={viewMode}
                   onValueChange={(value) =>
-                    onChangeTab(value as "stations" | "sites")
+                    onToggleViewMode(value as "stations" | "sites")
                   }
                   className="h-9"
                 >

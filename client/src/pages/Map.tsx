@@ -51,10 +51,10 @@ export default function Map() {
   const [showSoundings, setShowSoundings] = useState(() =>
     getStoredValue("showSoundings", false)
   );
-  const [showSites, setShowSites] = useState(() => false);
-  const [showStations, setShowStations] = useState(() =>
-    getStoredValue("showStations", true)
+  const [viewMode, setViewMode] = useState<"stations" | "sites">(() =>
+    getStoredValue<"stations" | "sites">("viewMode", "stations")
   );
+
   const [showElevation, setShowElevation] = useState(false);
   const [elevationFilter, setElevationFilter] = useState(0);
   const [isSatellite, setIsSatellite] = useState(false);
@@ -89,7 +89,7 @@ export default function Map() {
     isMapLoaded: isLoaded,
     isHistoricData: historyOffset < 0,
     unit,
-    isVisible: showStations,
+    isVisible: viewMode === "stations",
     onRefresh: setRefreshedStations,
   });
 
@@ -115,22 +115,16 @@ export default function Map() {
   const { setVisibility: setSiteVisibility } = useSiteMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: showSites,
+    isVisible: viewMode === "sites",
   });
 
   // Handle site toggle - when showing sites, hide stations and vice versa
-  const handleSitesToggle = useCallback(() => {
-    const newSitesValue = !showSites;
-    setShowSites(newSitesValue);
-    setStoredValue("showSites", newSitesValue);
-    setSiteVisibility(newSitesValue);
-
-    // Toggle stations opposite to sites
-    const newStationsValue = !newSitesValue;
-    setShowStations(newStationsValue);
-    setStoredValue("showStations", newStationsValue);
-    setStationVisibility(newStationsValue);
-  }, [showSites, setSiteVisibility, setStationVisibility]);
+  const toggleViewMode = (viewMode: "stations" | "sites") => {
+    setViewMode(viewMode);
+    setStoredValue("viewMode", viewMode);
+    setSiteVisibility(viewMode === "sites");
+    setStationVisibility(viewMode === "stations");
+  };
 
   // Handle webcam toggle
   const handleWebcamClick = useCallback(async () => {
@@ -316,8 +310,8 @@ export default function Map() {
         onElevationChange={setElevationFilter}
         minimizeRecents={minimizeRecents}
         onRecentsToggle={handleRecentsToggle}
-        onToggleSites={handleSitesToggle}
-        showSites={showSites}
+        onToggleViewMode={toggleViewMode}
+        viewMode={viewMode}
       />
 
       <div ref={mapContainer} className="w-full h-full" />
