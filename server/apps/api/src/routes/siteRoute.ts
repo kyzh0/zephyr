@@ -83,11 +83,6 @@ router.post(
       return;
     }
 
-    if (!siteGuideUrl) {
-      res.status(400).json({ error: 'Site guide URL is required' });
-      return;
-    }
-
     if (elevation === undefined || elevation === null) {
       res.status(400).json({ error: 'Elevation is required' });
       return;
@@ -101,6 +96,7 @@ router.post(
     const site: SiteDoc = new Site({
       name,
       location,
+      rating,
       siteGuideUrl,
       validBearings,
       elevation,
@@ -112,8 +108,7 @@ router.post(
       mandatoryNotices,
       airspaceNotices,
       landingNotices,
-      isDisabled: isDisabled ? true : undefined,
-      rating
+      isDisabled: isDisabled
     });
 
     try {
@@ -204,11 +199,6 @@ router.put(
       return;
     }
 
-    if (!siteGuideUrl) {
-      res.status(400).json({ error: 'Site guide URL is required' });
-      return;
-    }
-
     if (elevation === undefined || elevation === null) {
       res.status(400).json({ error: 'Elevation is required' });
       return;
@@ -222,7 +212,7 @@ router.put(
     site.name = name;
     site.location = location;
     site.rating = rating ?? undefined;
-    site.siteGuideUrl = siteGuideUrl;
+    site.siteGuideUrl = siteGuideUrl ?? undefined;
     site.validBearings = validBearings ?? undefined;
     site.elevation = elevation;
     site.radio = radio ?? undefined;
@@ -233,7 +223,7 @@ router.put(
     site.mandatoryNotices = mandatoryNotices ?? undefined;
     site.airspaceNotices = airspaceNotices ?? undefined;
     site.landingNotices = landingNotices ?? undefined;
-    site.isDisabled = isDisabled ?? undefined;
+    site.isDisabled = isDisabled;
 
     try {
       await site.save();

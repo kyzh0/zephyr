@@ -193,7 +193,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
             <Input
               ref={inputRef}
               type="text"
-              placeholder="Search stations, sites & cams"
+              placeholder={"Stations, sites, cams"}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}

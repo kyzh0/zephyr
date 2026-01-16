@@ -108,8 +108,8 @@ export default function Site() {
       </span>
 
       <span className="font-thin text-[10px] sm:text-xs mb-1">
-        [ {site?.location.coordinates[1].toFixed(3)},
-        {site?.location.coordinates[0].toFixed(3)} ] {site?.elevation}m
+        [ {site?.location.coordinates[1].toFixed(4)},
+        {site?.location.coordinates[0].toFixed(4)} ] {site?.elevation}m
       </span>
     </div>
   );
@@ -165,7 +165,7 @@ export default function Site() {
 
           {/* Landing Summary */}
           {site.landingSummary && (
-            <Alert className="py-2">
+            <Alert className="py-2 mb-4">
               <PlaneLanding />
               <AlertDescription className="text-sm whitespace-pre-wrap">
                 {site.landingSummary}
@@ -175,22 +175,18 @@ export default function Site() {
 
           {/* Description */}
           {site.description && (
-            <div>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {site.description}
-              </p>
+            <div className="mb-4">
+              <p className="text-sm whitespace-pre-wrap">{site.description}</p>
             </div>
           )}
 
           {/* Site Details Grid */}
-          <div className="grid grid-cols-1 gap-3 mt-4">
+          <div className="grid grid-cols-1 gap-3">
             {/* Access */}
             {site.access && (
               <div>
                 <h3 className="font-semibold text-sm mb-1">Access</h3>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {site.access}
-                </p>
+                <p className="text-sm whitespace-pre-wrap">{site.access}</p>
               </div>
             )}
 
@@ -198,7 +194,7 @@ export default function Site() {
             {site.landingNotices && (
               <div>
                 <h3 className="font-semibold text-sm mb-1">Landing</h3>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                <p className="text-sm whitespace-pre-wrap">
                   {site.landingNotices}
                 </p>
               </div>
@@ -208,7 +204,7 @@ export default function Site() {
             {site.airspaceNotices && (
               <div>
                 <h3 className="font-semibold text-sm mb-1">Airspace</h3>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                <p className="text-sm whitespace-pre-wrap">
                   {site.airspaceNotices}
                 </p>
               </div>
@@ -218,9 +214,7 @@ export default function Site() {
             {site.radio && (
               <div>
                 <h3 className="font-semibold text-sm mb-1">Radio</h3>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {site.radio}
-                </p>
+                <p className="text-sm whitespace-pre-wrap">{site.radio}</p>
               </div>
             )}
 
@@ -228,7 +222,7 @@ export default function Site() {
             {(site.rating?.paragliding || site.rating?.hangGliding) && (
               <div>
                 <h3 className="font-semibold text-sm mb-1">Site Rating</h3>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm">
                   {site.rating?.paragliding && (
                     <div>
                       PG:{" "}

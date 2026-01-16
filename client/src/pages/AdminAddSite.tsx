@@ -59,7 +59,7 @@ const formSchema = z.object({
   coordinates: coordinatesSchema,
   paraglidingRating: z.string().optional(),
   hangGlidingRating: z.string().optional(),
-  siteGuideURL: z.url("Enter a valid URL"),
+  siteGuideURL: z.url("Enter a valid URL").or(z.literal("")).optional(),
   validBearings: bearingsSchema,
   elevation: z.string().regex(/^$|^\d+$/, "Must be a number"),
   landingSummary: z.string().min(1, "Landing summary is required"),
@@ -190,13 +190,13 @@ export default function AdminAddSite() {
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="paraglidingRating"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>PG - Optional</FormLabel>
+                      <FormLabel>PG Rating - Optional</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="e.g. PG2" />
                       </FormControl>
@@ -218,28 +218,25 @@ export default function AdminAddSite() {
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <FormField
-                control={form.control}
-                name="isDisabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Disabled</FormLabel>
-                      <FormDescription>
-                        Disable this site to hide it from the map
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="isDisabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Disabled</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             {/* Location */}

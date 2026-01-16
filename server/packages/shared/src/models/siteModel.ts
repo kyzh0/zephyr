@@ -12,7 +12,7 @@ export type SiteAttrs = {
 
   rating?: SiteRating;
 
-  siteGuideUrl: string;
+  siteGuideUrl?: string;
   validBearings?: string;
   elevation: number;
 
@@ -48,7 +48,7 @@ const siteSchema = new mongoose.Schema<SiteAttrs>(
       hangGliding: { type: String }
     },
 
-    siteGuideUrl: { type: String, required: true },
+    siteGuideUrl: { type: String },
     validBearings: { type: String },
 
     elevation: { type: Number, required: true },
