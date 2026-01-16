@@ -8,17 +8,19 @@ export type SiteRating = {
 
 export type SiteAttrs = {
   name: string;
-  takeoffLocation?: GeoPoint;
-  landingLocation?: GeoPoint;
+  location: GeoPoint;
 
   rating?: SiteRating;
 
-  siteGuideUrl: string;
+  siteGuideUrl?: string;
   validBearings?: string;
   elevation: number;
 
   radio?: string;
-  description: string;
+  landingSummary: string;
+  hazards?: string;
+  description?: string;
+  access?: string;
 
   mandatoryNotices?: string;
   airspaceNotices?: string;
@@ -33,17 +35,11 @@ const siteSchema = new mongoose.Schema<SiteAttrs>(
   {
     name: { type: String, required: true },
 
-    takeoffLocation: {
+    location: {
       type: { type: String, required: true, enum: ['Point'] },
       coordinates: {
-        type: [Number]
-      }
-    },
-
-    landingLocation: {
-      type: { type: String, required: true, enum: ['Point'] },
-      coordinates: {
-        type: [Number]
+        type: [Number],
+        required: true
       }
     },
 
@@ -52,13 +48,16 @@ const siteSchema = new mongoose.Schema<SiteAttrs>(
       hangGliding: { type: String }
     },
 
-    siteGuideUrl: { type: String, required: true },
+    siteGuideUrl: { type: String },
     validBearings: { type: String },
 
     elevation: { type: Number, required: true },
 
     radio: { type: String },
-    description: { type: String, required: true },
+    landingSummary: { type: String, required: true },
+    hazards: { type: String },
+    description: { type: String },
+    access: { type: String },
 
     mandatoryNotices: { type: String },
     airspaceNotices: { type: String },

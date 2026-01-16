@@ -128,6 +128,15 @@
   height: 36px;
 }
 
+.site-marker {
+  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
+}
+
+.site-marker:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+}
+
 .marker-arrow {
   position: absolute;
   top: 0;
@@ -172,5 +181,9 @@
 }
 
 .mapboxgl-ctrl-logo {
-    display: none !important;
+  display: none !important;
+}
+
+.mapboxgl-popup {
+  z-index: 10000 !important;
 }

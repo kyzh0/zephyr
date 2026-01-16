@@ -28,11 +28,10 @@ export default async function scrapeAttentisData(stations: WithId<StationAttrs>[
   try {
     const result: StationResult[] = [];
 
-    const attentisKey = process.env.ATTENTIS_KEY;
     const { data } = await httpClient.get<AttentisResponse>(
       'https://api.attentistechnology.com/sensor-overview',
       {
-        headers: { Authorization: `Bearer ${attentisKey ?? ''}` }
+        headers: { Authorization: `Bearer ${process.env.ATTENTIS_KEY}` }
       }
     );
 

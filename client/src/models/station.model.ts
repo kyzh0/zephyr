@@ -18,6 +18,7 @@ interface IStation {
   isError: boolean;
   isOffline: boolean;
   isHighResolution: boolean;
+  isDisabled: boolean;
   harvestTemperatureId?: string;
   harvestWindAverageId?: string;
   harvestWindDirectionId?: string;

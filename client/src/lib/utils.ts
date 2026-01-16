@@ -7,6 +7,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Common error handling utility
+export const handleError = (err: unknown, defaultMessage: string): Error => {
+  return err instanceof Error ? err : new Error(defaultMessage);
+};
+
 export const getWindDirectionFromBearing = (bearing: number) => {
   if (bearing < 0) {
     return "";
@@ -218,7 +223,83 @@ export const getMinutesAgo = (date: Date): string => {
     return "just now";
   } else if (minutes === 1) {
     return "1 minute ago";
+  } else if (minutes > 60 * 24) {
+    return `Over ${Math.floor(minutes / (60 * 24))} days ago`;
+  } else if (minutes > 60) {
+    return `Over ${Math.floor(minutes / 60)} hours ago`;
   } else {
     return `${minutes} minutes ago`;
   }
+};
+
+// Convert compass directions to degrees
+export const compassToDegrees = (direction: string): number => {
+  const compass: Record<string, number> = {
+    N: 0,
+    NNE: 22.5,
+    NE: 45,
+    ENE: 67.5,
+    E: 90,
+    ESE: 112.5,
+    SE: 135,
+    SSE: 157.5,
+    S: 180,
+    SSW: 202.5,
+    SW: 225,
+    WSW: 247.5,
+    W: 270,
+    WNW: 292.5,
+    NW: 315,
+    NNW: 337.5,
+  };
+  return compass[direction.toUpperCase()] ?? parseFloat(direction);
+};
+
+// Parse valid bearings string into array of {start, end} sectors
+export const parseValidBearings = (
+  bearings: string | undefined
+): { start: number; end: number }[] => {
+  if (!bearings) {
+    return [];
+  }
+
+  const sectors: { start: number; end: number }[] = [];
+  const pairs = bearings.split(",");
+
+  for (const pair of pairs) {
+    const trimmedPair = pair.trim();
+
+    if (trimmedPair.includes("-")) {
+      // Range of bearings (e.g., "NW-NE" or "270-90")
+      const [start, end] = trimmedPair.split("-").map((s) => s.trim());
+      const startAngle = compassToDegrees(start);
+      const endAngle = compassToDegrees(end);
+
+      // Handle wrapping around 0/360
+      if (startAngle <= endAngle) {
+        sectors.push({ start: startAngle, end: endAngle });
+      } else {
+        sectors.push({ start: startAngle, end: 360 });
+        sectors.push({ start: 0, end: endAngle });
+      }
+    } else {
+      // Single bearing - create a small arc around it (±30 degrees)
+      const bearing = compassToDegrees(trimmedPair);
+      let startAngle = bearing - 30;
+      let endAngle = bearing + 30;
+
+      // Normalize angles
+      if (startAngle < 0) startAngle += 360;
+      if (endAngle > 360) endAngle -= 360;
+
+      if (startAngle <= endAngle) {
+        sectors.push({ start: startAngle, end: endAngle });
+      } else {
+        sectors.push({ start: startAngle, end: 360 });
+        sectors.push({ start: 0, end: endAngle });
+      }
+    }
+  }
+
+  return sectors;
 };

@@ -111,14 +111,16 @@ export default function Sounding() {
         </div>
 
         {sounding && (
-          <a
-            href={raspLink}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs sm:text-sm text-muted-foreground hover:underline self-end"
-          >
-            Source: RASP
-          </a>
+          <div className="flex items-center justify-end">
+            <a
+              href={raspLink}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs sm:text-sm text-muted-foreground hover:underline"
+            >
+              Source: RASP
+            </a>
+          </div>
         )}
       </DialogContent>
     </Dialog>
