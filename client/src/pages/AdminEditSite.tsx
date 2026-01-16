@@ -313,7 +313,7 @@ export default function AdminEditSite() {
                     name="paraglidingRating"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Paragliding Rating</FormLabel>
+                        <FormLabel>PG Rating - Optional</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="e.g. PG2" />
                         </FormControl>
@@ -327,7 +327,7 @@ export default function AdminEditSite() {
                     name="hangGlidingRating"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Hang Gliding Rating</FormLabel>
+                        <FormLabel>HG Rating - Optional</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="e.g. HG2" />
                         </FormControl>
@@ -449,67 +449,6 @@ export default function AdminEditSite() {
 
                 <FormField
                   control={form.control}
-                  name="hazards"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Hazards</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={4} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={4} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="access"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Access</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={4} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="radio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Radio Frequency - Optional</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={2} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Notices */}
-              <div className="space-y-4">
-                <h2 className="text-lg font-medium">Notices</h2>
-
-                <FormField
-                  control={form.control}
                   name="mandatoryNotices"
                   render={({ field }) => (
                     <FormItem>
@@ -524,10 +463,38 @@ export default function AdminEditSite() {
 
                 <FormField
                   control={form.control}
-                  name="airspaceNotices"
+                  name="hazards"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Airspace Notices - Optional</FormLabel>
+                      <FormLabel>Hazards - Optional</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} rows={4} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description - Optional</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} rows={4} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="access"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Access - Optional</FormLabel>
                       <FormControl>
                         <Textarea {...field} rows={4} />
                       </FormControl>
@@ -541,9 +508,37 @@ export default function AdminEditSite() {
                   name="landingNotices"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Landing Notices - Optional</FormLabel>
+                      <FormLabel>Landing Additional Info - Optional</FormLabel>
                       <FormControl>
                         <Textarea {...field} rows={4} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="airspaceNotices"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Airspace - Optional</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} rows={4} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="radio"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Radio Info - Optional</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} rows={2} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
