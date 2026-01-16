@@ -11,7 +11,6 @@ import type { ICam } from "@/models/cam.model";
 import { useSites } from "@/hooks/useSites";
 import { cn } from "@/lib/utils";
 import { SiteMarker } from "./SiteMarker";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface SearchBarProps {
   className?: string;

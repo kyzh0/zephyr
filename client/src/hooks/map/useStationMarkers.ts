@@ -663,7 +663,6 @@ export function useStationMarkers({
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {
     for (const item of markersRef.current) {
-      // eslint-disable-next-line react-hooks/immutability
       item.marker.style.visibility = visible ? "visible" : "hidden";
     }
   }, []);
