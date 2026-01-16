@@ -1,3 +1,5 @@
+import { parseValidBearings } from "@/lib/utils";
+
 interface WindCompassProps {
   bearing: number | null | undefined;
   validBearings: string | undefined;
@@ -34,31 +36,7 @@ export function WindCompass({
   const centerY = size / 2;
   const radius = size * 0.4;
 
-  // Parse valid bearings to create sectors
-  const createValidBearingSectors = () => {
-    if (!validBearings) {
-      return [];
-    }
-
-    const sectors: { start: number; end: number }[] = [];
-    const pairs = validBearings.split(",");
-
-    for (const pair of pairs) {
-      const bearings = pair.split("-");
-      if (bearings.length === 2) {
-        const start = Number(bearings[0]);
-        const end = Number(bearings[1]);
-
-        if (start <= end) {
-          sectors.push({ start, end });
-        } else {
-          sectors.push({ start, end: 360 });
-          sectors.push({ start: 0, end });
-        }
-      }
-    }
-    return sectors;
-  };
+  const validSectors = parseValidBearings(validBearings);
 
   const createSectorPath = (startAngle: number, endAngle: number) => {
     const startRad = ((startAngle - 90) * Math.PI) / 180;
@@ -78,8 +56,6 @@ export function WindCompass({
       "Z",
     ].join(" ");
   };
-
-  const validSectors = createValidBearingSectors();
 
   return (
     <svg width={size} height={size} style={{ overflow: "visible" }}>
