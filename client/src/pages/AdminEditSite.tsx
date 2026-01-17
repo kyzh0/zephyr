@@ -59,7 +59,7 @@ const coordinatesSchema = z.string().refine(
       lon <= 180
     );
   },
-  { message: "Enter valid coordinates: latitude, longitude" }
+  { message: "Enter valid coordinates: latitude, longitude" },
 );
 
 const bearingsSchema = z
@@ -75,7 +75,7 @@ const bearingsSchema = z
         return start >= 0 && start <= 360 && end >= 0 && end <= 360;
       });
     },
-    { message: "Format: 270-010,090-180 (bearings 0-360)" }
+    { message: "Format: 270-010,090-180 (bearings 0-360)" },
   )
   .min(1, "Bearings are required");
 
@@ -107,7 +107,7 @@ function formatCoordinates(location?: {
 }
 
 function parseCoordinates(
-  value: string
+  value: string,
 ): { type: "Point"; coordinates: [number, number] } | undefined {
   if (!value.trim()) return undefined;
   const [lat, lon] = value.replace(/\s/g, "").split(",").map(Number);
@@ -127,7 +127,9 @@ export default function AdminEditSite() {
   const [landings, setLandings] = useState<ILanding[]>([]);
   useEffect(() => {
     async function fetchLandings() {
-      setLandings((await listLandings()) ?? []);
+      const landings = (await listLandings()) ?? [];
+      landings.sort((a, b) => a.name.localeCompare(b.name));
+      setLandings(landings);
     }
     fetchLandings();
   }, []);
