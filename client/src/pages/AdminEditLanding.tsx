@@ -31,8 +31,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { deleteSite, getSiteById, patchSite } from "@/services/site.service";
-import type { ISite } from "@/models/site.model";
+import {
+  deleteLanding,
+  getLandingById,
+  patchLanding,
+} from "@/services/landing.service";
+import type { ILanding } from "@/models/landing.model";
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -52,23 +56,6 @@ const coordinatesSchema = z.string().refine(
   { message: "Enter valid coordinates: latitude, longitude" }
 );
 
-const bearingsSchema = z
-  .string()
-  .refine(
-    (val) => {
-      if (!val.trim()) return true;
-      const ranges = val.split(",");
-      const rangePattern = /^[0-9]{3}-[0-9]{3}$/;
-      return ranges.every((range) => {
-        if (!rangePattern.test(range)) return false;
-        const [start, end] = range.split("-").map(Number);
-        return start >= 0 && start <= 360 && end >= 0 && end <= 360;
-      });
-    },
-    { message: "Format: 270-010,090-180 (bearings 0-360)" }
-  )
-  .min(1, "Bearings are required");
-
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   coordinates: coordinatesSchema,
@@ -76,14 +63,10 @@ const formSchema = z.object({
     .string()
     .regex(/^$|^\d+$/, "Must be a number")
     .min(1, "Elevation is required"),
-  validBearings: bearingsSchema,
-  landingId: z.string().min(1, "Landing is required"),
   isDisabled: z.boolean(),
   description: z.string().optional(),
   mandatoryNotices: z.string().optional(),
   siteGuideUrl: z.url("Enter a valid URL").or(z.literal("")).optional(),
-  hazards: z.string().optional(),
-  access: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -107,11 +90,11 @@ function parseCoordinates(
   };
 }
 
-export default function AdminEditSite() {
+export default function AdminEditLanding() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
-  const [site, setSite] = useState<ISite | null>(null);
+  const [landing, setLanding] = useState<ILanding | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const form = useForm<FormValues>({
@@ -120,13 +103,9 @@ export default function AdminEditSite() {
       name: "",
       coordinates: "",
       elevation: "0",
-      validBearings: "",
-      landingId: "",
       isDisabled: false,
       description: "",
       siteGuideUrl: "",
-      hazards: "",
-      access: "",
     },
   });
 
@@ -134,26 +113,22 @@ export default function AdminEditSite() {
 
   useEffect(() => {
     if (!id) {
-      navigate("/admin/sites");
+      navigate("/admin/landings");
       return;
     }
 
     async function load() {
-      const data = await getSiteById(id!);
+      const data = await getLandingById(id!);
       if (data) {
-        setSite(data);
+        setLanding(data);
         form.reset({
           name: data.name,
           coordinates: formatCoordinates(data.location),
           elevation: data.elevation.toString(),
-          validBearings: data.validBearings,
-          landingId: data.landingId,
           isDisabled: data.isDisabled,
           description: data.description ?? "",
           mandatoryNotices: data.mandatoryNotices ?? "",
           siteGuideUrl: data.siteGuideUrl ?? "",
-          hazards: data.hazards ?? "",
-          access: data.access ?? "",
         });
       }
       setIsLoading(false);
@@ -169,30 +144,26 @@ export default function AdminEditSite() {
     setIsDeleting(true);
     const adminKey = sessionStorage.getItem("adminKey") ?? "";
     try {
-      await deleteSite(id, adminKey);
-      toast.success("Site deleted");
-      navigate("/admin/sites");
+      await deleteLanding(id, adminKey);
+      toast.success("Landing deleted");
+      navigate("/admin/landings");
     } catch (error) {
-      toast.error("Failed to delete site: " + (error as Error).message);
+      toast.error("Failed to delete landing: " + (error as Error).message);
       setIsDeleting(false);
     }
   }
 
   async function onSubmit(values: FormValues) {
-    if (!site) return;
+    if (!landing) return;
 
-    const updates: Partial<ISite> = {
+    const updates: Partial<ILanding> = {
       name: values.name,
       elevation: parseInt(values.elevation, 10),
-      validBearings: values.validBearings,
-      landingId: values.landingId,
       isDisabled: values.isDisabled,
       description: values.description,
       mandatoryNotices: values.mandatoryNotices,
       siteGuideUrl: values.siteGuideUrl,
-      hazards: values.hazards,
-      access: values.access,
-      __v: site.__v,
+      __v: landing.__v,
     };
 
     const location = parseCoordinates(values.coordinates);
@@ -202,11 +173,11 @@ export default function AdminEditSite() {
 
     const adminKey = sessionStorage.getItem("adminKey") ?? "";
     try {
-      await patchSite(id!, updates, adminKey);
+      await patchLanding(id!, updates, adminKey);
       toast.success("Site updated");
-      navigate(`/admin/sites`);
+      navigate(`/admin/landings`);
     } catch (error) {
-      toast.error("Failed to update site: " + (error as Error).message);
+      toast.error("Failed to update landing: " + (error as Error).message);
     }
   }
 
@@ -216,13 +187,15 @@ export default function AdminEditSite() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/admin/sites")}
+          onClick={() => navigate("/admin/landings")}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-xl font-semibold">Edit Site</h1>
-          {site && <p className="text-sm text-muted-foreground">{site.name}</p>}
+          <h1 className="text-xl font-semibold">Edit Landing</h1>
+          {landing && (
+            <p className="text-sm text-muted-foreground">{landing.name}</p>
+          )}
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -239,7 +212,7 @@ export default function AdminEditSite() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Site</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{site?.name}"? This action
+                Are you sure you want to delete "{landing?.name}"? This action
                 cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -275,21 +248,7 @@ export default function AdminEditSite() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Site Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="landingId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Landing</FormLabel>
+                      <FormLabel>Landing Name</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -356,20 +315,6 @@ export default function AdminEditSite() {
                       </FormItem>
                     )}
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="validBearings"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Valid Bearings</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="000-090,180-270" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
               </div>
 
@@ -413,34 +358,6 @@ export default function AdminEditSite() {
                       <FormLabel>Site Guide URL</FormLabel>
                       <FormControl>
                         <Input {...field} type="url" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="hazards"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Hazards - Optional</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={4} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="access"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Access - Optional</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={4} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

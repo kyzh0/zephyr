@@ -22,14 +22,16 @@ import {
 import { listStations } from "@/services/station.service";
 import { listSoundings } from "@/services/sounding.service";
 import { listSites } from "@/services/site.service";
+import { listLandings } from "@/services/landing.service";
 import type { IStation } from "@/models/station.model";
 import type { ISounding } from "@/models/sounding.model";
 import { getMinutesAgo } from "@/lib/utils";
 import { useWebcams } from "@/hooks";
 import type { ISite } from "@/models/site.model";
+import type { ILanding } from "@/models/landing.model";
 
 interface AdminDashboardProps {
-  tab?: "stations" | "webcams" | "soundings" | "sites";
+  tab?: "stations" | "webcams" | "soundings" | "sites" | "landings";
 }
 
 export default function AdminDashboard({
@@ -58,6 +60,10 @@ export default function AdminDashboard({
   const [sites, setSites] = useState<ISite[]>([]);
   const [siteSearch, setSiteSearch] = useState("");
 
+  // Landings state
+  const [landings, setLandings] = useState<ILanding[]>([]);
+  const [landingSearch, setLandingSearch] = useState("");
+
   useEffect(() => {
     async function loadStations() {
       const data = await listStations(true);
@@ -83,6 +89,15 @@ export default function AdminDashboard({
       setStationsLoading(false);
     }
     loadSites();
+  }, []);
+
+  useEffect(() => {
+    async function loadLandings() {
+      const data = await listLandings(true);
+      if (data?.length) setLandings(data);
+      setStationsLoading(false);
+    }
+    loadLandings();
   }, []);
 
   const filteredStations = useMemo(() => {
@@ -150,6 +165,23 @@ export default function AdminDashboard({
     });
   }, [sites, siteSearch]);
 
+  const filteredLandings = useMemo(() => {
+    if (!landings?.length) return [];
+
+    let filtered = landings;
+    if (landingSearch.trim())
+      filtered = filtered.filter((s) =>
+        s.name.toLowerCase().includes(landingSearch.toLowerCase())
+      );
+
+    return filtered.sort((a, b) => {
+      const disabledDiff =
+        Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
+      if (disabledDiff !== 0) return disabledDiff;
+      return a.name.localeCompare(b.name);
+    });
+  }, [landings, landingSearch]);
+
   const handleSignOut = () => {
     sessionStorage.removeItem("adminKey");
     navigate(-1);
@@ -160,7 +192,8 @@ export default function AdminDashboard({
       value === "stations" ||
       value === "webcams" ||
       value === "soundings" ||
-      value === "sites"
+      value === "sites" ||
+      value === "landings"
     ) {
       setActiveTab(value);
       navigate(`/admin/${value}`, { replace: true });
@@ -190,6 +223,7 @@ export default function AdminDashboard({
             <TabsTrigger value="webcams">Webcams</TabsTrigger>
             <TabsTrigger value="soundings">Soundings</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
+            <TabsTrigger value="landings">Landings</TabsTrigger>
           </TabsList>
 
           {/* Stations Tab */}
@@ -461,6 +495,65 @@ export default function AdminDashboard({
                         </TableCell>
                         <TableCell>
                           {site.isDisabled ? (
+                            <span>Disabled</span>
+                          ) : (
+                            <span className="text-green-600">Active</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+
+          {/* Landings Tab */}
+          <TabsContent value="landings" className="mt-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search landings..."
+                  value={landingSearch}
+                  onChange={(e) => setLandingSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Button onClick={() => navigate("/admin/landings/add")}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Landing
+              </Button>
+            </div>
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead className="w-[100px]">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {!filteredLandings?.length ? (
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-muted-foreground">
+                        No landings found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredLandings.map((landing) => (
+                      <TableRow
+                        key={landing._id}
+                        className="cursor-pointer"
+                        onClick={() =>
+                          navigate(`/admin/landings/${landing._id}`)
+                        }
+                      >
+                        <TableCell className="font-medium">
+                          {landing.name}
+                        </TableCell>
+                        <TableCell>
+                          {landing.isDisabled ? (
                             <span>Disabled</span>
                           ) : (
                             <span className="text-green-600">Active</span>

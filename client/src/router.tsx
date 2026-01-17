@@ -6,6 +6,7 @@ import Station from "./pages/Station";
 import Webcam from "./pages/Webcam";
 import Sounding from "./pages/Sounding";
 import Site from "./pages/Site";
+import Landing from "./pages/Landing";
 import GridView from "./pages/GridView";
 import ExportMapData from "./pages/ExportMapData";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -13,8 +14,10 @@ import AdminAddStation from "./pages/AdminAddStation";
 import AdminAddWebcam from "./pages/AdminAddWebcam";
 import AdminAddSounding from "./pages/AdminAddSounding";
 import AdminAddSite from "./pages/AdminAddSite";
+import AdminAddLanding from "./pages/AdminAddLanding";
 import AdminEditStation from "./pages/AdminEditStation";
 import AdminEditSite from "./pages/AdminEditSite";
+import AdminEditLanding from "./pages/AdminEditLanding";
 import ProtectedRoute from "./pages/ProtectedRoute";
 
 export const router = createBrowserRouter([
@@ -47,6 +50,10 @@ export const router = createBrowserRouter([
           {
             path: "sites/:id",
             element: <Site />,
+          },
+          {
+            path: "landings/:id",
+            element: <Landing />,
           },
           {
             path: "grid",
@@ -83,6 +90,10 @@ export const router = createBrowserRouter([
             element: <AdminDashboard tab="sites" />,
           },
           {
+            path: "landings",
+            element: <AdminDashboard tab="landings" />,
+          },
+          {
             path: "stations/add",
             element: <AdminAddStation />,
           },
@@ -99,12 +110,20 @@ export const router = createBrowserRouter([
             element: <AdminAddSite />,
           },
           {
+            path: "landings/add",
+            element: <AdminAddLanding />,
+          },
+          {
             path: "stations/:id",
             element: <AdminEditStation />,
           },
           {
             path: "sites/:id",
             element: <AdminEditSite />,
+          },
+          {
+            path: "landings/:id",
+            element: <AdminEditLanding />,
           },
         ],
       },

@@ -3,11 +3,12 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 import authRoute from './routes/authRoute';
-import stationRoute from './routes/stationRoute';
 import camRoute from './routes/camRoute';
-import soundingRoute from './routes/soundingRoute';
+import landingRoute from './routes/landingRoute';
 import publicRoute from './routes/publicRoute';
 import siteRoute from './routes/siteRoute';
+import soundingRoute from './routes/soundingRoute';
+import stationRoute from './routes/stationRoute';
 
 const { NODE_ENV } = process.env;
 if (NODE_ENV !== 'production' && NODE_ENV !== 'staging') {
@@ -25,10 +26,11 @@ if (NODE_ENV !== 'production' && NODE_ENV !== 'staging') {
 
 // routes
 app.use('/auth', authRoute);
-app.use('/stations', stationRoute);
 app.use('/cams', camRoute);
-app.use('/soundings', soundingRoute);
-app.use('/sites', siteRoute);
+app.use('/landings', landingRoute);
 app.use('/v1', publicRoute);
+app.use('/sites', siteRoute);
+app.use('/soundings', soundingRoute);
+app.use('/stations', stationRoute);
 
 export default app;
