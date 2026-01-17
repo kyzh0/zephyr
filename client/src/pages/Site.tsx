@@ -107,7 +107,7 @@ export default function Site() {
         {site?.name}
       </span>
 
-      <span className="font-thin text-[10px] sm:text-xs mb-1">
+      <span className="font-thin text-[10px] sm:text-xs">
         [ {site?.location.coordinates[1].toFixed(4)},
         {site?.location.coordinates[0].toFixed(4)} ] {site?.elevation}m
       </span>
@@ -118,7 +118,7 @@ export default function Site() {
   const bodyContent = (
     <>
       {isLoading ? (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-16 w-full" />
@@ -185,14 +185,14 @@ export default function Site() {
 
           {/* Description */}
           {site.description && (
-            <div className="mb-4">
+            <div className="my-4">
               <p className="text-sm whitespace-pre-wrap">{site.description}</p>
             </div>
           )}
 
           {/* Access */}
           {site.access && (
-            <div>
+            <div className="mb-4">
               <h3 className="font-semibold text-sm mb-1">Access</h3>
               <p className="text-sm whitespace-pre-wrap">{site.access}</p>
             </div>
@@ -256,9 +256,8 @@ export default function Site() {
           {/* Disclaimer */}
           <div>
             <p className="text-[10px] text-muted-foreground whitespace-pre-wrap">
-              Disclaimer: Zephyr does not guarantee the accuracy of this
-              information. Pilots are responsible for verifying current
-              conditions.
+              Zephyr does not guarantee the accuracy of this information. Pilots
+              are responsible for verifying current conditions.
             </p>
           </div>
         </div>
@@ -281,7 +280,7 @@ export default function Site() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex w-full text-center justify-evenly items-center">
+            <div className="flex w-full text-center justify-evenly items-center mb-3">
               {headerContent}
               {site?.validBearings && (
                 <WindCompass
@@ -307,7 +306,7 @@ export default function Site() {
     <Dialog open onOpenChange={() => navigate("/")}>
       <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="pb-2">
-          <DialogTitle className="text-center">
+          <DialogTitle className="text-center mb-3">
             <div className="flex w-full justify-center items-center">
               {site?.validBearings && (
                 <div className="mr-8">
