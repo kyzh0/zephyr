@@ -30,6 +30,7 @@ import scrapeWeatherProData from './types/weatherPro';
 import scrapeWeatherUndergroundData from './types/weatherUnderground';
 import scrapeWhanganuiInletData from './types/whanganuiInlet';
 import scrapeWindGuruData from './types/windGuru';
+import scrapeWindicatorData from './types/windicator';
 import scrapeWindyData from './types/windy';
 import scrapeWowData from './types/wow';
 import scrapeWswrData from './types/wswr';
@@ -67,6 +68,7 @@ const scrapers = {
   wu: scrapeWeatherUndergroundData,
   wi: scrapeWhanganuiInletData,
   windguru: scrapeWindGuruData,
+  windicator: scrapeWindicatorData,
   windy: scrapeWindyData,
   wow: scrapeWowData,
   wswr: scrapeWswrData
