@@ -2,6 +2,7 @@ import type { IStation } from "@/models/station.model";
 import type { ICam } from "@/models/cam.model";
 import type { ISounding } from "@/models/sounding.model";
 import type { ISite } from "@/models/site.model";
+import type { ILanding } from "@/models/landing.model";
 import type { GeoJson, GeoJsonFeature, WindUnit } from "./map.types";
 import { getArrowStyle as getArrowStylePng } from "./wind-icon.utils";
 
@@ -191,6 +192,39 @@ export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
         validBearings: site.validBearings,
       },
       geometry: site.location as {
+        type: string;
+        coordinates: [number, number];
+      },
+    };
+    geoJson.features.push(feature);
+  }
+
+  return geoJson;
+}
+
+export function getLandingGeoJson(
+  landings: ILanding[] | undefined
+): GeoJson | null {
+  if (!landings?.length) {
+    return null;
+  }
+
+  const geoJson: GeoJson = {
+    type: "FeatureCollection",
+    features: [],
+  };
+
+  for (const landing of landings) {
+    // Skip disabled landings
+    if (landing.isDisabled) continue;
+
+    const feature: GeoJsonFeature = {
+      type: "Feature",
+      properties: {
+        name: landing.name,
+        dbId: landing._id,
+      },
+      geometry: landing.location as {
         type: string;
         coordinates: [number, number];
       },

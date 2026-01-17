@@ -7,10 +7,13 @@ import { listStations } from "@/services/station.service";
 import { listCams } from "@/services/cam.service";
 import type { IStation } from "@/models/station.model";
 import type { ISite } from "@/models/site.model";
+import type { ILanding } from "@/models/landing.model";
 import type { ICam } from "@/models/cam.model";
 import { useSites } from "@/hooks/useSites";
+import { useLandings } from "@/hooks/useLandings";
 import { cn } from "@/lib/utils";
 import { SiteMarker } from "./SiteMarker";
+import { LandingMarker } from "./LandingMarker";
 
 interface SearchBarProps {
   className?: string;
@@ -20,6 +23,7 @@ interface SearchBarProps {
 type SearchResult =
   | { type: "station"; item: IStation }
   | { type: "site"; item: ISite }
+  | { type: "landing"; item: ILanding }
   | { type: "webcam"; item: ICam };
 
 export function SearchBar({ className, disabled }: SearchBarProps) {
@@ -30,6 +34,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
   const [stations, setStations] = useState<IStation[]>([]);
   const [webcams, setWebcams] = useState<ICam[]>([]);
   const { sites } = useSites();
+  const { landings } = useLandings();
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,18 +78,31 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
       )
       .map((site) => ({ type: "site" as const, item: site }));
 
+    // Filter landings
+    const filteredLandings: SearchResult[] = landings
+      .filter(
+        (landing) =>
+          !landing.isDisabled && landing.name.toLowerCase().includes(lowerQuery)
+      )
+      .map((landing) => ({ type: "landing" as const, item: landing }));
+
     const filteredWebcams: SearchResult[] = webcams
       .filter((cam) => cam.name.toLowerCase().includes(lowerQuery))
       .map((cam) => ({ type: "webcam" as const, item: cam }));
 
     // Combine and limit results
-    const combined = [...filteredStations, ...filteredSites, ...filteredWebcams]
+    const combined = [
+      ...filteredStations,
+      ...filteredSites,
+      ...filteredLandings,
+      ...filteredWebcams,
+    ]
       .sort((a, b) => a.item.name.localeCompare(b.item.name))
       .slice(0, 8);
 
     setResults(combined);
     setSelectedIndex(-1);
-  }, [query, stations, sites, webcams]);
+  }, [query, stations, sites, landings, webcams]);
 
   // Focus input when expanded
   useEffect(() => {
@@ -138,6 +156,8 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
         navigate(`/stations/${result.item._id}`);
       } else if (result.type === "site") {
         navigate(`/sites/${result.item._id}`);
+      } else if (result.type === "landing") {
+        navigate(`/landings/${result.item._id}`);
       } else {
         navigate(`/webcams/${result.item._id}`);
       }
@@ -239,6 +259,8 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
                       size={24}
                       borderWidth={4}
                     />
+                  ) : result.type === "landing" ? (
+                    <LandingMarker size={24} borderWidth={4} />
                   ) : (
                     <Camera className="w-5 h-5" />
                   )}

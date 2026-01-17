@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { SignInDialog } from "./SignInDialog";
 import { SiteMarker } from "./SiteMarker";
+import { LandingMarker } from "./LandingMarker";
 
 export const WELCOME_STORAGE_KEY = "zephyr-welcome-dismissed";
 
@@ -112,6 +113,11 @@ export function HelpDialog({
             <SiteMarker validBearings="45-140" size={30} borderWidth={5} />
           </div>
           <div className="flex items-center">PG / HG site info</div>
+
+          <div className="flex justify-center items-center">
+            <LandingMarker size={30} borderWidth={5} />
+          </div>
+          <div className="flex items-center">Landing info</div>
 
           <div className="flex justify-center items-center">
             <Camera className="w-5 h-5 sm:w-6 sm:h-6" />

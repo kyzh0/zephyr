@@ -18,6 +18,7 @@ import {
   useWebcamMarkers,
   useSoundingMarkers,
   useSiteMarkers,
+  useLandingMarkers,
 } from "@/hooks/map";
 import { toast } from "sonner";
 import { REFRESH_INTERVAL_MS } from "@/lib/utils";
@@ -110,6 +111,13 @@ export default function Map() {
       isVisible: showSoundings,
       isHistoricData: historyOffset < 0,
     });
+
+  // Initialize landing markers below sites
+  useLandingMarkers({
+    map,
+    isMapLoaded: isLoaded,
+    isVisible: viewMode === "sites",
+  });
 
   // Initialize site markers
   const { setVisibility: setSiteVisibility } = useSiteMarkers({
