@@ -2,23 +2,20 @@ import type { ILocation } from "./location.model";
 
 export interface ISite {
   _id: string;
+  __v: number;
+
   name: string;
   location: ILocation;
-  rating: {
-    paragliding: string;
-    hangGliding: string;
-  };
-  siteGuideUrl: string;
-  validBearings?: string;
-  elevation?: number;
-  radio: string;
-  landingSummary: string;
-  hazards: string;
-  description: string;
-  access: string;
-  mandatoryNotices: string;
-  airspaceNotices: string;
-  landingNotices: string;
+  elevation: number;
+  validBearings: string;
+  landingId: string;
+  landingName: string;
+  landingLocation: ILocation;
   isDisabled: boolean;
-  __v: number;
+
+  description: string;
+  mandatoryNotices: string;
+  siteGuideUrl: string;
+  hazards: string;
+  access: string;
 }

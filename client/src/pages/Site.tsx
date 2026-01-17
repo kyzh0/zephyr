@@ -144,7 +144,7 @@ export default function Site() {
                 </ItemMedia>
                 <ItemContent>
                   <ItemTitle>View the official site guide.</ItemTitle>
-                  <ItemDescription>For up to date information</ItemDescription>
+                  <ItemDescription>For current information</ItemDescription>
                 </ItemContent>
                 <ItemActions>
                   <ChevronRightIcon className="size-4" />
@@ -163,15 +163,13 @@ export default function Site() {
             </Alert>
           )}
 
-          {/* Landing Summary */}
-          {site.landingSummary && (
-            <Alert className="py-2 mb-4">
-              <PlaneLanding />
-              <AlertDescription className="text-sm whitespace-pre-wrap">
-                {site.landingSummary}
-              </AlertDescription>
-            </Alert>
-          )}
+          {/* Landing */}
+          <Alert className="py-2 mb-4">
+            <PlaneLanding />
+            <AlertDescription className="text-sm whitespace-pre-wrap">
+              {site.landingName}
+            </AlertDescription>
+          </Alert>
 
           {/* Description */}
           {site.description && (
@@ -180,69 +178,13 @@ export default function Site() {
             </div>
           )}
 
-          {/* Site Details Grid */}
-          <div className="grid grid-cols-1 gap-3">
-            {/* Access */}
-            {site.access && (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">Access</h3>
-                <p className="text-sm whitespace-pre-wrap">{site.access}</p>
-              </div>
-            )}
-
-            {/* Landing */}
-            {site.landingNotices && (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">Landing</h3>
-                <p className="text-sm whitespace-pre-wrap">
-                  {site.landingNotices}
-                </p>
-              </div>
-            )}
-
-            {/* Airspace */}
-            {site.airspaceNotices && (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">Airspace</h3>
-                <p className="text-sm whitespace-pre-wrap">
-                  {site.airspaceNotices}
-                </p>
-              </div>
-            )}
-
-            {/* Radio */}
-            {site.radio && (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">Radio</h3>
-                <p className="text-sm whitespace-pre-wrap">{site.radio}</p>
-              </div>
-            )}
-
-            {/* Rating */}
-            {(site.rating?.paragliding || site.rating?.hangGliding) && (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">Site Rating</h3>
-                <div className="text-sm">
-                  {site.rating?.paragliding && (
-                    <div>
-                      PG:{" "}
-                      {site.rating?.paragliding === "UNKNOWN"
-                        ? "Unknown"
-                        : site.rating?.paragliding}
-                    </div>
-                  )}
-                  {site.rating?.hangGliding && (
-                    <div>
-                      HG:{" "}
-                      {site.rating?.hangGliding === "UNKNOWN"
-                        ? "Unknown"
-                        : site.rating?.hangGliding}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Access */}
+          {site.access && (
+            <div>
+              <h3 className="font-semibold text-sm mb-1">Access</h3>
+              <p className="text-sm whitespace-pre-wrap">{site.access}</p>
+            </div>
+          )}
 
           {/* Nearby Stations */}
           {site && stations.length > 0 && (

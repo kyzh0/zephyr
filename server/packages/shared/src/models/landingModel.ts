@@ -1,24 +1,20 @@
 import mongoose, { type HydratedDocument, type Model } from 'mongoose';
 import type { GeoPoint } from '../types/mongoose';
 
-export type SiteAttrs = {
+export type LandingAttrs = {
   name: string;
   location: GeoPoint;
   elevation: number;
-  validBearings: string;
-  landing: mongoose.Types.ObjectId;
   isDisabled: boolean;
 
   description?: string;
   mandatoryNotices?: string;
   siteGuideUrl?: string;
-  hazards?: string;
-  access?: string;
 };
 
-export type SiteDoc = HydratedDocument<SiteAttrs>;
+export type LandingDoc = HydratedDocument<LandingAttrs>;
 
-const siteSchema = new mongoose.Schema<SiteAttrs>(
+const landingSchema = new mongoose.Schema<LandingAttrs>(
   {
     name: { type: String, required: true },
     location: {
@@ -29,25 +25,17 @@ const siteSchema = new mongoose.Schema<SiteAttrs>(
       }
     },
     elevation: { type: Number, required: true },
-    validBearings: { type: String, required: true },
-    landing: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Landing',
-      required: true
-    },
     isDisabled: { type: Boolean, required: true },
 
     description: { type: String },
     mandatoryNotices: { type: String },
-    siteGuideUrl: { type: String },
-    hazards: { type: String },
-    access: { type: String }
+    siteGuideUrl: { type: String }
   },
   {
     optimisticConcurrency: true
   }
 );
 
-siteSchema.index({ name: 1 });
+landingSchema.index({ name: 1 });
 
-export const Site: Model<SiteAttrs> = mongoose.model<SiteAttrs>('Site', siteSchema);
+export const Landing: Model<LandingAttrs> = mongoose.model<LandingAttrs>('Landing', landingSchema);

@@ -1,14 +1,28 @@
 import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
-import { QueryFilter } from 'mongoose';
+import mongoose, { QueryFilter } from 'mongoose';
 
-import { User, Site, SiteDoc, type SiteAttrs, type WithId } from '@zephyr/shared';
+import { User, Site, SiteDoc, type SiteAttrs, type WithId, type GeoPoint } from '@zephyr/shared';
 
 const router = express.Router();
 
 type ApiKeyQuery = { key?: string };
 type IncludeDisabledQuery = { includeDisabled?: string };
 type IdParams = { id: string };
+
+type LandingLean = {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+  location: GeoPoint;
+};
+type SiteWithLandingLean = Omit<SiteAttrs, 'landing'> & {
+  landing: LandingLean;
+};
+type SiteWithLandingDto = Omit<SiteAttrs, 'landing'> & {
+  landingId: mongoose.Types.ObjectId;
+  landingName: string;
+  landingLocation: GeoPoint;
+};
 
 function isValidLonLat(coords: unknown): coords is [number, number] {
   if (!Array.isArray(coords) || coords.length !== 2) {
@@ -40,15 +54,30 @@ router.get(
       query.isDisabled = { $ne: true };
     }
 
-    const sites = await Site.find(query).lean();
-    res.json(sites);
+    const sites = await Site.find(query)
+      .populate({
+        path: 'landing',
+        select: 'name location'
+      })
+      .lean<SiteWithLandingLean[]>();
+    res.json(
+      sites.map((site) => ({
+        ...site,
+        landingId: site.landing?._id,
+        landingName: site.landing?.name,
+        landingLocation: site.landing?.location
+      }))
+    );
   }
 );
 
 // add site
 router.post(
   '/',
-  async (req: Request<Record<string, never>, unknown, SiteAttrs, ApiKeyQuery>, res: Response) => {
+  async (
+    req: Request<Record<string, never>, unknown, SiteWithLandingDto, ApiKeyQuery>,
+    res: Response
+  ) => {
     const user = await User.findOne({ key: req.query.key }).lean();
     if (!user) {
       res.sendStatus(401);
@@ -58,19 +87,15 @@ router.post(
     const {
       name,
       location,
-      rating,
-      siteGuideUrl,
-      validBearings,
       elevation,
-      radio,
-      landingSummary,
-      hazards,
+      validBearings,
+      landingId,
+      isDisabled,
       description,
-      access,
       mandatoryNotices,
-      airspaceNotices,
-      landingNotices,
-      isDisabled
+      siteGuideUrl,
+      hazards,
+      access
     } = req.body;
 
     if (!name) {
@@ -78,37 +103,38 @@ router.post(
       return;
     }
 
-    if (location && !isValidLonLat(location.coordinates)) {
+    if (!location || !isValidLonLat(location.coordinates)) {
       res.status(400).json({ error: 'Location is not valid' });
       return;
     }
 
-    if (elevation === undefined || elevation === null) {
+    if (!elevation) {
       res.status(400).json({ error: 'Elevation is required' });
       return;
     }
 
-    if (!landingSummary) {
-      res.status(400).json({ error: 'Landing Summary is required' });
+    if (!validBearings) {
+      res.status(400).json({ error: 'Bearings are required' });
+      return;
+    }
+
+    if (!landingId || !ObjectId.isValid(landingId)) {
+      res.status(400).json({ error: 'Landing is not valid' });
       return;
     }
 
     const site: SiteDoc = new Site({
       name,
       location,
-      rating,
-      siteGuideUrl,
-      validBearings,
       elevation,
-      radio,
-      landingSummary,
-      hazards,
+      validBearings,
+      landing: new ObjectId(landingId),
+      isDisabled,
       description,
-      access,
       mandatoryNotices,
-      airspaceNotices,
-      landingNotices,
-      isDisabled: isDisabled
+      siteGuideUrl,
+      hazards,
+      access
     });
 
     try {
@@ -130,19 +156,32 @@ router.get('/:id', async (req: Request<IdParams>, res: Response) => {
     return;
   }
 
-  const s = await Site.findOne({ _id: new ObjectId(id) }).lean();
+  const s = await Site.findOne({ _id: new ObjectId(id) })
+    .populate({
+      path: 'landing',
+      select: 'name location'
+    })
+    .lean<SiteWithLandingLean>();
   if (!s) {
     res.sendStatus(404);
     return;
   }
 
-  res.json(s);
+  res.json({
+    ...s,
+    landingId: s.landing?._id,
+    landingName: s.landing?.name,
+    landingLocation: s.landing?.location
+  });
 });
 
 // update site
 router.put(
   '/:id',
-  async (req: Request<IdParams, unknown, WithId<SiteAttrs>, ApiKeyQuery>, res: Response) => {
+  async (
+    req: Request<IdParams, unknown, WithId<SiteWithLandingDto>, ApiKeyQuery>,
+    res: Response
+  ) => {
     const user = await User.findOne({ key: req.query.key }).lean();
     if (!user) {
       res.sendStatus(401);
@@ -152,22 +191,18 @@ router.put(
     const { id } = req.params;
     const {
       _id,
+      __v,
       name,
       location,
-      rating,
-      siteGuideUrl,
-      validBearings,
       elevation,
-      radio,
-      landingSummary,
-      hazards,
-      description,
-      access,
-      mandatoryNotices,
-      airspaceNotices,
-      landingNotices,
+      validBearings,
+      landingId,
       isDisabled,
-      __v
+      description,
+      mandatoryNotices,
+      siteGuideUrl,
+      hazards,
+      access
     } = req.body;
 
     if (!ObjectId.isValid(id)) {
@@ -199,31 +234,32 @@ router.put(
       return;
     }
 
-    if (elevation === undefined || elevation === null) {
+    if (!elevation) {
       res.status(400).json({ error: 'Elevation is required' });
       return;
     }
 
-    if (!landingSummary) {
-      res.status(400).json({ error: 'Landing Summary is required' });
+    if (!validBearings) {
+      res.status(400).json({ error: 'Bearings are required' });
+      return;
+    }
+
+    if (!landingId || !ObjectId.isValid(landingId)) {
+      res.status(400).json({ error: 'Landing is not valid' });
       return;
     }
 
     site.name = name;
     site.location = location;
-    site.rating = rating ?? undefined;
-    site.siteGuideUrl = siteGuideUrl ?? undefined;
-    site.validBearings = validBearings ?? undefined;
     site.elevation = elevation;
-    site.radio = radio ?? undefined;
-    site.landingSummary = landingSummary;
-    site.hazards = hazards;
-    site.description = description;
-    site.access = access;
-    site.mandatoryNotices = mandatoryNotices ?? undefined;
-    site.airspaceNotices = airspaceNotices ?? undefined;
-    site.landingNotices = landingNotices ?? undefined;
+    site.validBearings = validBearings;
+    site.landing = new ObjectId(landingId);
     site.isDisabled = isDisabled;
+    site.description = description;
+    site.mandatoryNotices = mandatoryNotices ?? undefined;
+    site.siteGuideUrl = siteGuideUrl;
+    site.hazards = hazards;
+    site.access = access;
 
     try {
       await site.save();

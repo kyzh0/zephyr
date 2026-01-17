@@ -52,37 +52,39 @@ const coordinatesSchema = z.string().refine(
   { message: "Enter valid coordinates: latitude, longitude" }
 );
 
-const bearingsSchema = z.string().refine(
-  (val) => {
-    if (!val.trim()) return true;
-    const ranges = val.split(",");
-    const rangePattern = /^[0-9]{3}-[0-9]{3}$/;
-    return ranges.every((range) => {
-      if (!rangePattern.test(range)) return false;
-      const [start, end] = range.split("-").map(Number);
-      return start >= 0 && start <= 360 && end >= 0 && end <= 360;
-    });
-  },
-  { message: "Format: 270-010,090-180 (bearings 0-360)" }
-);
+const bearingsSchema = z
+  .string()
+  .refine(
+    (val) => {
+      if (!val.trim()) return true;
+      const ranges = val.split(",");
+      const rangePattern = /^[0-9]{3}-[0-9]{3}$/;
+      return ranges.every((range) => {
+        if (!rangePattern.test(range)) return false;
+        const [start, end] = range.split("-").map(Number);
+        return start >= 0 && start <= 360 && end >= 0 && end <= 360;
+      });
+    },
+    { message: "Format: 270-010,090-180 (bearings 0-360)" }
+  )
+  .min(1, "Bearings are required");
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   coordinates: coordinatesSchema,
-  paraglidingRating: z.string().optional(),
-  hangGlidingRating: z.string().optional(),
-  siteGuideURL: z.url("Enter a valid URL").or(z.literal("")).optional(),
+  elevation: z
+    .string()
+    .regex(/^$|^\d+$/, "Must be a number")
+    .min(1, "Elevation is required"),
   validBearings: bearingsSchema,
-  elevation: z.string().regex(/^$|^\d+$/, "Must be a number"),
-  landingSummary: z.string().min(1, "Description is required"),
-  hazards: z.string().optional(),
-  description: z.string().optional(),
-  access: z.string().optional(),
-  radio: z.string().optional(),
-  mandatoryNotices: z.string().optional(),
-  airspaceNotices: z.string().optional(),
-  landingNotices: z.string().optional(),
+  landingId: z.string().min(1, "Landing is required"),
   isDisabled: z.boolean(),
+  hangGlidingRating: z.string().optional(),
+  description: z.string().optional(),
+  mandatoryNotices: z.string().optional(),
+  siteGuideUrl: z.url("Enter a valid URL").or(z.literal("")).optional(),
+  hazards: z.string().optional(),
+  access: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -118,20 +120,14 @@ export default function AdminEditSite() {
     defaultValues: {
       name: "",
       coordinates: "",
-      paraglidingRating: "",
-      hangGlidingRating: "",
-      siteGuideURL: "",
-      validBearings: "",
       elevation: "0",
-      radio: "",
-      landingSummary: "",
-      hazards: "",
-      description: "",
-      access: "",
-      mandatoryNotices: "",
-      airspaceNotices: "",
-      landingNotices: "",
+      validBearings: "",
+      landingId: "",
       isDisabled: false,
+      description: "",
+      siteGuideUrl: "",
+      hazards: "",
+      access: "",
     },
   });
 
@@ -148,22 +144,17 @@ export default function AdminEditSite() {
       if (data) {
         setSite(data);
         form.reset({
-          name: data.name ?? "",
+          name: data.name,
           coordinates: formatCoordinates(data.location),
-          paraglidingRating: data.rating?.paragliding ?? "",
-          hangGlidingRating: data.rating?.hangGliding ?? "",
-          siteGuideURL: data.siteGuideUrl ?? "",
-          elevation: data.elevation?.toString() ?? "",
-          validBearings: data.validBearings ?? "",
-          radio: data.radio ?? "",
-          landingSummary: data.landingSummary ?? "",
-          hazards: data.hazards ?? "",
+          elevation: data.elevation.toString(),
+          validBearings: data.validBearings,
+          landingId: data.landingId,
+          isDisabled: data.isDisabled,
           description: data.description ?? "",
-          access: data.access ?? "",
           mandatoryNotices: data.mandatoryNotices ?? "",
-          airspaceNotices: data.airspaceNotices ?? "",
-          landingNotices: data.landingNotices ?? "",
-          isDisabled: data.isDisabled ?? false,
+          siteGuideUrl: data.siteGuideUrl ?? "",
+          hazards: data.hazards ?? "",
+          access: data.access ?? "",
         });
       }
       setIsLoading(false);
@@ -193,34 +184,21 @@ export default function AdminEditSite() {
 
     const updates: Partial<ISite> = {
       name: values.name,
-      siteGuideUrl: values.siteGuideURL,
       elevation: parseInt(values.elevation, 10),
-      radio: values.radio,
-      landingSummary: values.landingSummary,
-      hazards: values.hazards,
-      description: values.description,
-      access: values.access,
-      mandatoryNotices: values.mandatoryNotices,
-      airspaceNotices: values.airspaceNotices,
-      landingNotices: values.landingNotices,
+      validBearings: values.validBearings,
+      landingId: values.landingId,
       isDisabled: values.isDisabled,
+      description: values.description,
+      mandatoryNotices: values.mandatoryNotices,
+      siteGuideUrl: values.siteGuideUrl,
+      hazards: values.hazards,
+      access: values.access,
       __v: site.__v,
     };
-
-    if (values.paraglidingRating || values.hangGlidingRating) {
-      updates.rating = {
-        paragliding: values.paraglidingRating ?? "Unknown",
-        hangGliding: values.hangGlidingRating ?? "Unknown",
-      };
-    }
 
     const location = parseCoordinates(values.coordinates);
     if (location) {
       updates.location = location;
-    }
-
-    if (values.validBearings) {
-      updates.validBearings = values.validBearings;
     }
 
     const adminKey = sessionStorage.getItem("adminKey") ?? "";
@@ -307,53 +285,37 @@ export default function AdminEditSite() {
                   )}
                 />
 
-                <div className="grid grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="paraglidingRating"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>PG Rating - Optional</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="e.g. PG2" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="landingId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Landing</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="hangGlidingRating"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>HG Rating - Optional</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="e.g. HG2" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="isDisabled"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Disabled</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="isDisabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Disabled</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
               </div>
 
               {/* Location */}
@@ -418,24 +380,10 @@ export default function AdminEditSite() {
 
                 <FormField
                   control={form.control}
-                  name="siteGuideURL"
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Site Guide URL</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="url" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="landingSummary"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Landing Summary</FormLabel>
+                      <FormLabel>Description - Optional</FormLabel>
                       <FormControl>
                         <Textarea {...field} rows={4} />
                       </FormControl>
@@ -460,12 +408,12 @@ export default function AdminEditSite() {
 
                 <FormField
                   control={form.control}
-                  name="hazards"
+                  name="siteGuideUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Hazards - Optional</FormLabel>
+                      <FormLabel>Site Guide URL</FormLabel>
                       <FormControl>
-                        <Textarea {...field} rows={4} />
+                        <Input {...field} type="url" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -474,10 +422,10 @@ export default function AdminEditSite() {
 
                 <FormField
                   control={form.control}
-                  name="description"
+                  name="hazards"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description - Optional</FormLabel>
+                      <FormLabel>Hazards - Optional</FormLabel>
                       <FormControl>
                         <Textarea {...field} rows={4} />
                       </FormControl>
@@ -494,48 +442,6 @@ export default function AdminEditSite() {
                       <FormLabel>Access - Optional</FormLabel>
                       <FormControl>
                         <Textarea {...field} rows={4} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="landingNotices"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Landing Additional Info - Optional</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={4} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="airspaceNotices"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Airspace - Optional</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={4} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="radio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Radio Info - Optional</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={2} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
