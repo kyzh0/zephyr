@@ -74,7 +74,7 @@ export default function AdminAddLanding() {
     defaultValues: {
       name: "",
       coordinates: "",
-      elevation: "0",
+      elevation: "",
       isDisabled: false,
       description: "",
       mandatoryNotices: "",

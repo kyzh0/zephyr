@@ -102,7 +102,7 @@ export default function AdminEditLanding() {
     defaultValues: {
       name: "",
       coordinates: "",
-      elevation: "0",
+      elevation: "",
       isDisabled: false,
       description: "",
       siteGuideUrl: "",
