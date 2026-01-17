@@ -31,8 +31,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { deleteSite, getSiteById, patchSite } from "@/services/site.service";
+import { listLandings } from "@/services/landing.service";
 import type { ISite } from "@/models/site.model";
+import type { ILanding } from "@/models/landing.model";
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -113,6 +123,14 @@ export default function AdminEditSite() {
 
   const [site, setSite] = useState<ISite | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [landings, setLandings] = useState<ILanding[]>([]);
+  useEffect(() => {
+    async function fetchLandings() {
+      setLandings((await listLandings()) ?? []);
+    }
+    fetchLandings();
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -290,9 +308,24 @@ export default function AdminEditSite() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Landing</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={!landings.length}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a landing" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {landings.map((landing) => (
+                            <SelectItem key={landing._id} value={landing._id}>
+                              {landing.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

@@ -281,16 +281,14 @@ export default function Site() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex w-full text-center justify-evenly">
+            <div className="flex w-full text-center justify-evenly items-center">
               {headerContent}
               {site?.validBearings && (
-                <div className="flex justify-center items-center">
-                  <WindCompass
-                    bearing={undefined}
-                    validBearings={site.validBearings}
-                    containerSize={{ width: 24, height: 24 }}
-                  />
-                </div>
+                <WindCompass
+                  bearing={undefined}
+                  validBearings={site.validBearings}
+                  containerSize={{ width: 24, height: 24 }}
+                />
               )}
             </div>
           </div>
@@ -310,9 +308,9 @@ export default function Site() {
       <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="pb-2">
           <DialogTitle className="text-center">
-            <div className="flex w-full justify-center">
+            <div className="flex w-full justify-center items-center">
               {site?.validBearings && (
-                <div className="flex justify-center items-center mr-8">
+                <div className="mr-8">
                   <WindCompass
                     bearing={undefined}
                     validBearings={site.validBearings}

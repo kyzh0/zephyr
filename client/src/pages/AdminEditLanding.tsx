@@ -269,7 +269,9 @@ export default function AdminEditLanding() {
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Disabled</FormLabel>
+                        <FormLabel>
+                          Disabled (remove refs from sites before disabling)
+                        </FormLabel>
                       </div>
                     </FormItem>
                   )}

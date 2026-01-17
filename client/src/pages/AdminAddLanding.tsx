@@ -113,7 +113,7 @@ export default function AdminAddLanding() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/admin/dashboard")}
+          onClick={() => navigate("/admin/landings")}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -156,7 +156,9 @@ export default function AdminAddLanding() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Disabled</FormLabel>
+                      <FormLabel>
+                        Disabled (remove refs from sites before disabling)
+                      </FormLabel>
                     </div>
                   </FormItem>
                 )}

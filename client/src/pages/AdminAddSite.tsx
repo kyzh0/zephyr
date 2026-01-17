@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,8 +20,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { addSite } from "@/services/site.service";
+import { listLandings } from "@/services/landing.service";
 import type { ISite } from "@/models/site.model";
+import type { ILanding } from "@/models/landing.model";
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -90,6 +101,14 @@ function parseCoordinates(
 export default function AdminAddSite() {
   const navigate = useNavigate();
 
+  const [landings, setLandings] = useState<ILanding[]>([]);
+  useEffect(() => {
+    async function fetchLandings() {
+      setLandings((await listLandings()) ?? []);
+    }
+    fetchLandings();
+  }, []);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -142,7 +161,7 @@ export default function AdminAddSite() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/admin/dashboard")}
+          onClick={() => navigate("/admin/sites")}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -179,9 +198,24 @@ export default function AdminAddSite() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Landing</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={!landings.length}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a landing" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {landings.map((landing) => (
+                          <SelectItem key={landing._id} value={landing._id}>
+                            {landing.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

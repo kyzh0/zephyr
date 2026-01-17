@@ -11,6 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
+  PlaneLanding,
   AlertCircleIcon,
   ArrowLeft,
   ChevronRightIcon,
@@ -71,7 +72,7 @@ export default function Site() {
   const headerContent = isLoading ? (
     <Skeleton className="h-7 w-48 mx-auto" />
   ) : (
-    <div className="grid grid-cols-1 mr-4">
+    <div className="grid grid-cols-1">
       <span className="text-lg sm:text-xl font-semibold leading-tight">
         {landing?.name}
       </span>
@@ -159,7 +160,10 @@ export default function Site() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="w-full text-center">{headerContent}</div>
+            <div className="flex w-full text-center justify-evenly items-center">
+              {headerContent}
+              <PlaneLanding />
+            </div>
           </div>
         </div>
 
@@ -176,7 +180,10 @@ export default function Site() {
     <Dialog open onOpenChange={() => navigate("/")}>
       <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="pb-2">
-          <DialogTitle className="text-center">{headerContent}</DialogTitle>
+          <DialogTitle className="flex w-full text-center justify-center items-center">
+            <PlaneLanding className="mr-8" />
+            {headerContent}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="overflow-y-auto flex-1 p-1">{bodyContent}</div>
