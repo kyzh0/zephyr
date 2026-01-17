@@ -291,7 +291,8 @@ export async function checkForErrors(): Promise<void> {
         'hw',
         'wswr',
         'sp',
-        'wl'
+        'wl',
+        'windicator'
       ];
 
       for (const [key, value] of Object.entries(g)) {
