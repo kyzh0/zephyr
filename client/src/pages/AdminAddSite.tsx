@@ -114,7 +114,7 @@ export default function AdminAddSite() {
     defaultValues: {
       name: "",
       coordinates: "",
-      elevation: "0",
+      elevation: "",
       validBearings: "",
       landingId: "",
       isDisabled: false,
