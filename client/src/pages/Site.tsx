@@ -164,12 +164,24 @@ export default function Site() {
           )}
 
           {/* Landing */}
-          <Alert className="py-2 mb-4">
-            <PlaneLanding />
-            <AlertDescription className="text-sm whitespace-pre-wrap">
-              {site.landingName}
-            </AlertDescription>
-          </Alert>
+          {site.landingId && site.landingName && (
+            <Item variant="outline" size="sm" asChild className="py-2">
+              <a
+                className="cursor-pointer"
+                onClick={() => navigate(`/landings/${site.landingId}`)}
+              >
+                <ItemMedia>
+                  <PlaneLanding className="h-4 w-4" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{site.landingName}</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <ChevronRightIcon className="size-4" />
+                </ItemActions>
+              </a>
+            </Item>
+          )}
 
           {/* Description */}
           {site.description && (
@@ -240,6 +252,15 @@ export default function Site() {
               </CollapsibleContent>
             </Collapsible>
           )}
+
+          {/* Disclaimer */}
+          <div>
+            <p className="text-[10px] text-muted-foreground whitespace-pre-wrap">
+              Disclaimer: Zephyr does not guarantee the accuracy of this
+              information. Pilots are responsible for verifying current
+              conditions.
+            </p>
+          </div>
         </div>
       ) : null}
     </>
@@ -285,7 +306,7 @@ export default function Site() {
 
   // Desktop: Dialog overlay
   return (
-    <Dialog open onOpenChange={() => navigate(-1)}>
+    <Dialog open onOpenChange={() => navigate("/")}>
       <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="pb-2">
           <DialogTitle className="text-center">
