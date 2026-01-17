@@ -33,7 +33,8 @@ export function useLandingMarkers({
   const createLandingMarker = useCallback(
     (
       dbId: string,
-      name: string
+      name: string,
+      isOfficial: boolean,
     ): { marker: HTMLDivElement; popup: mapboxgl.Popup } => {
       // Create popup
       const popup = new mapboxgl.Popup({
@@ -49,7 +50,9 @@ export function useLandingMarkers({
       el.style.zIndex = "1";
 
       // Render the LandingMarker component to HTML
-      el.innerHTML = renderToStaticMarkup(<LandingMarker />);
+      el.innerHTML = renderToStaticMarkup(
+        <LandingMarker isOfficial={isOfficial} />,
+      );
 
       // Event handlers
       const handleClick = () => {
@@ -69,7 +72,7 @@ export function useLandingMarkers({
 
       return { marker: el, popup };
     },
-    [navigate, map]
+    [navigate, map],
   );
 
   // Initialize landings
@@ -84,8 +87,9 @@ export function useLandingMarkers({
         for (const f of geoJson.features) {
           const name = f.properties.name as string;
           const dbId = f.properties.dbId as string;
+          const isOfficial = f.properties.siteGuideUrl ? true : false;
 
-          const { marker, popup } = createLandingMarker(dbId, name);
+          const { marker, popup } = createLandingMarker(dbId, name, isOfficial);
           markersRef.current.push({ marker, popup });
           new mapboxgl.Marker(marker)
             .setLngLat(f.geometry.coordinates)

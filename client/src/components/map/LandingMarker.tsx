@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 
 interface LandingMarkerProps {
+  isOfficial?: boolean;
   size?: number;
   borderWidth?: number;
 }
@@ -10,6 +11,7 @@ interface LandingMarkerProps {
  * and an orange border arc indicating valid wind bearings
  */
 export const LandingMarker = ({
+  isOfficial,
   size = 50,
   borderWidth = 15,
 }: LandingMarkerProps): ReactNode => {
@@ -20,7 +22,9 @@ export const LandingMarker = ({
     >
       {/* Circle container with landing logo */}
       <div
-        className="absolute inset-0 rounded-full border-2 border-black overflow-hidden flex items-center justify-center bg-white"
+        className={`absolute inset-0 rounded-full border-2 overflow-hidden flex items-center justify-center bg-white ${
+          isOfficial ? "border-[#d7ac00]" : "border-black"
+        }`}
         style={{
           margin: borderWidth,
           width: size - borderWidth * 2,

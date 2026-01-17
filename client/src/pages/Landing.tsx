@@ -125,7 +125,13 @@ export default function Site() {
 
           {/* Description */}
           {landing.description && (
-            <div className="my-4">
+            <div
+              className={
+                landing.mandatoryNotices || landing.siteGuideUrl
+                  ? "my-4"
+                  : "mb-4"
+              }
+            >
               <p className="text-sm whitespace-pre-wrap">
                 {landing.description}
               </p>

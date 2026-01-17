@@ -34,7 +34,8 @@ export function useSiteMarkers({
     (
       dbId: string,
       name: string,
-      validBearings?: string
+      validBearings: string,
+      isOfficial: boolean,
     ): { marker: HTMLDivElement; popup: mapboxgl.Popup } => {
       // Create popup
       const popup = new mapboxgl.Popup({
@@ -51,7 +52,7 @@ export function useSiteMarkers({
 
       // Render the SiteMarker component to HTML
       el.innerHTML = renderToStaticMarkup(
-        <SiteMarker validBearings={validBearings} />
+        <SiteMarker validBearings={validBearings} isOfficial={isOfficial} />,
       );
 
       // Event handlers
@@ -72,7 +73,7 @@ export function useSiteMarkers({
 
       return { marker: el, popup };
     },
-    [navigate, map]
+    [navigate, map],
   );
 
   // Initialize sites
@@ -87,11 +88,15 @@ export function useSiteMarkers({
         for (const f of geoJson.features) {
           const name = f.properties.name as string;
           const dbId = f.properties.dbId as string;
-          const validBearings = f.properties.validBearings as
-            | string
-            | undefined;
+          const validBearings = f.properties.validBearings as string;
+          const isOfficial = f.properties.siteGuideUrl ? true : false;
 
-          const { marker, popup } = createSiteMarker(dbId, name, validBearings);
+          const { marker, popup } = createSiteMarker(
+            dbId,
+            name,
+            validBearings,
+            isOfficial,
+          );
           markersRef.current.push({ marker, popup });
           new mapboxgl.Marker(marker)
             .setLngLat(f.geometry.coordinates)

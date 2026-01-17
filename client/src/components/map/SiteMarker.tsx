@@ -3,6 +3,7 @@ import { parseValidBearings } from "@/lib/utils";
 
 interface SiteMarkerProps {
   validBearings?: string;
+  isOfficial?: boolean;
   size?: number;
   borderWidth?: number;
 }
@@ -13,6 +14,7 @@ interface SiteMarkerProps {
  */
 export const SiteMarker = ({
   validBearings,
+  isOfficial,
   size = 50,
   borderWidth = 15,
 }: SiteMarkerProps): ReactNode => {
@@ -58,7 +60,7 @@ export const SiteMarker = ({
         Z
       `;
     });
-  }, [validBearings, size, borderWidth]);
+  }, [validBearings, isOfficial, size, borderWidth]);
 
   return (
     <div
@@ -82,7 +84,9 @@ export const SiteMarker = ({
 
       {/* Circle container with site logo */}
       <div
-        className="absolute inset-0 rounded-full border-2 border-black overflow-hidden flex items-center justify-center bg-white"
+        className={`absolute inset-0 rounded-full border-2 overflow-hidden flex items-center justify-center bg-white ${
+          isOfficial ? "border-[#d7ac00]" : "border-black"
+        }`}
         style={{
           margin: borderWidth,
           width: size - borderWidth * 2,

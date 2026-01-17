@@ -74,7 +74,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
     const filteredSites: SearchResult[] = sites
       .filter(
         (site) =>
-          !site.isDisabled && site.name.toLowerCase().includes(lowerQuery)
+          !site.isDisabled && site.name.toLowerCase().includes(lowerQuery),
       )
       .map((site) => ({ type: "site" as const, item: site }));
 
@@ -82,7 +82,8 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
     const filteredLandings: SearchResult[] = landings
       .filter(
         (landing) =>
-          !landing.isDisabled && landing.name.toLowerCase().includes(lowerQuery)
+          !landing.isDisabled &&
+          landing.name.toLowerCase().includes(lowerQuery),
       )
       .map((landing) => ({ type: "landing" as const, item: landing }));
 
@@ -162,7 +163,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
         navigate(`/webcams/${result.item._id}`);
       }
     },
-    [navigate]
+    [navigate],
   );
 
   const handleKeyDown = useCallback(
@@ -175,7 +176,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
         setSelectedIndex((prev) =>
-          prev < results.length - 1 ? prev + 1 : prev
+          prev < results.length - 1 ? prev + 1 : prev,
         );
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
@@ -186,7 +187,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
         handleResultClick(results[index]);
       }
     },
-    [results, selectedIndex, handleResultClick]
+    [results, selectedIndex, handleResultClick],
   );
 
   return (
@@ -195,7 +196,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
         className={cn(
           "flex items-center bg-background border rounded-md shadow-sm transition-all duration-200 h-9",
           isExpanded ? "w-[200px] sm:w-[250px]" : "w-9",
-          disabled ? "opacity-50 pointer-events-none" : ""
+          disabled ? "opacity-50 pointer-events-none" : "",
         )}
       >
         <Button
@@ -242,7 +243,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
               onClick={() => handleResultClick(result)}
               className={cn(
                 "w-full px-3 py-2 text-left text-sm transition-colors truncate",
-                index === selectedIndex ? "bg-accent" : "hover:bg-accent/50"
+                index === selectedIndex ? "bg-accent" : "hover:bg-accent/50",
               )}
             >
               <div className="flex items-center gap-2">
@@ -256,11 +257,16 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
                   ) : result.type === "site" ? (
                     <SiteMarker
                       validBearings={result.item.validBearings}
+                      isOfficial={result.item.siteGuideUrl ? true : false}
                       size={24}
                       borderWidth={4}
                     />
                   ) : result.type === "landing" ? (
-                    <LandingMarker size={24} borderWidth={4} />
+                    <LandingMarker
+                      size={24}
+                      borderWidth={4}
+                      isOfficial={result.item.siteGuideUrl ? true : false}
+                    />
                   ) : (
                     <Camera className="w-5 h-5" />
                   )}

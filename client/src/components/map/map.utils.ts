@@ -35,14 +35,14 @@ export function getArrowStyle(
   avgWind: number | null,
   currentBearing: number | null,
   validBearings: string | null,
-  isOffline: boolean | null
+  isOffline: boolean | null,
 ): [string, string] {
   return getArrowStylePng(avgWind, currentBearing, validBearings, isOffline);
 }
 
 // GeoJSON generators
 export function getStationGeoJson(
-  stations: IStation[] | undefined
+  stations: IStation[] | undefined,
 ): GeoJson | null {
   if (!stations?.length) {
     return null;
@@ -128,7 +128,7 @@ export function getWebcamGeoJson(webcams: ICam[] | undefined): GeoJson | null {
 }
 
 export function getSoundingGeoJson(
-  soundings: ISounding[] | undefined
+  soundings: ISounding[] | undefined,
 ): GeoJson | null {
   if (!soundings?.length) {
     return null;
@@ -141,10 +141,10 @@ export function getSoundingGeoJson(
 
   for (const s of soundings) {
     s.images.sort(
-      (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+      (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
     );
     const afterDates = s.images.filter(
-      (img) => new Date(img.time).getTime() - (Date.now() - 30 * 60 * 1000) > 0
+      (img) => new Date(img.time).getTime() - (Date.now() - 30 * 60 * 1000) > 0,
     );
 
     let url = "";
@@ -190,6 +190,7 @@ export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
         name: site.name,
         dbId: site._id,
         validBearings: site.validBearings,
+        siteGuideUrl: site.siteGuideUrl,
       },
       geometry: site.location as {
         type: string;
@@ -203,7 +204,7 @@ export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
 }
 
 export function getLandingGeoJson(
-  landings: ILanding[] | undefined
+  landings: ILanding[] | undefined,
 ): GeoJson | null {
   if (!landings?.length) {
     return null;
@@ -223,6 +224,7 @@ export function getLandingGeoJson(
       properties: {
         name: landing.name,
         dbId: landing._id,
+        siteGuideUrl: landing.siteGuideUrl,
       },
       geometry: landing.location as {
         type: string;
@@ -280,6 +282,6 @@ export function getHistoryTime(offset: number): Date {
     t.getTime() -
       ((t.getMinutes() % 30) - offset) * 60 * 1000 -
       t.getSeconds() * 1000 -
-      t.getMilliseconds()
+      t.getMilliseconds(),
   );
 }
