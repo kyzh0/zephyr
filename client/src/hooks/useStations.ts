@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { listStations } from "@/services/station.service";
 import type { IStation } from "@/models/station.model";
 import { getDistance, handleError } from "@/lib/utils";
+import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from ".";
 
 interface UseStationsOptions {
   autoLoad?: boolean;
@@ -80,24 +81,6 @@ export function useStations({
   };
 }
 
-interface UseNearbyStationsOptions {
-  lon: number;
-  lat: number;
-  maxDistance?: number; // in meters, default 10km
-  limit?: number; // max number of results
-}
-
-export interface StationWithDistance extends IStation {
-  distance: number; // distance in meters
-}
-
-export interface UseNearbyStationsResult {
-  stations: StationWithDistance[];
-  isLoading: boolean;
-  error: Error | null;
-  refetch: () => Promise<void>;
-}
-
 /**
  * Hook for fetching nearby stations filtered by distance
  * @param options - Configuration options
@@ -108,36 +91,42 @@ export interface UseNearbyStationsResult {
  * @returns Nearby stations sorted by distance with loading and error states
  */
 export function useNearbyStations({
-  lon,
   lat,
+  lon,
   maxDistance = 5000,
   limit,
-}: UseNearbyStationsOptions): UseNearbyStationsResult {
+}: UseNearbyLocationsOptions): UseNearbyLocationsResult<IStation> {
   const { stations: allStations, isLoading, error, refetch } = useStations();
 
   // Filter and sort stations by distance
   const nearbyStations = useMemo(() => {
-    const stationsWithDistance: StationWithDistance[] = allStations
-      .map((station) => {
-        const distance = getDistance(
-          lon,
-          lat,
-          station.location.coordinates[0],
-          station.location.coordinates[1]
-        );
-        return {
-          ...station,
-          distance,
-        };
-      })
-      .filter((station) => station.distance <= maxDistance)
-      .sort((a, b) => a.distance - b.distance);
+    // Don't compute if stations haven't loaded yet or coordinates are invalid
+    if (isLoading || !allStations?.length || (lat === 0 && lon === 0)) {
+      return [];
+    }
+
+    const stationsWithDistance: { data: IStation; distance: number }[] =
+      allStations
+        .map((station) => {
+          const distance = getDistance(
+            lat,
+            lon,
+            station.location.coordinates[0],
+            station.location.coordinates[1],
+          );
+          return {
+            data: station,
+            distance,
+          };
+        })
+        .filter((station) => station.distance <= maxDistance)
+        .sort((a, b) => a.distance - b.distance);
 
     return limit ? stationsWithDistance.slice(0, limit) : stationsWithDistance;
-  }, [allStations, lon, lat, maxDistance, limit]);
+  }, [allStations, lon, lat, maxDistance, limit, isLoading]);
 
   return {
-    stations: nearbyStations,
+    data: nearbyStations,
     isLoading,
     error,
     refetch,

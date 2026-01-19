@@ -37,12 +37,12 @@ export default function GridView() {
       () => {
         setCoords({ lat: 0, lng: 0 });
         setLocationError(true);
-      }
+      },
     );
   }, []);
 
   const {
-    stations,
+    data: stations,
     isLoading: loading,
     error,
   } = useNearbyStations({
@@ -54,7 +54,7 @@ export default function GridView() {
   const handleRadiusChange = (value: number) => setRadius(value);
 
   const filteredData = stations.filter(
-    (s) => !s.isOffline && (s.currentAverage ?? 0) >= threshold
+    (s) => !s.data.isOffline && (s.data.currentAverage ?? 0) >= threshold,
   );
 
   return (
@@ -128,7 +128,11 @@ export default function GridView() {
           {!loading && !locationError && !error && filteredData.length > 0 && (
             <div className="grid grid-cols-3 gap-2">
               {filteredData.map((station) => (
-                <StationPreview key={station._id} station={station} />
+                <StationPreview
+                  key={station.data._id}
+                  data={station.data}
+                  distance={station.distance}
+                />
               ))}
             </div>
           )}

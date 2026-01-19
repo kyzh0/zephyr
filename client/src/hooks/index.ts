@@ -5,17 +5,24 @@ export {
   useWebcams,
   useNearbyWebcams,
   type UseWebcamResult,
-  type UseNearbyWebcamsResult,
 } from "./useWebcam";
-export {
-  useNearbySites,
-  useSites,
-  type UseNearbySitesResult,
-  type UseSitesResult,
-} from "./useSites";
+export { useNearbySites, useSites, type UseSitesResult } from "./useSites";
 export {
   useNearbyStations,
   useStations,
-  type UseNearbyStationsResult,
   type UseStationsResult,
 } from "./useStations";
+
+export interface UseNearbyLocationsOptions {
+  lat: number;
+  lon: number;
+  maxDistance?: number; // in meters, default 10km
+  limit?: number; // max number of results
+}
+
+export interface UseNearbyLocationsResult<T> {
+  data: { data: T; distance: number }[];
+  isLoading: boolean;
+  error: Error | null;
+  refetch: () => Promise<void>;
+}

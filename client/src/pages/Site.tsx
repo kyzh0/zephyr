@@ -37,14 +37,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
-import {
-  useNearbyWebcams,
-  type UseNearbyWebcamsResult,
-} from "@/hooks/useWebcam";
-import {
-  useNearbyStations,
-  type UseNearbyStationsResult,
-} from "@/hooks/useStations";
+import { useNearbyWebcams } from "@/hooks/useWebcam";
+import { useNearbyStations } from "@/hooks/useStations";
 import { handleError } from "@/lib/utils";
 import { WebcamPreview } from "@/components/webcam/WebcamPreview";
 import { WindCompass } from "@/components/station";
@@ -81,12 +75,12 @@ export default function Site() {
     void fetchSite();
   }, [id]);
 
-  const { webcams }: UseNearbyWebcamsResult = useNearbyWebcams({
-    latitude: site?.location.coordinates[0] ?? 0,
-    longitude: site?.location.coordinates[1] ?? 0,
+  const { data: nearbyWebcamData } = useNearbyWebcams({
+    lat: site?.location.coordinates[0] ?? 0,
+    lon: site?.location.coordinates[1] ?? 0,
   });
 
-  const { stations }: UseNearbyStationsResult = useNearbyStations({
+  const { data: nearbyStationData } = useNearbyStations({
     lat: site?.location.coordinates[0] ?? 0,
     lon: site?.location.coordinates[1] ?? 0,
   });
@@ -205,7 +199,7 @@ export default function Site() {
           )}
 
           {/* Nearby Stations */}
-          {site && stations.length > 0 && (
+          {site && nearbyStationData.length > 0 && (
             <Collapsible open={stationsOpen} onOpenChange={setStationsOpen}>
               <CollapsibleTrigger
                 className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
@@ -213,7 +207,8 @@ export default function Site() {
                 }`}
               >
                 <span>
-                  Nearby Weather Stations ({stations.length} within 10km)
+                  Nearby Weather Stations ({nearbyStationData.length} within
+                  10km)
                 </span>
                 <ChevronDown
                   className={`h-4 w-4 transition-transform ${
@@ -222,22 +217,28 @@ export default function Site() {
                 />
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
-                {stations.map((station) => (
-                  <StationPreview key={String(station._id)} station={station} />
+                {nearbyStationData.map((station) => (
+                  <StationPreview
+                    key={String(station.data._id)}
+                    data={station.data}
+                    distance={station.distance}
+                  />
                 ))}
               </CollapsibleContent>
             </Collapsible>
           )}
 
           {/* Nearby Webcams */}
-          {site && webcams.length > 0 && (
+          {site && nearbyWebcamData.length > 0 && (
             <Collapsible open={webcamsOpen} onOpenChange={setWebcamsOpen}>
               <CollapsibleTrigger
                 className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
                   webcamsOpen ? "bg-transparent" : "bg-muted mb-4"
                 }`}
               >
-                <span>Nearby Webcams ({webcams.length} within 10km)</span>
+                <span>
+                  Nearby Webcams ({nearbyWebcamData.length} within 10km)
+                </span>
                 <ChevronDown
                   className={`h-4 w-4 transition-transform ${
                     webcamsOpen ? "rotate-180" : ""
@@ -245,14 +246,14 @@ export default function Site() {
                 />
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
-                {webcams.map((webcam) => (
+                {nearbyWebcamData.map((webcam) => (
                   <WebcamPreview
-                    key={webcam._id}
-                    _id={webcam._id}
-                    name={webcam.name}
+                    key={webcam.data._id}
+                    _id={webcam.data._id}
+                    name={webcam.data.name}
                     distance={webcam.distance}
-                    currentUrl={webcam.currentUrl}
-                    onClick={() => navigate(`/webcams/${webcam._id}`)}
+                    currentUrl={webcam.data.currentUrl}
+                    onClick={() => navigate(`/webcams/${webcam.data._id}`)}
                   />
                 ))}
               </CollapsibleContent>

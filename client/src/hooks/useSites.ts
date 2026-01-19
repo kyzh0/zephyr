@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { listSites } from "@/services/site.service";
 import type { ISite } from "@/models/site.model";
 import { getDistance, handleError } from "@/lib/utils";
+import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from ".";
 
 // Module-level singleton cache for sites
 let cachedSites: ISite[] | null = null;
@@ -79,24 +80,6 @@ export function useSites({
   };
 }
 
-interface UseNearbySitesOptions {
-  latitude: number;
-  longitude: number;
-  maxDistance?: number; // in meters, default 10km
-  limit?: number; // max number of results
-}
-
-interface SiteWithDistance extends ISite {
-  distance: number; // distance in meters
-}
-
-export interface UseNearbySitesResult {
-  sites: SiteWithDistance[];
-  isLoading: boolean;
-  error: Error | null;
-  refetch: () => Promise<void>;
-}
-
 /**
  * Hook for fetching nearby sites filtered by distance
  * @param options - Configuration options
@@ -107,40 +90,40 @@ export interface UseNearbySitesResult {
  * @returns Nearby sites sorted by distance with loading and error states
  */
 export function useNearbySites({
-  latitude,
-  longitude,
+  lat,
+  lon,
   maxDistance = 5000,
   limit,
-}: UseNearbySitesOptions): UseNearbySitesResult {
+}: UseNearbyLocationsOptions): UseNearbyLocationsResult<ISite> {
   const { sites: allSites, isLoading, error, refetch } = useSites();
 
   // Filter and sort sites by distance
   const nearbySites = useMemo(() => {
     // Don't compute if sites haven't loaded yet or coordinates are invalid
-    if (isLoading || !allSites?.length || (latitude === 0 && longitude === 0)) {
+    if (isLoading || !allSites?.length || (lat === 0 && lon === 0)) {
       return [];
     }
 
-    const sitesWithDistance: SiteWithDistance[] = allSites
+    const sitesWithDistance: { data: ISite; distance: number }[] = allSites
       .map((site) => {
         const distance = getDistance(
-          latitude,
-          longitude,
-          site.location.coordinates[0], // lat
-          site.location.coordinates[1] // lng
+          lat,
+          lon,
+          site.location.coordinates[0],
+          site.location.coordinates[1],
         );
         return {
-          ...site,
+          data: site,
           distance,
         };
       })
       .filter((site) => site.distance <= maxDistance)
       .sort((a, b) => a.distance - b.distance);
     return limit ? sitesWithDistance.slice(0, limit) : sitesWithDistance;
-  }, [allSites, latitude, longitude, maxDistance, limit, isLoading]);
+  }, [allSites, lat, lon, maxDistance, limit, isLoading]);
 
   return {
-    sites: nearbySites,
+    data: nearbySites,
     isLoading,
     error,
     refetch,

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { getCamById, loadCamImages, listCams } from "@/services/cam.service";
 import type { ICam, ICamImage } from "@/models/cam.model";
 import { getDistance, handleError } from "@/lib/utils";
+import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from ".";
 
 // Module-level singleton cache for webcams
 let cachedWebcams: ICam[] | null = null;
@@ -68,7 +69,7 @@ export function useWebcam({
       const imgs = await loadCamImages(id);
       if (imgs) {
         imgs.sort(
-          (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+          (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
         );
         setImages(imgs);
       }
@@ -101,7 +102,7 @@ export function useWebcam({
         const imgs = await loadCamImages(id);
         if (imgs) {
           imgs.sort(
-            (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+            (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
           );
           setImages(imgs);
         }
@@ -166,24 +167,6 @@ export function useWebcams() {
   };
 }
 
-interface UseNearbyWebcamsOptions {
-  latitude: number;
-  longitude: number;
-  maxDistance?: number; // in meters, default 50km
-  limit?: number; // max number of results
-}
-
-interface WebcamWithDistance extends ICam {
-  distance: number; // distance in meters
-}
-
-export interface UseNearbyWebcamsResult {
-  webcams: WebcamWithDistance[];
-  isLoading: boolean;
-  error: Error | null;
-  refetch: () => Promise<void>;
-}
-
 /**
  * Hook for fetching nearby webcams filtered by distance
  * @param options - Configuration options
@@ -194,34 +177,30 @@ export interface UseNearbyWebcamsResult {
  * @returns Nearby webcams sorted by distance with loading and error states
  */
 export function useNearbyWebcams({
-  latitude,
-  longitude,
+  lat,
+  lon,
   maxDistance = 5000,
   limit,
-}: UseNearbyWebcamsOptions): UseNearbyWebcamsResult {
+}: UseNearbyLocationsOptions): UseNearbyLocationsResult<ICam> {
   const { webcams: allWebcams, isLoading, error, refetch } = useWebcams();
 
   // Filter and sort webcams by distance
   const nearbyWebcams = useMemo(() => {
     // Don't compute if webcams haven't loaded yet or coordinates are invalid
-    if (
-      isLoading ||
-      !allWebcams?.length ||
-      (latitude === 0 && longitude === 0)
-    ) {
+    if (isLoading || !allWebcams?.length || (lat === 0 && lon === 0)) {
       return [];
     }
 
-    const webcamsWithDistance: WebcamWithDistance[] = allWebcams
+    const webcamsWithDistance: { data: ICam; distance: number }[] = allWebcams
       .map((cam) => {
         const distance = getDistance(
-          latitude,
-          longitude,
+          lat,
+          lon,
           cam.location.coordinates[0],
-          cam.location.coordinates[1]
+          cam.location.coordinates[1],
         );
         return {
-          ...cam,
+          data: cam,
           distance,
         };
       })
@@ -229,10 +208,10 @@ export function useNearbyWebcams({
       .sort((a, b) => a.distance - b.distance);
 
     return limit ? webcamsWithDistance.slice(0, limit) : webcamsWithDistance;
-  }, [allWebcams, latitude, longitude, maxDistance, limit, isLoading]);
+  }, [allWebcams, lat, lon, maxDistance, limit, isLoading]);
 
   return {
-    webcams: nearbyWebcams,
+    data: nearbyWebcams,
     isLoading,
     error,
     refetch,
