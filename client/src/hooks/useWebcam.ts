@@ -1,7 +1,33 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { getCamById, loadCamImages, listCams } from "@/services/cam.service";
 import type { ICam, ICamImage } from "@/models/cam.model";
-import { getDistance } from "@/lib/utils";
+import { getDistance, handleError } from "@/lib/utils";
+
+// Module-level singleton cache for webcams
+let cachedWebcams: ICam[] | null = null;
+let cachedWebcamsError: Error | null = null;
+let cachedWebcamsLoading = false;
+let webcamsListeners: (() => void)[] = [];
+
+async function fetchWebcamsAndNotify() {
+  cachedWebcamsLoading = true;
+  notifyWebcamsListeners();
+  try {
+    const result = await listCams();
+    cachedWebcams = result ?? [];
+    cachedWebcamsError = null;
+  } catch (err) {
+    cachedWebcamsError = handleError(err, "Operation failed");
+    cachedWebcams = [];
+  } finally {
+    cachedWebcamsLoading = false;
+    notifyWebcamsListeners();
+  }
+}
+
+function notifyWebcamsListeners() {
+  webcamsListeners.forEach((fn) => fn());
+}
 
 interface UseWebcamOptions {
   id?: string;
@@ -47,7 +73,7 @@ export function useWebcam({
         setImages(imgs);
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to load images"));
+      setError(handleError(err, "Failed to load webcam images"));
     }
   }, [id, webcam]);
 
@@ -81,9 +107,7 @@ export function useWebcam({
         }
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch webcam")
-      );
+      setError(handleError(err, "Failed to load webcam data"));
     } finally {
       setIsLoading(false);
     }
@@ -112,36 +136,32 @@ export function useWebcam({
  * @returns List of all webcams with loading and error states
  */
 export function useWebcams() {
-  const [webcams, setWebcams] = useState<ICam[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [, forceUpdate] = useState(0);
 
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  // Subscribe to cache updates
+  useEffect(() => {
+    const update = () => forceUpdate((n) => n + 1);
+    webcamsListeners.push(update);
+    return () => {
+      webcamsListeners = webcamsListeners.filter((fn) => fn !== update);
+    };
+  }, []);
 
-    try {
-      const cams = await listCams();
-      if (cams) {
-        setWebcams(cams);
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch webcams")
-      );
-    } finally {
-      setIsLoading(false);
+  // Fetch once if needed
+  useEffect(() => {
+    if (cachedWebcams === null && !cachedWebcamsLoading) {
+      fetchWebcamsAndNotify();
     }
   }, []);
 
-  useEffect(() => {
-    void refetch();
-  }, [refetch]);
+  const refetch = useCallback(async () => {
+    await fetchWebcamsAndNotify();
+  }, []);
 
   return {
-    webcams,
-    isLoading,
-    error,
+    webcams: cachedWebcams ?? [],
+    isLoading: cachedWebcamsLoading || cachedWebcams === null,
+    error: cachedWebcamsError,
     refetch,
   };
 }
@@ -169,44 +189,29 @@ export interface UseNearbyWebcamsResult {
  * @param options - Configuration options
  * @param options.latitude - Center point latitude
  * @param options.longitude - Center point longitude
- * @param options.maxDistance - Maximum distance in meters (default: 50000m / 50km)
+ * @param options.maxDistance - Maximum distance in meters (default: 5000m / 5km)
  * @param options.limit - Maximum number of results to return
  * @returns Nearby webcams sorted by distance with loading and error states
  */
 export function useNearbyWebcams({
   latitude,
   longitude,
-  maxDistance = 50000,
+  maxDistance = 5000,
   limit,
 }: UseNearbyWebcamsOptions): UseNearbyWebcamsResult {
-  const [allWebcams, setAllWebcams] = useState<ICam[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const cams = await listCams();
-      if (cams) {
-        setAllWebcams(cams);
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch webcams")
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refetch();
-  }, [refetch]);
+  const { webcams: allWebcams, isLoading, error, refetch } = useWebcams();
 
   // Filter and sort webcams by distance
   const nearbyWebcams = useMemo(() => {
+    // Don't compute if webcams haven't loaded yet or coordinates are invalid
+    if (
+      isLoading ||
+      !allWebcams?.length ||
+      (latitude === 0 && longitude === 0)
+    ) {
+      return [];
+    }
+
     const webcamsWithDistance: WebcamWithDistance[] = allWebcams
       .map((cam) => {
         const distance = getDistance(
@@ -224,7 +229,7 @@ export function useNearbyWebcams({
       .sort((a, b) => a.distance - b.distance);
 
     return limit ? webcamsWithDistance.slice(0, limit) : webcamsWithDistance;
-  }, [allWebcams, latitude, longitude, maxDistance, limit]);
+  }, [allWebcams, latitude, longitude, maxDistance, limit, isLoading]);
 
   return {
     webcams: nearbyWebcams,

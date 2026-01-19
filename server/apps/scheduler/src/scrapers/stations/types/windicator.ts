@@ -32,10 +32,14 @@ export type PotsumLiveFetchResponse = {
 };
 
 function parseNumeric(value?: string): number | null {
-  if (!value) return null;
+  if (!value) {
+    return null;
+  }
 
   const cleaned = value.replace(/[^0-9.]/g, '');
-  if (cleaned === '') return null;
+  if (cleaned === '') {
+    return null;
+  }
 
   const num = Number(cleaned);
   return Number.isFinite(num) ? num : null;

@@ -9,6 +9,7 @@ export * from './lib/utils';
 
 export * from './models/camModel';
 export * from './models/clientModel';
+export * from './models/landingModel';
 export * from './models/outputModel';
 export * from './models/siteModel';
 export * from './models/soundingModel';

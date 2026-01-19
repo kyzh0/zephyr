@@ -1,30 +1,19 @@
 import mongoose, { type HydratedDocument, type Model } from 'mongoose';
 import type { GeoPoint } from '../types/mongoose';
 
-export type SiteRating = {
-  paragliding?: string;
-  hangGliding?: string;
-};
-
 export type SiteAttrs = {
   name: string;
-  takeoffLocation?: GeoPoint;
-  landingLocation?: GeoPoint;
-
-  rating?: SiteRating;
-
-  siteGuideUrl: string;
-  validBearings?: string;
+  location: GeoPoint;
   elevation: number;
+  validBearings: string;
+  landings: mongoose.Types.ObjectId[];
+  isDisabled: boolean;
 
-  radio?: string;
-  description: string;
-
+  description?: string;
   mandatoryNotices?: string;
-  airspaceNotices?: string;
-  landingNotices?: string;
-
-  isDisabled?: boolean;
+  siteGuideUrl?: string;
+  hazards?: string;
+  access?: string;
 };
 
 export type SiteDoc = HydratedDocument<SiteAttrs>;
@@ -32,39 +21,28 @@ export type SiteDoc = HydratedDocument<SiteAttrs>;
 const siteSchema = new mongoose.Schema<SiteAttrs>(
   {
     name: { type: String, required: true },
-
-    takeoffLocation: {
+    location: {
       type: { type: String, required: true, enum: ['Point'] },
       coordinates: {
-        type: [Number]
+        type: [Number],
+        required: true
       }
     },
-
-    landingLocation: {
-      type: { type: String, required: true, enum: ['Point'] },
-      coordinates: {
-        type: [Number]
-      }
-    },
-
-    rating: {
-      paragliding: { type: String },
-      hangGliding: { type: String }
-    },
-
-    siteGuideUrl: { type: String, required: true },
-    validBearings: { type: String },
-
     elevation: { type: Number, required: true },
+    validBearings: { type: String, required: true },
+    landings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Landing'
+      }
+    ],
+    isDisabled: { type: Boolean, required: true },
 
-    radio: { type: String },
-    description: { type: String, required: true },
-
+    description: { type: String },
     mandatoryNotices: { type: String },
-    airspaceNotices: { type: String },
-    landingNotices: { type: String },
-
-    isDisabled: { type: Boolean }
+    siteGuideUrl: { type: String },
+    hazards: { type: String },
+    access: { type: String }
   },
   {
     optimisticConcurrency: true

@@ -13,3 +13,5 @@ export { ElevationControls } from "./ElevationControls";
 export { ElevationSlider } from "./ElevationSlider";
 export { HistorySlider } from "./HistorySlider";
 export { SearchBar } from "./SearchBar";
+export { SiteMarker } from "./SiteMarker";
+export { LandingMarker } from "./LandingMarker";

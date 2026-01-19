@@ -30,7 +30,7 @@ export const StationDataTable = function StationDataTable({
                 className={cn(
                   "text-center text-muted-foreground px-0.5 py-0 sm:p-0.5 text-xs sm:text-sm",
                   new Date(d.time).getMinutes() === 0 &&
-                    "bg-gray-300 text-color-base"
+                    "bg-gray-300 text-color-base",
                 )}
               >
                 {d.timeLabel}
@@ -102,7 +102,7 @@ export const StationDataTable = function StationDataTable({
                     d.windAverage == null && d.windGust == null
                       ? null
                       : d.windBearing,
-                    validBearings
+                    validBearings,
                   ),
                 }}
               >
@@ -115,7 +115,7 @@ export const StationDataTable = function StationDataTable({
                       className="h-4 w-4"
                       style={{
                         transform: `rotate(${Math.round(
-                          180 + d.windBearing
+                          180 + d.windBearing,
                         )}deg)`,
                       }}
                     />
@@ -149,9 +149,7 @@ export const StationDataTable = function StationDataTable({
                 key={String(d.time)}
                 className="text-center text-muted-foreground text-xs sm:text-sm p-0 sm:p-0.5"
               >
-                {d.temperature == null
-                  ? "-"
-                  : `${Math.round(d.temperature * 10) / 10}°C`}
+                {d.temperature == null ? "-" : `${Math.round(d.temperature)}°C`}
               </td>
             ))}
           </tr>

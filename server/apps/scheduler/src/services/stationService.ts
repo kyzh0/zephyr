@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import { formatInTimeZone } from 'date-fns-tz';
 import axios from 'axios';
-import { ObjectId } from 'mongodb';
 
 import {
   logger,

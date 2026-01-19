@@ -6,7 +6,7 @@ export type StationDataAttrs = {
   windGust?: number;
   windBearing?: number;
   temperature?: number;
-  station: mongoose.Types.ObjectId; // ref: "Station"
+  station: mongoose.Types.ObjectId;
 };
 
 export type StationDataDoc = HydratedDocument<StationDataAttrs>;

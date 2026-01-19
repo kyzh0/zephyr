@@ -1,3 +1,5 @@
+import { parseValidBearings } from "@/lib/utils";
+
 interface WindCompassProps {
   bearing: number | null | undefined;
   validBearings: string | undefined;
@@ -19,7 +21,7 @@ export function WindCompass({
       const availableHeight = containerSize.height - 20; // Some vertical padding
 
       // Use the smaller of available width/height, with min/max constraints
-      const minSize = 90;
+      const minSize = 40;
       const maxSize = 160;
 
       const calculatedSize = Math.min(availableWidth, availableHeight);
@@ -34,31 +36,7 @@ export function WindCompass({
   const centerY = size / 2;
   const radius = size * 0.4;
 
-  // Parse valid bearings to create sectors
-  const createValidBearingSectors = () => {
-    if (!validBearings) {
-      return [];
-    }
-
-    const sectors: { start: number; end: number }[] = [];
-    const pairs = validBearings.split(",");
-
-    for (const pair of pairs) {
-      const bearings = pair.split("-");
-      if (bearings.length === 2) {
-        const start = Number(bearings[0]);
-        const end = Number(bearings[1]);
-
-        if (start <= end) {
-          sectors.push({ start, end });
-        } else {
-          sectors.push({ start, end: 360 });
-          sectors.push({ start: 0, end });
-        }
-      }
-    }
-    return sectors;
-  };
+  const validSectors = parseValidBearings(validBearings);
 
   const createSectorPath = (startAngle: number, endAngle: number) => {
     const startRad = ((startAngle - 90) * Math.PI) / 180;
@@ -79,119 +57,115 @@ export function WindCompass({
     ].join(" ");
   };
 
-  const validSectors = createValidBearingSectors();
-
   return (
-    <div className="p-2">
-      <svg width={size} height={size} style={{ overflow: "visible" }}>
-        {/* Background circle */}
-        <circle
-          cx={centerX}
-          cy={centerY}
-          r={radius}
-          fill="#c4ebfa"
-          stroke="#333"
-          strokeWidth={Math.max(1.5, size / 60)}
+    <svg width={size} height={size} style={{ overflow: "visible" }}>
+      {/* Background circle */}
+      <circle
+        cx={centerX}
+        cy={centerY}
+        r={radius}
+        fill="#c4ebfa"
+        stroke="#333"
+        strokeWidth={Math.max(1.5, size / 60)}
+      />
+
+      {/* Valid bearing sectors */}
+      {validSectors.map((sector, index) => (
+        <path
+          // eslint-disable-next-line react-x/no-array-index-key
+          key={index}
+          d={createSectorPath(sector.start, sector.end)}
+          fill="rgba(34, 139, 34, 0.46)"
+          stroke="none"
         />
+      ))}
 
-        {/* Valid bearing sectors */}
-        {validSectors.map((sector, index) => (
-          <path
-            // eslint-disable-next-line react-x/no-array-index-key
-            key={index}
-            d={createSectorPath(sector.start, sector.end)}
-            fill="rgba(34, 139, 34, 0.46)"
-            stroke="none"
+      {/* Compass marks */}
+      {[0, 90, 180, 270].map((angle) => {
+        const rad = ((angle - 90) * Math.PI) / 180;
+        const markLength = size * 0.067; // Proportional mark length (was 8 at size 120)
+        const x1 = centerX + (radius - markLength) * Math.cos(rad);
+        const y1 = centerY + (radius - markLength) * Math.sin(rad);
+        const x2 = centerX + radius * Math.cos(rad);
+        const y2 = centerY + radius * Math.sin(rad);
+
+        return (
+          <line
+            key={angle}
+            x1={x1}
+            y1={y1}
+            x2={x2}
+            y2={y2}
+            stroke="#333"
+            strokeWidth={Math.max(1.5, size / 60)}
           />
-        ))}
+        );
+      })}
 
-        {/* Compass marks */}
-        {[0, 90, 180, 270].map((angle) => {
+      {/* Cardinal direction labels */}
+      {size > 90 &&
+        [
+          { angle: 0, label: "N" },
+          { angle: 90, label: "E" },
+          { angle: 180, label: "S" },
+          { angle: 270, label: "W" },
+        ].map(({ angle, label }) => {
           const rad = ((angle - 90) * Math.PI) / 180;
-          const markLength = size * 0.067; // Proportional mark length (was 8 at size 120)
-          const x1 = centerX + (radius - markLength) * Math.cos(rad);
-          const y1 = centerY + (radius - markLength) * Math.sin(rad);
-          const x2 = centerX + radius * Math.cos(rad);
-          const y2 = centerY + radius * Math.sin(rad);
+          const labelOffset = size * 0.125; // Proportional offset (was 15 at size 120)
+          const x = centerX + (radius + labelOffset) * Math.cos(rad);
+          const y = centerY + (radius + labelOffset) * Math.sin(rad);
+          const fontSize = Math.max(10, size * 0.1); // Proportional font size
 
           return (
-            <line
+            <text
               key={angle}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="#333"
-              strokeWidth={Math.max(1.5, size / 60)}
-            />
+              x={x}
+              y={y}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize={fontSize}
+              fontWeight="bold"
+              fill="#333"
+            >
+              {label}
+            </text>
           );
         })}
 
-        {/* Cardinal direction labels */}
-        {size > 90 &&
-          [
-            { angle: 0, label: "N" },
-            { angle: 90, label: "E" },
-            { angle: 180, label: "S" },
-            { angle: 270, label: "W" },
-          ].map(({ angle, label }) => {
-            const rad = ((angle - 90) * Math.PI) / 180;
-            const labelOffset = size * 0.125; // Proportional offset (was 15 at size 120)
-            const x = centerX + (radius + labelOffset) * Math.cos(rad);
-            const y = centerY + (radius + labelOffset) * Math.sin(rad);
-            const fontSize = Math.max(10, size * 0.1); // Proportional font size
+      {/* Wind direction arrow */}
+      {bearing != null && (
+        <g>
+          {(() => {
+            const bearingRad = ((bearing - 90) * Math.PI) / 180;
+            const edgeX = centerX + radius * Math.cos(bearingRad);
+            const edgeY = centerY + radius * Math.sin(bearingRad);
+            // Scale arrow proportionally to SVG size (base size was 120)
+            const arrowScale = (size / 120) * 2;
 
             return (
-              <text
-                key={angle}
-                x={x}
-                y={y}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fontSize={fontSize}
-                fontWeight="bold"
-                fill="#333"
+              <g
+                transform={`translate(${edgeX}, ${edgeY}) rotate(${
+                  bearing + 180
+                })`}
               >
-                {label}
-              </text>
+                <polygon
+                  points="0,-20 5,5 0,0 -5,5"
+                  fill="#FFD700"
+                  stroke="#333"
+                  strokeWidth="1"
+                  transform={`scale(${arrowScale})`}
+                />
+              </g>
             );
-          })}
-
-        {/* Wind direction arrow */}
-        {bearing != null && (
-          <g>
-            {(() => {
-              const bearingRad = ((bearing - 90) * Math.PI) / 180;
-              const edgeX = centerX + radius * Math.cos(bearingRad);
-              const edgeY = centerY + radius * Math.sin(bearingRad);
-              // Scale arrow proportionally to SVG size (base size was 120)
-              const arrowScale = (size / 120) * 2;
-
-              return (
-                <g
-                  transform={`translate(${edgeX}, ${edgeY}) rotate(${
-                    bearing + 180
-                  })`}
-                >
-                  <polygon
-                    points="0,-20 5,5 0,0 -5,5"
-                    fill="#FFD700"
-                    stroke="#333"
-                    strokeWidth="1"
-                    transform={`scale(${arrowScale})`}
-                  />
-                </g>
-              );
-            })()}
-          </g>
-        )}
-        <circle
-          cx={centerX}
-          cy={centerY}
-          r={Math.max(2, size * 0.025)}
-          fill="#333"
-        />
-      </svg>
-    </div>
+          })()}
+        </g>
+      )}
+      <circle
+        cx={centerX}
+        cy={centerY}
+        r={Math.max(2, size * 0.025)}
+        fill="#333"
+      />
+    </svg>
   );
 }

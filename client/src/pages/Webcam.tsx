@@ -94,14 +94,16 @@ export default function Webcam() {
         </div>
 
         {webcam && (
-          <a
-            href={webcam.externalLink}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs sm:text-sm text-muted-foreground hover:underline self-end"
-          >
-            Source: {getWebcamTypeName(webcam.type)}
-          </a>
+          <div className="flex items-center justify-end">
+            <a
+              href={webcam.externalLink}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs sm:text-sm text-muted-foreground hover:underline"
+            >
+              Source: {getWebcamTypeName(webcam.type)}
+            </a>
+          </div>
         )}
       </DialogContent>
     </Dialog>

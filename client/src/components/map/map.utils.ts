@@ -1,6 +1,8 @@
 import type { IStation } from "@/models/station.model";
 import type { ICam } from "@/models/cam.model";
 import type { ISounding } from "@/models/sounding.model";
+import type { ISite } from "@/models/site.model";
+import type { ILanding } from "@/models/landing.model";
 import type { GeoJson, GeoJsonFeature, WindUnit } from "./map.types";
 import { getArrowStyle as getArrowStylePng } from "./wind-icon.utils";
 
@@ -33,14 +35,14 @@ export function getArrowStyle(
   avgWind: number | null,
   currentBearing: number | null,
   validBearings: string | null,
-  isOffline: boolean | null
+  isOffline: boolean | null,
 ): [string, string] {
   return getArrowStylePng(avgWind, currentBearing, validBearings, isOffline);
 }
 
 // GeoJSON generators
 export function getStationGeoJson(
-  stations: IStation[] | undefined
+  stations: IStation[] | undefined,
 ): GeoJson | null {
   if (!stations?.length) {
     return null;
@@ -62,7 +64,7 @@ export function getStationGeoJson(
       type: "Feature",
       properties: {
         name: station.name,
-        dbId: (station as IStation & { _id: string })._id,
+        dbId: station._id,
         elevation: station.elevation,
         currentAverage: avg,
         currentGust: gust,
@@ -110,7 +112,7 @@ export function getWebcamGeoJson(webcams: ICam[] | undefined): GeoJson | null {
       type: "Feature",
       properties: {
         name: cam.name,
-        dbId: (cam as ICam & { _id: string })._id,
+        dbId: cam._id,
         currentTime: new Date(cam.currentTime),
         currentUrl: cam.currentUrl,
       },
@@ -126,7 +128,7 @@ export function getWebcamGeoJson(webcams: ICam[] | undefined): GeoJson | null {
 }
 
 export function getSoundingGeoJson(
-  soundings: ISounding[] | undefined
+  soundings: ISounding[] | undefined,
 ): GeoJson | null {
   if (!soundings?.length) {
     return null;
@@ -139,10 +141,10 @@ export function getSoundingGeoJson(
 
   for (const s of soundings) {
     s.images.sort(
-      (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+      (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
     );
     const afterDates = s.images.filter(
-      (img) => new Date(img.time).getTime() - (Date.now() - 30 * 60 * 1000) > 0
+      (img) => new Date(img.time).getTime() - (Date.now() - 30 * 60 * 1000) > 0,
     );
 
     let url = "";
@@ -161,6 +163,73 @@ export function getSoundingGeoJson(
         currentUrl: url,
       },
       geometry: s.location as { type: string; coordinates: [number, number] },
+    };
+    geoJson.features.push(feature);
+  }
+
+  return geoJson;
+}
+
+export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
+  if (!sites?.length) {
+    return null;
+  }
+
+  const geoJson: GeoJson = {
+    type: "FeatureCollection",
+    features: [],
+  };
+
+  for (const site of sites) {
+    // Skip disabled sites
+    if (site.isDisabled) continue;
+
+    const feature: GeoJsonFeature = {
+      type: "Feature",
+      properties: {
+        name: site.name,
+        dbId: site._id,
+        validBearings: site.validBearings,
+        siteGuideUrl: site.siteGuideUrl,
+      },
+      geometry: site.location as {
+        type: string;
+        coordinates: [number, number];
+      },
+    };
+    geoJson.features.push(feature);
+  }
+
+  return geoJson;
+}
+
+export function getLandingGeoJson(
+  landings: ILanding[] | undefined,
+): GeoJson | null {
+  if (!landings?.length) {
+    return null;
+  }
+
+  const geoJson: GeoJson = {
+    type: "FeatureCollection",
+    features: [],
+  };
+
+  for (const landing of landings) {
+    // Skip disabled landings
+    if (landing.isDisabled) continue;
+
+    const feature: GeoJsonFeature = {
+      type: "Feature",
+      properties: {
+        name: landing.name,
+        dbId: landing._id,
+        siteGuideUrl: landing.siteGuideUrl,
+      },
+      geometry: landing.location as {
+        type: string;
+        coordinates: [number, number];
+      },
     };
     geoJson.features.push(feature);
   }
@@ -213,6 +282,6 @@ export function getHistoryTime(offset: number): Date {
     t.getTime() -
       ((t.getMinutes() % 30) - offset) * 60 * 1000 -
       t.getSeconds() * 1000 -
-      t.getMilliseconds()
+      t.getMilliseconds(),
   );
 }

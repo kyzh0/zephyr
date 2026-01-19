@@ -1,8 +1,8 @@
 import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
-import { QueryFilter } from 'mongoose';
+import mongoose, { QueryFilter } from 'mongoose';
 
-import { User, Site, SiteAttrs, SiteDoc, type GeoPoint, type SiteRating } from '@zephyr/shared';
+import { User, Site, SiteDoc, type SiteAttrs, type WithId, type GeoPoint } from '@zephyr/shared';
 
 const router = express.Router();
 
@@ -10,21 +10,25 @@ type ApiKeyQuery = { key?: string };
 type IncludeDisabledQuery = { includeDisabled?: string };
 type IdParams = { id: string };
 
-type SiteBody = {
-  name?: string;
-  takeoffLocation?: GeoPoint;
-  landingLocation?: GeoPoint;
-  rating?: SiteRating;
-  siteGuideUrl?: string;
-  validBearings?: string;
-  elevation?: number;
-  radio?: string;
-  description?: string;
-  mandatoryNotices?: string;
-  airspaceNotices?: string;
-  landingNotices?: string;
-  isDisabled?: boolean;
+type LandingLean = {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+  location: GeoPoint;
 };
+type SiteWithLandingsLean = Omit<SiteAttrs, 'landings'> & {
+  landings: LandingLean[];
+};
+type SiteWithLandingsDto = Omit<SiteAttrs, 'landings'> & {
+  landings: {
+    landingId: mongoose.Types.ObjectId;
+    landingName: string;
+    landingLocation: GeoPoint;
+  }[];
+};
+type CreateSiteDto = Omit<SiteAttrs, 'landings'> & {
+  landingIds: string[];
+};
+type UpdateSiteDto = WithId<CreateSiteDto>;
 
 function isValidLonLat(coords: unknown): coords is [number, number] {
   if (!Array.isArray(coords) || coords.length !== 2) {
@@ -56,15 +60,35 @@ router.get(
       query.isDisabled = { $ne: true };
     }
 
-    const sites = await Site.find(query).lean();
-    res.json(sites);
+    const sites = await Site.find(query)
+      .populate({
+        path: 'landings',
+        select: 'name location'
+      })
+      .lean<SiteWithLandingsLean[]>();
+    res.json(
+      sites.map(
+        (site) =>
+          ({
+            ...site,
+            landings: site.landings?.map((l) => ({
+              landingId: l._id,
+              landingName: l.name,
+              landingLocation: l.location
+            }))
+          }) as SiteWithLandingsDto
+      )
+    );
   }
 );
 
 // add site
 router.post(
   '/',
-  async (req: Request<Record<string, never>, unknown, SiteBody, ApiKeyQuery>, res: Response) => {
+  async (
+    req: Request<Record<string, never>, unknown, CreateSiteDto, ApiKeyQuery>,
+    res: Response
+  ) => {
     const user = await User.findOne({ key: req.query.key }).lean();
     if (!user) {
       res.sendStatus(401);
@@ -73,18 +97,16 @@ router.post(
 
     const {
       name,
-      takeoffLocation,
-      landingLocation,
-      rating,
-      siteGuideUrl,
-      validBearings,
+      location,
       elevation,
-      radio,
+      validBearings,
+      landingIds,
+      isDisabled,
       description,
       mandatoryNotices,
-      airspaceNotices,
-      landingNotices,
-      isDisabled
+      siteGuideUrl,
+      hazards,
+      access
     } = req.body;
 
     if (!name) {
@@ -92,45 +114,40 @@ router.post(
       return;
     }
 
-    if (takeoffLocation && !isValidLonLat(takeoffLocation.coordinates)) {
-      res.status(400).json({ error: 'Takeoff location is not valid' });
+    if (!location || !isValidLonLat(location.coordinates)) {
+      res.status(400).json({ error: 'Location is not valid' });
       return;
     }
 
-    if (landingLocation && !isValidLonLat(landingLocation.coordinates)) {
-      res.status(400).json({ error: 'Landing location is not valid' });
-      return;
-    }
-
-    if (!siteGuideUrl) {
-      res.status(400).json({ error: 'Site guide URL is required' });
-      return;
-    }
-
-    if (elevation === undefined || elevation === null) {
+    if (!elevation) {
       res.status(400).json({ error: 'Elevation is required' });
       return;
     }
 
-    if (!description) {
-      res.status(400).json({ error: 'Description is required' });
+    if (!validBearings) {
+      res.status(400).json({ error: 'Bearings are required' });
       return;
+    }
+
+    for (const id of landingIds) {
+      if (!ObjectId.isValid(id)) {
+        res.status(400).json({ error: 'Landing is not valid' });
+        return;
+      }
     }
 
     const site: SiteDoc = new Site({
       name,
-      takeoffLocation,
-      landingLocation,
-      siteGuideUrl,
-      validBearings,
+      location,
       elevation,
-      radio,
+      validBearings,
+      landings: landingIds?.map((id) => new ObjectId(id)),
+      isDisabled,
       description,
       mandatoryNotices,
-      airspaceNotices,
-      landingNotices,
-      isDisabled: isDisabled ? true : undefined,
-      rating
+      siteGuideUrl,
+      hazards,
+      access
     });
 
     try {
@@ -152,19 +169,31 @@ router.get('/:id', async (req: Request<IdParams>, res: Response) => {
     return;
   }
 
-  const s = await Site.findOne({ _id: new ObjectId(id) }).lean();
+  const s = await Site.findOne({ _id: new ObjectId(id) })
+    .populate({
+      path: 'landings',
+      select: 'name location'
+    })
+    .lean<SiteWithLandingsLean>();
   if (!s) {
     res.sendStatus(404);
     return;
   }
 
-  res.json(s);
+  res.json({
+    ...s,
+    landings: s.landings?.map((l) => ({
+      landingId: l._id,
+      landingName: l.name,
+      landingLocation: l.location
+    }))
+  } as SiteWithLandingsDto);
 });
 
 // update site
 router.put(
   '/:id',
-  async (req: Request<IdParams, unknown, SiteBody, ApiKeyQuery>, res: Response) => {
+  async (req: Request<IdParams, unknown, UpdateSiteDto, ApiKeyQuery>, res: Response) => {
     const user = await User.findOne({ key: req.query.key }).lean();
     if (!user) {
       res.sendStatus(401);
@@ -172,9 +201,28 @@ router.put(
     }
 
     const { id } = req.params;
+    const {
+      _id,
+      __v,
+      name,
+      location,
+      elevation,
+      validBearings,
+      landingIds,
+      isDisabled,
+      description,
+      mandatoryNotices,
+      siteGuideUrl,
+      hazards,
+      access
+    } = req.body;
 
     if (!ObjectId.isValid(id)) {
       res.sendStatus(404);
+      return;
+    }
+    if (_id && _id.toString() !== id) {
+      res.sendStatus(400);
       return;
     }
 
@@ -183,66 +231,49 @@ router.put(
       res.sendStatus(404);
       return;
     }
-
-    const {
-      name,
-      takeoffLocation,
-      landingLocation,
-      rating,
-      siteGuideUrl,
-      validBearings,
-      elevation,
-      radio,
-      description,
-      mandatoryNotices,
-      airspaceNotices,
-      landingNotices,
-      isDisabled
-    } = req.body;
+    if (__v === null || __v === undefined || site.__v !== __v) {
+      res.sendStatus(409);
+      return;
+    }
 
     if (!name) {
       res.status(400).json({ error: 'Site name is required' });
       return;
     }
 
-    if (takeoffLocation && !isValidLonLat(takeoffLocation.coordinates)) {
-      res.status(400).json({ error: 'Takeoff location is not valid' });
+    if (!location || !isValidLonLat(location.coordinates)) {
+      res.status(400).json({ error: 'Location is not valid' });
       return;
     }
 
-    if (landingLocation && !isValidLonLat(landingLocation.coordinates)) {
-      res.status(400).json({ error: 'Landing location is not valid' });
-      return;
-    }
-
-    if (!siteGuideUrl) {
-      res.status(400).json({ error: 'Site guide URL is required' });
-      return;
-    }
-
-    if (elevation === undefined || elevation === null) {
+    if (!elevation) {
       res.status(400).json({ error: 'Elevation is required' });
       return;
     }
 
-    if (!description) {
-      res.status(400).json({ error: 'Description is required' });
+    if (!validBearings) {
+      res.status(400).json({ error: 'Bearings are required' });
       return;
     }
 
+    for (const id of landingIds) {
+      if (!ObjectId.isValid(id)) {
+        res.status(400).json({ error: 'Landing is not valid' });
+        return;
+      }
+    }
+
     site.name = name;
-    site.takeoffLocation = takeoffLocation;
-    site.landingLocation = landingLocation;
-    site.rating = rating ?? undefined;
-    site.siteGuideUrl = siteGuideUrl;
-    site.validBearings = validBearings ?? undefined;
+    site.location = location;
     site.elevation = elevation;
-    site.radio = radio ?? undefined;
+    site.validBearings = validBearings;
+    site.landings = landingIds?.map((id) => new ObjectId(id));
+    site.isDisabled = isDisabled;
     site.description = description;
     site.mandatoryNotices = mandatoryNotices ?? undefined;
-    site.airspaceNotices = airspaceNotices ?? undefined;
-    site.landingNotices = landingNotices ?? undefined;
-    site.isDisabled = isDisabled ?? undefined;
+    site.siteGuideUrl = siteGuideUrl;
+    site.hazards = hazards;
+    site.access = access;
 
     try {
       await site.save();
