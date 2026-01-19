@@ -6,7 +6,7 @@ export type SiteAttrs = {
   location: GeoPoint;
   elevation: number;
   validBearings: string;
-  landing: mongoose.Types.ObjectId;
+  landings: mongoose.Types.ObjectId[];
   isDisabled: boolean;
 
   description?: string;
@@ -30,11 +30,12 @@ const siteSchema = new mongoose.Schema<SiteAttrs>(
     },
     elevation: { type: Number, required: true },
     validBearings: { type: String, required: true },
-    landing: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Landing',
-      required: true
-    },
+    landings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Landing'
+      }
+    ],
     isDisabled: { type: Boolean, required: true },
 
     description: { type: String },

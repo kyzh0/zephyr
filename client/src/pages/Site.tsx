@@ -164,24 +164,30 @@ export default function Site() {
           )}
 
           {/* Landing */}
-          {site.landingId && site.landingName && (
-            <Item variant="outline" size="sm" asChild className="py-2">
+          {site.landings?.map((l) => (
+            <Item
+              key={l.landingId}
+              variant="outline"
+              size="sm"
+              asChild
+              className="py-2"
+            >
               <a
                 className="cursor-pointer"
-                onClick={() => navigate(`/landings/${site.landingId}`)}
+                onClick={() => navigate(`/landings/${l.landingId}`)}
               >
                 <ItemMedia>
                   <PlaneLanding className="h-4 w-4" />
                 </ItemMedia>
                 <ItemContent>
-                  <ItemTitle>{site.landingName}</ItemTitle>
+                  <ItemTitle>{l.landingName}</ItemTitle>
                 </ItemContent>
                 <ItemActions>
                   <ChevronRightIcon className="size-4" />
                 </ItemActions>
               </a>
             </Item>
-          )}
+          ))}
 
           {/* Description */}
           {site.description && (

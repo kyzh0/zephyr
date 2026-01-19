@@ -60,7 +60,7 @@ export const SiteMarker = ({
         Z
       `;
     });
-  }, [validBearings, isOfficial, size, borderWidth]);
+  }, [validBearings, size, borderWidth]);
 
   return (
     <div

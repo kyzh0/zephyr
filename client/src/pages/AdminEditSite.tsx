@@ -31,17 +31,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import { deleteSite, getSiteById, patchSite } from "@/services/site.service";
 import { listLandings } from "@/services/landing.service";
-import type { ISite } from "@/models/site.model";
+import type { ISite, UpdateSiteDto } from "@/models/site.model";
 import type { ILanding } from "@/models/landing.model";
 
 const coordinatesSchema = z.string().refine(
@@ -87,7 +80,7 @@ const formSchema = z.object({
     .regex(/^$|^\d+$/, "Must be a number")
     .min(1, "Elevation is required"),
   validBearings: bearingsSchema,
-  landingId: z.string().min(1, "Landing is required"),
+  landingIds: z.array(z.string().min(1)).optional(),
   isDisabled: z.boolean(),
   description: z.string().optional(),
   mandatoryNotices: z.string().optional(),
@@ -141,7 +134,7 @@ export default function AdminEditSite() {
       coordinates: "",
       elevation: "",
       validBearings: "",
-      landingId: "",
+      landingIds: [],
       isDisabled: false,
       description: "",
       siteGuideUrl: "",
@@ -167,7 +160,7 @@ export default function AdminEditSite() {
           coordinates: formatCoordinates(data.location),
           elevation: data.elevation.toString(),
           validBearings: data.validBearings,
-          landingId: data.landingId,
+          landingIds: data.landings?.map((l) => l.landingId) ?? [],
           isDisabled: data.isDisabled,
           description: data.description ?? "",
           mandatoryNotices: data.mandatoryNotices ?? "",
@@ -201,18 +194,20 @@ export default function AdminEditSite() {
   async function onSubmit(values: FormValues) {
     if (!site) return;
 
-    const updates: Partial<ISite> = {
+    const updates: UpdateSiteDto = {
+      _id: site._id,
+      __v: site.__v,
       name: values.name,
+      location: site.location,
       elevation: parseInt(values.elevation, 10),
       validBearings: values.validBearings,
-      landingId: values.landingId,
+      landingIds: values.landingIds ?? [],
       isDisabled: values.isDisabled,
       description: values.description,
       mandatoryNotices: values.mandatoryNotices,
       siteGuideUrl: values.siteGuideUrl,
       hazards: values.hazards,
       access: values.access,
-      __v: site.__v,
     };
 
     const location = parseCoordinates(values.coordinates);
@@ -306,31 +301,53 @@ export default function AdminEditSite() {
 
                 <FormField
                   control={form.control}
-                  name="landingId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Landing</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={!landings.length}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a landing" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {landings.map((landing) => (
-                            <SelectItem key={landing._id} value={landing._id}>
-                              {landing.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  name="landingIds"
+                  render={({ field }) => {
+                    const selectedIds = field.value ?? [];
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Landings</FormLabel>
+
+                        <div className="space-y-2 rounded-md border p-3">
+                          <div className="max-h-[60px] overflow-y-auto space-y-1">
+                            {landings.map((landing) => {
+                              const checked = selectedIds.includes(landing._id);
+
+                              return (
+                                <div
+                                  key={landing._id}
+                                  className="flex items-center space-x-2"
+                                >
+                                  <Checkbox
+                                    checked={checked}
+                                    onCheckedChange={(isChecked) => {
+                                      if (isChecked) {
+                                        field.onChange([
+                                          ...selectedIds,
+                                          landing._id,
+                                        ]);
+                                      } else {
+                                        field.onChange(
+                                          selectedIds.filter(
+                                            (id) => id !== landing._id,
+                                          ),
+                                        );
+                                      }
+                                    }}
+                                  />
+                                  <span className="text-sm">
+                                    {landing.name}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField

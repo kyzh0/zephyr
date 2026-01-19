@@ -15,14 +15,20 @@ type LandingLean = {
   name: string;
   location: GeoPoint;
 };
-type SiteWithLandingLean = Omit<SiteAttrs, 'landing'> & {
-  landing: LandingLean;
+type SiteWithLandingsLean = Omit<SiteAttrs, 'landings'> & {
+  landings: LandingLean[];
 };
-type SiteWithLandingDto = Omit<SiteAttrs, 'landing'> & {
-  landingId: mongoose.Types.ObjectId;
-  landingName: string;
-  landingLocation: GeoPoint;
+type SiteWithLandingsDto = Omit<SiteAttrs, 'landings'> & {
+  landings: {
+    landingId: mongoose.Types.ObjectId;
+    landingName: string;
+    landingLocation: GeoPoint;
+  }[];
 };
+type CreateSiteDto = Omit<SiteAttrs, 'landings'> & {
+  landingIds: string[];
+};
+type UpdateSiteDto = WithId<CreateSiteDto>;
 
 function isValidLonLat(coords: unknown): coords is [number, number] {
   if (!Array.isArray(coords) || coords.length !== 2) {
@@ -56,17 +62,22 @@ router.get(
 
     const sites = await Site.find(query)
       .populate({
-        path: 'landing',
+        path: 'landings',
         select: 'name location'
       })
-      .lean<SiteWithLandingLean[]>();
+      .lean<SiteWithLandingsLean[]>();
     res.json(
-      sites.map((site) => ({
-        ...site,
-        landingId: site.landing?._id,
-        landingName: site.landing?.name,
-        landingLocation: site.landing?.location
-      }))
+      sites.map(
+        (site) =>
+          ({
+            ...site,
+            landings: site.landings?.map((l) => ({
+              landingId: l._id,
+              landingName: l.name,
+              landingLocation: l.location
+            }))
+          }) as SiteWithLandingsDto
+      )
     );
   }
 );
@@ -75,7 +86,7 @@ router.get(
 router.post(
   '/',
   async (
-    req: Request<Record<string, never>, unknown, SiteWithLandingDto, ApiKeyQuery>,
+    req: Request<Record<string, never>, unknown, CreateSiteDto, ApiKeyQuery>,
     res: Response
   ) => {
     const user = await User.findOne({ key: req.query.key }).lean();
@@ -89,7 +100,7 @@ router.post(
       location,
       elevation,
       validBearings,
-      landingId,
+      landingIds,
       isDisabled,
       description,
       mandatoryNotices,
@@ -118,9 +129,11 @@ router.post(
       return;
     }
 
-    if (!landingId || !ObjectId.isValid(landingId)) {
-      res.status(400).json({ error: 'Landing is not valid' });
-      return;
+    for (const id of landingIds) {
+      if (!ObjectId.isValid(id)) {
+        res.status(400).json({ error: 'Landing is not valid' });
+        return;
+      }
     }
 
     const site: SiteDoc = new Site({
@@ -128,7 +141,7 @@ router.post(
       location,
       elevation,
       validBearings,
-      landing: new ObjectId(landingId),
+      landings: landingIds?.map((id) => new ObjectId(id)),
       isDisabled,
       description,
       mandatoryNotices,
@@ -158,10 +171,10 @@ router.get('/:id', async (req: Request<IdParams>, res: Response) => {
 
   const s = await Site.findOne({ _id: new ObjectId(id) })
     .populate({
-      path: 'landing',
+      path: 'landings',
       select: 'name location'
     })
-    .lean<SiteWithLandingLean>();
+    .lean<SiteWithLandingsLean>();
   if (!s) {
     res.sendStatus(404);
     return;
@@ -169,19 +182,18 @@ router.get('/:id', async (req: Request<IdParams>, res: Response) => {
 
   res.json({
     ...s,
-    landingId: s.landing?._id,
-    landingName: s.landing?.name,
-    landingLocation: s.landing?.location
-  });
+    landings: s.landings?.map((l) => ({
+      landingId: l._id,
+      landingName: l.name,
+      landingLocation: l.location
+    }))
+  } as SiteWithLandingsDto);
 });
 
 // update site
 router.put(
   '/:id',
-  async (
-    req: Request<IdParams, unknown, WithId<SiteWithLandingDto>, ApiKeyQuery>,
-    res: Response
-  ) => {
+  async (req: Request<IdParams, unknown, UpdateSiteDto, ApiKeyQuery>, res: Response) => {
     const user = await User.findOne({ key: req.query.key }).lean();
     if (!user) {
       res.sendStatus(401);
@@ -196,7 +208,7 @@ router.put(
       location,
       elevation,
       validBearings,
-      landingId,
+      landingIds,
       isDisabled,
       description,
       mandatoryNotices,
@@ -244,16 +256,18 @@ router.put(
       return;
     }
 
-    if (!landingId || !ObjectId.isValid(landingId)) {
-      res.status(400).json({ error: 'Landing is not valid' });
-      return;
+    for (const id of landingIds) {
+      if (!ObjectId.isValid(id)) {
+        res.status(400).json({ error: 'Landing is not valid' });
+        return;
+      }
     }
 
     site.name = name;
     site.location = location;
     site.elevation = elevation;
     site.validBearings = validBearings;
-    site.landing = new ObjectId(landingId);
+    site.landings = landingIds?.map((id) => new ObjectId(id));
     site.isDisabled = isDisabled;
     site.description = description;
     site.mandatoryNotices = mandatoryNotices ?? undefined;
