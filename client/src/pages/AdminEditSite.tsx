@@ -36,6 +36,7 @@ import { deleteSite, getSiteById, patchSite } from "@/services/site.service";
 import { listLandings } from "@/services/landing.service";
 import type { ISite, UpdateSiteDto } from "@/models/site.model";
 import type { ILanding } from "@/models/landing.model";
+import { lookupElevation } from "@/lib/utils";
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -112,6 +113,7 @@ function parseCoordinates(
 
 export default function AdminEditSite() {
   const navigate = useNavigate();
+  const [elevationLoading, setElevationLoading] = useState(false);
   const { id } = useParams<{ id: string }>();
 
   const [site, setSite] = useState<ISite | null>(null);
@@ -188,6 +190,43 @@ export default function AdminEditSite() {
     } catch (error) {
       toast.error("Failed to delete site: " + (error as Error).message);
       setIsDeleting(false);
+    }
+  }
+
+  async function handleAutoElevation() {
+    const coordsValue = form.getValues("coordinates");
+
+    if (!coordsValue?.trim()) {
+      toast.error("Please select coordinates first");
+      return;
+    }
+
+    const parts = coordsValue.replace(/\s/g, "").split(",");
+    if (parts.length !== 2) {
+      toast.error("Invalid coordinates");
+      return;
+    }
+
+    const [lat, lon] = parts.map(Number);
+    if (isNaN(lat) || isNaN(lon)) {
+      toast.error("Invalid coordinates");
+      return;
+    }
+
+    try {
+      setElevationLoading(true);
+
+      const elevation = await lookupElevation(lat, lon);
+      form.setValue("elevation", elevation.toString(), {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+
+      toast.success(`Elevation set to ${elevation} m`);
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setElevationLoading(false);
     }
   }
 
@@ -394,7 +433,7 @@ export default function AdminEditSite() {
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-2">
                   <FormField
                     control={form.control}
                     name="elevation"
@@ -408,6 +447,19 @@ export default function AdminEditSite() {
                       </FormItem>
                     )}
                   />
+
+                  <div className="flex items-end">
+                    <Button
+                      type="button"
+                      onClick={handleAutoElevation}
+                      disabled={elevationLoading}
+                    >
+                      {elevationLoading && (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      )}
+                      Auto
+                    </Button>
+                  </div>
 
                   <FormField
                     control={form.control}

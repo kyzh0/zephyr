@@ -35,7 +35,7 @@ export function CoordinatesPicker({ value, onChange }: CoordinatesPickerProps) {
     mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_GL_KEY as string;
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/outdoors-v11",
+      style: "mapbox://styles/kyzh0/cmkl32f5k00rg01svd1br8c1y",
       center: initialCoords
         ? [initialCoords.lng, initialCoords.lat]
         : [DEFAULT_LON, DEFAULT_LAT],

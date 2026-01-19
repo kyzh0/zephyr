@@ -58,8 +58,16 @@ router.post(
       return;
     }
 
-    const { name, location, elevation, isDisabled, description, mandatoryNotices, siteGuideUrl } =
-      req.body;
+    const {
+      name,
+      location,
+      elevation,
+      isDisabled,
+      description,
+      mandatoryNotices,
+      hazards,
+      siteGuideUrl
+    } = req.body;
 
     if (!name) {
       res.status(400).json({ error: 'Landing name is required' });
@@ -83,6 +91,7 @@ router.post(
       isDisabled,
       description,
       mandatoryNotices,
+      hazards,
       siteGuideUrl
     });
 
@@ -134,6 +143,7 @@ router.put(
       isDisabled,
       description,
       mandatoryNotices,
+      hazards,
       siteGuideUrl
     } = req.body;
 
@@ -176,7 +186,8 @@ router.put(
     landing.elevation = elevation;
     landing.isDisabled = isDisabled;
     landing.description = description;
-    landing.mandatoryNotices = mandatoryNotices ?? undefined;
+    landing.mandatoryNotices = mandatoryNotices;
+    landing.hazards = hazards;
     landing.siteGuideUrl = siteGuideUrl;
 
     try {

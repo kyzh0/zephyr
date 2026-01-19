@@ -24,6 +24,7 @@ import {
 import { addStation } from "@/services/station.service";
 import { STATION_TYPES, type INewStation } from "@/models/station.model";
 import { toast } from "sonner";
+import { lookupElevation } from "@/lib/utils";
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -39,7 +40,7 @@ const coordinatesSchema = z.string().refine(
       lon <= 180
     );
   },
-  { message: "Enter valid coordinates: latitude, longitude" }
+  { message: "Enter valid coordinates: latitude, longitude" },
 );
 
 const bearingsSchema = z
@@ -97,21 +98,6 @@ const formSchema = z.discriminatedUnion("type", [
 
 type FormValues = z.infer<typeof formSchema>;
 
-async function fetchElevation(
-  lat: number,
-  lon: number
-): Promise<number | undefined> {
-  try {
-    const res = await fetch(
-      `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`
-    );
-    const data = (await res.json()) as { elevation?: number[] };
-    return data.elevation?.[0];
-  } catch {
-    return undefined;
-  }
-}
-
 export default function AdminAddStation() {
   const navigate = useNavigate();
 
@@ -136,7 +122,13 @@ export default function AdminAddStation() {
       .replace(/\s/g, "")
       .split(",")
       .map(Number);
-    const elevation = await fetchElevation(lat, lon);
+
+    let elevation = 0;
+    try {
+      elevation = await lookupElevation(lat, lon);
+    } catch {
+      toast.error("Error fetching elevation data");
+    }
 
     const station: INewStation = {
       name: values.name,

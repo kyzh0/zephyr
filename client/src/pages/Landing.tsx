@@ -16,6 +16,7 @@ import {
   ArrowLeft,
   ChevronRightIcon,
   ExternalLink,
+  TriangleAlertIcon,
 } from "lucide-react";
 import { useState } from "react";
 import type { ILanding } from "@/models/landing.model";
@@ -123,11 +124,23 @@ export default function Site() {
             </Item>
           )}
 
+          {/* Hazards */}
+          {landing.hazards && (
+            <Alert className="py-2 text-orange-600">
+              <TriangleAlertIcon />
+              <AlertDescription className="text-sm text-orange-600 whitespace-pre-wrap">
+                {landing.hazards}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Description */}
           {landing.description && (
             <div
               className={
-                landing.mandatoryNotices || landing.siteGuideUrl
+                landing.mandatoryNotices ||
+                landing.siteGuideUrl ||
+                landing.hazards
                   ? "my-4"
                   : "mb-4"
               }

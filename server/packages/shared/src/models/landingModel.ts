@@ -9,6 +9,7 @@ export type LandingAttrs = {
 
   description?: string;
   mandatoryNotices?: string;
+  hazards?: string;
   siteGuideUrl?: string;
 };
 
@@ -29,6 +30,7 @@ const landingSchema = new mongoose.Schema<LandingAttrs>(
 
     description: { type: String },
     mandatoryNotices: { type: String },
+    hazards: { type: String },
     siteGuideUrl: { type: String }
   },
   {

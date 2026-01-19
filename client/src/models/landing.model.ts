@@ -11,5 +11,6 @@ export interface ILanding {
 
   description: string;
   mandatoryNotices: string;
+  hazards: string;
   siteGuideUrl: string;
 }

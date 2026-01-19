@@ -201,7 +201,7 @@ export const getDistance = (
   lat1: number,
   lon1: number,
   lat2: number,
-  lon2: number
+  lon2: number,
 ): number => {
   const R = 6371 * 1000; // Earth's radius in meters
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -257,7 +257,7 @@ export const compassToDegrees = (direction: string): number => {
 
 // Parse valid bearings string into array of {start, end} sectors
 export const parseValidBearings = (
-  bearings: string | undefined
+  bearings: string | undefined,
 ): { start: number; end: number }[] => {
   if (!bearings) {
     return [];
@@ -302,4 +302,28 @@ export const parseValidBearings = (
   }
 
   return sectors;
+};
+
+export const lookupElevation = async (
+  lat: number,
+  lon: number,
+): Promise<number> => {
+  const response = await fetch(
+    `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`,
+    { method: "GET" },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch elevation");
+  }
+
+  const data = (await response.json()) as {
+    elevation: number[];
+  };
+
+  if (!data.elevation?.length) {
+    throw new Error("No elevation data returned");
+  }
+
+  return Math.round(data.elevation[0]);
 };
