@@ -21,7 +21,7 @@ app.use(express.json());
 
 // static files are served by caddy in prod
 if (NODE_ENV !== 'production' && NODE_ENV !== 'staging') {
-  app.use(express.static('public'));
+  app.use(express.static('../scheduler/public'));
 }
 
 // routes

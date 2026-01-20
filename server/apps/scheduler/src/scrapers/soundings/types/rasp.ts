@@ -38,6 +38,7 @@ export default async function scrapeRaspData(soundings: WithId<SoundingAttrs>[])
           }
         }
 
+        const images = [];
         for (let i = 9; i < 20; i++) {
           const hr = i.toString().padStart(2, '0');
 
@@ -78,19 +79,21 @@ export default async function scrapeRaspData(soundings: WithId<SoundingAttrs>[])
             time: fromZonedTime(timeStr, 'Pacific/Auckland'),
             url: filePath.replace('public/', '')
           };
+          images.push(img);
+        }
 
+        if (images.length) {
           await Sounding.updateOne(
             { _id: sounding._id, __v: sounding.__v },
             {
-              $push: { images: img },
+              $push: { images: { $each: images } },
               $inc: { __v: 1 }
             }
           );
 
-          logger.info(
-            `rasp sounding updated - ${sounding.raspRegion} - ${sounding.raspId} - ${hr}`,
-            { service: 'sounding' }
-          );
+          logger.info(`rasp sounding updated - ${sounding.raspRegion} - ${sounding.raspId}`, {
+            service: 'sounding'
+          });
         }
       })
     )
