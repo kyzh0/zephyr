@@ -12,7 +12,12 @@ export default function MapWrapper() {
   const location = useLocation();
 
   // Check if we're at the root path (no child route)
-  const isRootPath = location.pathname === "/";
+  // Paths that should show the Map on mobile
+  const isRootPath =
+    location.pathname === "/" ||
+    location.pathname.startsWith("/soundings/") ||
+    location.pathname.startsWith("/webcams/") ||
+    location.pathname.startsWith("/grid");
 
   // On mobile at root, show the Map
   // On mobile with a child route, show just the child (full screen)

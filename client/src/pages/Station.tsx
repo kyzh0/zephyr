@@ -5,11 +5,8 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 
 import { getMinutesAgo, getStationTypeName } from "@/lib/utils";
 import { useStationData, useIsMobile, type TimeRange } from "@/hooks";
-import {
-  useNearbyWebcams,
-  type UseNearbyWebcamsResult,
-} from "@/hooks/useWebcam";
-import { useNearbySites, type UseNearbySitesResult } from "@/hooks/useSites";
+import { useNearbyWebcams } from "@/hooks/useWebcam";
+import { useNearbySites } from "@/hooks/useSites";
 import {
   CurrentConditions,
   StationDataTable,
@@ -43,17 +40,17 @@ export default function Station() {
 
   const { station, data, tableData, bearingPairCount } = useStationData(
     id,
-    timeRange
+    timeRange,
   );
 
-  const { webcams }: UseNearbyWebcamsResult = useNearbyWebcams({
-    latitude: station?.location.coordinates[0] ?? 0,
-    longitude: station?.location.coordinates[1] ?? 0,
+  const { data: nearbyWebcamData } = useNearbyWebcams({
+    lat: station?.location.coordinates[0] ?? 0,
+    lon: station?.location.coordinates[1] ?? 0,
   });
 
-  const { sites }: UseNearbySitesResult = useNearbySites({
-    latitude: station?.location.coordinates[0] ?? 0,
-    longitude: station?.location.coordinates[1] ?? 0,
+  const { data: nearbySitesData } = useNearbySites({
+    lat: station?.location.coordinates[0] ?? 0,
+    lon: station?.location.coordinates[1] ?? 0,
     maxDistance: 5000, // 5km
   });
 
@@ -177,14 +174,14 @@ export default function Station() {
       )}
 
       {/* Nearby Webcams */}
-      {station && webcams?.length > 0 && (
+      {station && nearbyWebcamData?.length > 0 && (
         <Collapsible open={webcamsOpen} onOpenChange={setWebcamsOpen}>
           <CollapsibleTrigger
             className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
               webcamsOpen ? "bg-transparent" : "bg-muted mb-4"
             }`}
           >
-            <span>Nearby Webcams ({webcams.length} within 5km)</span>
+            <span>Nearby Webcams ({nearbyWebcamData.length} within 5km)</span>
             <ChevronDown
               className={`h-4 w-4 transition-transform ${
                 webcamsOpen ? "rotate-180" : ""
@@ -192,13 +189,13 @@ export default function Station() {
             />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
-            {webcams.map((webcam) => (
+            {nearbyWebcamData.map((nearbyWebcamData) => (
               <WebcamPreview
-                key={webcam._id}
-                _id={webcam._id}
-                name={webcam.name}
-                distance={webcam.distance}
-                currentUrl={webcam.currentUrl}
+                key={nearbyWebcamData.data._id}
+                _id={nearbyWebcamData.data._id}
+                name={nearbyWebcamData.data.name}
+                distance={nearbyWebcamData.distance}
+                currentUrl={nearbyWebcamData.data.currentUrl}
               />
             ))}
           </CollapsibleContent>
@@ -206,14 +203,14 @@ export default function Station() {
       )}
 
       {/* Nearby Sites */}
-      {station && sites?.length > 0 && (
+      {station && nearbySitesData?.length > 0 && (
         <Collapsible open={sitesOpen} onOpenChange={setSitesOpen}>
           <CollapsibleTrigger
             className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
               sitesOpen ? "bg-transparent" : "bg-muted mb-4"
             }`}
           >
-            <span>Nearby Sites ({sites.length} within 5km)</span>
+            <span>Nearby Sites ({nearbySitesData.length} within 5km)</span>
             <ChevronDown
               className={`h-4 w-4 transition-transform ${
                 sitesOpen ? "rotate-180" : ""
@@ -222,13 +219,14 @@ export default function Station() {
           </CollapsibleTrigger>
           <CollapsibleContent>
             <ul className="list-disc list-inside ml-8">
-              {sites.map((site) => (
-                <li key={String(site._id)}>
+              {nearbySitesData.map((nearbySiteData) => (
+                <li key={String(nearbySiteData.data._id)}>
                   <Link
-                    to={`/sites/${site._id}`}
+                    to={`/sites/${nearbySiteData.data._id}`}
                     className="underline cursor-pointer hover:text-blue-600"
                   >
-                    {site.name} ({(site.distance / 1000).toFixed(1)}km away)
+                    {nearbySiteData.data.name} (
+                    {(nearbySiteData.distance / 1000).toFixed(1)}km away)
                   </Link>
                 </li>
               ))}
@@ -245,7 +243,7 @@ export default function Station() {
             {formatInTimeZone(
               new Date(station.lastUpdate),
               "Pacific/Auckland",
-              "HH:mm"
+              "HH:mm",
             )}
             {" ("}
             {getMinutesAgo(new Date(station.lastUpdate))}
@@ -297,7 +295,7 @@ export default function Station() {
 
   // Desktop: Dialog overlay
   return (
-    <Dialog open onOpenChange={() => navigate(-1)}>
+    <Dialog open onOpenChange={() => navigate("/")}>
       <DialogContent className="sm:max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="sticky pb-2">
           <DialogTitle className="text-center">{headerContent}</DialogTitle>
