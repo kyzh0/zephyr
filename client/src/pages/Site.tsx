@@ -203,7 +203,7 @@ export default function Site() {
             <Collapsible open={stationsOpen} onOpenChange={setStationsOpen}>
               <CollapsibleTrigger
                 className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
-                  stationsOpen ? "bg-transparent" : "bg-muted mb-4"
+                  stationsOpen ? "bg-transparent" : "bg-muted"
                 }`}
               >
                 <span>
@@ -233,7 +233,7 @@ export default function Site() {
             <Collapsible open={webcamsOpen} onOpenChange={setWebcamsOpen}>
               <CollapsibleTrigger
                 className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
-                  webcamsOpen ? "bg-transparent" : "bg-muted mb-4"
+                  webcamsOpen ? "bg-transparent" : "bg-muted"
                 }`}
               >
                 <span>

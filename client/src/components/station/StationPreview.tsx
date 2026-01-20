@@ -25,7 +25,7 @@ export const StationPreview: React.FC<{
       onClick={() => {
         navigate(`/stations/${data._id}`);
       }}
-      className="rounded-lg p-2 text-center transition-colors hover:opacity-80"
+      className="rounded-lg p-2 text-center transition-colors hover:opacity-80 cursor-pointer"
       style={{
         backgroundColor: color ?? "hsl(var(--muted))",
       }}
