@@ -1,4 +1,6 @@
 import pLimit from 'p-limit';
+import { fromZonedTime } from 'date-fns-tz';
+import { parse } from 'date-fns';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
@@ -37,23 +39,40 @@ export default async function scrapeWeatherProData(
           );
 
           if (data.length) {
-            windAverage = extractNumber(
-              data,
-              'Wind Speed</td><td style="font-size:200%;">:',
-              'kph</td></tr>'
-            );
+            let time: Date | null = null;
+            const startStr = '</u><br>';
+            const i = data.indexOf(startStr);
+            if (i > 0) {
+              const j = data.indexOf('</strong><br>', i);
+              if (j > i) {
+                const timeStr = data.slice(i + startStr.length, j).trim();
+                time = fromZonedTime(
+                  parse(timeStr, 'dd MMM yyyy h:mm a', new Date()),
+                  'Pacific/Auckland'
+                );
+              }
+            }
 
-            windBearing = extractNumber(
-              data,
-              'Wind Direction</td><td style="font-size:200%;">:',
-              '°</td></tr>'
-            );
+            // skip if older than 20 mins
+            if (time && Date.now() - time.getTime() < 20 * 60 * 1000) {
+              windAverage = extractNumber(
+                data,
+                'Wind Speed</td><td style="font-size:200%;">:',
+                'kph</td></tr>'
+              );
 
-            temperature = extractNumber(
-              data,
-              'Air Temperature</td><td style="font-size:200%;">:',
-              '°C</td></tr>'
-            );
+              windBearing = extractNumber(
+                data,
+                'Wind Direction</td><td style="font-size:200%;">:',
+                '°</td></tr>'
+              );
+
+              temperature = extractNumber(
+                data,
+                'Air Temperature</td><td style="font-size:200%;">:',
+                '°C</td></tr>'
+              );
+            }
           }
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
