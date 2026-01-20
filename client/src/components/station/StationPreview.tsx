@@ -59,12 +59,11 @@ export const StationPreview: React.FC<{
           {getWindDirectionFromBearing(data.currentBearing ?? -1)}
         </p>
       </div>
-      <p className="text-xs text-muted-foreground">
-        {distance?.toLocaleString(undefined, {
-          maximumFractionDigits: 0,
-        })}{" "}
-        km away
-      </p>
+      {distance && (
+        <p className="text-xs text-muted-foreground">
+          {(distance / 1000).toFixed(1)} km away
+        </p>
+      )}
     </button>
   );
 };
