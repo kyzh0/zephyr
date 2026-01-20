@@ -41,25 +41,30 @@ export default async function processScrapedData(
   await d.save();
 
   // save station flags
-  const isOffline = data.windAverage == null && data.windGust == null;
-  const isError =
-    data.windAverage == null ||
-    data.windGust == null ||
-    data.windBearing == null ||
-    data.temperature == null;
+  const updates = {
+    lastUpdate: lastUpdate,
+    currentAverage: currentAverage,
+    currentGust: currentGust,
+    currentBearing: currentBearing,
+    currentTemperature: currentTemperature
+  } as Partial<StationAttrs>;
+
+  if (data.windAverage != null || data.windGust != null) {
+    updates.isOffline = false;
+  }
+  if (
+    data.windAverage != null &&
+    data.windGust != null &&
+    data.windBearing != null &&
+    data.temperature != null
+  ) {
+    updates.isError = false;
+  }
 
   await Station.updateOne(
     { _id: station._id, __v: station.__v },
     {
-      $set: {
-        lastUpdate: lastUpdate,
-        currentAverage: currentAverage,
-        currentGust: currentGust,
-        currentBearing: currentBearing,
-        currentTemperature: currentTemperature,
-        isOffline: isOffline,
-        isError: isError
-      },
+      $set: updates,
       $inc: { __v: 1 }
     }
   );
