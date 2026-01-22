@@ -175,10 +175,14 @@ export default function Station() {
 
       {/* Nearby Webcams */}
       {station && nearbyWebcamData?.length > 0 && (
-        <Collapsible open={webcamsOpen} onOpenChange={setWebcamsOpen}>
+        <Collapsible
+          open={webcamsOpen}
+          onOpenChange={setWebcamsOpen}
+          className="mb-2"
+        >
           <CollapsibleTrigger
             className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
-              webcamsOpen ? "bg-transparent" : "bg-muted mb-4"
+              webcamsOpen ? "bg-transparent" : "bg-muted"
             }`}
           >
             <span>Nearby Webcams ({nearbyWebcamData.length} within 5km)</span>
@@ -204,10 +208,14 @@ export default function Station() {
 
       {/* Nearby Sites */}
       {station && nearbySitesData?.length > 0 && (
-        <Collapsible open={sitesOpen} onOpenChange={setSitesOpen}>
+        <Collapsible
+          open={sitesOpen}
+          onOpenChange={setSitesOpen}
+          className="mb-2"
+        >
           <CollapsibleTrigger
             className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
-              sitesOpen ? "bg-transparent" : "bg-muted mb-4"
+              sitesOpen ? "bg-transparent" : "bg-muted"
             }`}
           >
             <span>Nearby Sites ({nearbySitesData.length} within 5km)</span>

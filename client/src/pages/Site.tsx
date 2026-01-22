@@ -102,7 +102,7 @@ export default function Site() {
       </span>
 
       <span className="font-thin text-[10px] sm:text-xs">
-        [ {site?.location.coordinates[1].toFixed(4)},
+        [ {site?.location.coordinates[1].toFixed(4)},{" "}
         {site?.location.coordinates[0].toFixed(4)} ] {site?.elevation}m
       </span>
     </div>

@@ -237,7 +237,7 @@ export default function AdminAddSite() {
                       <FormLabel>Landings</FormLabel>
 
                       <div className="space-y-2 rounded-md border p-3">
-                        <div className="max-h-[60px] overflow-y-auto space-y-1">
+                        <div className="max-h-[140px] overflow-y-auto space-y-1">
                           {landings.map((landing) => {
                             const checked = selectedIds.includes(landing._id);
 

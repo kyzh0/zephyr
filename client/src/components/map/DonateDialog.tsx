@@ -44,7 +44,7 @@ export function DonateDialog({ open, onOpenChange }: DonateDialogProps) {
             If you like, you can make a contribution to the following bank
             account:
           </p>
-          <p className="text-base font-medium mt-2">Kyle Zhou</p>
+          <p className="text-base font-medium mt-2">Zephyr</p>
           <div className="flex items-center gap-2">
             <span className="text-base font-medium">{bankAccount}</span>
             <Button
