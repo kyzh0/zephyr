@@ -4,7 +4,7 @@ export interface StationMarker {
 }
 
 export interface GeoJsonFeature {
-  type: "Feature";
+  type: 'Feature';
   properties: Record<string, unknown>;
   geometry: {
     type: string;
@@ -13,7 +13,7 @@ export interface GeoJsonFeature {
 }
 
 export interface GeoJson {
-  type: "FeatureCollection";
+  type: 'FeatureCollection';
   features: GeoJsonFeature[];
 }
 
@@ -30,4 +30,4 @@ export interface HistoryValue {
   isOffline: boolean | null;
 }
 
-export type WindUnit = "kmh" | "kt";
+export type WindUnit = 'kmh' | 'kt';

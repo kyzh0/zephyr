@@ -1,4 +1,4 @@
-import type { ILocation } from "./location.model";
+import type { ILocation } from './location.model';
 
 interface IStation {
   _id: string;
@@ -45,16 +45,16 @@ interface INewStation {
 }
 
 export const STATION_TYPES = [
-  { value: "harvest", label: "Harvest" },
-  { value: "holfuy", label: "Holfuy" },
-  { value: "metservice", label: "Metservice" },
-  { value: "wu", label: "Weather Underground" },
-  { value: "tempest", label: "Tempest" },
-  { value: "attentis", label: "Attentis" },
-  { value: "wow", label: "Met Office WOW" },
-  { value: "windguru", label: "Windguru" },
-  { value: "windy", label: "Windy" },
-  { value: "wl", label: "Weatherlink" },
+  { value: 'harvest', label: 'Harvest' },
+  { value: 'holfuy', label: 'Holfuy' },
+  { value: 'metservice', label: 'Metservice' },
+  { value: 'wu', label: 'Weather Underground' },
+  { value: 'tempest', label: 'Tempest' },
+  { value: 'attentis', label: 'Attentis' },
+  { value: 'wow', label: 'Met Office WOW' },
+  { value: 'windguru', label: 'Windguru' },
+  { value: 'windy', label: 'Windy' },
+  { value: 'wl', label: 'Weatherlink' }
 ] as const;
 
 export type { IStation, INewStation };

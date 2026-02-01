@@ -1,99 +1,81 @@
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  FormMessage
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { addStation } from "@/services/station.service";
-import { STATION_TYPES, type INewStation } from "@/models/station.model";
-import { toast } from "sonner";
-import { lookupElevation } from "@/lib/utils";
+  SelectValue
+} from '@/components/ui/select';
+import { addStation } from '@/services/station.service';
+import { STATION_TYPES, type INewStation } from '@/models/station.model';
+import { toast } from 'sonner';
+import { lookupElevation } from '@/lib/utils';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
-    const parts = val.replace(/\s/g, "").split(",");
+    const parts = val.replace(/\s/g, '').split(',');
     if (parts.length !== 2) return false;
     const [lat, lon] = parts.map(Number);
-    return (
-      !isNaN(lat) &&
-      !isNaN(lon) &&
-      lat >= -90 &&
-      lat <= 90 &&
-      lon >= -180 &&
-      lon <= 180
-    );
+    return !isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
   },
-  { message: "Enter valid coordinates: latitude, longitude" },
+  { message: 'Enter valid coordinates: latitude, longitude' }
 );
 
-const bearingsSchema = z
-  .string()
-  .regex(/^$|^[0-9]{3}-[0-9]{3}(,[0-9]{3}-[0-9]{3})*$/, {
-    message: "Format: 000-090,180-270",
-  });
+const bearingsSchema = z.string().regex(/^$|^[0-9]{3}-[0-9]{3}(,[0-9]{3}-[0-9]{3})*$/, {
+  message: 'Format: 000-090,180-270'
+});
 
 const baseSchema = z.object({
-  name: z.string().min(1, "Required"),
-  externalId: z.string().min(1, "Required"),
-  externalLink: z.url("Enter a valid URL"),
-  type: z.string().min(1, "Required"),
+  name: z.string().min(1, 'Required'),
+  externalId: z.string().min(1, 'Required'),
+  externalLink: z.url('Enter a valid URL'),
+  type: z.string().min(1, 'Required'),
   coordinates: coordinatesSchema,
-  bearings: bearingsSchema,
+  bearings: bearingsSchema
 });
 
 const harvestSchema = baseSchema.extend({
-  type: z.literal("harvest"),
-  harvestConfigId: z.string().regex(/^\d+$/, "Must be numeric"),
-  harvestWindAvgGraphId: z.string().regex(/^\d+$/, "Must be numeric"),
-  harvestWindAvgTraceId: z.string().regex(/^\d+$/, "Must be numeric"),
-  harvestWindGustGraphId: z.string().regex(/^\d+$/, "Must be numeric"),
-  harvestWindGustTraceId: z.string().regex(/^\d+$/, "Must be numeric"),
-  harvestWindDirGraphId: z.string().regex(/^\d+$/, "Must be numeric"),
-  harvestWindDirTraceId: z.string().regex(/^\d+$/, "Must be numeric"),
-  harvestTempGraphId: z.string().regex(/^\d+$/, "Must be numeric"),
-  harvestTempTraceId: z.string().regex(/^\d+$/, "Must be numeric"),
+  type: z.literal('harvest'),
+  harvestConfigId: z.string().regex(/^\d+$/, 'Must be numeric'),
+  harvestWindAvgGraphId: z.string().regex(/^\d+$/, 'Must be numeric'),
+  harvestWindAvgTraceId: z.string().regex(/^\d+$/, 'Must be numeric'),
+  harvestWindGustGraphId: z.string().regex(/^\d+$/, 'Must be numeric'),
+  harvestWindGustTraceId: z.string().regex(/^\d+$/, 'Must be numeric'),
+  harvestWindDirGraphId: z.string().regex(/^\d+$/, 'Must be numeric'),
+  harvestWindDirTraceId: z.string().regex(/^\d+$/, 'Must be numeric'),
+  harvestTempGraphId: z.string().regex(/^\d+$/, 'Must be numeric'),
+  harvestTempTraceId: z.string().regex(/^\d+$/, 'Must be numeric')
 });
 
 const gwSchema = baseSchema.extend({
-  type: z.literal("gw"),
-  gwWindAvgFieldName: z.string().min(1, "Required"),
-  gwWindGustFieldName: z.string().min(1, "Required"),
-  gwWindBearingFieldName: z.string().min(1, "Required"),
-  gwTemperatureFieldName: z.string().min(1, "Required"),
+  type: z.literal('gw'),
+  gwWindAvgFieldName: z.string().min(1, 'Required'),
+  gwWindGustFieldName: z.string().min(1, 'Required'),
+  gwWindBearingFieldName: z.string().min(1, 'Required'),
+  gwTemperatureFieldName: z.string().min(1, 'Required')
 });
 
-const formSchema = z.discriminatedUnion("type", [
+const formSchema = z.discriminatedUnion('type', [
   harvestSchema,
   gwSchema,
   baseSchema.extend({
-    type: z.enum([
-      "holfuy",
-      "metservice",
-      "wu",
-      "tempest",
-      "attentis",
-      "wow",
-      "windguru",
-      "wp",
-    ]),
-  }),
+    type: z.enum(['holfuy', 'metservice', 'wu', 'tempest', 'attentis', 'wow', 'windguru', 'wp'])
+  })
 ]);
 
 type FormValues = z.infer<typeof formSchema>;
@@ -104,30 +86,27 @@ export default function AdminAddStation() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      externalId: "",
-      externalLink: "",
-      type: "" as FormValues["type"],
-      coordinates: "",
-      bearings: "",
-    },
+      name: '',
+      externalId: '',
+      externalLink: '',
+      type: '' as FormValues['type'],
+      coordinates: '',
+      bearings: ''
+    }
   });
 
   // eslint-disable-next-line react-hooks/incompatible-library
-  const stationType = form.watch("type");
+  const stationType = form.watch('type');
   const isSubmitting = form.formState.isSubmitting;
 
   async function onSubmit(values: FormValues) {
-    const [lat, lon] = values.coordinates
-      .replace(/\s/g, "")
-      .split(",")
-      .map(Number);
+    const [lat, lon] = values.coordinates.replace(/\s/g, '').split(',').map(Number);
 
     let elevation = 0;
     try {
       elevation = await lookupElevation(lat, lon);
     } catch {
-      toast.error("Error fetching elevation data");
+      toast.error('Error fetching elevation data');
     }
 
     const station: INewStation = {
@@ -137,10 +116,10 @@ export default function AdminAddStation() {
       externalLink: values.externalLink,
       externalId: values.externalId,
       ...(elevation !== undefined && { elevation }),
-      ...(values.bearings && { validBearings: values.bearings }),
+      ...(values.bearings && { validBearings: values.bearings })
     };
 
-    if (values.type === "harvest") {
+    if (values.type === 'harvest') {
       const v = values;
       station.externalId = `${v.externalId}_${v.harvestConfigId}`;
       station.harvestWindAverageId = `${v.harvestWindAvgGraphId}_${v.harvestWindAvgTraceId}`;
@@ -149,7 +128,7 @@ export default function AdminAddStation() {
       station.harvestTemperatureId = `${v.harvestTempGraphId}_${v.harvestTempTraceId}`;
     }
 
-    if (values.type === "gw") {
+    if (values.type === 'gw') {
       const v = values;
       station.gwWindAverageFieldName = v.gwWindAvgFieldName;
       station.gwWindGustFieldName = v.gwWindGustFieldName;
@@ -158,18 +137,14 @@ export default function AdminAddStation() {
     }
 
     await addStation(station);
-    toast.success("Station added successfully");
-    navigate("/admin/dashboard");
+    toast.success('Station added successfully');
+    navigate('/admin/dashboard');
   }
 
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b bg-white px-6 py-4 flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate("/admin/dashboard")}
-        >
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/dashboard')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <h1 className="text-xl font-semibold">Add New Station</h1>
@@ -177,10 +152,7 @@ export default function AdminAddStation() {
 
       <main className="flex-1 p-6">
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="max-w-lg space-y-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-lg space-y-4">
             <FormField
               control={form.control}
               name="name"
@@ -220,11 +192,7 @@ export default function AdminAddStation() {
               )}
             />
 
-            <div
-              className={
-                stationType === "harvest" ? "grid grid-cols-2 gap-4" : ""
-              }
-            >
+            <div className={stationType === 'harvest' ? 'grid grid-cols-2 gap-4' : ''}>
               <FormField
                 control={form.control}
                 name="externalId"
@@ -238,7 +206,7 @@ export default function AdminAddStation() {
                   </FormItem>
                 )}
               />
-              {stationType === "harvest" && (
+              {stationType === 'harvest' && (
                 <FormField
                   control={form.control}
                   name="harvestConfigId"
@@ -297,11 +265,9 @@ export default function AdminAddStation() {
               )}
             />
 
-            {stationType === "harvest" && (
+            {stationType === 'harvest' && (
               <div className="space-y-4 pt-2">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  Harvest Configuration
-                </h3>
+                <h3 className="text-sm font-medium text-muted-foreground">Harvest Configuration</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -411,7 +377,7 @@ export default function AdminAddStation() {
               </div>
             )}
 
-            {stationType === "gw" && (
+            {stationType === 'gw' && (
               <div className="space-y-4 pt-2">
                 <h3 className="text-sm font-medium text-muted-foreground">
                   Greater Wellington Configuration
@@ -474,9 +440,7 @@ export default function AdminAddStation() {
             )}
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting && (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              )}
+              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Add Station
             </Button>
           </form>

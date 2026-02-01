@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { formatInTimeZone } from "date-fns-tz";
-import { getStationById, loadStationData } from "@/services/station.service";
-import { useAppContext } from "@/context/AppContext";
-import type { IStation } from "@/models/station.model";
-import type { IStationData } from "@/models/station-data.model";
-import type { ExtendedStationData } from "@/components/station/types";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { formatInTimeZone } from 'date-fns-tz';
+import { getStationById, loadStationData } from '@/services/station.service';
+import { useAppContext } from '@/context/AppContext';
+import type { IStation } from '@/models/station.model';
+import type { IStationData } from '@/models/station-data.model';
+import type { ExtendedStationData } from '@/components/station/types';
 
-export type TimeRange = "3" | "6" | "12" | "24";
+export type TimeRange = '3' | '6' | '12' | '24';
 
 interface UseStationDataReturn {
   station: IStation | null;
@@ -18,10 +18,7 @@ interface UseStationDataReturn {
   isRefreshing: boolean;
 }
 
-function filterByTimeRange<T extends { time: Date | string }>(
-  data: T[],
-  hours: TimeRange
-): T[] {
+function filterByTimeRange<T extends { time: Date | string }>(data: T[], hours: TimeRange): T[] {
   const hoursNum = parseInt(hours, 10);
   const cutoffTime = Date.now() - hoursNum * 60 * 60 * 1000;
   return data.filter((d) => new Date(d.time).getTime() >= cutoffTime);
@@ -29,7 +26,7 @@ function filterByTimeRange<T extends { time: Date | string }>(
 
 export function useStationData(
   id: string | undefined,
-  timeRange: TimeRange = "12"
+  timeRange: TimeRange = '12'
 ): UseStationDataReturn {
   const navigate = useNavigate();
   const { refreshedStations } = useAppContext();
@@ -44,10 +41,7 @@ export function useStationData(
   const initialLoadRef = useRef(true);
 
   // Filter data based on time range (memoized to prevent re-renders)
-  const data = useMemo(
-    () => filterByTimeRange(allData, timeRange),
-    [allData, timeRange]
-  );
+  const data = useMemo(() => filterByTimeRange(allData, timeRange), [allData, timeRange]);
 
   const tableData = useMemo(
     () => filterByTimeRange(allTableData, timeRange),
@@ -75,9 +69,9 @@ export function useStationData(
       }
 
       const validBearings: [number, number][] = [];
-      const pairs = s.validBearings ? s.validBearings.split(",") : [];
+      const pairs = s.validBearings ? s.validBearings.split(',') : [];
       for (const p of pairs) {
-        const temp = p.split("-");
+        const temp = p.split('-');
         const b1 = Number(temp[0]);
         const b2 = Number(temp[1]);
         if (b1 <= b2) {
@@ -95,22 +89,14 @@ export function useStationData(
       }
 
       const stationData = rawData as unknown as IStationData[];
-      stationData.sort(
-        (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
-      );
+      stationData.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
       const extendedData: ExtendedStationData[] = stationData.map((d) => {
         const extended: ExtendedStationData = {
           ...d,
-          timeLabel: formatInTimeZone(
-            new Date(d.time),
-            "Pacific/Auckland",
-            "HH:mm"
-          ),
-          windAverageKt:
-            d.windAverage == null ? null : Math.round(d.windAverage / 1.852),
-          windGustKt:
-            d.windGust == null ? null : Math.round(d.windGust / 1.852),
+          timeLabel: formatInTimeZone(new Date(d.time), 'Pacific/Auckland', 'HH:mm'),
+          windAverageKt: d.windAverage == null ? null : Math.round(d.windAverage / 1.852),
+          windGustKt: d.windGust == null ? null : Math.round(d.windGust / 1.852)
         };
 
         if (validBearings.length) {
@@ -180,7 +166,7 @@ export function useStationData(
     tableData,
     bearingPairCount,
     isLoading,
-    isRefreshing,
+    isRefreshing
   };
 }
 
@@ -215,21 +201,15 @@ function calculateHighResAverages(
 
     if (
       time.getTime() - intervalStart.getTime() >= 10 * 60 * 1000 ||
-      (time.getMinutes() % 10 > 0 &&
-        time.getMinutes() % 10 < intervalStart.getMinutes() % 10)
+      (time.getMinutes() % 10 > 0 && time.getMinutes() % 10 < intervalStart.getMinutes() % 10)
     ) {
       const avg = count > 0 ? Math.round(sumAvg / count) : null;
       const calculatedBearing =
-        count > 0
-          ? Math.round(
-              Math.atan2(sumBearingSin, sumBearingCos) / (Math.PI / 180)
-            )
-          : null;
+        count > 0 ? Math.round(Math.atan2(sumBearingSin, sumBearingCos) / (Math.PI / 180)) : null;
       const temperature = count > 0 ? Math.round(sumTemperature / count) : null;
 
       const timeValue = new Date(
-        intervalStart.getTime() +
-          (10 - (intervalStart.getMinutes() % 10)) * 60 * 1000
+        intervalStart.getTime() + (10 - (intervalStart.getMinutes() % 10)) * 60 * 1000
       ).toISOString();
 
       result.push({
@@ -244,13 +224,9 @@ function calculateHighResAverages(
             : undefined,
         temperature: temperature ?? undefined,
         _id: stationId,
-        timeLabel: formatInTimeZone(
-          new Date(timeValue),
-          "Pacific/Auckland",
-          "HH:mm"
-        ),
+        timeLabel: formatInTimeZone(new Date(timeValue), 'Pacific/Auckland', 'HH:mm'),
         windAverageKt: avg == null ? null : Math.round(avg / 1.852),
-        windGustKt: maxGust == null ? null : Math.round(maxGust / 1.852),
+        windGustKt: maxGust == null ? null : Math.round(maxGust / 1.852)
       });
 
       intervalStart = time;
@@ -266,12 +242,8 @@ function calculateHighResAverages(
       count++;
       sumAvg += extendedData[i].windAverage!;
       if (extendedData[i].windBearing != null) {
-        sumBearingSin += Math.sin(
-          (extendedData[i].windBearing! * Math.PI) / 180
-        );
-        sumBearingCos += Math.cos(
-          (extendedData[i].windBearing! * Math.PI) / 180
-        );
+        sumBearingSin += Math.sin((extendedData[i].windBearing! * Math.PI) / 180);
+        sumBearingCos += Math.cos((extendedData[i].windBearing! * Math.PI) / 180);
       }
       if (extendedData[i].temperature != null) {
         sumTemperature += extendedData[i].temperature!;
@@ -287,11 +259,7 @@ function calculateHighResAverages(
     if (time.getMinutes() % 10 === 0) {
       const avg = count > 0 ? Math.round(sumAvg / count) : null;
       const calculatedBearing =
-        count > 0
-          ? Math.round(
-              Math.atan2(sumBearingSin, sumBearingCos) / (Math.PI / 180)
-            )
-          : null;
+        count > 0 ? Math.round(Math.atan2(sumBearingSin, sumBearingCos) / (Math.PI / 180)) : null;
       const temperature = count > 0 ? Math.round(sumTemperature / count) : null;
 
       result.push({
@@ -306,9 +274,9 @@ function calculateHighResAverages(
             : undefined,
         temperature: temperature ?? undefined,
         _id: stationId,
-        timeLabel: formatInTimeZone(time, "Pacific/Auckland", "HH:mm"),
+        timeLabel: formatInTimeZone(time, 'Pacific/Auckland', 'HH:mm'),
         windAverageKt: avg == null ? null : Math.round(avg / 1.852),
-        windGustKt: maxGust == null ? null : Math.round(maxGust / 1.852),
+        windGustKt: maxGust == null ? null : Math.round(maxGust / 1.852)
       });
 
       count = 0;

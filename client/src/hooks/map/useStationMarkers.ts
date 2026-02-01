@@ -1,34 +1,30 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import mapboxgl from 'mapbox-gl';
 
-import {
-  getWindDirectionFromBearing,
-  handleError,
-  REFRESH_INTERVAL_MS,
-} from "@/lib/utils";
+import { getWindDirectionFromBearing, handleError, REFRESH_INTERVAL_MS } from '@/lib/utils';
 import {
   listStations,
   listStationsUpdatedSince,
-  loadAllStationDataAtTimestamp,
-} from "@/services/station.service";
-import type { IHistoricalStationData } from "@/models/station-data.model";
+  loadAllStationDataAtTimestamp
+} from '@/services/station.service';
+import type { IHistoricalStationData } from '@/models/station-data.model';
 import {
   getStationGeoJson,
   sortStationFeatures,
   convertWindSpeed,
-  getArrowStyle,
-} from "@/components/map";
-import type { StationMarker, WindUnit } from "@/components/map";
+  getArrowStyle
+} from '@/components/map';
+import type { StationMarker, WindUnit } from '@/components/map';
 import {
   extractStationProperties,
   formatMarkerText,
   getElevationDashArray,
   getElevationRotation,
-  type StationProperties,
-} from "./station-marker.utils";
-import { useNavigate } from "react-router-dom";
-import type { IStation } from "@/models/station.model";
-import { toast } from "sonner";
+  type StationProperties
+} from './station-marker.utils';
+import { useNavigate } from 'react-router-dom';
+import type { IStation } from '@/models/station.model';
+import { toast } from 'sonner';
 
 interface UseStationMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -43,8 +39,7 @@ interface UseStationMarkersOptions {
  * Generate popup HTML content for a station marker
  */
 function createPopupHtml(props: StationProperties, unit: WindUnit): string {
-  const { name, currentAverage, currentGust, currentBearing, isOffline } =
-    props;
+  const { name, currentAverage, currentGust, currentBearing, isOffline } = props;
 
   const header = `<p align="center"><strong>${name}</strong></p>`;
 
@@ -56,11 +51,10 @@ function createPopupHtml(props: StationProperties, unit: WindUnit): string {
     return header + `<p align="center">-</p>`;
   }
 
-  const unitLabel = unit === "kt" ? "kt" : "km/h";
-  const direction =
-    currentBearing != null ? getWindDirectionFromBearing(currentBearing) : "";
+  const unitLabel = unit === 'kt' ? 'kt' : 'km/h';
+  const direction = currentBearing != null ? getWindDirectionFromBearing(currentBearing) : '';
 
-  let windText = "";
+  let windText = '';
   if (currentAverage != null) {
     windText = String(convertWindSpeed(currentAverage, unit));
     if (currentGust != null) {
@@ -74,29 +68,23 @@ function createPopupHtml(props: StationProperties, unit: WindUnit): string {
 /**
  * Create the elevation border SVG element
  */
-function createElevationBorderSvg(
-  elevation: number,
-  bearing: number | null
-): SVGSVGElement {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+function createElevationBorderSvg(elevation: number, bearing: number | null): SVGSVGElement {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute(
-    "class",
-    "marker-border absolute top-[-2.2px] left-[-3px] z-[4] w-[30px] h-[30px] hidden"
+    'class',
+    'marker-border absolute top-[-2.2px] left-[-3px] z-[4] w-[30px] h-[30px] hidden'
   );
-  svg.setAttribute("viewBox", "0 0 120 120");
-  svg.setAttribute("transform", `rotate(${getElevationRotation(bearing)})`);
+  svg.setAttribute('viewBox', '0 0 120 120');
+  svg.setAttribute('transform', `rotate(${getElevationRotation(bearing)})`);
 
-  const circle = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "circle"
-  );
-  circle.setAttribute("fill", "none");
-  circle.setAttribute("cx", "60");
-  circle.setAttribute("cy", "60");
-  circle.setAttribute("r", "56");
-  circle.setAttribute("stroke", "#ff4261");
-  circle.setAttribute("stroke-width", "8");
-  circle.setAttribute("stroke-dasharray", getElevationDashArray(elevation));
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('fill', 'none');
+  circle.setAttribute('cx', '60');
+  circle.setAttribute('cy', '60');
+  circle.setAttribute('r', '56');
+  circle.setAttribute('stroke', '#ff4261');
+  circle.setAttribute('stroke-width', '8');
+  circle.setAttribute('stroke-dasharray', getElevationDashArray(elevation));
   svg.appendChild(circle);
 
   return svg;
@@ -113,39 +101,21 @@ function createMarkerElement(
   onHover: (popup: mapboxgl.Popup, show: boolean) => void,
   popup: mapboxgl.Popup
 ): HTMLDivElement {
-  const {
-    dbId,
-    elevation,
-    currentAverage,
-    currentGust,
-    currentBearing,
-    validBearings,
-    isOffline,
-  } = props;
-  const [img, textColor] = getArrowStyle(
-    currentAverage,
-    currentBearing,
-    validBearings,
-    isOffline
-  );
+  const { dbId, elevation, currentAverage, currentGust, currentBearing, validBearings, isOffline } =
+    props;
+  const [img, textColor] = getArrowStyle(currentAverage, currentBearing, validBearings, isOffline);
 
   // Arrow icon (div with background image)
-  const arrow = document.createElement("div");
-  arrow.className = "marker-arrow";
-  arrow.style.transform =
-    currentBearing != null ? `rotate(${Math.round(currentBearing)}deg)` : "";
+  const arrow = document.createElement('div');
+  arrow.className = 'marker-arrow';
+  arrow.style.transform = currentBearing != null ? `rotate(${Math.round(currentBearing)}deg)` : '';
   arrow.style.backgroundImage = img;
 
   // Wind speed text
-  const text = document.createElement("span");
-  text.className = "marker-text";
+  const text = document.createElement('span');
+  text.className = 'marker-text';
   text.style.color = textColor;
-  text.textContent = formatMarkerText(
-    currentAverage,
-    isOffline,
-    unit,
-    convertWindSpeed
-  );
+  text.textContent = formatMarkerText(currentAverage, isOffline, unit, convertWindSpeed);
 
   // Event handlers
   const handleClick = () => {
@@ -156,25 +126,24 @@ function createMarkerElement(
   const handleLeave = () => onHover(popup, false);
 
   for (const el of [arrow, text]) {
-    el.addEventListener("click", handleClick);
-    el.addEventListener("mouseenter", handleEnter);
-    el.addEventListener("mouseleave", handleLeave);
+    el.addEventListener('click', handleClick);
+    el.addEventListener('mouseenter', handleEnter);
+    el.addEventListener('mouseleave', handleLeave);
   }
 
   // Container
-  const container = document.createElement("div");
+  const container = document.createElement('div');
   container.id = dbId;
-  container.className = "marker";
-  container.setAttribute("elevation", String(elevation));
+  container.className = 'marker';
+  container.setAttribute('elevation', String(elevation));
   container.dataset.timestamp = String(timestamp);
-  container.dataset.avg = currentAverage != null ? String(currentAverage) : "";
-  container.dataset.gust = currentGust != null ? String(currentGust) : "";
+  container.dataset.avg = currentAverage != null ? String(currentAverage) : '';
+  container.dataset.gust = currentGust != null ? String(currentGust) : '';
   container.dataset.name = props.name;
-  container.dataset.bearing =
-    currentBearing != null ? String(currentBearing) : "";
+  container.dataset.bearing = currentBearing != null ? String(currentBearing) : '';
   container.dataset.isOffline = String(isOffline ?? false);
-  container.dataset.validBearings = validBearings ?? "";
-  container.style.zIndex = "2";
+  container.dataset.validBearings = validBearings ?? '';
+  container.style.zIndex = '2';
 
   container.appendChild(arrow);
   container.appendChild(text);
@@ -192,53 +161,31 @@ function updateMarkerElement(
   timestamp: number,
   unit: WindUnit
 ): void {
-  const {
-    currentAverage,
-    currentGust,
-    currentBearing,
-    validBearings,
-    isOffline,
-  } = props;
-  const [img, textColor] = getArrowStyle(
-    currentAverage,
-    currentBearing,
-    validBearings,
-    isOffline
-  );
+  const { currentAverage, currentGust, currentBearing, validBearings, isOffline } = props;
+  const [img, textColor] = getArrowStyle(currentAverage, currentBearing, validBearings, isOffline);
 
   marker.dataset.timestamp = String(timestamp);
-  marker.dataset.avg = currentAverage != null ? String(currentAverage) : "";
-  marker.dataset.gust = currentGust != null ? String(currentGust) : "";
+  marker.dataset.avg = currentAverage != null ? String(currentAverage) : '';
+  marker.dataset.gust = currentGust != null ? String(currentGust) : '';
   marker.dataset.name = props.name;
-  marker.dataset.bearing = currentBearing != null ? String(currentBearing) : "";
+  marker.dataset.bearing = currentBearing != null ? String(currentBearing) : '';
   marker.dataset.isOffline = String(props.isOffline ?? false);
-  marker.dataset.validBearings = props.validBearings ?? "";
+  marker.dataset.validBearings = props.validBearings ?? '';
 
   for (const child of Array.from(marker.children)) {
-    if (child.classList.contains("marker-text")) {
+    if (child.classList.contains('marker-text')) {
       const el = child as HTMLElement;
       el.style.color = textColor;
-      el.textContent = formatMarkerText(
-        currentAverage,
-        isOffline,
-        unit,
-        convertWindSpeed
-      );
-    } else if (child.classList.contains("marker-arrow")) {
+      el.textContent = formatMarkerText(currentAverage, isOffline, unit, convertWindSpeed);
+    } else if (child.classList.contains('marker-arrow')) {
       const el = child as HTMLElement;
       el.style.backgroundImage = img;
-      el.style.transform =
-        currentBearing != null
-          ? `rotate(${Math.round(currentBearing)}deg)`
-          : "";
+      el.style.transform = currentBearing != null ? `rotate(${Math.round(currentBearing)}deg)` : '';
     } else if (
-      child.tagName === "svg" &&
-      (child as SVGElement).classList.contains("marker-border")
+      child.tagName === 'svg' &&
+      (child as SVGElement).classList.contains('marker-border')
     ) {
-      child.setAttribute(
-        "transform",
-        `rotate(${getElevationRotation(currentBearing)})`
-      );
+      child.setAttribute('transform', `rotate(${getElevationRotation(currentBearing)})`);
     }
   }
 }
@@ -249,7 +196,7 @@ export function useStationMarkers({
   isHistoricData,
   unit,
   isVisible,
-  onRefresh,
+  onRefresh
 }: UseStationMarkersOptions) {
   const isVisibleRef = useRef(isVisible);
 
@@ -281,10 +228,7 @@ export function useStationMarkers({
 
   // Wrapper for async operations with error handling
   const withErrorHandling = useCallback(
-    async <T>(
-      operation: () => Promise<T>,
-      errorMessage: string
-    ): Promise<T | null> => {
+    async <T>(operation: () => Promise<T>, errorMessage: string): Promise<T | null> => {
       try {
         setError(null);
         return await operation();
@@ -304,7 +248,7 @@ export function useStationMarkers({
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
-        offset: [0, -15],
+        offset: [0, -15]
       }).setHTML(createPopupHtml(props, unitRef.current));
 
       const marker = createMarkerElement(
@@ -342,7 +286,7 @@ export function useStationMarkers({
 
     const allStations = await withErrorHandling(
       () => listStations(false),
-      "Failed to load stations"
+      'Failed to load stations'
     );
 
     if (!allStations?.length) {
@@ -369,7 +313,7 @@ export function useStationMarkers({
       const { marker, popup } = createStationMarker(props, timestamp);
 
       // Set initial visibility based on isVisible prop
-      marker.style.visibility = isVisibleRef.current ? "visible" : "hidden";
+      marker.style.visibility = isVisibleRef.current ? 'visible' : 'hidden';
 
       markersRef.current.push({ marker, popup });
       new mapboxgl.Marker(marker)
@@ -386,11 +330,7 @@ export function useStationMarkers({
     // We don't update map when showing historical data
     if (isHistoricData) return;
 
-    if (
-      document.visibilityState !== "visible" ||
-      !markersRef.current.length ||
-      isRefreshing
-    ) {
+    if (document.visibilityState !== 'visible' || !markersRef.current.length || isRefreshing) {
       return;
     }
 
@@ -408,15 +348,13 @@ export function useStationMarkers({
       // Find newest marker timestamp
       const newestTimestamp =
         stations.length > 0
-          ? Math.max(
-              ...stations.map((s) => new Date(s.lastUpdate).getTime() || 0)
-            )
+          ? Math.max(...stations.map((s) => new Date(s.lastUpdate).getTime() || 0))
           : 0;
 
       // Fetch stations updated since then
       const updatedStations = await withErrorHandling(
         () => listStationsUpdatedSince(Math.round(newestTimestamp / 1000)),
-        "Failed to refresh station data"
+        'Failed to refresh station data'
       );
 
       if (refreshAbortController.current?.signal.aborted) {
@@ -435,9 +373,7 @@ export function useStationMarkers({
 
       const updatedIds: string[] = [];
       for (const item of markersRef.current) {
-        const feature = geoJson.features.find(
-          (f) => f.properties.dbId === item.marker.id
-        );
+        const feature = geoJson.features.find((f) => f.properties.dbId === item.marker.id);
         if (!feature) continue;
 
         const props = extractStationProperties(feature.properties);
@@ -447,43 +383,28 @@ export function useStationMarkers({
 
       onRefresh?.(updatedIds);
     } catch (err) {
-      console.error("Failed to refresh station markers", err);
-      toast.error(
-        handleError(err, "Failed to refresh station markers").message
-      );
+      console.error('Failed to refresh station markers', err);
+      toast.error(handleError(err, 'Failed to refresh station markers').message);
     } finally {
       // Ensure isRefreshing is always set to false
       setIsRefreshing(false);
     }
-  }, [
-    stations,
-    onRefresh,
-    updateStationMarker,
-    withErrorHandling,
-    isRefreshing,
-    isHistoricData,
-  ]);
+  }, [stations, onRefresh, updateStationMarker, withErrorHandling, isRefreshing, isHistoricData]);
 
   // Update all markers when unit changes
   useEffect(() => {
     for (const item of markersRef.current) {
-      const avg =
-        item.marker.dataset.avg === "" ? null : Number(item.marker.dataset.avg);
-      const gust =
-        item.marker.dataset.gust === ""
-          ? null
-          : Number(item.marker.dataset.gust);
+      const avg = item.marker.dataset.avg === '' ? null : Number(item.marker.dataset.avg);
+      const gust = item.marker.dataset.gust === '' ? null : Number(item.marker.dataset.gust);
       const bearing =
-        item.marker.dataset.bearing === ""
-          ? null
-          : Number(item.marker.dataset.bearing);
-      const name = item.marker.dataset.name ?? "";
-      const isOffline = item.marker.dataset.isOffline === "true";
+        item.marker.dataset.bearing === '' ? null : Number(item.marker.dataset.bearing);
+      const name = item.marker.dataset.name ?? '';
+      const isOffline = item.marker.dataset.isOffline === 'true';
       const validBearings = item.marker.dataset.validBearings ?? null;
 
       // Update text
       for (const child of Array.from(item.marker.children)) {
-        if (child.classList.contains("marker-text") && avg != null) {
+        if (child.classList.contains('marker-text') && avg != null) {
           child.textContent = String(convertWindSpeed(avg, unit));
         }
       }
@@ -492,12 +413,12 @@ export function useStationMarkers({
       const stationProps: StationProperties = {
         dbId: item.marker.id,
         name,
-        elevation: Number(item.marker.getAttribute("elevation")),
+        elevation: Number(item.marker.getAttribute('elevation')),
         currentAverage: avg,
         currentGust: gust,
         currentBearing: bearing,
         validBearings,
-        isOffline,
+        isOffline
       };
       item.popup.setHTML(createPopupHtml(stationProps, unit));
     }
@@ -510,7 +431,7 @@ export function useStationMarkers({
 
       const data = await withErrorHandling(
         () => loadAllStationDataAtTimestamp(time),
-        "Failed to load historical data"
+        'Failed to load historical data'
       );
       if (!data?.values?.length) return;
 
@@ -532,32 +453,23 @@ export function useStationMarkers({
           false // not offline in history mode
         );
 
-        item.marker.dataset.avg =
-          windAverage != null ? String(windAverage) : "";
+        item.marker.dataset.avg = windAverage != null ? String(windAverage) : '';
 
         for (const child of Array.from(item.marker.children)) {
-          if (child.classList.contains("marker-text")) {
+          if (child.classList.contains('marker-text')) {
             const el = child as HTMLElement;
             el.style.color = textColor;
             el.textContent =
-              windAverage != null
-                ? String(convertWindSpeed(windAverage, unitRef.current))
-                : "-";
-          } else if (child.classList.contains("marker-arrow")) {
+              windAverage != null ? String(convertWindSpeed(windAverage, unitRef.current)) : '-';
+          } else if (child.classList.contains('marker-arrow')) {
             const el = child as HTMLElement;
             el.style.backgroundImage = img;
-            el.style.transform =
-              windBearing != null
-                ? `rotate(${Math.round(windBearing)}deg)`
-                : "";
+            el.style.transform = windBearing != null ? `rotate(${Math.round(windBearing)}deg)` : '';
           } else if (
-            child.tagName === "svg" &&
-            (child as SVGElement).classList.contains("marker-border")
+            child.tagName === 'svg' &&
+            (child as SVGElement).classList.contains('marker-border')
           ) {
-            child.setAttribute(
-              "transform",
-              `rotate(${getElevationRotation(windBearing)})`
-            );
+            child.setAttribute('transform', `rotate(${getElevationRotation(windBearing)})`);
           }
         }
       }
@@ -568,8 +480,8 @@ export function useStationMarkers({
   // Set marker interactivity (enable/disable click handlers)
   const setInteractive = useCallback((interactive: boolean) => {
     for (const item of markersRef.current) {
-      item.marker.style.pointerEvents = interactive ? "auto" : "none";
-      item.marker.style.cursor = interactive ? "pointer" : "default";
+      item.marker.style.pointerEvents = interactive ? 'auto' : 'none';
+      item.marker.style.cursor = interactive ? 'pointer' : 'default';
     }
   }, []);
 
@@ -579,7 +491,7 @@ export function useStationMarkers({
 
     const stations = await withErrorHandling(
       () => listStations(false),
-      "Failed to load current station data"
+      'Failed to load current station data'
     );
     if (!stations?.length) return;
 
@@ -597,7 +509,7 @@ export function useStationMarkers({
         currentGust: station.currentGust ?? null,
         currentBearing: station.currentBearing ?? null,
         validBearings: station.validBearings ?? null,
-        isOffline: station.isOffline ?? false,
+        isOffline: station.isOffline ?? false
       };
 
       const [img, textColor] = getArrowStyle(
@@ -607,13 +519,11 @@ export function useStationMarkers({
         props.isOffline
       );
 
-      item.marker.dataset.avg =
-        props.currentAverage != null ? String(props.currentAverage) : "";
-      item.marker.dataset.gust =
-        props.currentGust != null ? String(props.currentGust) : "";
+      item.marker.dataset.avg = props.currentAverage != null ? String(props.currentAverage) : '';
+      item.marker.dataset.gust = props.currentGust != null ? String(props.currentGust) : '';
 
       for (const child of Array.from(item.marker.children)) {
-        if (child.classList.contains("marker-text")) {
+        if (child.classList.contains('marker-text')) {
           const el = child as HTMLElement;
           el.style.color = textColor;
           el.textContent = formatMarkerText(
@@ -622,21 +532,16 @@ export function useStationMarkers({
             unitRef.current,
             convertWindSpeed
           );
-        } else if (child.classList.contains("marker-arrow")) {
+        } else if (child.classList.contains('marker-arrow')) {
           const el = child as HTMLElement;
           el.style.backgroundImage = img;
           el.style.transform =
-            props.currentBearing != null
-              ? `rotate(${Math.round(props.currentBearing)}deg)`
-              : "";
+            props.currentBearing != null ? `rotate(${Math.round(props.currentBearing)}deg)` : '';
         } else if (
-          child.tagName === "svg" &&
-          (child as SVGElement).classList.contains("marker-border")
+          child.tagName === 'svg' &&
+          (child as SVGElement).classList.contains('marker-border')
         ) {
-          child.setAttribute(
-            "transform",
-            `rotate(${getElevationRotation(props.currentBearing)})`
-          );
+          child.setAttribute('transform', `rotate(${getElevationRotation(props.currentBearing)})`);
         }
       }
 
@@ -666,7 +571,7 @@ export function useStationMarkers({
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {
     for (const item of markersRef.current) {
-      item.marker.style.visibility = visible ? "visible" : "hidden";
+      item.marker.style.visibility = visible ? 'visible' : 'hidden';
     }
   }, []);
 
@@ -684,6 +589,6 @@ export function useStationMarkers({
     setVisibility,
     isRefreshing,
     error,
-    isInitialized,
+    isInitialized
   };
 }

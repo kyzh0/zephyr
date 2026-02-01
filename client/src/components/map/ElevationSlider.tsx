@@ -1,13 +1,9 @@
-import { useState, useCallback } from "react";
-import { CircleDashed, Mountain } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
-import { Toggle } from "@/components/ui/toggle";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
+import { useState, useCallback } from 'react';
+import { CircleDashed, Mountain } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
+import { Toggle } from '@/components/ui/toggle';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 interface ElevationSliderProps {
   showElevation: boolean;
@@ -22,7 +18,7 @@ export function ElevationSlider({
   elevationFilter,
   onToggleElevation,
   onElevationChange,
-  disabled = false,
+  disabled = false
 }: ElevationSliderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -39,16 +35,9 @@ export function ElevationSlider({
   return (
     <Popover open={isExpanded} onOpenChange={setIsExpanded}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={disabled}
-          className="h-9 w-9"
-        >
+        <Button variant="outline" size="sm" disabled={disabled} className="h-9 w-9">
           <Mountain
-            className={`h-4 w-4 ${
-              isFilterActive ? "fill-blue-500 stroke-blue-500" : "opacity-70"
-            }`}
+            className={`h-4 w-4 ${isFilterActive ? 'fill-blue-500 stroke-blue-500' : 'opacity-70'}`}
           />
         </Button>
       </PopoverTrigger>
@@ -58,7 +47,7 @@ export function ElevationSlider({
           <div className="text-xs text-muted-foreground">
             {elevationFilter > 0
               ? `Showing stations above ${elevationFilter}m`
-              : "Showing all elevations"}
+              : 'Showing all elevations'}
           </div>
 
           <Slider
@@ -81,10 +70,10 @@ export function ElevationSlider({
           >
             <CircleDashed
               className={`h-4 w-4 mr-2 ${
-                showElevation ? "fill-blue-500 stroke-blue-500" : "opacity-70"
+                showElevation ? 'fill-blue-500 stroke-blue-500' : 'opacity-70'
               }`}
             />
-            {showElevation ? "Borders on" : "Borders off"}
+            {showElevation ? 'Borders on' : 'Borders off'}
           </Toggle>
         </div>
       </PopoverContent>

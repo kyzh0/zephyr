@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import mapboxgl from "mapbox-gl";
-import { LandingMarker } from "@/components/map/LandingMarker";
-import { getLandingGeoJson } from "@/components/map";
-import { useNavigate } from "react-router-dom";
-import { useLandings } from "../useLandings";
+import { useCallback, useEffect, useRef } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import mapboxgl from 'mapbox-gl';
+import { LandingMarker } from '@/components/map/LandingMarker';
+import { getLandingGeoJson } from '@/components/map';
+import { useNavigate } from 'react-router-dom';
+import { useLandings } from '../useLandings';
 
 interface UseLandingMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -12,16 +12,10 @@ interface UseLandingMarkersOptions {
   isVisible: boolean;
 }
 
-export function useLandingMarkers({
-  map,
-  isMapLoaded,
-  isVisible,
-}: UseLandingMarkersOptions) {
+export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMarkersOptions) {
   const navigate = useNavigate();
   const { landings, isLoading: landingsLoading } = useLandings();
-  const markersRef = useRef<
-    { marker: HTMLDivElement; popup: mapboxgl.Popup }[]
-  >([]);
+  const markersRef = useRef<{ marker: HTMLDivElement; popup: mapboxgl.Popup }[]>([]);
   const isVisibleRef = useRef(isVisible);
 
   // Keep visibility ref in sync
@@ -34,25 +28,23 @@ export function useLandingMarkers({
     (
       dbId: string,
       name: string,
-      isOfficial: boolean,
+      isOfficial: boolean
     ): { marker: HTMLDivElement; popup: mapboxgl.Popup } => {
       // Create popup
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
-        offset: [0, -15],
+        offset: [0, -15]
       }).setHTML(`<p align="center"><strong>${name}</strong></p>`);
 
-      const el = document.createElement("div");
+      const el = document.createElement('div');
       el.id = dbId;
-      el.className = "site-marker cursor-pointer";
-      el.style.visibility = "hidden";
-      el.style.zIndex = "1";
+      el.className = 'site-marker cursor-pointer';
+      el.style.visibility = 'hidden';
+      el.style.zIndex = '1';
 
       // Render the LandingMarker component to HTML
-      el.innerHTML = renderToStaticMarkup(
-        <LandingMarker isOfficial={isOfficial} />,
-      );
+      el.innerHTML = renderToStaticMarkup(<LandingMarker isOfficial={isOfficial} />);
 
       // Event handlers
       const handleClick = () => {
@@ -66,13 +58,13 @@ export function useLandingMarkers({
         popup.remove();
       };
 
-      el.addEventListener("click", handleClick);
-      el.addEventListener("mouseenter", handleEnter);
-      el.addEventListener("mouseleave", handleLeave);
+      el.addEventListener('click', handleClick);
+      el.addEventListener('mouseenter', handleEnter);
+      el.addEventListener('mouseleave', handleLeave);
 
       return { marker: el, popup };
     },
-    [navigate, map],
+    [navigate, map]
   );
 
   // Initialize landings
@@ -98,14 +90,12 @@ export function useLandingMarkers({
         }
       }
     } catch (error) {
-      console.error("❌ Error loading real landings:", error);
+      console.error('❌ Error loading real landings:', error);
     }
 
     // Set initial visibility after all markers are created
     for (const item of markersRef.current) {
-      item.marker.style.visibility = isVisibleRef.current
-        ? "visible"
-        : "hidden";
+      item.marker.style.visibility = isVisibleRef.current ? 'visible' : 'hidden';
     }
   }, [map, landings, landingsLoading, createLandingMarker]);
 
@@ -113,7 +103,7 @@ export function useLandingMarkers({
   const setVisibility = useCallback((visible: boolean) => {
     for (const item of markersRef.current) {
       // eslint-disable-next-line react-hooks/immutability
-      item.marker.style.visibility = visible ? "visible" : "hidden";
+      item.marker.style.visibility = visible ? 'visible' : 'hidden';
     }
   }, []);
 
@@ -131,6 +121,6 @@ export function useLandingMarkers({
 
   return {
     markers: markersRef,
-    setVisibility,
+    setVisibility
   };
 }

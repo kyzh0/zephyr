@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useRef } from "react";
-import mapboxgl from "mapbox-gl";
-import { formatInTimeZone } from "date-fns-tz";
+import { useCallback, useEffect, useRef } from 'react';
+import mapboxgl from 'mapbox-gl';
+import { formatInTimeZone } from 'date-fns-tz';
 
-import { getCamById, listCamsUpdatedSince } from "@/services/cam.service";
-import type { ICam } from "@/models/cam.model";
-import { getWebcamGeoJson } from "@/components/map";
-import { useNavigate } from "react-router-dom";
-import { REFRESH_INTERVAL_MS } from "@/lib/utils";
-import { useWebcams } from "@/hooks";
+import { getCamById, listCamsUpdatedSince } from '@/services/cam.service';
+import type { ICam } from '@/models/cam.model';
+import { getWebcamGeoJson } from '@/components/map';
+import { useNavigate } from 'react-router-dom';
+import { REFRESH_INTERVAL_MS } from '@/lib/utils';
+import { useWebcams } from '@/hooks';
 
 interface UseWebcamMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -20,7 +20,7 @@ export function useWebcamMarkers({
   map,
   isMapLoaded,
   isVisible,
-  onRefresh,
+  onRefresh
 }: UseWebcamMarkersOptions) {
   const navigate = useNavigate();
   const markersRef = useRef<HTMLDivElement[]>([]);
@@ -45,43 +45,37 @@ export function useWebcamMarkers({
     ): HTMLDivElement => {
       const isStale = timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000;
 
-      const img = document.createElement("img");
+      const img = document.createElement('img');
       img.width = 150;
-      img.src = isStale
-        ? ""
-        : `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${currentUrl}`;
-      img.className = "webcam-img";
+      img.src = isStale ? '' : `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${currentUrl}`;
+      img.className = 'webcam-img';
 
-      const text = document.createElement("span");
+      const text = document.createElement('span');
       text.className =
-        "absolute bottom-0 left-0 z-10 w-full h-full font-semibold text-sm text-center flex justify-center items-start";
-      text.style.fontFamily = "Arial, Helvetica, sans-serif";
+        'absolute bottom-0 left-0 z-10 w-full h-full font-semibold text-sm text-center flex justify-center items-start';
+      text.style.fontFamily = 'Arial, Helvetica, sans-serif';
       text.innerHTML = name;
 
-      const timeText = document.createElement("span");
+      const timeText = document.createElement('span');
       timeText.className =
-        "absolute bottom-0 left-0 z-10 w-full h-full text-sm text-center flex justify-center items-end";
-      timeText.style.fontFamily = "Arial, Helvetica, sans-serif";
+        'absolute bottom-0 left-0 z-10 w-full h-full text-sm text-center flex justify-center items-end';
+      timeText.style.fontFamily = 'Arial, Helvetica, sans-serif';
 
       if (isStale) {
-        timeText.innerHTML = "No images in the last 24h.";
-        timeText.style.color = "#ff4261";
+        timeText.innerHTML = 'No images in the last 24h.';
+        timeText.style.color = '#ff4261';
       } else {
-        timeText.innerHTML = formatInTimeZone(
-          currentTime,
-          "Pacific/Auckland",
-          "dd MMM HH:mm"
-        );
+        timeText.innerHTML = formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm');
       }
 
-      const el = document.createElement("div");
-      el.style.backgroundColor = "white";
-      el.style.visibility = "hidden";
-      el.style.zIndex = "4";
+      const el = document.createElement('div');
+      el.style.backgroundColor = 'white';
+      el.style.visibility = 'hidden';
+      el.style.zIndex = '4';
       el.id = dbId;
-      el.className = "webcam py-[18px] px-2 rounded-lg cursor-pointer";
+      el.className = 'webcam py-[18px] px-2 rounded-lg cursor-pointer';
       el.dataset.timestamp = String(timestamp);
-      el.addEventListener("click", () => navigate(`/webcams/${dbId}`));
+      el.addEventListener('click', () => navigate(`/webcams/${dbId}`));
       el.appendChild(text);
       el.appendChild(img);
       el.appendChild(timeText);
@@ -92,12 +86,8 @@ export function useWebcamMarkers({
   );
 
   // Check for missed webcam updates
-  const checkMissedUpdates = useCallback(async (): Promise<
-    ReturnType<typeof getWebcamGeoJson>
-  > => {
-    const distinctTimestamps = [
-      ...new Set(markersRef.current.map((m) => m.dataset.timestamp)),
-    ];
+  const checkMissedUpdates = useCallback(async (): Promise<ReturnType<typeof getWebcamGeoJson>> => {
+    const distinctTimestamps = [...new Set(markersRef.current.map((m) => m.dataset.timestamp))];
     if (distinctTimestamps.length < 2) return null;
 
     const sorted = distinctTimestamps.map(Number).sort((a, b) => a - b);
@@ -107,9 +97,7 @@ export function useWebcamMarkers({
     if (secondMin - min <= 1.1 * REFRESH_INTERVAL_MS) return null;
 
     const cams: ICam[] = [];
-    const oldestMarkers = markersRef.current.filter(
-      (m) => Number(m.dataset.timestamp) === min
-    );
+    const oldestMarkers = markersRef.current.filter((m) => Number(m.dataset.timestamp) === min);
 
     for (const m of oldestMarkers) {
       const cam = await getCamById(m.id);
@@ -135,23 +123,15 @@ export function useWebcamMarkers({
       const currentTime = f.properties.currentTime as Date;
       const currentUrl = f.properties.currentUrl as string;
 
-      const el = createWebcamMarker(
-        dbId,
-        name,
-        currentTime,
-        currentUrl,
-        timestamp
-      );
+      const el = createWebcamMarker(dbId, name, currentTime, currentUrl, timestamp);
       markersRef.current.push(el);
-      new mapboxgl.Marker(el)
-        .setLngLat(f.geometry.coordinates)
-        .addTo(map.current);
+      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
     }
   }, [map, createWebcamMarker, webcams, webcamsLoading]);
 
   // Refresh webcams
   const refresh = useCallback(async () => {
-    if (document.visibilityState !== "visible") return;
+    if (document.visibilityState !== 'visible') return;
     if (!isVisibleRef.current) return;
     if (!markersRef.current.length) return;
 
@@ -161,9 +141,7 @@ export function useWebcamMarkers({
     lastRefreshRef.current = timestamp;
 
     const newestMarker = markersRef.current.reduce((prev, current) =>
-      Number(prev.dataset.timestamp) > Number(current.dataset.timestamp)
-        ? prev
-        : current
+      Number(prev.dataset.timestamp) > Number(current.dataset.timestamp) ? prev : current
     );
 
     const webcams = await listCamsUpdatedSince(
@@ -174,9 +152,7 @@ export function useWebcamMarkers({
     if (!geoJson?.features.length) {
       geoJson = await checkMissedUpdates();
       if (geoJson) {
-        const distinctTimestamps = [
-          ...new Set(markersRef.current.map((m) => m.dataset.timestamp)),
-        ];
+        const distinctTimestamps = [...new Set(markersRef.current.map((m) => m.dataset.timestamp))];
         const sorted = distinctTimestamps.map(Number).sort((a, b) => a - b);
         if (sorted.length >= 2) timestamp = sorted[1];
       }
@@ -196,21 +172,17 @@ export function useWebcamMarkers({
       item.dataset.timestamp = String(timestamp);
 
       for (const child of Array.from(item.children)) {
-        if ((child as HTMLElement).className === "webcam-img") {
+        if ((child as HTMLElement).className === 'webcam-img') {
           (child as HTMLImageElement).src = isStale
-            ? ""
+            ? ''
             : `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${currentUrl}`;
-        } else if ((child as HTMLElement).className.includes("items-end")) {
+        } else if ((child as HTMLElement).className.includes('items-end')) {
           if (isStale) {
-            child.innerHTML = "No images in the last 24h.";
-            (child as HTMLElement).style.color = "#ff4261";
+            child.innerHTML = 'No images in the last 24h.';
+            (child as HTMLElement).style.color = '#ff4261';
           } else {
-            child.innerHTML = formatInTimeZone(
-              currentTime,
-              "Pacific/Auckland",
-              "dd MMM HH:mm"
-            );
-            (child as HTMLElement).style.color = "";
+            child.innerHTML = formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm');
+            (child as HTMLElement).style.color = '';
           }
         }
       }
@@ -225,7 +197,7 @@ export function useWebcamMarkers({
   const setVisibility = useCallback((visible: boolean) => {
     for (const marker of markersRef.current) {
       // eslint-disable-next-line react-hooks/immutability
-      marker.style.visibility = visible ? "visible" : "hidden";
+      marker.style.visibility = visible ? 'visible' : 'hidden';
     }
   }, []);
 
@@ -247,6 +219,6 @@ export function useWebcamMarkers({
   return {
     markers: markersRef,
     refresh,
-    setVisibility,
+    setVisibility
   };
 }

@@ -1,5 +1,5 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export const REFRESH_INTERVAL_MS = 60 * 1000;
 
@@ -14,94 +14,94 @@ export const handleError = (err: unknown, defaultMessage: string): Error => {
 
 export const getWindDirectionFromBearing = (bearing: number) => {
   if (bearing < 0) {
-    return "";
+    return '';
   } else if (bearing <= 11.25) {
-    return "N";
+    return 'N';
   } else if (bearing <= 33.75) {
-    return "NNE";
+    return 'NNE';
   } else if (bearing <= 56.25) {
-    return "NE";
+    return 'NE';
   } else if (bearing <= 78.75) {
-    return "ENE";
+    return 'ENE';
   } else if (bearing <= 101.25) {
-    return "E";
+    return 'E';
   } else if (bearing <= 123.75) {
-    return "ESE";
+    return 'ESE';
   } else if (bearing <= 146.25) {
-    return "SE";
+    return 'SE';
   } else if (bearing <= 168.75) {
-    return "SSE";
+    return 'SSE';
   } else if (bearing <= 191.25) {
-    return "S";
+    return 'S';
   } else if (bearing <= 213.75) {
-    return "SSW";
+    return 'SSW';
   } else if (bearing <= 236.25) {
-    return "SW";
+    return 'SW';
   } else if (bearing <= 258.75) {
-    return "WSW";
+    return 'WSW';
   } else if (bearing <= 281.25) {
-    return "W";
+    return 'W';
   } else if (bearing <= 303.75) {
-    return "WNW";
+    return 'WNW';
   } else if (bearing <= 326.25) {
-    return "NW";
+    return 'NW';
   } else if (bearing <= 348.75) {
-    return "NNW";
+    return 'NNW';
   } else {
-    return "N";
+    return 'N';
   }
 };
 
 export const getStationTypeName = (code: string) => {
   switch (code) {
-    case "wu":
-      return "Weather Underground";
-    case "wow":
-      return "Met Office WOW";
-    case "po":
-      return "Port Otago";
-    case "wp":
-      return "Weather Pro";
-    case "cp":
-      return "CentrePort";
-    case "sfo":
-      return "Sofar Ocean";
-    case "gw":
-      return "Greater Wellington";
-    case "cwu":
-      return "Canterbury Weather Updates";
-    case "mpyc":
-      return "Mt Pleasant Yacht Club";
-    case "lpc":
-      return "Lyttelton Port Company";
-    case "levin":
-      return "Ecowitt";
-    case "mrc":
-      return "Mountain Research Centre";
-    case "mfhb":
+    case 'wu':
+      return 'Weather Underground';
+    case 'wow':
+      return 'Met Office WOW';
+    case 'po':
+      return 'Port Otago';
+    case 'wp':
+      return 'Weather Pro';
+    case 'cp':
+      return 'CentrePort';
+    case 'sfo':
+      return 'Sofar Ocean';
+    case 'gw':
+      return 'Greater Wellington';
+    case 'cwu':
+      return 'Canterbury Weather Updates';
+    case 'mpyc':
+      return 'Mt Pleasant Yacht Club';
+    case 'lpc':
+      return 'Lyttelton Port Company';
+    case 'levin':
+      return 'Ecowitt';
+    case 'mrc':
+      return 'Mountain Research Centre';
+    case 'mfhb':
       return "Model Flying Hawke's Bay";
-    case "wainui":
-      return "Wainuiomata";
-    case "prime":
-      return "Prime Port";
-    case "porters":
-      return "Porters Alpine Resort";
-    case "wl":
-      return "Weatherlink";
-    case "hw":
-      return "Hutt Weather";
-    case "pw":
-      return "PredictWind";
-    case "wi":
-      return "Whanganui Inlet";
-    case "hbrc":
+    case 'wainui':
+      return 'Wainuiomata';
+    case 'prime':
+      return 'Prime Port';
+    case 'porters':
+      return 'Porters Alpine Resort';
+    case 'wl':
+      return 'Weatherlink';
+    case 'hw':
+      return 'Hutt Weather';
+    case 'pw':
+      return 'PredictWind';
+    case 'wi':
+      return 'Whanganui Inlet';
+    case 'hbrc':
       return "Hawke's Bay Regional Council";
-    case "ac":
-      return "Auckland Council";
-    case "wswr":
-      return "WSWR";
-    case "sp":
-      return "South Port";
+    case 'ac':
+      return 'Auckland Council';
+    case 'wswr':
+      return 'WSWR';
+    case 'sp':
+      return 'South Port';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
@@ -109,100 +109,95 @@ export const getStationTypeName = (code: string) => {
 
 export const getWindColor = (wind: number | null) => {
   if (wind == null) {
-    return "";
+    return '';
   } else if (wind <= 2) {
-    return "";
+    return '';
   } else if (wind <= 4) {
-    return "#d1f9ff";
+    return '#d1f9ff';
   } else if (wind <= 6) {
-    return "#b5fffe";
+    return '#b5fffe';
   } else if (wind <= 8) {
-    return "#a8ffec";
+    return '#a8ffec';
   } else if (wind <= 10) {
-    return "#a8ffe2";
+    return '#a8ffe2';
   } else if (wind <= 12) {
-    return "#a8ffd1";
+    return '#a8ffd1';
   } else if (wind <= 14) {
-    return "#a8ffc2";
+    return '#a8ffc2';
   } else if (wind <= 16) {
-    return "#a8ffb1";
+    return '#a8ffb1';
   } else if (wind <= 18) {
-    return "#abffa8";
+    return '#abffa8';
   } else if (wind <= 20) {
-    return "#95ff91";
+    return '#95ff91';
   } else if (wind <= 22) {
-    return "#87ff82";
+    return '#87ff82';
   } else if (wind <= 24) {
-    return "#9dff82";
+    return '#9dff82';
   } else if (wind <= 26) {
-    return "#c3ff82";
+    return '#c3ff82';
   } else if (wind <= 28) {
-    return "#e2ff82";
+    return '#e2ff82';
   } else if (wind <= 30) {
-    return "#fff582";
+    return '#fff582';
   } else if (wind <= 32) {
-    return "#ffda82";
+    return '#ffda82';
   } else if (wind <= 34) {
-    return "#ff9966";
+    return '#ff9966';
   } else if (wind <= 36) {
-    return "#ff8766";
+    return '#ff8766';
   } else if (wind <= 38) {
-    return "#ff7d66";
+    return '#ff7d66';
   } else if (wind <= 40) {
-    return "#ff6666";
+    return '#ff6666';
   } else if (wind <= 42) {
-    return "#ff4d4d";
+    return '#ff4d4d';
   } else if (wind <= 50) {
-    return "#ff365e";
+    return '#ff365e';
   } else if (wind <= 60) {
-    return "#ff3683";
+    return '#ff3683';
   } else if (wind <= 70) {
-    return "#ff36a8";
+    return '#ff36a8';
   } else if (wind <= 80) {
-    return "#ff36c6";
+    return '#ff36c6';
   } else if (wind <= 90) {
-    return "#ff36e1";
+    return '#ff36e1';
   } else {
-    return "#f536ff";
+    return '#f536ff';
   }
 };
 
 export const getWebcamTypeName = (code: string) => {
   switch (code) {
-    case "lw":
-      return "Lake Wanaka";
-    case "qa":
-      return "Queenstown Airport";
-    case "wa":
-      return "Wanaka Airport";
-    case "cgc":
-      return "Canterbury Gliding Club";
-    case "ch":
-      return "Castle Hill";
-    case "cm":
-      return "Mt Cheeseman";
-    case "cwu":
-      return "Canterbury Weather Updates";
-    case "ap":
-      return "Arthurs Pass";
-    case "hutt":
-      return "Mt Hutt";
-    case "ts":
-      return "Taylors Surf";
-    case "camftp":
-      return "Camera FTP";
+    case 'lw':
+      return 'Lake Wanaka';
+    case 'qa':
+      return 'Queenstown Airport';
+    case 'wa':
+      return 'Wanaka Airport';
+    case 'cgc':
+      return 'Canterbury Gliding Club';
+    case 'ch':
+      return 'Castle Hill';
+    case 'cm':
+      return 'Mt Cheeseman';
+    case 'cwu':
+      return 'Canterbury Weather Updates';
+    case 'ap':
+      return 'Arthurs Pass';
+    case 'hutt':
+      return 'Mt Hutt';
+    case 'ts':
+      return 'Taylors Surf';
+    case 'camftp':
+      return 'Camera FTP';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
 };
 
 // Haversine distance calculation (returns meters)
-export const getDistance = (
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-): number => {
+export const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371 * 1000; // Earth's radius in meters
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -220,9 +215,9 @@ export const getMinutesAgo = (date: Date): string => {
   const diff = new Date().getTime() - date.getTime();
   const minutes = Math.floor(diff / (1000 * 60));
   if (minutes < 1) {
-    return "just now";
+    return 'just now';
   } else if (minutes === 1) {
-    return "1 minute ago";
+    return '1 minute ago';
   } else if (minutes > 60 * 24) {
     return `Over ${Math.floor(minutes / (60 * 24))} days ago`;
   } else if (minutes > 60) {
@@ -250,28 +245,28 @@ export const compassToDegrees = (direction: string): number => {
     W: 270,
     WNW: 292.5,
     NW: 315,
-    NNW: 337.5,
+    NNW: 337.5
   };
   return compass[direction.toUpperCase()] ?? parseFloat(direction);
 };
 
 // Parse valid bearings string into array of {start, end} sectors
 export const parseValidBearings = (
-  bearings: string | undefined,
+  bearings: string | undefined
 ): { start: number; end: number }[] => {
   if (!bearings) {
     return [];
   }
 
   const sectors: { start: number; end: number }[] = [];
-  const pairs = bearings.split(",");
+  const pairs = bearings.split(',');
 
   for (const pair of pairs) {
     const trimmedPair = pair.trim();
 
-    if (trimmedPair.includes("-")) {
+    if (trimmedPair.includes('-')) {
       // Range of bearings (e.g., "NW-NE" or "270-90")
-      const [start, end] = trimmedPair.split("-").map((s) => s.trim());
+      const [start, end] = trimmedPair.split('-').map((s) => s.trim());
       const startAngle = compassToDegrees(start);
       const endAngle = compassToDegrees(end);
 
@@ -304,17 +299,14 @@ export const parseValidBearings = (
   return sectors;
 };
 
-export const lookupElevation = async (
-  lat: number,
-  lon: number,
-): Promise<number> => {
+export const lookupElevation = async (lat: number, lon: number): Promise<number> => {
   const response = await fetch(
     `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`,
-    { method: "GET" },
+    { method: 'GET' }
   );
 
   if (!response.ok) {
-    throw new Error("Failed to fetch elevation");
+    throw new Error('Failed to fetch elevation');
   }
 
   const data = (await response.json()) as {
@@ -322,7 +314,7 @@ export const lookupElevation = async (
   };
 
   if (!data.elevation?.length) {
-    throw new Error("No elevation data returned");
+    throw new Error('No elevation data returned');
   }
 
   return Math.round(data.elevation[0]);

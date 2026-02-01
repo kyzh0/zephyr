@@ -1,16 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Outlet } from "react-router-dom";
-import "mapbox-gl/dist/mapbox-gl.css";
-import { History } from "lucide-react";
-import { formatInTimeZone } from "date-fns-tz";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
-import { useAppContext } from "@/context/AppContext";
-import {
-  MapControlButtons,
-  getStoredValue,
-  setStoredValue,
-} from "@/components/map";
-import type { WindUnit } from "@/components/map";
+import { useAppContext } from '@/context/AppContext';
+import { MapControlButtons, getStoredValue, setStoredValue } from '@/components/map';
+import type { WindUnit } from '@/components/map';
 
 import {
   useMapInstance,
@@ -18,10 +12,10 @@ import {
   useWebcamMarkers,
   useSoundingMarkers,
   useSiteMarkers,
-  useLandingMarkers,
-} from "@/hooks/map";
-import { toast } from "sonner";
-import { REFRESH_INTERVAL_MS } from "@/lib/utils";
+  useLandingMarkers
+} from '@/hooks/map';
+import { toast } from 'sonner';
+import { REFRESH_INTERVAL_MS } from '@/lib/utils';
 
 /**
  * Calculate the snapshot time based on offset (in minutes from current time)
@@ -46,14 +40,10 @@ export default function Map() {
   const mapContainer = useRef<HTMLDivElement>(null);
 
   // UI state
-  const [showWebcams, setShowWebcams] = useState(() =>
-    getStoredValue("showWebcams", false)
-  );
-  const [showSoundings, setShowSoundings] = useState(() =>
-    getStoredValue("showSoundings", false)
-  );
-  const [viewMode, setViewMode] = useState<"stations" | "sites">(() =>
-    getStoredValue<"stations" | "sites">("viewMode", "stations")
+  const [showWebcams, setShowWebcams] = useState(() => getStoredValue('showWebcams', false));
+  const [showSoundings, setShowSoundings] = useState(() => getStoredValue('showSoundings', false));
+  const [viewMode, setViewMode] = useState<'stations' | 'sites'>(() =>
+    getStoredValue<'stations' | 'sites'>('viewMode', 'stations')
   );
 
   const [showElevation, setShowElevation] = useState(false);
@@ -64,18 +54,16 @@ export default function Map() {
   const [historyOffset, setHistoryOffset] = useState(0);
 
   // Unit state
-  const [unit, setUnit] = useState<WindUnit>(() =>
-    getStoredValue<WindUnit>("unit", "kmh")
-  );
+  const [unit, setUnit] = useState<WindUnit>(() => getStoredValue<WindUnit>('unit', 'kmh'));
 
   // Recent stations state
   const [minimizeRecents, setMinimizeRecents] = useState(() =>
-    getStoredValue("minimizeRecents", false)
+    getStoredValue('minimizeRecents', false)
   );
 
   // Initialize map
   const { map, isLoaded, triggerGeolocate } = useMapInstance({
-    containerRef: mapContainer,
+    containerRef: mapContainer
   });
 
   // Initialize station markers
@@ -84,97 +72,83 @@ export default function Map() {
     renderHistoricalData,
     renderCurrentData,
     setInteractive: setStationMarkersInteractive,
-    setVisibility: setStationVisibility,
+    setVisibility: setStationVisibility
   } = useStationMarkers({
     map,
     isMapLoaded: isLoaded,
     isHistoricData: historyOffset < 0,
     unit,
-    isVisible: viewMode === "stations",
-    onRefresh: setRefreshedStations,
+    isVisible: viewMode === 'stations',
+    onRefresh: setRefreshedStations
   });
 
   // Initialize webcam markers
-  const { refresh: refreshWebcams, setVisibility: setWebcamVisibility } =
-    useWebcamMarkers({
-      map,
-      isMapLoaded: isLoaded,
-      isVisible: showWebcams,
-      onRefresh: setRefreshedWebcams,
-    });
+  const { refresh: refreshWebcams, setVisibility: setWebcamVisibility } = useWebcamMarkers({
+    map,
+    isMapLoaded: isLoaded,
+    isVisible: showWebcams,
+    onRefresh: setRefreshedWebcams
+  });
 
   // Initialize sounding markers
-  const { refresh: refreshSoundings, setVisibility: setSoundingVisibility } =
-    useSoundingMarkers({
-      map,
-      isMapLoaded: isLoaded,
-      isVisible: showSoundings,
-      isHistoricData: historyOffset < 0,
-    });
+  const { refresh: refreshSoundings, setVisibility: setSoundingVisibility } = useSoundingMarkers({
+    map,
+    isMapLoaded: isLoaded,
+    isVisible: showSoundings,
+    isHistoricData: historyOffset < 0
+  });
 
   // Initialize landing markers below sites
   useLandingMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: viewMode === "sites",
+    isVisible: viewMode === 'sites'
   });
 
   // Initialize site markers
   const { setVisibility: setSiteVisibility } = useSiteMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: viewMode === "sites",
+    isVisible: viewMode === 'sites'
   });
 
   // Handle site toggle - when showing sites, hide stations and vice versa
-  const toggleViewMode = (viewMode: "stations" | "sites") => {
+  const toggleViewMode = (viewMode: 'stations' | 'sites') => {
     setViewMode(viewMode);
-    setStoredValue("viewMode", viewMode);
-    setSiteVisibility(viewMode === "sites");
-    setStationVisibility(viewMode === "stations");
+    setStoredValue('viewMode', viewMode);
+    setSiteVisibility(viewMode === 'sites');
+    setStationVisibility(viewMode === 'stations');
   };
 
   // Handle webcam toggle
   const handleWebcamClick = useCallback(async () => {
     if (showSoundings) {
       setShowSoundings(false);
-      setStoredValue("showSoundings", false);
+      setStoredValue('showSoundings', false);
       setSoundingVisibility(false);
     }
 
     const newValue = !showWebcams;
     setShowWebcams(newValue);
-    setStoredValue("showWebcams", newValue);
+    setStoredValue('showWebcams', newValue);
     setWebcamVisibility(newValue);
     if (newValue) await refreshWebcams();
-  }, [
-    showWebcams,
-    showSoundings,
-    setWebcamVisibility,
-    setSoundingVisibility,
-    refreshWebcams,
-  ]);
+  }, [showWebcams, showSoundings, setWebcamVisibility, setSoundingVisibility, refreshWebcams]);
 
   // Handle sounding toggle
   const handleSoundingClick = useCallback(async () => {
     if (showWebcams) {
       setShowWebcams(false);
-      setStoredValue("showWebcams", false);
+      setStoredValue('showWebcams', false);
       setWebcamVisibility(false);
     }
 
     const newValue = !showSoundings;
     setShowSoundings(newValue);
-    setStoredValue("showSoundings", newValue);
+    setStoredValue('showSoundings', newValue);
     setSoundingVisibility(newValue);
     if (newValue) await refreshSoundings();
-  }, [
-    showSoundings,
-    showWebcams,
-    setSoundingVisibility,
-    setWebcamVisibility,
-    refreshSoundings,
-  ]);
+  }, [showSoundings, showWebcams, setSoundingVisibility, setWebcamVisibility, refreshSoundings]);
 
   // Handle layer toggle (outdoors <-> satellite)
   const handleLayerToggle = useCallback(() => {
@@ -183,18 +157,18 @@ export default function Map() {
     setIsSatellite(newValue);
     map.current.setStyle(
       newValue
-        ? "mapbox://styles/mapbox/satellite-streets-v11"
-        : "mapbox://styles/mapbox/outdoors-v11"
+        ? 'mapbox://styles/mapbox/satellite-streets-v11'
+        : 'mapbox://styles/mapbox/outdoors-v11'
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSatellite, map.current]);
 
   // Handle unit toggle
   const handleUnitToggle = useCallback(() => {
-    const newUnit = unit === "kmh" ? "kt" : "kmh";
+    const newUnit = unit === 'kmh' ? 'kt' : 'kmh';
     setUnit(newUnit);
-    setStoredValue("unit", newUnit);
-    toast.info(`Switched to ${newUnit === "kmh" ? "km/h" : "knots"}`);
+    setStoredValue('unit', newUnit);
+    toast.info(`Switched to ${newUnit === 'kmh' ? 'km/h' : 'knots'}`);
   }, [unit]);
 
   // Handle history offset change
@@ -227,7 +201,7 @@ export default function Map() {
       setSoundingVisibility,
       setStationMarkersInteractive,
       renderHistoricalData,
-      renderCurrentData,
+      renderCurrentData
     ]
   );
 
@@ -235,7 +209,7 @@ export default function Map() {
   const handleRecentsToggle = useCallback(() => {
     const newValue = !minimizeRecents;
     setMinimizeRecents(newValue);
-    setStoredValue("minimizeRecents", newValue);
+    setStoredValue('minimizeRecents', newValue);
   }, [minimizeRecents]);
 
   // Check if in history mode
@@ -256,13 +230,7 @@ export default function Map() {
     }, REFRESH_INTERVAL_MS);
 
     return () => clearInterval(interval);
-  }, [
-    isLoaded,
-    isHistoricData,
-    refreshStations,
-    refreshWebcams,
-    refreshSoundings,
-  ]);
+  }, [isLoaded, isHistoricData, refreshStations, refreshWebcams, refreshSoundings]);
 
   // Refresh on visibility change
   useEffect(() => {
@@ -271,25 +239,24 @@ export default function Map() {
       await refreshWebcams();
       await refreshSoundings();
     };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [refreshStations, refreshWebcams, refreshSoundings]);
 
   // Show/hide elevation borders
   useEffect(() => {
-    const borders = document.querySelectorAll("svg.marker-border");
+    const borders = document.querySelectorAll('svg.marker-border');
     borders.forEach((b) => {
-      b.classList.toggle("hidden", !showElevation);
+      b.classList.toggle('hidden', !showElevation);
     });
   }, [showElevation]);
 
   // Filter by elevation
   useEffect(() => {
-    const markers = document.querySelectorAll("div.marker");
+    const markers = document.querySelectorAll('div.marker');
     markers.forEach((m) => {
-      const elevation = Number(m.getAttribute("elevation"));
-      m.classList.toggle("hidden", elevation < elevationFilter);
+      const elevation = Number(m.getAttribute('elevation'));
+      m.classList.toggle('hidden', elevation < elevationFilter);
     });
   }, [elevationFilter]);
 
@@ -323,24 +290,6 @@ export default function Map() {
       />
 
       <div ref={mapContainer} className="w-full h-full" />
-
-      {/* History mode indicator */}
-      {isHistoricData && (
-        <div className="absolute bottom-4 z-50 flex justify-center w-full px-4">
-          <div className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-full shadow-lg">
-            <History className="h-4 w-4" />
-            <span className="text-sm font-medium">
-              Viewing Historic Data for{" "}
-              {formatInTimeZone(
-                getSnapshotTime(historyOffset),
-                "Pacific/Auckland",
-                "dd MMM HH:mm"
-              )}
-            </span>
-          </div>
-        </div>
-      )}
-
       <Outlet />
     </div>
   );

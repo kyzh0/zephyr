@@ -1,132 +1,132 @@
-import { createBrowserRouter, Outlet } from "react-router-dom";
+import { createBrowserRouter, Outlet } from 'react-router-dom';
 
 // Import the route components we've created
-import MapWrapper from "./pages/MapWrapper";
-import Station from "./pages/Station";
-import Webcam from "./pages/Webcam";
-import Sounding from "./pages/Sounding";
-import Site from "./pages/Site";
-import Landing from "./pages/Landing";
-import GridView from "./pages/GridView";
-import ExportMapData from "./pages/ExportMapData";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminAddStation from "./pages/AdminAddStation";
-import AdminAddWebcam from "./pages/AdminAddWebcam";
-import AdminAddSounding from "./pages/AdminAddSounding";
-import AdminAddSite from "./pages/AdminAddSite";
-import AdminAddLanding from "./pages/AdminAddLanding";
-import AdminEditStation from "./pages/AdminEditStation";
-import AdminEditSite from "./pages/AdminEditSite";
-import AdminEditLanding from "./pages/AdminEditLanding";
-import ProtectedRoute from "./pages/ProtectedRoute";
+import MapWrapper from './pages/MapWrapper';
+import Station from './pages/Station';
+import Webcam from './pages/Webcam';
+import Sounding from './pages/Sounding';
+import Site from './pages/Site';
+import Landing from './pages/Landing';
+import GridView from './pages/GridView';
+import ExportMapData from './pages/ExportMapData';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminAddStation from './pages/AdminAddStation';
+import AdminAddWebcam from './pages/AdminAddWebcam';
+import AdminAddSounding from './pages/AdminAddSounding';
+import AdminAddSite from './pages/AdminAddSite';
+import AdminAddLanding from './pages/AdminAddLanding';
+import AdminEditStation from './pages/AdminEditStation';
+import AdminEditSite from './pages/AdminEditSite';
+import AdminEditLanding from './pages/AdminEditLanding';
+import ProtectedRoute from './pages/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <Outlet />,
     children: [
       {
-        path: "",
+        path: '',
         element: <MapWrapper />,
         children: [
           {
             // Index route renders Map on desktop (handled by MapWrapper)
             // On mobile, this will be empty so we need Map here
             index: true,
-            element: null,
+            element: null
           },
           {
-            path: "stations/:id",
-            element: <Station />,
+            path: 'stations/:id',
+            element: <Station />
           },
           {
-            path: "webcams/:id",
-            element: <Webcam />,
+            path: 'webcams/:id',
+            element: <Webcam />
           },
           {
-            path: "soundings/:id",
-            element: <Sounding />,
+            path: 'soundings/:id',
+            element: <Sounding />
           },
           {
-            path: "sites/:id",
-            element: <Site />,
+            path: 'sites/:id',
+            element: <Site />
           },
           {
-            path: "landings/:id",
-            element: <Landing />,
+            path: 'landings/:id',
+            element: <Landing />
           },
           {
-            path: "grid",
-            element: <GridView />,
+            path: 'grid',
+            element: <GridView />
           },
           {
-            path: "export-map-data",
-            element: <ExportMapData />,
-          },
-        ],
+            path: 'export-map-data',
+            element: <ExportMapData />
+          }
+        ]
       },
       {
-        path: "admin",
+        path: 'admin',
         element: <ProtectedRoute />,
         children: [
           {
-            path: "dashboard",
-            element: <AdminDashboard />,
+            path: 'dashboard',
+            element: <AdminDashboard />
           },
           {
-            path: "stations",
-            element: <AdminDashboard tab="stations" />,
+            path: 'stations',
+            element: <AdminDashboard tab="stations" />
           },
           {
-            path: "webcams",
-            element: <AdminDashboard tab="webcams" />,
+            path: 'webcams',
+            element: <AdminDashboard tab="webcams" />
           },
           {
-            path: "soundings",
-            element: <AdminDashboard tab="soundings" />,
+            path: 'soundings',
+            element: <AdminDashboard tab="soundings" />
           },
           {
-            path: "sites",
-            element: <AdminDashboard tab="sites" />,
+            path: 'sites',
+            element: <AdminDashboard tab="sites" />
           },
           {
-            path: "landings",
-            element: <AdminDashboard tab="landings" />,
+            path: 'landings',
+            element: <AdminDashboard tab="landings" />
           },
           {
-            path: "stations/add",
-            element: <AdminAddStation />,
+            path: 'stations/add',
+            element: <AdminAddStation />
           },
           {
-            path: "webcams/add",
-            element: <AdminAddWebcam />,
+            path: 'webcams/add',
+            element: <AdminAddWebcam />
           },
           {
-            path: "soundings/add",
-            element: <AdminAddSounding />,
+            path: 'soundings/add',
+            element: <AdminAddSounding />
           },
           {
-            path: "sites/add",
-            element: <AdminAddSite />,
+            path: 'sites/add',
+            element: <AdminAddSite />
           },
           {
-            path: "landings/add",
-            element: <AdminAddLanding />,
+            path: 'landings/add',
+            element: <AdminAddLanding />
           },
           {
-            path: "stations/:id",
-            element: <AdminEditStation />,
+            path: 'stations/:id',
+            element: <AdminEditStation />
           },
           {
-            path: "sites/:id",
-            element: <AdminEditSite />,
+            path: 'sites/:id',
+            element: <AdminEditSite />
           },
           {
-            path: "landings/:id",
-            element: <AdminEditLanding />,
-          },
-        ],
-      },
-    ],
-  },
+            path: 'landings/:id',
+            element: <AdminEditLanding />
+          }
+        ]
+      }
+    ]
+  }
 ]);

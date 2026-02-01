@@ -1,7 +1,7 @@
-import { Slider } from "@/components/ui/slider";
-import { Mountain } from "lucide-react";
-import { toast } from "sonner";
-import { Toggle } from "../ui/toggle";
+import { Slider } from '@/components/ui/slider';
+import { Mountain } from 'lucide-react';
+import { toast } from 'sonner';
+import { Toggle } from '../ui/toggle';
 
 interface ElevationControlsProps {
   showElevation: boolean;
@@ -14,7 +14,7 @@ export function ElevationControls({
   showElevation,
   elevationFilter,
   onToggleElevation,
-  onElevationChange,
+  onElevationChange
 }: ElevationControlsProps) {
   const notifyElevationChange = (value: number) => {
     // Notify only when elevation filter is greater than 0
@@ -31,9 +31,7 @@ export function ElevationControls({
         className="bg-background data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
         onClick={onToggleElevation}
       >
-        <Mountain
-          className={`h-4 w-4 ${showElevation ? "opacity-100" : "opacity-70"}`}
-        />
+        <Mountain className={`h-4 w-4 ${showElevation ? 'opacity-100' : 'opacity-70'}`} />
       </Toggle>
       <div className="h-[60px] px-5">
         <Slider
@@ -48,9 +46,7 @@ export function ElevationControls({
         />
       </div>
       {elevationFilter > 0 && (
-        <div className="z-51 bg-white rounded px-1 text-xs text-center">
-          &gt;{elevationFilter}m
-        </div>
+        <div className="z-51 bg-white rounded px-1 text-xs text-center">&gt;{elevationFilter}m</div>
       )}
     </div>
   );

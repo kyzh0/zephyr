@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { ArrowLeft, Loader2, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import {
   AlertDialog,
@@ -15,13 +15,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { CoordinatesPicker } from "@/components/ui/coordinates-picker";
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CoordinatesPicker } from '@/components/ui/coordinates-picker';
 import {
   Form,
   FormControl,
@@ -29,31 +29,24 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  FormMessage
+} from '@/components/ui/form';
 
-import { deleteSite, getSiteById, patchSite } from "@/services/site.service";
-import { listLandings } from "@/services/landing.service";
-import type { ISite, UpdateSiteDto } from "@/models/site.model";
-import type { ILanding } from "@/models/landing.model";
-import { lookupElevation } from "@/lib/utils";
+import { deleteSite, getSiteById, patchSite } from '@/services/site.service';
+import { listLandings } from '@/services/landing.service';
+import type { ISite, UpdateSiteDto } from '@/models/site.model';
+import type { ILanding } from '@/models/landing.model';
+import { lookupElevation } from '@/lib/utils';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
     if (!val.trim()) return true; // Allow empty
-    const parts = val.replace(/\s/g, "").split(",");
+    const parts = val.replace(/\s/g, '').split(',');
     if (parts.length !== 2) return false;
     const [lat, lon] = parts.map(Number);
-    return (
-      !isNaN(lat) &&
-      !isNaN(lon) &&
-      lat >= -90 &&
-      lat <= 90 &&
-      lon >= -180 &&
-      lon <= 180
-    );
+    return !isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
   },
-  { message: "Enter valid coordinates: latitude, longitude" },
+  { message: 'Enter valid coordinates: latitude, longitude' }
 );
 
 const bearingsSchema = z
@@ -61,53 +54,51 @@ const bearingsSchema = z
   .refine(
     (val) => {
       if (!val.trim()) return true;
-      const ranges = val.split(",");
+      const ranges = val.split(',');
       const rangePattern = /^[0-9]{3}-[0-9]{3}$/;
       return ranges.every((range) => {
         if (!rangePattern.test(range)) return false;
-        const [start, end] = range.split("-").map(Number);
+        const [start, end] = range.split('-').map(Number);
         return start >= 0 && start <= 360 && end >= 0 && end <= 360;
       });
     },
-    { message: "Format: 270-010,090-180 (bearings 0-360)" },
+    { message: 'Format: 270-010,090-180 (bearings 0-360)' }
   )
-  .min(1, "Bearings are required");
+  .min(1, 'Bearings are required');
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, 'Name is required'),
   coordinates: coordinatesSchema,
   elevation: z
     .string()
-    .regex(/^$|^\d+$/, "Must be a number")
-    .min(1, "Elevation is required"),
+    .regex(/^$|^\d+$/, 'Must be a number')
+    .min(1, 'Elevation is required'),
   validBearings: bearingsSchema,
   landingIds: z.array(z.string().min(1)).optional(),
   isDisabled: z.boolean(),
   description: z.string().optional(),
   mandatoryNotices: z.string().optional(),
-  siteGuideUrl: z.url("Enter a valid URL").or(z.literal("")).optional(),
+  siteGuideUrl: z.url('Enter a valid URL').or(z.literal('')).optional(),
   hazards: z.string().optional(),
-  access: z.string().optional(),
+  access: z.string().optional()
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-function formatCoordinates(location?: {
-  coordinates: [number, number];
-}): string {
-  if (!location?.coordinates) return "";
+function formatCoordinates(location?: { coordinates: [number, number] }): string {
+  if (!location?.coordinates) return '';
   const [lon, lat] = location.coordinates;
   return `${lat}, ${lon}`;
 }
 
 function parseCoordinates(
-  value: string,
-): { type: "Point"; coordinates: [number, number] } | undefined {
+  value: string
+): { type: 'Point'; coordinates: [number, number] } | undefined {
   if (!value.trim()) return undefined;
-  const [lat, lon] = value.replace(/\s/g, "").split(",").map(Number);
+  const [lat, lon] = value.replace(/\s/g, '').split(',').map(Number);
   return {
-    type: "Point",
-    coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6],
+    type: 'Point',
+    coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6]
   };
 }
 
@@ -132,24 +123,24 @@ export default function AdminEditSite() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      coordinates: "",
-      elevation: "",
-      validBearings: "",
+      name: '',
+      coordinates: '',
+      elevation: '',
+      validBearings: '',
       landingIds: [],
       isDisabled: false,
-      description: "",
-      siteGuideUrl: "",
-      hazards: "",
-      access: "",
-    },
+      description: '',
+      siteGuideUrl: '',
+      hazards: '',
+      access: ''
+    }
   });
 
   const isSubmitting = form.formState.isSubmitting;
 
   useEffect(() => {
     if (!id) {
-      navigate("/admin/sites");
+      navigate('/admin/sites');
       return;
     }
 
@@ -164,11 +155,11 @@ export default function AdminEditSite() {
           validBearings: data.validBearings,
           landingIds: data.landings?.map((l) => l.landingId) ?? [],
           isDisabled: data.isDisabled,
-          description: data.description ?? "",
-          mandatoryNotices: data.mandatoryNotices ?? "",
-          siteGuideUrl: data.siteGuideUrl ?? "",
-          hazards: data.hazards ?? "",
-          access: data.access ?? "",
+          description: data.description ?? '',
+          mandatoryNotices: data.mandatoryNotices ?? '',
+          siteGuideUrl: data.siteGuideUrl ?? '',
+          hazards: data.hazards ?? '',
+          access: data.access ?? ''
         });
       }
       setIsLoading(false);
@@ -182,34 +173,34 @@ export default function AdminEditSite() {
     if (!id) return;
 
     setIsDeleting(true);
-    const adminKey = sessionStorage.getItem("adminKey") ?? "";
+    const adminKey = sessionStorage.getItem('adminKey') ?? '';
     try {
       await deleteSite(id, adminKey);
-      toast.success("Site deleted");
-      navigate("/admin/sites");
+      toast.success('Site deleted');
+      navigate('/admin/sites');
     } catch (error) {
-      toast.error("Failed to delete site: " + (error as Error).message);
+      toast.error('Failed to delete site: ' + (error as Error).message);
       setIsDeleting(false);
     }
   }
 
   async function handleAutoElevation() {
-    const coordsValue = form.getValues("coordinates");
+    const coordsValue = form.getValues('coordinates');
 
     if (!coordsValue?.trim()) {
-      toast.error("Please select coordinates first");
+      toast.error('Please select coordinates first');
       return;
     }
 
-    const parts = coordsValue.replace(/\s/g, "").split(",");
+    const parts = coordsValue.replace(/\s/g, '').split(',');
     if (parts.length !== 2) {
-      toast.error("Invalid coordinates");
+      toast.error('Invalid coordinates');
       return;
     }
 
     const [lat, lon] = parts.map(Number);
     if (isNaN(lat) || isNaN(lon)) {
-      toast.error("Invalid coordinates");
+      toast.error('Invalid coordinates');
       return;
     }
 
@@ -217,9 +208,9 @@ export default function AdminEditSite() {
       setElevationLoading(true);
 
       const elevation = await lookupElevation(lat, lon);
-      form.setValue("elevation", elevation.toString(), {
+      form.setValue('elevation', elevation.toString(), {
         shouldDirty: true,
-        shouldValidate: true,
+        shouldValidate: true
       });
 
       toast.success(`Elevation set to ${elevation} m`);
@@ -246,7 +237,7 @@ export default function AdminEditSite() {
       mandatoryNotices: values.mandatoryNotices,
       siteGuideUrl: values.siteGuideUrl,
       hazards: values.hazards,
-      access: values.access,
+      access: values.access
     };
 
     const location = parseCoordinates(values.coordinates);
@@ -254,24 +245,20 @@ export default function AdminEditSite() {
       updates.location = location;
     }
 
-    const adminKey = sessionStorage.getItem("adminKey") ?? "";
+    const adminKey = sessionStorage.getItem('adminKey') ?? '';
     try {
       await patchSite(id!, updates, adminKey);
-      toast.success("Site updated");
+      toast.success('Site updated');
       navigate(`/admin/sites`);
     } catch (error) {
-      toast.error("Failed to update site: " + (error as Error).message);
+      toast.error('Failed to update site: ' + (error as Error).message);
     }
   }
 
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b bg-white px-6 py-4 flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate("/admin/sites")}
-        >
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/sites')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
@@ -293,8 +280,7 @@ export default function AdminEditSite() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Site</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{site?.name}"? This action
-                cannot be undone.
+                Are you sure you want to delete "{site?.name}"? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -316,10 +302,7 @@ export default function AdminEditSite() {
           <div className="text-muted-foreground">Loading...</div>
         ) : (
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="max-w-2xl space-y-6"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl space-y-6">
               {/* Basic Info */}
               <div className="space-y-4">
                 <h2 className="text-lg font-medium">Basic Information</h2>
@@ -354,30 +337,20 @@ export default function AdminEditSite() {
                               const checked = selectedIds.includes(landing._id);
 
                               return (
-                                <div
-                                  key={landing._id}
-                                  className="flex items-center space-x-2"
-                                >
+                                <div key={landing._id} className="flex items-center space-x-2">
                                   <Checkbox
                                     checked={checked}
                                     onCheckedChange={(isChecked) => {
                                       if (isChecked) {
-                                        field.onChange([
-                                          ...selectedIds,
-                                          landing._id,
-                                        ]);
+                                        field.onChange([...selectedIds, landing._id]);
                                       } else {
                                         field.onChange(
-                                          selectedIds.filter(
-                                            (id) => id !== landing._id,
-                                          ),
+                                          selectedIds.filter((id) => id !== landing._id)
                                         );
                                       }
                                     }}
                                   />
-                                  <span className="text-sm">
-                                    {landing.name}
-                                  </span>
+                                  <span className="text-sm">{landing.name}</span>
                                 </div>
                               );
                             })}
@@ -395,10 +368,7 @@ export default function AdminEditSite() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border p-4">
                       <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>Disabled</FormLabel>
@@ -418,13 +388,8 @@ export default function AdminEditSite() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Coordinates (lat, lon)</FormLabel>
-                      <FormDescription>
-                        Click on the map to set the location
-                      </FormDescription>
-                      <CoordinatesPicker
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
+                      <FormDescription>Click on the map to set the location</FormDescription>
+                      <CoordinatesPicker value={field.value} onChange={field.onChange} />
                       <FormControl>
                         <Input {...field} placeholder="-41.2865, 174.7762" />
                       </FormControl>
@@ -449,14 +414,8 @@ export default function AdminEditSite() {
                   />
 
                   <div className="flex items-end">
-                    <Button
-                      type="button"
-                      onClick={handleAutoElevation}
-                      disabled={elevationLoading}
-                    >
-                      {elevationLoading && (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      )}
+                    <Button type="button" onClick={handleAutoElevation} disabled={elevationLoading}>
+                      {elevationLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                       Auto
                     </Button>
                   </div>
@@ -557,9 +516,7 @@ export default function AdminEditSite() {
                 className="w-full"
                 disabled={isSubmitting || !form.formState.isDirty}
               >
-                {isSubmitting && (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                )}
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Save Changes
               </Button>
             </form>

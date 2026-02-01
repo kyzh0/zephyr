@@ -1,17 +1,12 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useWebcam } from "@/hooks";
-import { getWebcamTypeName } from "@/lib/utils";
-import { formatInTimeZone } from "date-fns-tz";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useWebcam } from '@/hooks';
+import { getWebcamTypeName } from '@/lib/utils';
+import { formatInTimeZone } from 'date-fns-tz';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Webcam() {
   const { id } = useParams<{ id: string }>();
@@ -39,9 +34,7 @@ export default function Webcam() {
       <DialogContent className="sm:max-w-6xl w-[95vw] max-h-[90vh] p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-base sm:text-lg">
-            {webcam?.name ?? (
-              <Skeleton className="h-6 sm:h-7 w-36 sm:w-44 mx-auto" />
-            )}
+            {webcam?.name ?? <Skeleton className="h-6 sm:h-7 w-36 sm:w-44 mx-auto" />}
           </DialogTitle>
         </DialogHeader>
 
@@ -53,9 +46,7 @@ export default function Webcam() {
           ) : images.length ? (
             <>
               <img
-                src={`${import.meta.env.VITE_FILE_SERVER_PREFIX}/${
-                  images[index].url
-                }`}
+                src={`${import.meta.env.VITE_FILE_SERVER_PREFIX}/${images[index].url}`}
                 alt={webcam.name}
                 loading="lazy"
                 className="w-full max-h-[60vh] object-contain"
@@ -73,8 +64,8 @@ export default function Webcam() {
                 <span className="text-xs sm:text-sm min-w-24 sm:min-w-28 text-center">
                   {formatInTimeZone(
                     new Date(images[index].time),
-                    "Pacific/Auckland",
-                    "dd MMM HH:mm"
+                    'Pacific/Auckland',
+                    'dd MMM HH:mm'
                   )}
                 </span>
                 <Button

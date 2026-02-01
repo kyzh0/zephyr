@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { getCamById, loadCamImages, listCams } from "@/services/cam.service";
-import type { ICam, ICamImage } from "@/models/cam.model";
-import { getDistance, handleError } from "@/lib/utils";
-import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from ".";
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { getCamById, loadCamImages, listCams } from '@/services/cam.service';
+import type { ICam, ICamImage } from '@/models/cam.model';
+import { getDistance, handleError } from '@/lib/utils';
+import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from '.';
 
 // Module-level singleton cache for webcams
 let cachedWebcams: ICam[] | null = null;
@@ -18,7 +18,7 @@ async function fetchWebcamsAndNotify() {
     cachedWebcams = result ?? [];
     cachedWebcamsError = null;
   } catch (err) {
-    cachedWebcamsError = handleError(err, "Operation failed");
+    cachedWebcamsError = handleError(err, 'Operation failed');
     cachedWebcams = [];
   } finally {
     cachedWebcamsLoading = false;
@@ -52,10 +52,7 @@ export interface UseWebcamResult {
  * @param options.autoLoad - Whether to automatically load images (default: true)
  * @returns Webcam data and control functions
  */
-export function useWebcam({
-  id,
-  autoLoad = true,
-}: UseWebcamOptions = {}): UseWebcamResult {
+export function useWebcam({ id, autoLoad = true }: UseWebcamOptions = {}): UseWebcamResult {
   const [webcam, setWebcam] = useState<ICam | null>(null);
   const [images, setImages] = useState<ICamImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -68,13 +65,11 @@ export function useWebcam({
     try {
       const imgs = await loadCamImages(id);
       if (imgs) {
-        imgs.sort(
-          (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
-        );
+        imgs.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
         setImages(imgs);
       }
     } catch (err) {
-      setError(handleError(err, "Failed to load webcam images"));
+      setError(handleError(err, 'Failed to load webcam images'));
     }
   }, [id, webcam]);
 
@@ -87,28 +82,25 @@ export function useWebcam({
     try {
       const cam = await getCamById(id);
       if (!cam) {
-        throw new Error("Webcam not found");
+        throw new Error('Webcam not found');
       }
 
       setWebcam(cam);
 
       // Check if webcam is stale (no images in last 24 hours)
-      const stale =
-        Date.now() - new Date(cam.currentTime).getTime() >= 86400000;
+      const stale = Date.now() - new Date(cam.currentTime).getTime() >= 86400000;
       setIsStale(stale);
 
       // Load images if not stale and autoLoad is enabled
       if (!stale && autoLoad) {
         const imgs = await loadCamImages(id);
         if (imgs) {
-          imgs.sort(
-            (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
-          );
+          imgs.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
           setImages(imgs);
         }
       }
     } catch (err) {
-      setError(handleError(err, "Failed to load webcam data"));
+      setError(handleError(err, 'Failed to load webcam data'));
     } finally {
       setIsLoading(false);
     }
@@ -128,7 +120,7 @@ export function useWebcam({
     isStale,
     error,
     refetch,
-    loadImages,
+    loadImages
   };
 }
 
@@ -163,7 +155,7 @@ export function useWebcams() {
     webcams: cachedWebcams ?? [],
     isLoading: cachedWebcamsLoading || cachedWebcams === null,
     error: cachedWebcamsError,
-    refetch,
+    refetch
   };
 }
 
@@ -180,7 +172,7 @@ export function useNearbyWebcams({
   lat,
   lon,
   maxDistance = 5000,
-  limit,
+  limit
 }: UseNearbyLocationsOptions): UseNearbyLocationsResult<ICam> {
   const { webcams: allWebcams, isLoading, error, refetch } = useWebcams();
 
@@ -197,11 +189,11 @@ export function useNearbyWebcams({
           lat,
           lon,
           cam.location.coordinates[0],
-          cam.location.coordinates[1],
+          cam.location.coordinates[1]
         );
         return {
           data: cam,
-          distance,
+          distance
         };
       })
       .filter((cam) => cam.distance <= maxDistance)
@@ -214,6 +206,6 @@ export function useNearbyWebcams({
     data: nearbyWebcams,
     isLoading,
     error,
-    refetch,
+    refetch
   };
 }

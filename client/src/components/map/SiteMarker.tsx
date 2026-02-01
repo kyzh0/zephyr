@@ -1,5 +1,5 @@
-import { type ReactNode, useMemo } from "react";
-import { parseValidBearings } from "@/lib/utils";
+import { type ReactNode, useMemo } from 'react';
+import { parseValidBearings } from '@/lib/utils';
 
 interface SiteMarkerProps {
   validBearings?: string;
@@ -16,7 +16,7 @@ export const SiteMarker = ({
   validBearings,
   isOfficial,
   size = 50,
-  borderWidth = 15,
+  borderWidth = 15
 }: SiteMarkerProps): ReactNode => {
   // Parse validBearings to calculate the arcs
   const arcPaths = useMemo(() => {
@@ -63,10 +63,7 @@ export const SiteMarker = ({
   }, [validBearings, size, borderWidth]);
 
   return (
-    <div
-      className="relative inline-block"
-      style={{ width: size, height: size }}
-    >
+    <div className="relative inline-block" style={{ width: size, height: size }}>
       {/* SVG overlay for the orange bearing arcs */}
       {arcPaths.length > 0 && (
         <svg
@@ -74,7 +71,7 @@ export const SiteMarker = ({
           width={size}
           height={size}
           viewBox={`0 0 ${size} ${size}`}
-          style={{ transform: "rotate(0deg)" }}
+          style={{ transform: 'rotate(0deg)' }}
         >
           {arcPaths.map((path, index) => (
             <path key={index} d={path} fill="#FFA930" fillOpacity="0.9" />
@@ -85,12 +82,12 @@ export const SiteMarker = ({
       {/* Circle container with site logo */}
       <div
         className={`absolute inset-0 rounded-full border-2 overflow-hidden flex items-center justify-center bg-white ${
-          isOfficial ? "border-[#d7ac00]" : "border-black"
+          isOfficial ? 'border-[#d7ac00]' : 'border-black'
         }`}
         style={{
           margin: borderWidth,
           width: size - borderWidth * 2,
-          height: size - borderWidth * 2,
+          height: size - borderWidth * 2
         }}
       >
         <img src="/kea.png" className="w-[60%] h-[60%] object-contain" />

@@ -1,47 +1,38 @@
-import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getSiteById } from "@/services/site.service";
-import { StationPreview } from "@/components/station/StationPreview";
+import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getSiteById } from '@/services/site.service';
+import { StationPreview } from '@/components/station/StationPreview';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import {
   AlertCircleIcon,
   TriangleAlertIcon,
   PlaneLanding,
   ArrowLeft,
   ChevronRightIcon,
-  ExternalLink,
-} from "lucide-react";
-import { useState } from "react";
-import type { ISite } from "@/models/site.model";
-import { useIsMobile } from "@/hooks";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+  ExternalLink
+} from 'lucide-react';
+import { useState } from 'react';
+import type { ISite } from '@/models/site.model';
+import { useIsMobile } from '@/hooks';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemDescription,
   ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
-import { useNearbyWebcams } from "@/hooks/useWebcam";
-import { useNearbyStations } from "@/hooks/useStations";
-import { handleError } from "@/lib/utils";
-import { WebcamPreview } from "@/components/webcam/WebcamPreview";
-import { WindCompass } from "@/components/station";
+  ItemTitle
+} from '@/components/ui/item';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
+import { useNearbyWebcams } from '@/hooks/useWebcam';
+import { useNearbyStations } from '@/hooks/useStations';
+import { handleError } from '@/lib/utils';
+import { WebcamPreview } from '@/components/webcam/WebcamPreview';
+import { WindCompass } from '@/components/station';
 
 export default function Site() {
   const { id } = useParams<{ id: string }>();
@@ -62,11 +53,11 @@ export default function Site() {
       try {
         const data = await getSiteById(id);
         if (!data) {
-          throw new Error("Site not found");
+          throw new Error('Site not found');
         }
         setSite(data);
       } catch (err) {
-        setError(handleError(err, "Failed to load site details"));
+        setError(handleError(err, 'Failed to load site details'));
       } finally {
         setIsLoading(false);
       }
@@ -77,12 +68,12 @@ export default function Site() {
 
   const { data: nearbyWebcamData } = useNearbyWebcams({
     lat: site?.location.coordinates[0] ?? 0,
-    lon: site?.location.coordinates[1] ?? 0,
+    lon: site?.location.coordinates[1] ?? 0
   });
 
   const { data: nearbyStationData } = useNearbyStations({
     lat: site?.location.coordinates[0] ?? 0,
-    lon: site?.location.coordinates[1] ?? 0,
+    lon: site?.location.coordinates[1] ?? 0
   });
 
   // Navigate back if site not found
@@ -97,13 +88,11 @@ export default function Site() {
     <Skeleton className="h-7 w-48 mx-auto" />
   ) : (
     <div className="grid grid-cols-1">
-      <span className="text-lg sm:text-xl font-semibold leading-tight">
-        {site?.name}
-      </span>
+      <span className="text-lg sm:text-xl font-semibold leading-tight">{site?.name}</span>
 
       <span className="font-thin text-[10px] sm:text-xs">
-        [ {site?.location.coordinates[1].toFixed(4)},{" "}
-        {site?.location.coordinates[0].toFixed(4)} ] {site?.elevation}m
+        [ {site?.location.coordinates[1].toFixed(4)}, {site?.location.coordinates[0].toFixed(4)} ]{' '}
+        {site?.elevation}m
       </span>
     </div>
   );
@@ -159,17 +148,8 @@ export default function Site() {
 
           {/* Landing */}
           {site.landings?.map((l) => (
-            <Item
-              key={l.landingId}
-              variant="outline"
-              size="sm"
-              asChild
-              className="py-2"
-            >
-              <a
-                className="cursor-pointer"
-                onClick={() => navigate(`/landings/${l.landingId}`)}
-              >
+            <Item key={l.landingId} variant="outline" size="sm" asChild className="py-2">
+              <a className="cursor-pointer" onClick={() => navigate(`/landings/${l.landingId}`)}>
                 <ItemMedia>
                   <PlaneLanding className="h-4 w-4" />
                 </ItemMedia>
@@ -203,17 +183,12 @@ export default function Site() {
             <Collapsible open={stationsOpen} onOpenChange={setStationsOpen}>
               <CollapsibleTrigger
                 className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
-                  stationsOpen ? "bg-transparent" : "bg-muted"
+                  stationsOpen ? 'bg-transparent' : 'bg-muted'
                 }`}
               >
-                <span>
-                  Nearby Weather Stations ({nearbyStationData.length} within
-                  10km)
-                </span>
+                <span>Nearby Weather Stations ({nearbyStationData.length} within 10km)</span>
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform ${
-                    stationsOpen ? "rotate-180" : ""
-                  }`}
+                  className={`h-4 w-4 transition-transform ${stationsOpen ? 'rotate-180' : ''}`}
                 />
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
@@ -233,16 +208,12 @@ export default function Site() {
             <Collapsible open={webcamsOpen} onOpenChange={setWebcamsOpen}>
               <CollapsibleTrigger
                 className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
-                  webcamsOpen ? "bg-transparent" : "bg-muted"
+                  webcamsOpen ? 'bg-transparent' : 'bg-muted'
                 }`}
               >
-                <span>
-                  Nearby Webcams ({nearbyWebcamData.length} within 10km)
-                </span>
+                <span>Nearby Webcams ({nearbyWebcamData.length} within 10km)</span>
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform ${
-                    webcamsOpen ? "rotate-180" : ""
-                  }`}
+                  className={`h-4 w-4 transition-transform ${webcamsOpen ? 'rotate-180' : ''}`}
                 />
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
@@ -263,8 +234,8 @@ export default function Site() {
           {/* Disclaimer */}
           <div>
             <p className="text-[10px] text-muted-foreground whitespace-pre-wrap">
-              Zephyr does not guarantee the accuracy of this information. Pilots
-              are responsible for verifying current conditions.
+              Zephyr does not guarantee the accuracy of this information. Pilots are responsible for
+              verifying current conditions.
             </p>
           </div>
         </div>
@@ -279,12 +250,7 @@ export default function Site() {
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background p-4 pb-0">
           <div className="flex items-center gap-2 sm:gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex w-full text-center justify-evenly items-center mb-3">
@@ -301,16 +267,14 @@ export default function Site() {
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-4 pt-1 flex flex-col gap-4">
-          {bodyContent}
-        </div>
+        <div className="flex-1 overflow-y-auto px-4 pt-1 flex flex-col gap-4">{bodyContent}</div>
       </div>
     );
   }
 
   // Desktop: Dialog overlay
   return (
-    <Dialog open onOpenChange={() => navigate("/")}>
+    <Dialog open onOpenChange={() => navigate('/')}>
       <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="pb-2">
           <DialogTitle className="text-center mb-3">

@@ -1,19 +1,19 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, X, Camera } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { listStations } from "@/services/station.service";
-import { listCams } from "@/services/cam.service";
-import type { IStation } from "@/models/station.model";
-import type { ISite } from "@/models/site.model";
-import type { ILanding } from "@/models/landing.model";
-import type { ICam } from "@/models/cam.model";
-import { useSites } from "@/hooks/useSites";
-import { useLandings } from "@/hooks/useLandings";
-import { cn } from "@/lib/utils";
-import { SiteMarker } from "./SiteMarker";
-import { LandingMarker } from "./LandingMarker";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, X, Camera } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { listStations } from '@/services/station.service';
+import { listCams } from '@/services/cam.service';
+import type { IStation } from '@/models/station.model';
+import type { ISite } from '@/models/site.model';
+import type { ILanding } from '@/models/landing.model';
+import type { ICam } from '@/models/cam.model';
+import { useSites } from '@/hooks/useSites';
+import { useLandings } from '@/hooks/useLandings';
+import { cn } from '@/lib/utils';
+import { SiteMarker } from './SiteMarker';
+import { LandingMarker } from './LandingMarker';
 
 interface SearchBarProps {
   className?: string;
@@ -21,15 +21,15 @@ interface SearchBarProps {
 }
 
 type SearchResult =
-  | { type: "station"; item: IStation }
-  | { type: "site"; item: ISite }
-  | { type: "landing"; item: ILanding }
-  | { type: "webcam"; item: ICam };
+  | { type: 'station'; item: IStation }
+  | { type: 'site'; item: ISite }
+  | { type: 'landing'; item: ILanding }
+  | { type: 'webcam'; item: ICam };
 
 export function SearchBar({ className, disabled }: SearchBarProps) {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [stations, setStations] = useState<IStation[]>([]);
   const [webcams, setWebcams] = useState<ICam[]>([]);
@@ -68,35 +68,28 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
     // Filter stations
     const filteredStations: SearchResult[] = stations
       .filter((station) => station.name.toLowerCase().includes(lowerQuery))
-      .map((station) => ({ type: "station" as const, item: station }));
+      .map((station) => ({ type: 'station' as const, item: station }));
 
     // Filter sites
     const filteredSites: SearchResult[] = sites
-      .filter(
-        (site) =>
-          !site.isDisabled && site.name.toLowerCase().includes(lowerQuery),
-      )
-      .map((site) => ({ type: "site" as const, item: site }));
+      .filter((site) => !site.isDisabled && site.name.toLowerCase().includes(lowerQuery))
+      .map((site) => ({ type: 'site' as const, item: site }));
 
     // Filter landings
     const filteredLandings: SearchResult[] = landings
-      .filter(
-        (landing) =>
-          !landing.isDisabled &&
-          landing.name.toLowerCase().includes(lowerQuery),
-      )
-      .map((landing) => ({ type: "landing" as const, item: landing }));
+      .filter((landing) => !landing.isDisabled && landing.name.toLowerCase().includes(lowerQuery))
+      .map((landing) => ({ type: 'landing' as const, item: landing }));
 
     const filteredWebcams: SearchResult[] = webcams
       .filter((cam) => cam.name.toLowerCase().includes(lowerQuery))
-      .map((cam) => ({ type: "webcam" as const, item: cam }));
+      .map((cam) => ({ type: 'webcam' as const, item: cam }));
 
     // Combine and limit results
     const combined = [
       ...filteredStations,
       ...filteredSites,
       ...filteredLandings,
-      ...filteredWebcams,
+      ...filteredWebcams
     ]
       .sort((a, b) => a.item.name.localeCompare(b.item.name))
       .slice(0, 8);
@@ -115,24 +108,21 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
   // Close on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsExpanded(false);
-        setQuery("");
+        setQuery('');
         setResults([]);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleToggle = useCallback(() => {
     if (isExpanded) {
       setIsExpanded(false);
-      setQuery("");
+      setQuery('');
       setResults([]);
       setSelectedIndex(-1);
     } else {
@@ -141,7 +131,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
   }, [isExpanded]);
 
   const handleClear = useCallback(() => {
-    setQuery("");
+    setQuery('');
     setResults([]);
     setSelectedIndex(-1);
     inputRef.current?.focus();
@@ -150,53 +140,51 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
   const handleResultClick = useCallback(
     (result: SearchResult) => {
       setIsExpanded(false);
-      setQuery("");
+      setQuery('');
       setResults([]);
       setSelectedIndex(-1);
-      if (result.type === "station") {
+      if (result.type === 'station') {
         navigate(`/stations/${result.item._id}`);
-      } else if (result.type === "site") {
+      } else if (result.type === 'site') {
         navigate(`/sites/${result.item._id}`);
-      } else if (result.type === "landing") {
+      } else if (result.type === 'landing') {
         navigate(`/landings/${result.item._id}`);
       } else {
         navigate(`/webcams/${result.item._id}`);
       }
     },
-    [navigate],
+    [navigate]
   );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setIsExpanded(false);
-        setQuery("");
+        setQuery('');
         setResults([]);
         setSelectedIndex(-1);
-      } else if (e.key === "ArrowDown") {
+      } else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev < results.length - 1 ? prev + 1 : prev,
-        );
-      } else if (e.key === "ArrowUp") {
+        setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : prev));
+      } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
-      } else if (e.key === "Enter" && results.length > 0) {
+      } else if (e.key === 'Enter' && results.length > 0) {
         e.preventDefault();
         const index = selectedIndex >= 0 ? selectedIndex : 0;
         handleResultClick(results[index]);
       }
     },
-    [results, selectedIndex, handleResultClick],
+    [results, selectedIndex, handleResultClick]
   );
 
   return (
-    <div ref={containerRef} className={cn("relative", className)}>
+    <div ref={containerRef} className={cn('relative', className)}>
       <div
         className={cn(
-          "flex items-center bg-background border rounded-md shadow-sm transition-all duration-200 h-9",
-          isExpanded ? "w-[200px] sm:w-[250px]" : "w-9",
-          disabled ? "opacity-50 pointer-events-none" : "",
+          'flex items-center bg-background border rounded-md shadow-sm transition-all duration-200 h-9',
+          isExpanded ? 'w-[200px] sm:w-[250px]' : 'w-9',
+          disabled ? 'opacity-50 pointer-events-none' : ''
         )}
       >
         <Button
@@ -214,7 +202,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
             <Input
               ref={inputRef}
               type="text"
-              placeholder={"Stations, sites, cams"}
+              placeholder={'Stations, sites, cams'}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -242,26 +230,26 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
               key={`${result.type}-${result.item._id}`}
               onClick={() => handleResultClick(result)}
               className={cn(
-                "w-full px-3 py-2 text-left text-sm transition-colors truncate",
-                index === selectedIndex ? "bg-accent" : "hover:bg-accent/50",
+                'w-full px-3 py-2 text-left text-sm transition-colors truncate',
+                index === selectedIndex ? 'bg-accent' : 'hover:bg-accent/50'
               )}
             >
               <div className="flex items-center gap-2">
                 <div className="flex items-center justify-center w-6 h-6 shrink-0">
-                  {result.type === "station" ? (
+                  {result.type === 'station' ? (
                     <img
                       src="/gold-valid-arrow-light-green.png"
                       alt="Station"
                       className="w-4 h-6 -rotate-45"
                     />
-                  ) : result.type === "site" ? (
+                  ) : result.type === 'site' ? (
                     <SiteMarker
                       validBearings={result.item.validBearings}
                       isOfficial={result.item.siteGuideUrl ? true : false}
                       size={24}
                       borderWidth={4}
                     />
-                  ) : result.type === "landing" ? (
+                  ) : result.type === 'landing' ? (
                     <LandingMarker
                       size={24}
                       borderWidth={4}
@@ -281,9 +269,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
       {/* No results message */}
       {isExpanded && query.trim() && results.length === 0 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg overflow-hidden z-50">
-          <div className="px-3 py-2 text-sm text-muted-foreground">
-            No results found
-          </div>
+          <div className="px-3 py-2 text-sm text-muted-foreground">No results found</div>
         </div>
       )}
     </div>

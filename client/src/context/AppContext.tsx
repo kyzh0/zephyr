@@ -1,4 +1,4 @@
-import { createContext, use, useState, type ReactNode } from "react";
+import { createContext, use, useState, type ReactNode } from 'react';
 
 interface AppContextType {
   // TODO: Define your app state here
@@ -26,7 +26,7 @@ export function AppProvider({ children }: AppProviderProps) {
     refreshedStations,
     setRefreshedStations,
     refreshedWebcams,
-    setRefreshedWebcams,
+    setRefreshedWebcams
   };
 
   return <AppContext value={value}>{children}</AppContext>;
@@ -36,7 +36,7 @@ export function AppProvider({ children }: AppProviderProps) {
 export function useAppContext() {
   const context = use(AppContext);
   if (context === undefined) {
-    throw new Error("useAppContext must be used within an AppProvider");
+    throw new Error('useAppContext must be used within an AppProvider');
   }
   return context;
 }

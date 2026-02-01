@@ -1,4 +1,4 @@
-import { parseValidBearings } from "@/lib/utils";
+import { parseValidBearings } from '@/lib/utils';
 
 interface WindCompassProps {
   bearing: number | null | undefined;
@@ -6,11 +6,7 @@ interface WindCompassProps {
   containerSize?: { width: number; height: number } | null;
 }
 
-export function WindCompass({
-  bearing,
-  validBearings,
-  containerSize,
-}: WindCompassProps) {
+export function WindCompass({ bearing, validBearings, containerSize }: WindCompassProps) {
   // Calculate size based on container, with fallback to fixed sizes
   const calculateSize = () => {
     if (containerSize) {
@@ -53,12 +49,12 @@ export function WindCompass({
       `M ${centerX} ${centerY}`,
       `L ${x1} ${y1}`,
       `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-      "Z",
-    ].join(" ");
+      'Z'
+    ].join(' ');
   };
 
   return (
-    <svg width={size} height={size} style={{ overflow: "visible" }}>
+    <svg width={size} height={size} style={{ overflow: 'visible' }}>
       {/* Background circle */}
       <circle
         cx={centerX}
@@ -105,10 +101,10 @@ export function WindCompass({
       {/* Cardinal direction labels */}
       {size > 90 &&
         [
-          { angle: 0, label: "N" },
-          { angle: 90, label: "E" },
-          { angle: 180, label: "S" },
-          { angle: 270, label: "W" },
+          { angle: 0, label: 'N' },
+          { angle: 90, label: 'E' },
+          { angle: 180, label: 'S' },
+          { angle: 270, label: 'W' }
         ].map(({ angle, label }) => {
           const rad = ((angle - 90) * Math.PI) / 180;
           const labelOffset = size * 0.125; // Proportional offset (was 15 at size 120)
@@ -143,11 +139,7 @@ export function WindCompass({
             const arrowScale = (size / 120) * 2;
 
             return (
-              <g
-                transform={`translate(${edgeX}, ${edgeY}) rotate(${
-                  bearing + 180
-                })`}
-              >
+              <g transform={`translate(${edgeX}, ${edgeY}) rotate(${bearing + 180})`}>
                 <polygon
                   points="0,-20 5,5 0,0 -5,5"
                   fill="#FFD700"
@@ -160,12 +152,7 @@ export function WindCompass({
           })()}
         </g>
       )}
-      <circle
-        cx={centerX}
-        cy={centerY}
-        r={Math.max(2, size * 0.025)}
-        fill="#333"
-      />
+      <circle cx={centerX} cy={centerY} r={Math.max(2, size * 0.025)} fill="#333" />
     </svg>
   );
 }

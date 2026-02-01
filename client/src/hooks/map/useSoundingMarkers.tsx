@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef } from "react";
-import mapboxgl from "mapbox-gl";
-import { formatInTimeZone } from "date-fns-tz";
+import { useCallback, useEffect, useRef } from 'react';
+import mapboxgl from 'mapbox-gl';
+import { formatInTimeZone } from 'date-fns-tz';
 
-import { listSoundings } from "@/services/sounding.service";
-import { getSoundingGeoJson } from "@/components/map";
-import { useNavigate } from "react-router-dom";
-import { REFRESH_INTERVAL_MS } from "@/lib/utils";
+import { listSoundings } from '@/services/sounding.service';
+import { getSoundingGeoJson } from '@/components/map';
+import { useNavigate } from 'react-router-dom';
+import { REFRESH_INTERVAL_MS } from '@/lib/utils';
 
 interface UseSoundingMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -18,7 +18,7 @@ export function useSoundingMarkers({
   map,
   isMapLoaded,
   isVisible,
-  isHistoricData,
+  isHistoricData
 }: UseSoundingMarkersOptions) {
   const navigate = useNavigate();
   const markersRef = useRef<HTMLDivElement[]>([]);
@@ -39,36 +39,34 @@ export function useSoundingMarkers({
       currentUrl: string,
       timestamp: number
     ): HTMLDivElement => {
-      const img = document.createElement("img");
+      const img = document.createElement('img');
       img.width = 150;
-      img.className = "webcam-img";
+      img.className = 'webcam-img';
       img.src =
-        currentUrl && currentTime
-          ? `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${currentUrl}`
-          : "";
+        currentUrl && currentTime ? `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${currentUrl}` : '';
 
-      const text = document.createElement("span");
+      const text = document.createElement('span');
       text.className =
-        "absolute bottom-0 left-0 z-10 w-full h-full font-semibold text-sm text-center flex justify-center items-start";
-      text.style.fontFamily = "Arial, Helvetica, sans-serif";
+        'absolute bottom-0 left-0 z-10 w-full h-full font-semibold text-sm text-center flex justify-center items-start';
+      text.style.fontFamily = 'Arial, Helvetica, sans-serif';
       text.innerHTML = name;
 
-      const timeText = document.createElement("span");
+      const timeText = document.createElement('span');
       timeText.className =
-        "absolute bottom-0 left-0 z-10 w-full h-full text-sm text-center flex justify-center items-end";
-      timeText.style.fontFamily = "Arial, Helvetica, sans-serif";
+        'absolute bottom-0 left-0 z-10 w-full h-full text-sm text-center flex justify-center items-end';
+      timeText.style.fontFamily = 'Arial, Helvetica, sans-serif';
       timeText.innerHTML = currentTime
-        ? formatInTimeZone(currentTime, "Pacific/Auckland", "dd MMM HH:mm")
-        : "Click to view more...";
+        ? formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm')
+        : 'Click to view more...';
 
-      const el = document.createElement("div");
-      el.style.backgroundColor = "white";
-      el.style.visibility = "hidden";
-      el.style.zIndex = "3";
+      const el = document.createElement('div');
+      el.style.backgroundColor = 'white';
+      el.style.visibility = 'hidden';
+      el.style.zIndex = '3';
       el.id = dbId;
-      el.className = "webcam py-[18px] px-2 rounded-lg cursor-pointer";
+      el.className = 'webcam py-[18px] px-2 rounded-lg cursor-pointer';
       el.dataset.timestamp = String(timestamp);
-      el.addEventListener("click", () => navigate(`/soundings/${dbId}`));
+      el.addEventListener('click', () => navigate(`/soundings/${dbId}`));
       el.appendChild(text);
       el.appendChild(img);
       el.appendChild(timeText);
@@ -92,24 +90,16 @@ export function useSoundingMarkers({
       const currentTime = f.properties.currentTime as Date | null;
       const currentUrl = f.properties.currentUrl as string;
 
-      const el = createSoundingMarker(
-        dbId,
-        name,
-        currentTime,
-        currentUrl,
-        timestamp
-      );
+      const el = createSoundingMarker(dbId, name, currentTime, currentUrl, timestamp);
       markersRef.current.push(el);
-      new mapboxgl.Marker(el)
-        .setLngLat(f.geometry.coordinates)
-        .addTo(map.current);
+      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
     }
   }, [map, createSoundingMarker]);
 
   // Refresh soundings
   const refresh = useCallback(async () => {
     if (isHistoricData) return;
-    if (document.visibilityState !== "visible") return;
+    if (document.visibilityState !== 'visible') return;
     if (!isVisibleRef.current) return;
     if (!markersRef.current.length) return;
 
@@ -123,10 +113,7 @@ export function useSoundingMarkers({
       if (nowMins > lastMins) nowMins -= 30;
       lastMins -= 30;
     }
-    if (
-      timestamp - lastRefreshRef.current < 60 * 60 * 1000 &&
-      !(lastMins < 30 && nowMins >= 30)
-    )
+    if (timestamp - lastRefreshRef.current < 60 * 60 * 1000 && !(lastMins < 30 && nowMins >= 30))
       return;
 
     lastRefreshRef.current = timestamp;
@@ -145,14 +132,14 @@ export function useSoundingMarkers({
       item.dataset.timestamp = String(timestamp);
 
       for (const child of Array.from(item.children)) {
-        if ((child as HTMLElement).className === "webcam-img") {
+        if ((child as HTMLElement).className === 'webcam-img') {
           (child as HTMLImageElement).src = currentUrl
             ? `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${currentUrl}`
-            : "";
-        } else if ((child as HTMLElement).className.includes("items-end")) {
+            : '';
+        } else if ((child as HTMLElement).className.includes('items-end')) {
           child.innerHTML = currentTime
-            ? formatInTimeZone(currentTime, "Pacific/Auckland", "dd MMM HH:mm")
-            : "Click to view more...";
+            ? formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm')
+            : 'Click to view more...';
         }
       }
     }
@@ -162,7 +149,7 @@ export function useSoundingMarkers({
   const setVisibility = useCallback((visible: boolean) => {
     for (const marker of markersRef.current) {
       // eslint-disable-next-line react-hooks/immutability
-      marker.style.visibility = visible ? "visible" : "hidden";
+      marker.style.visibility = visible ? 'visible' : 'hidden';
     }
   }, []);
 
@@ -184,6 +171,6 @@ export function useSoundingMarkers({
   return {
     markers: markersRef,
     refresh,
-    setVisibility,
+    setVisibility
   };
 }

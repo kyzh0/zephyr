@@ -1,42 +1,34 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  LogOut,
-  Plus,
-  Search,
-  AlertCircle,
-  SquareArrowOutUpRight,
-} from "lucide-react";
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LogOut, Plus, Search, AlertCircle, SquareArrowOutUpRight } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { listStations } from "@/services/station.service";
-import { listSoundings } from "@/services/sounding.service";
-import { listSites } from "@/services/site.service";
-import { listLandings } from "@/services/landing.service";
-import type { IStation } from "@/models/station.model";
-import type { ISounding } from "@/models/sounding.model";
-import { getMinutesAgo } from "@/lib/utils";
-import { useWebcams } from "@/hooks";
-import type { ISite } from "@/models/site.model";
-import type { ILanding } from "@/models/landing.model";
+  TableRow
+} from '@/components/ui/table';
+import { listStations } from '@/services/station.service';
+import { listSoundings } from '@/services/sounding.service';
+import { listSites } from '@/services/site.service';
+import { listLandings } from '@/services/landing.service';
+import type { IStation } from '@/models/station.model';
+import type { ISounding } from '@/models/sounding.model';
+import { getMinutesAgo } from '@/lib/utils';
+import { useWebcams } from '@/hooks';
+import type { ISite } from '@/models/site.model';
+import type { ILanding } from '@/models/landing.model';
 
 interface AdminDashboardProps {
-  tab?: "stations" | "webcams" | "soundings" | "sites" | "landings";
+  tab?: 'stations' | 'webcams' | 'soundings' | 'sites' | 'landings';
 }
 
-export default function AdminDashboard({
-  tab = "stations",
-}: AdminDashboardProps) {
+export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps) {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState(tab);
@@ -44,25 +36,25 @@ export default function AdminDashboard({
   // Stations state
   const [stations, setStations] = useState<IStation[]>([]);
   const [stationsLoading, setStationsLoading] = useState(true);
-  const [stationSearch, setStationSearch] = useState("");
+  const [stationSearch, setStationSearch] = useState('');
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
 
   // Webcams state
   const { webcams, isLoading: webcamsLoading } = useWebcams();
-  const [webcamSearch, setWebcamSearch] = useState("");
+  const [webcamSearch, setWebcamSearch] = useState('');
 
   // Soundings state
   const [soundings, setSoundings] = useState<ISounding[]>([]);
   const [soundingsLoading, setSoundingsLoading] = useState(true);
-  const [soundingSearch, setSoundingSearch] = useState("");
+  const [soundingSearch, setSoundingSearch] = useState('');
 
   // Sites state
   const [sites, setSites] = useState<ISite[]>([]);
-  const [siteSearch, setSiteSearch] = useState("");
+  const [siteSearch, setSiteSearch] = useState('');
 
   // Landings state
   const [landings, setLandings] = useState<ILanding[]>([]);
-  const [landingSearch, setLandingSearch] = useState("");
+  const [landingSearch, setLandingSearch] = useState('');
 
   useEffect(() => {
     async function loadStations() {
@@ -104,8 +96,7 @@ export default function AdminDashboard({
     if (!stations.length) return [];
     let filtered = stations;
     filtered.sort((a, b) => {
-      const disabledDiff =
-        Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
+      const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
       if (disabledDiff !== 0) return disabledDiff;
       return a.name.localeCompare(b.name);
     });
@@ -114,11 +105,9 @@ export default function AdminDashboard({
       filtered = filtered
         .filter((s) => s.isError)
         .sort((a, b) => {
-          const disabledDiff =
-            Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
+          const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
           if (disabledDiff !== 0) return disabledDiff;
-          const offlineDiff =
-            Number(Boolean(b.isOffline)) - Number(Boolean(a.isOffline));
+          const offlineDiff = Number(Boolean(b.isOffline)) - Number(Boolean(a.isOffline));
           if (offlineDiff !== 0) return offlineDiff;
           return a.name.localeCompare(b.name);
         });
@@ -153,13 +142,10 @@ export default function AdminDashboard({
 
     let filtered = sites;
     if (siteSearch.trim())
-      filtered = filtered.filter((s) =>
-        s.name.toLowerCase().includes(siteSearch.toLowerCase())
-      );
+      filtered = filtered.filter((s) => s.name.toLowerCase().includes(siteSearch.toLowerCase()));
 
     return filtered.sort((a, b) => {
-      const disabledDiff =
-        Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
+      const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
       if (disabledDiff !== 0) return disabledDiff;
       return a.name.localeCompare(b.name);
     });
@@ -170,30 +156,27 @@ export default function AdminDashboard({
 
     let filtered = landings;
     if (landingSearch.trim())
-      filtered = filtered.filter((s) =>
-        s.name.toLowerCase().includes(landingSearch.toLowerCase())
-      );
+      filtered = filtered.filter((s) => s.name.toLowerCase().includes(landingSearch.toLowerCase()));
 
     return filtered.sort((a, b) => {
-      const disabledDiff =
-        Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
+      const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
       if (disabledDiff !== 0) return disabledDiff;
       return a.name.localeCompare(b.name);
     });
   }, [landings, landingSearch]);
 
   const handleSignOut = () => {
-    sessionStorage.removeItem("adminKey");
+    sessionStorage.removeItem('adminKey');
     navigate(-1);
   };
 
   const handleTabChange = (value: string) => {
     if (
-      value === "stations" ||
-      value === "webcams" ||
-      value === "soundings" ||
-      value === "sites" ||
-      value === "landings"
+      value === 'stations' ||
+      value === 'webcams' ||
+      value === 'soundings' ||
+      value === 'sites' ||
+      value === 'landings'
     ) {
       setActiveTab(value);
       navigate(`/admin/${value}`, { replace: true });
@@ -213,11 +196,7 @@ export default function AdminDashboard({
 
       {/* Main content */}
       <main className="flex-1 p-6">
-        <Tabs
-          value={activeTab}
-          onValueChange={handleTabChange}
-          className="h-full"
-        >
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="h-full">
           <TabsList>
             <TabsTrigger value="stations">Stations</TabsTrigger>
             <TabsTrigger value="webcams">Webcams</TabsTrigger>
@@ -240,13 +219,13 @@ export default function AdminDashboard({
               </div>
               <div className="flex items-center gap-2">
                 <Button
-                  variant={showErrorsOnly ? "default" : "outline"}
+                  variant={showErrorsOnly ? 'default' : 'outline'}
                   onClick={() => setShowErrorsOnly(!showErrorsOnly)}
                 >
                   <AlertCircle className="h-4 w-4 mr-2" />
-                  {showErrorsOnly ? "Show All" : `Errors (${errorCount})`}
+                  {showErrorsOnly ? 'Show All' : `Errors (${errorCount})`}
                 </Button>
-                <Button onClick={() => navigate("/admin/stations/add")}>
+                <Button onClick={() => navigate('/admin/stations/add')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Station
                 </Button>
@@ -280,13 +259,9 @@ export default function AdminDashboard({
                       <TableRow
                         key={station._id}
                         className="cursor-pointer"
-                        onClick={() =>
-                          navigate(`/admin/stations/${station._id}`)
-                        }
+                        onClick={() => navigate(`/admin/stations/${station._id}`)}
                       >
-                        <TableCell className="font-medium">
-                          {station.name}
-                        </TableCell>
+                        <TableCell className="font-medium">{station.name}</TableCell>
                         <TableCell>{station.type}</TableCell>
                         <TableCell>
                           {station.isDisabled ? (
@@ -301,15 +276,11 @@ export default function AdminDashboard({
                         </TableCell>
                         <TableCell>
                           <Button
-                            variant={"ghost"}
+                            variant={'ghost'}
                             className="cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
-                              window.open(
-                                station.externalLink,
-                                "_blank",
-                                "noopener,noreferrer"
-                              );
+                              window.open(station.externalLink, '_blank', 'noopener,noreferrer');
                             }}
                           >
                             <SquareArrowOutUpRight className="h-4 w-4" />
@@ -335,7 +306,7 @@ export default function AdminDashboard({
                   className="pl-9"
                 />
               </div>
-              <Button onClick={() => navigate("/admin/webcams/add")}>
+              <Button onClick={() => navigate('/admin/webcams/add')}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Webcam
               </Button>
@@ -365,14 +336,12 @@ export default function AdminDashboard({
                   ) : (
                     filteredWebcams.map((webcam) => (
                       <TableRow key={webcam._id}>
-                        <TableCell className="font-medium">
-                          {webcam.name}
-                        </TableCell>
+                        <TableCell className="font-medium">{webcam.name}</TableCell>
                         <TableCell>{webcam.type}</TableCell>
                         <TableCell>
                           {webcam.lastUpdate
                             ? `${getMinutesAgo(new Date(webcam.lastUpdate))}`
-                            : "N/A"}
+                            : 'N/A'}
                         </TableCell>
                       </TableRow>
                     ))
@@ -394,7 +363,7 @@ export default function AdminDashboard({
                   className="pl-9"
                 />
               </div>
-              <Button onClick={() => navigate("/admin/soundings/add")}>
+              <Button onClick={() => navigate('/admin/soundings/add')}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Sounding
               </Button>
@@ -425,22 +394,16 @@ export default function AdminDashboard({
                     filteredSoundings.map((sounding) => {
                       const lastUpdatedImage =
                         sounding.images?.length > 0
-                          ? sounding.images.map((s) => new Date(s.time))[
-                              sounding.images.length - 1
-                            ]
+                          ? sounding.images.map((s) => new Date(s.time))[sounding.images.length - 1]
                           : null;
                       return (
                         <TableRow key={sounding.raspId}>
-                          <TableCell className="font-medium">
-                            {sounding.name}
-                          </TableCell>
+                          <TableCell className="font-medium">{sounding.name}</TableCell>
                           <TableCell>
                             {sounding.raspRegion} - {sounding.raspId}
                           </TableCell>
                           <TableCell>
-                            {lastUpdatedImage
-                              ? `${getMinutesAgo(lastUpdatedImage)}`
-                              : "N/A"}
+                            {lastUpdatedImage ? `${getMinutesAgo(lastUpdatedImage)}` : 'N/A'}
                           </TableCell>
                         </TableRow>
                       );
@@ -463,7 +426,7 @@ export default function AdminDashboard({
                   className="pl-9"
                 />
               </div>
-              <Button onClick={() => navigate("/admin/sites/add")}>
+              <Button onClick={() => navigate('/admin/sites/add')}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Site
               </Button>
@@ -490,9 +453,7 @@ export default function AdminDashboard({
                         className="cursor-pointer"
                         onClick={() => navigate(`/admin/sites/${site._id}`)}
                       >
-                        <TableCell className="font-medium">
-                          {site.name}
-                        </TableCell>
+                        <TableCell className="font-medium">{site.name}</TableCell>
                         <TableCell>
                           {site.isDisabled ? (
                             <span>Disabled</span>
@@ -520,7 +481,7 @@ export default function AdminDashboard({
                   className="pl-9"
                 />
               </div>
-              <Button onClick={() => navigate("/admin/landings/add")}>
+              <Button onClick={() => navigate('/admin/landings/add')}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Landing
               </Button>
@@ -545,13 +506,9 @@ export default function AdminDashboard({
                       <TableRow
                         key={landing._id}
                         className="cursor-pointer"
-                        onClick={() =>
-                          navigate(`/admin/landings/${landing._id}`)
-                        }
+                        onClick={() => navigate(`/admin/landings/${landing._id}`)}
                       >
-                        <TableCell className="font-medium">
-                          {landing.name}
-                        </TableCell>
+                        <TableCell className="font-medium">{landing.name}</TableCell>
                         <TableCell>
                           {landing.isDisabled ? (
                             <span>Disabled</span>
