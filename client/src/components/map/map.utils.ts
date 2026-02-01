@@ -1,10 +1,10 @@
-import type { IStation } from "@/models/station.model";
-import type { ICam } from "@/models/cam.model";
-import type { ISounding } from "@/models/sounding.model";
-import type { ISite } from "@/models/site.model";
-import type { ILanding } from "@/models/landing.model";
-import type { GeoJson, GeoJsonFeature, WindUnit } from "./map.types";
-import { getArrowStyle as getArrowStylePng } from "./wind-icon.utils";
+import type { IStation } from '@/models/station.model';
+import type { ICam } from '@/models/cam.model';
+import type { ISounding } from '@/models/sounding.model';
+import type { ISite } from '@/models/site.model';
+import type { ILanding } from '@/models/landing.model';
+import type { GeoJson, GeoJsonFeature, WindUnit } from './map.types';
+import { getArrowStyle as getArrowStylePng } from './wind-icon.utils';
 
 // localStorage helpers
 export function getStoredValue<T>(key: string, defaultValue: T): T {
@@ -21,13 +21,13 @@ export function setStoredValue<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
-    console.error("Error saving to localStorage:", error);
+    console.error('Error saving to localStorage:', error);
   }
 }
 
 // Wind speed conversion
 export function convertWindSpeed(speed: number, unit: WindUnit): number {
-  return Math.round(unit === "kt" ? speed / 1.852 : speed);
+  return Math.round(unit === 'kt' ? speed / 1.852 : speed);
 }
 
 // Arrow styling based on wind conditions - uses PNG images
@@ -35,22 +35,20 @@ export function getArrowStyle(
   avgWind: number | null,
   currentBearing: number | null,
   validBearings: string | null,
-  isOffline: boolean | null,
+  isOffline: boolean | null
 ): [string, string] {
   return getArrowStylePng(avgWind, currentBearing, validBearings, isOffline);
 }
 
 // GeoJSON generators
-export function getStationGeoJson(
-  stations: IStation[] | undefined,
-): GeoJson | null {
+export function getStationGeoJson(stations: IStation[] | undefined): GeoJson | null {
   if (!stations?.length) {
     return null;
   }
 
   const geoJson: GeoJson = {
-    type: "FeatureCollection",
-    features: [],
+    type: 'FeatureCollection',
+    features: []
   };
 
   for (const station of stations) {
@@ -61,33 +59,25 @@ export function getStationGeoJson(
     }
 
     const feature: GeoJsonFeature = {
-      type: "Feature",
+      type: 'Feature',
       properties: {
         name: station.name,
         dbId: station._id,
         elevation: station.elevation,
         currentAverage: avg,
         currentGust: gust,
-        currentBearing:
-          station.currentBearing == null
-            ? null
-            : Math.round(station.currentBearing),
+        currentBearing: station.currentBearing == null ? null : Math.round(station.currentBearing),
         validBearings: station.validBearings,
-        isOffline: station.isOffline,
+        isOffline: station.isOffline
       },
       geometry: station.location as {
         type: string;
         coordinates: [number, number];
-      },
+      }
     };
 
     // CWU stations sometimes show avg=0 even when gust is high
-    if (
-      station.type === "cwu" &&
-      avg === 0 &&
-      gust !== null &&
-      gust - avg > 5
-    ) {
+    if (station.type === 'cwu' && avg === 0 && gust !== null && gust - avg > 5) {
       feature.properties.currentAverage = gust;
     }
 
@@ -103,23 +93,23 @@ export function getWebcamGeoJson(webcams: ICam[] | undefined): GeoJson | null {
   }
 
   const geoJson: GeoJson = {
-    type: "FeatureCollection",
-    features: [],
+    type: 'FeatureCollection',
+    features: []
   };
 
   for (const cam of webcams) {
     const feature: GeoJsonFeature = {
-      type: "Feature",
+      type: 'Feature',
       properties: {
         name: cam.name,
         dbId: cam._id,
         currentTime: new Date(cam.currentTime),
-        currentUrl: cam.currentUrl,
+        currentUrl: cam.currentUrl
       },
       geometry: cam.location as {
         type: string;
         coordinates: [number, number];
-      },
+      }
     };
     geoJson.features.push(feature);
   }
@@ -127,27 +117,23 @@ export function getWebcamGeoJson(webcams: ICam[] | undefined): GeoJson | null {
   return geoJson;
 }
 
-export function getSoundingGeoJson(
-  soundings: ISounding[] | undefined,
-): GeoJson | null {
+export function getSoundingGeoJson(soundings: ISounding[] | undefined): GeoJson | null {
   if (!soundings?.length) {
     return null;
   }
 
   const geoJson: GeoJson = {
-    type: "FeatureCollection",
-    features: [],
+    type: 'FeatureCollection',
+    features: []
   };
 
   for (const s of soundings) {
-    s.images.sort(
-      (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
-    );
+    s.images.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
     const afterDates = s.images.filter(
-      (img) => new Date(img.time).getTime() - (Date.now() - 30 * 60 * 1000) > 0,
+      (img) => new Date(img.time).getTime() - (Date.now() - 30 * 60 * 1000) > 0
     );
 
-    let url = "";
+    let url = '';
     let time: Date | null = null;
     if (afterDates?.length) {
       url = afterDates[0].url;
@@ -155,14 +141,14 @@ export function getSoundingGeoJson(
     }
 
     const feature: GeoJsonFeature = {
-      type: "Feature",
+      type: 'Feature',
       properties: {
         name: s.name,
         dbId: (s as ISounding & { _id: string })._id,
         currentTime: time,
-        currentUrl: url,
+        currentUrl: url
       },
-      geometry: s.location as { type: string; coordinates: [number, number] },
+      geometry: s.location as { type: string; coordinates: [number, number] }
     };
     geoJson.features.push(feature);
   }
@@ -176,8 +162,8 @@ export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
   }
 
   const geoJson: GeoJson = {
-    type: "FeatureCollection",
-    features: [],
+    type: 'FeatureCollection',
+    features: []
   };
 
   for (const site of sites) {
@@ -185,17 +171,17 @@ export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
     if (site.isDisabled) continue;
 
     const feature: GeoJsonFeature = {
-      type: "Feature",
+      type: 'Feature',
       properties: {
         name: site.name,
         dbId: site._id,
         validBearings: site.validBearings,
-        siteGuideUrl: site.siteGuideUrl,
+        siteGuideUrl: site.siteGuideUrl
       },
       geometry: site.location as {
         type: string;
         coordinates: [number, number];
-      },
+      }
     };
     geoJson.features.push(feature);
   }
@@ -203,16 +189,14 @@ export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
   return geoJson;
 }
 
-export function getLandingGeoJson(
-  landings: ILanding[] | undefined,
-): GeoJson | null {
+export function getLandingGeoJson(landings: ILanding[] | undefined): GeoJson | null {
   if (!landings?.length) {
     return null;
   }
 
   const geoJson: GeoJson = {
-    type: "FeatureCollection",
-    features: [],
+    type: 'FeatureCollection',
+    features: []
   };
 
   for (const landing of landings) {
@@ -220,16 +204,16 @@ export function getLandingGeoJson(
     if (landing.isDisabled) continue;
 
     const feature: GeoJsonFeature = {
-      type: "Feature",
+      type: 'Feature',
       properties: {
         name: landing.name,
         dbId: landing._id,
-        siteGuideUrl: landing.siteGuideUrl,
+        siteGuideUrl: landing.siteGuideUrl
       },
       geometry: landing.location as {
         type: string;
         coordinates: [number, number];
-      },
+      }
     };
     geoJson.features.push(feature);
   }
@@ -248,15 +232,9 @@ export function sortStationFeatures(features: GeoJsonFeature[]): void {
     }
 
     // Render stations with no data on bottom
-    if (
-      a.properties.currentAverage == null &&
-      b.properties.currentAverage != null
-    ) {
+    if (a.properties.currentAverage == null && b.properties.currentAverage != null) {
       return -1;
-    } else if (
-      a.properties.currentAverage != null &&
-      b.properties.currentAverage == null
-    ) {
+    } else if (a.properties.currentAverage != null && b.properties.currentAverage == null) {
       return 1;
     }
 
@@ -268,10 +246,7 @@ export function sortStationFeatures(features: GeoJsonFeature[]): void {
     }
 
     // Render stations with higher reading on top
-    return (
-      (a.properties.currentAverage as number) -
-      (b.properties.currentAverage as number)
-    );
+    return (a.properties.currentAverage as number) - (b.properties.currentAverage as number);
   });
 }
 
@@ -282,6 +257,6 @@ export function getHistoryTime(offset: number): Date {
     t.getTime() -
       ((t.getMinutes() % 30) - offset) * 60 * 1000 -
       t.getSeconds() * 1000 -
-      t.getMilliseconds(),
+      t.getMilliseconds()
   );
 }

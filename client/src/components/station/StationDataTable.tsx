@@ -1,7 +1,7 @@
-import { cn, getWindColor, getWindDirectionFromBearing } from "@/lib/utils";
-import { getDirectionColor, convertWindSpeed, getUnit } from "./utils";
-import { DirectionArrow } from "@/components/ui/DirectionArrow";
-import type { ExtendedStationData } from "./types";
+import { cn, getWindColor, getWindDirectionFromBearing } from '@/lib/utils';
+import { getDirectionColor, convertWindSpeed, getUnit } from './utils';
+import { DirectionArrow } from '@/components/ui/DirectionArrow';
+import type { ExtendedStationData } from './types';
 
 interface StationDataTableProps {
   tableData: ExtendedStationData[];
@@ -11,7 +11,7 @@ interface StationDataTableProps {
 export const StationDataTable = function StationDataTable({
   ref,
   tableData,
-  validBearings,
+  validBearings
 }: StationDataTableProps & {
   ref?: React.RefObject<HTMLTableRowElement | null>;
 }) {
@@ -28,9 +28,8 @@ export const StationDataTable = function StationDataTable({
               <td
                 key={String(d.time)}
                 className={cn(
-                  "text-center text-muted-foreground px-0.5 py-0 sm:p-0.5 text-xs sm:text-sm",
-                  new Date(d.time).getMinutes() === 0 &&
-                    "bg-gray-300 text-color-base",
+                  'text-center text-muted-foreground px-0.5 py-0 sm:p-0.5 text-xs sm:text-sm',
+                  new Date(d.time).getMinutes() === 0 && 'bg-gray-300 text-color-base'
                 )}
               >
                 {d.timeLabel}
@@ -48,10 +47,10 @@ export const StationDataTable = function StationDataTable({
                 key={String(d.time)}
                 className="text-center text-xs sm:text-sm p-0 sm:p-0.5"
                 style={{
-                  backgroundColor: getWindColor(d.windAverage ?? null),
+                  backgroundColor: getWindColor(d.windAverage ?? null)
                 }}
               >
-                {convertWindSpeed(d.windAverage, unit) ?? "-"}
+                {convertWindSpeed(d.windAverage, unit) ?? '-'}
               </td>
             ))}
           </tr>
@@ -66,10 +65,10 @@ export const StationDataTable = function StationDataTable({
                 key={String(d.time)}
                 className="text-center text-xs sm:text-sm p-0 sm:p-0.5"
                 style={{
-                  backgroundColor: getWindColor(d.windGust ?? null),
+                  backgroundColor: getWindColor(d.windGust ?? null)
                 }}
               >
-                {convertWindSpeed(d.windGust, unit) ?? "-"}
+                {convertWindSpeed(d.windGust, unit) ?? '-'}
               </td>
             ))}
           </tr>
@@ -82,9 +81,8 @@ export const StationDataTable = function StationDataTable({
                 key={String(d.time)}
                 className="text-center text-muted-foreground text-xs sm:text-sm p-0 sm:p-0.5"
               >
-                {d.windBearing == null ||
-                (d.windAverage == null && d.windGust == null)
-                  ? ""
+                {d.windBearing == null || (d.windAverage == null && d.windGust == null)
+                  ? ''
                   : getWindDirectionFromBearing(d.windBearing)}
               </td>
             ))}
@@ -99,24 +97,19 @@ export const StationDataTable = function StationDataTable({
                 className="p-0 text-center"
                 style={{
                   background: getDirectionColor(
-                    d.windAverage == null && d.windGust == null
-                      ? null
-                      : d.windBearing,
-                    validBearings,
-                  ),
+                    d.windAverage == null && d.windGust == null ? null : d.windBearing,
+                    validBearings
+                  )
                 }}
               >
-                {d.windBearing == null ||
-                (d.windAverage == null && d.windGust == null) ? (
-                  "-"
+                {d.windBearing == null || (d.windAverage == null && d.windGust == null) ? (
+                  '-'
                 ) : (
                   <div className="flex items-center justify-center">
                     <DirectionArrow
                       className="h-4 w-4"
                       style={{
-                        transform: `rotate(${Math.round(
-                          180 + d.windBearing,
-                        )}deg)`,
+                        transform: `rotate(${Math.round(180 + d.windBearing)}deg)`
                       }}
                     />
                   </div>
@@ -133,10 +126,9 @@ export const StationDataTable = function StationDataTable({
                 key={String(d.time)}
                 className="text-center text-muted-foreground text-xs sm:text-sm p-0 sm:p-0.5"
               >
-                {d.windBearing == null ||
-                (d.windAverage == null && d.windGust == null)
-                  ? ""
-                  : `${Math.round(d.windBearing).toString().padStart(3, "0")}°`}
+                {d.windBearing == null || (d.windAverage == null && d.windGust == null)
+                  ? ''
+                  : `${Math.round(d.windBearing).toString().padStart(3, '0')}°`}
               </td>
             ))}
           </tr>
@@ -149,7 +141,7 @@ export const StationDataTable = function StationDataTable({
                 key={String(d.time)}
                 className="text-center text-muted-foreground text-xs sm:text-sm p-0 sm:p-0.5"
               >
-                {d.temperature == null ? "-" : `${Math.round(d.temperature)}°C`}
+                {d.temperature == null ? '-' : `${Math.round(d.temperature)}°C`}
               </td>
             ))}
           </tr>

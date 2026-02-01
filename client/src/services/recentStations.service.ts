@@ -1,8 +1,8 @@
-import { getStoredValue, setStoredValue } from "@/components/map";
+import { getStoredValue, setStoredValue } from '@/components/map';
 
-const RECENT_STATIONS_KEY = "recentStations";
+const RECENT_STATIONS_KEY = 'recentStations';
 const MAX_RECENT_STATIONS = 5;
-export const RECENT_STATIONS_UPDATED_EVENT = "recentStationsUpdated";
+export const RECENT_STATIONS_UPDATED_EVENT = 'recentStationsUpdated';
 
 export interface RecentStation {
   id: string;
@@ -29,10 +29,10 @@ export function addRecentStation(id: string, name: string): void {
   const filtered = recentStations.filter((station) => station.id !== id);
 
   // Add the new station to the beginning
-  const updated: RecentStation[] = [
-    { id, name, viewedAt: Date.now() },
-    ...filtered,
-  ].slice(0, MAX_RECENT_STATIONS);
+  const updated: RecentStation[] = [{ id, name, viewedAt: Date.now() }, ...filtered].slice(
+    0,
+    MAX_RECENT_STATIONS
+  );
 
   setStoredValue(RECENT_STATIONS_KEY, updated);
 

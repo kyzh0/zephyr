@@ -1,4 +1,4 @@
-import type { IStationData } from "@/models/station-data.model";
+import type { IStationData } from '@/models/station-data.model';
 
 // Extended station data type with computed fields
 export interface ExtendedStationData extends IStationData {
@@ -9,4 +9,4 @@ export interface ExtendedStationData extends IStationData {
 }
 
 // Unit type for wind speed display
-export type WindUnit = "kt" | "kmh";
+export type WindUnit = 'kt' | 'kmh';

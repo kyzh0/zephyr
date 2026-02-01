@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import mapboxgl from "mapbox-gl";
-import { SiteMarker } from "@/components/map/SiteMarker";
-import { getSiteGeoJson } from "@/components/map";
-import { useNavigate } from "react-router-dom";
-import { useSites } from "../useSites";
+import { useCallback, useEffect, useRef } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import mapboxgl from 'mapbox-gl';
+import { SiteMarker } from '@/components/map/SiteMarker';
+import { getSiteGeoJson } from '@/components/map';
+import { useNavigate } from 'react-router-dom';
+import { useSites } from '../useSites';
 
 interface UseSiteMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -12,16 +12,10 @@ interface UseSiteMarkersOptions {
   isVisible: boolean;
 }
 
-export function useSiteMarkers({
-  map,
-  isMapLoaded,
-  isVisible,
-}: UseSiteMarkersOptions) {
+export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOptions) {
   const navigate = useNavigate();
   const { sites, isLoading: sitesLoading } = useSites();
-  const markersRef = useRef<
-    { marker: HTMLDivElement; popup: mapboxgl.Popup }[]
-  >([]);
+  const markersRef = useRef<{ marker: HTMLDivElement; popup: mapboxgl.Popup }[]>([]);
   const isVisibleRef = useRef(isVisible);
 
   // Keep visibility ref in sync
@@ -35,24 +29,24 @@ export function useSiteMarkers({
       dbId: string,
       name: string,
       validBearings: string,
-      isOfficial: boolean,
+      isOfficial: boolean
     ): { marker: HTMLDivElement; popup: mapboxgl.Popup } => {
       // Create popup
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
-        offset: [0, -15],
+        offset: [0, -15]
       }).setHTML(`<p align="center"><strong>${name}</strong></p>`);
 
-      const el = document.createElement("div");
+      const el = document.createElement('div');
       el.id = dbId;
-      el.className = "site-marker cursor-pointer";
-      el.style.visibility = "hidden";
-      el.style.zIndex = "1";
+      el.className = 'site-marker cursor-pointer';
+      el.style.visibility = 'hidden';
+      el.style.zIndex = '1';
 
       // Render the SiteMarker component to HTML
       el.innerHTML = renderToStaticMarkup(
-        <SiteMarker validBearings={validBearings} isOfficial={isOfficial} />,
+        <SiteMarker validBearings={validBearings} isOfficial={isOfficial} />
       );
 
       // Event handlers
@@ -67,13 +61,13 @@ export function useSiteMarkers({
         popup.remove();
       };
 
-      el.addEventListener("click", handleClick);
-      el.addEventListener("mouseenter", handleEnter);
-      el.addEventListener("mouseleave", handleLeave);
+      el.addEventListener('click', handleClick);
+      el.addEventListener('mouseenter', handleEnter);
+      el.addEventListener('mouseleave', handleLeave);
 
       return { marker: el, popup };
     },
-    [navigate, map],
+    [navigate, map]
   );
 
   // Initialize sites
@@ -91,12 +85,7 @@ export function useSiteMarkers({
           const validBearings = f.properties.validBearings as string;
           const isOfficial = f.properties.siteGuideUrl ? true : false;
 
-          const { marker, popup } = createSiteMarker(
-            dbId,
-            name,
-            validBearings,
-            isOfficial,
-          );
+          const { marker, popup } = createSiteMarker(dbId, name, validBearings, isOfficial);
           markersRef.current.push({ marker, popup });
           new mapboxgl.Marker(marker)
             .setLngLat(f.geometry.coordinates)
@@ -105,14 +94,12 @@ export function useSiteMarkers({
         }
       }
     } catch (error) {
-      console.error("❌ Error loading real sites:", error);
+      console.error('❌ Error loading real sites:', error);
     }
 
     // Set initial visibility after all markers are created
     for (const item of markersRef.current) {
-      item.marker.style.visibility = isVisibleRef.current
-        ? "visible"
-        : "hidden";
+      item.marker.style.visibility = isVisibleRef.current ? 'visible' : 'hidden';
     }
   }, [map, sites, sitesLoading, createSiteMarker]);
 
@@ -120,7 +107,7 @@ export function useSiteMarkers({
   const setVisibility = useCallback((visible: boolean) => {
     for (const item of markersRef.current) {
       // eslint-disable-next-line react-hooks/immutability
-      item.marker.style.visibility = visible ? "visible" : "hidden";
+      item.marker.style.visibility = visible ? 'visible' : 'hidden';
     }
   }, []);
 
@@ -138,6 +125,6 @@ export function useSiteMarkers({
 
   return {
     markers: markersRef,
-    setVisibility,
+    setVisibility
   };
 }

@@ -1,13 +1,9 @@
-import { useState, useCallback } from "react";
-import { formatInTimeZone } from "date-fns-tz";
-import { X, ChevronLeft, ChevronRight, Hourglass } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useState, useCallback } from 'react';
+import { formatInTimeZone } from 'date-fns-tz';
+import { X, ChevronLeft, ChevronRight, Hourglass } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface HistorySliderProps {
   historyOffset: number;
@@ -34,7 +30,7 @@ function getSnapshotTime(offset: number): Date {
 export function HistorySlider({
   historyOffset,
   onHistoryChange,
-  disabled = false,
+  disabled = false
 }: HistorySliderProps) {
   const [isExpanded, setIsExpanded] = useState(historyOffset < 0);
 
@@ -66,9 +62,10 @@ export function HistorySlider({
     if (isExpanded && historyOffset === 0) {
       setIsExpanded(false);
     } else if (!isExpanded) {
+      onHistoryChange(-30);
       setIsExpanded(true);
     }
-  }, [isExpanded, historyOffset]);
+  }, [isExpanded, historyOffset, onHistoryChange]);
 
   const snapshotTime = getSnapshotTime(historyOffset);
 
@@ -92,65 +89,64 @@ export function HistorySlider({
   }
 
   return (
-    <div className="flex flex-col gap-2 bg-background border rounded-md p-2 shadow-sm min-w-[180px]">
-      {/* Slider */}
-      <div className="flex items-center gap-2">
-        <Slider
-          defaultValue={[historyOffset]}
-          onValueCommit={handleSliderChange}
-          min={-10080} // 7 days in minutes
-          max={0}
-          step={30}
-          className="flex-1"
-          disabled={disabled}
-        />
-      </div>
-
-      {/* Controls and time display */}
-      <div className="flex items-center justify-between">
-        <div className="w-6" /> {/* Spacer for alignment */}
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleLeftClick}
-            className="h-6 w-6"
-            disabled={historyOffset <= -10080}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-
-          <div className="text-center min-w-[140px]">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">
-              Historic Data
-            </p>
-            <p className="text-sm font-medium">
-              {formatInTimeZone(
-                snapshotTime,
-                "Pacific/Auckland",
-                "EEE dd MMM HH:mm"
-              )}
-            </p>
+    <div className="fixed inset-x-0 bottom-4 z-50 flex justify-center w-full px-4">
+      <div className="flex items-center gap-2 bg-red-100 border-2 border-red-500 px-4 pt-3 pb-2 rounded-lg shadow-lg">
+        <div className="flex flex-col gap-2">
+          {/* Slider */}
+          <div className="w-full">
+            <Slider
+              value={[historyOffset]}
+              onValueChange={handleSliderChange}
+              min={-10080} // 7 days in minutes
+              max={-30}
+              step={30}
+              className="flex-1"
+              disabled={disabled}
+            />
           </div>
 
+          {/* Controls and time display */}
+          <div className="flex items-center justify-between">
+            <div className="w-6" /> {/* Spacer for alignment */}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLeftClick}
+                className="h-6 w-6 cursor-pointer"
+                disabled={historyOffset <= -10080}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              <div className="text-center min-w-[140px]">
+                <p className="text-sm font-medium">
+                  {formatInTimeZone(snapshotTime, 'Pacific/Auckland', 'EEE dd MMM HH:mm')}
+                </p>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleRightClick}
+                className="h-6 w-6 cursor-pointer"
+                disabled={historyOffset >= -30}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col h-full justify-center">
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleRightClick}
-            className="h-6 w-6"
-            disabled={historyOffset >= 0}
+            onClick={handleClose}
+            className="h-3 w-3 cursor-pointer"
           >
-            <ChevronRight className="h-4 w-4" />
+            <X className="h-3 w-3" />
           </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleClose}
-          className="h-6 w-6"
-        >
-          <X className="h-3 w-3" />
-        </Button>
       </div>
     </div>
   );

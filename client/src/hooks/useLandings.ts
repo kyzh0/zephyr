@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
-import { listLandings } from "@/services/landing.service";
-import type { ILanding } from "@/models/landing.model";
-import { handleError } from "@/lib/utils";
+import { useEffect, useState, useCallback } from 'react';
+import { listLandings } from '@/services/landing.service';
+import type { ILanding } from '@/models/landing.model';
+import { handleError } from '@/lib/utils';
 
 // Module-level singleton cache for landings
 let cachedLandings: ILanding[] | null = null;
@@ -17,7 +17,7 @@ async function fetchLandingsAndNotify() {
     cachedLandings = result ?? [];
     cachedError = null;
   } catch (err) {
-    cachedError = handleError(err, "Operation failed");
+    cachedError = handleError(err, 'Operation failed');
     cachedLandings = [];
   } finally {
     cachedLoading = false;
@@ -46,9 +46,7 @@ export interface UseLandingsResult {
  * @param options.autoLoad - Whether to automatically load landings (default: true)
  * @returns All landings with loading and error states
  */
-export function useLandings({
-  autoLoad = true,
-}: UseLandingsOptions = {}): UseLandingsResult {
+export function useLandings({ autoLoad = true }: UseLandingsOptions = {}): UseLandingsResult {
   const [, forceUpdate] = useState(0);
 
   // Subscribe to cache updates
@@ -75,6 +73,6 @@ export function useLandings({
     landings: cachedLandings ?? [],
     isLoading: cachedLoading || cachedLandings === null,
     error: cachedError,
-    refetch,
+    refetch
   };
 }

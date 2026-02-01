@@ -1,4 +1,4 @@
-import type { ILocation } from "./location.model";
+import type { ILocation } from './location.model';
 
 interface ISounding {
   name: string;
@@ -12,10 +12,10 @@ interface ISounding {
 }
 
 export const RASP_REGIONS = [
-  { value: "NZNORTH_N", label: "NZNORTH_N" },
-  { value: "NZNORTH_C", label: "NZNORTH_C" },
-  { value: "NZSOUTH_N", label: "NZSOUTH_N" },
-  { value: "NZSOUTH_S", label: "NZSOUTH_S" },
+  { value: 'NZNORTH_N', label: 'NZNORTH_N' },
+  { value: 'NZNORTH_C', label: 'NZNORTH_C' },
+  { value: 'NZSOUTH_N', label: 'NZSOUTH_N' },
+  { value: 'NZSOUTH_S', label: 'NZSOUTH_S' }
 ] as const;
 
 export type { ISounding };

@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { listSites } from "@/services/site.service";
-import type { ISite } from "@/models/site.model";
-import { getDistance, handleError } from "@/lib/utils";
-import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from ".";
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { listSites } from '@/services/site.service';
+import type { ISite } from '@/models/site.model';
+import { getDistance, handleError } from '@/lib/utils';
+import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from '.';
 
 // Module-level singleton cache for sites
 let cachedSites: ISite[] | null = null;
@@ -18,7 +18,7 @@ async function fetchSitesAndNotify() {
     cachedSites = result ?? [];
     cachedError = null;
   } catch (err) {
-    cachedError = handleError(err, "Operation failed");
+    cachedError = handleError(err, 'Operation failed');
     cachedSites = [];
   } finally {
     cachedLoading = false;
@@ -47,9 +47,7 @@ export interface UseSitesResult {
  * @param options.autoLoad - Whether to automatically load sites (default: true)
  * @returns All sites with loading and error states
  */
-export function useSites({
-  autoLoad = true,
-}: UseSitesOptions = {}): UseSitesResult {
+export function useSites({ autoLoad = true }: UseSitesOptions = {}): UseSitesResult {
   const [, forceUpdate] = useState(0);
 
   // Subscribe to cache updates
@@ -76,7 +74,7 @@ export function useSites({
     sites: cachedSites ?? [],
     isLoading: cachedLoading || cachedSites === null,
     error: cachedError,
-    refetch,
+    refetch
   };
 }
 
@@ -93,7 +91,7 @@ export function useNearbySites({
   lat,
   lon,
   maxDistance = 5000,
-  limit,
+  limit
 }: UseNearbyLocationsOptions): UseNearbyLocationsResult<ISite> {
   const { sites: allSites, isLoading, error, refetch } = useSites();
 
@@ -110,11 +108,11 @@ export function useNearbySites({
           lat,
           lon,
           site.location.coordinates[0],
-          site.location.coordinates[1],
+          site.location.coordinates[1]
         );
         return {
           data: site,
-          distance,
+          distance
         };
       })
       .filter((site) => site.distance <= maxDistance)
@@ -126,6 +124,6 @@ export function useNearbySites({
     data: nearbySites,
     isLoading,
     error,
-    refetch,
+    refetch
   };
 }

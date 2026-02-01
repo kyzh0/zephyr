@@ -1,25 +1,20 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
-import { format, startOfDay, endOfDay } from "date-fns";
-import { fromZonedTime } from "date-fns-tz";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import type { DateRange } from "react-day-picker";
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { format, startOfDay, endOfDay } from 'date-fns';
+import { fromZonedTime } from 'date-fns-tz';
+import { CalendarIcon, Loader2 } from 'lucide-react';
+import type { DateRange } from 'react-day-picker';
 
-import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks";
-import { exportXlsx } from "@/services/public.service";
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks';
+import { exportXlsx } from '@/services/public.service';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -27,18 +22,14 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { toast } from "sonner";
+  FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { toast } from 'sonner';
 
 const DEFAULT_LON = 172.5;
 const DEFAULT_LAT = -42;
@@ -46,33 +37,32 @@ const DEFAULT_RADIUS = 50;
 
 const formSchema = z
   .object({
-    apiKey: z.string().min(1, "API key is required"),
+    apiKey: z.string().min(1, 'API key is required'),
     dateRange: z.object({
       from: z.date(),
-      to: z.date(),
+      to: z.date()
     }),
-    radius: z.number().min(10).max(100),
+    radius: z.number().min(10).max(100)
   })
   .refine((data) => data.dateRange.from <= data.dateRange.to, {
-    message: "Start date must come before end date",
-    path: ["dateRange"],
+    message: 'Start date must come before end date',
+    path: ['dateRange']
   })
   .refine(
     (data) => {
-      const diffMs =
-        data.dateRange.to.getTime() - data.dateRange.from.getTime();
+      const diffMs = data.dateRange.to.getTime() - data.dateRange.from.getTime();
       const diffDays = diffMs / (1000 * 60 * 60 * 24);
       return diffDays <= 180;
     },
     {
-      message: "Maximum 180 days of data",
-      path: ["dateRange"],
+      message: 'Maximum 180 days of data',
+      path: ['dateRange']
     }
   );
 
 type FormValues = z.infer<typeof formSchema>;
 
-const NZ_TIMEZONE = "Pacific/Auckland";
+const NZ_TIMEZONE = 'Pacific/Auckland';
 
 /**
  * Convert a date (treating its year/month/day as NZT) to a UTC timestamp.
@@ -105,7 +95,7 @@ function MapView({ onCoordinatesChange, radiusKm }: MapViewProps) {
   const marker = useRef<mapboxgl.Marker | null>(null);
   const markerCoords = useRef<{ lng: number; lat: number } | null>(null);
   const radiusRef = useRef<number | null>(null);
-  const circleSourceId = "circle-radius";
+  const circleSourceId = 'circle-radius';
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -113,32 +103,32 @@ function MapView({ onCoordinatesChange, radiusKm }: MapViewProps) {
     mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_GL_KEY as string;
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/outdoors-v11",
+      style: 'mapbox://styles/mapbox/outdoors-v11',
       center: [172.5, -41],
-      zoom: 4.3,
+      zoom: 4.3
     });
 
-    map.current.on("load", () => {
+    map.current.on('load', () => {
       if (!map.current) return;
 
       // Add circle source
       map.current.addSource(circleSourceId, {
-        type: "geojson",
+        type: 'geojson',
         data: {
-          type: "FeatureCollection",
-          features: [],
-        },
+          type: 'FeatureCollection',
+          features: []
+        }
       });
 
       map.current.addLayer({
         id: circleSourceId,
-        type: "fill",
+        type: 'fill',
         source: circleSourceId,
         layout: {},
         paint: {
-          "fill-color": "#0074D9",
-          "fill-opacity": 0.2,
-        },
+          'fill-color': '#0074D9',
+          'fill-opacity': 0.2
+        }
       });
 
       // Default marker and circle
@@ -150,7 +140,7 @@ function MapView({ onCoordinatesChange, radiusKm }: MapViewProps) {
       updateCircle(DEFAULT_LON, DEFAULT_LAT, DEFAULT_RADIUS);
     });
 
-    map.current.on("click", (e) => {
+    map.current.on('click', (e) => {
       if (!map.current) return;
 
       const { lng, lat } = e.lngLat;
@@ -159,9 +149,7 @@ function MapView({ onCoordinatesChange, radiusKm }: MapViewProps) {
       if (marker.current) {
         marker.current.setLngLat([lng, lat]);
       } else {
-        marker.current = new mapboxgl.Marker()
-          .setLngLat([lng, lat])
-          .addTo(map.current);
+        marker.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(map.current);
       }
 
       const r = radiusRef.current ?? radiusKm;
@@ -193,7 +181,7 @@ function MapView({ onCoordinatesChange, radiusKm }: MapViewProps) {
     if (!map.current) return;
 
     const source = map.current?.getSource(circleSourceId);
-    if (source?.type !== "geojson") return;
+    if (source?.type !== 'geojson') return;
 
     // Create circle polygon using simple math (approximate)
     const points = 64;
@@ -204,27 +192,21 @@ function MapView({ onCoordinatesChange, radiusKm }: MapViewProps) {
       const angle = (i / points) * 2 * Math.PI;
       const dx = km / (111.32 * Math.cos((lat * Math.PI) / 180));
       const dy = km / 110.574;
-      coordinates.push([
-        lng + dx * Math.cos(angle),
-        lat + dy * Math.sin(angle),
-      ]);
+      coordinates.push([lng + dx * Math.cos(angle), lat + dy * Math.sin(angle)]);
     }
 
     source.setData({
-      type: "Feature",
+      type: 'Feature',
       properties: {},
       geometry: {
-        type: "Polygon",
-        coordinates: [coordinates],
-      },
+        type: 'Polygon',
+        coordinates: [coordinates]
+      }
     });
   }
 
   return (
-    <div
-      ref={mapContainer}
-      className="w-full h-[40vh] sm:h-[45vh] rounded-md overflow-hidden"
-    />
+    <div ref={mapContainer} className="w-full h-[40vh] sm:h-[45vh] rounded-md overflow-hidden" />
   );
 }
 
@@ -239,17 +221,17 @@ export default function ExportMapData() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      apiKey: "",
+      apiKey: '',
       dateRange: {
         from: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        to: new Date(),
+        to: new Date()
       },
-      radius: DEFAULT_RADIUS,
-    },
+      radius: DEFAULT_RADIUS
+    }
   });
 
   // eslint-disable-next-line react-hooks/incompatible-library
-  const radius = form.watch("radius");
+  const radius = form.watch('radius');
 
   async function onSubmit(values: FormValues) {
     if (loading) return;
@@ -273,29 +255,29 @@ export default function ExportMapData() {
 
       setLoading(false);
 
-      if (url === "INVALID KEY") {
-        setErrorMsg("Invalid API key");
+      if (url === 'INVALID KEY') {
+        setErrorMsg('Invalid API key');
         return;
       }
 
       if (!url) {
-        setErrorMsg("Something went wrong");
+        setErrorMsg('Something went wrong');
         return;
       }
 
       // Trigger download
-      const a = document.createElement("a");
-      a.download = "zephyr-export";
+      const a = document.createElement('a');
+      a.download = 'zephyr-export';
       a.href = url;
-      a.target = "_blank";
+      a.target = '_blank';
       a.click();
-      toast.success("Export started. Check your downloads.");
+      toast.success('Export started. Check your downloads.');
       handleClose();
     } catch (error) {
       setLoading(false);
       console.error(error);
-      setErrorMsg("Something went wrong");
-      toast.error("Something went wrong");
+      setErrorMsg('Something went wrong');
+      toast.error('Something went wrong');
     }
   }
 
@@ -316,9 +298,7 @@ export default function ExportMapData() {
             <FormItem>
               <div className="flex items-center justify-between">
                 <FormLabel>Radius</FormLabel>
-                <span className="text-sm text-muted-foreground">
-                  {field.value}km
-                </span>
+                <span className="text-sm text-muted-foreground">{field.value}km</span>
               </div>
               <FormControl>
                 <Slider
@@ -341,27 +321,25 @@ export default function ExportMapData() {
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Date Range</FormLabel>
-              <FormDescription>
-                Dates are inclusive and in New Zealand Time (NZT)
-              </FormDescription>
+              <FormDescription>Dates are inclusive and in New Zealand Time (NZT)</FormDescription>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value?.from && "text-muted-foreground"
+                        'w-full pl-3 text-left font-normal',
+                        !field.value?.from && 'text-muted-foreground'
                       )}
                     >
                       {field.value?.from ? (
                         field.value.to ? (
                           <>
-                            {format(field.value.from, "dd/MM/yyyy")} -{" "}
-                            {format(field.value.to, "dd/MM/yyyy")}
+                            {format(field.value.from, 'dd/MM/yyyy')} -{' '}
+                            {format(field.value.to, 'dd/MM/yyyy')}
                           </>
                         ) : (
-                          format(field.value.from, "dd/MM/yyyy")
+                          format(field.value.from, 'dd/MM/yyyy')
                         )
                       ) : (
                         <span>Pick a date range</span>
@@ -381,9 +359,7 @@ export default function ExportMapData() {
                         field.onChange({ from: range.from, to: range.from });
                       }
                     }}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("2020-01-01")
-                    }
+                    disabled={(date) => date > new Date() || date < new Date('2020-01-01')}
                     numberOfMonths={2}
                   />
                 </PopoverContent>
@@ -415,9 +391,7 @@ export default function ExportMapData() {
         </Button>
 
         {/* Error message */}
-        {errorMsg && (
-          <p className="text-sm text-destructive text-center">{errorMsg}</p>
-        )}
+        {errorMsg && <p className="text-sm text-destructive text-center">{errorMsg}</p>}
       </form>
     </Form>
   );

@@ -1,5 +1,5 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface WebcamPreviewProps {
   _id: string | number;
@@ -14,7 +14,7 @@ export const WebcamPreview: React.FC<WebcamPreviewProps> = ({
   name,
   distance,
   currentUrl,
-  onClick,
+  onClick
 }) => {
   const navigate = useNavigate();
 
@@ -26,9 +26,7 @@ export const WebcamPreview: React.FC<WebcamPreviewProps> = ({
     >
       <div className="flex flex-col sm:flex-row items-center sm:items-end gap-1">
         <span className="text-xs sm:text-sm font-medium">{name}</span>
-        <span className="text-xs text-muted-foreground">
-          {(distance / 1000).toFixed(1)}km away
-        </span>
+        <span className="text-xs text-muted-foreground">{(distance / 1000).toFixed(1)}km away</span>
       </div>
       {currentUrl && (
         <img

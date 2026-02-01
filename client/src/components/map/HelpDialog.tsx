@@ -1,27 +1,27 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Camera, Grid3X3, Mountain } from "lucide-react";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Camera, Grid3X3, Mountain } from 'lucide-react';
 
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { SignInDialog } from "./SignInDialog";
-import { SiteMarker } from "./SiteMarker";
-import { LandingMarker } from "./LandingMarker";
+  DialogDescription
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { SignInDialog } from './SignInDialog';
+import { SiteMarker } from './SiteMarker';
+import { LandingMarker } from './LandingMarker';
 
-export const WELCOME_STORAGE_KEY = "zephyr-welcome-dismissed";
+export const WELCOME_STORAGE_KEY = 'zephyr-welcome-dismissed';
 
 function shouldShowWelcome(): boolean {
   const dismissed =
     window.self !== window.top || // Dismiss if iframe
-    localStorage.getItem(WELCOME_STORAGE_KEY) === "true";
+    localStorage.getItem(WELCOME_STORAGE_KEY) === 'true';
   return !dismissed;
 }
 
@@ -30,10 +30,7 @@ interface HelpDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function HelpDialog({
-  open: controlledOpen,
-  onOpenChange,
-}: HelpDialogProps) {
+export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogProps) {
   const navigate = useNavigate();
   const [internalOpen, setInternalOpen] = useState(shouldShowWelcome);
   const [dontShowAgain, setDontShowAgain] = useState(true);
@@ -43,7 +40,7 @@ export function HelpDialog({
 
   const handleOpenChange = (open: boolean) => {
     if (!open && dontShowAgain) {
-      localStorage.setItem(WELCOME_STORAGE_KEY, "true");
+      localStorage.setItem(WELCOME_STORAGE_KEY, 'true');
     }
     setInternalOpen(open);
     onOpenChange?.(open);
@@ -64,15 +61,9 @@ export function HelpDialog({
             </Button>
           </div>
           <div className="flex justify-center mb-1 sm:mb-2">
-            <img
-              src="/logo192.png"
-              className="w-12 h-12 sm:w-16 sm:h-16"
-              alt="Zephyr Logo"
-            />
+            <img src="/logo192.png" className="w-12 h-12 sm:w-16 sm:h-16" alt="Zephyr Logo" />
           </div>
-          <DialogTitle className="text-lg sm:text-xl">
-            Welcome to Zephyr
-          </DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">Welcome to Zephyr</DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
             Live weather data for free flying in New Zealand.
           </DialogDescription>
@@ -105,9 +96,7 @@ export function HelpDialog({
               className="w-4 h-6 sm:w-5 sm:h-7 -rotate-45"
             />
           </div>
-          <div className="flex items-center">
-            Green tail = favourable wind direction
-          </div>
+          <div className="flex items-center">Green tail = favourable wind direction</div>
 
           <div className="flex justify-center items-center">
             <SiteMarker validBearings="45-140" size={30} borderWidth={5} />
@@ -127,9 +116,7 @@ export function HelpDialog({
           <div className="flex justify-center items-center">
             <Mountain className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div className="flex items-center">
-            Elevation border (each dash = 250m)
-          </div>
+          <div className="flex items-center">Elevation border (each dash = 250m)</div>
 
           <div className="flex justify-center items-center">
             <Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -168,7 +155,7 @@ export function HelpDialog({
               className="text-xs text-muted-foreground cursor-pointer px-1 sm:px-2"
               onClick={() => {
                 handleOpenChange(false);
-                navigate("/export-map-data");
+                navigate('/export-map-data');
               }}
             >
               Export Data

@@ -1,38 +1,38 @@
-export type IconShape = "arrow" | "circle";
-export type IconBorder = "none" | "gold" | "gold-valid";
+export type IconShape = 'arrow' | 'circle';
+export type IconBorder = 'none' | 'gold' | 'gold-valid';
 
 // Color names for wind speed thresholds (matching PNG filenames)
 export type WindColorName =
-  | "white"
-  | "light-green"
-  | "green"
-  | "yellow"
-  | "orange"
-  | "red"
-  | "purple"
-  | "black";
+  | 'white'
+  | 'light-green'
+  | 'green'
+  | 'yellow'
+  | 'orange'
+  | 'red'
+  | 'purple'
+  | 'black';
 
 /**
  * Get wind color name based on average wind speed (in km/h)
  */
 export function getWindColor(avgWind: number | null): WindColorName {
-  if (avgWind == null || avgWind < 5) return "white";
-  if (avgWind < 15) return "light-green";
-  if (avgWind < 23) return "green";
-  if (avgWind < 30) return "yellow";
-  if (avgWind < 35) return "orange";
-  if (avgWind < 60) return "red";
-  if (avgWind < 80) return "purple";
-  return "black";
+  if (avgWind == null || avgWind < 5) return 'white';
+  if (avgWind < 15) return 'light-green';
+  if (avgWind < 23) return 'green';
+  if (avgWind < 30) return 'yellow';
+  if (avgWind < 35) return 'orange';
+  if (avgWind < 60) return 'red';
+  if (avgWind < 80) return 'purple';
+  return 'black';
 }
 
 /**
  * Get text color for wind speed overlay
  */
 export function getTextColor(avgWind: number | null): string {
-  if (avgWind == null) return "black";
-  if (avgWind >= 35) return "white";
-  return "black";
+  if (avgWind == null) return 'black';
+  if (avgWind >= 35) return 'white';
+  return 'black';
 }
 
 /**
@@ -52,34 +52,34 @@ export function getArrowStyle(
   validBearings: string | null,
   isOffline: boolean | null
 ): [string, string] {
-  let textColor = "black";
-  let img = "";
+  let textColor = 'black';
+  let img = '';
 
   if (isOffline) {
-    textColor = "#ff4261";
+    textColor = '#ff4261';
     img = `url('/circle-white.png')`;
     return [img, textColor];
   }
 
-  let prefix = "";
+  let prefix = '';
   if (currentBearing != null && avgWind != null) {
     // station has bearings, check if within bounds
     if (validBearings) {
-      prefix = "gold-arrow";
-      const pairs = validBearings.split(",");
+      prefix = 'gold-arrow';
+      const pairs = validBearings.split(',');
       for (const p of pairs) {
-        const bearings = p.split("-");
+        const bearings = p.split('-');
         if (bearings.length === 2) {
           const bearing1 = Number(bearings[0]);
           const bearing2 = Number(bearings[1]);
           if (bearing1 <= bearing2) {
             if (currentBearing >= bearing1 && currentBearing <= bearing2) {
-              prefix = "gold-valid-arrow";
+              prefix = 'gold-valid-arrow';
               break;
             }
           } else {
             if (currentBearing >= bearing1 || currentBearing <= bearing2) {
-              prefix = "gold-valid-arrow";
+              prefix = 'gold-valid-arrow';
               break;
             }
           }
@@ -87,11 +87,11 @@ export function getArrowStyle(
       }
     } else {
       // station has no bearings
-      prefix = "arrow";
+      prefix = 'arrow';
     }
   } else {
     // wind has no direction or avg is null
-    prefix = validBearings ? "gold-circle" : "circle";
+    prefix = validBearings ? 'gold-circle' : 'circle';
   }
 
   if (avgWind == null) {
@@ -108,13 +108,13 @@ export function getArrowStyle(
     img = `url('/${prefix}-orange.png')`;
   } else if (avgWind < 60) {
     img = `url('/${prefix}-red.png')`;
-    textColor = "white";
+    textColor = 'white';
   } else if (avgWind < 80) {
     img = `url('/${prefix}-purple.png')`;
-    textColor = "white";
+    textColor = 'white';
   } else {
     img = `url('/${prefix}-black.png')`;
-    textColor = "white";
+    textColor = 'white';
   }
   return [img, textColor];
 }
@@ -137,10 +137,10 @@ export function getIconConfig(
   // Offline stations show a white circle with red text
   if (isOffline) {
     return {
-      shape: "circle",
-      border: "none",
-      colorName: "white",
-      textColor: "#ff4261",
+      shape: 'circle',
+      border: 'none',
+      colorName: 'white',
+      textColor: '#ff4261'
     };
   }
 
@@ -149,26 +149,26 @@ export function getIconConfig(
 
   if (currentBearing != null && avgWind != null) {
     // Station has bearings
-    shape = "arrow";
+    shape = 'arrow';
 
     if (validBearings) {
       // Check if current bearing is within valid range
-      border = "gold"; // Default to gold (outside valid range)
-      const pairs = validBearings.split(",");
+      border = 'gold'; // Default to gold (outside valid range)
+      const pairs = validBearings.split(',');
       for (const p of pairs) {
-        const bearings = p.split("-");
+        const bearings = p.split('-');
         if (bearings.length === 2) {
           const bearing1 = Number(bearings[0]);
           const bearing2 = Number(bearings[1]);
           if (bearing1 <= bearing2) {
             if (currentBearing >= bearing1 && currentBearing <= bearing2) {
-              border = "gold-valid";
+              border = 'gold-valid';
               break;
             }
           } else {
             // Wraps around 360 degrees
             if (currentBearing >= bearing1 || currentBearing <= bearing2) {
-              border = "gold-valid";
+              border = 'gold-valid';
               break;
             }
           }
@@ -176,12 +176,12 @@ export function getIconConfig(
       }
     } else {
       // Station has no valid bearings defined
-      border = "none";
+      border = 'none';
     }
   } else {
     // Wind has no direction or avg is null
-    shape = "circle";
-    border = validBearings ? "gold" : "none";
+    shape = 'circle';
+    border = validBearings ? 'gold' : 'none';
   }
 
   const colorName = getWindColor(avgWind);

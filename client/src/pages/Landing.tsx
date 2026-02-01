@@ -1,36 +1,31 @@
-import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getLandingById } from "@/services/landing.service";
+import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getLandingById } from '@/services/landing.service';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import {
   PlaneLanding,
   AlertCircleIcon,
   ArrowLeft,
   ChevronRightIcon,
   ExternalLink,
-  TriangleAlertIcon,
-} from "lucide-react";
-import { useState } from "react";
-import type { ILanding } from "@/models/landing.model";
-import { useIsMobile } from "@/hooks";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+  TriangleAlertIcon
+} from 'lucide-react';
+import { useState } from 'react';
+import type { ILanding } from '@/models/landing.model';
+import { useIsMobile } from '@/hooks';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemDescription,
   ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
-import { handleError } from "@/lib/utils";
+  ItemTitle
+} from '@/components/ui/item';
+import { handleError } from '@/lib/utils';
 
 export default function Site() {
   const { id } = useParams<{ id: string }>();
@@ -49,11 +44,11 @@ export default function Site() {
       try {
         const data = await getLandingById(id);
         if (!data) {
-          throw new Error("Landing not found");
+          throw new Error('Landing not found');
         }
         setLanding(data);
       } catch (err) {
-        setError(handleError(err, "Failed to load landing details"));
+        setError(handleError(err, 'Failed to load landing details'));
       } finally {
         setIsLoading(false);
       }
@@ -74,12 +69,10 @@ export default function Site() {
     <Skeleton className="h-7 w-48 mx-auto" />
   ) : (
     <div className="grid grid-cols-1">
-      <span className="text-lg sm:text-xl font-semibold leading-tight">
-        {landing?.name}
-      </span>
+      <span className="text-lg sm:text-xl font-semibold leading-tight">{landing?.name}</span>
 
       <span className="font-thin text-[10px] sm:text-xs mb-1">
-        [ {landing?.location.coordinates[1].toFixed(4)},{" "}
+        [ {landing?.location.coordinates[1].toFixed(4)},{' '}
         {landing?.location.coordinates[0].toFixed(4)} ] {landing?.elevation}m
       </span>
     </div>
@@ -138,24 +131,20 @@ export default function Site() {
           {landing.description && (
             <div
               className={
-                landing.mandatoryNotices ||
-                landing.siteGuideUrl ||
-                landing.hazards
-                  ? "my-4"
-                  : "mb-4"
+                landing.mandatoryNotices || landing.siteGuideUrl || landing.hazards
+                  ? 'my-4'
+                  : 'mb-4'
               }
             >
-              <p className="text-sm whitespace-pre-wrap">
-                {landing.description}
-              </p>
+              <p className="text-sm whitespace-pre-wrap">{landing.description}</p>
             </div>
           )}
 
           {/* Disclaimer */}
           <div>
             <p className="text-[10px] text-muted-foreground whitespace-pre-wrap">
-              Zephyr does not guarantee the accuracy of this information. Pilots
-              are responsible for verifying current conditions.
+              Zephyr does not guarantee the accuracy of this information. Pilots are responsible for
+              verifying current conditions.
             </p>
           </div>
         </div>
@@ -170,12 +159,7 @@ export default function Site() {
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background p-4 pb-0">
           <div className="flex items-center gap-2 sm:gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex w-full text-center justify-evenly items-center mb-3">
@@ -186,16 +170,14 @@ export default function Site() {
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-4 pt-1 flex flex-col gap-4">
-          {bodyContent}
-        </div>
+        <div className="flex-1 overflow-y-auto px-4 pt-1 flex flex-col gap-4">{bodyContent}</div>
       </div>
     );
   }
 
   // Desktop: Dialog overlay
   return (
-    <Dialog open onOpenChange={() => navigate("/")}>
+    <Dialog open onOpenChange={() => navigate('/')}>
       <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="pb-2">
           <DialogTitle className="flex w-full text-center justify-center items-center mb-3">

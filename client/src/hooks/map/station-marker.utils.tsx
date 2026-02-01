@@ -1,4 +1,4 @@
-import type { WindUnit } from "@/components/map";
+import type { WindUnit } from '@/components/map';
 
 // Elevation thresholds for border segments (in meters)
 const ELEVATION_THRESHOLDS = [250, 500, 750, 1000, 1250, 1500] as const;
@@ -19,9 +19,7 @@ export interface StationProperties {
 /**
  * Extract station properties from GeoJSON feature with proper typing
  */
-export function extractStationProperties(
-  properties: Record<string, unknown>
-): StationProperties {
+export function extractStationProperties(properties: Record<string, unknown>): StationProperties {
   return {
     dbId: properties.dbId as string,
     name: properties.name as string,
@@ -30,7 +28,7 @@ export function extractStationProperties(
     currentGust: properties.currentGust as number | null,
     currentBearing: properties.currentBearing as number | null,
     validBearings: properties.validBearings as string | null,
-    isOffline: properties.isOffline as boolean | null,
+    isOffline: properties.isOffline as boolean | null
   };
 }
 
@@ -43,11 +41,11 @@ export function formatWindDisplay(
   unit: WindUnit,
   convertFn: (speed: number, unit: WindUnit) => number
 ): string {
-  if (avg == null && gust == null) return "-";
+  if (avg == null && gust == null) return '-';
 
-  const unitLabel = unit === "kt" ? "kt" : "km/h";
+  const unitLabel = unit === 'kt' ? 'kt' : 'km/h';
 
-  if (avg == null) return "-";
+  if (avg == null) return '-';
 
   const avgDisplay = convertFn(avg, unit);
   if (gust != null) {
@@ -66,8 +64,8 @@ export function formatMarkerText(
   unit: WindUnit,
   convertFn: (speed: number, unit: WindUnit) => number
 ): string {
-  if (isOffline) return "X";
-  if (avg == null) return "-";
+  if (isOffline) return 'X';
+  if (avg == null) return '-';
   return String(convertFn(avg, unit));
 }
 

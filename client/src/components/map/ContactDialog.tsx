@@ -1,33 +1,33 @@
-import { useState } from "react";
-import { CheckCircle } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "sonner";
-import emailjs from "@emailjs/browser";
+import { useState } from 'react';
+import { CheckCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'sonner';
+import emailjs from '@emailjs/browser';
 
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+  DialogDescription
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  FormMessage
+} from '@/components/ui/form';
 
 const formSchema = z.object({
-  user_email: z.email("Email is not valid").min(1, "Email is required"),
-  message: z.string().min(1, "Message is required"),
+  user_email: z.email('Email is not valid').min(1, 'Email is required'),
+  message: z.string().min(1, 'Message is required')
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -43,9 +43,9 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      user_email: "",
-      message: "",
-    },
+      user_email: '',
+      message: ''
+    }
   });
 
   const handleOpenChange = (open: boolean) => {
@@ -64,16 +64,16 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
         import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string,
         {
           user_email: data.user_email,
-          message: data.message,
+          message: data.message
         },
         { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string }
       );
 
       setSuccess(true);
-      toast.success("Thanks for your feedback!");
+      toast.success('Thanks for your feedback!');
       form.reset();
     } catch (error) {
-      toast.error("Something went wrong, please try again.");
+      toast.error('Something went wrong, please try again.');
       console.error(error);
     }
   };
@@ -83,17 +83,13 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
       <DialogContent className="sm:max-w-md pb-2">
         <DialogHeader className="text-center sm:text-center">
           <DialogTitle className="text-xl">Contact Us</DialogTitle>
-          <DialogDescription>
-            Got feedback, or want a weather station added?
-          </DialogDescription>
+          <DialogDescription>Got feedback, or want a weather station added?</DialogDescription>
         </DialogHeader>
 
         {success ? (
           <div className="flex flex-col items-center justify-center py-6">
             <CheckCircle className="h-16 w-16 text-green-500" />
-            <p className="mt-2 text-sm text-center">
-              Thanks for your feedback!
-            </p>
+            <p className="mt-2 text-sm text-center">Thanks for your feedback!</p>
             <p className="mt-2 text-sm text-center">
               Please consider making a donation to support our project.
             </p>
@@ -128,11 +124,7 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
                   <FormItem>
                     <FormLabel className="text-xs">Message</FormLabel>
                     <FormControl>
-                      <Textarea
-                        rows={3}
-                        placeholder="Your message..."
-                        {...field}
-                      />
+                      <Textarea rows={3} placeholder="Your message..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -140,15 +132,11 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
               />
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleOpenChange(false)}
-                >
+                <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting ? "Sending..." : "Send"}
+                  {form.formState.isSubmitting ? 'Sending...' : 'Send'}
                 </Button>
               </div>
             </form>

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Menu,
   HelpCircle,
@@ -9,34 +9,26 @@ import {
   Camera,
   LocateFixed,
   History,
-  Mail,
-} from "lucide-react";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import { HelpDialog, WELCOME_STORAGE_KEY } from "./HelpDialog";
-import { DonateDialog } from "./DonateDialog";
-import { ContactDialog } from "./ContactDialog";
-import { HistorySlider } from "./HistorySlider";
-import { ElevationSlider } from "./ElevationSlider";
-import { SearchBar } from "./SearchBar";
-import type { WindUnit } from "./map.types";
-import { Toggle } from "@/components/ui/toggle";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  Mail
+} from 'lucide-react';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { HelpDialog, WELCOME_STORAGE_KEY } from './HelpDialog';
+import { DonateDialog } from './DonateDialog';
+import { ContactDialog } from './ContactDialog';
+import { HistorySlider } from './HistorySlider';
+import { ElevationSlider } from './ElevationSlider';
+import { SearchBar } from './SearchBar';
+import type { WindUnit } from './map.types';
+import { Toggle } from '@/components/ui/toggle';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   getRecentStations,
   RECENT_STATIONS_UPDATED_EVENT,
-  type RecentStation,
-} from "@/services/recentStations.service";
-import { useIsMobile } from "@/hooks/useIsMobile";
+  type RecentStation
+} from '@/services/recentStations.service';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface MapControlButtonsProps {
   onWebcamClick: () => void;
@@ -56,8 +48,8 @@ interface MapControlButtonsProps {
   onElevationChange: (value: number) => void;
   minimizeRecents: boolean;
   onRecentsToggle: () => void;
-  viewMode: "sites" | "stations";
-  onToggleViewMode: (value: "sites" | "stations") => void;
+  viewMode: 'sites' | 'stations';
+  onToggleViewMode: (value: 'sites' | 'stations') => void;
 }
 
 export function MapControlButtons({
@@ -79,13 +71,13 @@ export function MapControlButtons({
   minimizeRecents,
   onRecentsToggle,
   viewMode,
-  onToggleViewMode,
+  onToggleViewMode
 }: MapControlButtonsProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [helpOpen, setHelpOpen] = useState(
     window.self === window.top && // don't show if iframe
-      localStorage.getItem(WELCOME_STORAGE_KEY) !== "true"
+      localStorage.getItem(WELCOME_STORAGE_KEY) !== 'true'
   );
   const [donateOpen, setDonateOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
@@ -101,26 +93,23 @@ export function MapControlButtons({
     loadRecentStations();
 
     // Listen for storage changes (in case another tab updates)
-    window.addEventListener("storage", loadRecentStations);
+    window.addEventListener('storage', loadRecentStations);
 
     // Listen for custom event when recent stations are updated
     window.addEventListener(RECENT_STATIONS_UPDATED_EVENT, loadRecentStations);
 
     // Also refresh when the component becomes visible again
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
+      if (document.visibilityState === 'visible') {
         loadRecentStations();
       }
     };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("storage", loadRecentStations);
-      window.removeEventListener(
-        RECENT_STATIONS_UPDATED_EVENT,
-        loadRecentStations
-      );
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener('storage', loadRecentStations);
+      window.removeEventListener(RECENT_STATIONS_UPDATED_EVENT, loadRecentStations);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -131,16 +120,16 @@ export function MapControlButtons({
         <Tabs
           value={viewMode}
           onValueChange={(value) => {
-            onToggleViewMode(value as "stations" | "sites");
+            onToggleViewMode(value as 'stations' | 'sites');
             setMenuOpen(false);
           }}
           className="h-9"
         >
           <TabsList className="h-9 w-full">
-            <TabsTrigger value="stations" className="h-8 flex-1">
+            <TabsTrigger disabled={isHistoricData} value="stations" className="h-8 flex-1">
               Stations
             </TabsTrigger>
-            <TabsTrigger value="sites" className="h-8 flex-1">
+            <TabsTrigger disabled={isHistoricData} value="sites" className="h-8 flex-1">
               Sites
             </TabsTrigger>
           </TabsList>
@@ -152,7 +141,7 @@ export function MapControlButtons({
         size="sm"
         className="justify-start gap-2"
         onClick={() => {
-          navigate("/grid");
+          navigate('/grid');
           setMenuOpen(false);
         }}
         disabled={isHistoricData}
@@ -171,7 +160,7 @@ export function MapControlButtons({
         disabled={isHistoricData}
       >
         <Camera className="h-4 w-4 opacity-70" />
-        {showWebcams ? "Hide" : "Show"} Webcams
+        {showWebcams ? 'Hide' : 'Show'} Webcams
       </Button>
       <Button
         variant="ghost"
@@ -188,7 +177,7 @@ export function MapControlButtons({
             <path d="m18,2.47l-9,6.53l-4.38,-4.38l-4.62,3.38l0,-2.48l4.83,-3.52l4.38,4.38l8.79,-6.38m0,12l-4.7,0l-4.17,3.34l-6.13,-5.93l-3,2.13l0,2.46l2.8,-2l6.2,6l5,-4l4,0l0,-2z" />
           </g>
         </svg>
-        {showSoundings ? "Hide" : "Show"} Soundings
+        {showSoundings ? 'Hide' : 'Show'} Soundings
       </Button>
       <div className="border-t my-1" />
       <Button
@@ -243,11 +232,7 @@ export function MapControlButtons({
                   <Menu className="h-4 w-4 opacity-70" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent
-                align="start"
-                sideOffset={4}
-                className="p-1 w-auto"
-              >
+              <PopoverContent align="start" sideOffset={4} className="p-1 w-auto">
                 {renderMenuContent()}
               </PopoverContent>
             </Popover>
@@ -255,6 +240,7 @@ export function MapControlButtons({
             <HistorySlider
               historyOffset={historyOffset}
               onHistoryChange={onHistoryChange}
+              disabled={viewMode === 'sites'}
             />
           </>
         ) : (
@@ -303,22 +289,21 @@ export function MapControlButtons({
             <HistorySlider
               historyOffset={historyOffset}
               onHistoryChange={onHistoryChange}
+              disabled={viewMode === 'sites'}
             />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate("/grid")}
+                  onClick={() => navigate('/grid')}
                   disabled={isHistoricData}
                   className="h-9 w-9"
                 >
                   <Grid3X3 className="h-4 w-4 opacity-70" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
-                Grid View of Nearby Weather Stations
-              </TooltipContent>
+              <TooltipContent>Grid View of Nearby Weather Stations</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -328,15 +313,13 @@ export function MapControlButtons({
                   onClick={onWebcamClick}
                   disabled={isHistoricData}
                   className={`h-9 w-9 bg-background ${
-                    showWebcams ? "*:[svg]:stroke-blue-500" : ""
+                    showWebcams ? '*:[svg]:stroke-blue-500' : ''
                   }`}
                 >
                   <Camera className="h-4 w-4 opacity-70" />
                 </Toggle>
               </TooltipTrigger>
-              <TooltipContent>
-                {showWebcams ? "Hide" : "Show"} Webcams on Map
-              </TooltipContent>
+              <TooltipContent>{showWebcams ? 'Hide' : 'Show'} Webcams on Map</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -345,9 +328,7 @@ export function MapControlButtons({
                   size="sm"
                   onClick={onSoundingClick}
                   disabled={isHistoricData}
-                  className={`h-9 w-9 bg-background ${
-                    showSoundings ? "fill-blue-500" : ""
-                  }`}
+                  className={`h-9 w-9 bg-background ${showSoundings ? 'fill-blue-500' : ''}`}
                 >
                   <svg viewBox="0 0 18 18" className="h-4 w-4 opacity-70">
                     <g transform="rotate(-90, 9, 9)">
@@ -356,24 +337,20 @@ export function MapControlButtons({
                   </svg>
                 </Toggle>
               </TooltipTrigger>
-              <TooltipContent>
-                {showSoundings ? "Hide" : "Show"} Soundings on Map
-              </TooltipContent>
+              <TooltipContent>{showSoundings ? 'Hide' : 'Show'} Soundings on Map</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Tabs
                   value={viewMode}
-                  onValueChange={(value) =>
-                    onToggleViewMode(value as "stations" | "sites")
-                  }
+                  onValueChange={(value) => onToggleViewMode(value as 'stations' | 'sites')}
                   className="h-9"
                 >
                   <TabsList className="h-9">
-                    <TabsTrigger value="stations" className="h-8">
+                    <TabsTrigger disabled={isHistoricData} value="stations" className="h-8">
                       Stations
                     </TabsTrigger>
-                    <TabsTrigger value="sites" className="h-8">
+                    <TabsTrigger disabled={isHistoricData} value="sites" className="h-8">
                       Sites
                     </TabsTrigger>
                   </TabsList>
@@ -397,11 +374,11 @@ export function MapControlButtons({
               onClick={onUnitToggle}
               className="h-9 w-9 text-xs font-semibold bg-background"
             >
-              {unit === "kt" ? "kt" : "km/h"}
+              {unit === 'kt' ? 'kt' : 'km/h'}
             </Toggle>
           </TooltipTrigger>
           <TooltipContent side="left">
-            Change unit to {unit === "kt" ? "km/h" : "kt"}
+            Change unit to {unit === 'kt' ? 'km/h' : 'kt'}
           </TooltipContent>
         </Tooltip>
         <Tooltip>
@@ -419,12 +396,7 @@ export function MapControlButtons({
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onLocateClick}
-              className="h-9 w-9"
-            >
+            <Button variant="outline" size="sm" onClick={onLocateClick} className="h-9 w-9">
               <LocateFixed className="h-4 w-4 opacity-70" />
             </Button>
           </TooltipTrigger>
@@ -449,12 +421,7 @@ export function MapControlButtons({
           {minimizeRecents ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onRecentsToggle}
-                  className="h-9 w-9"
-                >
+                <Button variant="outline" size="sm" onClick={onRecentsToggle} className="h-9 w-9">
                   <History className="h-4 w-4 opacity-70" />
                 </Button>
               </TooltipTrigger>
@@ -474,9 +441,7 @@ export function MapControlButtons({
                 {recentStations.map((station) => {
                   const displayName =
                     station.name.length > 14
-                      ? `${station.name.slice(0, 7)}...${station.name.slice(
-                          -5
-                        )}`
+                      ? `${station.name.slice(0, 7)}...${station.name.slice(-5)}`
                       : station.name;
                   return (
                     <Button

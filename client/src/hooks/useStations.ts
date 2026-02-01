@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { listStations } from "@/services/station.service";
-import type { IStation } from "@/models/station.model";
-import { getDistance, handleError } from "@/lib/utils";
-import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from ".";
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { listStations } from '@/services/station.service';
+import type { IStation } from '@/models/station.model';
+import { getDistance, handleError } from '@/lib/utils';
+import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from '.';
 
 interface UseStationsOptions {
   autoLoad?: boolean;
@@ -36,7 +36,7 @@ async function fetchStationsAndNotify() {
     cachedStations = result ?? [];
     cachedStationsError = null;
   } catch (err) {
-    cachedStationsError = handleError(err, "Failed to load stations");
+    cachedStationsError = handleError(err, 'Failed to load stations');
     cachedStations = [];
   } finally {
     cachedStationsLoading = false;
@@ -48,9 +48,7 @@ function notifyStationsListeners() {
   stationsListeners.forEach((fn) => fn());
 }
 
-export function useStations({
-  autoLoad = true,
-}: UseStationsOptions = {}): UseStationsResult {
+export function useStations({ autoLoad = true }: UseStationsOptions = {}): UseStationsResult {
   const [, forceUpdate] = useState(0);
 
   // Subscribe to cache updates
@@ -77,7 +75,7 @@ export function useStations({
     stations: cachedStations ?? [],
     isLoading: cachedStationsLoading || cachedStations === null,
     error: cachedStationsError,
-    refetch,
+    refetch
   };
 }
 
@@ -94,7 +92,7 @@ export function useNearbyStations({
   lat,
   lon,
   maxDistance = 5000,
-  limit,
+  limit
 }: UseNearbyLocationsOptions): UseNearbyLocationsResult<IStation> {
   const { stations: allStations, isLoading, error, refetch } = useStations();
 
@@ -105,22 +103,21 @@ export function useNearbyStations({
       return [];
     }
 
-    const stationsWithDistance: { data: IStation; distance: number }[] =
-      allStations
-        .map((station) => {
-          const distance = getDistance(
-            lat,
-            lon,
-            station.location.coordinates[0],
-            station.location.coordinates[1],
-          );
-          return {
-            data: station,
-            distance,
-          };
-        })
-        .filter((station) => station.distance <= maxDistance)
-        .sort((a, b) => a.distance - b.distance);
+    const stationsWithDistance: { data: IStation; distance: number }[] = allStations
+      .map((station) => {
+        const distance = getDistance(
+          lat,
+          lon,
+          station.location.coordinates[0],
+          station.location.coordinates[1]
+        );
+        return {
+          data: station,
+          distance
+        };
+      })
+      .filter((station) => station.distance <= maxDistance)
+      .sort((a, b) => a.distance - b.distance);
 
     return limit ? stationsWithDistance.slice(0, limit) : stationsWithDistance;
   }, [allStations, lon, lat, maxDistance, limit, isLoading]);
@@ -129,6 +126,6 @@ export function useNearbyStations({
     data: nearbyStations,
     isLoading,
     error,
-    refetch,
+    refetch
   };
 }

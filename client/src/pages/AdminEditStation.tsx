@@ -1,27 +1,27 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { getStationById, patchStation } from "@/services/station.service";
-import type { IStation } from "@/models/station.model";
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { getStationById, patchStation } from '@/services/station.service';
+import type { IStation } from '@/models/station.model';
 
 export default function AdminEditStation() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   const [station, setStation] = useState<IStation | null>(null);
-  const [stationData, setStationData] = useState("");
+  const [stationData, setStationData] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!id) {
-      navigate("/admin/stations");
+      navigate('/admin/stations');
       return;
     }
 
@@ -40,7 +40,7 @@ export default function AdminEditStation() {
     if (!station || isSaving) return;
 
     setIsSaving(true);
-    setError("");
+    setError('');
 
     try {
       const modified = JSON.parse(stationData) as IStation;
@@ -64,16 +64,12 @@ export default function AdminEditStation() {
         }
       }
 
-      const adminKey = sessionStorage.getItem("adminKey") ?? "";
-      await patchStation(
-        id!,
-        { patch, remove } as unknown as Partial<IStation>,
-        adminKey
-      );
-      toast.success("Station updated");
-      navigate("/admin/stations");
+      const adminKey = sessionStorage.getItem('adminKey') ?? '';
+      await patchStation(id!, { patch, remove } as unknown as Partial<IStation>, adminKey);
+      toast.success('Station updated');
+      navigate('/admin/stations');
     } catch {
-      setError("Invalid JSON data");
+      setError('Invalid JSON data');
     } finally {
       setIsSaving(false);
     }
@@ -82,18 +78,12 @@ export default function AdminEditStation() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b bg-white px-6 py-4 flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate("/admin/stations")}
-        >
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/stations')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
           <h1 className="text-xl font-semibold">Edit Station</h1>
-          {station && (
-            <p className="text-sm text-muted-foreground">{station.name}</p>
-          )}
+          {station && <p className="text-sm text-muted-foreground">{station.name}</p>}
         </div>
       </header>
 

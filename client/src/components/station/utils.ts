@@ -1,5 +1,5 @@
-import { getStoredValue } from "../map";
-import type { WindUnit } from "./types";
+import { getStoredValue } from '../map';
+import type { WindUnit } from './types';
 
 /**
  * Get direction color based on whether the bearing is within valid bearing ranges
@@ -9,66 +9,61 @@ export function getDirectionColor(
   validBearings: string | undefined
 ): string {
   if (bearing != null && validBearings) {
-    const pairs = validBearings.split(",");
+    const pairs = validBearings.split(',');
     for (const p of pairs) {
-      const bearings = p.split("-");
+      const bearings = p.split('-');
       if (bearings.length === 2) {
         const bearing1 = Number(bearings[0]);
         const bearing2 = Number(bearings[1]);
         if (bearing1 <= bearing2) {
           if (bearing >= bearing1 && bearing <= bearing2) {
-            return "rgba(192, 255, 191, 0.5)";
+            return 'rgba(192, 255, 191, 0.5)';
           }
         } else {
           if (bearing >= bearing1 || bearing <= bearing2) {
-            return "rgba(192, 255, 191, 0.5)";
+            return 'rgba(192, 255, 191, 0.5)';
           }
         }
       }
     }
   }
-  return "";
+  return '';
 }
 
 /**
  * Get unit preference from localStorage
  */
 export function getUnit(): WindUnit {
-  return getStoredValue<WindUnit>("unit", "kmh");
+  return getStoredValue<WindUnit>('unit', 'kmh');
 }
 
 /**
  * Convert wind speed based on unit preference
  */
-export function convertWindSpeed(
-  speed: number | null | undefined,
-  unit: WindUnit
-): number | null {
+export function convertWindSpeed(speed: number | null | undefined, unit: WindUnit): number | null {
   if (speed == null) return null;
-  return Math.round(unit === "kt" ? speed / 1.852 : speed);
+  return Math.round(unit === 'kt' ? speed / 1.852 : speed);
 }
 
 /**
  * Format temperature for display
  */
 export function formatTemperature(temp: number | null | undefined): string {
-  if (temp == null) return "";
+  if (temp == null) return '';
   return `${Math.round(temp * 10) / 10}°C`;
 }
 
 /**
  * Parse valid bearings string into sector pairs
  */
-export function parseValidBearings(
-  validBearings: string | undefined
-): [number, number][] {
+export function parseValidBearings(validBearings: string | undefined): [number, number][] {
   if (!validBearings) return [];
 
   const result: [number, number][] = [];
-  const pairs = validBearings.split(",");
+  const pairs = validBearings.split(',');
 
   for (const p of pairs) {
-    const temp = p.split("-");
+    const temp = p.split('-');
     if (temp.length === 2) {
       const b1 = Number(temp[0]);
       const b2 = Number(temp[1]);

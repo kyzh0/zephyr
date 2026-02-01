@@ -1,4 +1,4 @@
-import type { ILocation } from "./location.model";
+import type { ILocation } from './location.model';
 
 interface ICam {
   _id: string;

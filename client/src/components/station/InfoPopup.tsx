@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 interface InfoPopupProps {
   message: string;
@@ -31,15 +31,15 @@ export function InfoPopup({ message }: InfoPopupProps) {
       el.style.top = `${y + 20}px`;
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   return (
     <div
       ref={popupRef}
       className="absolute z-[100] min-w-[40vh] rounded-lg border bg-pink-50 p-4 shadow-lg"
-      style={{ left: "50%", transform: "translateX(-50%)" }}
+      style={{ left: '50%', transform: 'translateX(-50%)' }}
     >
       <h2 className="mb-2 text-center text-lg font-bold">INFO</h2>
       <p className="text-center text-sm">{message}</p>
