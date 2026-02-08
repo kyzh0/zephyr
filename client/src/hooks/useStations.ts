@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useCallback, useMemo, useSyncExternalStore } from 'react';
 import { listStations } from '@/services/station.service';
 import type { IStation } from '@/models/station.model';
 import { getDistance, handleError } from '@/lib/utils';
@@ -48,17 +48,37 @@ function notifyStationsListeners() {
   stationsListeners.forEach((fn) => fn());
 }
 
-export function useStations({ autoLoad = true }: UseStationsOptions = {}): UseStationsResult {
-  const [, forceUpdate] = useState(0);
+function subscribeStations(callback: () => void) {
+  stationsListeners.push(callback);
+  return () => {
+    stationsListeners = stationsListeners.filter((fn) => fn !== callback);
+  };
+}
 
-  // Subscribe to cache updates
-  useEffect(() => {
-    const update = () => forceUpdate((n) => n + 1);
-    stationsListeners.push(update);
-    return () => {
-      stationsListeners = stationsListeners.filter((fn) => fn !== update);
-    };
-  }, []);
+function getStationsSnapshot() {
+  return {
+    stations: cachedStations,
+    error: cachedStationsError,
+    isLoading: cachedStationsLoading
+  };
+}
+
+let lastStationsSnapshot = getStationsSnapshot();
+function getStableStationsSnapshot() {
+  const next = getStationsSnapshot();
+  if (
+    next.stations === lastStationsSnapshot.stations &&
+    next.error === lastStationsSnapshot.error &&
+    next.isLoading === lastStationsSnapshot.isLoading
+  ) {
+    return lastStationsSnapshot;
+  }
+  lastStationsSnapshot = next;
+  return next;
+}
+
+export function useStations({ autoLoad = true }: UseStationsOptions = {}): UseStationsResult {
+  const snapshot = useSyncExternalStore(subscribeStations, getStableStationsSnapshot);
 
   // Fetch once if needed
   useEffect(() => {
@@ -72,9 +92,9 @@ export function useStations({ autoLoad = true }: UseStationsOptions = {}): UseSt
   }, []);
 
   return {
-    stations: cachedStations ?? [],
-    isLoading: cachedStationsLoading || cachedStations === null,
-    error: cachedStationsError,
+    stations: snapshot.stations ?? [],
+    isLoading: snapshot.isLoading || snapshot.stations === null,
+    error: snapshot.error,
     refetch
   };
 }

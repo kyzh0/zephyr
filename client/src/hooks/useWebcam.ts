@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useSyncExternalStore } from 'react';
 import { getCamById, loadCamImages, listCams } from '@/services/cam.service';
 import type { ICam, ICamImage } from '@/models/cam.model';
 import { getDistance, handleError } from '@/lib/utils';
@@ -124,21 +124,38 @@ export function useWebcam({ id, autoLoad = true }: UseWebcamOptions = {}): UseWe
   };
 }
 
+function subscribeWebcams(callback: () => void) {
+  webcamsListeners.push(callback);
+  return () => {
+    webcamsListeners = webcamsListeners.filter((fn) => fn !== callback);
+  };
+}
+
+function getWebcamsSnapshot() {
+  return { webcams: cachedWebcams, error: cachedWebcamsError, isLoading: cachedWebcamsLoading };
+}
+
+// Keep a stable reference when the snapshot values haven't changed
+let lastWebcamsSnapshot = getWebcamsSnapshot();
+function getStableWebcamsSnapshot() {
+  const next = getWebcamsSnapshot();
+  if (
+    next.webcams === lastWebcamsSnapshot.webcams &&
+    next.error === lastWebcamsSnapshot.error &&
+    next.isLoading === lastWebcamsSnapshot.isLoading
+  ) {
+    return lastWebcamsSnapshot;
+  }
+  lastWebcamsSnapshot = next;
+  return next;
+}
+
 /**
  * Hook for fetching all webcams
  * @returns List of all webcams with loading and error states
  */
 export function useWebcams() {
-  const [, forceUpdate] = useState(0);
-
-  // Subscribe to cache updates
-  useEffect(() => {
-    const update = () => forceUpdate((n) => n + 1);
-    webcamsListeners.push(update);
-    return () => {
-      webcamsListeners = webcamsListeners.filter((fn) => fn !== update);
-    };
-  }, []);
+  const snapshot = useSyncExternalStore(subscribeWebcams, getStableWebcamsSnapshot);
 
   // Fetch once if needed
   useEffect(() => {
@@ -152,9 +169,9 @@ export function useWebcams() {
   }, []);
 
   return {
-    webcams: cachedWebcams ?? [],
-    isLoading: cachedWebcamsLoading || cachedWebcams === null,
-    error: cachedWebcamsError,
+    webcams: snapshot.webcams ?? [],
+    isLoading: snapshot.isLoading || snapshot.webcams === null,
+    error: snapshot.error,
     refetch
   };
 }
