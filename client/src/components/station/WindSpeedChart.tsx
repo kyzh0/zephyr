@@ -46,6 +46,7 @@ export function WindSpeedChart({ data }: WindSpeedChartProps) {
             stroke="#8884d8"
             dot={{ r: 0 }}
             activeDot={{ r: 4 }}
+            isAnimationActive={false}
           />
           <Line
             type="monotone"
@@ -54,6 +55,7 @@ export function WindSpeedChart({ data }: WindSpeedChartProps) {
             stroke="#ffa894"
             dot={{ r: 0 }}
             activeDot={{ r: 4 }}
+            isAnimationActive={false}
           />
         </LineChart>
       </ResponsiveContainer>
