@@ -68,6 +68,7 @@ export function WindDirectionChart({ data, bearingPairCount }: WindDirectionChar
             stroke="#8884d8"
             strokeWidth={0}
             dot={{ r: 1, strokeWidth: 2 }}
+            isAnimationActive={false}
           />
           {[...Array(bearingPairCount).keys()].map((i) => (
             <Area

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useCallback, useMemo, useSyncExternalStore } from 'react';
 import { listSites } from '@/services/site.service';
 import type { ISite } from '@/models/site.model';
 import { getDistance, handleError } from '@/lib/utils';
@@ -41,6 +41,31 @@ export interface UseSitesResult {
   refetch: () => Promise<void>;
 }
 
+function subscribeSites(callback: () => void) {
+  listeners.push(callback);
+  return () => {
+    listeners = listeners.filter((fn) => fn !== callback);
+  };
+}
+
+function getSitesSnapshot() {
+  return { sites: cachedSites, error: cachedError, isLoading: cachedLoading };
+}
+
+let lastSitesSnapshot = getSitesSnapshot();
+function getStableSitesSnapshot() {
+  const next = getSitesSnapshot();
+  if (
+    next.sites === lastSitesSnapshot.sites &&
+    next.error === lastSitesSnapshot.error &&
+    next.isLoading === lastSitesSnapshot.isLoading
+  ) {
+    return lastSitesSnapshot;
+  }
+  lastSitesSnapshot = next;
+  return next;
+}
+
 /**
  * Hook for fetching all sites
  * @param options - Configuration options
@@ -48,16 +73,7 @@ export interface UseSitesResult {
  * @returns All sites with loading and error states
  */
 export function useSites({ autoLoad = true }: UseSitesOptions = {}): UseSitesResult {
-  const [, forceUpdate] = useState(0);
-
-  // Subscribe to cache updates
-  useEffect(() => {
-    const update = () => forceUpdate((n) => n + 1);
-    listeners.push(update);
-    return () => {
-      listeners = listeners.filter((fn) => fn !== update);
-    };
-  }, []);
+  const snapshot = useSyncExternalStore(subscribeSites, getStableSitesSnapshot);
 
   // Fetch once if needed
   useEffect(() => {
@@ -71,9 +87,9 @@ export function useSites({ autoLoad = true }: UseSitesOptions = {}): UseSitesRes
   }, []);
 
   return {
-    sites: cachedSites ?? [],
-    isLoading: cachedLoading || cachedSites === null,
-    error: cachedError,
+    sites: snapshot.sites ?? [],
+    isLoading: snapshot.isLoading || snapshot.sites === null,
+    error: snapshot.error,
     refetch
   };
 }

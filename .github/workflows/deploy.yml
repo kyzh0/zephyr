@@ -221,7 +221,7 @@ jobs:
             WEATHERLINK_PASSWORD=${{ secrets.WEATHERLINK_PASSWORD }}
 
             EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}
-            EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}
+            EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE1_ID }}
             EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}
             EMAILJS_PRIVATE_KEY=${{ secrets.EMAILJS_PRIVATE_KEY }}
             EOF
