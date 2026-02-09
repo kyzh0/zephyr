@@ -26,6 +26,7 @@ import {
   ItemTitle
 } from '@/components/ui/item';
 import { handleError } from '@/lib/utils';
+import SEO from '@/components/SEO';
 
 export default function Site() {
   const { id } = useParams<{ id: string }>();
@@ -152,10 +153,17 @@ export default function Site() {
     </>
   );
 
+  const landingDescription = landing
+    ? `${landing.name} — landing zone in New Zealand.${landing.description ? ` ${landing.description.slice(0, 120)}` : ''}`
+    : undefined;
+
   // Mobile: Full-screen layout
   if (isMobile) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
+        {landing && (
+          <SEO title={landing.name} description={landingDescription} path={`/landings/${id}`} />
+        )}
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background p-4 pb-0">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -178,6 +186,9 @@ export default function Site() {
   // Desktop: Dialog overlay
   return (
     <Dialog open onOpenChange={() => navigate('/')}>
+      {landing && (
+        <SEO title={landing.name} description={landingDescription} path={`/landings/${id}`} />
+      )}
       <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="pb-2">
           <DialogTitle className="flex w-full text-center justify-center items-center mb-3">

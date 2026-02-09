@@ -30,6 +30,7 @@ import { Slider } from '@/components/ui/slider';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from 'sonner';
+import SEO from '@/components/SEO';
 
 const DEFAULT_LON = 172.5;
 const DEFAULT_LAT = -42;
@@ -400,6 +401,12 @@ export default function ExportMapData() {
   if (isMobile) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
+        <SEO
+          title="Export Data"
+          description="Export historical wind and weather data from Zephyr stations in New Zealand. Download data as XLSX for analysis."
+          path="/export-map-data"
+          noindex
+        />
         <div className="sticky top-0 z-10 bg-background border-b px-4 py-3">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold">Export Data</h1>
@@ -416,6 +423,12 @@ export default function ExportMapData() {
   // Desktop: Dialog overlay
   return (
     <Dialog open onOpenChange={handleClose}>
+      <SEO
+        title="Export Data"
+        description="Export historical wind and weather data from Zephyr stations in New Zealand. Download data as XLSX for analysis."
+        path="/export-map-data"
+        noindex
+      />
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-center">Export Data</DialogTitle>

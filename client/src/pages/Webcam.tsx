@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 export default function Webcam() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +32,13 @@ export default function Webcam() {
 
   return (
     <Dialog open onOpenChange={() => navigate(-1)}>
+      {webcam && (
+        <SEO
+          title={`${webcam.name} Webcam`}
+          description={`Live webcam view of ${webcam.name}. Check current weather conditions visually for free flying in New Zealand.`}
+          path={`/webcams/${id}`}
+        />
+      )}
       <DialogContent className="sm:max-w-6xl w-[95vw] max-h-[90vh] p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-base sm:text-lg">
