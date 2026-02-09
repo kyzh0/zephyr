@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import SEO from '@/components/SEO';
 
 import { useAppContext } from '@/context/AppContext';
 import { MapControlButtons, getStoredValue, setStoredValue } from '@/components/map';
@@ -262,6 +263,24 @@ export default function Map() {
 
   return (
     <div className="absolute top-0 left-0 h-dvh w-screen flex flex-col">
+      <SEO
+        path="/"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: 'Zephyr',
+          url: 'https://www.zephyrapp.nz',
+          description:
+            'Weather station aggregator built for free flying in New Zealand. Browse live wind and weather data from stations across the country on an interactive map.',
+          applicationCategory: 'WeatherApplication',
+          operatingSystem: 'Any',
+          areaServed: {
+            '@type': 'Country',
+            name: 'New Zealand'
+          }
+        }}
+      />
+
       {/* Red border overlay when in history mode */}
       {isHistoricData && (
         <div className="absolute inset-0 border-4 border-red-500 pointer-events-none z-40" />

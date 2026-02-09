@@ -74,6 +74,7 @@ export const SiteMarker = ({
           style={{ transform: 'rotate(0deg)' }}
         >
           {arcPaths.map((path, index) => (
+            // eslint-disable-next-line react-x/no-array-index-key
             <path key={index} d={path} fill="#FFA930" fillOpacity="0.9" />
           ))}
         </svg>

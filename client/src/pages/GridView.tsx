@@ -15,6 +15,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { StationPreview } from '@/components/station/StationPreview';
+import SEO from '@/components/SEO';
 
 export default function GridView() {
   const navigate = useNavigate();
@@ -59,6 +60,11 @@ export default function GridView() {
 
   return (
     <Dialog open onOpenChange={() => navigate(-1)}>
+      <SEO
+        title="Nearby Stations"
+        description="View nearby weather stations sorted by distance. Live wind speed, gust, and direction data for free flying in New Zealand."
+        path="/grid"
+      />
       <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Nearby Stations</DialogTitle>

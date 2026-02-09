@@ -21,6 +21,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { addRecentStation } from '@/services/recentStations.service';
 import { WebcamPreview } from '@/components/webcam/WebcamPreview';
+import SEO from '@/components/SEO';
 
 export default function Station() {
   const { id } = useParams<{ id: string }>();
@@ -73,6 +74,10 @@ export default function Station() {
       addRecentStation(id, station.name);
     }
   }, [station, id]);
+
+  const stationDescription = station
+    ? `Live wind and weather data for ${station.name}. Updated every minute.`
+    : `Live wind and weather data. Updated every minute.`;
 
   // Shared header content
   const headerContent = station ? (
@@ -230,6 +235,9 @@ export default function Station() {
   if (isMobile) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
+        {station && (
+          <SEO title={station.name} description={stationDescription} path={`/stations/${id}`} />
+        )}
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background p-4 pb-0">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -255,6 +263,9 @@ export default function Station() {
   // Desktop: Dialog overlay
   return (
     <Dialog open onOpenChange={() => navigate('/')}>
+      {station && (
+        <SEO title={station.name} description={stationDescription} path={`/stations/${id}`} />
+      )}
       <DialogContent className="sm:max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
         <DialogHeader className="sticky pb-2">
           <DialogTitle className="text-center">{headerContent}</DialogTitle>

@@ -1,4 +1,5 @@
 import { createBrowserRouter, Outlet } from 'react-router-dom';
+import { usePageTracking } from './hooks/usePageTracking';
 
 // Import the route components we've created
 import MapWrapper from './pages/MapWrapper';
@@ -20,10 +21,16 @@ import AdminEditSite from './pages/AdminEditSite';
 import AdminEditLanding from './pages/AdminEditLanding';
 import ProtectedRoute from './pages/ProtectedRoute';
 
+// eslint-disable-next-line react-refresh/only-export-components
+function RootLayout() {
+  usePageTracking();
+  return <Outlet />;
+}
+
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Outlet />,
+    element: <RootLayout />,
     children: [
       {
         path: '',

@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 export default function Sounding() {
   const { id } = useParams<{ id: string }>();
@@ -42,6 +43,13 @@ export default function Sounding() {
 
   return (
     <Dialog open onOpenChange={() => navigate(-1)}>
+      {sounding && (
+        <SEO
+          title={`${sounding.name} Sounding`}
+          description={`Atmospheric sounding forecast for ${sounding.name}. View predicted thermal and wind conditions for paragliding and hang gliding in New Zealand.`}
+          path={`/soundings/${id}`}
+        />
+      )}
       <DialogContent className="max-w-3xl p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-base sm:text-lg">

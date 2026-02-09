@@ -9,12 +9,35 @@
       name="description"
       content="Zephyr is a weather station aggregator built for free flying in New Zealand. Browse live wind and weather data from stations across the country on an interactive map to make smarter, safer flying decisions."
     />
+    <link rel="canonical" href="https://www.zephyrapp.nz/" />
     <link rel="apple-touch-icon" href="/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
     <link rel="manifest" href="/manifest.json" />
+
+    <!-- Open Graph defaults (overridden per-page by React 19 metadata) -->
+    <meta property="og:title" content="Zephyr — Live Wind & Weather for NZ Free Flying" />
+    <meta
+      property="og:description"
+      content="Zephyr is a weather station aggregator built for free flying in New Zealand. Browse live wind and weather data from stations across the country on an interactive map to make smarter, safer flying decisions."
+    />
+    <meta property="og:url" content="https://www.zephyrapp.nz/" />
+    <meta property="og:image" content="https://www.zephyrapp.nz/logo512.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Zephyr" />
+    <meta property="og:locale" content="en_NZ" />
+
+    <!-- Twitter Card defaults -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Zephyr — Live Wind & Weather for NZ Free Flying" />
+    <meta
+      name="twitter:description"
+      content="Zephyr is a weather station aggregator built for free flying in New Zealand. Browse live wind and weather data from stations across the country on an interactive map to make smarter, safer flying decisions."
+    />
+    <meta name="twitter:image" content="https://www.zephyrapp.nz/logo512.png" />
+
+    <!-- Additional SEO -->
+    <meta name="author" content="Zephyr" />
+    <meta name="geo.region" content="NZ" />
+    <meta name="geo.placename" content="New Zealand" />
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-6ZC59F952Y"></script>
@@ -25,10 +48,10 @@
       }
       gtag('js', new Date());
 
-      gtag('config', 'G-6ZC59F952Y');
+      gtag('config', 'G-6ZC59F952Y', { send_page_view: false });
     </script>
 
-    <title>Zephyr</title>
+    <title>Zephyr — Live Wind & Weather for NZ Free Flying</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
