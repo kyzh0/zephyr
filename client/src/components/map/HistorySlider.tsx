@@ -1,9 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { formatInTimeZone } from 'date-fns-tz';
-import { X, ChevronLeft, ChevronRight, Hourglass } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface HistorySliderProps {
   historyOffset: number;
@@ -32,8 +31,6 @@ export function HistorySlider({
   onHistoryChange,
   disabled = false
 }: HistorySliderProps) {
-  const [isExpanded, setIsExpanded] = useState(historyOffset < 0);
-
   const handleSliderChange = useCallback(
     (value: number[]) => {
       onHistoryChange(value[0]);
@@ -55,41 +52,11 @@ export function HistorySlider({
 
   const handleClose = useCallback(() => {
     onHistoryChange(0);
-    setIsExpanded(false);
   }, [onHistoryChange]);
 
-  const handleToggle = useCallback(() => {
-    if (isExpanded && historyOffset === 0) {
-      setIsExpanded(false);
-    } else if (!isExpanded) {
-      onHistoryChange(-30);
-      setIsExpanded(true);
-    }
-  }, [isExpanded, historyOffset, onHistoryChange]);
-
   const snapshotTime = getSnapshotTime(historyOffset);
-
-  if (!isExpanded) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleToggle}
-            disabled={disabled}
-            className="h-9 w-9"
-          >
-            <Hourglass className="h-4 w-4 opacity-70" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>View Historical Data</TooltipContent>
-      </Tooltip>
-    );
-  }
-
   return (
-    <div className="fixed inset-x-0 bottom-4 z-50 flex justify-center w-full px-4">
+    <div className="fixed inset-x-0 bottom-4 z-100 flex justify-center w-full px-4">
       <div className="flex items-center gap-2 bg-red-100 border-2 border-red-500 px-4 pt-3 pb-2 rounded-lg shadow-lg">
         <div className="flex flex-col gap-2">
           {/* Slider */}

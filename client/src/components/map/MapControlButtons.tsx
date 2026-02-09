@@ -9,7 +9,8 @@ import {
   Camera,
   LocateFixed,
   History,
-  Mail
+  Mail,
+  Hourglass
 } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { HelpDialog, WELCOME_STORAGE_KEY } from './HelpDialog';
@@ -141,6 +142,19 @@ export function MapControlButtons({
         size="sm"
         className="justify-start gap-2"
         onClick={() => {
+          onHistoryChange(-30);
+          setMenuOpen(false);
+        }}
+        disabled={isHistoricData || viewMode === 'sites'}
+      >
+        <Hourglass className="h-4 w-4 opacity-70" />
+        History View
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="justify-start gap-2"
+        onClick={() => {
           navigate('/grid');
           setMenuOpen(false);
         }}
@@ -148,19 +162,6 @@ export function MapControlButtons({
       >
         <Grid3X3 className="h-4 w-4 opacity-70" />
         Grid View
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="justify-start gap-2"
-        onClick={() => {
-          onWebcamClick();
-          setMenuOpen(false);
-        }}
-        disabled={isHistoricData}
-      >
-        <Camera className="h-4 w-4 opacity-70" />
-        {showWebcams ? 'Hide' : 'Show'} Webcams
       </Button>
       <Button
         variant="ghost"
@@ -225,7 +226,7 @@ export function MapControlButtons({
       <div className="flex flex-wrap gap-2 items-start absolute top-2.5 left-2.5 z-50 right-2.5 md:right-auto">
         {isMobile ? (
           <>
-            {/* Mobile: Hamburger menu + Search + Historic Data */}
+            {/* Mobile: Hamburger menu + Search + Webcams */}
             <Popover open={menuOpen} onOpenChange={setMenuOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="h-9 w-9">
@@ -237,11 +238,15 @@ export function MapControlButtons({
               </PopoverContent>
             </Popover>
             <SearchBar disabled={isHistoricData} />
-            <HistorySlider
-              historyOffset={historyOffset}
-              onHistoryChange={onHistoryChange}
-              disabled={viewMode === 'sites'}
-            />
+            <Toggle
+              variant="outline"
+              size="sm"
+              onClick={onWebcamClick}
+              disabled={isHistoricData}
+              className={`h-9 w-9 bg-background ${showWebcams ? '*:[svg]:stroke-blue-500' : ''}`}
+            >
+              <Camera className="h-4 w-4 opacity-70" />
+            </Toggle>
           </>
         ) : (
           <>
@@ -286,11 +291,23 @@ export function MapControlButtons({
               </TooltipTrigger>
               <TooltipContent>Contact</TooltipContent>
             </Tooltip>
-            <HistorySlider
-              historyOffset={historyOffset}
-              onHistoryChange={onHistoryChange}
-              disabled={viewMode === 'sites'}
-            />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Toggle
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onHistoryChange(isHistoricData ? 0 : -30)}
+                  disabled={viewMode === 'sites'}
+                  className={`h-9 w-9 bg-background ${
+                    historyOffset < 0 ? '*:[svg]:stroke-blue-500' : ''
+                  }`}
+                >
+                  <Hourglass className="h-4 w-4 opacity-70" />
+                </Toggle>
+              </TooltipTrigger>
+              <TooltipContent>{historyOffset < 0 ? 'Hide' : 'Show'} History</TooltipContent>
+            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -414,6 +431,15 @@ export function MapControlButtons({
       <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
       <DonateDialog open={donateOpen} onOpenChange={setDonateOpen} />
       <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />
+
+      {/* History Slider at bottom */}
+      {historyOffset < 0 && (
+        <HistorySlider
+          historyOffset={historyOffset}
+          onHistoryChange={onHistoryChange}
+          disabled={viewMode === 'sites'}
+        />
+      )}
 
       {/* Bottom left - Recent Stations (hidden in history mode) */}
       {recentStations.length > 0 && !isHistoricData && (
