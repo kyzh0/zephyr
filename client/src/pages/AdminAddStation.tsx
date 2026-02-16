@@ -74,7 +74,17 @@ const formSchema = z.discriminatedUnion('type', [
   harvestSchema,
   gwSchema,
   baseSchema.extend({
-    type: z.enum(['holfuy', 'metservice', 'wu', 'tempest', 'attentis', 'wow', 'windguru', 'wp'])
+    type: z.enum([
+      'holfuy',
+      'metservice',
+      'wu',
+      'tempest',
+      'attentis',
+      'wow',
+      'windguru',
+      'windy',
+      'wp'
+    ])
   })
 ]);
 
