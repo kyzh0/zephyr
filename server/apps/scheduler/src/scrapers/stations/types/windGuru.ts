@@ -36,7 +36,7 @@ export default async function scrapeWindGuruData(stations: WithId<StationAttrs>[
 
           if (data && data.datetime) {
             const time = fromZonedTime(
-              parse(data.datetime.replace(/ NZD?ST$/, ''), 'yyyy-MM-dd HH:mm:ss', new Date()),
+              parse(data.datetime.replace(/ NZD[ST]$/, ''), 'yyyy-MM-dd HH:mm:ss', new Date()),
               'Pacific/Auckland'
             );
 
