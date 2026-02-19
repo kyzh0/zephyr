@@ -22,6 +22,7 @@ export type CamAttrs = {
   currentTime?: Date;
   currentUrl?: string;
   images: CamImage[];
+  isDisabled?: boolean;
 };
 
 export type CamDoc = HydratedDocument<CamAttrs>;
@@ -58,11 +59,15 @@ const camSchema = new mongoose.Schema<CamAttrs>(
         fileSize: { type: Number },
         hash: { type: String }
       }
-    ]
+    ],
+
+    isDisabled: { type: Boolean }
   },
   {
     optimisticConcurrency: true
   }
 );
+
+camSchema.index({ isDisabled: 1 });
 
 export const Cam: Model<CamAttrs> = mongoose.model<CamAttrs>('Cam', camSchema);

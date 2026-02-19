@@ -17,10 +17,11 @@ import { listStations } from '@/services/station.service';
 import { listSoundings } from '@/services/sounding.service';
 import { listSites } from '@/services/site.service';
 import { listLandings } from '@/services/landing.service';
+import { listCams } from '@/services/cam.service';
 import type { IStation } from '@/models/station.model';
 import type { ISounding } from '@/models/sounding.model';
+import type { ICam } from '@/models/cam.model';
 import { getMinutesAgo } from '@/lib/utils';
-import { useWebcams } from '@/hooks';
 import type { ISite } from '@/models/site.model';
 import type { ILanding } from '@/models/landing.model';
 
@@ -40,7 +41,8 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
 
   // Webcams state
-  const { webcams, isLoading: webcamsLoading } = useWebcams();
+  const [webcams, setWebcams] = useState<ICam[]>([]);
+  const [webcamsLoading, setWebcamsLoading] = useState(true);
   const [webcamSearch, setWebcamSearch] = useState('');
 
   // Soundings state
@@ -92,6 +94,15 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
     loadLandings();
   }, []);
 
+  useEffect(() => {
+    async function loadWebcams() {
+      const data = await listCams(true);
+      if (data) setWebcams(data);
+      setWebcamsLoading(false);
+    }
+    loadWebcams();
+  }, []);
+
   const filteredStations = useMemo(() => {
     if (!stations.length) return [];
     let filtered = stations;
@@ -125,9 +136,16 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
 
   const filteredWebcams = useMemo(() => {
     if (!webcams?.length) return [];
-    if (!webcamSearch.trim()) return webcams;
-    const query = webcamSearch.toLowerCase();
-    return webcams.filter((w) => w.name.toLowerCase().includes(query));
+    let filtered = webcams;
+    if (webcamSearch.trim()) {
+      const query = webcamSearch.toLowerCase();
+      filtered = filtered.filter((w) => w.name.toLowerCase().includes(query));
+    }
+    return filtered.sort((a, b) => {
+      const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
+      if (disabledDiff !== 0) return disabledDiff;
+      return a.name.localeCompare(b.name);
+    });
   }, [webcams, webcamSearch]);
 
   const filteredSoundings = useMemo(() => {
@@ -317,19 +335,20 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead className="w-[100px]">Type</TableHead>
+                    <TableHead className="w-[100px]">Status</TableHead>
                     <TableHead className="w-[100px]">Last Updated</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {webcamsLoading ? (
                     <TableRow>
-                      <TableCell colSpan={2} className="text-muted-foreground">
+                      <TableCell colSpan={4} className="text-muted-foreground">
                         Loading...
                       </TableCell>
                     </TableRow>
                   ) : !filteredWebcams?.length ? (
                     <TableRow>
-                      <TableCell colSpan={2} className="text-muted-foreground">
+                      <TableCell colSpan={4} className="text-muted-foreground">
                         No webcams found
                       </TableCell>
                     </TableRow>
@@ -338,6 +357,13 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                       <TableRow key={webcam._id}>
                         <TableCell className="font-medium">{webcam.name}</TableCell>
                         <TableCell>{webcam.type}</TableCell>
+                        <TableCell>
+                          {webcam.isDisabled ? (
+                            <span>Disabled</span>
+                          ) : (
+                            <span className="text-green-600">OK</span>
+                          )}
+                        </TableCell>
                         <TableCell>
                           {webcam.lastUpdate
                             ? `${getMinutesAgo(new Date(webcam.lastUpdate))}`

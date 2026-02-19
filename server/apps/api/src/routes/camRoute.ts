@@ -8,6 +8,7 @@ const router = express.Router();
 
 type CamsListQuery = {
   unixTimeFrom?: string;
+  includeDisabled?: string;
 };
 
 type CreateCamQuery = {
@@ -20,27 +21,54 @@ type CreateCamBody = {
   coordinates: [number, number]; // [lng, lat]
   externalLink: string;
   externalId?: string;
+  isDisabled?: boolean;
+};
+
+type PatchCamBody = {
+  name?: string;
+  type?: string;
+  coordinates?: [number, number];
+  externalLink?: string;
+  externalId?: string;
+  isDisabled?: boolean;
 };
 
 type IdParams = {
   id: string;
 };
 
+type ApiKeyQuery = { key?: string };
+
 type CamImagesAggResult = {
   images: CamImage[];
 };
+
+type CamListDoc = CamAttrs & { _id: ObjectId; imageCount?: number };
 
 router.get(
   '/',
   async (req: Request<Record<string, never>, unknown, unknown, CamsListQuery>, res: Response) => {
     const time = Number(req.query.unixTimeFrom);
 
-    const query: QueryFilter<CamAttrs> = {};
+    const match: QueryFilter<CamAttrs> = {};
+    if (String(req.query.includeDisabled).toLowerCase() !== 'true') {
+      match.isDisabled = { $ne: true };
+    }
     if (time) {
-      query.lastUpdate = { $gte: new Date(time * 1000) };
+      match.lastUpdate = { $gte: new Date(time * 1000) };
     }
 
-    const cams = await Cam.find(query, { images: 0 }).sort({ currentTime: 1 }).lean();
+    const cams = await Cam.aggregate<CamListDoc>([
+      { $match: match },
+      {
+        $addFields: {
+          imageCount: { $size: { $ifNull: ['$images', []] } }
+        }
+      },
+      { $project: { images: 0 } },
+      { $sort: { currentTime: 1 } }
+    ]);
+
     res.json(cams);
   }
 );
@@ -57,7 +85,7 @@ router.post(
       return;
     }
 
-    const { name, type, coordinates, externalLink, externalId } = req.body;
+    const { name, type, coordinates, externalLink, externalId, isDisabled } = req.body;
     const cam = new Cam({
       name,
       type,
@@ -66,7 +94,8 @@ router.post(
         coordinates
       },
       externalLink,
-      externalId
+      externalId,
+      isDisabled
     });
 
     try {

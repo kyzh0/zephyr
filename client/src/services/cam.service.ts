@@ -9,18 +9,26 @@ export const getCamById = async (id: string) => {
   }
 };
 
-export const listCams = async () => {
+export const listCams = async (includeDisabled?: boolean) => {
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/cams`);
+    let url = `${import.meta.env.VITE_API_PREFIX}/cams`;
+    if (includeDisabled) {
+      url += '?includeDisabled=true';
+    }
+    const res = await fetch(url);
     return (await res.json()) as ICam[];
   } catch (error) {
     console.error(error);
   }
 };
 
-export async function listCamsUpdatedSince(unixTime: number) {
+export async function listCamsUpdatedSince(unixTime: number, includeDisabled?: boolean) {
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/cams?unixTimeFrom=${unixTime}`);
+    let url = `${import.meta.env.VITE_API_PREFIX}/cams?unixTimeFrom=${unixTime}`;
+    if (includeDisabled) {
+      url += '&includeDisabled=true';
+    }
+    const res = await fetch(url);
     return (await res.json()) as ICam[];
   } catch (error) {
     console.error(error);
