@@ -76,26 +76,6 @@ export function useSoundingMarkers({
     [navigate]
   );
 
-  // Initialize soundings
-  const initialize = useCallback(async () => {
-    const geoJson = getSoundingGeoJson(await listSoundings());
-    if (!map.current || !geoJson?.features.length) return;
-
-    const timestamp = Date.now();
-    lastRefreshRef.current = timestamp;
-
-    for (const f of geoJson.features) {
-      const name = f.properties.name as string;
-      const dbId = f.properties.dbId as string;
-      const currentTime = f.properties.currentTime as Date | null;
-      const currentUrl = f.properties.currentUrl as string;
-
-      const el = createSoundingMarker(dbId, name, currentTime, currentUrl, timestamp);
-      markersRef.current.push(el);
-      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
-    }
-  }, [map, createSoundingMarker]);
-
   // Refresh soundings
   const refresh = useCallback(async () => {
     if (isHistoricData) return;
@@ -128,7 +108,6 @@ export function useSoundingMarkers({
       const currentTime = match.properties.currentTime as Date | null;
       const currentUrl = match.properties.currentUrl as string;
 
-      // eslint-disable-next-line react-hooks/immutability
       item.dataset.timestamp = String(timestamp);
 
       for (const child of Array.from(item.children)) {
@@ -153,12 +132,43 @@ export function useSoundingMarkers({
     }
   }, []);
 
-  // Initialize when map is loaded
+  // Initialize when map is loaded (only once - markersRef empty)
   useEffect(() => {
-    if (isMapLoaded) {
-      initialize();
+    if (!isMapLoaded || !map.current || markersRef.current.length > 0) return;
+
+    let cancelled = false;
+
+    async function initialize() {
+      try {
+        const soundings = await listSoundings();
+        if (cancelled) return;
+        const geoJson = getSoundingGeoJson(soundings);
+        if (!map.current || !geoJson?.features.length || markersRef.current.length > 0) return;
+
+        const timestamp = Date.now();
+        lastRefreshRef.current = timestamp;
+
+        for (const f of geoJson.features) {
+          const name = f.properties.name as string;
+          const dbId = f.properties.dbId as string;
+          const currentTime = f.properties.currentTime as Date | null;
+          const currentUrl = f.properties.currentUrl as string;
+
+          const el = createSoundingMarker(dbId, name, currentTime, currentUrl, timestamp);
+          el.style.visibility = isVisible ? 'visible' : 'hidden';
+          markersRef.current.push(el);
+          new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
+        }
+      } catch {
+        // ignore
+      }
     }
-  }, [isMapLoaded, initialize]);
+
+    void initialize();
+    return () => {
+      cancelled = true;
+    };
+  }, [isMapLoaded, isVisible, createSoundingMarker, map]);
 
   // Update visibility when prop changes
   useEffect(() => {

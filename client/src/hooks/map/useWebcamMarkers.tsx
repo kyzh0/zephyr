@@ -107,28 +107,6 @@ export function useWebcamMarkers({
     return getWebcamGeoJson(cams);
   }, []);
 
-  // Initialize webcams
-  const initialize = useCallback(() => {
-    if (!map.current || webcamsLoading || !webcams?.length) return;
-
-    const geoJson = getWebcamGeoJson(webcams);
-    if (!geoJson?.features.length) return;
-
-    const timestamp = Date.now();
-    lastRefreshRef.current = timestamp;
-
-    for (const f of geoJson.features) {
-      const name = f.properties.name as string;
-      const dbId = f.properties.dbId as string;
-      const currentTime = f.properties.currentTime as Date;
-      const currentUrl = f.properties.currentUrl as string;
-
-      const el = createWebcamMarker(dbId, name, currentTime, currentUrl, timestamp);
-      markersRef.current.push(el);
-      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
-    }
-  }, [map, createWebcamMarker, webcams, webcamsLoading]);
-
   // Refresh webcams
   const refresh = useCallback(async () => {
     if (document.visibilityState !== 'visible') return;
@@ -201,12 +179,29 @@ export function useWebcamMarkers({
     }
   }, []);
 
-  // Initialize when map is loaded
+  // Initialize when map is loaded (only once - markersRef empty)
   useEffect(() => {
-    if (isMapLoaded && !webcamsLoading && webcams?.length) {
-      initialize();
+    if (!isMapLoaded || webcamsLoading || !webcams?.length || !map.current) return;
+    if (markersRef.current.length > 0) return;
+
+    const geoJson = getWebcamGeoJson(webcams);
+    if (!geoJson?.features.length) return;
+
+    const timestamp = Date.now();
+    lastRefreshRef.current = timestamp;
+
+    for (const f of geoJson.features) {
+      const name = f.properties.name as string;
+      const dbId = f.properties.dbId as string;
+      const currentTime = f.properties.currentTime as Date;
+      const currentUrl = f.properties.currentUrl as string;
+
+      const el = createWebcamMarker(dbId, name, currentTime, currentUrl, timestamp);
+      el.style.visibility = isVisible ? 'visible' : 'hidden';
+      markersRef.current.push(el);
+      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
     }
-  }, [isMapLoaded, initialize, webcamsLoading, webcams]);
+  }, [isMapLoaded, webcamsLoading, webcams, isVisible, createWebcamMarker, map]);
 
   // Update visibility when prop changes
   useEffect(() => {

@@ -10,6 +10,7 @@ interface ICam {
   location: ILocation;
   name: string;
   type: string;
+  isDisabled?: boolean;
   __v?: number;
 }
 

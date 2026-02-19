@@ -17,12 +17,16 @@ import { listStations } from '@/services/station.service';
 import { listSoundings } from '@/services/sounding.service';
 import { listSites } from '@/services/site.service';
 import { listLandings } from '@/services/landing.service';
+import { listCams } from '@/services/cam.service';
 import type { IStation } from '@/models/station.model';
 import type { ISounding } from '@/models/sounding.model';
+import type { ICam } from '@/models/cam.model';
 import { getMinutesAgo } from '@/lib/utils';
-import { useWebcams } from '@/hooks';
 import type { ISite } from '@/models/site.model';
 import type { ILanding } from '@/models/landing.model';
+
+const STALE_CHECK_TIMESTAMP = Date.now();
+const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
 interface AdminDashboardProps {
   tab?: 'stations' | 'webcams' | 'soundings' | 'sites' | 'landings';
@@ -40,7 +44,8 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
 
   // Webcams state
-  const { webcams, isLoading: webcamsLoading } = useWebcams();
+  const [webcams, setWebcams] = useState<ICam[]>([]);
+  const [webcamsLoading, setWebcamsLoading] = useState(true);
   const [webcamSearch, setWebcamSearch] = useState('');
 
   // Soundings state
@@ -92,6 +97,15 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
     loadLandings();
   }, []);
 
+  useEffect(() => {
+    async function loadWebcams() {
+      const data = await listCams(true);
+      if (data) setWebcams(data);
+      setWebcamsLoading(false);
+    }
+    loadWebcams();
+  }, []);
+
   const filteredStations = useMemo(() => {
     if (!stations.length) return [];
     let filtered = stations;
@@ -125,9 +139,16 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
 
   const filteredWebcams = useMemo(() => {
     if (!webcams?.length) return [];
-    if (!webcamSearch.trim()) return webcams;
-    const query = webcamSearch.toLowerCase();
-    return webcams.filter((w) => w.name.toLowerCase().includes(query));
+    let filtered = webcams;
+    if (webcamSearch.trim()) {
+      const query = webcamSearch.toLowerCase();
+      filtered = filtered.filter((w) => w.name.toLowerCase().includes(query));
+    }
+    return filtered.sort((a, b) => {
+      const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
+      if (disabledDiff !== 0) return disabledDiff;
+      return a.name.localeCompare(b.name);
+    });
   }, [webcams, webcamSearch]);
 
   const filteredSoundings = useMemo(() => {
@@ -317,31 +338,60 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead className="w-[100px]">Type</TableHead>
+                    <TableHead className="w-[100px]">Status</TableHead>
                     <TableHead className="w-[100px]">Last Updated</TableHead>
+                    <TableHead className="w-[40px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {webcamsLoading ? (
                     <TableRow>
-                      <TableCell colSpan={2} className="text-muted-foreground">
+                      <TableCell colSpan={5} className="text-muted-foreground">
                         Loading...
                       </TableCell>
                     </TableRow>
                   ) : !filteredWebcams?.length ? (
                     <TableRow>
-                      <TableCell colSpan={2} className="text-muted-foreground">
+                      <TableCell colSpan={5} className="text-muted-foreground">
                         No webcams found
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredWebcams.map((webcam) => (
-                      <TableRow key={webcam._id}>
+                      <TableRow
+                        key={webcam._id}
+                        className="cursor-pointer"
+                        onClick={() => navigate(`/admin/webcams/${webcam._id}`)}
+                      >
                         <TableCell className="font-medium">{webcam.name}</TableCell>
                         <TableCell>{webcam.type}</TableCell>
+                        <TableCell>
+                          {webcam.isDisabled ? (
+                            <span className="text-foreground">Disabled</span>
+                          ) : !webcam.lastUpdate ||
+                            STALE_CHECK_TIMESTAMP - new Date(webcam.lastUpdate).getTime() >
+                              STALE_THRESHOLD_MS ? (
+                            <span className="text-destructive">Error</span>
+                          ) : (
+                            <span className="text-green-600">OK</span>
+                          )}
+                        </TableCell>
                         <TableCell>
                           {webcam.lastUpdate
                             ? `${getMinutesAgo(new Date(webcam.lastUpdate))}`
                             : 'N/A'}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            className="cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(webcam.externalLink, '_blank', 'noopener,noreferrer');
+                            }}
+                          >
+                            <SquareArrowOutUpRight className="h-4 w-4" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))
