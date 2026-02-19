@@ -135,16 +135,27 @@ router.patch(
       return;
     }
 
-    const { name, type, coordinates, externalLink, externalId, isDisabled } = req.body as PatchCamBody;
+    const { name, type, coordinates, externalLink, externalId, isDisabled } =
+      req.body as PatchCamBody;
 
-    if (name !== undefined) cam.name = name;
-    if (type !== undefined) cam.type = type;
+    if (name !== undefined) {
+      cam.name = name;
+    }
+    if (type !== undefined) {
+      cam.type = type;
+    }
     if (coordinates !== undefined) {
       cam.location = { type: 'Point', coordinates };
     }
-    if (externalLink !== undefined) cam.externalLink = externalLink;
-    if (externalId !== undefined) cam.externalId = externalId;
-    if (isDisabled !== undefined) cam.isDisabled = isDisabled;
+    if (externalLink !== undefined) {
+      cam.externalLink = externalLink;
+    }
+    if (externalId !== undefined) {
+      cam.externalId = externalId;
+    }
+    if (isDisabled !== undefined) {
+      cam.isDisabled = isDisabled;
+    }
 
     try {
       await cam.save();

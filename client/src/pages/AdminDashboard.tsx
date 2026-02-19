@@ -25,6 +25,9 @@ import { getMinutesAgo } from '@/lib/utils';
 import type { ISite } from '@/models/site.model';
 import type { ILanding } from '@/models/landing.model';
 
+const STALE_CHECK_TIMESTAMP = Date.now();
+const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
 interface AdminDashboardProps {
   tab?: 'stations' | 'webcams' | 'soundings' | 'sites' | 'landings';
 }
@@ -365,8 +368,9 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                         <TableCell>
                           {webcam.isDisabled ? (
                             <span className="text-foreground">Disabled</span>
-                          ) : webcam.lastUpdate &&
-                            Date.now() - new Date(webcam.lastUpdate).getTime() > 24 * 60 * 60 * 1000 ? (
+                          ) : !webcam.lastUpdate ||
+                            STALE_CHECK_TIMESTAMP - new Date(webcam.lastUpdate).getTime() >
+                              STALE_THRESHOLD_MS ? (
                             <span className="text-destructive">Error</span>
                           ) : (
                             <span className="text-green-600">OK</span>
