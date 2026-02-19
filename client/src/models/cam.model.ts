@@ -11,7 +11,6 @@ interface ICam {
   name: string;
   type: string;
   isDisabled?: boolean;
-  imageCount?: number;
   __v?: number;
 }
 

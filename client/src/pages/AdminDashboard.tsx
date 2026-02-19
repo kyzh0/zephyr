@@ -337,29 +337,37 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                     <TableHead className="w-[100px]">Type</TableHead>
                     <TableHead className="w-[100px]">Status</TableHead>
                     <TableHead className="w-[100px]">Last Updated</TableHead>
+                    <TableHead className="w-[40px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {webcamsLoading ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-muted-foreground">
+                      <TableCell colSpan={5} className="text-muted-foreground">
                         Loading...
                       </TableCell>
                     </TableRow>
                   ) : !filteredWebcams?.length ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-muted-foreground">
+                      <TableCell colSpan={5} className="text-muted-foreground">
                         No webcams found
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredWebcams.map((webcam) => (
-                      <TableRow key={webcam._id}>
+                      <TableRow
+                        key={webcam._id}
+                        className="cursor-pointer"
+                        onClick={() => navigate(`/admin/webcams/${webcam._id}`)}
+                      >
                         <TableCell className="font-medium">{webcam.name}</TableCell>
                         <TableCell>{webcam.type}</TableCell>
                         <TableCell>
                           {webcam.isDisabled ? (
-                            <span>Disabled</span>
+                            <span className="text-foreground">Disabled</span>
+                          ) : webcam.lastUpdate &&
+                            Date.now() - new Date(webcam.lastUpdate).getTime() > 24 * 60 * 60 * 1000 ? (
+                            <span className="text-destructive">Error</span>
                           ) : (
                             <span className="text-green-600">OK</span>
                           )}
@@ -368,6 +376,18 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                           {webcam.lastUpdate
                             ? `${getMinutesAgo(new Date(webcam.lastUpdate))}`
                             : 'N/A'}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            className="cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(webcam.externalLink, '_blank', 'noopener,noreferrer');
+                            }}
+                          >
+                            <SquareArrowOutUpRight className="h-4 w-4" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))

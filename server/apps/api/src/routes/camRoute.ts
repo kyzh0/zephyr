@@ -43,32 +43,20 @@ type CamImagesAggResult = {
   images: CamImage[];
 };
 
-type CamListDoc = CamAttrs & { _id: ObjectId; imageCount?: number };
-
 router.get(
   '/',
   async (req: Request<Record<string, never>, unknown, unknown, CamsListQuery>, res: Response) => {
     const time = Number(req.query.unixTimeFrom);
 
-    const match: QueryFilter<CamAttrs> = {};
+    const query: QueryFilter<CamAttrs> = {};
     if (String(req.query.includeDisabled).toLowerCase() !== 'true') {
-      match.isDisabled = { $ne: true };
+      query.isDisabled = { $ne: true };
     }
     if (time) {
-      match.lastUpdate = { $gte: new Date(time * 1000) };
+      query.lastUpdate = { $gte: new Date(time * 1000) };
     }
 
-    const cams = await Cam.aggregate<CamListDoc>([
-      { $match: match },
-      {
-        $addFields: {
-          imageCount: { $size: { $ifNull: ['$images', []] } }
-        }
-      },
-      { $project: { images: 0 } },
-      { $sort: { currentTime: 1 } }
-    ]);
-
+    const cams = await Cam.find(query, { images: 0 }).sort({ currentTime: 1 }).lean();
     res.json(cams);
   }
 );
@@ -124,6 +112,49 @@ router.get('/:id', async (req: Request<IdParams>, res: Response) => {
 
   res.json(cam);
 });
+
+router.patch(
+  '/:id',
+  async (req: Request<IdParams, PatchCamBody, unknown, ApiKeyQuery>, res: Response) => {
+    const { id } = req.params;
+
+    const user = await User.findOne({ key: req.query.key }).lean();
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
+
+    if (!ObjectId.isValid(id)) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const cam = await Cam.findOne({ _id: new ObjectId(id) });
+    if (!cam) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const { name, type, coordinates, externalLink, externalId, isDisabled } = req.body as PatchCamBody;
+
+    if (name !== undefined) cam.name = name;
+    if (type !== undefined) cam.type = type;
+    if (coordinates !== undefined) {
+      cam.location = { type: 'Point', coordinates };
+    }
+    if (externalLink !== undefined) cam.externalLink = externalLink;
+    if (externalId !== undefined) cam.externalId = externalId;
+    if (isDisabled !== undefined) cam.isDisabled = isDisabled;
+
+    try {
+      await cam.save();
+      const updated = await Cam.findById(id, { images: 0 }).lean();
+      res.json(updated);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+);
 
 router.get('/:id/images', async (req: Request<IdParams>, res: Response) => {
   const { id } = req.params;
