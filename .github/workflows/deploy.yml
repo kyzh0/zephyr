@@ -219,6 +219,7 @@ jobs:
             ECOWITT_APPLICATION_KEY=${{ secrets.ECOWITT_APPLICATION_KEY }}
             WEATHERLINK_USERNAME=${{ secrets.WEATHERLINK_USERNAME }}
             WEATHERLINK_PASSWORD=${{ secrets.WEATHERLINK_PASSWORD }}
+            TCLZ_KEY=${{ secrets.TCLZ_KEY }}
 
             EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}
             EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE1_ID }}

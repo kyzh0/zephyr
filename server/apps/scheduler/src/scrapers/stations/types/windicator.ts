@@ -4,7 +4,7 @@ import { parse } from 'date-fns';
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
-export type PotSumLiveFetch = {
+type PotSumLiveFetch = {
   Wind: string;
   Gust: string;
   Direction: string;
@@ -27,7 +27,7 @@ export type PotSumLiveFetch = {
   WaterTemp: string;
 };
 
-export type PotsumLiveFetchResponse = {
+type PotsumLiveFetchResponse = {
   'potsum-live-fetch': PotSumLiveFetch;
 };
 

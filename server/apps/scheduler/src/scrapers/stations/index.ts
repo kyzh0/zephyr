@@ -34,6 +34,7 @@ import scrapeWindicatorData from './types/windicator';
 import scrapeWindyData from './types/windy';
 import scrapeWowData from './types/wow';
 import scrapeWswrData from './types/wswr';
+import scrapeTclzData from './types/tclz';
 
 export type StationScraper = (stations: WithId<StationAttrs>[]) => Promise<void>;
 
@@ -61,6 +62,7 @@ const scrapers = {
   prime: scrapePrimePortData,
   sfo: scrapeSofarOceanData,
   sp: scrapeSouthPortData,
+  tclz: scrapeTclzData,
   tempest: scrapeTempestData,
   wainui: scrapeWainuiData,
   wl: scrapeWeatherLinkData,

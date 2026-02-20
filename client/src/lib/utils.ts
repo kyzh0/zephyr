@@ -102,6 +102,8 @@ export const getStationTypeName = (code: string) => {
       return 'WSWR';
     case 'sp':
       return 'South Port';
+    case 'tclz':
+      return 'Treble Cone WX';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
