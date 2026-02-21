@@ -1,6 +1,4 @@
 import pLimit from 'p-limit';
-import { fromZonedTime } from 'date-fns-tz';
-import { parse } from 'date-fns';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
@@ -10,7 +8,7 @@ type WindGuruResponse = {
   wind_max?: number; // kt
   wind_direction?: number;
   temperature?: number;
-  datetime?: string; // e.g. 2026-02-15 18:27:11 NZDT
+  unixtime?: number;
 };
 
 export default async function scrapeWindGuruData(stations: WithId<StationAttrs>[]): Promise<void> {
@@ -34,11 +32,8 @@ export default async function scrapeWindGuruData(stations: WithId<StationAttrs>[
             }
           );
 
-          if (data && data.datetime) {
-            const time = fromZonedTime(
-              parse(data.datetime.replace(/ NZD[ST]$/, ''), 'yyyy-MM-dd HH:mm:ss', new Date()),
-              'Pacific/Auckland'
-            );
+          if (data && data.unixtime) {
+            const time = new Date(data.unixtime * 1000);
 
             if (time && Date.now() - time.getTime() < 20 * 60 * 1000) {
               const avg = Number(data.wind_avg);

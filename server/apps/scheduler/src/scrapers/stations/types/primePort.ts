@@ -74,7 +74,7 @@ export default async function scrapePrimePortData(stations: WithId<StationAttrs>
     croppedBuf = await sharp(imgBuff)
       .extract({
         left: 850,
-        top: 140,
+        top: 50,
         width: 175,
         height: 60
       })
@@ -118,9 +118,9 @@ export default async function scrapePrimePortData(stations: WithId<StationAttrs>
     croppedBuf = await sharp(imgBuff)
       .extract({
         left: 845,
-        top: 360,
+        top: 340,
         width: 180,
-        height: 40
+        height: 80
       })
       .toBuffer();
 
