@@ -110,3 +110,12 @@ export async function patchStation(id: string, updates: Partial<IStation>, key: 
     console.error(error);
   }
 }
+
+export async function deleteStation(id: string, key: string) {
+  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/stations/${id}?key=${key}`, {
+    method: 'DELETE'
+  });
+  if (!res.ok) {
+    throw new Error(res.statusText);
+  }
+}

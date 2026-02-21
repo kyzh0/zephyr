@@ -42,7 +42,7 @@ const bearingsSchema = z.string().regex(/^$|^[0-9]{3}-[0-9]{3}(,[0-9]{3}-[0-9]{3
 
 const baseSchema = z.object({
   name: z.string().min(1, 'Required'),
-  externalId: z.string().min(1, 'Required'),
+  externalId: z.string().optional(),
   externalLink: z.url('Enter a valid URL'),
   type: z.string().min(1, 'Required'),
   coordinates: coordinatesSchema,
@@ -124,7 +124,7 @@ export default function AdminAddStation() {
       type: values.type,
       coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6],
       externalLink: values.externalLink,
-      externalId: values.externalId,
+      externalId: values.externalId ?? '',
       ...(elevation !== undefined && { elevation }),
       ...(values.bearings && { validBearings: values.bearings })
     };

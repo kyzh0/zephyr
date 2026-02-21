@@ -23,6 +23,12 @@ interface IStation {
   harvestWindAverageId?: string;
   harvestWindDirectionId?: string;
   harvestWindGustId?: string;
+  harvestCookie?: string;
+  gwWindAverageFieldName?: string;
+  gwWindGustFieldName?: string;
+  gwWindBearingFieldName?: string;
+  gwTemperatureFieldName?: string;
+  weatherlinkCookie?: string;
   popupMessage?: string;
 }
 
@@ -46,6 +52,7 @@ interface INewStation {
 
 export const STATION_TYPES = [
   { value: 'harvest', label: 'Harvest' },
+  { value: 'gw', label: 'Greater Wellington' },
   { value: 'holfuy', label: 'Holfuy' },
   { value: 'metservice', label: 'Metservice' },
   { value: 'wu', label: 'Weather Underground' },

@@ -350,6 +350,35 @@ router.patch(
   }
 );
 
+// delete station (and associated station data)
+router.delete(
+  '/:id',
+  async (req: Request<IdParams, unknown, unknown, ApiKeyQuery>, res: Response) => {
+    const user = await User.findOne({ key: req.query.key }).lean();
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
+
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const station = await Station.findOne({ _id: new ObjectId(id) }).lean();
+    if (!station) {
+      res.sendStatus(404);
+      return;
+    }
+
+    await StationData.deleteMany({ station: new ObjectId(id) });
+    await Station.deleteOne({ _id: new ObjectId(id) });
+    res.sendStatus(204);
+  }
+);
+
 // get station data
 router.get(
   '/:id/data',
