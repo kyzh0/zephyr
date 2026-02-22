@@ -91,10 +91,16 @@ export default function Site() {
     <div className="grid grid-cols-1">
       <span className="text-lg sm:text-xl font-semibold leading-tight">{site?.name}</span>
 
-      <span className="font-thin text-[10px] sm:text-xs">
-        [ {site?.location.coordinates[1].toFixed(4)}, {site?.location.coordinates[0].toFixed(4)} ]{' '}
-        {site?.elevation}m
-      </span>
+      {site && (
+        <a
+          className="font-thin text-[10px] sm:text-xs"
+          href={`https://www.google.com/maps/place/${site?.location.coordinates[1]},${site?.location.coordinates[0]}`}
+          target="_blank"
+        >
+          [ {site.location.coordinates[1].toFixed(4)}, {site.location.coordinates[0].toFixed(4)} ]{' '}
+          {site.elevation}m
+        </a>
+      )}
     </div>
   );
 
