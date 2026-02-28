@@ -71,17 +71,25 @@ function createPopupHtml(props: StationProperties, unit: WindUnit): string {
 function applyMarkerArrowStyle(
   arrow: HTMLDivElement,
   avgWind: number | null,
+  avgGust: number | null,
   currentBearing: number | null,
   validBearings: string | null,
   isOffline: boolean | null,
   unit: WindUnit
 ): { textColor: string; hideText: boolean } {
-  if (USE_NEW_WIND_MARKER && !isOffline && avgWind != null && currentBearing != null) {
+  if (
+    USE_NEW_WIND_MARKER &&
+    !isOffline &&
+    avgWind != null &&
+    avgGust != null &&
+    currentBearing != null
+  ) {
     arrow.style.backgroundImage = '';
     arrow.style.transform = '';
     arrow.innerHTML = generateWindMarkerSVG({
       direction: Math.round(currentBearing),
-      speed: convertWindSpeed(avgWind, unit)
+      speed: convertWindSpeed(avgWind, unit),
+      gust: convertWindSpeed(avgGust, unit)
     });
     return { textColor: 'white', hideText: true };
   }
@@ -143,6 +151,7 @@ function createMarkerElement(
   const { textColor, hideText } = applyMarkerArrowStyle(
     arrow,
     currentAverage,
+    currentGust,
     currentBearing,
     validBearings,
     isOffline,
@@ -212,6 +221,7 @@ function updateMarkerElement(
     const { textColor, hideText } = applyMarkerArrowStyle(
       arrow,
       currentAverage,
+      currentGust,
       currentBearing,
       validBearings,
       isOffline,
