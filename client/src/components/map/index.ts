@@ -4,9 +4,9 @@ export {
   type IconShape,
   type IconBorder,
   type WindColorName,
-  getWindColor,
-  getTextColor,
-  getIconConfig
+  getWindColorName,
+  getWindColorHex,
+  getTextColor
 } from './wind-icon.utils';
 export { MapControlButtons } from './MapControlButtons';
 export { ElevationControls } from './ElevationControls';

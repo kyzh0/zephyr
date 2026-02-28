@@ -14,6 +14,7 @@ import {
   convertWindSpeed,
   getArrowStyle
 } from '@/components/map';
+import { generateWindMarkerSVG } from '@/components/map/wind-marker';
 import type { StationMarker, WindUnit } from '@/components/map';
 import {
   extractStationProperties,
@@ -34,6 +35,8 @@ interface UseStationMarkersOptions {
   isVisible: boolean;
   onRefresh?: (updatedIds: string[]) => void;
 }
+
+const USE_NEW_WIND_MARKER = true;
 
 /**
  * Generate popup HTML content for a station marker
@@ -63,6 +66,32 @@ function createPopupHtml(props: StationProperties, unit: WindUnit): string {
   }
 
   return header + `<p align="center">${windText} ${unitLabel} ${direction}</p>`;
+}
+
+function applyMarkerArrowStyle(
+  arrow: HTMLDivElement,
+  avgWind: number | null,
+  currentBearing: number | null,
+  validBearings: string | null,
+  isOffline: boolean | null,
+  unit: WindUnit
+): { textColor: string; hideText: boolean } {
+  if (USE_NEW_WIND_MARKER && !isOffline && avgWind != null && currentBearing != null) {
+    arrow.style.backgroundImage = '';
+    arrow.style.transform = '';
+    arrow.innerHTML = generateWindMarkerSVG({
+      direction: Math.round(currentBearing),
+      speed: convertWindSpeed(avgWind, unit)
+    });
+    return { textColor: 'white', hideText: true };
+  }
+
+  const [img, textColor] = getArrowStyle(avgWind, currentBearing, validBearings, isOffline);
+  arrow.innerHTML = '';
+  arrow.style.backgroundImage = img;
+  arrow.style.transform = currentBearing != null ? `rotate(${Math.round(currentBearing)}deg)` : '';
+
+  return { textColor, hideText: false };
 }
 
 /**
@@ -103,18 +132,24 @@ function createMarkerElement(
 ): HTMLDivElement {
   const { dbId, elevation, currentAverage, currentGust, currentBearing, validBearings, isOffline } =
     props;
-  const [img, textColor] = getArrowStyle(currentAverage, currentBearing, validBearings, isOffline);
 
   // Arrow icon (div with background image)
   const arrow = document.createElement('div');
   arrow.className = 'marker-arrow';
-  arrow.style.transform = currentBearing != null ? `rotate(${Math.round(currentBearing)}deg)` : '';
-  arrow.style.backgroundImage = img;
 
   // Wind speed text
   const text = document.createElement('span');
   text.className = 'marker-text';
+  const { textColor, hideText } = applyMarkerArrowStyle(
+    arrow,
+    currentAverage,
+    currentBearing,
+    validBearings,
+    isOffline,
+    unit
+  );
   text.style.color = textColor;
+  text.style.display = hideText ? 'none' : '';
   text.textContent = formatMarkerText(currentAverage, isOffline, unit, convertWindSpeed);
 
   // Event handlers
@@ -162,7 +197,6 @@ function updateMarkerElement(
   unit: WindUnit
 ): void {
   const { currentAverage, currentGust, currentBearing, validBearings, isOffline } = props;
-  const [img, textColor] = getArrowStyle(currentAverage, currentBearing, validBearings, isOffline);
 
   marker.dataset.timestamp = String(timestamp);
   marker.dataset.avg = currentAverage != null ? String(currentAverage) : '';
@@ -172,19 +206,24 @@ function updateMarkerElement(
   marker.dataset.isOffline = String(props.isOffline ?? false);
   marker.dataset.validBearings = props.validBearings ?? '';
 
+  const arrow = marker.querySelector<HTMLDivElement>('.marker-arrow');
+  const text = marker.querySelector<HTMLElement>('.marker-text');
+  if (arrow && text) {
+    const { textColor, hideText } = applyMarkerArrowStyle(
+      arrow,
+      currentAverage,
+      currentBearing,
+      validBearings,
+      isOffline,
+      unit
+    );
+    text.style.color = textColor;
+    text.style.display = hideText ? 'none' : '';
+    text.textContent = formatMarkerText(currentAverage, isOffline, unit, convertWindSpeed);
+  }
+
   for (const child of Array.from(marker.children)) {
-    if (child.classList.contains('marker-text')) {
-      const el = child as HTMLElement;
-      el.style.color = textColor;
-      el.textContent = formatMarkerText(currentAverage, isOffline, unit, convertWindSpeed);
-    } else if (child.classList.contains('marker-arrow')) {
-      const el = child as HTMLElement;
-      el.style.backgroundImage = img;
-      el.style.transform = currentBearing != null ? `rotate(${Math.round(currentBearing)}deg)` : '';
-    } else if (
-      child.tagName === 'svg' &&
-      (child as SVGElement).classList.contains('marker-border')
-    ) {
+    if (child.tagName === 'svg' && (child as SVGElement).classList.contains('marker-border')) {
       child.setAttribute('transform', `rotate(${getElevationRotation(currentBearing)})`);
     }
   }
@@ -420,6 +459,12 @@ export function useStationMarkers({
         validBearings,
         isOffline
       };
+      updateMarkerElement(
+        item.marker,
+        stationProps,
+        Number(item.marker.dataset.timestamp ?? Date.now()),
+        unit
+      );
       item.popup.setHTML(createPopupHtml(stationProps, unit));
     }
   }, [unit]);
@@ -446,32 +491,18 @@ export function useStationMarkers({
         const windBearing = stationData?.windBearing ?? null;
         const validBearings = stationData?.validBearings ?? null;
 
-        const [img, textColor] = getArrowStyle(
-          windAverage,
-          windBearing,
+        const historicalProps: StationProperties = {
+          dbId: item.marker.id,
+          name: item.marker.dataset.name ?? '',
+          elevation: Number(item.marker.getAttribute('elevation')),
+          currentAverage: windAverage,
+          currentGust: null,
+          currentBearing: windBearing,
           validBearings,
-          false // not offline in history mode
-        );
+          isOffline: false
+        };
 
-        item.marker.dataset.avg = windAverage != null ? String(windAverage) : '';
-
-        for (const child of Array.from(item.marker.children)) {
-          if (child.classList.contains('marker-text')) {
-            const el = child as HTMLElement;
-            el.style.color = textColor;
-            el.textContent =
-              windAverage != null ? String(convertWindSpeed(windAverage, unitRef.current)) : '-';
-          } else if (child.classList.contains('marker-arrow')) {
-            const el = child as HTMLElement;
-            el.style.backgroundImage = img;
-            el.style.transform = windBearing != null ? `rotate(${Math.round(windBearing)}deg)` : '';
-          } else if (
-            child.tagName === 'svg' &&
-            (child as SVGElement).classList.contains('marker-border')
-          ) {
-            child.setAttribute('transform', `rotate(${getElevationRotation(windBearing)})`);
-          }
-        }
+        updateMarkerElement(item.marker, historicalProps, Date.now(), unitRef.current);
       }
     },
     [withErrorHandling]
@@ -512,38 +543,7 @@ export function useStationMarkers({
         isOffline: station.isOffline ?? false
       };
 
-      const [img, textColor] = getArrowStyle(
-        props.currentAverage,
-        props.currentBearing,
-        props.validBearings,
-        props.isOffline
-      );
-
-      item.marker.dataset.avg = props.currentAverage != null ? String(props.currentAverage) : '';
-      item.marker.dataset.gust = props.currentGust != null ? String(props.currentGust) : '';
-
-      for (const child of Array.from(item.marker.children)) {
-        if (child.classList.contains('marker-text')) {
-          const el = child as HTMLElement;
-          el.style.color = textColor;
-          el.textContent = formatMarkerText(
-            props.currentAverage,
-            props.isOffline,
-            unitRef.current,
-            convertWindSpeed
-          );
-        } else if (child.classList.contains('marker-arrow')) {
-          const el = child as HTMLElement;
-          el.style.backgroundImage = img;
-          el.style.transform =
-            props.currentBearing != null ? `rotate(${Math.round(props.currentBearing)}deg)` : '';
-        } else if (
-          child.tagName === 'svg' &&
-          (child as SVGElement).classList.contains('marker-border')
-        ) {
-          child.setAttribute('transform', `rotate(${getElevationRotation(props.currentBearing)})`);
-        }
-      }
+      updateMarkerElement(item.marker, props, Date.now(), unitRef.current);
 
       // Update popup
       item.popup.setHTML(createPopupHtml(props, unitRef.current));
