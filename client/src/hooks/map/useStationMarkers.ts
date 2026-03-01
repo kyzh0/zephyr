@@ -14,7 +14,7 @@ import {
   convertWindSpeed,
   getArrowStyle
 } from '@/components/map';
-import { generateWindMarkerSVG } from '@/components/map/wind-marker';
+import { generateWindMarker2SVG } from '@/components/map/wind-marker2';
 import type { StationMarker, WindUnit } from '@/components/map';
 import {
   extractStationProperties,
@@ -86,7 +86,7 @@ function applyMarkerArrowStyle(
   ) {
     arrow.style.backgroundImage = '';
     arrow.style.transform = '';
-    arrow.innerHTML = generateWindMarkerSVG({
+    arrow.innerHTML = generateWindMarker2SVG({
       direction: Math.round(currentBearing),
       speed: convertWindSpeed(avgWind, unit),
       gust: convertWindSpeed(avgGust, unit)
