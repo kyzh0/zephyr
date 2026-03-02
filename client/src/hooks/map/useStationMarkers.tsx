@@ -11,12 +11,6 @@ import type { IHistoricalStationData } from '@/models/station-data.model';
 import { getStationGeoJson, sortStationFeatures, convertWindSpeed } from '@/components/map';
 import { StationMarker } from '@/components/map/StationMarker';
 import type { StationMarker as IStationMarker, WindUnit } from '@/components/map/map.types';
-import {
-  extractStationProperties,
-  getElevationDashArray,
-  getElevationRotation,
-  type StationProperties
-} from './station-marker.utils';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
 import type { IStation } from '@/models/station.model';
@@ -31,6 +25,31 @@ interface UseStationMarkersOptions {
   isVisible: boolean;
   onRefresh?: (updatedIds: string[]) => void;
 }
+
+interface StationProperties {
+  dbId: string;
+  name: string;
+  elevation: number;
+  currentAverage: number | null;
+  currentGust: number | null;
+  currentBearing: number | null;
+  validBearings: string | null;
+  isOffline: boolean | null;
+}
+
+/**
+ * Extract station properties from GeoJSON feature with proper typing
+ */
+const extractStationProperties = (properties: Record<string, unknown>): StationProperties => ({
+  dbId: properties.dbId as string,
+  name: properties.name as string,
+  elevation: properties.elevation as number,
+  currentAverage: properties.currentAverage as number | null,
+  currentGust: properties.currentGust as number | null,
+  currentBearing: properties.currentBearing as number | null,
+  validBearings: properties.validBearings as string | null,
+  isOffline: properties.isOffline as boolean | null
+});
 
 /**
  * Generate popup HTML content for a station marker
@@ -60,31 +79,6 @@ function createPopupHtml(props: StationProperties, unit: WindUnit): string {
   }
 
   return header + `<p align="center">${windText} ${unitLabel} ${direction}</p>`;
-}
-
-/**
- * Create the elevation border SVG element
- */
-function createElevationBorderSvg(elevation: number, bearing: number | null): SVGSVGElement {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute(
-    'class',
-    'marker-border absolute top-[-2.2px] left-[-3px] z-[4] w-[30px] h-[30px] hidden'
-  );
-  svg.setAttribute('viewBox', '0 0 120 120');
-  svg.setAttribute('transform', `rotate(${getElevationRotation(bearing)})`);
-
-  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  circle.setAttribute('fill', 'none');
-  circle.setAttribute('cx', '60');
-  circle.setAttribute('cy', '60');
-  circle.setAttribute('r', '56');
-  circle.setAttribute('stroke', '#ff4261');
-  circle.setAttribute('stroke-width', '8');
-  circle.setAttribute('stroke-dasharray', getElevationDashArray(elevation));
-  svg.appendChild(circle);
-
-  return svg;
 }
 
 /**
@@ -144,7 +138,6 @@ function createMarkerElement(
   container.style.zIndex = '2';
 
   container.appendChild(arrow);
-  container.appendChild(createElevationBorderSvg(elevation, currentBearing));
 
   return container;
 }
@@ -180,12 +173,6 @@ function updateMarkerElement(
         unit={unit}
       />
     );
-  }
-
-  for (const child of Array.from(marker.children)) {
-    if (child.tagName === 'svg' && (child as SVGElement).classList.contains('marker-border')) {
-      child.setAttribute('transform', `rotate(${getElevationRotation(currentBearing)})`);
-    }
   }
 }
 
