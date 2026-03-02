@@ -14,6 +14,7 @@ import { useLandings } from '@/hooks/useLandings';
 import { cn } from '@/lib/utils';
 import { SiteMarker } from './SiteMarker';
 import { LandingMarker } from './LandingMarker';
+import { WindMarker } from './StationMarker';
 
 interface SearchBarProps {
   className?: string;
@@ -237,10 +238,11 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
               <div className="flex items-center gap-2">
                 <div className="flex items-center justify-center w-6 h-6 shrink-0">
                   {result.type === 'station' ? (
-                    <img
-                      src="/gold-valid-arrow-light-green.png"
-                      alt="Station"
-                      className="w-4 h-6 -rotate-45"
+                    <WindMarker
+                      speed={result.item.currentAverage ?? undefined}
+                      direction={result.item.currentBearing ?? undefined}
+                      unit="kt"
+                      size={20}
                     />
                   ) : result.type === 'site' ? (
                     <SiteMarker

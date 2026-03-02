@@ -8,14 +8,14 @@
  * Direction: 0 = North (tail points up), 90 = East, 180 = South, 270 = West
  */
 
-import { createElement } from 'react';
+import { type ReactNode } from 'react';
 import { convertWindSpeed } from './map.utils';
 import type { WindUnit } from '../station';
 import { getTextColor, getWindColor } from '@/lib/utils';
 
 const DEFAULT_SIZE = 50; // default bounding box size in pixels
 
-export interface WindMarkerProps {
+export interface StationMarkerProps {
   direction?: number; // degrees clockwise from North — tail tip points this way
   speed?: number; // wind speed value shown in circle
   gust?: number; // gust speed
@@ -33,13 +33,13 @@ export interface WindMarkerProps {
  * true tangent points from the tip to the circle — so the sides of the
  * triangle are tangent to the circle edge and the join is seamless.
  */
-export function generateWindMarkerSVG({
+export const StationMarker = ({
   direction,
   speed,
   gust,
   size = DEFAULT_SIZE,
   unit
-}: WindMarkerProps): string {
+}: StationMarkerProps): ReactNode => {
   const coreColor = getWindColor(speed ?? 0);
   const gustColor = getWindColor(gust ?? speed ?? 0);
 
@@ -78,45 +78,40 @@ export function generateWindMarkerSVG({
   const borderWidth = (size * 0.02).toFixed(2);
 
   const tailMarkup =
-    direction !== undefined
-      ? `
-    <!-- Tail (gust color) -->
-    <path d="${tail_attr}" fill="${gustColor}" stroke="none"/>  
-  `
-      : '';
+    direction !== undefined ? `<path d="${tail_attr}" fill="${gustColor}" stroke="none"/>` : '';
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <!-- Shape rotated so tail tip points in wind direction (0 = North/up) -->
-  <g transform="rotate(${direction},${cx},${cy})">
-    ${tailMarkup}
-  </g>
+  return (
+    <div className="relative inline-block" style={{ width: size, height: size }}>
+      {/* SVG overlay for the orange bearing arcs */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+      >
+        {/* Shape rotated so tail tip points in wind direction (0 = North/up) */}
+        <g transform={`rotate(${direction},${cx},${cy})`}>${tailMarkup}</g>
 
-  <!-- Circle (core color) - drawn outside rotation so it appears cleanly on top -->
-  <circle cx="${cx}" cy="${cy}" r="${R}" fill="${coreColor}" stroke="none"/>
+        {/* Circle (core color) - drawn outside rotation so it appears cleanly on top */}
+        <circle cx={cx} cy={cy} r={R} fill={coreColor} stroke="none" />
 
-  <!-- White border on circle only — drawn on top so it covers the tail join -->
-  <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="white" stroke-width="${borderWidth}"/>
+        {/* White border on circle only — drawn on top so it covers the tail join */}
+        <circle cx={cx} cy={cy} r={R} fill="none" stroke="white" stroke-width={borderWidth} />
 
-  <!-- Speed: always upright, centered in circle -->
-  <text
-    x="${cx}" y="${cy}"
-    text-anchor="middle" dominant-baseline="central"
-    font-family="'Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif"
-    font-size="${fontSize}" font-weight="200"
-    fill="${getTextColor(coreColor)}"
-  >${speed ? convertWindSpeed(speed, unit) : '-'}</text>
-</svg>`;
-}
-
-/**
- * React component for rendering a wind direction marker SVG
- */
-export function WindMarker({ direction, speed, gust, size = DEFAULT_SIZE, unit }: WindMarkerProps) {
-  const svg = generateWindMarkerSVG({ direction, speed, gust, size, unit });
-
-  return createElement('div', {
-    dangerouslySetInnerHTML: { __html: svg },
-    className: 'wind-marker',
-    style: { display: 'inline-block' }
-  });
-}
+        {/* Speed: always upright, centered in circle */}
+        <text
+          x={cx}
+          y={cy}
+          text-anchor="middle"
+          dominant-baseline="central"
+          font-family="'Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif"
+          font-size={fontSize}
+          font-weight="200"
+          fill={getTextColor(coreColor)}
+        >
+          ${speed ? convertWindSpeed(speed, unit) : '-'}
+        </text>
+      </svg>
+    </div>
+  );
+};

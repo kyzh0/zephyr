@@ -1,6 +1,5 @@
 export * from './map.types';
 export * from './map.utils';
-export { type IconShape, type IconBorder } from './wind-icon.utils';
 export { MapControlButtons } from './MapControlButtons';
 export { ElevationControls } from './ElevationControls';
 export { ElevationSlider } from './ElevationSlider';
@@ -8,3 +7,4 @@ export { HistorySlider } from './HistorySlider';
 export { SearchBar } from './SearchBar';
 export { SiteMarker } from './SiteMarker';
 export { LandingMarker } from './LandingMarker';
+export { StationMarker } from './StationMarker';
