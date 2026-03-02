@@ -15,7 +15,6 @@ import { Label } from '@/components/ui/label';
 import { SignInDialog } from './SignInDialog';
 import { SiteMarker } from './SiteMarker';
 import { LandingMarker } from './LandingMarker';
-import { getUnit } from '../station';
 import { StationMarker } from './StationMarker';
 
 export const WELCOME_STORAGE_KEY = 'zephyr-welcome-dismissed';
