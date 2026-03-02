@@ -94,17 +94,17 @@ export const StationMarker = ({
         <circle cx={cx} cy={cy} r={R} fill={coreColor} stroke="none" />
 
         {/* White border on circle only — drawn on top so it covers the tail join */}
-        <circle cx={cx} cy={cy} r={R} fill="none" stroke="white" stroke-width={borderWidth} />
+        <circle cx={cx} cy={cy} r={R} fill="none" stroke="white" strokeWidth={borderWidth} />
 
         {/* Speed: always upright, centered in circle */}
         <text
           x={cx}
           y={cy}
-          text-anchor="middle"
-          dominant-baseline="central"
-          font-family="'Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif"
-          font-size={fontSize}
-          font-weight="200"
+          textAnchor="middle"
+          dominantBaseline="central"
+          fontFamily="'Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif"
+          fontSize={fontSize}
+          fontWeight="200"
           fill={getTextColor(coreColor)}
         >
           {speed ? convertWindSpeed(speed, unit) : '-'}
