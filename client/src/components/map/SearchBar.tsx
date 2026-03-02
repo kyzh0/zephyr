@@ -14,7 +14,8 @@ import { useLandings } from '@/hooks/useLandings';
 import { cn } from '@/lib/utils';
 import { SiteMarker } from './SiteMarker';
 import { LandingMarker } from './LandingMarker';
-import { WindMarker } from './StationMarker';
+import { StationMarker } from './StationMarker';
+import { getUnit } from '../station';
 
 interface SearchBarProps {
   className?: string;
@@ -29,6 +30,7 @@ type SearchResult =
 
 export function SearchBar({ className, disabled }: SearchBarProps) {
   const navigate = useNavigate();
+  const unit = getUnit();
   const [isExpanded, setIsExpanded] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -238,11 +240,11 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
               <div className="flex items-center gap-2">
                 <div className="flex items-center justify-center w-6 h-6 shrink-0">
                   {result.type === 'station' ? (
-                    <WindMarker
+                    <StationMarker
                       speed={result.item.currentAverage ?? undefined}
                       direction={result.item.currentBearing ?? undefined}
-                      unit="kt"
-                      size={20}
+                      unit={unit}
+                      size={30}
                     />
                   ) : result.type === 'site' ? (
                     <SiteMarker

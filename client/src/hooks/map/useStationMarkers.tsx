@@ -9,21 +9,22 @@ import {
 } from '@/services/station.service';
 import type { IHistoricalStationData } from '@/models/station-data.model';
 import { getStationGeoJson, sortStationFeatures, convertWindSpeed } from '@/components/map';
-import { generateWindMarkerSVG } from '@/components/map/wind-marker';
-import type { StationMarker, WindUnit } from '@/components/map';
+import { StationMarker } from '@/components/map/StationMarker';
+import type { StationMarker as IStationMarker, WindUnit } from '@/components/map/map.types';
 import {
   extractStationProperties,
-  formatMarkerText,
   getElevationDashArray,
   getElevationRotation,
   type StationProperties
 } from './station-marker.utils';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
 import type { IStation } from '@/models/station.model';
+import type { RefObject } from 'react';
 import { toast } from 'sonner';
 
 interface UseStationMarkersOptions {
-  map: React.RefObject<mapboxgl.Map | null>;
+  map: RefObject<mapboxgl.Map | null>;
   isMapLoaded: boolean;
   isHistoricData: boolean;
   unit: WindUnit;
@@ -104,15 +105,17 @@ function createMarkerElement(
   const arrow = document.createElement('div');
   arrow.className = 'marker-arrow';
 
-  // Wind speed text
+  // Wind speed marker
   arrow.style.backgroundImage = '';
   arrow.style.transform = '';
-  arrow.innerHTML = generateWindMarkerSVG({
-    direction: currentBearing ?? undefined,
-    speed: currentAverage ?? undefined,
-    gust: currentGust ?? undefined,
-    unit
-  });
+  arrow.innerHTML = renderToStaticMarkup(
+    <StationMarker
+      direction={currentBearing ?? undefined}
+      speed={currentAverage ?? undefined}
+      gust={currentGust ?? undefined}
+      unit={unit}
+    />
+  );
 
   // Event handlers
   const handleClick = () => {
@@ -155,7 +158,7 @@ function updateMarkerElement(
   timestamp: number,
   unit: WindUnit
 ): void {
-  const { currentAverage, currentGust, currentBearing, isOffline } = props;
+  const { currentAverage, currentGust, currentBearing } = props;
 
   marker.dataset.timestamp = String(timestamp);
   marker.dataset.avg = currentAverage != null ? String(currentAverage) : '';
@@ -166,17 +169,17 @@ function updateMarkerElement(
   marker.dataset.validBearings = props.validBearings ?? '';
 
   const arrow = marker.querySelector<HTMLDivElement>('.marker-arrow');
-  const text = marker.querySelector<HTMLElement>('.marker-text');
-  if (arrow && text) {
+  if (arrow) {
     arrow.style.backgroundImage = '';
     arrow.style.transform = '';
-    arrow.innerHTML = generateWindMarkerSVG({
-      direction: currentBearing ?? undefined,
-      speed: currentAverage ?? undefined,
-      gust: currentGust ?? undefined,
-      unit
-    });
-    text.textContent = formatMarkerText(currentAverage, isOffline, unit, convertWindSpeed);
+    arrow.innerHTML = renderToStaticMarkup(
+      <StationMarker
+        direction={currentBearing ?? undefined}
+        speed={currentAverage ?? undefined}
+        gust={currentGust ?? undefined}
+        unit={unit}
+      />
+    );
   }
 
   for (const child of Array.from(marker.children)) {
@@ -201,7 +204,7 @@ export function useStationMarkers({
     isVisibleRef.current = isVisible;
   }, [isVisible]);
   const navigate = useNavigate();
-  const markersRef = useRef<StationMarker[]>([]);
+  const markersRef = useRef<IStationMarker[]>([]);
   const lastRefreshRef = useRef(0);
   const unitRef = useRef<WindUnit>(unit);
   const refreshAbortController = useRef<AbortController | null>(null);
@@ -224,7 +227,7 @@ export function useStationMarkers({
 
   // Wrapper for async operations with error handling
   const withErrorHandling = useCallback(
-    async <T>(operation: () => Promise<T>, errorMessage: string): Promise<T | null> => {
+    async <T,>(operation: () => Promise<T>, errorMessage: string): Promise<T | null> => {
       try {
         setError(null);
         return await operation();
@@ -240,7 +243,7 @@ export function useStationMarkers({
 
   // Create a station marker with popup
   const createStationMarker = useCallback(
-    (props: StationProperties, timestamp: number): StationMarker => {
+    (props: StationProperties, timestamp: number): IStationMarker => {
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
@@ -269,7 +272,7 @@ export function useStationMarkers({
 
   // Update existing marker
   const updateStationMarker = useCallback(
-    (item: StationMarker, props: StationProperties, timestamp: number) => {
+    (item: IStationMarker, props: StationProperties, timestamp: number) => {
       updateMarkerElement(item.marker, props, timestamp, unitRef.current);
       item.popup.setHTML(createPopupHtml(props, unitRef.current));
     },
@@ -397,13 +400,6 @@ export function useStationMarkers({
       const name = item.marker.dataset.name ?? '';
       const isOffline = item.marker.dataset.isOffline === 'true';
       const validBearings = item.marker.dataset.validBearings ?? null;
-
-      // Update text
-      for (const child of Array.from(item.marker.children)) {
-        if (child.classList.contains('marker-text') && avg != null) {
-          child.textContent = String(convertWindSpeed(avg, unit));
-        }
-      }
 
       // Regenerate popup with proper data
       const stationProps: StationProperties = {

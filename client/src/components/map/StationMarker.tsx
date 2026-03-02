@@ -76,10 +76,6 @@ export const StationMarker = ({
   const fontSize = Math.round(R * 1.15);
 
   const borderWidth = (size * 0.02).toFixed(2);
-
-  const tailMarkup =
-    direction !== undefined ? `<path d="${tail_attr}" fill="${gustColor}" stroke="none"/>` : '';
-
   return (
     <div className="relative inline-block" style={{ width: size, height: size }}>
       {/* SVG overlay for the orange bearing arcs */}
@@ -90,7 +86,9 @@ export const StationMarker = ({
         viewBox={`0 0 ${size} ${size}`}
       >
         {/* Shape rotated so tail tip points in wind direction (0 = North/up) */}
-        <g transform={`rotate(${direction},${cx},${cy})`}>${tailMarkup}</g>
+        <g transform={`rotate(${direction},${cx},${cy})`}>
+          {direction !== undefined ? <path d={tail_attr} fill={gustColor} stroke="none" /> : null}
+        </g>
 
         {/* Circle (core color) - drawn outside rotation so it appears cleanly on top */}
         <circle cx={cx} cy={cy} r={R} fill={coreColor} stroke="none" />
@@ -109,7 +107,7 @@ export const StationMarker = ({
           font-weight="200"
           fill={getTextColor(coreColor)}
         >
-          ${speed ? convertWindSpeed(speed, unit) : '-'}
+          {speed ? convertWindSpeed(speed, unit) : '-'}
         </text>
       </svg>
     </div>

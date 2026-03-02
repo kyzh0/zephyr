@@ -15,6 +15,8 @@ import { Label } from '@/components/ui/label';
 import { SignInDialog } from './SignInDialog';
 import { SiteMarker } from './SiteMarker';
 import { LandingMarker } from './LandingMarker';
+import { getUnit } from '../station';
+import { StationMarker } from './StationMarker';
 
 export const WELCOME_STORAGE_KEY = 'zephyr-welcome-dismissed';
 
@@ -72,31 +74,14 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
         {/* Guide content */}
         <div className="grid grid-cols-[auto_1fr] gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-2 text-xs sm:text-sm">
           <div className="flex justify-center items-center">
-            <img
-              src="/circle-yellow.png"
-              alt="Station marker"
-              className="w-4 h-6 sm:w-5 sm:h-7 -rotate-45"
-            />
+            <StationMarker speed={15} direction={240} unit="kmh" size={30} />
           </div>
           <div className="flex items-center">Click a station for details</div>
 
           <div className="flex justify-center items-center">
-            <img
-              src="/gold-circle-green.png"
-              alt="Popular site marker"
-              className="w-4 h-6 sm:w-5 sm:h-7 -rotate-45"
-            />
+            <StationMarker speed={15} gust={30} direction={240} unit="kmh" size={30} />
           </div>
-          <div className="flex items-center">Popular sites are outlined</div>
-
-          <div className="flex justify-center items-center">
-            <img
-              src="/gold-valid-arrow-light-green.png"
-              alt="Favourable wind marker"
-              className="w-4 h-6 sm:w-5 sm:h-7 -rotate-45"
-            />
-          </div>
-          <div className="flex items-center">Green tail = favourable wind direction</div>
+          <div className="flex items-center">Tails colour indicates wind gusts</div>
 
           <div className="flex justify-center items-center">
             <SiteMarker validBearings="45-140" size={30} borderWidth={5} />
