@@ -1,4 +1,4 @@
-import { createContext, use, useState, type ReactNode } from 'react';
+import { createContext, use, useMemo, useState, type ReactNode } from 'react';
 
 interface AppContextType {
   // TODO: Define your app state here
@@ -20,14 +20,17 @@ export function AppProvider({ children }: AppProviderProps) {
   const [refreshedStations, setRefreshedStations] = useState<string[]>([]);
   const [refreshedWebcams, setRefreshedWebcams] = useState<string[]>([]);
 
-  const value: AppContextType = {
-    user: null,
-    isLoading: false,
-    refreshedStations,
-    setRefreshedStations,
-    refreshedWebcams,
-    setRefreshedWebcams
-  };
+  const value = useMemo<AppContextType>(
+    () => ({
+      user: null,
+      isLoading: false,
+      refreshedStations,
+      setRefreshedStations,
+      refreshedWebcams,
+      setRefreshedWebcams
+    }),
+    [refreshedStations, refreshedWebcams]
+  );
 
   return <AppContext value={value}>{children}</AppContext>;
 }

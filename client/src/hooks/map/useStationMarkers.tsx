@@ -209,7 +209,7 @@ export function useStationMarkers({
   const unitRef = useRef<WindUnit>(unit);
   const refreshAbortController = useRef<AbortController | null>(null);
 
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const isRefreshingRef = useRef(false);
   const [stations, setStations] = useState<IStation[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -329,7 +329,11 @@ export function useStationMarkers({
     // We don't update map when showing historical data
     if (isHistoricData) return;
 
-    if (document.visibilityState !== 'visible' || !markersRef.current.length || isRefreshing) {
+    if (
+      document.visibilityState !== 'visible' ||
+      !markersRef.current.length ||
+      isRefreshingRef.current
+    ) {
       return;
     }
 
@@ -341,7 +345,7 @@ export function useStationMarkers({
     refreshAbortController.current = new AbortController();
 
     lastRefreshRef.current = timestamp;
-    setIsRefreshing(true);
+    isRefreshingRef.current = true;
 
     try {
       // Find newest marker timestamp
@@ -385,10 +389,9 @@ export function useStationMarkers({
       console.error('Failed to refresh station markers', err);
       toast.error(handleError(err, 'Failed to refresh station markers').message);
     } finally {
-      // Ensure isRefreshing is always set to false
-      setIsRefreshing(false);
+      isRefreshingRef.current = false;
     }
-  }, [stations, onRefresh, updateStationMarker, withErrorHandling, isRefreshing, isHistoricData]);
+  }, [stations, onRefresh, updateStationMarker, withErrorHandling, isHistoricData]);
 
   // Update all markers when unit changes
   useEffect(() => {
@@ -540,7 +543,6 @@ export function useStationMarkers({
     renderCurrentData,
     setInteractive,
     setVisibility,
-    isRefreshing,
     error,
     isInitialized
   };
