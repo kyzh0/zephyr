@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, getTextColor } from '@/lib/utils';
 import { getWindColor } from '@/lib/utils';
 import type { IStation } from '@/models/station.model';
 import { WindCompass } from './WindCompass';
@@ -45,6 +45,9 @@ export function CurrentConditions({
     return <p className="mt-2 text-center text-red-500">Station is offline.</p>;
   }
 
+  const avgColor = getWindColor(station.currentAverage ?? null);
+  const gustColor = getWindColor(station.currentGust ?? null);
+
   return (
     <div
       ref={containerRef}
@@ -69,7 +72,8 @@ export function CurrentConditions({
             <td
               className="text-center p-0 sm:p-1 text-xl sm:text-2xl"
               style={{
-                backgroundColor: getWindColor(station.currentAverage ?? null)
+                backgroundColor: avgColor,
+                color: getTextColor(avgColor)
               }}
             >
               {convertWindSpeed(station.currentAverage, unit) ?? '-'}
@@ -77,7 +81,8 @@ export function CurrentConditions({
             <td
               className="text-center p-0 sm:p-1 text-xl sm:text-2xl"
               style={{
-                backgroundColor: getWindColor(station.currentGust ?? null)
+                backgroundColor: gustColor,
+                color: getTextColor(gustColor)
               }}
             >
               {convertWindSpeed(station.currentGust, unit) ?? '-'}

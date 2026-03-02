@@ -52,6 +52,86 @@ export const getWindDirectionFromBearing = (bearing: number) => {
   }
 };
 
+/**
+ * Convert hex color to RGB values
+ */
+function hexToRgb(hex: string): [number, number, number] {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return [255, 255, 255];
+  return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
+}
+
+/**
+ * Convert RGB values to hex color
+ */
+function rgbToHex(r: number, g: number, b: number): string {
+  const toHex = (n: number) => {
+    const hex = Math.round(Math.max(0, Math.min(255, n))).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+/**
+ * Interpolate between two hex colors
+ */
+function interpolateColor(color1: string, color2: string, factor: number): string {
+  const [r1, g1, b1] = hexToRgb(color1);
+  const [r2, g2, b2] = hexToRgb(color2);
+
+  const r = r1 + (r2 - r1) * factor;
+  const g = g1 + (g2 - g1) * factor;
+  const b = b1 + (b2 - b1) * factor;
+
+  return rgbToHex(r, g, b);
+}
+
+/**
+ * Get wind color as hex value with smooth transitions between bands
+ * Transitions smoothly between color bands based on wind speed (in km/h)
+ */
+export const getWindColor = (avgWindKph: number | null): string => {
+  const colors = [
+    { speed: 0, hex: '#FFFFFF' }, // white
+    { speed: 5, hex: '#A8D8A8' }, // light-green
+    { speed: 15, hex: '#228B22' }, // green
+    { speed: 23, hex: '#FFFF00' }, // yellow
+    { speed: 30, hex: '#FFA500' }, // orange
+    { speed: 35, hex: '#FF0000' }, // red
+    { speed: 60, hex: '#800080' }, // purple
+    { speed: 80, hex: '#000000' } // black
+  ];
+
+  if (avgWindKph == null) return colors[0].hex;
+
+  // Find the two colors to interpolate between
+  for (let i = 0; i < colors.length - 1; i++) {
+    if (avgWindKph >= colors[i].speed && avgWindKph <= colors[i + 1].speed) {
+      const speedRange = colors[i + 1].speed - colors[i].speed;
+      const factor = speedRange === 0 ? 0 : (avgWindKph - colors[i].speed) / speedRange;
+      return interpolateColor(colors[i].hex, colors[i + 1].hex, factor);
+    }
+  }
+
+  // Return black if speed exceeds the highest threshold
+  return colors[colors.length - 1].hex;
+};
+
+/**
+ * Get text color (black or white) based on background hex color brightness
+ * Returns white text for dark backgrounds, black text for light backgrounds
+ */
+export function getTextColor(hexColor: string): string {
+  const [r, g, b] = hexToRgb(hexColor);
+
+  // Calculate perceived brightness using standard formula
+  // Weights colors by human perception (green appears brighter than red, which appears brighter than blue)
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+  // Return white text for dark backgrounds, black for light
+  return brightness > 128 ? 'black' : 'white';
+}
+
 export const getStationTypeName = (code: string) => {
   switch (code) {
     case 'wu':
@@ -106,66 +186,6 @@ export const getStationTypeName = (code: string) => {
       return 'Treble Cone WX';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
-  }
-};
-
-export const getWindColor = (wind: number | null) => {
-  if (wind == null) {
-    return '';
-  } else if (wind <= 2) {
-    return '';
-  } else if (wind <= 4) {
-    return '#d1f9ff';
-  } else if (wind <= 6) {
-    return '#b5fffe';
-  } else if (wind <= 8) {
-    return '#a8ffec';
-  } else if (wind <= 10) {
-    return '#a8ffe2';
-  } else if (wind <= 12) {
-    return '#a8ffd1';
-  } else if (wind <= 14) {
-    return '#a8ffc2';
-  } else if (wind <= 16) {
-    return '#a8ffb1';
-  } else if (wind <= 18) {
-    return '#abffa8';
-  } else if (wind <= 20) {
-    return '#95ff91';
-  } else if (wind <= 22) {
-    return '#87ff82';
-  } else if (wind <= 24) {
-    return '#9dff82';
-  } else if (wind <= 26) {
-    return '#c3ff82';
-  } else if (wind <= 28) {
-    return '#e2ff82';
-  } else if (wind <= 30) {
-    return '#fff582';
-  } else if (wind <= 32) {
-    return '#ffda82';
-  } else if (wind <= 34) {
-    return '#ff9966';
-  } else if (wind <= 36) {
-    return '#ff8766';
-  } else if (wind <= 38) {
-    return '#ff7d66';
-  } else if (wind <= 40) {
-    return '#ff6666';
-  } else if (wind <= 42) {
-    return '#ff4d4d';
-  } else if (wind <= 50) {
-    return '#ff365e';
-  } else if (wind <= 60) {
-    return '#ff3683';
-  } else if (wind <= 70) {
-    return '#ff36a8';
-  } else if (wind <= 80) {
-    return '#ff36c6';
-  } else if (wind <= 90) {
-    return '#ff36e1';
-  } else {
-    return '#f536ff';
   }
 };
 

@@ -9,15 +9,18 @@
  */
 
 import { createElement } from 'react';
-import { getTextColor, getWindColorHex } from './wind-icon.utils';
+import { convertWindSpeed } from './map.utils';
+import type { WindUnit } from '../station';
+import { getTextColor, getWindColor } from '@/lib/utils';
 
-const DEFAULT_SIZE = 70; // default bounding box size in pixels
+const DEFAULT_SIZE = 50; // default bounding box size in pixels
 
 export interface WindMarkerProps {
-  direction: number; // degrees clockwise from North — tail tip points this way
-  speed: number; // wind speed value shown in circle
+  direction?: number; // degrees clockwise from North — tail tip points this way
+  speed?: number; // wind speed value shown in circle
   gust?: number; // gust speed
   size?: number; // bounding box size in px (default: 50)
+  unit: WindUnit;
 }
 
 // ─── Core SVG builder ──────────────────────────────────────────────────────────
@@ -34,10 +37,11 @@ export function generateWindMarkerSVG({
   direction,
   speed,
   gust,
-  size = DEFAULT_SIZE
+  size = DEFAULT_SIZE,
+  unit
 }: WindMarkerProps): string {
-  const coreColor = getWindColorHex(speed);
-  const gustColor = getWindColorHex(gust ?? speed);
+  const coreColor = getWindColor(speed ?? 0);
+  const gustColor = getWindColor(gust ?? speed ?? 0);
 
   const cx = size / 2;
   const cy = size / 2;
@@ -73,11 +77,18 @@ export function generateWindMarkerSVG({
 
   const borderWidth = (size * 0.02).toFixed(2);
 
+  const tailMarkup =
+    direction !== undefined
+      ? `
+    <!-- Tail (gust color) -->
+    <path d="${tail_attr}" fill="${gustColor}" stroke="none"/>  
+  `
+      : '';
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <!-- Shape rotated so tail tip points in wind direction (0 = North/up) -->
   <g transform="rotate(${direction},${cx},${cy})">
-    <!-- Tail (gust color) -->
-    <path d="${tail_attr}" fill="${gustColor}" stroke="none"/>  
+    ${tailMarkup}
   </g>
 
   <!-- Circle (core color) - drawn outside rotation so it appears cleanly on top -->
@@ -93,15 +104,15 @@ export function generateWindMarkerSVG({
     font-family="'Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif"
     font-size="${fontSize}" font-weight="200"
     fill="${getTextColor(coreColor)}"
-  >${speed}</text>
+  >${speed ? convertWindSpeed(speed, unit) : '-'}</text>
 </svg>`;
 }
 
 /**
  * React component for rendering a wind direction marker SVG
  */
-export function WindMarker({ direction, speed, gust, size = DEFAULT_SIZE }: WindMarkerProps) {
-  const svg = generateWindMarkerSVG({ direction, speed, gust, size });
+export function WindMarker({ direction, speed, gust, size = DEFAULT_SIZE, unit }: WindMarkerProps) {
+  const svg = generateWindMarkerSVG({ direction, speed, gust, size, unit });
 
   return createElement('div', {
     dangerouslySetInnerHTML: { __html: svg },

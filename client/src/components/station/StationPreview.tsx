@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { convertWindSpeed, getStoredValue, getWindColorHex } from '../map';
-import { getWindDirectionFromBearing } from '@/lib/utils';
+import { convertWindSpeed, getStoredValue } from '../map';
+import { getTextColor, getWindColor, getWindDirectionFromBearing } from '@/lib/utils';
 import DirectionArrow from '../ui/DirectionArrow';
 import type { WindUnit } from './types';
 import type { IStation } from '@/models/station.model';
@@ -12,7 +12,7 @@ export const StationPreview: React.FC<{
 }> = ({ data, distance }) => {
   const navigate = useNavigate();
 
-  const color = data.currentAverage != null ? getWindColorHex(data.currentAverage + 10) : undefined;
+  const color = getWindColor(data.currentAverage ?? 0);
   const unit = getStoredValue<WindUnit>('unit', 'kmh');
 
   return (
@@ -24,7 +24,8 @@ export const StationPreview: React.FC<{
       }}
       className="rounded-lg p-2 text-center transition-colors hover:opacity-80 cursor-pointer"
       style={{
-        backgroundColor: color ?? 'hsl(var(--muted))'
+        backgroundColor: color,
+        color: getTextColor(color)
       }}
     >
       <p className="truncate text-xs">{data.name}</p>

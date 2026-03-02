@@ -8,13 +8,8 @@ import {
   loadAllStationDataAtTimestamp
 } from '@/services/station.service';
 import type { IHistoricalStationData } from '@/models/station-data.model';
-import {
-  getStationGeoJson,
-  sortStationFeatures,
-  convertWindSpeed,
-  getArrowStyle
-} from '@/components/map';
-import { generateWindMarker2SVG } from '@/components/map/wind-marker2';
+import { getStationGeoJson, sortStationFeatures, convertWindSpeed } from '@/components/map';
+import { generateWindMarkerSVG } from '@/components/map/wind-marker';
 import type { StationMarker, WindUnit } from '@/components/map';
 import {
   extractStationProperties,
@@ -35,8 +30,6 @@ interface UseStationMarkersOptions {
   isVisible: boolean;
   onRefresh?: (updatedIds: string[]) => void;
 }
-
-const USE_NEW_WIND_MARKER = true;
 
 /**
  * Generate popup HTML content for a station marker
@@ -66,40 +59,6 @@ function createPopupHtml(props: StationProperties, unit: WindUnit): string {
   }
 
   return header + `<p align="center">${windText} ${unitLabel} ${direction}</p>`;
-}
-
-function applyMarkerArrowStyle(
-  arrow: HTMLDivElement,
-  avgWind: number | null,
-  avgGust: number | null,
-  currentBearing: number | null,
-  validBearings: string | null,
-  isOffline: boolean | null,
-  unit: WindUnit
-): { textColor: string; hideText: boolean } {
-  if (
-    USE_NEW_WIND_MARKER &&
-    !isOffline &&
-    avgWind != null &&
-    avgGust != null &&
-    currentBearing != null
-  ) {
-    arrow.style.backgroundImage = '';
-    arrow.style.transform = '';
-    arrow.innerHTML = generateWindMarker2SVG({
-      direction: Math.round(currentBearing),
-      speed: convertWindSpeed(avgWind, unit),
-      gust: convertWindSpeed(avgGust, unit)
-    });
-    return { textColor: 'white', hideText: true };
-  }
-
-  const [img, textColor] = getArrowStyle(avgWind, currentBearing, validBearings, isOffline);
-  arrow.innerHTML = '';
-  arrow.style.backgroundImage = img;
-  arrow.style.transform = currentBearing != null ? `rotate(${Math.round(currentBearing)}deg)` : '';
-
-  return { textColor, hideText: false };
 }
 
 /**
@@ -146,20 +105,14 @@ function createMarkerElement(
   arrow.className = 'marker-arrow';
 
   // Wind speed text
-  const text = document.createElement('span');
-  text.className = 'marker-text';
-  const { textColor, hideText } = applyMarkerArrowStyle(
-    arrow,
-    currentAverage,
-    currentGust,
-    currentBearing,
-    validBearings,
-    isOffline,
+  arrow.style.backgroundImage = '';
+  arrow.style.transform = '';
+  arrow.innerHTML = generateWindMarkerSVG({
+    direction: currentBearing ?? undefined,
+    speed: currentAverage ?? undefined,
+    gust: currentGust ?? undefined,
     unit
-  );
-  text.style.color = textColor;
-  text.style.display = hideText ? 'none' : '';
-  text.textContent = formatMarkerText(currentAverage, isOffline, unit, convertWindSpeed);
+  });
 
   // Event handlers
   const handleClick = () => {
@@ -169,11 +122,9 @@ function createMarkerElement(
   const handleEnter = () => onHover(popup, true);
   const handleLeave = () => onHover(popup, false);
 
-  for (const el of [arrow, text]) {
-    el.addEventListener('click', handleClick);
-    el.addEventListener('mouseenter', handleEnter);
-    el.addEventListener('mouseleave', handleLeave);
-  }
+  arrow.addEventListener('click', handleClick);
+  arrow.addEventListener('mouseenter', handleEnter);
+  arrow.addEventListener('mouseleave', handleLeave);
 
   // Container
   const container = document.createElement('div');
@@ -190,7 +141,6 @@ function createMarkerElement(
   container.style.zIndex = '2';
 
   container.appendChild(arrow);
-  container.appendChild(text);
   container.appendChild(createElevationBorderSvg(elevation, currentBearing));
 
   return container;
@@ -205,7 +155,7 @@ function updateMarkerElement(
   timestamp: number,
   unit: WindUnit
 ): void {
-  const { currentAverage, currentGust, currentBearing, validBearings, isOffline } = props;
+  const { currentAverage, currentGust, currentBearing, isOffline } = props;
 
   marker.dataset.timestamp = String(timestamp);
   marker.dataset.avg = currentAverage != null ? String(currentAverage) : '';
@@ -218,17 +168,14 @@ function updateMarkerElement(
   const arrow = marker.querySelector<HTMLDivElement>('.marker-arrow');
   const text = marker.querySelector<HTMLElement>('.marker-text');
   if (arrow && text) {
-    const { textColor, hideText } = applyMarkerArrowStyle(
-      arrow,
-      currentAverage,
-      currentGust,
-      currentBearing,
-      validBearings,
-      isOffline,
+    arrow.style.backgroundImage = '';
+    arrow.style.transform = '';
+    arrow.innerHTML = generateWindMarkerSVG({
+      direction: currentBearing ?? undefined,
+      speed: currentAverage ?? undefined,
+      gust: currentGust ?? undefined,
       unit
-    );
-    text.style.color = textColor;
-    text.style.display = hideText ? 'none' : '';
+    });
     text.textContent = formatMarkerText(currentAverage, isOffline, unit, convertWindSpeed);
   }
 

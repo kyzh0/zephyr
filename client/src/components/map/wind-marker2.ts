@@ -8,8 +8,8 @@
  * Direction: 0 = North (tail points up), 90 = East, 180 = South, 270 = West
  */
 
+import { getWindColor } from '@/lib/utils';
 import { createElement } from 'react';
-import { getWindColorHex } from './wind-icon.utils';
 
 const DEFAULT_SIZE = 100; // default bounding box size in pixels
 
@@ -35,8 +35,8 @@ export function generateWindMarker2SVG({
   gust,
   size = DEFAULT_SIZE
 }: WindMarkerProps): string {
-  const coreColor = getWindColorHex(speed);
-  const gustColor = getWindColorHex(gust ?? speed);
+  const coreColor = getWindColor(speed);
+  const gustColor = getWindColor(gust ?? speed);
 
   const cx = size / 2;
   const cy = size / 2;
