@@ -172,6 +172,9 @@ export default function Map() {
     toast.info(`Switched to ${newUnit === 'kmh' ? 'km/h' : 'knots'}`);
   }, [unit]);
 
+  // Debounce historical fetch so rapid slider/arrow changes only trigger one API call
+  const historyFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Handle history offset change
   const handleHistoryChange = useCallback(
     async (offset: number) => {
@@ -191,8 +194,21 @@ export default function Map() {
       setHistoryOffset(offset);
 
       if (offset < 0) {
-        await renderHistoricalData?.(getSnapshotTime(offset));
+        // Clear any pending fetch so we only run after user stops changing the slider
+        if (historyFetchTimeoutRef.current) {
+          clearTimeout(historyFetchTimeoutRef.current);
+          historyFetchTimeoutRef.current = null;
+        }
+        const snapshotTime = getSnapshotTime(offset);
+        historyFetchTimeoutRef.current = setTimeout(() => {
+          historyFetchTimeoutRef.current = null;
+          void renderHistoricalData?.(snapshotTime);
+        }, 100);
       } else {
+        if (historyFetchTimeoutRef.current) {
+          clearTimeout(historyFetchTimeoutRef.current);
+          historyFetchTimeoutRef.current = null;
+        }
         await renderCurrentData?.();
       }
     },
