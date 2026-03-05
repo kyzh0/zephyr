@@ -104,9 +104,10 @@ function createMarkerElement(
   arrow.style.transform = '';
   arrow.innerHTML = renderToStaticMarkup(
     <StationMarker
-      direction={currentBearing ?? undefined}
+      bearing={currentBearing ?? undefined}
       speed={currentAverage ?? undefined}
       gust={currentGust ?? undefined}
+      validBearings={validBearings ?? undefined}
       unit={unit}
     />
   );
@@ -167,9 +168,10 @@ function updateMarkerElement(
     arrow.style.transform = '';
     arrow.innerHTML = renderToStaticMarkup(
       <StationMarker
-        direction={currentBearing ?? undefined}
+        bearing={currentBearing ?? undefined}
         speed={currentAverage ?? undefined}
         gust={currentGust ?? undefined}
+        validBearings={props.validBearings ?? undefined}
         unit={unit}
       />
     );

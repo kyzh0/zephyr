@@ -71,50 +71,80 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
         </DialogHeader>
 
         {/* Guide content */}
-        <div className="grid grid-cols-[auto_1fr] gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-2 text-xs sm:text-sm">
-          <div className="flex justify-center items-center">
-            <StationMarker speed={15} direction={240} unit="kmh" size={30} />
+        <div className="flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm">
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center flex-shrink-0">
+              <StationMarker speed={15} bearing={240} unit="kmh" size={40} />
+            </div>
+            <div className="flex items-center">Click a station for details</div>
           </div>
-          <div className="flex items-center">Click a station for details</div>
 
-          <div className="flex justify-center items-center">
-            <StationMarker speed={15} gust={30} direction={240} unit="kmh" size={30} />
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center flex-shrink-0">
+              <StationMarker speed={15} gust={30} bearing={240} unit="kmh" size={40} />
+            </div>
+            <div className="flex items-center">Tails colour indicates wind gusts</div>
           </div>
-          <div className="flex items-center">Tails colour indicates wind gusts</div>
 
-          <div className="flex justify-center items-center">
-            <SiteMarker validBearings="45-140" size={30} borderWidth={5} />
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center flex-shrink-0">
+              <StationMarker
+                speed={15}
+                gust={30}
+                bearing={240}
+                validBearings={'220-260'}
+                unit="kmh"
+                size={40}
+              />
+            </div>
+            <div className="flex items-center">Gold border indicates valid wind direction</div>
           </div>
-          <div className="flex items-center">PG / HG site info</div>
 
-          <div className="flex justify-center items-center">
-            <LandingMarker size={30} borderWidth={5} />
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center flex-shrink-0">
+              <SiteMarker validBearings="45-140" size={30} borderWidth={5} />
+            </div>
+            <div className="flex items-center">PG / HG site info</div>
           </div>
-          <div className="flex items-center">Landing info</div>
 
-          <div className="flex justify-center items-center">
-            <Camera className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center flex-shrink-0">
+              <LandingMarker size={30} borderWidth={5} />
+            </div>
+            <div className="flex items-center">Landing info</div>
           </div>
-          <div className="flex items-center">Webcam overlay</div>
 
-          <div className="flex justify-center items-center">
-            <Mountain className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center flex-shrink-0">
+              <Camera className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div className="flex items-center">Webcam overlay</div>
           </div>
-          <div className="flex items-center">Elevation border (each dash = 250m)</div>
 
-          <div className="flex justify-center items-center">
-            <Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center flex-shrink-0">
+              <Mountain className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div className="flex items-center">Elevation border (each dash = 250m)</div>
           </div>
-          <div className="flex items-center">Live grid view</div>
 
-          <div className="flex justify-center items-center">
-            <svg viewBox="0 0 18 18" className="h-4 w-4">
-              <g transform="rotate(-90, 9, 9)">
-                <path d="m18,2.47l-9,6.53l-4.38,-4.38l-4.62,3.38l0,-2.48l4.83,-3.52l4.38,4.38l8.79,-6.38m0,12l-4.7,0l-4.17,3.34l-6.13,-5.93l-3,2.13l0,2.46l2.8,-2l6.2,6l5,-4l4,0l0,-2z" />
-              </g>
-            </svg>
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center flex-shrink-0">
+              <Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div className="flex items-center">Live grid view</div>
           </div>
-          <div className="flex items-center">RASP Skew-T soundings</div>
+
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center flex-shrink-0">
+              <svg viewBox="0 0 18 18" className="h-4 w-4">
+                <g transform="rotate(-90, 9, 9)">
+                  <path d="m18,2.47l-9,6.53l-4.38,-4.38l-4.62,3.38l0,-2.48l4.83,-3.52l4.38,4.38l8.79,-6.38m0,12l-4.7,0l-4.17,3.34l-6.13,-5.93l-3,2.13l0,2.46l2.8,-2l6.2,6l5,-4l4,0l0,-2z" />
+                </g>
+              </svg>
+            </div>
+            <div className="flex items-center">RASP Skew-T soundings</div>
+          </div>
         </div>
 
         {/* Footer with checkbox */}

@@ -242,13 +242,14 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
                   {result.type === 'station' ? (
                     <StationMarker
                       speed={result.item.currentAverage ?? undefined}
-                      direction={result.item.currentBearing ?? undefined}
+                      bearing={result.item.currentBearing ?? undefined}
                       unit={unit}
+                      validBearings={result.item.validBearings ?? undefined}
                       size={30}
                     />
                   ) : result.type === 'site' ? (
                     <SiteMarker
-                      validBearings={result.item.validBearings}
+                      validBearings={result.item.validBearings ?? undefined}
                       isOfficial={result.item.siteGuideUrl ? true : false}
                       size={24}
                       borderWidth={4}

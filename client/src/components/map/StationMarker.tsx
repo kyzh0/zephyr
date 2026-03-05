@@ -10,16 +10,17 @@
 
 import { type ReactNode } from 'react';
 import { convertWindSpeed } from './map.utils';
-import type { WindUnit } from '../station';
+import { parseValidBearings, type WindUnit } from '../station';
 import { getTextColor, getWindColor } from '@/lib/utils';
 
 const DEFAULT_SIZE = 50; // default bounding box size in pixels
 
 export interface StationMarkerProps {
-  direction?: number; // degrees clockwise from North — tail tip points this way
+  bearing?: number; // degrees clockwise from North — tail tip points this way
   speed?: number; // wind speed value shown in circle
   gust?: number; // gust speed
   size?: number; // bounding box size in px (default: 50)
+  validBearings?: string;
   unit: WindUnit;
 }
 
@@ -34,12 +35,17 @@ export interface StationMarkerProps {
  * triangle are tangent to the circle edge and the join is seamless.
  */
 export const StationMarker = ({
-  direction,
+  bearing,
   speed,
   gust,
   size = DEFAULT_SIZE,
+  validBearings,
   unit
 }: StationMarkerProps): ReactNode => {
+  const parsedValidBearings = parseValidBearings(validBearings);
+  const isBearingValid =
+    bearing !== undefined &&
+    parsedValidBearings.some(([from, to]) => bearing >= from && bearing <= to);
   const coreColor = getWindColor(speed ?? 0);
   const gustColor = getWindColor(gust ?? speed ?? 0);
 
@@ -75,7 +81,7 @@ export const StationMarker = ({
 
   const fontSize = Math.round(R * 1.15);
 
-  const borderWidth = (size * 0.02).toFixed(2);
+  const borderWidth = size * 0.02;
   return (
     <div className="relative inline-block" style={{ width: size, height: size }}>
       {/* SVG overlay for the orange bearing arcs */}
@@ -86,15 +92,22 @@ export const StationMarker = ({
         viewBox={`0 0 ${size} ${size}`}
       >
         {/* Shape rotated so tail tip points in wind direction (0 = North/up) */}
-        <g transform={`rotate(${direction},${cx},${cy})`}>
-          {direction !== undefined ? <path d={tail_attr} fill={gustColor} stroke="none" /> : null}
+        <g transform={`rotate(${bearing},${cx},${cy})`}>
+          {bearing !== undefined ? <path d={tail_attr} fill={gustColor} stroke="none" /> : null}
         </g>
 
         {/* Circle (core color) - drawn outside rotation so it appears cleanly on top */}
         <circle cx={cx} cy={cy} r={R} fill={coreColor} stroke="none" />
 
-        {/* White border on circle only — drawn on top so it covers the tail join */}
-        <circle cx={cx} cy={cy} r={R} fill="none" stroke="white" strokeWidth={borderWidth} />
+        {/* White/gold border on circle only — drawn on top so it covers the tail join */}
+        <circle
+          cx={cx}
+          cy={cy}
+          r={R}
+          fill="none"
+          stroke={isBearingValid ? 'gold' : 'white'}
+          strokeWidth={isBearingValid ? borderWidth * 2 : borderWidth}
+        />
 
         {/* Speed: always upright, centered in circle */}
         <text

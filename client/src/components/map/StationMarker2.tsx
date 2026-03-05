@@ -20,7 +20,7 @@ const DEFAULT_SIZE = 60; // default bounding box size in pixels
  * props interface as `StationMarker` (StationMarkerProps).
  */
 export const StationMarker = ({
-  direction,
+  bearing: direction,
   speed,
   gust,
   size = DEFAULT_SIZE,
