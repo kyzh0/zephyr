@@ -92,14 +92,34 @@ function interpolateColor(color1: string, color2: string, factor: number): strin
  */
 export const getWindColor = (avgWindKph: number | null): string => {
   const colors = [
-    { speed: 0, hex: '#FFFFFF' }, // white
-    { speed: 5, hex: '#A8D8A8' }, // light-green
-    { speed: 15, hex: '#228B22' }, // green
-    { speed: 23, hex: '#FFFF00' }, // yellow
-    { speed: 30, hex: '#FFA500' }, // orange
-    { speed: 35, hex: '#FF0000' }, // red
-    { speed: 60, hex: '#800080' }, // purple
-    { speed: 80, hex: '#000000' } // black
+    { speed: 0, hex: '#FFFFFF' },
+    { speed: 2, hex: '#FFFFFF' },
+    { speed: 4, hex: '#d1f9ff' },
+    { speed: 6, hex: '#b5fffe' },
+    { speed: 8, hex: '#a8ffec' },
+    { speed: 10, hex: '#a8ffe2' },
+    { speed: 12, hex: '#a8ffd1' },
+    { speed: 14, hex: '#a8ffc2' },
+    { speed: 16, hex: '#a8ffb1' },
+    { speed: 18, hex: '#abffa8' },
+    { speed: 20, hex: '#95ff91' },
+    { speed: 22, hex: '#87ff82' },
+    { speed: 24, hex: '#9dff82' },
+    { speed: 26, hex: '#c3ff82' },
+    { speed: 28, hex: '#e2ff82' },
+    { speed: 30, hex: '#fff582' },
+    { speed: 32, hex: '#ffda82' },
+    { speed: 34, hex: '#ff9966' },
+    { speed: 36, hex: '#ff8766' },
+    { speed: 38, hex: '#ff7d66' },
+    { speed: 40, hex: '#ff6666' },
+    { speed: 42, hex: '#ff4d4d' },
+    { speed: 50, hex: '#ff365e' },
+    { speed: 60, hex: '#ff3683' },
+    { speed: 70, hex: '#ff36a8' },
+    { speed: 80, hex: '#ff36c6' },
+    { speed: 90, hex: '#ff36e1' },
+    { speed: 100, hex: '#f536ff' }
   ];
 
   if (avgWindKph == null) return colors[0].hex;
