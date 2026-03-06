@@ -13,6 +13,7 @@ interface UseMapInstanceOptions {
 interface UseMapInstanceReturn {
   map: React.RefObject<mapboxgl.Map | null>;
   isLoaded: boolean;
+  zoom: number;
   triggerGeolocate: () => void;
 }
 
@@ -24,10 +25,12 @@ export function useMapInstance({
   const [isLoaded, setIsLoaded] = useState(false);
   const posInitRef = useRef(false);
 
-  // Load saved map position
+  // Load saved map position and zoom
   const lon = getStoredValue('lon', 172.5);
   const lat = getStoredValue('lat', -41);
-  const zoom = getStoredValue('zoom', window.innerWidth > 1000 ? 5.1 : 4.3);
+  const [zoom, setZoom] = useState(() =>
+    getStoredValue('zoom', window.innerWidth > 1000 ? 5.1 : 4.3)
+  );
 
   // Map initialization
   useEffect(() => {
@@ -57,9 +60,9 @@ export function useMapInstance({
 
     map.current.on('move', () => {
       if (!map.current) return;
+      setZoom(Number(map.current.getZoom().toFixed(2)));
       setStoredValue('lon', Number(map.current.getCenter().lng.toFixed(4)));
       setStoredValue('lat', Number(map.current.getCenter().lat.toFixed(4)));
-      setStoredValue('zoom', Number(map.current.getZoom().toFixed(2)));
     });
   }, [containerRef, lon, lat, zoom, onLoad]);
 
@@ -69,6 +72,11 @@ export function useMapInstance({
     map.current.flyTo({ center: [lon, lat], zoom });
     posInitRef.current = true;
   }, [lon, lat, zoom]);
+
+  // Persist zoom to localStorage when it changes from map interaction
+  useEffect(() => {
+    setStoredValue('zoom', Number(zoom.toFixed(2)));
+  }, [zoom]);
 
   // Trigger geolocation programmatically
   const triggerGeolocate = useCallback(() => {
@@ -88,5 +96,5 @@ export function useMapInstance({
     );
   }, []);
 
-  return { map, isLoaded, triggerGeolocate };
+  return { map, isLoaded, zoom, triggerGeolocate };
 }

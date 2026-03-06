@@ -61,7 +61,7 @@ export default function Map() {
   );
 
   // Initialize map
-  const { map, isLoaded, triggerGeolocate } = useMapInstance({
+  const { map, isLoaded, zoom, triggerGeolocate } = useMapInstance({
     containerRef: mapContainer
   });
 
@@ -78,6 +78,7 @@ export default function Map() {
     isHistoricData: historyOffset < 0,
     unit,
     isVisible: viewMode === 'stations',
+    mapZoom: zoom,
     onRefresh: setRefreshedStations
   });
 

@@ -123,6 +123,11 @@
   cursor: pointer;
 }
 
+/* Hide gust label on station markers when zoom is below threshold */
+.marker.gust-label-hidden .marker-gust-label {
+  display: none;
+}
+
 /* Webcam and sounding overlays */
 .webcam {
   z-index: 10;

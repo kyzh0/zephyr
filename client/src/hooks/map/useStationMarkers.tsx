@@ -22,6 +22,7 @@ interface UseStationMarkersOptions {
   isHistoricData: boolean;
   unit: WindUnit;
   isVisible: boolean;
+  mapZoom?: number;
   onRefresh?: (updatedIds: string[]) => void;
 }
 
@@ -179,15 +180,19 @@ function updateMarkerElement(
   }
 }
 
+const GUST_LABEL_MIN_ZOOM = 10;
+
 export function useStationMarkers({
   map,
   isMapLoaded,
   isHistoricData,
   unit,
   isVisible,
+  mapZoom,
   onRefresh
 }: UseStationMarkersOptions) {
   const isVisibleRef = useRef(isVisible);
+  const showGustLabelRef = useRef((mapZoom ?? 0) >= GUST_LABEL_MIN_ZOOM);
 
   // Keep visibility ref in sync
   useEffect(() => {
@@ -207,6 +212,15 @@ export function useStationMarkers({
   useEffect(() => {
     unitRef.current = unit;
   }, [unit]);
+
+  // Toggle gust label visibility via CSS class when zoom crosses threshold
+  useEffect(() => {
+    const hideGust = (mapZoom ?? 0) < GUST_LABEL_MIN_ZOOM;
+    showGustLabelRef.current = !hideGust;
+    for (const item of markersRef.current) {
+      item.marker.classList.toggle('gust-label-hidden', hideGust);
+    }
+  }, [mapZoom]);
 
   // Cleanup abort controller on unmount
   useEffect(() => {
@@ -254,6 +268,8 @@ export function useStationMarkers({
         },
         popup
       );
+
+      if (!showGustLabelRef.current) marker.classList.add('gust-label-hidden');
 
       return { marker, popup };
     },

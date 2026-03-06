@@ -238,10 +238,11 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
               )}
             >
               <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center w-6 h-6 shrink-0">
+                <div className="flex items-center justify-center w-6 h-6 shrink-0 marker gust-label-hidden">
                   {result.type === 'station' ? (
                     <StationMarker
                       speed={result.item.currentAverage ?? undefined}
+                      gust={result.item.currentGust ?? undefined}
                       bearing={result.item.currentBearing ?? undefined}
                       unit={unit}
                       validBearings={result.item.validBearings ?? undefined}

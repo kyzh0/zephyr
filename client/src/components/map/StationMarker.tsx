@@ -73,6 +73,15 @@ export const StationMarker = ({
 
   const fontSize = Math.round(R * 1.15);
 
+  // Position gust text outside circle, next to tail
+  let gustX = null;
+  let gustY = null;
+  if (!isOffline && speed !== undefined && bearing !== undefined) {
+    const rad = ((bearing + 45) * Math.PI) / 180;
+    gustX = cx - fontSize * 1.4 * Math.sin(rad);
+    gustY = cy + fontSize * 1.4 * Math.cos(rad);
+  }
+
   const borderWidth = size * 0.01;
   return (
     <div className="relative inline-block" style={{ width: size, height: size }}>
@@ -123,6 +132,23 @@ export const StationMarker = ({
         >
           {isOffline ? 'X' : speed !== undefined ? convertWindSpeed(speed, unit) : '-'}
         </text>
+
+        {/* Gust: smaller text outside circle; hidden at low zoom via .marker.gust-label-hidden */}
+        {gustX !== null && gustY !== null && (
+          <text
+            className="marker-gust-label"
+            x={gustX}
+            y={gustY}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontFamily="'Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif"
+            fontSize={0.7 * fontSize}
+            fontWeight="200"
+            fill="black"
+          >
+            {gust ? `${convertWindSpeed(gust, unit)}` : ''}
+          </text>
+        )}
       </svg>
     </div>
   );

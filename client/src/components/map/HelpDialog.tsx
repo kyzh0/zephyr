@@ -73,23 +73,23 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
         {/* Guide content */}
         <div className="flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm">
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center flex-shrink-0">
+            <div className="flex justify-center items-center flex-shrink-0 marker gust-label-hidden">
               <StationMarker speed={15} bearing={240} unit="kmh" size={40} />
             </div>
             <div className="flex items-center">Click a station for details</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center flex-shrink-0">
+            <div className="flex justify-center items-center flex-shrink-0 marker">
               <StationMarker speed={15} gust={30} bearing={240} unit="kmh" size={40} />
             </div>
             <div className="flex items-center">
-              Core colour indicates wind speed, tail colour wind gusts
+              Core colour indicates wind speed, tail colour wind gusts with label
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center flex-shrink-0">
+            <div className="flex justify-center items-center flex-shrink-0 marker gust-label-hidden">
               <StationMarker
                 speed={15}
                 gust={30}
