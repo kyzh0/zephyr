@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
-
 import { getWindDirectionFromBearing, handleError, REFRESH_INTERVAL_MS } from '@/lib/utils';
 import {
   listStations,
@@ -9,7 +8,7 @@ import {
 } from '@/services/station.service';
 import type { IHistoricalStationData } from '@/models/station-data.model';
 import { getStationGeoJson, sortStationFeatures, convertWindSpeed } from '@/components/map';
-import { StationMarker } from '@/components/map/StationMarker';
+import { DEFAULT_STATION_MARKER_SIZE, StationMarker } from '@/components/map/StationMarker';
 import type { StationMarker as IStationMarker, WindUnit } from '@/components/map/map.types';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
@@ -109,6 +108,7 @@ function createMarkerElement(
       gust={currentGust ?? undefined}
       validBearings={validBearings ?? undefined}
       unit={unit}
+      size={validBearings ? DEFAULT_STATION_MARKER_SIZE * 1.2 : DEFAULT_STATION_MARKER_SIZE}
     />
   );
 
@@ -136,7 +136,7 @@ function createMarkerElement(
   container.dataset.bearing = currentBearing != null ? String(currentBearing) : '';
   container.dataset.isOffline = String(isOffline ?? false);
   container.dataset.validBearings = validBearings ?? '';
-  container.style.zIndex = '2';
+  container.style.zIndex = validBearings ? '4' : isOffline ? '2' : '3'; // valid bearings above normal, offline below
 
   container.appendChild(arrow);
 
@@ -173,6 +173,7 @@ function updateMarkerElement(
         gust={currentGust ?? undefined}
         validBearings={props.validBearings ?? undefined}
         unit={unit}
+        size={props.validBearings ? DEFAULT_STATION_MARKER_SIZE * 1.2 : DEFAULT_STATION_MARKER_SIZE}
       />
     );
   }

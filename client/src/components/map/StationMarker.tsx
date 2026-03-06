@@ -13,7 +13,7 @@ import { convertWindSpeed } from './map.utils';
 import { parseValidBearings, type WindUnit } from '../station';
 import { getTextColor, getWindColor } from '@/lib/utils';
 
-const DEFAULT_SIZE = 50; // default bounding box size in pixels
+export const DEFAULT_STATION_MARKER_SIZE = 50; // default bounding box size in pixels
 
 export interface StationMarkerProps {
   bearing?: number; // degrees clockwise from North — tail tip points this way
@@ -38,7 +38,7 @@ export const StationMarker = ({
   bearing,
   speed,
   gust,
-  size = DEFAULT_SIZE,
+  size = DEFAULT_STATION_MARKER_SIZE,
   validBearings,
   unit
 }: StationMarkerProps): ReactNode => {
