@@ -177,118 +177,106 @@ function calculateHighResAverages(
   extendedData: ExtendedStationData[],
   stationId: string
 ): ExtendedStationData[] {
-  let startIdx = 0;
-  for (const d of extendedData) {
-    if (new Date(d.time).getMinutes() % 10 === 2) {
-      break;
-    }
-    startIdx++;
+  if (extendedData.length === 0) return [];
+
+  const MS_10_MIN = 10 * 60 * 1000;
+
+  const firstTime = new Date(extendedData[0].time);
+  const lastTime = new Date(extendedData[extendedData.length - 1].time);
+
+  // First bucket boundary
+  const firstBucketTime = new Date(Math.ceil(firstTime.getTime() / MS_10_MIN) * MS_10_MIN);
+
+  // Last completed boundary
+  const lastCompletedBucketTime = new Date(Math.floor(lastTime.getTime() / MS_10_MIN) * MS_10_MIN);
+
+  // No completed buckets
+  if (lastCompletedBucketTime < firstBucketTime) {
+    return [];
   }
 
-  if (startIdx >= extendedData.length) return [];
+  const buckets = new Map<number, ExtendedStationData[]>();
+
+  // Pre-create buckets
+  for (let t = firstBucketTime.getTime(); t <= lastCompletedBucketTime.getTime(); t += MS_10_MIN) {
+    buckets.set(t, []);
+  }
+
+  // Assign samples to buckets
+  for (const row of extendedData) {
+    const sampleTime = new Date(row.time).getTime();
+    const bucketTime = Math.ceil(sampleTime / MS_10_MIN) * MS_10_MIN;
+
+    // Only assign if bucket is completed
+    if (bucketTime <= lastCompletedBucketTime.getTime()) {
+      if (buckets.has(bucketTime)) {
+        buckets.get(bucketTime)!.push(row);
+      }
+    }
+  }
 
   const result: ExtendedStationData[] = [];
-  let sumAvg = 0;
-  let sumBearingSin = 0;
-  let sumBearingCos = 0;
-  let sumTemperature = 0;
-  let maxGust: number | null = null;
-  let count = 0;
-  let intervalStart = new Date(extendedData[startIdx].time);
 
-  for (let i = startIdx; i < extendedData.length; i += 1) {
-    const time = new Date(extendedData[i].time);
+  for (const [bucketTime, rows] of buckets) {
+    let sumAvg = 0;
+    let countAvg = 0;
 
-    if (
-      time.getTime() - intervalStart.getTime() >= 10 * 60 * 1000 ||
-      (time.getMinutes() % 10 > 0 && time.getMinutes() % 10 < intervalStart.getMinutes() % 10)
-    ) {
-      const avg = count > 0 ? Math.round(sumAvg / count) : null;
-      const calculatedBearing =
-        count > 0 ? Math.round(Math.atan2(sumBearingSin, sumBearingCos) / (Math.PI / 180)) : null;
-      const temperature = count > 0 ? Math.round(sumTemperature / count) : null;
+    let sumTemp = 0;
+    let countTemp = 0;
 
-      const timeValue = new Date(
-        intervalStart.getTime() + (10 - (intervalStart.getMinutes() % 10)) * 60 * 1000
-      ).toISOString();
+    let sumSin = 0;
+    let sumCos = 0;
+    let countBearing = 0;
 
-      result.push({
-        time: new Date(timeValue),
-        windAverage: avg ?? undefined,
-        windGust: maxGust ?? undefined,
-        windBearing:
-          calculatedBearing != null
-            ? calculatedBearing < 0
-              ? calculatedBearing + 360
-              : calculatedBearing
-            : undefined,
-        temperature: temperature ?? undefined,
-        _id: stationId,
-        timeLabel: formatInTimeZone(new Date(timeValue), 'Pacific/Auckland', 'HH:mm'),
-        windAverageKt: avg == null ? null : Math.round(avg / 1.852),
-        windGustKt: maxGust == null ? null : Math.round(maxGust / 1.852)
-      });
+    let maxGust: number | null = null;
 
-      intervalStart = time;
-      count = 0;
-      sumAvg = 0;
-      sumBearingSin = 0;
-      sumBearingCos = 0;
-      sumTemperature = 0;
-      maxGust = null;
-    }
-
-    if (extendedData[i].windAverage != null) {
-      count++;
-      sumAvg += extendedData[i].windAverage!;
-      if (extendedData[i].windBearing != null) {
-        sumBearingSin += Math.sin((extendedData[i].windBearing! * Math.PI) / 180);
-        sumBearingCos += Math.cos((extendedData[i].windBearing! * Math.PI) / 180);
+    for (const r of rows) {
+      if (r.windAverage != null) {
+        sumAvg += r.windAverage;
+        countAvg++;
       }
-      if (extendedData[i].temperature != null) {
-        sumTemperature += extendedData[i].temperature!;
+
+      if (r.windBearing != null) {
+        sumSin += Math.sin((r.windBearing * Math.PI) / 180);
+        sumCos += Math.cos((r.windBearing * Math.PI) / 180);
+        countBearing++;
       }
-      if (
-        extendedData[i].windGust != null &&
-        (maxGust === null || extendedData[i].windGust! > maxGust)
-      ) {
-        maxGust = extendedData[i].windGust!;
+
+      if (r.temperature != null) {
+        sumTemp += r.temperature;
+        countTemp++;
+      }
+
+      if (r.windGust != null) {
+        maxGust = Math.max(maxGust ?? 0, r.windGust);
       }
     }
 
-    if (time.getMinutes() % 10 === 0) {
-      const avg = count > 0 ? Math.round(sumAvg / count) : null;
-      const calculatedBearing =
-        count > 0 ? Math.round(Math.atan2(sumBearingSin, sumBearingCos) / (Math.PI / 180)) : null;
-      const temperature = count > 0 ? Math.round(sumTemperature / count) : null;
+    const avg = countAvg > 0 ? Math.round(sumAvg / countAvg) : null;
 
-      result.push({
-        time: time,
-        windAverage: avg ?? undefined,
-        windGust: maxGust ?? undefined,
-        windBearing:
-          calculatedBearing != null
-            ? calculatedBearing < 0
-              ? calculatedBearing + 360
-              : calculatedBearing
-            : undefined,
-        temperature: temperature ?? undefined,
-        _id: stationId,
-        timeLabel: formatInTimeZone(time, 'Pacific/Auckland', 'HH:mm'),
-        windAverageKt: avg == null ? null : Math.round(avg / 1.852),
-        windGustKt: maxGust == null ? null : Math.round(maxGust / 1.852)
-      });
+    const temperature = countTemp > 0 ? Math.round(sumTemp / countTemp) : null;
 
-      count = 0;
-      sumAvg = 0;
-      sumBearingSin = 0;
-      sumBearingCos = 0;
-      sumTemperature = 0;
-      maxGust = null;
-      if (i < extendedData.length - 1) {
-        intervalStart = new Date(extendedData[i + 1].time);
-      }
-    }
+    const bearing =
+      countBearing > 0
+        ? (() => {
+            const deg = Math.round(Math.atan2(sumSin, sumCos) * (180 / Math.PI));
+            return deg < 0 ? deg + 360 : deg;
+          })()
+        : null;
+
+    const bucketDate = new Date(bucketTime);
+
+    result.push({
+      time: bucketDate,
+      windAverage: avg ?? undefined,
+      windGust: maxGust ?? undefined,
+      windBearing: bearing ?? undefined,
+      temperature: temperature ?? undefined,
+      _id: stationId,
+      timeLabel: formatInTimeZone(bucketDate, 'Pacific/Auckland', 'HH:mm'),
+      windAverageKt: avg == null ? null : Math.round(avg / 1.852),
+      windGustKt: maxGust == null ? null : Math.round(maxGust / 1.852)
+    });
   }
 
   return result;

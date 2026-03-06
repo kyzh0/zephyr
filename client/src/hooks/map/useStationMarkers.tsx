@@ -413,15 +413,34 @@ export function useStationMarkers({
     }
   }, [unit]);
 
+  // Cache historical responses by timestamp to avoid refetching when user revisits a time
+  const historicalCacheRef = useRef<
+    Map<number, { time: string; values: IHistoricalStationData[] }>
+  >(new Map());
+  const MAX_HISTORICAL_CACHE = 50;
+
   // Render historical data at a specific timestamp
   const renderHistoricalData = useCallback(
     async (time: Date): Promise<void> => {
       if (!markersRef.current.length) return;
 
-      const data = await withErrorHandling(
-        () => loadAllStationDataAtTimestamp(time),
-        'Failed to load historical data'
-      );
+      const key = time.getTime();
+      let data = historicalCacheRef.current.get(key);
+
+      if (!data) {
+        data = await withErrorHandling(
+          () => loadAllStationDataAtTimestamp(time),
+          'Failed to load historical data'
+        ) ?? undefined;
+        if (data) {
+          historicalCacheRef.current.set(key, data);
+          if (historicalCacheRef.current.size > MAX_HISTORICAL_CACHE) {
+            const oldestKey = historicalCacheRef.current.keys().next().value;
+            if (oldestKey !== undefined) historicalCacheRef.current.delete(oldestKey);
+          }
+        }
+      }
+
       if (!data?.values?.length) return;
 
       // Update each marker with historical data

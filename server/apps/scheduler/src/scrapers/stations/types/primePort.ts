@@ -54,7 +54,7 @@ export default async function scrapePrimePortData(stations: WithId<StationAttrs>
     const width = meta.width ?? 0;
     const height = meta.height ?? 0;
 
-    if (width !== 1034 || height !== 900) {
+    if (width !== 1034 || (height !== 900 && height !== 879)) {
       throw new Error(`Unexpected image dimensions: ${width}x${height}`);
     }
 
