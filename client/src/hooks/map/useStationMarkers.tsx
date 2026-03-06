@@ -454,6 +454,7 @@ export function useStationMarkers({
 
         // Use data if found, otherwise show empty state
         const windAverage = stationData?.windAverage ?? null;
+        const windGust = stationData?.windGust ?? null;
         const windBearing = stationData?.windBearing ?? null;
         const validBearings = stationData?.validBearings ?? null;
 
@@ -462,7 +463,7 @@ export function useStationMarkers({
           name: item.marker.dataset.name ?? '',
           elevation: Number(item.marker.getAttribute('elevation')),
           currentAverage: windAverage,
-          currentGust: null,
+          currentGust: windGust,
           currentBearing: windBearing,
           validBearings,
           isOffline: false

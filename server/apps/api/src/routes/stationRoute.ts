@@ -238,6 +238,7 @@ router.get(
           if (item != null && item.data != null) {
             item.data.push({
               windAverage: d.windAverage,
+              windGust: d.windGust,
               windBearing: d.windBearing
             });
           }
@@ -249,7 +250,11 @@ router.get(
 
     type Group = {
       _id: string;
-      data: Array<{ windAverage?: number | null; windBearing?: number | null }>;
+      data: Array<{
+        windAverage?: number | null;
+        windGust?: number | null;
+        windBearing?: number | null;
+      }>;
       validBearings: string | null;
     };
     const data: Group[] = groups.map((g) => ({
@@ -265,6 +270,7 @@ router.get(
     const result = data.map((d) => {
       let count = 0;
       let sumAvg = 0;
+      let maxGust = null;
       let sumBearingSin = 0;
       let sumBearingCos = 0;
 
@@ -272,6 +278,7 @@ router.get(
         if (d1.windAverage != null && d1.windBearing != null) {
           count++;
           sumAvg += d1.windAverage;
+          maxGust = maxGust == null ? d1.windGust : Math.max(maxGust, d1.windGust ?? 0);
           sumBearingSin += Math.sin((d1.windBearing * Math.PI) / 180);
           sumBearingCos += Math.cos((d1.windBearing * Math.PI) / 180);
         }
@@ -283,6 +290,7 @@ router.get(
       return {
         id: d._id,
         windAverage: count > 0 ? Math.round(sumAvg / count) : null,
+        windGust: count > 0 ? maxGust : null,
         windBearing: bearing == null ? null : bearing < 0 ? bearing + 360 : bearing,
         validBearings: d.validBearings
       };
