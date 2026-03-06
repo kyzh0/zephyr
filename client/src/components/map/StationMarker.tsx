@@ -1,19 +1,9 @@
-/**
- * Wind Direction SVG Marker Component
- *
- * Shape: large circle with a seamless sharp triangular tail.
- * The triangle sides are computed as true tangent lines from the tip to the
- * circle, so the join between tail and circle is perfectly smooth with no gap.
- *
- * Direction: 0 = North (tail points up), 90 = East, 180 = South, 270 = West
- */
-
 import { type ReactNode } from 'react';
 import { convertWindSpeed } from './map.utils';
 import { parseValidBearings, type WindUnit } from '../station';
 import { getTextColor, getWindColor } from '@/lib/utils';
 
-export const DEFAULT_STATION_MARKER_SIZE = 50; // default bounding box size in pixels
+const DEFAULT_STATION_MARKER_SIZE = 50; // default bounding box size in pixels
 
 export interface StationMarkerProps {
   bearing?: number; // degrees clockwise from North — tail tip points this way
@@ -81,7 +71,7 @@ export const StationMarker = ({
 
   const fontSize = Math.round(R * 1.15);
 
-  const borderWidth = size * 0.02;
+  const borderWidth = size * 0.01;
   return (
     <div className="relative inline-block" style={{ width: size, height: size }}>
       {/* SVG overlay for the orange bearing arcs */}
@@ -91,10 +81,19 @@ export const StationMarker = ({
         height={size}
         viewBox={`0 0 ${size} ${size}`}
       >
-        {/* Shape rotated so tail tip points in wind direction (0 = North/up) */}
-        <g transform={`rotate(${bearing},${cx},${cy})`}>
-          {bearing !== undefined ? <path d={tail_attr} fill={gustColor} stroke="none" /> : null}
-        </g>
+        {/* Tail Shape rotated so tail tip points in wind direction (0 = North/up) */}
+        {speed !== undefined && bearing !== undefined && (
+          <g transform={`rotate(${bearing},${cx},${cy})`}>
+            {bearing !== undefined ? (
+              <path
+                d={tail_attr}
+                fill={gustColor}
+                stroke={isBearingValid ? 'gold' : 'black'}
+                strokeWidth={borderWidth}
+              />
+            ) : null}
+          </g>
+        )}
 
         {/* Circle (core color) - drawn outside rotation so it appears cleanly on top */}
         <circle cx={cx} cy={cy} r={R} fill={coreColor} stroke="none" />
@@ -105,8 +104,8 @@ export const StationMarker = ({
           cy={cy}
           r={R}
           fill="none"
-          stroke={isBearingValid ? 'gold' : 'white'}
-          strokeWidth={isBearingValid ? borderWidth * 2 : borderWidth}
+          stroke={isBearingValid ? 'gold' : 'black'}
+          strokeWidth={isBearingValid ? borderWidth * 5 : borderWidth}
         />
 
         {/* Speed: always upright, centered in circle */}
@@ -118,9 +117,9 @@ export const StationMarker = ({
           fontFamily="'Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif"
           fontSize={fontSize}
           fontWeight="200"
-          fill={getTextColor(coreColor)}
+          fill={speed !== undefined ? getTextColor(coreColor) : 'red'}
         >
-          {speed ? convertWindSpeed(speed, unit) : '-'}
+          {speed !== undefined ? convertWindSpeed(speed, unit) : 'X'}
         </text>
       </svg>
     </div>

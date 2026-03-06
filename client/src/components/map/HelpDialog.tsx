@@ -83,7 +83,9 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
             <div className="flex justify-center items-center flex-shrink-0">
               <StationMarker speed={15} gust={30} bearing={240} unit="kmh" size={40} />
             </div>
-            <div className="flex items-center">Tails colour indicates wind gusts</div>
+            <div className="flex items-center">
+              Core colour indicates wind speed, tail colour wind gusts
+            </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
@@ -97,7 +99,9 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
                 size={40}
               />
             </div>
-            <div className="flex items-center">Gold border indicates valid wind direction</div>
+            <div className="flex items-center">
+              Gold border indicates valid wind direction near flying sites
+            </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
@@ -118,21 +122,21 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
             <div className="flex justify-center items-center flex-shrink-0">
               <Camera className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="flex items-center">Webcam overlay</div>
+            <div className="flex items-center">Webcams</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
             <div className="flex justify-center items-center flex-shrink-0">
               <Mountain className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="flex items-center">Elevation border (each dash = 250m)</div>
+            <div className="flex items-center">Filter stations by elevation</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
             <div className="flex justify-center items-center flex-shrink-0">
               <Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="flex items-center">Live grid view</div>
+            <div className="flex items-center">Live grid view of sites nearest you</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">

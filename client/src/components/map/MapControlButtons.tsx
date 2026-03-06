@@ -43,9 +43,7 @@ interface MapControlButtonsProps {
   historyOffset: number;
   onHistoryChange: (offset: number) => void;
   isHistoricData: boolean;
-  showElevation: boolean;
   elevationFilter: number;
-  onToggleElevation: () => void;
   onElevationChange: (value: number) => void;
   minimizeRecents: boolean;
   onRecentsToggle: () => void;
@@ -65,9 +63,7 @@ export function MapControlButtons({
   historyOffset,
   onHistoryChange,
   isHistoricData,
-  showElevation,
   elevationFilter,
-  onToggleElevation,
   onElevationChange,
   minimizeRecents,
   onRecentsToggle,
@@ -419,12 +415,7 @@ export function MapControlButtons({
           </TooltipTrigger>
           <TooltipContent side="left">Find My Location</TooltipContent>
         </Tooltip>
-        <ElevationSlider
-          showElevation={showElevation}
-          elevationFilter={elevationFilter}
-          onToggleElevation={onToggleElevation}
-          onElevationChange={onElevationChange}
-        />
+        <ElevationSlider elevationFilter={elevationFilter} onElevationChange={onElevationChange} />
       </div>
 
       {/* Dialogs */}
