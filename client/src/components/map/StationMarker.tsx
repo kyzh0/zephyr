@@ -44,7 +44,7 @@ export const StationMarker = ({
   const cx = size / 2;
   const cy = size / 2;
   const R = size * 0.25; // circle radius
-  const tailLength = size * 0.3; // how far tip extends beyond circle edge
+  const tailLength = size * 0.2; // how far tip extends beyond circle edge
 
   // Tip: straight down from circle centre (before rotation)
   const tipX = cx;
