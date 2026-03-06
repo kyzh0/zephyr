@@ -57,7 +57,7 @@ export default function Map() {
 
   // Recent stations state
   const [minimizeRecents, setMinimizeRecents] = useState(() =>
-    getStoredValue('minimizeRecents', false)
+    getStoredValue('minimizeRecents', true)
   );
 
   // Initialize map

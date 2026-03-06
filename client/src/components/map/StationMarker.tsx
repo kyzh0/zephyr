@@ -11,6 +11,7 @@ export interface StationMarkerProps {
   gust?: number; // gust speed
   size?: number; // bounding box size in px (default: 50)
   validBearings?: string;
+  isOffline?: boolean;
   unit: WindUnit;
 }
 
@@ -30,6 +31,7 @@ export const StationMarker = ({
   gust,
   size = DEFAULT_STATION_MARKER_SIZE,
   validBearings,
+  isOffline,
   unit
 }: StationMarkerProps): ReactNode => {
   const parsedValidBearings = parseValidBearings(validBearings);
@@ -117,9 +119,9 @@ export const StationMarker = ({
           fontFamily="'Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif"
           fontSize={fontSize}
           fontWeight="200"
-          fill={speed !== undefined ? getTextColor(coreColor) : 'red'}
+          fill={isOffline ? 'red' : getTextColor(coreColor)}
         >
-          {speed !== undefined ? convertWindSpeed(speed, unit) : 'X'}
+          {isOffline ? 'X' : speed !== undefined ? convertWindSpeed(speed, unit) : '-'}
         </text>
       </svg>
     </div>

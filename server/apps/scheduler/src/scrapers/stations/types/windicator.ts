@@ -65,10 +65,8 @@ export default async function scrapeWindicatorData(
 
     if (data) {
       const fetch = data['potsum-live-fetch'];
-      const time = fromZonedTime(
-        parse(fetch.Timestamp, 'dd/MM/yyyy HH:mm', new Date()),
-        'Pacific/Auckland'
-      );
+      const ts = fetch.Timestamp.replace('71/', '7/'); // 7/XX/20XX returns as 71/XX/20XX
+      const time = fromZonedTime(parse(ts, 'dd/MM/yyyy HH:mm', new Date()), 'Pacific/Auckland');
 
       // skip if older than 20 min
       if (Date.now() - time.getTime() < 20 * 60 * 1000) {

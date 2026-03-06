@@ -119,6 +119,9 @@
   }
 }
 
+.marker {
+  cursor: pointer;
+}
 
 /* Webcam and sounding overlays */
 .webcam {

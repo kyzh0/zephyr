@@ -107,6 +107,7 @@ function createMarkerElement(
       speed={currentAverage ?? undefined}
       gust={currentGust ?? undefined}
       validBearings={validBearings ?? undefined}
+      isOffline={isOffline ?? undefined}
       unit={unit}
     />
   );
@@ -171,6 +172,7 @@ function updateMarkerElement(
         speed={currentAverage ?? undefined}
         gust={currentGust ?? undefined}
         validBearings={props.validBearings ?? undefined}
+        isOffline={props.isOffline ?? undefined}
         unit={unit}
       />
     );
@@ -428,10 +430,11 @@ export function useStationMarkers({
       let data = historicalCacheRef.current.get(key);
 
       if (!data) {
-        data = await withErrorHandling(
-          () => loadAllStationDataAtTimestamp(time),
-          'Failed to load historical data'
-        ) ?? undefined;
+        data =
+          (await withErrorHandling(
+            () => loadAllStationDataAtTimestamp(time),
+            'Failed to load historical data'
+          )) ?? undefined;
         if (data) {
           historicalCacheRef.current.set(key, data);
           if (historicalCacheRef.current.size > MAX_HISTORICAL_CACHE) {
