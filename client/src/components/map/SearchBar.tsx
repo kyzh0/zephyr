@@ -14,6 +14,8 @@ import { useLandings } from '@/hooks/useLandings';
 import { cn } from '@/lib/utils';
 import { SiteMarker } from './SiteMarker';
 import { LandingMarker } from './LandingMarker';
+import { StationMarker } from './StationMarker';
+import { getUnit } from '../station';
 
 interface SearchBarProps {
   className?: string;
@@ -28,6 +30,7 @@ type SearchResult =
 
 export function SearchBar({ className, disabled }: SearchBarProps) {
   const navigate = useNavigate();
+  const unit = getUnit();
   const [isExpanded, setIsExpanded] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -235,16 +238,19 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
               )}
             >
               <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center w-6 h-6 shrink-0">
+                <div className="flex items-center justify-center w-6 h-6 shrink-0 marker gust-label-hidden">
                   {result.type === 'station' ? (
-                    <img
-                      src="/gold-valid-arrow-light-green.png"
-                      alt="Station"
-                      className="w-4 h-6 -rotate-45"
+                    <StationMarker
+                      speed={result.item.currentAverage ?? undefined}
+                      gust={result.item.currentGust ?? undefined}
+                      bearing={result.item.currentBearing ?? undefined}
+                      unit={unit}
+                      validBearings={result.item.validBearings ?? undefined}
+                      size={30}
                     />
                   ) : result.type === 'site' ? (
                     <SiteMarker
-                      validBearings={result.item.validBearings}
+                      validBearings={result.item.validBearings ?? undefined}
                       isOfficial={result.item.siteGuideUrl ? true : false}
                       size={24}
                       borderWidth={4}

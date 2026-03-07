@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
-
 import { getWindDirectionFromBearing, handleError, REFRESH_INTERVAL_MS } from '@/lib/utils';
 import {
   listStations,
@@ -8,32 +7,49 @@ import {
   loadAllStationDataAtTimestamp
 } from '@/services/station.service';
 import type { IHistoricalStationData } from '@/models/station-data.model';
-import {
-  getStationGeoJson,
-  sortStationFeatures,
-  convertWindSpeed,
-  getArrowStyle
-} from '@/components/map';
-import type { StationMarker, WindUnit } from '@/components/map';
-import {
-  extractStationProperties,
-  formatMarkerText,
-  getElevationDashArray,
-  getElevationRotation,
-  type StationProperties
-} from './station-marker.utils';
+import { getStationGeoJson, sortStationFeatures, convertWindSpeed } from '@/components/map';
+import { StationMarker } from '@/components/map/StationMarker';
+import type { StationMarker as IStationMarker, WindUnit } from '@/components/map/map.types';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
 import type { IStation } from '@/models/station.model';
+import type { RefObject } from 'react';
 import { toast } from 'sonner';
 
 interface UseStationMarkersOptions {
-  map: React.RefObject<mapboxgl.Map | null>;
+  map: RefObject<mapboxgl.Map | null>;
   isMapLoaded: boolean;
   isHistoricData: boolean;
   unit: WindUnit;
   isVisible: boolean;
+  mapZoom?: number;
   onRefresh?: (updatedIds: string[]) => void;
 }
+
+interface StationProperties {
+  dbId: string;
+  name: string;
+  elevation: number;
+  currentAverage: number | null;
+  currentGust: number | null;
+  currentBearing: number | null;
+  validBearings: string | null;
+  isOffline: boolean | null;
+}
+
+/**
+ * Extract station properties from GeoJSON feature with proper typing
+ */
+const extractStationProperties = (properties: Record<string, unknown>): StationProperties => ({
+  dbId: properties.dbId as string,
+  name: properties.name as string,
+  elevation: properties.elevation as number,
+  currentAverage: properties.currentAverage as number | null,
+  currentGust: properties.currentGust as number | null,
+  currentBearing: properties.currentBearing as number | null,
+  validBearings: properties.validBearings as string | null,
+  isOffline: properties.isOffline as boolean | null
+});
 
 /**
  * Generate popup HTML content for a station marker
@@ -66,31 +82,6 @@ function createPopupHtml(props: StationProperties, unit: WindUnit): string {
 }
 
 /**
- * Create the elevation border SVG element
- */
-function createElevationBorderSvg(elevation: number, bearing: number | null): SVGSVGElement {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute(
-    'class',
-    'marker-border absolute top-[-2.2px] left-[-3px] z-[4] w-[30px] h-[30px] hidden'
-  );
-  svg.setAttribute('viewBox', '0 0 120 120');
-  svg.setAttribute('transform', `rotate(${getElevationRotation(bearing)})`);
-
-  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  circle.setAttribute('fill', 'none');
-  circle.setAttribute('cx', '60');
-  circle.setAttribute('cy', '60');
-  circle.setAttribute('r', '56');
-  circle.setAttribute('stroke', '#ff4261');
-  circle.setAttribute('stroke-width', '8');
-  circle.setAttribute('stroke-dasharray', getElevationDashArray(elevation));
-  svg.appendChild(circle);
-
-  return svg;
-}
-
-/**
  * Create a station marker DOM element
  */
 function createMarkerElement(
@@ -103,19 +94,24 @@ function createMarkerElement(
 ): HTMLDivElement {
   const { dbId, elevation, currentAverage, currentGust, currentBearing, validBearings, isOffline } =
     props;
-  const [img, textColor] = getArrowStyle(currentAverage, currentBearing, validBearings, isOffline);
 
   // Arrow icon (div with background image)
   const arrow = document.createElement('div');
   arrow.className = 'marker-arrow';
-  arrow.style.transform = currentBearing != null ? `rotate(${Math.round(currentBearing)}deg)` : '';
-  arrow.style.backgroundImage = img;
 
-  // Wind speed text
-  const text = document.createElement('span');
-  text.className = 'marker-text';
-  text.style.color = textColor;
-  text.textContent = formatMarkerText(currentAverage, isOffline, unit, convertWindSpeed);
+  // Wind speed marker
+  arrow.style.backgroundImage = '';
+  arrow.style.transform = '';
+  arrow.innerHTML = renderToStaticMarkup(
+    <StationMarker
+      bearing={currentBearing ?? undefined}
+      speed={currentAverage ?? undefined}
+      gust={currentGust ?? undefined}
+      validBearings={validBearings ?? undefined}
+      isOffline={isOffline ?? undefined}
+      unit={unit}
+    />
+  );
 
   // Event handlers
   const handleClick = () => {
@@ -125,11 +121,9 @@ function createMarkerElement(
   const handleEnter = () => onHover(popup, true);
   const handleLeave = () => onHover(popup, false);
 
-  for (const el of [arrow, text]) {
-    el.addEventListener('click', handleClick);
-    el.addEventListener('mouseenter', handleEnter);
-    el.addEventListener('mouseleave', handleLeave);
-  }
+  arrow.addEventListener('click', handleClick);
+  arrow.addEventListener('mouseenter', handleEnter);
+  arrow.addEventListener('mouseleave', handleLeave);
 
   // Container
   const container = document.createElement('div');
@@ -143,11 +137,9 @@ function createMarkerElement(
   container.dataset.bearing = currentBearing != null ? String(currentBearing) : '';
   container.dataset.isOffline = String(isOffline ?? false);
   container.dataset.validBearings = validBearings ?? '';
-  container.style.zIndex = '2';
+  container.style.zIndex = validBearings ? '4' : isOffline ? '2' : '3'; // valid bearings above normal, offline below
 
   container.appendChild(arrow);
-  container.appendChild(text);
-  container.appendChild(createElevationBorderSvg(elevation, currentBearing));
 
   return container;
 }
@@ -161,8 +153,7 @@ function updateMarkerElement(
   timestamp: number,
   unit: WindUnit
 ): void {
-  const { currentAverage, currentGust, currentBearing, validBearings, isOffline } = props;
-  const [img, textColor] = getArrowStyle(currentAverage, currentBearing, validBearings, isOffline);
+  const { currentAverage, currentGust, currentBearing } = props;
 
   marker.dataset.timestamp = String(timestamp);
   marker.dataset.avg = currentAverage != null ? String(currentAverage) : '';
@@ -172,23 +163,24 @@ function updateMarkerElement(
   marker.dataset.isOffline = String(props.isOffline ?? false);
   marker.dataset.validBearings = props.validBearings ?? '';
 
-  for (const child of Array.from(marker.children)) {
-    if (child.classList.contains('marker-text')) {
-      const el = child as HTMLElement;
-      el.style.color = textColor;
-      el.textContent = formatMarkerText(currentAverage, isOffline, unit, convertWindSpeed);
-    } else if (child.classList.contains('marker-arrow')) {
-      const el = child as HTMLElement;
-      el.style.backgroundImage = img;
-      el.style.transform = currentBearing != null ? `rotate(${Math.round(currentBearing)}deg)` : '';
-    } else if (
-      child.tagName === 'svg' &&
-      (child as SVGElement).classList.contains('marker-border')
-    ) {
-      child.setAttribute('transform', `rotate(${getElevationRotation(currentBearing)})`);
-    }
+  const arrow = marker.querySelector<HTMLDivElement>('.marker-arrow');
+  if (arrow) {
+    arrow.style.backgroundImage = '';
+    arrow.style.transform = '';
+    arrow.innerHTML = renderToStaticMarkup(
+      <StationMarker
+        bearing={currentBearing ?? undefined}
+        speed={currentAverage ?? undefined}
+        gust={currentGust ?? undefined}
+        validBearings={props.validBearings ?? undefined}
+        isOffline={props.isOffline ?? undefined}
+        unit={unit}
+      />
+    );
   }
 }
+
+const GUST_LABEL_MIN_ZOOM = 10;
 
 export function useStationMarkers({
   map,
@@ -196,21 +188,23 @@ export function useStationMarkers({
   isHistoricData,
   unit,
   isVisible,
+  mapZoom,
   onRefresh
 }: UseStationMarkersOptions) {
   const isVisibleRef = useRef(isVisible);
+  const showGustLabelRef = useRef((mapZoom ?? 0) >= GUST_LABEL_MIN_ZOOM);
 
   // Keep visibility ref in sync
   useEffect(() => {
     isVisibleRef.current = isVisible;
   }, [isVisible]);
   const navigate = useNavigate();
-  const markersRef = useRef<StationMarker[]>([]);
+  const markersRef = useRef<IStationMarker[]>([]);
   const lastRefreshRef = useRef(0);
   const unitRef = useRef<WindUnit>(unit);
   const refreshAbortController = useRef<AbortController | null>(null);
 
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const isRefreshingRef = useRef(false);
   const [stations, setStations] = useState<IStation[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -218,6 +212,15 @@ export function useStationMarkers({
   useEffect(() => {
     unitRef.current = unit;
   }, [unit]);
+
+  // Toggle gust label visibility via CSS class when zoom crosses threshold
+  useEffect(() => {
+    const hideGust = (mapZoom ?? 0) < GUST_LABEL_MIN_ZOOM;
+    showGustLabelRef.current = !hideGust;
+    for (const item of markersRef.current) {
+      item.marker.classList.toggle('gust-label-hidden', hideGust);
+    }
+  }, [mapZoom]);
 
   // Cleanup abort controller on unmount
   useEffect(() => {
@@ -228,7 +231,7 @@ export function useStationMarkers({
 
   // Wrapper for async operations with error handling
   const withErrorHandling = useCallback(
-    async <T>(operation: () => Promise<T>, errorMessage: string): Promise<T | null> => {
+    async <T,>(operation: () => Promise<T>, errorMessage: string): Promise<T | null> => {
       try {
         setError(null);
         return await operation();
@@ -244,7 +247,7 @@ export function useStationMarkers({
 
   // Create a station marker with popup
   const createStationMarker = useCallback(
-    (props: StationProperties, timestamp: number): StationMarker => {
+    (props: StationProperties, timestamp: number): IStationMarker => {
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
@@ -266,6 +269,8 @@ export function useStationMarkers({
         popup
       );
 
+      if (!showGustLabelRef.current) marker.classList.add('gust-label-hidden');
+
       return { marker, popup };
     },
     [navigate, map]
@@ -273,7 +278,7 @@ export function useStationMarkers({
 
   // Update existing marker
   const updateStationMarker = useCallback(
-    (item: StationMarker, props: StationProperties, timestamp: number) => {
+    (item: IStationMarker, props: StationProperties, timestamp: number) => {
       updateMarkerElement(item.marker, props, timestamp, unitRef.current);
       item.popup.setHTML(createPopupHtml(props, unitRef.current));
     },
@@ -330,7 +335,11 @@ export function useStationMarkers({
     // We don't update map when showing historical data
     if (isHistoricData) return;
 
-    if (document.visibilityState !== 'visible' || !markersRef.current.length || isRefreshing) {
+    if (
+      document.visibilityState !== 'visible' ||
+      !markersRef.current.length ||
+      isRefreshingRef.current
+    ) {
       return;
     }
 
@@ -342,7 +351,7 @@ export function useStationMarkers({
     refreshAbortController.current = new AbortController();
 
     lastRefreshRef.current = timestamp;
-    setIsRefreshing(true);
+    isRefreshingRef.current = true;
 
     try {
       // Find newest marker timestamp
@@ -386,10 +395,9 @@ export function useStationMarkers({
       console.error('Failed to refresh station markers', err);
       toast.error(handleError(err, 'Failed to refresh station markers').message);
     } finally {
-      // Ensure isRefreshing is always set to false
-      setIsRefreshing(false);
+      isRefreshingRef.current = false;
     }
-  }, [stations, onRefresh, updateStationMarker, withErrorHandling, isRefreshing, isHistoricData]);
+  }, [stations, onRefresh, updateStationMarker, withErrorHandling, isHistoricData]);
 
   // Update all markers when unit changes
   useEffect(() => {
@@ -402,13 +410,6 @@ export function useStationMarkers({
       const isOffline = item.marker.dataset.isOffline === 'true';
       const validBearings = item.marker.dataset.validBearings ?? null;
 
-      // Update text
-      for (const child of Array.from(item.marker.children)) {
-        if (child.classList.contains('marker-text') && avg != null) {
-          child.textContent = String(convertWindSpeed(avg, unit));
-        }
-      }
-
       // Regenerate popup with proper data
       const stationProps: StationProperties = {
         dbId: item.marker.id,
@@ -420,6 +421,12 @@ export function useStationMarkers({
         validBearings,
         isOffline
       };
+      updateMarkerElement(
+        item.marker,
+        stationProps,
+        Number(item.marker.dataset.timestamp ?? Date.now()),
+        unit
+      );
       item.popup.setHTML(createPopupHtml(stationProps, unit));
     }
   }, [unit]);
@@ -439,10 +446,11 @@ export function useStationMarkers({
       let data = historicalCacheRef.current.get(key);
 
       if (!data) {
-        data = await withErrorHandling(
-          () => loadAllStationDataAtTimestamp(time),
-          'Failed to load historical data'
-        ) ?? undefined;
+        data =
+          (await withErrorHandling(
+            () => loadAllStationDataAtTimestamp(time),
+            'Failed to load historical data'
+          )) ?? undefined;
         if (data) {
           historicalCacheRef.current.set(key, data);
           if (historicalCacheRef.current.size > MAX_HISTORICAL_CACHE) {
@@ -462,35 +470,22 @@ export function useStationMarkers({
 
         // Use data if found, otherwise show empty state
         const windAverage = stationData?.windAverage ?? null;
+        const windGust = stationData?.windGust ?? null;
         const windBearing = stationData?.windBearing ?? null;
         const validBearings = stationData?.validBearings ?? null;
 
-        const [img, textColor] = getArrowStyle(
-          windAverage,
-          windBearing,
+        const historicalProps: StationProperties = {
+          dbId: item.marker.id,
+          name: item.marker.dataset.name ?? '',
+          elevation: Number(item.marker.getAttribute('elevation')),
+          currentAverage: windAverage,
+          currentGust: windGust,
+          currentBearing: windBearing,
           validBearings,
-          false // not offline in history mode
-        );
+          isOffline: false
+        };
 
-        item.marker.dataset.avg = windAverage != null ? String(windAverage) : '';
-
-        for (const child of Array.from(item.marker.children)) {
-          if (child.classList.contains('marker-text')) {
-            const el = child as HTMLElement;
-            el.style.color = textColor;
-            el.textContent =
-              windAverage != null ? String(convertWindSpeed(windAverage, unitRef.current)) : '-';
-          } else if (child.classList.contains('marker-arrow')) {
-            const el = child as HTMLElement;
-            el.style.backgroundImage = img;
-            el.style.transform = windBearing != null ? `rotate(${Math.round(windBearing)}deg)` : '';
-          } else if (
-            child.tagName === 'svg' &&
-            (child as SVGElement).classList.contains('marker-border')
-          ) {
-            child.setAttribute('transform', `rotate(${getElevationRotation(windBearing)})`);
-          }
-        }
+        updateMarkerElement(item.marker, historicalProps, Date.now(), unitRef.current);
       }
     },
     [withErrorHandling]
@@ -531,38 +526,7 @@ export function useStationMarkers({
         isOffline: station.isOffline ?? false
       };
 
-      const [img, textColor] = getArrowStyle(
-        props.currentAverage,
-        props.currentBearing,
-        props.validBearings,
-        props.isOffline
-      );
-
-      item.marker.dataset.avg = props.currentAverage != null ? String(props.currentAverage) : '';
-      item.marker.dataset.gust = props.currentGust != null ? String(props.currentGust) : '';
-
-      for (const child of Array.from(item.marker.children)) {
-        if (child.classList.contains('marker-text')) {
-          const el = child as HTMLElement;
-          el.style.color = textColor;
-          el.textContent = formatMarkerText(
-            props.currentAverage,
-            props.isOffline,
-            unitRef.current,
-            convertWindSpeed
-          );
-        } else if (child.classList.contains('marker-arrow')) {
-          const el = child as HTMLElement;
-          el.style.backgroundImage = img;
-          el.style.transform =
-            props.currentBearing != null ? `rotate(${Math.round(props.currentBearing)}deg)` : '';
-        } else if (
-          child.tagName === 'svg' &&
-          (child as SVGElement).classList.contains('marker-border')
-        ) {
-          child.setAttribute('transform', `rotate(${getElevationRotation(props.currentBearing)})`);
-        }
-      }
+      updateMarkerElement(item.marker, props, Date.now(), unitRef.current);
 
       // Update popup
       item.popup.setHTML(createPopupHtml(props, unitRef.current));
@@ -606,7 +570,6 @@ export function useStationMarkers({
     renderCurrentData,
     setInteractive,
     setVisibility,
-    isRefreshing,
     error,
     isInitialized
   };

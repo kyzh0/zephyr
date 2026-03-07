@@ -12,6 +12,7 @@ interface IStationData {
 interface IHistoricalStationData {
   id: string;
   windAverage: number | null;
+  windGust: number | null;
   windBearing: number | null;
   validBearings: string | null;
 }

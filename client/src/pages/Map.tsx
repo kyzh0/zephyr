@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import SEO from '@/components/SEO';
-
 import { useAppContext } from '@/context/AppContext';
 import { MapControlButtons, getStoredValue, setStoredValue } from '@/components/map';
 import type { WindUnit } from '@/components/map';
@@ -47,7 +46,6 @@ export default function Map() {
     getStoredValue<'stations' | 'sites'>('viewMode', 'stations')
   );
 
-  const [showElevation, setShowElevation] = useState(false);
   const [elevationFilter, setElevationFilter] = useState(0);
   const [isSatellite, setIsSatellite] = useState(false);
 
@@ -59,11 +57,11 @@ export default function Map() {
 
   // Recent stations state
   const [minimizeRecents, setMinimizeRecents] = useState(() =>
-    getStoredValue('minimizeRecents', false)
+    getStoredValue('minimizeRecents', true)
   );
 
   // Initialize map
-  const { map, isLoaded, triggerGeolocate } = useMapInstance({
+  const { map, isLoaded, zoom, triggerGeolocate } = useMapInstance({
     containerRef: mapContainer
   });
 
@@ -80,6 +78,7 @@ export default function Map() {
     isHistoricData: historyOffset < 0,
     unit,
     isVisible: viewMode === 'stations',
+    mapZoom: zoom,
     onRefresh: setRefreshedStations
   });
 
@@ -260,14 +259,6 @@ export default function Map() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [refreshStations, refreshWebcams, refreshSoundings]);
 
-  // Show/hide elevation borders
-  useEffect(() => {
-    const borders = document.querySelectorAll('svg.marker-border');
-    borders.forEach((b) => {
-      b.classList.toggle('hidden', !showElevation);
-    });
-  }, [showElevation]);
-
   // Filter by elevation
   useEffect(() => {
     const markers = document.querySelectorAll('div.marker');
@@ -314,9 +305,7 @@ export default function Map() {
         historyOffset={historyOffset}
         onHistoryChange={handleHistoryChange}
         isHistoricData={isHistoricData}
-        showElevation={showElevation}
         elevationFilter={elevationFilter}
-        onToggleElevation={() => setShowElevation(!showElevation)}
         onElevationChange={setElevationFilter}
         minimizeRecents={minimizeRecents}
         onRecentsToggle={handleRecentsToggle}

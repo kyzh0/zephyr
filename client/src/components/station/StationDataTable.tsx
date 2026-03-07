@@ -1,4 +1,4 @@
-import { cn, getWindColor, getWindDirectionFromBearing } from '@/lib/utils';
+import { cn, getTextColor, getWindColor, getWindDirectionFromBearing } from '@/lib/utils';
 import { getDirectionColor, convertWindSpeed, getUnit } from './utils';
 import { DirectionArrow } from '@/components/ui/DirectionArrow';
 import type { ExtendedStationData } from './types';
@@ -42,17 +42,21 @@ export const StationDataTable = function StationDataTable({
             <th className="sticky left-0 bg-white text-left text-xs sm:text-sm py-0 pl-0.5 pr-0.5 sm:p-0.8">
               Avg
             </th>
-            {tableData.map((d) => (
-              <td
-                key={String(d.time)}
-                className="text-center text-xs sm:text-sm p-0 sm:p-0.5"
-                style={{
-                  backgroundColor: getWindColor(d.windAverage ?? null)
-                }}
-              >
-                {convertWindSpeed(d.windAverage, unit) ?? '-'}
-              </td>
-            ))}
+            {tableData.map((d) => {
+              const windColor = getWindColor(d.windAverage ?? null);
+              return (
+                <td
+                  key={String(d.time)}
+                  className="text-center text-xs sm:text-sm p-0 sm:p-0.5"
+                  style={{
+                    backgroundColor: windColor,
+                    color: getTextColor(windColor)
+                  }}
+                >
+                  {convertWindSpeed(d.windAverage, unit) ?? '-'}
+                </td>
+              );
+            })}
           </tr>
 
           {/* Gust row */}
@@ -60,17 +64,21 @@ export const StationDataTable = function StationDataTable({
             <th className="sticky left-0 bg-white text-left text-xs sm:text-sm py-0 pl-0.5 pr-0.5 sm:p-0.8">
               Gust
             </th>
-            {tableData.map((d) => (
-              <td
-                key={String(d.time)}
-                className="text-center text-xs sm:text-sm p-0 sm:p-0.5"
-                style={{
-                  backgroundColor: getWindColor(d.windGust ?? null)
-                }}
-              >
-                {convertWindSpeed(d.windGust, unit) ?? '-'}
-              </td>
-            ))}
+            {tableData.map((d) => {
+              const gustColor = getWindColor(d.windGust ?? null);
+              return (
+                <td
+                  key={String(d.time)}
+                  className="text-center text-xs sm:text-sm p-0 sm:p-0.5"
+                  style={{
+                    backgroundColor: gustColor,
+                    color: getTextColor(gustColor)
+                  }}
+                >
+                  {convertWindSpeed(d.windGust, unit) ?? '-'}
+                </td>
+              );
+            })}
           </tr>
 
           {/* Direction text row */}

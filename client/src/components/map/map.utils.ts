@@ -4,7 +4,6 @@ import type { ISounding } from '@/models/sounding.model';
 import type { ISite } from '@/models/site.model';
 import type { ILanding } from '@/models/landing.model';
 import type { GeoJson, GeoJsonFeature, WindUnit } from './map.types';
-import { getArrowStyle as getArrowStylePng } from './wind-icon.utils';
 
 // localStorage helpers
 export function getStoredValue<T>(key: string, defaultValue: T): T {
@@ -28,16 +27,6 @@ export function setStoredValue<T>(key: string, value: T): void {
 // Wind speed conversion
 export function convertWindSpeed(speed: number, unit: WindUnit): number {
   return Math.round(unit === 'kt' ? speed / 1.852 : speed);
-}
-
-// Arrow styling based on wind conditions - uses PNG images
-export function getArrowStyle(
-  avgWind: number | null,
-  currentBearing: number | null,
-  validBearings: string | null,
-  isOffline: boolean | null
-): [string, string] {
-  return getArrowStylePng(avgWind, currentBearing, validBearings, isOffline);
 }
 
 // GeoJSON generators
