@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { StationPreview } from '@/components/station/StationPreview';
 import SEO from '@/components/SEO';
+import { Button } from '@/components/ui/button';
 
 export default function GridView() {
   const navigate = useNavigate();
@@ -29,17 +30,23 @@ export default function GridView() {
     lng: 0
   });
   const [locationError, setLocationError] = useState(false);
-  React.useEffect(() => {
+  const requestLocation = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        console.log('Got user location:', pos.coords);
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocationError(false);
       },
-      () => {
+      (error) => {
+        console.warn('Error getting location:', error);
         setCoords({ lat: 0, lng: 0 });
         setLocationError(true);
       }
     );
+  };
+
+  React.useEffect(() => {
+    requestLocation();
   }, []);
 
   const {
@@ -102,12 +109,31 @@ export default function GridView() {
           {loading && <Skeleton className="h-40 w-full" />}
 
           {locationError && (
-            <div className="flex flex-col items-center justify-center h-40">
-              <p className="text-center text-sm text-destructive py-4">
+            <div className="flex flex-col items-center justify-center h-40 text-sm gap-2">
+              <p className="text-center text-destructive">
                 Location permission is required to show nearby stations.
-                <br />
-                Please enable location access in your browser settings.
               </p>
+              {locationError ? (
+                <>
+                  <p>How to enable location access:</p>
+                  <ul className="list-disc">
+                    <li>
+                      Chrome: Click the lock icon in the address bar → Site settings → Location →
+                      Allow
+                    </li>
+                    <li>Safari: Safari menu → Settings for This Website → Location → Allow</li>
+                    <li>
+                      Edge/Firefox: Click the lock icon in the address bar → Permissions → Location
+                      → Allow
+                    </li>
+                  </ul>
+                  <p>After changing your location permission, refresh the page.</p>
+                </>
+              ) : (
+                <Button variant="link" onClick={requestLocation}>
+                  Request location access
+                </Button>
+              )}
             </div>
           )}
 

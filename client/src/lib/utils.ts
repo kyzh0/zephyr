@@ -234,7 +234,7 @@ export const getWebcamTypeName = (code: string) => {
 };
 
 // Haversine distance calculation (returns meters)
-export const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+export const getDistance = (lon1: number, lat1: number, lon2: number, lat2: number): number => {
   const R = 6371 * 1000; // Earth's radius in meters
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;

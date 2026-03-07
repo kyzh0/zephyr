@@ -203,8 +203,8 @@ export function useNearbyWebcams({
     const webcamsWithDistance: { data: ICam; distance: number }[] = allWebcams
       .map((cam) => {
         const distance = getDistance(
-          lat,
           lon,
+          lat,
           cam.location.coordinates[0],
           cam.location.coordinates[1]
         );
