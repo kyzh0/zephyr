@@ -125,9 +125,9 @@ export const StationMarker = ({
           y={cy}
           textAnchor="middle"
           dominantBaseline="central"
-          fontFamily="'Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif"
+          fontFamily="Roboto,Arial,sans-serif"
           fontSize={fontSize}
-          fontWeight="200"
+          fontWeight="600"
           fill={isOffline ? 'red' : getTextColor(coreColor)}
         >
           {isOffline ? 'X' : speed !== undefined ? convertWindSpeed(speed, unit) : '-'}
@@ -141,9 +141,9 @@ export const StationMarker = ({
             y={gustY}
             textAnchor="middle"
             dominantBaseline="central"
-            fontFamily="'Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif"
+            fontFamily="Roboto,Arial,sans-serif"
             fontSize={0.7 * fontSize}
-            fontWeight="200"
+            fontWeight="600"
             fill="black"
           >
             {gust ? `${convertWindSpeed(gust, unit)}` : ''}
