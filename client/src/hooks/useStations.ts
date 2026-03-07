@@ -126,8 +126,8 @@ export function useNearbyStations({
     const stationsWithDistance: { data: IStation; distance: number }[] = allStations
       .map((station) => {
         const distance = getDistance(
-          lat,
           lon,
+          lat,
           station.location.coordinates[0],
           station.location.coordinates[1]
         );

@@ -68,13 +68,13 @@ export default function Site() {
   }, [id]);
 
   const { data: nearbyWebcamData } = useNearbyWebcams({
-    lat: site?.location.coordinates[0] ?? 0,
-    lon: site?.location.coordinates[1] ?? 0
+    lon: site?.location.coordinates[0] ?? 0,
+    lat: site?.location.coordinates[1] ?? 0
   });
 
   const { data: nearbyStationData } = useNearbyStations({
-    lat: site?.location.coordinates[0] ?? 0,
-    lon: site?.location.coordinates[1] ?? 0
+    lon: site?.location.coordinates[0] ?? 0,
+    lat: site?.location.coordinates[1] ?? 0
   });
 
   // Navigate back if site not found

@@ -62,7 +62,7 @@ export function useSoundingMarkers({
       const el = document.createElement('div');
       el.style.backgroundColor = 'white';
       el.style.visibility = 'hidden';
-      el.style.zIndex = '3';
+      el.style.zIndex = '10';
       el.id = dbId;
       el.className = 'webcam py-[18px] px-2 rounded-lg cursor-pointer';
       el.dataset.timestamp = String(timestamp);

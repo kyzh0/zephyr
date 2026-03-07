@@ -33,13 +33,13 @@ export default function Station() {
   const { station, data, tableData, bearingPairCount } = useStationData(id, timeRange);
 
   const { data: nearbyWebcamData } = useNearbyWebcams({
-    lat: station?.location.coordinates[0] ?? 0,
-    lon: station?.location.coordinates[1] ?? 0
+    lon: station?.location.coordinates[0] ?? 0,
+    lat: station?.location.coordinates[1] ?? 0
   });
 
   const { data: nearbySitesData } = useNearbySites({
-    lat: station?.location.coordinates[0] ?? 0,
-    lon: station?.location.coordinates[1] ?? 0,
+    lon: station?.location.coordinates[0] ?? 0,
+    lat: station?.location.coordinates[1] ?? 0,
     maxDistance: 5000 // 5km
   });
 

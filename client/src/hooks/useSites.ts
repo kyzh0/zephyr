@@ -121,8 +121,8 @@ export function useNearbySites({
     const sitesWithDistance: { data: ISite; distance: number }[] = allSites
       .map((site) => {
         const distance = getDistance(
-          lat,
           lon,
+          lat,
           site.location.coordinates[0],
           site.location.coordinates[1]
         );
