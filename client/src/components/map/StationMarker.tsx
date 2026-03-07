@@ -96,12 +96,7 @@ export const StationMarker = ({
         {speed !== undefined && bearing !== undefined && (
           <g transform={`rotate(${bearing},${cx},${cy})`}>
             {bearing !== undefined ? (
-              <path
-                d={tail_attr}
-                fill={gustColor}
-                stroke={isBearingValid ? 'gold' : 'black'}
-                strokeWidth={borderWidth}
-              />
+              <path d={tail_attr} fill={gustColor} stroke="black" strokeWidth={borderWidth} />
             ) : null}
           </g>
         )}
@@ -118,6 +113,28 @@ export const StationMarker = ({
           stroke={isBearingValid ? 'gold' : 'black'}
           strokeWidth={isBearingValid ? borderWidth * 5 : borderWidth}
         />
+
+        {/* Extra black borders for the gold for contrast */}
+        {isBearingValid && (
+          <circle
+            cx={cx}
+            cy={cy}
+            r={R - borderWidth * 2}
+            fill="none"
+            stroke="black"
+            strokeWidth={borderWidth}
+          />
+        )}
+        {isBearingValid && (
+          <circle
+            cx={cx}
+            cy={cy}
+            r={R + borderWidth * 2}
+            fill="none"
+            stroke="black"
+            strokeWidth={borderWidth}
+          />
+        )}
 
         {/* Speed: always upright, centered in circle */}
         <text
