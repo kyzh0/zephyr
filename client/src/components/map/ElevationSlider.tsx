@@ -8,13 +8,17 @@ interface ElevationSliderProps {
   elevationFilter: number;
   onElevationChange: (value: number) => void;
   disabled?: boolean;
+  flyingMode?: boolean;
 }
 
 export function ElevationSlider({
   elevationFilter,
   onElevationChange,
-  disabled = false
+  disabled = false,
+  flyingMode = false
 }: ElevationSliderProps) {
+  const flyBtn = flyingMode ? 'h-[3.375rem] w-[3.375rem]' : 'h-9 w-9';
+  const flyIcon = flyingMode ? 'h-6 w-6' : 'h-4 w-4';
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleSliderChange = useCallback(
@@ -30,9 +34,9 @@ export function ElevationSlider({
   return (
     <Popover open={isExpanded} onOpenChange={setIsExpanded}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" disabled={disabled} className="h-9 w-9">
+        <Button variant="outline" size="sm" disabled={disabled} className={flyBtn}>
           <Mountain
-            className={`h-4 w-4 ${isFilterActive ? 'fill-blue-500 stroke-blue-500' : 'opacity-70'}`}
+            className={`${flyIcon} ${isFilterActive ? 'fill-blue-500 stroke-blue-500' : 'opacity-70'}`}
           />
         </Button>
       </PopoverTrigger>

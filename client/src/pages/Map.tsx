@@ -34,7 +34,7 @@ function getSnapshotTime(offset: number): Date {
 }
 
 export default function Map() {
-  const { setRefreshedStations, setRefreshedWebcams } = useAppContext();
+  const { setRefreshedStations, setRefreshedWebcams, flyingMode } = useAppContext();
 
   // Map container ref
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -220,6 +220,14 @@ export default function Map() {
       renderCurrentData
     ]
   );
+
+  // Auto-minimize recents when flying mode is enabled
+  useEffect(() => {
+    if (flyingMode) {
+      setMinimizeRecents(true);
+      setStoredValue('minimizeRecents', true);
+    }
+  }, [flyingMode]);
 
   // Handle recent stations toggle
   const handleRecentsToggle = useCallback(() => {

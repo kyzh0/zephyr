@@ -20,6 +20,7 @@ import { getUnit } from '../station';
 interface SearchBarProps {
   className?: string;
   disabled: boolean;
+  flyingMode?: boolean;
 }
 
 type SearchResult =
@@ -28,7 +29,10 @@ type SearchResult =
   | { type: 'landing'; item: ILanding }
   | { type: 'webcam'; item: ICam };
 
-export function SearchBar({ className, disabled }: SearchBarProps) {
+export function SearchBar({ className, disabled, flyingMode = false }: SearchBarProps) {
+  const flyBtn = flyingMode ? 'h-[3.375rem] w-[3.375rem]' : 'h-9 w-9';
+  const flyIcon = flyingMode ? 'h-6 w-6' : 'h-4 w-4';
+  const flyH = flyingMode ? 'h-[3.375rem]' : 'h-9';
   const navigate = useNavigate();
   const unit = getUnit();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -185,8 +189,8 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
     <div ref={containerRef} className={cn('relative', className)}>
       <div
         className={cn(
-          'flex items-center bg-background border rounded-md shadow-sm transition-all duration-200 h-9',
-          isExpanded ? 'w-[200px] sm:w-[250px]' : 'w-9',
+          `flex items-center bg-background border rounded-md shadow-sm transition-all duration-200 ${flyH}`,
+          isExpanded ? 'w-[200px] sm:w-[250px]' : flyingMode ? 'w-[3.375rem]' : 'w-9',
           disabled ? 'opacity-50 pointer-events-none' : ''
         )}
       >
@@ -194,10 +198,10 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
           variant="ghost"
           size="sm"
           onClick={handleToggle}
-          className="h-9 w-9"
+          className={flyBtn}
           disabled={disabled}
         >
-          <Search className="h-4 w-4 opacity-70" />
+          <Search className={`${flyIcon} opacity-70`} />
         </Button>
 
         {isExpanded && (
@@ -209,16 +213,16 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="h-9 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
+              className={`${flyH} border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0`}
             />
             {query && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleClear}
-                className="h-9 w-9 p-0 shrink-0"
+                className={`${flyBtn} p-0 shrink-0`}
               >
-                <X className="h-4 w-4 opacity-70" />
+                <X className={`${flyIcon} opacity-70`} />
               </Button>
             )}
           </>

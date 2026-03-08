@@ -1,13 +1,15 @@
-import { createContext, use, useMemo, useState, type ReactNode } from 'react';
+import { createContext, use, useCallback, useMemo, useState, type ReactNode } from 'react';
+import { getStoredValue, setStoredValue } from '@/components/map/map.utils';
 
 interface AppContextType {
-  // TODO: Define your app state here
   user?: unknown;
   isLoading?: boolean;
   refreshedStations: string[];
   setRefreshedStations: (ids: string[]) => void;
   refreshedWebcams: string[];
   setRefreshedWebcams: (ids: string[]) => void;
+  flyingMode: boolean;
+  toggleFlyingMode: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -19,6 +21,15 @@ interface AppProviderProps {
 export function AppProvider({ children }: AppProviderProps) {
   const [refreshedStations, setRefreshedStations] = useState<string[]>([]);
   const [refreshedWebcams, setRefreshedWebcams] = useState<string[]>([]);
+  const [flyingMode, setFlyingMode] = useState(() => getStoredValue('flyingMode', false));
+
+  const toggleFlyingMode = useCallback(() => {
+    setFlyingMode((prev) => {
+      const next = !prev;
+      setStoredValue('flyingMode', next);
+      return next;
+    });
+  }, []);
 
   const value = useMemo<AppContextType>(
     () => ({
@@ -27,9 +38,11 @@ export function AppProvider({ children }: AppProviderProps) {
       refreshedStations,
       setRefreshedStations,
       refreshedWebcams,
-      setRefreshedWebcams
+      setRefreshedWebcams,
+      flyingMode,
+      toggleFlyingMode
     }),
-    [refreshedStations, refreshedWebcams]
+    [refreshedStations, refreshedWebcams, flyingMode, toggleFlyingMode]
   );
 
   return <AppContext value={value}>{children}</AppContext>;
