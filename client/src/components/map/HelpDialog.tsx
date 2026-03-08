@@ -67,6 +67,8 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
           <DialogTitle className="text-lg sm:text-xl">Welcome to Zephyr</DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
             Live weather data for free flying in New Zealand.
+            <br />
+            Contributors: Kyle Zhou & James Bayly
           </DialogDescription>
         </DialogHeader>
 
