@@ -19,7 +19,7 @@ import { ContactDialog } from './ContactDialog';
 import { HistorySlider } from './HistorySlider';
 import { ElevationSlider } from './ElevationSlider';
 import { SearchBar } from './SearchBar';
-import type { WindUnit } from './map.types';
+import type { MapControlsState } from './map.types';
 import { Toggle } from '@/components/ui/toggle';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -32,31 +32,10 @@ import {
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useAppContext } from '@/context/AppContext';
 
-interface MapControlButtonsProps {
-  onWebcamClick: () => void;
-  showWebcams: boolean;
-  onSoundingClick: () => void;
-  showSoundings: boolean;
-  onLayerToggle: () => void;
-  onLocateClick: () => void;
-  unit: WindUnit;
-  onUnitToggle: () => void;
-  historyOffset: number;
-  onHistoryChange: (offset: number) => void;
-  isHistoricData: boolean;
-  elevationFilter: number;
-  onElevationChange: (value: number) => void;
-  minimizeRecents: boolean;
-  onRecentsToggle: () => void;
-  viewMode: 'sites' | 'stations';
-  onToggleViewMode: (value: 'sites' | 'stations') => void;
-}
-
 export function MapControlButtons({
+  overlay,
   onWebcamClick,
-  showWebcams,
   onSoundingClick,
-  showSoundings,
   onLayerToggle,
   onLocateClick,
   unit,
@@ -70,7 +49,9 @@ export function MapControlButtons({
   onRecentsToggle,
   viewMode,
   onToggleViewMode
-}: MapControlButtonsProps) {
+}: MapControlsState) {
+  const showWebcams = overlay === 'webcams';
+  const showSoundings = overlay === 'soundings';
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { flyingMode, toggleFlyingMode } = useAppContext();

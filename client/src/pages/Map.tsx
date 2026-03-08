@@ -1,36 +1,27 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import SEO from '@/components/SEO';
 import { useAppContext } from '@/context/AppContext';
-import { MapControlButtons, getStoredValue, setStoredValue } from '@/components/map';
-import type { WindUnit } from '@/components/map';
+import { MapControlButtons, getStoredValue } from '@/components/map';
+import type { MapOverlay } from '@/components/map';
 
 import {
   useMapInstance,
+  useMapControls,
   useStationMarkers,
   useWebcamMarkers,
   useSoundingMarkers,
   useSiteMarkers,
   useLandingMarkers
 } from '@/hooks/map';
-import { toast } from 'sonner';
 import { REFRESH_INTERVAL_MS } from '@/lib/utils';
 
-/**
- * Calculate the snapshot time based on offset (in minutes from current time)
- * Rounds to nearest 30-minute mark
- */
-function getSnapshotTime(offset: number): Date {
-  const now = new Date();
-  const minutesPast30 = now.getMinutes() % 30;
-  const roundedTime = new Date(
-    now.getTime() -
-      (minutesPast30 - offset) * 60 * 1000 -
-      now.getSeconds() * 1000 -
-      now.getMilliseconds()
-  );
-  return roundedTime;
+/** Compute the initial overlay state from localStorage (read once at module scope per render) */
+function getInitialOverlay(): MapOverlay {
+  if (getStoredValue('showWebcams', false)) return 'webcams';
+  if (getStoredValue('showSoundings', false)) return 'soundings';
+  return null;
 }
 
 export default function Map() {
@@ -39,26 +30,14 @@ export default function Map() {
   // Map container ref
   const mapContainer = useRef<HTMLDivElement>(null);
 
-  // UI state
-  const [showWebcams, setShowWebcams] = useState(() => getStoredValue('showWebcams', false));
-  const [showSoundings, setShowSoundings] = useState(() => getStoredValue('showSoundings', false));
-  const [viewMode, setViewMode] = useState<'stations' | 'sites'>(() =>
-    getStoredValue<'stations' | 'sites'>('viewMode', 'stations')
-  );
-
-  const [elevationFilter, setElevationFilter] = useState(0);
-  const [isSatellite, setIsSatellite] = useState(false);
-
-  // History state
+  // historyOffset lives here so marker hooks can read isHistoricData reactively
   const [historyOffset, setHistoryOffset] = useState(0);
+  const isHistoricData = historyOffset < 0;
 
-  // Unit state
-  const [unit, setUnit] = useState<WindUnit>(() => getStoredValue<WindUnit>('unit', 'kmh'));
-
-  // Recent stations state
-  const [minimizeRecents, setMinimizeRecents] = useState(() =>
-    getStoredValue('minimizeRecents', true)
-  );
+  // Compute initial overlay once — passed to both marker hooks (for initial isVisible)
+  // and to useMapControls (to seed its overlay state)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const initialOverlay = useMemo(getInitialOverlay, []);
 
   // Initialize map
   const { map, isLoaded, zoom, triggerGeolocate } = useMapInstance({
@@ -75,9 +54,9 @@ export default function Map() {
   } = useStationMarkers({
     map,
     isMapLoaded: isLoaded,
-    isHistoricData: historyOffset < 0,
-    unit,
-    isVisible: viewMode === 'stations',
+    isHistoricData,
+    unit: getStoredValue('unit', 'kmh'), // initial unit only; hook re-renders on unit change via controls
+    isVisible: true,
     mapZoom: zoom,
     onRefresh: setRefreshedStations
   });
@@ -86,7 +65,7 @@ export default function Map() {
   const { refresh: refreshWebcams, setVisibility: setWebcamVisibility } = useWebcamMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: showWebcams,
+    isVisible: initialOverlay === 'webcams',
     onRefresh: setRefreshedWebcams
   });
 
@@ -94,150 +73,42 @@ export default function Map() {
   const { refresh: refreshSoundings, setVisibility: setSoundingVisibility } = useSoundingMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: showSoundings,
-    isHistoricData: historyOffset < 0
+    isVisible: initialOverlay === 'soundings',
+    isHistoricData
   });
 
   // Initialize landing markers below sites
   useLandingMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: viewMode === 'sites'
+    isVisible: false
   });
 
   // Initialize site markers
   const { setVisibility: setSiteVisibility } = useSiteMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: viewMode === 'sites'
+    isVisible: false
   });
 
-  // Handle site toggle - when showing sites, hide stations and vice versa
-  const toggleViewMode = (viewMode: 'stations' | 'sites') => {
-    setViewMode(viewMode);
-    setStoredValue('viewMode', viewMode);
-    setSiteVisibility(viewMode === 'sites');
-    setStationVisibility(viewMode === 'stations');
-  };
-
-  // Handle webcam toggle
-  const handleWebcamClick = useCallback(async () => {
-    if (showSoundings) {
-      setShowSoundings(false);
-      setStoredValue('showSoundings', false);
-      setSoundingVisibility(false);
-    }
-
-    const newValue = !showWebcams;
-    setShowWebcams(newValue);
-    setStoredValue('showWebcams', newValue);
-    setWebcamVisibility(newValue);
-    if (newValue) await refreshWebcams();
-  }, [showWebcams, showSoundings, setWebcamVisibility, setSoundingVisibility, refreshWebcams]);
-
-  // Handle sounding toggle
-  const handleSoundingClick = useCallback(async () => {
-    if (showWebcams) {
-      setShowWebcams(false);
-      setStoredValue('showWebcams', false);
-      setWebcamVisibility(false);
-    }
-
-    const newValue = !showSoundings;
-    setShowSoundings(newValue);
-    setStoredValue('showSoundings', newValue);
-    setSoundingVisibility(newValue);
-    if (newValue) await refreshSoundings();
-  }, [showSoundings, showWebcams, setSoundingVisibility, setWebcamVisibility, refreshSoundings]);
-
-  // Handle layer toggle (outdoors <-> satellite)
-  const handleLayerToggle = useCallback(() => {
-    if (!map.current) return;
-    const newValue = !isSatellite;
-    setIsSatellite(newValue);
-    map.current.setStyle(
-      newValue
-        ? 'mapbox://styles/mapbox/satellite-streets-v11'
-        : 'mapbox://styles/mapbox/outdoors-v11'
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSatellite, map.current]);
-
-  // Handle unit toggle
-  const handleUnitToggle = useCallback(() => {
-    const newUnit = unit === 'kmh' ? 'kt' : 'kmh';
-    setUnit(newUnit);
-    setStoredValue('unit', newUnit);
-    toast.info(`Switched to ${newUnit === 'kmh' ? 'km/h' : 'knots'}`);
-  }, [unit]);
-
-  // Debounce historical fetch so rapid slider/arrow changes only trigger one API call
-  const historyFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Handle history offset change
-  const handleHistoryChange = useCallback(
-    async (offset: number) => {
-      const enteringHistoryMode = offset < 0 && historyOffset === 0;
-      const exitingHistoryMode = offset === 0 && historyOffset < 0;
-
-      if (enteringHistoryMode) {
-        setShowWebcams(false);
-        setWebcamVisibility(false);
-        setShowSoundings(false);
-        setSoundingVisibility(false);
-        setStationMarkersInteractive(false);
-      } else if (exitingHistoryMode) {
-        setStationMarkersInteractive(true);
-      }
-
-      setHistoryOffset(offset);
-
-      if (offset < 0) {
-        // Clear any pending fetch so we only run after user stops changing the slider
-        if (historyFetchTimeoutRef.current) {
-          clearTimeout(historyFetchTimeoutRef.current);
-          historyFetchTimeoutRef.current = null;
-        }
-        const snapshotTime = getSnapshotTime(offset);
-        historyFetchTimeoutRef.current = setTimeout(() => {
-          historyFetchTimeoutRef.current = null;
-          void renderHistoricalData?.(snapshotTime);
-        }, 100);
-      } else {
-        if (historyFetchTimeoutRef.current) {
-          clearTimeout(historyFetchTimeoutRef.current);
-          historyFetchTimeoutRef.current = null;
-        }
-        await renderCurrentData?.();
-      }
-    },
-    [
-      historyOffset,
-      setWebcamVisibility,
-      setSoundingVisibility,
-      setStationMarkersInteractive,
-      renderHistoricalData,
-      renderCurrentData
-    ]
-  );
-
-  // Auto-minimize recents when flying mode is enabled
-  useEffect(() => {
-    if (flyingMode) {
-      setMinimizeRecents(true);
-      setStoredValue('minimizeRecents', true);
-    }
-  }, [flyingMode]);
-
-  // Handle recent stations toggle
-  const handleRecentsToggle = useCallback(() => {
-    const newValue = !minimizeRecents;
-    setMinimizeRecents(newValue);
-    setStoredValue('minimizeRecents', newValue);
-  }, [minimizeRecents]);
-
-  // Check if in history mode
-  const isHistoricData = historyOffset < 0;
+  // All UI control state and handlers
+  const controls = useMapControls({
+    map,
+    triggerGeolocate,
+    flyingMode,
+    historyOffset,
+    setHistoryOffset,
+    initialOverlay,
+    setWebcamVisibility,
+    setSoundingVisibility,
+    setSiteVisibility,
+    setStationVisibility,
+    setStationMarkersInteractive,
+    refreshWebcams,
+    refreshSoundings,
+    renderHistoricalData,
+    renderCurrentData
+  });
 
   // Auto-refresh interval (disabled when in history mode)
   useEffect(() => {
@@ -256,7 +127,7 @@ export default function Map() {
     return () => clearInterval(interval);
   }, [isLoaded, isHistoricData, refreshStations, refreshWebcams, refreshSoundings]);
 
-  // Refresh on visibility change
+  // Refresh on tab visibility change
   useEffect(() => {
     const handleVisibilityChange = async () => {
       await refreshStations();
@@ -267,14 +138,14 @@ export default function Map() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [refreshStations, refreshWebcams, refreshSoundings]);
 
-  // Filter by elevation
+  // Filter markers by elevation
   useEffect(() => {
     const markers = document.querySelectorAll('div.marker');
     markers.forEach((m) => {
       const elevation = Number(m.getAttribute('elevation'));
-      m.classList.toggle('hidden', elevation < elevationFilter);
+      m.classList.toggle('hidden', elevation < controls.elevationFilter);
     });
-  }, [elevationFilter]);
+  }, [controls.elevationFilter]);
 
   return (
     <div className="absolute top-0 left-0 h-dvh w-screen flex flex-col">
@@ -301,25 +172,7 @@ export default function Map() {
         <div className="absolute inset-0 border-4 border-red-500 pointer-events-none z-40" />
       )}
 
-      <MapControlButtons
-        onWebcamClick={handleWebcamClick}
-        showWebcams={showWebcams}
-        onSoundingClick={handleSoundingClick}
-        showSoundings={showSoundings}
-        onLayerToggle={handleLayerToggle}
-        onLocateClick={triggerGeolocate}
-        unit={unit}
-        onUnitToggle={handleUnitToggle}
-        historyOffset={historyOffset}
-        onHistoryChange={handleHistoryChange}
-        isHistoricData={isHistoricData}
-        elevationFilter={elevationFilter}
-        onElevationChange={setElevationFilter}
-        minimizeRecents={minimizeRecents}
-        onRecentsToggle={handleRecentsToggle}
-        onToggleViewMode={toggleViewMode}
-        viewMode={viewMode}
-      />
+      <MapControlButtons {...controls} />
 
       <div ref={mapContainer} className="w-full h-full" />
       <Outlet />

@@ -31,3 +31,26 @@ export interface HistoryValue {
 }
 
 export type WindUnit = 'kmh' | 'kt';
+
+export type MapOverlay = 'webcams' | 'soundings' | null;
+
+export interface MapControlsState {
+  // State
+  overlay: MapOverlay;
+  viewMode: 'stations' | 'sites';
+  unit: WindUnit;
+  elevationFilter: number;
+  historyOffset: number;
+  isHistoricData: boolean;
+  minimizeRecents: boolean;
+  // Handlers
+  onWebcamClick: () => void;
+  onSoundingClick: () => void;
+  onLayerToggle: () => void;
+  onLocateClick: () => void;
+  onUnitToggle: () => void;
+  onHistoryChange: (offset: number) => Promise<void>;
+  onElevationChange: (value: number) => void;
+  onRecentsToggle: () => void;
+  onToggleViewMode: (value: 'stations' | 'sites') => void;
+}
