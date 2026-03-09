@@ -3,8 +3,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { formatInTimeZone } from 'date-fns-tz';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 
-import { getMinutesAgo, getStationTypeName } from '@/lib/utils';
+import { getButtonStyle, getIconStyle, getMinutesAgo, getStationTypeName } from '@/lib/utils';
 import { useStationData, useIsMobile, type TimeRange } from '@/hooks';
+import { useAppContext } from '@/context/AppContext';
 import { useNearbyWebcams } from '@/hooks/useWebcam';
 import { useNearbySites } from '@/hooks/useSites';
 import {
@@ -27,6 +28,7 @@ export default function Station() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { flyingMode } = useAppContext();
 
   const [timeRange, setTimeRange] = useState<TimeRange>('6');
 
@@ -241,8 +243,13 @@ export default function Station() {
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background p-4 pb-0">
           <div className="flex items-center gap-2 sm:gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
-              <ArrowLeft className="h-5 w-5" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className={getButtonStyle(flyingMode)}
+            >
+              <ArrowLeft className={getIconStyle(flyingMode)} />
             </Button>
             <div className="flex-1 text-center pr-10">{headerContent}</div>
           </div>

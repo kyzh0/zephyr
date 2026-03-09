@@ -16,6 +16,7 @@ import {
 import { useState } from 'react';
 import type { ILanding } from '@/models/landing.model';
 import { useIsMobile } from '@/hooks';
+import { useAppContext } from '@/context/AppContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Item,
@@ -25,13 +26,14 @@ import {
   ItemMedia,
   ItemTitle
 } from '@/components/ui/item';
-import { handleError } from '@/lib/utils';
+import { getButtonStyle, getIconStyle, handleError } from '@/lib/utils';
 import SEO from '@/components/SEO';
 
 export default function Site() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { flyingMode } = useAppContext();
   const [landing, setLanding] = useState<ILanding | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -173,8 +175,13 @@ export default function Site() {
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background p-4 pb-0">
           <div className="flex items-center gap-2 sm:gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
-              <ArrowLeft className="h-5 w-5" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className={getButtonStyle(flyingMode)}
+            >
+              <ArrowLeft className={getIconStyle(flyingMode)} />
             </Button>
             <div className="flex w-full text-center justify-evenly items-center mb-3">
               {headerContent}

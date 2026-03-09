@@ -17,6 +17,7 @@ import {
 import { useState } from 'react';
 import type { ISite } from '@/models/site.model';
 import { useIsMobile } from '@/hooks';
+import { useAppContext } from '@/context/AppContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Item,
@@ -30,7 +31,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown } from 'lucide-react';
 import { useNearbyWebcams } from '@/hooks/useWebcam';
 import { useNearbyStations } from '@/hooks/useStations';
-import { handleError } from '@/lib/utils';
+import { getButtonStyle, getIconStyle, handleError } from '@/lib/utils';
 import { WebcamPreview } from '@/components/webcam/WebcamPreview';
 import { WindCompass } from '@/components/station';
 import SEO from '@/components/SEO';
@@ -39,6 +40,7 @@ export default function Site() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { flyingMode } = useAppContext();
   const [site, setSite] = useState<ISite | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -262,8 +264,13 @@ export default function Site() {
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background p-4 pb-0">
           <div className="flex items-center gap-2 sm:gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
-              <ArrowLeft className="h-5 w-5" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className={getButtonStyle(flyingMode)}
+            >
+              <ArrowLeft className={getIconStyle(flyingMode)} />
             </Button>
             <div className="flex w-full text-center justify-evenly items-center mb-3">
               {headerContent}
