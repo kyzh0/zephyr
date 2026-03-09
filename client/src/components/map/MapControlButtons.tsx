@@ -464,7 +464,7 @@ export function MapControlButtons({
       )}
 
       {/* Bottom left - Recent Stations (hidden in history mode) */}
-      {recentStations.length > 0 && !isHistoricData && (
+      {recentStations.length > 0 && !flyingMode && !isHistoricData && (
         <div className="absolute bottom-2.5 left-2.5 z-50">
           {minimizeRecents ? (
             <Tooltip>
