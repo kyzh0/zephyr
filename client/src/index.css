@@ -141,29 +141,3 @@
 .mapboxgl-popup {
   z-index: 10000 !important;
 }
-
-/* Fullscreen map helpers for iOS safe-area and 100vh fix */
-.zephyr-map-fullscreen {
-  position: absolute;
-  inset: 0; /* top:0; right:0; bottom:0; left:0 */
-  width: 100%;
-  height: calc(var(--vh, 1vh) * 100);
-  z-index: 0; /* UI overlays should sit above */
-  background: var(--background);
-}
-
-.zephyr-map-root {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: calc(var(--vh, 1vh) * 100);
-}
-
-/* Respect iPhone notch / home indicator for internal content */
-.map-safe-padding {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
