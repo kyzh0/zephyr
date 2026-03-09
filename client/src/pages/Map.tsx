@@ -174,7 +174,7 @@ export default function Map() {
 
       <MapControlButtons {...controls} />
 
-      <div ref={mapContainer} className="zephyr-map-fullscreen" />
+      <div ref={mapContainer} className="w-full h-full zephyr-map-fullscreen" />
       <Outlet />
     </div>
   );
