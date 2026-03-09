@@ -27,6 +27,20 @@ function getInitialOverlay(): MapOverlay {
 export default function Map() {
   const { setRefreshedStations, setRefreshedWebcams, flyingMode } = useAppContext();
 
+  // Fix mobile 100vh issues by setting a --vh custom property based on window.innerHeight
+  useEffect(() => {
+    const setVh = () => {
+      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+    };
+    setVh();
+    window.addEventListener('resize', setVh);
+    window.addEventListener('orientationchange', setVh);
+    return () => {
+      window.removeEventListener('resize', setVh);
+      window.removeEventListener('orientationchange', setVh);
+    };
+  }, []);
+
   // Map container ref
   const mapContainer = useRef<HTMLDivElement>(null);
 
@@ -148,7 +162,7 @@ export default function Map() {
   }, [controls.elevationFilter]);
 
   return (
-    <div className="absolute top-0 left-0 h-dvh w-screen flex flex-col">
+    <div className="absolute top-0 left-0 h-dvh w-screen flex flex-col zephyr-map-root">
       <SEO
         path="/"
         jsonLd={{
@@ -174,7 +188,7 @@ export default function Map() {
 
       <MapControlButtons {...controls} />
 
-      <div ref={mapContainer} className="w-full h-full" />
+      <div ref={mapContainer} className="w-full h-full zephyr-map-fullscreen map-safe-padding" />
       <Outlet />
     </div>
   );
