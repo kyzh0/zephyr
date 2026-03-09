@@ -142,28 +142,27 @@
   z-index: 10000 !important;
 }
 
-/* Fullscreen map helpers for iOS safe-area and 100vh fix */
+/* Fullscreen map helpers for iOS — viewport-fit=cover must be set in the viewport meta */
+
+/* Root container: fixed to the full screen (behind notch + home indicator on iOS) */
+.zephyr-map-root {
+  position: fixed;
+  inset: 0;
+}
+
+/* Map canvas: fill the entire fixed root */
 .zephyr-map-fullscreen {
   position: absolute;
-  inset: 0; /* top:0; right:0; bottom:0; left:0 */
-  width: 100%;
-  height: calc(var(--vh, 1vh) * 100);
-  z-index: 0; /* UI overlays should sit above */
-  background: var(--background);
+  inset: 0;
+  z-index: 0;
 }
 
-.zephyr-map-root {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: calc(var(--vh, 1vh) * 100);
+/* Top UI controls: clear the notch / Dynamic Island */
+.map-ctrl-top {
+  top: calc(0.625rem + env(safe-area-inset-top, 0px));
 }
 
-/* Respect iPhone notch / home indicator for internal content */
-.map-safe-padding {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
+/* Bottom UI controls: clear the home indicator */
+.map-ctrl-bottom {
+  bottom: calc(0.625rem + env(safe-area-inset-bottom, 0px));
 }

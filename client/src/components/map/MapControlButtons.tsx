@@ -237,7 +237,7 @@ export function MapControlButtons({
     <>
       {/* Top left controls */}
       <div
-        className={`flex flex-wrap gap-2 items-start absolute top-2.5 left-2.5 z-50 right-2.5 md:right-auto`}
+        className={`flex flex-wrap gap-2 items-start absolute map-ctrl-top left-2.5 z-50 right-2.5 md:right-auto`}
       >
         {isMobile ? (
           <>
@@ -466,7 +466,7 @@ export function MapControlButtons({
 
       {/* Bottom left - Recent Stations (hidden in history mode) */}
       {recentStations.length > 0 && !flyingMode && !isHistoricData && (
-        <div className="absolute bottom-2.5 left-2.5 z-50">
+        <div className="absolute map-ctrl-bottom left-2.5 z-50">
           {minimizeRecents ? (
             <Tooltip>
               <TooltipTrigger asChild>
