@@ -3,7 +3,6 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { getStoredValue, setStoredValue } from '@/components/map';
-import { toast } from 'sonner';
 
 interface UseMapInstanceOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -14,7 +13,7 @@ interface UseMapInstanceReturn {
   map: React.RefObject<mapboxgl.Map | null>;
   isLoaded: boolean;
   zoom: number;
-  triggerGeolocate: () => void;
+  triggerGeolocate: () => Promise<void>;
 }
 
 export function useMapInstance({
@@ -79,21 +78,19 @@ export function useMapInstance({
   }, [zoom]);
 
   // Trigger geolocation programmatically
-  const triggerGeolocate = useCallback(() => {
+  const triggerGeolocate = useCallback(async (): Promise<void> => {
     if (!map.current) return;
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        map.current?.flyTo({
-          center: [position.coords.longitude, position.coords.latitude],
-          zoom: 12
-        });
-      },
-      (error) => {
-        toast.error('Geolocation error: ' + error.message);
-      },
-      { enableHighAccuracy: true }
-    );
+    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true
+      });
+    });
+
+    map.current.flyTo({
+      center: [position.coords.longitude, position.coords.latitude],
+      zoom: 12
+    });
   }, []);
 
   return { map, isLoaded, zoom, triggerGeolocate };

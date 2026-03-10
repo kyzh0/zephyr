@@ -358,6 +358,5 @@ export const lookupElevation = async (lat: number, lon: number): Promise<number>
 };
 
 export const getButtonStyle = (flyingMode: boolean) =>
-  flyingMode ? 'h-[3.375rem] w-[3.375rem] shrink-0' : 'h-9 w-9 shrink-0';
-export const getIconStyle = (flyingMode: boolean) =>
-  flyingMode ? 'h-[1.875rem] w-[1.875rem]' : 'h-5 w-5';
+  flyingMode ? 'h-[4rem] w-[4rem] shrink-0' : 'h-9 w-9 shrink-0';
+export const getIconStyle = (flyingMode: boolean) => (flyingMode ? 'h-[2rem] w-[2rem]' : 'h-5 w-5');

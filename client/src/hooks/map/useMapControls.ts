@@ -17,7 +17,7 @@ function getSnapshotTime(offset: number): Date {
 
 export interface UseMapControlsParams {
   map: RefObject<{ setStyle: (style: string) => void } | null>;
-  triggerGeolocate: () => void;
+  triggerGeolocate: () => Promise<void>;
   flyingMode: boolean;
   // historyOffset is owned by Map.tsx so marker hooks can read it reactively
   historyOffset: number;

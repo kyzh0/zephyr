@@ -8,17 +8,13 @@ interface ElevationSliderProps {
   elevationFilter: number;
   onElevationChange: (value: number) => void;
   disabled?: boolean;
-  flyingMode?: boolean;
 }
 
 export function ElevationSlider({
   elevationFilter,
   onElevationChange,
-  disabled = false,
-  flyingMode = false
+  disabled = false
 }: ElevationSliderProps) {
-  const flyBtn = flyingMode ? 'h-[3.375rem] w-[3.375rem]' : 'h-9 w-9';
-  const flyIcon = flyingMode ? 'h-6 w-6' : 'h-4 w-4';
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleSliderChange = useCallback(
@@ -34,15 +30,15 @@ export function ElevationSlider({
   return (
     <Popover open={isExpanded} onOpenChange={setIsExpanded}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" disabled={disabled} className={flyBtn}>
+        <Button variant="outline" size="sm" disabled={disabled} className="h-9 w-9">
           <Mountain
-            className={`${flyIcon} ${isFilterActive ? 'fill-blue-500 stroke-blue-500' : 'opacity-70'}`}
+            className={`h-4 w-4 ${isFilterActive ? 'fill-blue-500 stroke-blue-500' : 'opacity-70'}`}
           />
         </Button>
       </PopoverTrigger>
 
       <PopoverContent className="p-0" align="end">
-        <div className="flex flex-col gap-4 bg-background border rounded-md p-3 shadow-sm min-w-[250px]">
+        <div className="flex flex-col gap-4 bg-background border rounded-md p-3 shadow-sm min-w-62.5">
           <div className="text-xs text-muted-foreground">
             {elevationFilter > 0
               ? `Showing stations above ${elevationFilter}m`

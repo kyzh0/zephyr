@@ -47,7 +47,7 @@ export interface MapControlsState {
   onWebcamClick: () => void;
   onSoundingClick: () => void;
   onLayerToggle: () => void;
-  onLocateClick: () => void;
+  onLocateClick: () => Promise<void>;
   onUnitToggle: () => void;
   onHistoryChange: (offset: number) => Promise<void>;
   onElevationChange: (value: number) => void;

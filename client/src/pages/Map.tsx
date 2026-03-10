@@ -36,7 +36,7 @@ export default function Map() {
 
   // Compute initial overlay once — passed to both marker hooks (for initial isVisible)
   // and to useMapControls (to seed its overlay state)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/use-memo
   const initialOverlay = useMemo(getInitialOverlay, []);
 
   // Initialize map

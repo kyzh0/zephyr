@@ -10,7 +10,8 @@ import {
   LocateFixed,
   History,
   Mail,
-  Hourglass
+  Hourglass,
+  Undo2
 } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { HelpDialog, WELCOME_STORAGE_KEY } from './HelpDialog';
@@ -32,6 +33,7 @@ import {
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useAppContext } from '@/context/AppContext';
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export function MapControlButtons({
   overlay,
@@ -56,9 +58,9 @@ export function MapControlButtons({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { flyingMode, toggleFlyingMode } = useAppContext();
-  const flyTabsList = flyingMode ? 'h-[3.375rem]' : 'h-9';
-  const flyTabsTrigger = flyingMode ? 'h-[3rem]' : 'h-8';
+  const isFlyingMode = flyingMode && isMobile;
 
+  const [isLocating, setIsLocating] = useState(false);
   const [helpOpen, setHelpOpen] = useState(
     window.self === window.top && // don't show if iframe
       localStorage.getItem(WELCOME_STORAGE_KEY) !== 'true'
@@ -97,6 +99,22 @@ export function MapControlButtons({
     };
   }, []);
 
+  useEffect(() => {
+    if (!isLocating) return;
+
+    const run = async () => {
+      try {
+        await onLocateClick();
+      } catch {
+        toast.error('Geolocation error');
+      } finally {
+        setIsLocating(false);
+      }
+    };
+
+    run();
+  }, [isLocating, onLocateClick]);
+
   // Render menu button content
   const renderMenuContent = () => (
     <div className="flex flex-col gap-0">
@@ -107,21 +125,13 @@ export function MapControlButtons({
             onToggleViewMode(value as 'stations' | 'sites');
             setMenuOpen(false);
           }}
-          className={flyTabsList}
+          className="h-9"
         >
-          <TabsList className={`${flyTabsList} w-full`}>
-            <TabsTrigger
-              disabled={isHistoricData}
-              value="stations"
-              className={`${flyTabsTrigger} flex-1`}
-            >
+          <TabsList className="h-9 w-full">
+            <TabsTrigger disabled={isHistoricData} value="stations" className="h-8 flex-1">
               Stations
             </TabsTrigger>
-            <TabsTrigger
-              disabled={isHistoricData}
-              value="sites"
-              className={`${flyTabsTrigger} flex-1`}
-            >
+            <TabsTrigger disabled={isHistoricData} value="sites" className="h-8 flex-1">
               Sites
             </TabsTrigger>
           </TabsList>
@@ -138,7 +148,7 @@ export function MapControlButtons({
         }}
         disabled={isHistoricData || viewMode === 'sites'}
       >
-        <Hourglass className={`${getIconStyle(flyingMode)} opacity-70`} />
+        <Hourglass className={`${getIconStyle(isFlyingMode)} opacity-70`} />
         History View
       </Button>
       <Button
@@ -151,7 +161,7 @@ export function MapControlButtons({
         }}
         disabled={isHistoricData}
       >
-        <Grid3X3 className={`${getIconStyle(flyingMode)} opacity-70`} />
+        <Grid3X3 className={`${getIconStyle(isFlyingMode)} opacity-70`} />
         Grid View
       </Button>
       <Button
@@ -164,7 +174,7 @@ export function MapControlButtons({
         }}
         disabled={isHistoricData}
       >
-        <svg viewBox="0 0 18 18" className={`${getIconStyle(flyingMode)} opacity-70`}>
+        <svg viewBox="0 0 18 18" className={`${getIconStyle(isFlyingMode)} opacity-70`}>
           <g transform="rotate(-90, 9, 9)">
             <path d="m18,2.47l-9,6.53l-4.38,-4.38l-4.62,3.38l0,-2.48l4.83,-3.52l4.38,4.38l8.79,-6.38m0,12l-4.7,0l-4.17,3.34l-6.13,-5.93l-3,2.13l0,2.46l2.8,-2l6.2,6l5,-4l4,0l0,-2z" />
           </g>
@@ -181,7 +191,7 @@ export function MapControlButtons({
           setMenuOpen(false);
         }}
       >
-        <HelpCircle className={`${getIconStyle(flyingMode)} opacity-70`} />
+        <HelpCircle className={`${getIconStyle(isFlyingMode)} opacity-70`} />
         Help
       </Button>
       <Button
@@ -193,7 +203,7 @@ export function MapControlButtons({
           setMenuOpen(false);
         }}
       >
-        <HandHelping className={`${getIconStyle(flyingMode)} opacity-70`} />
+        <HandHelping className={`${getIconStyle(isFlyingMode)} opacity-70`} />
         Donate
       </Button>
       <Button
@@ -205,26 +215,26 @@ export function MapControlButtons({
           setMenuOpen(false);
         }}
       >
-        <Mail className={`${getIconStyle(flyingMode)} opacity-70`} />
+        <Mail className={`${getIconStyle(isFlyingMode)} opacity-70`} />
         Contact
       </Button>
       <div className="border-t my-1" />
       <div className="px-2 py-1.5">
         <Tabs
-          value={flyingMode ? 'on' : 'off'}
+          value={isFlyingMode ? 'on' : 'off'}
           onValueChange={(value) => {
-            if ((value === 'on') !== flyingMode) {
+            if ((value === 'on') !== isFlyingMode) {
               toggleFlyingMode();
             }
             setMenuOpen(false);
           }}
-          className={flyTabsList}
+          className="h-9"
         >
-          <TabsList className={`${flyTabsList} w-full`}>
-            <TabsTrigger value="off" className={`${flyTabsTrigger} flex-1`}>
+          <TabsList className="h-9 w-full">
+            <TabsTrigger value="off" className="h-8 flex-1">
               Off
             </TabsTrigger>
-            <TabsTrigger value="on" className={`${flyTabsTrigger} flex-1`}>
+            <TabsTrigger value="on" className="h-8 flex-1">
               Flying Mode
             </TabsTrigger>
           </TabsList>
@@ -242,40 +252,62 @@ export function MapControlButtons({
         {isMobile ? (
           <>
             {/* Mobile: Hamburger menu + Search + Webcams */}
-            <Popover open={menuOpen} onOpenChange={setMenuOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className={getButtonStyle(flyingMode)}>
-                  <Menu className={`${getIconStyle(flyingMode)} opacity-70`} />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="start" sideOffset={4} className="p-1 w-auto">
-                {renderMenuContent()}
-              </PopoverContent>
-            </Popover>
-            <SearchBar disabled={isHistoricData} flyingMode={flyingMode} />
+            {!isFlyingMode && (
+              <Popover open={menuOpen} onOpenChange={setMenuOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className={getButtonStyle(isFlyingMode)}>
+                    <Menu className={`${getIconStyle(isFlyingMode)} opacity-70`} />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" sideOffset={4} className="p-1 w-auto">
+                  {renderMenuContent()}
+                </PopoverContent>
+              </Popover>
+            )}
+            {isFlyingMode && (
+              <Toggle
+                variant="outline"
+                size="sm"
+                onClick={toggleFlyingMode}
+                className={`${getButtonStyle(isFlyingMode)} bg-background`}
+              >
+                <Undo2 className={`${getIconStyle(isFlyingMode)} opacity-70`} />
+              </Toggle>
+            )}
+            {!isFlyingMode && <SearchBar disabled={isHistoricData} />}
             <Toggle
               variant="outline"
               size="sm"
               onClick={onWebcamClick}
               disabled={isHistoricData}
-              className={`${getButtonStyle(flyingMode)} bg-background ${showWebcams ? '*:[svg]:stroke-blue-500' : ''}`}
+              className={`${getButtonStyle(isFlyingMode)} bg-background ${showWebcams ? '*:[svg]:stroke-blue-500' : ''}`}
             >
-              <Camera className={`${getIconStyle(flyingMode)} opacity-70`} />
+              <Camera className={`${getIconStyle(isFlyingMode)} opacity-70`} />
             </Toggle>
+            {isFlyingMode && (
+              <Toggle
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/grid')}
+                className={`${getButtonStyle(isFlyingMode)} bg-background`}
+              >
+                <Grid3X3 className={`${getIconStyle(isFlyingMode)} opacity-70`} />
+              </Toggle>
+            )}
           </>
         ) : (
           <>
             {/* Large screens: Top-left group */}
-            <SearchBar disabled={isHistoricData} flyingMode={flyingMode} />
+            <SearchBar disabled={isHistoricData} />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  className={getButtonStyle(flyingMode)}
+                  className={getButtonStyle(isFlyingMode)}
                   onClick={() => setHelpOpen(true)}
                 >
-                  <HelpCircle className={`${getIconStyle(flyingMode)} opacity-70`} />
+                  <HelpCircle className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Help</TooltipContent>
@@ -285,10 +317,10 @@ export function MapControlButtons({
                 <Button
                   variant="outline"
                   size="sm"
-                  className={getButtonStyle(flyingMode)}
+                  className={getButtonStyle(isFlyingMode)}
                   onClick={() => setDonateOpen(true)}
                 >
-                  <HandHelping className={`${getIconStyle(flyingMode)} opacity-70`} />
+                  <HandHelping className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Donate</TooltipContent>
@@ -298,10 +330,10 @@ export function MapControlButtons({
                 <Button
                   variant="outline"
                   size="sm"
-                  className={getButtonStyle(flyingMode)}
+                  className={getButtonStyle(isFlyingMode)}
                   onClick={() => setContactOpen(true)}
                 >
-                  <Mail className={`${getIconStyle(flyingMode)} opacity-70`} />
+                  <Mail className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Contact</TooltipContent>
@@ -314,11 +346,11 @@ export function MapControlButtons({
                   size="sm"
                   onClick={() => onHistoryChange(isHistoricData ? 0 : -30)}
                   disabled={viewMode === 'sites'}
-                  className={`${getButtonStyle(flyingMode)} bg-background ${
+                  className={`${getButtonStyle(isFlyingMode)} bg-background ${
                     historyOffset < 0 ? '*:[svg]:stroke-blue-500' : ''
                   }`}
                 >
-                  <Hourglass className={`${getIconStyle(flyingMode)} opacity-70`} />
+                  <Hourglass className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Toggle>
               </TooltipTrigger>
               <TooltipContent>{historyOffset < 0 ? 'Hide' : 'Show'} History</TooltipContent>
@@ -330,9 +362,9 @@ export function MapControlButtons({
                   size="sm"
                   onClick={() => navigate('/grid')}
                   disabled={isHistoricData}
-                  className={getButtonStyle(flyingMode)}
+                  className={getButtonStyle(isFlyingMode)}
                 >
-                  <Grid3X3 className={`${getIconStyle(flyingMode)} opacity-70`} />
+                  <Grid3X3 className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Grid View of Nearby Weather Stations</TooltipContent>
@@ -344,11 +376,11 @@ export function MapControlButtons({
                   size="sm"
                   onClick={onWebcamClick}
                   disabled={isHistoricData}
-                  className={`${getButtonStyle(flyingMode)} bg-background ${
+                  className={`${getButtonStyle(isFlyingMode)} bg-background ${
                     showWebcams ? '*:[svg]:stroke-blue-500' : ''
                   }`}
                 >
-                  <Camera className={`${getIconStyle(flyingMode)} opacity-70`} />
+                  <Camera className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Toggle>
               </TooltipTrigger>
               <TooltipContent>{showWebcams ? 'Hide' : 'Show'} Webcams on Map</TooltipContent>
@@ -360,9 +392,9 @@ export function MapControlButtons({
                   size="sm"
                   onClick={onSoundingClick}
                   disabled={isHistoricData}
-                  className={`${getButtonStyle(flyingMode)} bg-background ${showSoundings ? 'fill-blue-500' : ''}`}
+                  className={`${getButtonStyle(isFlyingMode)} bg-background ${showSoundings ? 'fill-blue-500' : ''}`}
                 >
-                  <svg viewBox="0 0 18 18" className={`${getIconStyle(flyingMode)} opacity-70`}>
+                  <svg viewBox="0 0 18 18" className={`${getIconStyle(isFlyingMode)} opacity-70`}>
                     <g transform="rotate(-90, 9, 9)">
                       <path d="m18,2.47l-9,6.53l-4.38,-4.38l-4.62,3.38l0,-2.48l4.83,-3.52l4.38,4.38l8.79,-6.38m0,12l-4.7,0l-4.17,3.34l-6.13,-5.93l-3,2.13l0,2.46l2.8,-2l6.2,6l5,-4l4,0l0,-2z" />
                     </g>
@@ -376,17 +408,13 @@ export function MapControlButtons({
                 <Tabs
                   value={viewMode}
                   onValueChange={(value) => onToggleViewMode(value as 'stations' | 'sites')}
-                  className={flyTabsList}
+                  className="h-9"
                 >
-                  <TabsList className={flyTabsList}>
-                    <TabsTrigger
-                      disabled={isHistoricData}
-                      value="stations"
-                      className={flyTabsTrigger}
-                    >
+                  <TabsList className="h-9">
+                    <TabsTrigger disabled={isHistoricData} value="stations" className="h-8">
                       Stations
                     </TabsTrigger>
-                    <TabsTrigger disabled={isHistoricData} value="sites" className={flyTabsTrigger}>
+                    <TabsTrigger disabled={isHistoricData} value="sites" className="h-8">
                       Sites
                     </TabsTrigger>
                   </TabsList>
@@ -407,47 +435,52 @@ export function MapControlButtons({
             <Button
               variant="outline"
               size="sm"
-              onClick={onLocateClick}
-              className={getButtonStyle(flyingMode)}
+              onClick={() => setIsLocating(true)}
+              className={getButtonStyle(isFlyingMode)}
             >
-              <LocateFixed className={`${getIconStyle(flyingMode)} opacity-70`} />
+              <LocateFixed
+                className={`${getIconStyle(isFlyingMode)} opacity-70 ${isLocating ? 'animate-ping' : ''}`}
+              />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="left">Find My Location</TooltipContent>
         </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Toggle
-              variant="outline"
-              size="sm"
-              onClick={onUnitToggle}
-              className={`${getButtonStyle(flyingMode)} ${flyingMode ? 'text-sm' : 'text-xs'} font-semibold bg-background`}
-            >
-              {unit === 'kt' ? 'kt' : 'km/h'}
-            </Toggle>
-          </TooltipTrigger>
-          <TooltipContent side="left">
-            Change unit to {unit === 'kt' ? 'km/h' : 'kt'}
-          </TooltipContent>
-        </Tooltip>
+        {!isFlyingMode && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Toggle
+                variant="outline"
+                size="sm"
+                onClick={onUnitToggle}
+                className={`${getButtonStyle(isFlyingMode)} text-xs font-semibold bg-background`}
+              >
+                {unit === 'kt' ? 'kt' : 'km/h'}
+              </Toggle>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              Change unit to {unit === 'kt' ? 'km/h' : 'kt'}
+            </TooltipContent>
+          </Tooltip>
+        )}
         <Tooltip>
           <TooltipTrigger asChild>
             <Toggle
               variant="outline"
               size="sm"
               onClick={onLayerToggle}
-              className={`${getButtonStyle(flyingMode)} bg-background`}
+              className={`${getButtonStyle(isFlyingMode)} bg-background`}
             >
-              <Layers className={`${getIconStyle(flyingMode)} opacity-70`} />
+              <Layers className={`${getIconStyle(isFlyingMode)} opacity-70`} />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent side="left">Switch Map Layer</TooltipContent>
         </Tooltip>
-        <ElevationSlider
-          elevationFilter={elevationFilter}
-          onElevationChange={onElevationChange}
-          flyingMode={flyingMode}
-        />
+        {!isFlyingMode && (
+          <ElevationSlider
+            elevationFilter={elevationFilter}
+            onElevationChange={onElevationChange}
+          />
+        )}
       </div>
 
       {/* Dialogs */}
@@ -465,7 +498,7 @@ export function MapControlButtons({
       )}
 
       {/* Bottom left - Recent Stations (hidden in history mode) */}
-      {recentStations.length > 0 && !flyingMode && !isHistoricData && (
+      {recentStations.length > 0 && !isFlyingMode && !isHistoricData && (
         <div className="absolute bottom-2.5 left-2.5 z-50">
           {minimizeRecents ? (
             <Tooltip>
@@ -474,21 +507,21 @@ export function MapControlButtons({
                   variant="outline"
                   size="sm"
                   onClick={onRecentsToggle}
-                  className={getButtonStyle(flyingMode)}
+                  className={getButtonStyle(isFlyingMode)}
                 >
-                  <History className={`${getIconStyle(flyingMode)} opacity-70`} />
+                  <History className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Show Recent Stations</TooltipContent>
             </Tooltip>
           ) : (
-            <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-[200px]">
+            <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-50">
               <div
                 className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors"
                 onClick={onRecentsToggle}
                 title="Click to minimize"
               >
-                <History className={`${getIconStyle(flyingMode)} h-3 w-3`} />
+                <History className={`${getIconStyle(isFlyingMode)} h-3 w-3`} />
                 <span>Recent Stations</span>
               </div>
               <div className="flex flex-col gap-1">
@@ -503,7 +536,7 @@ export function MapControlButtons({
                       variant="ghost"
                       size="sm"
                       onClick={() => navigate(`/stations/${station.id}`)}
-                      className={`${flyingMode ? 'h-[2.625rem]' : 'h-7'} justify-start text-xs font-normal px-2 truncate`}
+                      className="h-7 justify-start text-xs font-normal px-2 truncate"
                       title={station.name}
                     >
                       {displayName}
