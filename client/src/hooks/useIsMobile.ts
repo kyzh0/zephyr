@@ -9,11 +9,15 @@ const MOBILE_BREAKPOINT = 768;
 export function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === 'undefined') return false;
-    return window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`).matches;
+    return window.matchMedia(
+      `(max-width: ${MOBILE_BREAKPOINT}px), (max-height: ${MOBILE_BREAKPOINT}px)`
+    ).matches;
   });
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const mediaQuery = window.matchMedia(
+      `(max-width: ${MOBILE_BREAKPOINT}px), (max-height: ${MOBILE_BREAKPOINT}px)`
+    );
 
     const handleChange = (e: MediaQueryListEvent) => {
       setIsMobile(e.matches);
