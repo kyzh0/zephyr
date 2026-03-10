@@ -80,7 +80,7 @@ export default function GridView() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex gap-6">
+        <div className="hidden gap-6">
           <div className="flex-1 space-y-2">
             <Label className="text-xs">Radius: {radius} km</Label>
             <Slider

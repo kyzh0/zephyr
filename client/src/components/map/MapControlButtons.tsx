@@ -224,6 +224,7 @@ export function MapControlButtons({
           value={isFlyingMode ? 'on' : 'off'}
           onValueChange={(value) => {
             if ((value === 'on') !== isFlyingMode) {
+              onToggleViewMode('stations');
               toggleFlyingMode();
             }
             setMenuOpen(false);
