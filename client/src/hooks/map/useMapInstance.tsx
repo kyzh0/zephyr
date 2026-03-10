@@ -89,7 +89,7 @@ export function useMapInstance({
 
     map.current.flyTo({
       center: [position.coords.longitude, position.coords.latitude],
-      zoom: 12
+      zoom: 10
     });
   }, []);
 
