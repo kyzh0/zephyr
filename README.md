@@ -21,7 +21,7 @@
 
 ## Introduction
 
-Zephyr is an interactive weather map aimed towards paraglider pilots in New Zealand, scraping real-time data from various stations across the country. The frontend is build on React, TypeScript, and Vite, while the backend is built with NodeJS, Express, and MongoDB.
+Zephyr is an interactive weather map aimed towards paraglider pilots in New Zealand, scraping real-time data from various stations across the country. The frontend is built on React and Vite, while the backend is built with NodeJS, Express, and MongoDB.
 
 ## Features
 
@@ -30,30 +30,50 @@ Zephyr is an interactive weather map aimed towards paraglider pilots in New Zeal
 - Filtering and history - a flexible way to interface with the data.
 - Charts and tables - a tidy representation of each station's data over time.
 - Live grid view - easy to integrate with XCTrack for in-flight updates.
+- Site guide - information for free flying sites around NZ.
 - Webcams - live images from various cameras.
 - RASP soudings - overlay of skew-T plots from [RASP](https://rasp.nz).
 - Mobile-first design - scalable across different screen sizes.
-- Help tab - provides information and a way for users to contact the developer.
-- Admin-only area - for adding new weather stations and viewing errors.
-- Error checker - scheduled function to identify issues with stations or the scraper.
+- Help & contact - provides information and a way for users to send feedback.
+- Admin-only area - for adding new stations and viewing errors.
+- Error checker - scheduled function to identify issues with stations.
 - API - endpoints for integration with external apps.
 - Export - data is preserved and can be exported for analysis.
 
-<p align="center">
-  <img src = "https://i.postimg.cc/RCyCtyQX/Untitled.png" width=200>
-  <br/>
-  Interactive map view
-</p>
-<p align="center">
-  <img src = "https://i.postimg.cc/pTkZ7KkH/Untitled.png" width=200>
-  <br/>
-  Station data
-</p>
-<p align="center">
-  <img src = "https://i.imgur.com/hK6Dyg6.png" width=200>
-  <br/>
-  Live grid view
-</p>
+<table style="width: 100%;">
+  <tr>
+    <td>
+      <p align="center">
+        <img src = "https://i.postimg.cc/brLCk4tT/Screenshot-2026-03-10-144326.png" width=100>
+        <br/>
+        Interactive map view
+      </p>
+    </td>
+    <td>
+      <p align="center">
+        <img src = "https://i.postimg.cc/L8gD8JNL/Screenshot-2026-03-10-144638.png" width=100>
+        <br/>
+        Station data
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <p align="center">
+        <img src = "https://i.postimg.cc/NMcpVQ8H/Screenshot-2026-03-10-144459.png" width=100>
+        <br/>
+        Live grid view
+      </p>
+    </td>
+    <td>
+      <p align="center">
+        <img src = "https://i.postimg.cc/Gh7g2wR6/Screenshot-2026-03-10-144347.png" width=100>
+        <br/>
+        Site Guide
+      </p>
+    </td>
+  </tr>
+</table>
 
 ## Setup
 
