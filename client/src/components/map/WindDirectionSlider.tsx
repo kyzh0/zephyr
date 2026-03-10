@@ -39,7 +39,7 @@ export function WindDirectionSlider({
         />
 
         {/* Slider + label */}
-        <div className="flex flex-col flex-grow gap-2 min-w-48 sm:min-w-64">
+        <div className="flex flex-col grow gap-2 min-w-48 sm:min-w-64">
           <div className="text-center text-base">
             {label}{' '}
             {windBearing && (
