@@ -186,7 +186,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
       <div
         className={cn(
           'flex items-center bg-background border rounded-md shadow-sm transition-all duration-200 h-9',
-          isExpanded ? 'w-[200px] sm:w-[250px]' : 'w-9',
+          isExpanded ? 'w-50 sm:w-62.5' : 'w-9',
           disabled ? 'opacity-50 pointer-events-none' : ''
         )}
       >

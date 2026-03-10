@@ -38,7 +38,7 @@ export function ElevationSlider({
       </PopoverTrigger>
 
       <PopoverContent className="p-0" align="end">
-        <div className="flex flex-col gap-4 bg-background border rounded-md p-3 shadow-sm min-w-[250px]">
+        <div className="flex flex-col gap-4 bg-background border rounded-md p-3 shadow-sm min-w-62.5">
           <div className="text-xs text-muted-foreground">
             {elevationFilter > 0
               ? `Showing stations above ${elevationFilter}m`
