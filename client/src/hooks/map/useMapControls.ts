@@ -30,6 +30,7 @@ export interface UseMapControlsParams {
   setSiteVisibility: (visible: boolean) => void;
   setStationVisibility: (visible: boolean) => void;
   setStationMarkersInteractive: (interactive: boolean) => void;
+  setWindFilter: (bearing: number | null) => void;
   refreshWebcams: () => Promise<void>;
   refreshSoundings: () => Promise<void>;
   renderHistoricalData: ((time: Date) => Promise<void>) | undefined;
@@ -48,6 +49,7 @@ export function useMapControls({
   setSiteVisibility,
   setStationVisibility,
   setStationMarkersInteractive,
+  setWindFilter,
   refreshWebcams,
   refreshSoundings,
   renderHistoricalData,
@@ -63,6 +65,7 @@ export function useMapControls({
   const [minimizeRecents, setMinimizeRecents] = useState(() =>
     getStoredValue('minimizeRecents', true)
   );
+  const [windBearing, setWindBearing] = useState<number | null>(null);
 
   const historyFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -159,14 +162,26 @@ export function useMapControls({
     setStoredValue('minimizeRecents', newValue);
   }, [minimizeRecents]);
 
+  const onWindBearingChange = useCallback(
+    (bearing: number | null) => {
+      setWindBearing(bearing);
+      setWindFilter(bearing);
+    },
+    [setWindFilter]
+  );
+
   const onToggleViewMode = useCallback(
     (mode: 'stations' | 'sites') => {
       setViewMode(mode);
       setStoredValue('viewMode', mode);
       setSiteVisibility(mode === 'sites');
       setStationVisibility(mode === 'stations');
+      if (mode !== 'sites') {
+        setWindBearing(null);
+        setWindFilter(null);
+      }
     },
-    [setSiteVisibility, setStationVisibility]
+    [setSiteVisibility, setStationVisibility, setWindFilter]
   );
 
   return {
@@ -178,6 +193,7 @@ export function useMapControls({
     isHistoricData,
     // flyingMode forces recents to be minimised; respects user toggle otherwise
     minimizeRecents: flyingMode ? true : minimizeRecents,
+    windBearing,
     onWebcamClick,
     onSoundingClick,
     onLayerToggle,
@@ -186,6 +202,7 @@ export function useMapControls({
     onHistoryChange,
     onElevationChange: setElevationFilter,
     onRecentsToggle,
-    onToggleViewMode
+    onToggleViewMode,
+    onWindBearingChange
   };
 }

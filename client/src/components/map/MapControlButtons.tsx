@@ -19,6 +19,7 @@ import { DonateDialog } from './DonateDialog';
 import { ContactDialog } from './ContactDialog';
 import { HistorySlider } from './HistorySlider';
 import { ElevationSlider } from './ElevationSlider';
+import { WindDirectionSlider } from './WindDirectionSlider';
 import { SearchBar } from './SearchBar';
 import type { MapControlsState } from './map.types';
 import { Toggle } from '@/components/ui/toggle';
@@ -51,7 +52,9 @@ export function MapControlButtons({
   minimizeRecents,
   onRecentsToggle,
   viewMode,
-  onToggleViewMode
+  onToggleViewMode,
+  windBearing,
+  onWindBearingChange
 }: MapControlsState) {
   const showWebcams = overlay === 'webcams';
   const showSoundings = overlay === 'soundings';
@@ -496,6 +499,11 @@ export function MapControlButtons({
           onHistoryChange={onHistoryChange}
           disabled={viewMode === 'sites'}
         />
+      )}
+
+      {/* Wind Direction Slider - shown in Sites mode */}
+      {viewMode === 'sites' && (
+        <WindDirectionSlider windBearing={windBearing} onWindBearingChange={onWindBearingChange} />
       )}
 
       {/* Bottom left - Recent Stations (hidden in history mode) */}

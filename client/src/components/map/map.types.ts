@@ -43,6 +43,7 @@ export interface MapControlsState {
   historyOffset: number;
   isHistoricData: boolean;
   minimizeRecents: boolean;
+  windBearing: number | null;
   // Handlers
   onWebcamClick: () => void;
   onSoundingClick: () => void;
@@ -53,4 +54,5 @@ export interface MapControlsState {
   onElevationChange: (value: number) => void;
   onRecentsToggle: () => void;
   onToggleViewMode: (value: 'stations' | 'sites') => void;
+  onWindBearingChange: (bearing: number | null) => void;
 }

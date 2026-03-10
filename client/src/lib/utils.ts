@@ -336,6 +336,19 @@ export const parseValidBearings = (
   return sectors;
 };
 
+/**
+ * Check if a wind bearing falls within any of a site's valid bearing sectors.
+ * Returns true when no validBearings are defined (site has no restriction).
+ */
+export const isWindBearingInRange = (
+  bearing: number,
+  validBearings: string | undefined
+): boolean => {
+  const sectors = parseValidBearings(validBearings);
+  if (sectors.length === 0) return true;
+  return sectors.some((s) => bearing >= s.start && bearing <= s.end);
+};
+
 export const lookupElevation = async (lat: number, lon: number): Promise<number> => {
   const response = await fetch(
     `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`,

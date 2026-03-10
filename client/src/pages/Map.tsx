@@ -85,7 +85,7 @@ export default function Map() {
   });
 
   // Initialize site markers
-  const { setVisibility: setSiteVisibility } = useSiteMarkers({
+  const { setVisibility: setSiteVisibility, setWindFilter } = useSiteMarkers({
     map,
     isMapLoaded: isLoaded,
     isVisible: false
@@ -104,6 +104,7 @@ export default function Map() {
     setSiteVisibility,
     setStationVisibility,
     setStationMarkersInteractive,
+    setWindFilter,
     refreshWebcams,
     refreshSoundings,
     renderHistoricalData,
