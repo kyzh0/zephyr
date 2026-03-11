@@ -168,7 +168,7 @@ export default function Site() {
   // Mobile: Full-screen layout
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col z-100">
         {landing && (
           <SEO title={landing.name} description={landingDescription} path={`/landings/${id}`} />
         )}

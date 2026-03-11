@@ -2,7 +2,7 @@ import { createBrowserRouter, Outlet } from 'react-router-dom';
 import { usePageTracking } from './hooks/usePageTracking';
 
 // Import the route components we've created
-import MapWrapper from './pages/MapWrapper';
+import Map from './pages/Map';
 import Station from './pages/Station';
 import Webcam from './pages/Webcam';
 import Sounding from './pages/Sounding';
@@ -35,14 +35,8 @@ export const router = createBrowserRouter([
     children: [
       {
         path: '',
-        element: <MapWrapper />,
+        element: <Map />,
         children: [
-          {
-            // Index route renders Map on desktop (handled by MapWrapper)
-            // On mobile, this will be empty so we need Map here
-            index: true,
-            element: null
-          },
           {
             path: 'stations/:id',
             element: <Station />
