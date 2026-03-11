@@ -34,7 +34,7 @@ export const StationMarker = ({
   isOffline,
   unit
 }: StationMarkerProps): ReactNode => {
-  const isBearingValid = bearing ? isWindBearingInRange(bearing, validBearings) : false;
+  const isBearingValid = isWindBearingInRange(bearing, validBearings);
   const coreColor = getWindColor(speed ?? 0);
   const gustColor = getWindColor(gust ?? speed ?? 0);
 

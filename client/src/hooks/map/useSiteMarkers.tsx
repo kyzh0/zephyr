@@ -116,7 +116,7 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
   }, []);
 
   // Filter markers by wind bearing; null clears the filter
-  const setWindFilter = useCallback((bearing: number | null) => {
+  const setWindDirectionFilter = useCallback((bearing: number | null) => {
     for (const item of markersRef.current) {
       const validBearings = item.marker.dataset.validBearings;
       const matches = bearing === null || isWindBearingInRange(bearing, validBearings);
@@ -140,6 +140,6 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
   return {
     markers: markersRef,
     setVisibility,
-    setWindFilter
+    setWindDirectionFilter
   };
 }

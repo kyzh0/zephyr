@@ -341,9 +341,13 @@ export const parseValidBearings = (
  * Returns true when no validBearings are defined (site has no restriction).
  */
 export const isWindBearingInRange = (
-  bearing: number,
+  bearing: number | undefined | null,
   validBearings: string | undefined
 ): boolean => {
+  if (validBearings === undefined || bearing == null) {
+    return false;
+  }
+
   const sectors = parseValidBearings(validBearings);
   if (sectors.length === 0) return true;
   return sectors.some((s) => bearing >= s.start && bearing <= s.end);

@@ -85,11 +85,12 @@ export default function Map() {
   });
 
   // Initialize site markers
-  const { setVisibility: setSiteVisibility, setWindFilter } = useSiteMarkers({
-    map,
-    isMapLoaded: isLoaded,
-    isVisible: false
-  });
+  const { setVisibility: setSiteVisibility, setWindDirectionFilter: setSiteDirectionFilter } =
+    useSiteMarkers({
+      map,
+      isMapLoaded: isLoaded,
+      isVisible: false
+    });
 
   // All UI control state and handlers
   const controls = useMapControls({
@@ -104,7 +105,7 @@ export default function Map() {
     setSiteVisibility,
     setStationVisibility,
     setStationMarkersInteractive,
-    setWindFilter,
+    setSiteDirectionFilter,
     refreshWebcams,
     refreshSoundings,
     renderHistoricalData,
@@ -144,9 +145,9 @@ export default function Map() {
     const markers = document.querySelectorAll('div.marker');
     markers.forEach((m) => {
       const elevation = Number(m.getAttribute('elevation'));
-      m.classList.toggle('hidden', elevation < controls.elevationFilter);
+      m.classList.toggle('hidden', elevation < controls.stationElevationFilter);
     });
-  }, [controls.elevationFilter]);
+  }, [controls.stationElevationFilter]);
 
   return (
     <div className="absolute top-0 left-0 h-dvh w-screen flex flex-col">

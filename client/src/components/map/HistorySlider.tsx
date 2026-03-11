@@ -86,7 +86,7 @@ export function HistorySlider({
                 <ChevronLeft className="h-4 w-4" />
               </Button>
 
-              <div className="text-center min-w-[140px]">
+              <div className="text-center min-w-35">
                 <p className="text-sm font-medium">
                   {formatInTimeZone(snapshotTime, 'Pacific/Auckland', 'EEE dd MMM HH:mm')}
                 </p>

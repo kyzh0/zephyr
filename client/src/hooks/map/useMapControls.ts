@@ -30,7 +30,7 @@ export interface UseMapControlsParams {
   setSiteVisibility: (visible: boolean) => void;
   setStationVisibility: (visible: boolean) => void;
   setStationMarkersInteractive: (interactive: boolean) => void;
-  setWindFilter: (bearing: number | null) => void;
+  setSiteDirectionFilter: (bearing: number | null) => void;
   refreshWebcams: () => Promise<void>;
   refreshSoundings: () => Promise<void>;
   renderHistoricalData: ((time: Date) => Promise<void>) | undefined;
@@ -49,7 +49,7 @@ export function useMapControls({
   setSiteVisibility,
   setStationVisibility,
   setStationMarkersInteractive,
-  setWindFilter,
+  setSiteDirectionFilter,
   refreshWebcams,
   refreshSoundings,
   renderHistoricalData,
@@ -61,11 +61,11 @@ export function useMapControls({
   );
   const [unit, setUnit] = useState<WindUnit>(() => getStoredValue<WindUnit>('unit', 'kmh'));
   const [isSatellite, setIsSatellite] = useState(false);
-  const [elevationFilter, setElevationFilter] = useState(0);
+  const [stationElevationFilter, setStationElevationFilter] = useState(0);
   const [minimizeRecents, setMinimizeRecents] = useState(() =>
     getStoredValue('minimizeRecents', true)
   );
-  const [windBearing, setWindBearing] = useState<number | null>(null);
+  const [selectedSiteDirection, setSelectedSiteDirection] = useState<number | null>(null);
 
   const historyFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -162,12 +162,12 @@ export function useMapControls({
     setStoredValue('minimizeRecents', newValue);
   }, [minimizeRecents]);
 
-  const onWindBearingChange = useCallback(
+  const onSiteDirectionFilterChange = useCallback(
     (bearing: number | null) => {
-      setWindBearing(bearing);
-      setWindFilter(bearing);
+      setSelectedSiteDirection(bearing);
+      setSiteDirectionFilter(bearing);
     },
-    [setWindFilter]
+    [setSiteDirectionFilter]
   );
 
   const onToggleViewMode = useCallback(
@@ -176,33 +176,29 @@ export function useMapControls({
       setStoredValue('viewMode', mode);
       setSiteVisibility(mode === 'sites');
       setStationVisibility(mode === 'stations');
-      if (mode !== 'sites') {
-        setWindBearing(null);
-        setWindFilter(null);
-      }
     },
-    [setSiteVisibility, setStationVisibility, setWindFilter]
+    [setSiteVisibility, setStationVisibility]
   );
 
   return {
     overlay,
     viewMode,
     unit,
-    elevationFilter,
+    stationElevationFilter,
     historyOffset,
     isHistoricData,
     // flyingMode forces recents to be minimised; respects user toggle otherwise
     minimizeRecents: flyingMode ? true : minimizeRecents,
-    windBearing,
+    siteDirectionFilter: selectedSiteDirection,
     onWebcamClick,
     onSoundingClick,
     onLayerToggle,
     onLocateClick: triggerGeolocate,
     onUnitToggle,
     onHistoryChange,
-    onElevationChange: setElevationFilter,
+    onStationElevationFilterChange: setStationElevationFilter,
     onRecentsToggle,
     onToggleViewMode,
-    onWindBearingChange
+    onSiteDirectionFilterChange
   };
 }
