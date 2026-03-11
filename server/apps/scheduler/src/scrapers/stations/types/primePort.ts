@@ -54,17 +54,21 @@ export default async function scrapePrimePortData(stations: WithId<StationAttrs>
     const width = meta.width ?? 0;
     const height = meta.height ?? 0;
 
-    if (width !== 1034 || (height !== 900 && height !== 879)) {
+    let smallImg = false;
+    if (width === 1034 && (height === 900 || height === 879)) {
+    } else if (width === 864 && height === 650) {
+      smallImg = true;
+    } else {
       throw new Error(`Unexpected image dimensions: ${width}x${height}`);
     }
 
     // avg
     let croppedBuf = await sharp(imgBuff)
       .extract({
-        left: 850,
-        top: 240,
-        width: 175,
-        height: 60
+        left: smallImg ? 710 : 850,
+        top: smallImg ? 170 : 240,
+        width: smallImg ? 140 : 175,
+        height: smallImg ? 50 : 60
       })
       .toBuffer();
 
@@ -73,10 +77,10 @@ export default async function scrapePrimePortData(stations: WithId<StationAttrs>
     // gust
     croppedBuf = await sharp(imgBuff)
       .extract({
-        left: 850,
-        top: 50,
-        width: 175,
-        height: 60
+        left: smallImg ? 710 : 850,
+        top: smallImg ? 35 : 50,
+        width: smallImg ? 140 : 175,
+        height: smallImg ? 50 : 60
       })
       .toBuffer();
 
@@ -117,10 +121,10 @@ export default async function scrapePrimePortData(stations: WithId<StationAttrs>
     // direction
     croppedBuf = await sharp(imgBuff)
       .extract({
-        left: 845,
-        top: 340,
-        width: 180,
-        height: 80
+        left: smallImg ? 710 : 845,
+        top: smallImg ? 230 : 340,
+        width: smallImg ? 140 : 180,
+        height: smallImg ? 80 : 80
       })
       .toBuffer();
 
