@@ -28,6 +28,7 @@ export interface UseMapControlsParams {
   setWebcamVisibility: (visible: boolean) => void;
   setSoundingVisibility: (visible: boolean) => void;
   setSiteVisibility: (visible: boolean) => void;
+  setLandingVisibility: (visible: boolean) => void;
   setStationVisibility: (visible: boolean) => void;
   setStationMarkersInteractive: (interactive: boolean) => void;
   setSiteDirectionFilter: (bearing: number | null) => void;
@@ -47,6 +48,7 @@ export function useMapControls({
   setWebcamVisibility,
   setSoundingVisibility,
   setSiteVisibility,
+  setLandingVisibility,
   setStationVisibility,
   setStationMarkersInteractive,
   setSiteDirectionFilter,
@@ -175,9 +177,10 @@ export function useMapControls({
       setViewMode(mode);
       setStoredValue('viewMode', mode);
       setSiteVisibility(mode === 'sites');
+      setLandingVisibility(mode === 'sites');
       setStationVisibility(mode === 'stations');
     },
-    [setSiteVisibility, setStationVisibility]
+    [setSiteVisibility, setLandingVisibility, setStationVisibility]
   );
 
   return {
@@ -199,6 +202,7 @@ export function useMapControls({
     onStationElevationFilterChange: setStationElevationFilter,
     onRecentsToggle,
     onToggleViewMode,
-    onSiteDirectionFilterChange
+    onSiteDirectionFilterChange,
+    onLandingVisibilityChange: setLandingVisibility
   };
 }

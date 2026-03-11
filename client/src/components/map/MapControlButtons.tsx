@@ -53,7 +53,8 @@ export function MapControlButtons({
   viewMode,
   onToggleViewMode,
   siteDirectionFilter,
-  onSiteDirectionFilterChange
+  onSiteDirectionFilterChange,
+  onLandingVisibilityChange
 }: MapControlsState) {
   const showWebcams = overlay === 'webcams';
   const showSoundings = overlay === 'soundings';
@@ -484,6 +485,7 @@ export function MapControlButtons({
             onStationElevationFilterChange={onStationElevationFilterChange}
             siteDirectionFilter={siteDirectionFilter}
             onSiteDirectionFilterChange={onSiteDirectionFilterChange}
+            onLandingVisibilityChange={onLandingVisibilityChange}
             viewMode={viewMode}
           />
         )}

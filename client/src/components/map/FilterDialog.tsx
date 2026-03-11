@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Filter, Mountain } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ interface FilterDialogProps {
   onStationElevationFilterChange: (value: number) => void;
   siteDirectionFilter: number | null;
   onSiteDirectionFilterChange: (bearing: number | null) => void;
+  onLandingVisibilityChange: (visible: boolean) => void;
   viewMode?: 'stations' | 'sites';
 }
 
@@ -22,27 +23,13 @@ export function FilterDialog({
   onStationElevationFilterChange,
   siteDirectionFilter,
   onSiteDirectionFilterChange,
+  onLandingVisibilityChange,
   viewMode
 }: FilterDialogProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const isStationsView = viewMode === 'stations';
   const isSitesView = viewMode === 'sites';
-
-  const handleElevationChange = useCallback(
-    (value: number[]) => {
-      onStationElevationFilterChange(value[0]);
-    },
-    [onStationElevationFilterChange]
-  );
-
-  const handleSiteDirectionChange = useCallback(
-    (value: number[]) => {
-      const v = value[0];
-      onSiteDirectionFilterChange(v === 0 ? null : v);
-    },
-    [onSiteDirectionFilterChange]
-  );
 
   const isStationElevationActive = stationElevationFilter > 0;
   const isSiteDirectionActive = siteDirectionFilter !== null;
@@ -67,7 +54,10 @@ export function FilterDialog({
             {/* Elevation filter */}
             <div className={`flex flex-col gap-2 ${isStationsView ? '' : 'hidden'}`}>
               <div className="flex items-center gap-2">
-                <div className="flex flex-col items-center shrink-0 w-9">
+                <div
+                  className="flex flex-col items-center shrink-0 w-9 cursor-pointer"
+                  onClick={() => onStationElevationFilterChange(0)}
+                >
                   <Mountain
                     className={`h-4 w-4 ${isStationElevationActive ? 'stroke-blue-500' : 'opacity-70'}`}
                   />
@@ -77,7 +67,7 @@ export function FilterDialog({
                 </div>
                 <Slider
                   value={[stationElevationFilter]}
-                  onValueChange={handleElevationChange}
+                  onValueChange={(v) => onStationElevationFilterChange(v[0])}
                   min={0}
                   max={1500}
                   step={250}
@@ -89,7 +79,10 @@ export function FilterDialog({
             {/* Wind direction filter */}
             <div className={`flex flex-col gap-2 ${isSitesView ? '' : 'hidden'}`}>
               <div className="flex items-center gap-2">
-                <div className="flex flex-col items-center shrink-0 w-9">
+                <div
+                  className="flex flex-col items-center shrink-0 w-9 cursor-pointer"
+                  onClick={() => onSiteDirectionFilterChange(null)}
+                >
                   <WindCompass
                     bearing={siteDirectionFilter}
                     validBearings={undefined}
@@ -115,7 +108,10 @@ export function FilterDialog({
                   </div>
                   <Slider
                     value={[siteDirectionFilter ?? 0]}
-                    onValueChange={handleSiteDirectionChange}
+                    onValueChange={(v) => {
+                      onLandingVisibilityChange(v[0] === 0);
+                      onSiteDirectionFilterChange(v[0] === 0 ? null : v[0]);
+                    }}
                     min={0}
                     max={360}
                     step={BEARING_STEP}

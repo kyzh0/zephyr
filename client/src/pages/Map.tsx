@@ -78,7 +78,7 @@ export default function Map() {
   });
 
   // Initialize landing markers below sites
-  useLandingMarkers({
+  const { setVisibility: setLandingVisibility } = useLandingMarkers({
     map,
     isMapLoaded: isLoaded,
     isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'sites'
@@ -103,6 +103,7 @@ export default function Map() {
     setWebcamVisibility,
     setSoundingVisibility,
     setSiteVisibility,
+    setLandingVisibility,
     setStationVisibility,
     setStationMarkersInteractive,
     setSiteDirectionFilter,

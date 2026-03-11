@@ -55,4 +55,5 @@ export interface MapControlsState {
   onRecentsToggle: () => void;
   onToggleViewMode: (value: 'stations' | 'sites') => void;
   onSiteDirectionFilterChange: (bearing: number | null) => void;
+  onLandingVisibilityChange: (visible: boolean) => void;
 }
