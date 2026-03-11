@@ -96,5 +96,5 @@ export function CoordinatesPicker({ value, onChange }: CoordinatesPickerProps) {
     }
   }, [value]);
 
-  return <div ref={mapContainer} className="w-full h-[400px] rounded-md overflow-hidden border" />;
+  return <div ref={mapContainer} className="w-full h-100 rounded-md overflow-hidden border" />;
 }

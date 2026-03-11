@@ -5,6 +5,7 @@ import { SiteMarker } from '@/components/map/SiteMarker';
 import { getSiteGeoJson } from '@/components/map';
 import { useNavigate } from 'react-router-dom';
 import { useSites } from '../useSites';
+import { isWindBearingInRange } from '@/lib/utils';
 
 interface UseSiteMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -48,6 +49,9 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
       el.innerHTML = renderToStaticMarkup(
         <SiteMarker validBearings={validBearings} isOfficial={isOfficial} />
       );
+
+      // Store validBearings for wind filter comparisons
+      if (validBearings) el.dataset.validBearings = validBearings;
 
       // Event handlers
       const handleClick = () => {
@@ -111,6 +115,16 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
     }
   }, []);
 
+  // Filter markers by wind bearing; null clears the filter
+  const setWindDirectionFilter = useCallback((bearing: number | null) => {
+    for (const item of markersRef.current) {
+      const validBearings = item.marker.dataset.validBearings;
+      const matches = bearing === null || isWindBearingInRange(bearing, validBearings);
+      // eslint-disable-next-line react-hooks/immutability
+      item.marker.style.opacity = matches ? '1' : '0.1';
+    }
+  }, []);
+
   // Initialize when map is loaded
   useEffect(() => {
     if (isMapLoaded) {
@@ -125,6 +139,7 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
 
   return {
     markers: markersRef,
-    setVisibility
+    setVisibility,
+    setWindDirectionFilter
   };
 }

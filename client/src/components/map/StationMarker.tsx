@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { convertWindSpeed } from './map.utils';
-import { parseValidBearings, type WindUnit } from '../station';
-import { getTextColor, getWindColor } from '@/lib/utils';
+import { type WindUnit } from '../station';
+import { getTextColor, getWindColor, isWindBearingInRange } from '@/lib/utils';
 
 const DEFAULT_STATION_MARKER_SIZE = 50; // default bounding box size in pixels
 
@@ -34,10 +34,7 @@ export const StationMarker = ({
   isOffline,
   unit
 }: StationMarkerProps): ReactNode => {
-  const parsedValidBearings = parseValidBearings(validBearings);
-  const isBearingValid =
-    bearing !== undefined &&
-    parsedValidBearings.some(([from, to]) => bearing >= from && bearing <= to);
+  const isBearingValid = isWindBearingInRange(bearing, validBearings);
   const coreColor = getWindColor(speed ?? 0);
   const gustColor = getWindColor(gust ?? speed ?? 0);
 

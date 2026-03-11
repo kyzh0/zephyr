@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import SEO from '@/components/SEO';
 import { useAppContext } from '@/context/AppContext';
 import { MapControlButtons, getStoredValue } from '@/components/map';
-import type { MapOverlay } from '@/components/map';
 
 import {
   useMapInstance,
@@ -17,13 +16,6 @@ import {
 } from '@/hooks/map';
 import { REFRESH_INTERVAL_MS } from '@/lib/utils';
 
-/** Compute the initial overlay state from localStorage (read once at module scope per render) */
-function getInitialOverlay(): MapOverlay {
-  if (getStoredValue('showWebcams', false)) return 'webcams';
-  if (getStoredValue('showSoundings', false)) return 'soundings';
-  return null;
-}
-
 export default function Map() {
   const { setRefreshedStations, setRefreshedWebcams, flyingMode } = useAppContext();
 
@@ -33,11 +25,6 @@ export default function Map() {
   // historyOffset lives here so marker hooks can read isHistoricData reactively
   const [historyOffset, setHistoryOffset] = useState(0);
   const isHistoricData = historyOffset < 0;
-
-  // Compute initial overlay once — passed to both marker hooks (for initial isVisible)
-  // and to useMapControls (to seed its overlay state)
-  // eslint-disable-next-line react-hooks/use-memo
-  const initialOverlay = useMemo(getInitialOverlay, []);
 
   // Initialize map
   const { map, isLoaded, zoom, triggerGeolocate } = useMapInstance({
@@ -49,46 +36,45 @@ export default function Map() {
     refresh: refreshStations,
     renderHistoricalData,
     renderCurrentData,
-    setInteractive: setStationMarkersInteractive,
-    setVisibility: setStationVisibility
+    setInteractive: setStationMarkersInteractive
   } = useStationMarkers({
     map,
     isMapLoaded: isLoaded,
     isHistoricData,
     unit: getStoredValue('unit', 'kmh'), // initial unit only; hook re-renders on unit change via controls
-    isVisible: true,
+    isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'stations',
     mapZoom: zoom,
     onRefresh: setRefreshedStations
   });
 
   // Initialize webcam markers
-  const { refresh: refreshWebcams, setVisibility: setWebcamVisibility } = useWebcamMarkers({
+  const { refresh: refreshWebcams } = useWebcamMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: initialOverlay === 'webcams',
+    isVisible: getStoredValue('showWebcams', false),
     onRefresh: setRefreshedWebcams
   });
 
   // Initialize sounding markers
-  const { refresh: refreshSoundings, setVisibility: setSoundingVisibility } = useSoundingMarkers({
+  const { refresh: refreshSoundings } = useSoundingMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: initialOverlay === 'soundings',
+    isVisible: getStoredValue('showSoundings', false),
     isHistoricData
   });
 
   // Initialize landing markers below sites
-  useLandingMarkers({
+  const { setTransparent: setLandingTransparent } = useLandingMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: false
+    isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'sites'
   });
 
   // Initialize site markers
-  const { setVisibility: setSiteVisibility } = useSiteMarkers({
+  const { setWindDirectionFilter: setSiteDirectionFilter } = useSiteMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: false
+    isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'sites'
   });
 
   // All UI control state and handlers
@@ -98,12 +84,9 @@ export default function Map() {
     flyingMode,
     historyOffset,
     setHistoryOffset,
-    initialOverlay,
-    setWebcamVisibility,
-    setSoundingVisibility,
-    setSiteVisibility,
-    setStationVisibility,
+    setLandingTransparent,
     setStationMarkersInteractive,
+    setSiteDirectionFilter,
     refreshWebcams,
     refreshSoundings,
     renderHistoricalData,
@@ -143,9 +126,9 @@ export default function Map() {
     const markers = document.querySelectorAll('div.marker');
     markers.forEach((m) => {
       const elevation = Number(m.getAttribute('elevation'));
-      m.classList.toggle('hidden', elevation < controls.elevationFilter);
+      m.classList.toggle('hidden', elevation < controls.stationElevationFilter);
     });
-  }, [controls.elevationFilter]);
+  }, [controls.stationElevationFilter]);
 
   return (
     <div className="absolute top-0 left-0 h-dvh w-screen flex flex-col">

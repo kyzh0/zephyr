@@ -18,7 +18,7 @@ import { HelpDialog, WELCOME_STORAGE_KEY } from './HelpDialog';
 import { DonateDialog } from './DonateDialog';
 import { ContactDialog } from './ContactDialog';
 import { HistorySlider } from './HistorySlider';
-import { ElevationSlider } from './ElevationSlider';
+import { FilterDialog } from './FilterDialog';
 import { SearchBar } from './SearchBar';
 import type { MapControlsState } from './map.types';
 import { Toggle } from '@/components/ui/toggle';
@@ -46,12 +46,14 @@ export function MapControlButtons({
   historyOffset,
   onHistoryChange,
   isHistoricData,
-  elevationFilter,
-  onElevationChange,
+  stationElevationFilter,
+  onStationElevationFilterChange,
   minimizeRecents,
   onRecentsToggle,
   viewMode,
-  onToggleViewMode
+  onToggleViewMode,
+  siteDirectionFilter,
+  onSiteDirectionFilterChange
 }: MapControlsState) {
   const showWebcams = overlay === 'webcams';
   const showSoundings = overlay === 'soundings';
@@ -477,9 +479,12 @@ export function MapControlButtons({
           <TooltipContent side="left">Switch Map Layer</TooltipContent>
         </Tooltip>
         {!isFlyingMode && (
-          <ElevationSlider
-            elevationFilter={elevationFilter}
-            onElevationChange={onElevationChange}
+          <FilterDialog
+            stationElevationFilter={stationElevationFilter}
+            onStationElevationFilterChange={onStationElevationFilterChange}
+            siteDirectionFilter={siteDirectionFilter}
+            onSiteDirectionFilterChange={onSiteDirectionFilterChange}
+            viewMode={viewMode}
           />
         )}
       </div>

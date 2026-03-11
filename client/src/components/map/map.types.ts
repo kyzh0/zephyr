@@ -39,10 +39,11 @@ export interface MapControlsState {
   overlay: MapOverlay;
   viewMode: 'stations' | 'sites';
   unit: WindUnit;
-  elevationFilter: number;
+  stationElevationFilter: number;
   historyOffset: number;
   isHistoricData: boolean;
   minimizeRecents: boolean;
+  siteDirectionFilter: number | null;
   // Handlers
   onWebcamClick: () => void;
   onSoundingClick: () => void;
@@ -50,7 +51,8 @@ export interface MapControlsState {
   onLocateClick: () => Promise<void>;
   onUnitToggle: () => void;
   onHistoryChange: (offset: number) => Promise<void>;
-  onElevationChange: (value: number) => void;
+  onStationElevationFilterChange: (value: number) => void;
   onRecentsToggle: () => void;
   onToggleViewMode: (value: 'stations' | 'sites') => void;
+  onSiteDirectionFilterChange: (bearing: number | null) => void;
 }
