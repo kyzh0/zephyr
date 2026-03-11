@@ -56,7 +56,7 @@ export default function Map() {
     isMapLoaded: isLoaded,
     isHistoricData,
     unit: getStoredValue('unit', 'kmh'), // initial unit only; hook re-renders on unit change via controls
-    isVisible: true,
+    isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'stations',
     mapZoom: zoom,
     onRefresh: setRefreshedStations
   });
@@ -81,7 +81,7 @@ export default function Map() {
   useLandingMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: false
+    isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'sites'
   });
 
   // Initialize site markers
@@ -89,7 +89,7 @@ export default function Map() {
     useSiteMarkers({
       map,
       isMapLoaded: isLoaded,
-      isVisible: false
+      isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'sites'
     });
 
   // All UI control state and handlers
