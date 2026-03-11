@@ -259,7 +259,7 @@ export default function Site() {
   // Mobile: Full-screen layout
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col z-100">
         {site && <SEO title={site.name} description={siteDescription} path={`/sites/${id}`} />}
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background p-4 pb-0">
