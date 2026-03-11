@@ -69,7 +69,7 @@ export function FilterDialog({
                   min={0}
                   max={1500}
                   step={250}
-                  className="flex-1"
+                  className="flex-1 ml-1"
                 />
               </div>
             </div>
@@ -96,7 +96,7 @@ export function FilterDialog({
                     )}
                   </span>
                 </div>
-                <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-col gap-2 w-full ml-3">
                   <div className="flex justify-between text-[8px]">
                     <span>&nbsp;&nbsp;&nbsp;</span>
                     <span>E</span>
