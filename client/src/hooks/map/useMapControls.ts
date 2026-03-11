@@ -27,9 +27,7 @@ export interface UseMapControlsParams {
   // Marker operations
   setWebcamVisibility: (visible: boolean) => void;
   setSoundingVisibility: (visible: boolean) => void;
-  setSiteVisibility: (visible: boolean) => void;
-  setLandingVisibility: (visible: boolean) => void;
-  setStationVisibility: (visible: boolean) => void;
+  setLandingTransparent: (visible: boolean) => void;
   setStationMarkersInteractive: (interactive: boolean) => void;
   setSiteDirectionFilter: (bearing: number | null) => void;
   refreshWebcams: () => Promise<void>;
@@ -47,9 +45,7 @@ export function useMapControls({
   initialOverlay,
   setWebcamVisibility,
   setSoundingVisibility,
-  setSiteVisibility,
-  setLandingVisibility,
-  setStationVisibility,
+  setLandingTransparent,
   setStationMarkersInteractive,
   setSiteDirectionFilter,
   refreshWebcams,
@@ -168,20 +164,16 @@ export function useMapControls({
     (bearing: number | null) => {
       setSelectedSiteDirection(bearing);
       setSiteDirectionFilter(bearing);
+      setLandingTransparent(!!bearing);
     },
-    [setSiteDirectionFilter]
+    [setSiteDirectionFilter, setLandingTransparent]
   );
 
-  const onToggleViewMode = useCallback(
-    (mode: 'stations' | 'sites') => {
-      setViewMode(mode);
-      setStoredValue('viewMode', mode);
-      setSiteVisibility(mode === 'sites');
-      setLandingVisibility(mode === 'sites');
-      setStationVisibility(mode === 'stations');
-    },
-    [setSiteVisibility, setLandingVisibility, setStationVisibility]
-  );
+  const onToggleViewMode = useCallback((mode: 'stations' | 'sites') => {
+    // Visibility is controlled by localstorage
+    setViewMode(mode);
+    setStoredValue('viewMode', mode);
+  }, []);
 
   return {
     overlay,
@@ -202,7 +194,6 @@ export function useMapControls({
     onStationElevationFilterChange: setStationElevationFilter,
     onRecentsToggle,
     onToggleViewMode,
-    onSiteDirectionFilterChange,
-    onLandingVisibilityChange: setLandingVisibility
+    onSiteDirectionFilterChange
   };
 }

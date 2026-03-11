@@ -49,8 +49,7 @@ export default function Map() {
     refresh: refreshStations,
     renderHistoricalData,
     renderCurrentData,
-    setInteractive: setStationMarkersInteractive,
-    setVisibility: setStationVisibility
+    setInteractive: setStationMarkersInteractive
   } = useStationMarkers({
     map,
     isMapLoaded: isLoaded,
@@ -78,19 +77,18 @@ export default function Map() {
   });
 
   // Initialize landing markers below sites
-  const { setVisibility: setLandingVisibility } = useLandingMarkers({
+  const { setTransparent: setLandingTransparent } = useLandingMarkers({
     map,
     isMapLoaded: isLoaded,
     isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'sites'
   });
 
   // Initialize site markers
-  const { setVisibility: setSiteVisibility, setWindDirectionFilter: setSiteDirectionFilter } =
-    useSiteMarkers({
-      map,
-      isMapLoaded: isLoaded,
-      isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'sites'
-    });
+  const { setWindDirectionFilter: setSiteDirectionFilter } = useSiteMarkers({
+    map,
+    isMapLoaded: isLoaded,
+    isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'sites'
+  });
 
   // All UI control state and handlers
   const controls = useMapControls({
@@ -102,9 +100,7 @@ export default function Map() {
     initialOverlay,
     setWebcamVisibility,
     setSoundingVisibility,
-    setSiteVisibility,
-    setLandingVisibility,
-    setStationVisibility,
+    setLandingTransparent,
     setStationMarkersInteractive,
     setSiteDirectionFilter,
     refreshWebcams,

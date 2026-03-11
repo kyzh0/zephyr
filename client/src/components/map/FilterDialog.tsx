@@ -12,7 +12,6 @@ interface FilterDialogProps {
   onStationElevationFilterChange: (value: number) => void;
   siteDirectionFilter: number | null;
   onSiteDirectionFilterChange: (bearing: number | null) => void;
-  onLandingVisibilityChange: (visible: boolean) => void;
   viewMode?: 'stations' | 'sites';
 }
 
@@ -23,7 +22,6 @@ export function FilterDialog({
   onStationElevationFilterChange,
   siteDirectionFilter,
   onSiteDirectionFilterChange,
-  onLandingVisibilityChange,
   viewMode
 }: FilterDialogProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -108,10 +106,7 @@ export function FilterDialog({
                   </div>
                   <Slider
                     value={[siteDirectionFilter ?? 0]}
-                    onValueChange={(v) => {
-                      onLandingVisibilityChange(v[0] === 0);
-                      onSiteDirectionFilterChange(v[0] === 0 ? null : v[0]);
-                    }}
+                    onValueChange={(v) => onSiteDirectionFilterChange(v[0] === 0 ? null : v[0])}
                     min={0}
                     max={360}
                     step={BEARING_STEP}
