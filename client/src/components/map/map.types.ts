@@ -34,6 +34,15 @@ export type WindUnit = 'kmh' | 'kt';
 
 export type MapOverlay = 'webcams' | 'soundings' | null;
 
+export type SportType = 'paragliding' | 'hanggliding' | 'kitesurfing' | 'kitefoiling';
+
+export const SPORT_LABELS: Record<SportType, string> = {
+  paragliding: 'Paragliding',
+  hanggliding: 'Hang Gliding',
+  kitesurfing: 'Kitesurfing',
+  kitefoiling: 'Kite Foiling'
+};
+
 export interface MapControlsState {
   // State
   overlay: MapOverlay;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Grid3X3, Mountain } from 'lucide-react';
+import { Camera, Grid3X3, Mountain, Wind } from 'lucide-react';
 
 import {
   Dialog,
@@ -74,14 +74,21 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
         <div className="flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm">
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
             <div className="flex justify-center items-center shrink-0 marker gust-label-hidden">
-              <StationMarker speed={15} bearing={240} unit="kmh" size={40} />
+              <StationMarker speed={15} bearing={240} unit="kmh" size={40} sport="paragliding" />
             </div>
             <div className="flex items-center">Click a station for details</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
             <div className="flex justify-center items-center shrink-0 marker">
-              <StationMarker speed={15} gust={30} bearing={240} unit="kmh" size={40} />
+              <StationMarker
+                speed={15}
+                gust={30}
+                bearing={240}
+                unit="kmh"
+                size={40}
+                sport="paragliding"
+              />
             </div>
             <div className="flex items-center">
               Core colour indicates wind speed, tail colour wind gusts with label
@@ -97,10 +104,20 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
                 validBearings={'220-260'}
                 unit="kmh"
                 size={40}
+                sport="paragliding"
               />
             </div>
             <div className="flex items-center">
               Gold border indicates valid wind direction near flying sites
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center shrink-0">
+              <Wind className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div className="flex items-center">
+              Change sport in the menu to update wind indicator scheme
             </div>
           </div>
 

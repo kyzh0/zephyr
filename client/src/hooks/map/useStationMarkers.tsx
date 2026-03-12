@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { getWindDirectionFromBearing, handleError, REFRESH_INTERVAL_MS } from '@/lib/utils';
+import { useAppContext } from '@/context/AppContext';
 import {
   listStations,
   listStationsUpdatedSince,
@@ -9,7 +10,11 @@ import {
 import type { IHistoricalStationData } from '@/models/station-data.model';
 import { getStationGeoJson, sortStationFeatures, convertWindSpeed } from '@/components/map';
 import { StationMarker } from '@/components/map/StationMarker';
-import type { StationMarker as IStationMarker, WindUnit } from '@/components/map/map.types';
+import type {
+  StationMarker as IStationMarker,
+  SportType,
+  WindUnit
+} from '@/components/map/map.types';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
 import type { IStation } from '@/models/station.model';
@@ -88,6 +93,7 @@ function createMarkerElement(
   props: StationProperties,
   timestamp: number,
   unit: WindUnit,
+  sport: SportType,
   onNavigate: (dbId: string) => void,
   onHover: (popup: mapboxgl.Popup, show: boolean) => void,
   popup: mapboxgl.Popup
@@ -110,10 +116,9 @@ function createMarkerElement(
       validBearings={validBearings ?? undefined}
       isOffline={isOffline ?? undefined}
       unit={unit}
+      sport={sport}
     />
   );
-
-  // Event handlers
   const handleClick = () => {
     popup.remove();
     onNavigate(dbId);
@@ -151,7 +156,8 @@ function updateMarkerElement(
   marker: HTMLDivElement,
   props: StationProperties,
   timestamp: number,
-  unit: WindUnit
+  unit: WindUnit,
+  sport: SportType
 ): void {
   const { currentAverage, currentGust, currentBearing } = props;
 
@@ -175,6 +181,7 @@ function updateMarkerElement(
         validBearings={props.validBearings ?? undefined}
         isOffline={props.isOffline ?? undefined}
         unit={unit}
+        sport={sport}
       />
     );
   }
@@ -199,9 +206,11 @@ export function useStationMarkers({
     isVisibleRef.current = isVisible;
   }, [isVisible]);
   const navigate = useNavigate();
+  const { sport } = useAppContext();
   const markersRef = useRef<IStationMarker[]>([]);
   const lastRefreshRef = useRef(0);
   const unitRef = useRef<WindUnit>(unit);
+  const sportRef = useRef(sport);
   const refreshAbortController = useRef<AbortController | null>(null);
 
   const isRefreshingRef = useRef(false);
@@ -212,6 +221,10 @@ export function useStationMarkers({
   useEffect(() => {
     unitRef.current = unit;
   }, [unit]);
+
+  useEffect(() => {
+    sportRef.current = sport;
+  }, [sport]);
 
   // Toggle gust label visibility via CSS class when zoom crosses threshold
   useEffect(() => {
@@ -258,6 +271,7 @@ export function useStationMarkers({
         props,
         timestamp,
         unitRef.current,
+        sportRef.current,
         (dbId) => {
           popup.remove();
           void navigate(`/stations/${dbId}`);
@@ -279,7 +293,7 @@ export function useStationMarkers({
   // Update existing marker
   const updateStationMarker = useCallback(
     (item: IStationMarker, props: StationProperties, timestamp: number) => {
-      updateMarkerElement(item.marker, props, timestamp, unitRef.current);
+      updateMarkerElement(item.marker, props, timestamp, unitRef.current, sportRef.current);
       item.popup.setHTML(createPopupHtml(props, unitRef.current));
     },
     []
@@ -399,37 +413,46 @@ export function useStationMarkers({
     }
   }, [stations, onRefresh, updateStationMarker, withErrorHandling, isHistoricData]);
 
-  // Update all markers when unit changes
-  useEffect(() => {
+  // Re-render all markers from their stored dataset values
+  const refreshAllMarkerElements = useCallback((u: WindUnit, s: SportType) => {
     for (const item of markersRef.current) {
       const avg = item.marker.dataset.avg === '' ? null : Number(item.marker.dataset.avg);
       const gust = item.marker.dataset.gust === '' ? null : Number(item.marker.dataset.gust);
       const bearing =
         item.marker.dataset.bearing === '' ? null : Number(item.marker.dataset.bearing);
-      const name = item.marker.dataset.name ?? '';
-      const isOffline = item.marker.dataset.isOffline === 'true';
-      const validBearings = item.marker.dataset.validBearings ?? null;
-
-      // Regenerate popup with proper data
       const stationProps: StationProperties = {
         dbId: item.marker.id,
-        name,
+        name: item.marker.dataset.name ?? '',
         elevation: Number(item.marker.getAttribute('elevation')),
         currentAverage: avg,
         currentGust: gust,
         currentBearing: bearing,
-        validBearings,
-        isOffline
+        validBearings:
+          item.marker.dataset.validBearings !== ''
+            ? (item.marker.dataset.validBearings ?? null)
+            : null,
+        isOffline: item.marker.dataset.isOffline === 'true'
       };
       updateMarkerElement(
         item.marker,
         stationProps,
         Number(item.marker.dataset.timestamp ?? Date.now()),
-        unit
+        u,
+        s
       );
-      item.popup.setHTML(createPopupHtml(stationProps, unit));
+      item.popup.setHTML(createPopupHtml(stationProps, u));
     }
-  }, [unit]);
+  }, []);
+
+  // Update all markers when unit changes
+  useEffect(() => {
+    refreshAllMarkerElements(unit, sportRef.current);
+  }, [unit, refreshAllMarkerElements]);
+
+  // Update all markers when sport changes
+  useEffect(() => {
+    refreshAllMarkerElements(unitRef.current, sport);
+  }, [sport, refreshAllMarkerElements]);
 
   // Cache historical responses by timestamp to avoid refetching when user revisits a time
   const historicalCacheRef = useRef<
@@ -485,7 +508,13 @@ export function useStationMarkers({
           isOffline: false
         };
 
-        updateMarkerElement(item.marker, historicalProps, Date.now(), unitRef.current);
+        updateMarkerElement(
+          item.marker,
+          historicalProps,
+          Date.now(),
+          unitRef.current,
+          sportRef.current
+        );
       }
     },
     [withErrorHandling]
@@ -526,7 +555,7 @@ export function useStationMarkers({
         isOffline: station.isOffline ?? false
       };
 
-      updateMarkerElement(item.marker, props, Date.now(), unitRef.current);
+      updateMarkerElement(item.marker, props, Date.now(), unitRef.current, sportRef.current);
 
       // Update popup
       item.popup.setHTML(createPopupHtml(props, unitRef.current));

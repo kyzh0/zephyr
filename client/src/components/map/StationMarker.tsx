@@ -1,7 +1,8 @@
 import { type ReactNode } from 'react';
 import { convertWindSpeed } from './map.utils';
 import { type WindUnit } from '../station';
-import { getTextColor, getWindColor, isWindBearingInRange } from '@/lib/utils';
+import { getTextColor, getWindColorForSport, isWindBearingInRange } from '@/lib/utils';
+import type { SportType } from './map.types';
 
 const DEFAULT_STATION_MARKER_SIZE = 50; // default bounding box size in pixels
 
@@ -13,6 +14,7 @@ export interface StationMarkerProps {
   validBearings?: string;
   isOffline?: boolean;
   unit: WindUnit;
+  sport: SportType;
 }
 
 // ─── Core SVG builder ──────────────────────────────────────────────────────────
@@ -32,11 +34,12 @@ export const StationMarker = ({
   size = DEFAULT_STATION_MARKER_SIZE,
   validBearings,
   isOffline,
-  unit
+  unit,
+  sport
 }: StationMarkerProps): ReactNode => {
   const isBearingValid = isWindBearingInRange(bearing, validBearings);
-  const coreColor = getWindColor(speed ?? 0);
-  const gustColor = getWindColor(gust ?? speed ?? 0);
+  const coreColor = getWindColorForSport(speed ?? 0, sport);
+  const gustColor = getWindColorForSport(gust ?? speed ?? 0, sport);
 
   const cx = size / 2;
   const cy = size / 2;

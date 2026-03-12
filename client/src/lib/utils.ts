@@ -1,3 +1,4 @@
+import type { SportType } from '@/components/map';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -86,40 +87,35 @@ function interpolateColor(color1: string, color2: string, factor: number): strin
   return rgbToHex(r, g, b);
 }
 
-/**
- * Get wind color as hex value with smooth transitions between bands
- * Transitions smoothly between color bands based on wind speed (in km/h)
- */
-export const getWindColor = (avgWindKph: number | null): string => {
+interface SportProfile {
+  min: number;
+  perfectLow: number;
+  perfectHigh: number;
+  strong: number;
+  extreme: number;
+}
+
+const SPORT_PROFILES: Record<SportType, SportProfile> = {
+  paragliding: { min: 4, perfectLow: 14, perfectHigh: 24, strong: 30, extreme: 40 },
+  hanggliding: { min: 10, perfectLow: 20, perfectHigh: 30, strong: 37, extreme: 45 },
+  kitesurfing: { min: 20, perfectLow: 28, perfectHigh: 46, strong: 56, extreme: 70 },
+  kitefoiling: { min: 11, perfectLow: 22, perfectHigh: 28, strong: 51, extreme: 56 }
+};
+
+export const getWindColorForSport = (avgWindKph: number | null, sport: SportType): string => {
+  if (avgWindKph == null) return '#FFFFFF';
+
+  const p = SPORT_PROFILES[sport];
   const colors = [
     { speed: 0, hex: '#FFFFFF' },
-    { speed: 2, hex: '#FFFFFF' },
-    { speed: 4, hex: '#d1f9ff' },
-    { speed: 6, hex: '#d1fffb' },
-    { speed: 8, hex: '#b5fffe' },
-    { speed: 10, hex: '#a6ffec' },
-    { speed: 12, hex: '#86ffd7' },
-    { speed: 14, hex: '#91ffc4' },
-    { speed: 16, hex: '#95ffb5' },
-    { speed: 18, hex: '#abffa8' },
-    { speed: 20, hex: '#87ff82' },
-    { speed: 22, hex: '#9dff82' },
-    { speed: 24, hex: '#c3ff82' },
-    { speed: 26, hex: '#fff582' },
-    { speed: 28, hex: '#ffda82' },
-    { speed: 30, hex: '#ff9966' },
-    { speed: 40, hex: '#ff4d4d' },
-    { speed: 50, hex: '#ff365e' },
-    { speed: 60, hex: '#ff3683' },
-    { speed: 70, hex: '#ff36a8' },
-    { speed: 80, hex: '#ff36c6' },
-    { speed: 90, hex: '#ff36e1' },
-    { speed: 100, hex: '#f536ff' }
+    { speed: p.min, hex: '#d1f9ff' },
+    { speed: p.perfectLow, hex: '#91ffc4' },
+    { speed: p.perfectHigh, hex: '#c3ff82' },
+    { speed: p.strong, hex: '#ff9966' },
+    { speed: p.extreme, hex: '#ff4d4d' },
+    { speed: p.extreme * 1.5, hex: '#f536ff' }
   ];
 
-  if (avgWindKph == null) return colors[0].hex;
-
-  // Find the two colors to interpolate between
   for (let i = 0; i < colors.length - 1; i++) {
     if (avgWindKph >= colors[i].speed && avgWindKph <= colors[i + 1].speed) {
       const speedRange = colors[i + 1].speed - colors[i].speed;
@@ -128,7 +124,6 @@ export const getWindColor = (avgWindKph: number | null): string => {
     }
   }
 
-  // Return black if speed exceeds the highest threshold
   return colors[colors.length - 1].hex;
 };
 
