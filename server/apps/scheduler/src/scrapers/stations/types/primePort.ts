@@ -1,22 +1,12 @@
-import fs from 'node:fs/promises';
-import sharp from 'sharp';
-import { createWorker, type Worker as TesseractWorker } from 'tesseract.js';
+import { Anthropic } from '@anthropic-ai/sdk';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
-const REG_NUM = /[^0-9.]/g;
-
-async function ocr(
-  worker: TesseractWorker,
-  dir: string,
-  fileName: string,
-  buf: Buffer
-): Promise<string> {
-  const filePath = `${dir}/${fileName}`;
-  await fs.writeFile(filePath, buf);
-  const ret = await worker.recognize(filePath);
-  return ret.data.text;
+interface AnthropicJsonResponse {
+  maxGust10min: number | null;
+  windSpeed: number | null;
+  windDirection: number | null;
 }
 
 export default async function scrapePrimePortData(stations: WithId<StationAttrs>[]): Promise<void> {
@@ -31,110 +21,67 @@ export default async function scrapePrimePortData(stations: WithId<StationAttrs>
     let windBearing: number | null = null;
     const temperature: number | null = null;
 
-    // fetch img
-    const response = await httpClient.get<ArrayBuffer>(
+    // fetch img because claude caches
+    const imgResponse = await httpClient.get<ArrayBuffer>(
       'https://local.timaru.govt.nz/primeport/NorthMoleWind.jpg',
       { responseType: 'arraybuffer' }
     );
-    const imgBuff = Buffer.from(response.data);
+    const imgBuff = Buffer.from(imgResponse.data);
+    const imgBase64 = Buffer.from(imgBuff).toString('base64');
 
-    // init OCR
-    const dir = 'public/temp/prime';
-    await fs.mkdir(dir, { recursive: true });
-
-    const worker = await createWorker('eng', 1, {
-      errorHandler: (error) => {
-        const msg = error instanceof Error ? error.message : String(error);
-        logger.warn(msg, { service: 'station', type: 'prime' });
-        return error;
-      }
+    const client = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY
     });
 
-    const meta = await sharp(imgBuff).metadata();
-    const width = meta.width ?? 0;
-    const height = meta.height ?? 0;
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: 'image/jpeg',
+                data: imgBase64
+              }
+            },
+            {
+              type: 'text',
+              text: `Extract the following values from this wind data image and return as JSON only:
+            - maxGust10min (numeric, knots)
+            - windSpeed (numeric, knots)
+            - windDirection (numeric, degrees)
+            
+            Return only raw JSON with no markdown, no code fences, no backticks, no preamble. 
+            The response must start with { and end with }.
+            If any value cannot be extracted, return null for that value instead of guessing.`
+            }
+          ]
+        }
+      ]
+    });
 
-    let smallImg = false;
-    if (width === 1034 && (height === 900 || height === 879)) {
-    } else if (width === 864 && height === 650) {
-      smallImg = true;
-    } else {
-      throw new Error(`Unexpected image dimensions: ${width}x${height}`);
-    }
-
-    // avg
-    let croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: smallImg ? 710 : 850,
-        top: smallImg ? 170 : 240,
-        width: smallImg ? 140 : 175,
-        height: smallImg ? 50 : 60
-      })
-      .toBuffer();
-
-    const textAvg = (await ocr(worker, dir, 'primeportavg.jpg', croppedBuf)).replace(REG_NUM, '');
-
-    // gust
-    croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: smallImg ? 710 : 850,
-        top: smallImg ? 35 : 50,
-        width: smallImg ? 140 : 175,
-        height: smallImg ? 50 : 60
-      })
-      .toBuffer();
-
-    const textGust = (await ocr(worker, dir, 'primeportgust.jpg', croppedBuf)).replace(REG_NUM, '');
-
-    windAverage = Number.isNaN(Number(textAvg)) ? 0 : Number(textAvg);
-    windGust = Number.isNaN(Number(textGust)) ? 0 : Number(textGust);
-
-    // sometimes OCR misses a period
-    if (!textAvg.includes('.') && textGust.includes('.')) {
-      const i = textGust.indexOf('.');
-      windAverage = Number(`${textAvg.slice(0, i)}.${textAvg.slice(i)}`);
-      if (windAverage > windGust) {
-        windAverage = Math.round(windAverage * 100) / 1000;
+    const content = response.content[0];
+    if (content.type === 'text') {
+      const cleaned = content.text
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+      const result: AnthropicJsonResponse = JSON.parse(cleaned);
+      if (result.windSpeed != null) {
+        windAverage = Math.round(result.windSpeed * 1.852 * 100) / 100; // kt -> km/h
       }
-    } else if (textAvg.includes('.') && !textGust.includes('.')) {
-      const i = textAvg.indexOf('.');
-      windGust = Number(`${textGust.slice(0, i)}.${textGust.slice(i)}`);
-      if (windAverage > windGust) {
-        windGust = Math.round(windGust * 1000) / 100;
+      if (result.maxGust10min != null) {
+        windGust = Math.round(result.maxGust10min * 1.852 * 100) / 100; // kt -> km/h
       }
-    } else if (!textAvg.includes('.') && !textGust.includes('.')) {
-      if (windAverage > 10) {
-        windAverage = null;
-      }
-      if (windGust > 10) {
-        windGust = null;
+      if (result.windDirection != null) {
+        windBearing = result.windDirection;
       }
     }
-
-    if (windAverage != null) {
-      windAverage = Math.round(windAverage * 1.852 * 100) / 100;
-    } // kt -> km/h
-    if (windGust != null) {
-      windGust = Math.round(windGust * 1.852 * 100) / 100;
-    }
-
-    // direction
-    croppedBuf = await sharp(imgBuff)
-      .extract({
-        left: smallImg ? 710 : 845,
-        top: smallImg ? 230 : 340,
-        width: smallImg ? 140 : 180,
-        height: smallImg ? 80 : 80
-      })
-      .toBuffer();
-
-    const dirText = (await ocr(worker, dir, 'primeportdir.jpg', croppedBuf)).replace(REG_NUM, '');
-    const bearing = Number(dirText);
-    windBearing = Number.isNaN(bearing) ? null : bearing;
-
-    // cleanup
-    await worker.terminate();
-    await fs.rm(dir, { recursive: true, force: true });
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
   } catch (error) {

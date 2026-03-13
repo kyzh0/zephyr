@@ -12,6 +12,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@zephyr/shared": "workspace:*",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
