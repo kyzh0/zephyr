@@ -89,17 +89,51 @@ function interpolateColor(color1: string, color2: string, factor: number): strin
 
 interface SportProfile {
   min: number;
+  weak: number;
   perfectLow: number;
   perfectHigh: number;
   strong: number;
+  threshold: number;
   extreme: number;
 }
 
 const SPORT_PROFILES: Record<SportType, SportProfile> = {
-  paragliding: { min: 4, perfectLow: 14, perfectHigh: 24, strong: 30, extreme: 40 },
-  hanggliding: { min: 10, perfectLow: 20, perfectHigh: 30, strong: 37, extreme: 45 },
-  kitesurfing: { min: 20, perfectLow: 28, perfectHigh: 46, strong: 56, extreme: 70 },
-  kitefoiling: { min: 11, perfectLow: 22, perfectHigh: 28, strong: 51, extreme: 56 }
+  paragliding: {
+    min: 4,
+    weak: 10,
+    perfectLow: 14,
+    perfectHigh: 22,
+    strong: 26,
+    threshold: 30,
+    extreme: 40
+  },
+  hanggliding: {
+    min: 10,
+    weak: 15,
+    perfectLow: 20,
+    perfectHigh: 30,
+    strong: 34,
+    threshold: 37,
+    extreme: 45
+  },
+  kitesurfing: {
+    min: 20,
+    weak: 24,
+    perfectLow: 28,
+    perfectHigh: 46,
+    strong: 50,
+    threshold: 56,
+    extreme: 70
+  },
+  kitefoiling: {
+    min: 11,
+    weak: 16,
+    perfectLow: 22,
+    perfectHigh: 28,
+    strong: 45,
+    threshold: 51,
+    extreme: 56
+  }
 };
 
 export const getWindColorForSport = (avgWindKph: number | null, sport: SportType): string => {
@@ -108,10 +142,12 @@ export const getWindColorForSport = (avgWindKph: number | null, sport: SportType
   const p = SPORT_PROFILES[sport];
   const colors = [
     { speed: 0, hex: '#FFFFFF' },
-    { speed: p.min, hex: '#d1f9ff' },
+    { speed: p.min, hex: '#e1fbff' },
+    { speed: p.weak, hex: '#b1fffe' },
     { speed: p.perfectLow, hex: '#91ffc4' },
-    { speed: p.perfectHigh, hex: '#c3ff82' },
-    { speed: p.strong, hex: '#ff9966' },
+    { speed: p.perfectHigh, hex: '#82ff82' },
+    { speed: p.strong, hex: '#f8ff71' },
+    { speed: p.threshold, hex: '#ff9966' },
     { speed: p.extreme, hex: '#ff4d4d' },
     { speed: p.extreme * 1.5, hex: '#f536ff' }
   ];
