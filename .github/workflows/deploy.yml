@@ -203,6 +203,8 @@ jobs:
             # scheduler .env
             mkdir -p apps/scheduler
             cat > apps/scheduler/.env <<'EOF'
+            ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
+
             ATTENTIS_KEY=${{ secrets.ATTENTIS_KEY }}
             WUNDERGROUND_KEY=${{ secrets.WUNDERGROUND_KEY }}
             TEMPEST_KEY=${{ secrets.TEMPEST_KEY }}
