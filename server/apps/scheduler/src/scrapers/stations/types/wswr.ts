@@ -38,6 +38,11 @@ export default async function scrapeWswrData(stations: WithId<StationAttrs>[]): 
         windGust = Math.round(d.windgst_10mnmax * 1.852 * 10) / 10;
         windBearing = d.winddir_10mnavg;
         temperature = d.airtemp_01mnavg;
+      } else {
+        logger.warn('wswr stale data', {
+          service: 'station',
+          type: 'wswr'
+        });
       }
     }
 

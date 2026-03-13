@@ -47,6 +47,11 @@ export default async function scrapeWindyData(stations: WithId<StationAttrs>[]):
               windGust = Math.round(data.data.gust[i] * 3.6 * 100) / 100;
               windBearing = data.data.windDir[i];
               temperature = Math.round(data.data.temp[i] - 273.15); // K -> °C
+            } else {
+              logger.warn(`windy stale data - ${station.externalId}`, {
+                service: 'station',
+                type: 'windy'
+              });
             }
           }
 

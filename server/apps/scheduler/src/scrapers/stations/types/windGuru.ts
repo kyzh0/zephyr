@@ -55,6 +55,11 @@ export default async function scrapeWindGuruData(stations: WithId<StationAttrs>[
               if (data.temperature !== null && Number.isFinite(temp)) {
                 temperature = temp;
               }
+            } else {
+              logger.warn(`windguru stale data - ${station.externalId}`, {
+                service: 'station',
+                type: 'windguru'
+              });
             }
           }
 

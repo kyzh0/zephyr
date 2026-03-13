@@ -40,6 +40,11 @@ export default async function scrapeSouthPortData(stations: WithId<StationAttrs>
         if (Number.isNaN(windBearing)) {
           windBearing = null;
         }
+      } else {
+        logger.warn('southport stale data', {
+          service: 'station',
+          type: 'sp'
+        });
       }
     }
 

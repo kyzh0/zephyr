@@ -53,12 +53,17 @@ export default async function scrapeAucklandCouncilData(
               if (temp !== null && Number.isFinite(temp)) {
                 temperature = temp;
               }
+            } else {
+              logger.warn(`auckland council stale data - ${station.externalId}`, {
+                service: 'station',
+                type: 'ac'
+              });
             }
           }
 
           await processScrapedData(station, windAverage, windGust, windBearing, temperature);
         } catch {
-          logger.warn(`ac error - ${station.externalId}`, {
+          logger.warn(`auckland council error - ${station.externalId}`, {
             service: 'station',
             type: 'ac'
           });

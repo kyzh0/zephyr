@@ -54,6 +54,11 @@ export default async function scrapeSofarOceanData(
                 windAverage = wind.speed * 3.6; // m/s -> km/h
                 windBearing = wind.direction;
               }
+            } else {
+              logger.warn(`sofarocean stale data - ${station.externalId}`, {
+                service: 'station',
+                type: 'sfo'
+              });
             }
           }
 

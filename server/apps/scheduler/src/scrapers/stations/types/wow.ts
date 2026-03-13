@@ -60,6 +60,11 @@ export default async function scrapeWowData(stations: WithId<StationAttrs>[]): P
               if (d.dryBulbTemperature_Celsius !== null && Number.isFinite(temp)) {
                 temperature = temp;
               }
+            } else {
+              logger.warn(`wow stale data - ${station.externalId}`, {
+                service: 'station',
+                type: 'wow'
+              });
             }
           }
 

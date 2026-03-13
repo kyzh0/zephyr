@@ -52,6 +52,10 @@ export default async function scrapeWhanganuiInletData(
       }
 
       if (skipUpdate) {
+        logger.warn('whanganui inlet stale data', {
+          service: 'station',
+          type: 'wi'
+        });
         await processScrapedData(station, null, null, null, null);
         return;
       }
