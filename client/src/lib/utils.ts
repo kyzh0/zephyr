@@ -228,6 +228,8 @@ export const getWebcamTypeName = (code: string) => {
       return 'Taylors Surf';
     case 'camftp':
       return 'Camera FTP';
+    case 'srs':
+      return 'Summit Road Society';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
