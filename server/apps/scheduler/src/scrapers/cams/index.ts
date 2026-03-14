@@ -12,6 +12,7 @@ import scrapeMetserviceData from './types/metservice';
 import scrapeMtHuttData from './types/mtHutt';
 import scrapeQueenstownAirportData from './types/queenstownAirport';
 import scrapeSnowgrassData from './types/snowgrass';
+import scrapeSrsData from './types/srs';
 import scrapeTaylorsSurfData from './types/taylorsSurf';
 import scrapeWanakaAirportData from './types/wanakaAirport';
 
@@ -30,6 +31,7 @@ const scrapers = {
   hutt: scrapeMtHuttData,
   qa: scrapeQueenstownAirportData,
   snowgrass: scrapeSnowgrassData,
+  srs: scrapeSrsData,
   ts: scrapeTaylorsSurfData,
   wa: scrapeWanakaAirportData
 } satisfies Record<string, CamScraper>;
