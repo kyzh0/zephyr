@@ -73,14 +73,14 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
         {/* Guide content */}
         <div className="flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm">
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center shrink-0 marker gust-label-hidden">
+            <div className="flex justify-center items-center w-10 shrink-0 marker gust-label-hidden">
               <StationMarker speed={15} bearing={240} unit="kmh" size={40} sport="paragliding" />
             </div>
             <div className="flex items-center">Click a station for details</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center shrink-0 marker">
+            <div className="flex justify-center items-center w-10 shrink-0 marker">
               <StationMarker
                 speed={15}
                 gust={30}
@@ -96,7 +96,7 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center shrink-0 marker gust-label-hidden">
+            <div className="flex justify-center items-center w-10 shrink-0 marker gust-label-hidden">
               <StationMarker
                 speed={15}
                 gust={30}
@@ -113,51 +113,49 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center shrink-0">
+            <div className="flex justify-center items-center w-10 shrink-0">
               <Wind className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="flex items-center">
-              Change sport in the menu to update wind indicator scheme
-            </div>
+            <div className="flex items-center">Change sport to update wind colours</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center shrink-0">
+            <div className="flex justify-center items-center w-10 shrink-0">
               <SiteMarker validBearings="45-140" size={30} borderWidth={5} />
             </div>
             <div className="flex items-center">PG / HG site info</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center shrink-0">
+            <div className="flex justify-center items-center w-10 shrink-0">
               <LandingMarker size={30} borderWidth={5} />
             </div>
             <div className="flex items-center">Landing info</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center shrink-0">
+            <div className="flex justify-center items-center w-10 shrink-0">
               <Camera className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="flex items-center">Webcams</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center shrink-0">
+            <div className="flex justify-center items-center w-10 shrink-0">
               <Mountain className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="flex items-center">Filter stations by elevation</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center shrink-0">
+            <div className="flex justify-center items-center w-10 shrink-0">
               <Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="flex items-center">Live grid view of nearby stations</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center shrink-0">
+            <div className="flex justify-center items-center w-10 shrink-0">
               <svg viewBox="0 0 18 18" className="h-4 w-4">
                 <g transform="rotate(-90, 9, 9)">
                   <path d="m18,2.47l-9,6.53l-4.38,-4.38l-4.62,3.38l0,-2.48l4.83,-3.52l4.38,4.38l8.79,-6.38m0,12l-4.7,0l-4.17,3.34l-6.13,-5.93l-3,2.13l0,2.46l2.8,-2l6.2,6l5,-4l4,0l0,-2z" />
