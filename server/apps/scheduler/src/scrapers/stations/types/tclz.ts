@@ -37,6 +37,11 @@ export default async function scrapeTclzData(stations: WithId<StationAttrs>[]): 
         windGust = d.wind_gust;
         windBearing = d.wind_direction;
         temperature = d.temperature;
+      } else {
+        logger.warn('tclz stale data', {
+          service: 'station',
+          type: 'tclz'
+        });
       }
     }
 

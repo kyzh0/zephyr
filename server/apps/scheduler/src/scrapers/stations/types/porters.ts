@@ -131,6 +131,11 @@ export default async function scrapePortersData(stations: WithId<StationAttrs>[]
         id: 'base',
         data: { windAverage, windGust, windBearing, temperature }
       });
+    } else {
+      logger.warn('porters stale data - base', {
+        service: 'station',
+        type: 'porters'
+      });
     }
 
     // ----- T-BAR 2 WEATHER STATION -----
@@ -167,6 +172,11 @@ export default async function scrapePortersData(stations: WithId<StationAttrs>[]
         id: 'tbar',
         data: { windAverage, windGust, windBearing, temperature }
       });
+    } else {
+      logger.warn('porters stale data - tbar', {
+        service: 'station',
+        type: 'porters'
+      });
     }
 
     // ----- RIDGELINE WEATHER STATION -----
@@ -202,6 +212,11 @@ export default async function scrapePortersData(stations: WithId<StationAttrs>[]
       result.push({
         id: 'ridgeline',
         data: { windAverage, windGust, windBearing, temperature }
+      });
+    } else {
+      logger.warn('porters stale data - ridgeline', {
+        service: 'station',
+        type: 'porters'
       });
     }
 

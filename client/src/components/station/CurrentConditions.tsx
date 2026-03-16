@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
-import { cn, getTextColor } from '@/lib/utils';
-import { getWindColor } from '@/lib/utils';
+import { cn, getTextColor, getWindColorForSport } from '@/lib/utils';
+import { useAppContext } from '@/context/AppContext';
 import type { IStation } from '@/models/station.model';
 import { WindCompass } from './WindCompass';
 import { convertWindSpeed, formatTemperature, getUnit } from './utils';
@@ -20,6 +20,7 @@ export function CurrentConditions({
   onInfoIconHover
 }: CurrentConditionsProps) {
   const unit = getUnit();
+  const { sport } = useAppContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState<{
     width: number;
@@ -45,8 +46,8 @@ export function CurrentConditions({
     return <p className="mt-2 text-center text-red-500">Station is offline.</p>;
   }
 
-  const avgColor = getWindColor(station.currentAverage ?? null);
-  const gustColor = getWindColor(station.currentGust ?? null);
+  const avgColor = getWindColorForSport(station.currentAverage ?? null, sport);
+  const gustColor = getWindColorForSport(station.currentGust ?? null, sport);
 
   return (
     <div

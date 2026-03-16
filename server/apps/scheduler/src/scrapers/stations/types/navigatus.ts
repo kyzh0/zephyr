@@ -168,6 +168,11 @@ export default async function scrapeNavigatusData(stations: WithId<StationAttrs>
                 if (data.air_temperature !== null && Number.isFinite(temp)) {
                   temperature = temp;
                 }
+              } else {
+                logger.warn(`navigatus stale data - ${station.externalId}`, {
+                  service: 'station',
+                  type: 'navigatus'
+                });
               }
             }
           }

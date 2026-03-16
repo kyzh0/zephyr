@@ -62,7 +62,10 @@ export default function GridView() {
   const handleRadiusChange = (value: number) => setRadius(value);
 
   const filteredData = stations.filter(
-    (s) => !s.data.isOffline && (s.data.currentAverage ?? 0) >= threshold
+    (s) =>
+      !s.data.isOffline &&
+      s.data.currentAverage != null &&
+      (s.data.currentAverage ?? 0) >= threshold
   );
 
   return (

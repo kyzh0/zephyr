@@ -20,7 +20,7 @@ import { ContactDialog } from './ContactDialog';
 import { HistorySlider } from './HistorySlider';
 import { FilterDialog } from './FilterDialog';
 import { SearchBar } from './SearchBar';
-import type { MapControlsState } from './map.types';
+import { SPORT_LABELS, type MapControlsState, type SportType } from './map.types';
 import { Toggle } from '@/components/ui/toggle';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -33,6 +33,13 @@ import {
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useAppContext } from '@/context/AppContext';
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 
 export function MapControlButtons({
@@ -59,7 +66,7 @@ export function MapControlButtons({
   const showSoundings = overlay === 'soundings';
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { flyingMode, toggleFlyingMode } = useAppContext();
+  const { flyingMode, toggleFlyingMode, sport, setSport } = useAppContext();
   const isFlyingMode = flyingMode && isMobile;
 
   const [isLocating, setIsLocating] = useState(false);
@@ -242,6 +249,27 @@ export function MapControlButtons({
             </TabsTrigger>
           </TabsList>
         </Tabs>
+      </div>
+      <div className="border-t my-1" />
+      <div className="px-2 py-1.5">
+        <Select
+          value={sport as string}
+          onValueChange={(v) => {
+            setSport(v as SportType);
+            setMenuOpen(false);
+          }}
+        >
+          <SelectTrigger className="h-9 w-full text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {(Object.entries(SPORT_LABELS) as [SportType, string][]).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
@@ -426,6 +454,27 @@ export function MapControlButtons({
               <TooltipContent>
                 Switch between viewing weather stations or flying sites
               </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Select value={sport as string} onValueChange={(v) => setSport(v as SportType)}>
+                    <SelectTrigger className="h-9 text-sm bg-background">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(Object.entries(SPORT_LABELS) as [SportType, string][]).map(
+                        ([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="right">Wind colour scale for sport</TooltipContent>
             </Tooltip>
           </>
         )}

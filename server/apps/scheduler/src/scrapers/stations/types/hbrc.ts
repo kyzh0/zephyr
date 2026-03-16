@@ -15,6 +15,10 @@ function getFreshValue(point: HilltopPoint | undefined): number | null {
   }
   const lastUpdate = new Date(point.t);
   if (Number.isNaN(lastUpdate.getTime()) || Date.now() - lastUpdate.getTime() >= 40 * 60 * 1000) {
+    logger.warn('hbrc stale data', {
+      service: 'station',
+      type: 'hbrc'
+    });
     return null;
   }
   return Number(point.v);

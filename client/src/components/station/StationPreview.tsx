@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { convertWindSpeed, getStoredValue } from '../map';
-import { getTextColor, getWindColor, getWindDirectionFromBearing } from '@/lib/utils';
+import { getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
+import { useAppContext } from '@/context/AppContext';
 import DirectionArrow from '../ui/DirectionArrow';
 import type { WindUnit } from './types';
 import type { IStation } from '@/models/station.model';
@@ -11,8 +12,9 @@ export const StationPreview: React.FC<{
   distance: number | undefined;
 }> = ({ data, distance }) => {
   const navigate = useNavigate();
+  const { sport } = useAppContext();
 
-  const color = getWindColor(data.currentAverage ?? 0);
+  const color = getWindColorForSport(data.currentAverage ?? 0, sport);
   const unit = getStoredValue<WindUnit>('unit', 'kmh');
 
   return (

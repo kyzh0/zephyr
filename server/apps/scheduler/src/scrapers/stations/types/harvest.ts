@@ -152,6 +152,10 @@ function extractFreshHarvestValue(resp: HarvestGetDataResponse): number | null {
 
   // skip data older than 40 mins
   if (Number.isNaN(ts.getTime()) || Date.now() - ts.getTime() >= 40 * 60 * 1000) {
+    logger.warn('harvest stale data', {
+      service: 'station',
+      type: 'harvest'
+    });
     return null;
   }
 
@@ -266,6 +270,19 @@ async function scrapeHarvestStation(station: WithId<StationAttrs>): Promise<void
   ids = station.harvestTemperatureId?.split('_') ?? [];
   if (ids.length === 2) {
     temperature = await processHarvestValue(sid, configId, ids[0], ids[1], station.harvestCookie);
+  }
+
+  // these stations are in kt
+  if (
+    station.externalId &&
+    (station.externalId.startsWith('10243') || station.externalId.startsWith('11433'))
+  ) {
+    if (windAverage !== null) {
+      windAverage = Math.round(windAverage * 1.852 * 100) / 100;
+    }
+    if (windGust !== null) {
+      windGust = Math.round(windGust * 1.852 * 100) / 100;
+    }
   }
 
   await processScrapedData(station, windAverage, windGust, windBearing, temperature);

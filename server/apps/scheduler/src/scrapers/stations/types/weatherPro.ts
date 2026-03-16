@@ -72,6 +72,11 @@ export default async function scrapeWeatherProData(
                 'Air Temperature</td><td style="font-size:200%;">:',
                 '°C</td></tr>'
               );
+            } else {
+              logger.warn(`weatherpro stale data - ${station.externalId}`, {
+                service: 'station',
+                type: 'wp'
+              });
             }
           }
 

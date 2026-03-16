@@ -1,5 +1,6 @@
-import { cn, getTextColor, getWindColor, getWindDirectionFromBearing } from '@/lib/utils';
+import { cn, getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
 import { getDirectionColor, convertWindSpeed, getUnit } from './utils';
+import { useAppContext } from '@/context/AppContext';
 import { DirectionArrow } from '@/components/ui/DirectionArrow';
 import type { ExtendedStationData } from './types';
 
@@ -16,6 +17,7 @@ export const StationDataTable = function StationDataTable({
   ref?: React.RefObject<HTMLTableRowElement | null>;
 }) {
   const unit = getUnit();
+  const { sport } = useAppContext();
 
   return (
     <div className="overflow-x-auto rounded-lg border bg-white sm:min-h-0">
@@ -43,7 +45,7 @@ export const StationDataTable = function StationDataTable({
               Avg
             </th>
             {tableData.map((d) => {
-              const windColor = getWindColor(d.windAverage ?? null);
+              const windColor = getWindColorForSport(d.windAverage ?? null, sport);
               return (
                 <td
                   key={String(d.time)}
@@ -65,7 +67,7 @@ export const StationDataTable = function StationDataTable({
               Gust
             </th>
             {tableData.map((d) => {
-              const gustColor = getWindColor(d.windGust ?? null);
+              const gustColor = getWindColorForSport(d.windGust ?? null, sport);
               return (
                 <td
                   key={String(d.time)}

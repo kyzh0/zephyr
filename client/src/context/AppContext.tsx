@@ -1,5 +1,6 @@
 import { createContext, use, useCallback, useMemo, useState, type ReactNode } from 'react';
 import { getStoredValue, setStoredValue } from '@/components/map/map.utils';
+import { type SportType } from '@/components/map';
 
 interface AppContextType {
   user?: unknown;
@@ -10,6 +11,8 @@ interface AppContextType {
   setRefreshedWebcams: (ids: string[]) => void;
   flyingMode: boolean;
   toggleFlyingMode: () => void;
+  sport: SportType;
+  setSport: (sport: SportType) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -22,6 +25,9 @@ export function AppProvider({ children }: AppProviderProps) {
   const [refreshedStations, setRefreshedStations] = useState<string[]>([]);
   const [refreshedWebcams, setRefreshedWebcams] = useState<string[]>([]);
   const [flyingMode, setFlyingMode] = useState(() => getStoredValue('flyingMode', false));
+  const [sport, setSportState] = useState<SportType>(() =>
+    getStoredValue<SportType>('sport', 'paragliding')
+  );
 
   const toggleFlyingMode = useCallback(() => {
     setFlyingMode((prev) => {
@@ -29,6 +35,11 @@ export function AppProvider({ children }: AppProviderProps) {
       setStoredValue('flyingMode', next);
       return next;
     });
+  }, []);
+
+  const setSport = useCallback((newSport: SportType) => {
+    setSportState(newSport);
+    setStoredValue('sport', newSport);
   }, []);
 
   const value = useMemo<AppContextType>(
@@ -40,9 +51,11 @@ export function AppProvider({ children }: AppProviderProps) {
       refreshedWebcams,
       setRefreshedWebcams,
       flyingMode,
-      toggleFlyingMode
+      toggleFlyingMode,
+      sport,
+      setSport
     }),
-    [refreshedStations, refreshedWebcams, flyingMode, toggleFlyingMode]
+    [refreshedStations, refreshedWebcams, flyingMode, toggleFlyingMode, sport, setSport]
   );
 
   return <AppContext value={value}>{children}</AppContext>;

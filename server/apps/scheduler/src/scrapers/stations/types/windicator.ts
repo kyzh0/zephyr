@@ -76,6 +76,11 @@ export default async function scrapeWindicatorData(
         windGust = gust === null ? null : gust * 1.852;
         windBearing = parseNumeric(fetch.Direction); // "133° SE" → 133
         temperature = parseNumeric(fetch.AirTemp); // "19.1 °C" → 19.1
+      } else {
+        logger.warn('windicator stale data', {
+          service: 'station',
+          type: 'windicator'
+        });
       }
     }
 
