@@ -124,15 +124,6 @@ const SPORT_PROFILES: Record<SportType, SportProfile> = {
     strong: 50,
     threshold: 56,
     extreme: 70
-  },
-  kitefoiling: {
-    min: 11,
-    weak: 16,
-    perfectLow: 22,
-    perfectHigh: 28,
-    strong: 45,
-    threshold: 51,
-    extreme: 56
   }
 };
 
