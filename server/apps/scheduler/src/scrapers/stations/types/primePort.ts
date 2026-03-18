@@ -1,9 +1,9 @@
-import { Anthropic } from '@anthropic-ai/sdk';
+import { GoogleGenAI } from '@google/genai';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
-interface AnthropicJsonResponse {
+interface GeminiJsonResponse {
   maxGust10min: number | null;
   windSpeed: number | null;
   windDirection: number | null;
@@ -21,7 +21,7 @@ export default async function scrapePrimePortData(stations: WithId<StationAttrs>
     let windBearing: number | null = null;
     const temperature: number | null = null;
 
-    // fetch img because claude caches
+    // fetch img to bust caching
     const imgResponse = await httpClient.get<ArrayBuffer>(
       'https://local.timaru.govt.nz/primeport/NorthMoleWind.jpg',
       { responseType: 'arraybuffer' }
@@ -29,57 +29,54 @@ export default async function scrapePrimePortData(stations: WithId<StationAttrs>
     const imgBuff = Buffer.from(imgResponse.data);
     const imgBase64 = Buffer.from(imgBuff).toString('base64');
 
-    const client = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY
-    });
-
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      messages: [
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.1-flash-lite-preview',
+      contents: [
         {
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: 'image/jpeg',
-                data: imgBase64
-              }
-            },
-            {
-              type: 'text',
-              text: `Extract the following values from this wind data image and return as JSON only:
-            - maxGust10min (numeric, knots)
-            - windSpeed (numeric, knots)
-            - windDirection (numeric, degrees)
-            
-            Return only raw JSON with no markdown, no code fences, no backticks, no preamble. 
-            The response must start with { and end with }.
+          inlineData: {
+            mimeType: 'image/jpeg',
+            data: imgBase64
+          }
+        },
+        {
+          text: `Extract the relevant values from this wind data image and return as JSON only.            
             If any value cannot be extracted, return null for that value instead of guessing.`
-            }
-          ]
         }
-      ]
+      ],
+      config: {
+        responseMimeType: 'application/json',
+        responseJsonSchema: {
+          type: 'object',
+          properties: {
+            maxGust10min: {
+              type: 'number',
+              description: 'Maximum gust in the last 10 minutes, in knots'
+            },
+            windSpeed: {
+              type: 'number',
+              description: 'Wind speed, in knots'
+            },
+            windDirection: {
+              type: 'number',
+              description: 'Wind direction, in degrees'
+            }
+          },
+          required: ['maxGust10min', 'windSpeed', 'windDirection']
+        }
+      }
     });
 
-    const content = response.content[0];
-    if (content.type === 'text') {
-      const cleaned = content.text
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/```\s*$/i, '')
-        .trim();
-      const result: AnthropicJsonResponse = JSON.parse(cleaned);
-      if (result.windSpeed != null) {
-        windAverage = Math.round(result.windSpeed * 1.852 * 100) / 100; // kt -> km/h
+    if (response?.text) {
+      const data: GeminiJsonResponse = JSON.parse(response.text);
+      if (data.windSpeed != null) {
+        windAverage = Math.round(data.windSpeed * 1.852 * 100) / 100; // kt -> km/h
       }
-      if (result.maxGust10min != null) {
-        windGust = Math.round(result.maxGust10min * 1.852 * 100) / 100; // kt -> km/h
+      if (data.maxGust10min != null) {
+        windGust = Math.round(data.maxGust10min * 1.852 * 100) / 100; // kt -> km/h
       }
-      if (result.windDirection != null) {
-        windBearing = result.windDirection;
+      if (data.windDirection != null) {
+        windBearing = data.windDirection;
       }
     }
 
