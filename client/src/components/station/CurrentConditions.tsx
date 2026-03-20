@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { cn, getTextColor, getWindColorForSport } from '@/lib/utils';
+import { cn, getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
 import type { IStation } from '@/models/station.model';
 import { WindCompass } from './WindCompass';
@@ -52,15 +52,25 @@ export function CurrentConditions({
   return (
     <div
       ref={containerRef}
-      className="flex w-full items-center justify-center gap-6 sm:gap-8 overflow-x-auto flex-grow min-h-[10vw]"
+      className="flex w-full items-center justify-center gap-6 sm:gap-8 overflow-x-auto grow min-h-[10vw]"
     >
       {station.currentBearing != null &&
         (station.currentAverage != null || station.currentGust != null) && (
-          <WindCompass
-            bearing={station.currentBearing}
-            validBearings={station.validBearings}
-            containerSize={containerSize}
-          />
+          <div className="flex flex-col items-center">
+            <div className="flex items-center">
+              <p className="text-md mr-8 hidden sm:block">
+                {station.currentBearing}° {getWindDirectionFromBearing(station.currentBearing)}
+              </p>
+              <WindCompass
+                bearing={station.currentBearing}
+                validBearings={station.validBearings}
+                containerSize={containerSize}
+              />
+            </div>
+            <p className="text-xs sm:hidden">
+              {station.currentBearing}° {getWindDirectionFromBearing(station.currentBearing)}
+            </p>
+          </div>
         )}
       <table>
         <tbody>
