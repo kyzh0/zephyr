@@ -80,6 +80,12 @@ export default function DonateDialog() {
           <DialogTitle className="text-xl text-center w-full pr-6">Donate</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 text-center items-center">
+          {/* hide focus on load */}
+          <Button
+            style={{ width: 0, height: 0, opacity: 0, position: 'absolute' }}
+            aria-hidden
+            tabIndex={0}
+          />
           <DialogDescription className="text-center">
             Zephyr will always be free and available for the New Zealand free-flying community.
           </DialogDescription>
