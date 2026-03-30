@@ -34,11 +34,10 @@ router.get(
           $group: {
             _id: { $trim: { input: '$donorName' } },
             total: { $sum: '$amount' },
-            donationCount: { $sum: 1 }
+            firstDonation: { $min: '$donatedAt' }
           }
         },
-        { $match: { _id: { $ne: '' } } },
-        { $sort: { total: -1 } },
+        { $sort: { total: -1, firstDonation: 1 } },
         { $project: { _id: 0, name: '$_id' } }
       ]),
       Donation.aggregate<{ name: string; donationCount: number }>([
