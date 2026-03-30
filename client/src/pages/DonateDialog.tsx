@@ -43,6 +43,9 @@ export default function DonateDialog() {
   const [regions, setRegions] = useState<LeaderboardRegionRow[]>([]);
   const [boardError, setBoardError] = useState<string | null>(null);
 
+  const topDonors = donors.slice(0, 3);
+  const remainingDonors = donors.slice(3); 
+  
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -128,16 +131,36 @@ export default function DonateDialog() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        donors.map((row, i) => (
-                          <TableRow key={row.name}>
-                            <TableCell className="font-medium text-center">
-                              <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
-                                {i < 3 ? <PlaceMedal rank={i} /> : null}
-                                {row.name}
-                              </span>
-                            </TableCell>
-                          </TableRow>
-                        ))
+                        <>
+                          {topDonors.map((row, i) => (
+                            <TableRow key={row.name}>
+                              <TableCell className="font-medium text-center" colSpan={2}>
+                                <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
+                                  <PlaceMedal rank={i} />
+                                  {row.name}
+                                </span>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                          {remainingDonors.length > 0 &&
+                            Array.from(
+                              { length: Math.ceil(remainingDonors.length / 2) },
+                              (_, rowIdx) => {
+                                const left = remainingDonors[rowIdx * 2];
+                                const right = remainingDonors[rowIdx * 2 + 1];
+                                return (
+                                  <TableRow key={left.name}>
+                                    <TableCell className="text-center text-sm py-2 w-1/2">
+                                      {left.name}
+                                    </TableCell>
+                                    <TableCell className="text-center text-sm py-2 w-1/2">
+                                      {right?.name ?? ''}
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              }
+                            )}
+                        </>
                       )}
                     </TableBody>
                   </Table>
