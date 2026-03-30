@@ -30,11 +30,16 @@ export default function HelpDialog() {
       <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto pb-2">
         <DialogHeader className="text-center sm:text-center">
           <div className="hidden sm:flex justify-between items-start">
+            {/* hide focus on load */}
+            <Button
+              style={{ width: 0, height: 0, opacity: 0, position: 'absolute' }}
+              aria-hidden
+              tabIndex={0}
+            />
             <Button
               variant="link"
               onClick={() => setSignInOpen(true)}
               className="text-xs text-transparent hover:text-transparent cursor-default select-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              tabIndex={-1}
             >
               admin
             </Button>
