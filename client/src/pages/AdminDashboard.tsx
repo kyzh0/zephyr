@@ -193,7 +193,7 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
 
   const handleSignOut = () => {
     sessionStorage.removeItem('adminKey');
-    navigate(-1);
+    navigate('/');
   };
 
   const handleTabChange = (value: string) => {
