@@ -10,45 +10,23 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { SignInDialog } from './SignInDialog';
-import { SiteMarker } from './SiteMarker';
-import { LandingMarker } from './LandingMarker';
-import { StationMarker } from './StationMarker';
+import { SignInDialog } from '../components/map/SignInDialog';
+import { SiteMarker } from '../components/map/SiteMarker';
+import { LandingMarker } from '../components/map/LandingMarker';
+import { StationMarker } from '../components/map/StationMarker';
 
-export const WELCOME_STORAGE_KEY = 'zephyr-welcome-dismissed';
-
-function shouldShowWelcome(): boolean {
-  const dismissed =
-    window.self !== window.top || // Dismiss if iframe
-    localStorage.getItem(WELCOME_STORAGE_KEY) === 'true';
-  return !dismissed;
-}
-
-interface HelpDialogProps {
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-}
-
-export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogProps) {
+export default function HelpDialog() {
   const navigate = useNavigate();
-  const [internalOpen, setInternalOpen] = useState(shouldShowWelcome);
-  const [dontShowAgain, setDontShowAgain] = useState(true);
   const [signInOpen, setSignInOpen] = useState(false);
 
-  const isOpen = controlledOpen ?? internalOpen;
-
-  const handleOpenChange = (open: boolean) => {
-    if (!open && dontShowAgain) {
-      localStorage.setItem(WELCOME_STORAGE_KEY, 'true');
-    }
-    setInternalOpen(open);
-    onOpenChange?.(open);
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog
+      open
+      onOpenChange={() => {
+        localStorage.setItem('welcomeDismissed', 'true');
+        navigate('/');
+      }}
+    >
       <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto pb-2">
         <DialogHeader className="text-center sm:text-center">
           <div className="hidden sm:flex justify-between items-start">
@@ -167,27 +145,12 @@ export function HelpDialog({ open: controlledOpen, onOpenChange }: HelpDialogPro
         </div>
 
         {/* Footer with checkbox */}
-        <div className="flex items-center justify-between pt-2 sm:pt-4 border-t">
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            <Checkbox
-              id="dontShowAgain"
-              checked={dontShowAgain}
-              onCheckedChange={(checked) => setDontShowAgain(checked === true)}
-              className="h-3 w-3 sm:h-4 sm:w-4"
-            />
-            <Label
-              htmlFor="dontShowAgain"
-              className="text-xs sm:text-sm text-muted-foreground cursor-pointer"
-            >
-              Hide on startup
-            </Label>
-          </div>
+        <div className="flex items-center justify-end sm:pt-4 border-t">
           <div className="flex items-center space-x-1 sm:space-x-2">
             <Button
               variant="link"
               className="text-xs text-muted-foreground cursor-pointer px-1 sm:px-2"
               onClick={() => {
-                handleOpenChange(false);
                 navigate('/export-map-data');
               }}
             >

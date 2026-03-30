@@ -63,7 +63,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
   useEffect(() => {
     if (!query.trim()) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setResults([]);
+      setResults((prev) => (prev.length === 0 ? prev : []));
       setSelectedIndex(-1);
       return;
     }

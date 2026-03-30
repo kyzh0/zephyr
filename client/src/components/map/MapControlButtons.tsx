@@ -14,9 +14,6 @@ import {
   Undo2
 } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { HelpDialog, WELCOME_STORAGE_KEY } from './HelpDialog';
-import { DonateDialog } from './DonateDialog';
-import { ContactDialog } from './ContactDialog';
 import { HistorySlider } from './HistorySlider';
 import { FilterDialog } from './FilterDialog';
 import { SearchBar } from './SearchBar';
@@ -70,12 +67,6 @@ export function MapControlButtons({
   const isFlyingMode = flyingMode && isMobile;
 
   const [isLocating, setIsLocating] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(
-    window.self === window.top && // don't show if iframe
-      localStorage.getItem(WELCOME_STORAGE_KEY) !== 'true'
-  );
-  const [donateOpen, setDonateOpen] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [recentStations, setRecentStations] = useState<RecentStation[]>([]);
 
@@ -123,6 +114,12 @@ export function MapControlButtons({
 
     run();
   }, [isLocating, onLocateClick]);
+
+  useEffect(() => {
+    if (localStorage.getItem('welcomeDismissed') !== 'true') {
+      navigate('/help');
+    }
+  }, [navigate]);
 
   // Render menu button content
   const renderMenuContent = () => (
@@ -196,8 +193,8 @@ export function MapControlButtons({
         size="sm"
         className="justify-start gap-2"
         onClick={() => {
-          setHelpOpen(true);
           setMenuOpen(false);
+          navigate('/help');
         }}
       >
         <HelpCircle className={`${getIconStyle(isFlyingMode)} opacity-70`} />
@@ -208,8 +205,8 @@ export function MapControlButtons({
         size="sm"
         className="justify-start gap-2"
         onClick={() => {
-          setDonateOpen(true);
           setMenuOpen(false);
+          navigate('/donate');
         }}
       >
         <HandHelping className={`${getIconStyle(isFlyingMode)} opacity-70`} />
@@ -220,8 +217,8 @@ export function MapControlButtons({
         size="sm"
         className="justify-start gap-2"
         onClick={() => {
-          setContactOpen(true);
           setMenuOpen(false);
+          navigate('/contact');
         }}
       >
         <Mail className={`${getIconStyle(isFlyingMode)} opacity-70`} />
@@ -336,7 +333,7 @@ export function MapControlButtons({
                   variant="outline"
                   size="sm"
                   className={getButtonStyle(isFlyingMode)}
-                  onClick={() => setHelpOpen(true)}
+                  onClick={() => navigate('/help')}
                 >
                   <HelpCircle className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Button>
@@ -349,7 +346,7 @@ export function MapControlButtons({
                   variant="outline"
                   size="sm"
                   className={getButtonStyle(isFlyingMode)}
-                  onClick={() => setDonateOpen(true)}
+                  onClick={() => navigate('/donate')}
                 >
                   <HandHelping className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Button>
@@ -362,7 +359,7 @@ export function MapControlButtons({
                   variant="outline"
                   size="sm"
                   className={getButtonStyle(isFlyingMode)}
-                  onClick={() => setContactOpen(true)}
+                  onClick={() => navigate('/contact')}
                 >
                   <Mail className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Button>
@@ -537,11 +534,6 @@ export function MapControlButtons({
           />
         )}
       </div>
-
-      {/* Dialogs */}
-      <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
-      <DonateDialog open={donateOpen} onOpenChange={setDonateOpen} />
-      <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />
 
       {/* History Slider at bottom */}
       {historyOffset < 0 && (

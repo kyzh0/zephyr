@@ -9,6 +9,7 @@ import publicRoute from './routes/publicRoute';
 import siteRoute from './routes/siteRoute';
 import soundingRoute from './routes/soundingRoute';
 import stationRoute from './routes/stationRoute';
+import donationRoute from './routes/donationRoute';
 
 const { NODE_ENV } = process.env;
 if (NODE_ENV !== 'production' && NODE_ENV !== 'staging') {
@@ -32,5 +33,6 @@ app.use('/v1', publicRoute);
 app.use('/sites', siteRoute);
 app.use('/soundings', soundingRoute);
 app.use('/stations', stationRoute);
+app.use('/donations', donationRoute);
 
 export default app;

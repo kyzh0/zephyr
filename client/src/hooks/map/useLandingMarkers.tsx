@@ -109,7 +109,6 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
 
   // Use with wind direction filter
   const setTransparent = useCallback((transparent: boolean) => {
-    console.log(transparent);
     for (const item of markersRef.current) {
       // eslint-disable-next-line react-hooks/immutability
       item.marker.style.opacity = transparent ? '0.1' : '1';
