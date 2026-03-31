@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,12 +33,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface ContactDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
+export default function ContactDialog() {
+  const navigate = useNavigate();
   const [success, setSuccess] = useState(false);
 
   const form = useForm<FormValues>({
@@ -47,15 +44,6 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
       message: ''
     }
   });
-
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      // Reset form and success state when closing
-      form.reset();
-      setSuccess(false);
-    }
-    onOpenChange(open);
-  };
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -79,7 +67,7 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open onOpenChange={() => navigate('/')}>
       <DialogContent className="sm:max-w-md pb-2">
         <DialogHeader className="text-center sm:text-center">
           <DialogTitle className="text-xl">Contact Us</DialogTitle>
@@ -132,7 +120,7 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
               />
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+                <Button type="button" variant="outline" onClick={() => navigate(-1)}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={form.formState.isSubmitting}>

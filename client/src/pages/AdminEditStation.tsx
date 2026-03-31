@@ -66,29 +66,28 @@ const validBearingsSchema = z
   .optional()
   .or(z.literal(''));
 
-const formSchema = z
-  .object({
-    name: z.string().min(1, 'Required'),
-    type: z.string().min(1, 'Required'),
-    externalLink: z.url('Enter a valid URL'),
-    externalId: z.string().optional().or(z.literal('')),
-    coordinates: coordinatesSchema,
-    elevation: z.string().regex(/^-?\d+$/, 'Must be a number'),
-    validBearings: validBearingsSchema,
-    popupMessage: z.string().optional().or(z.literal('')),
-    isDisabled: z.boolean(),
-    isHighResolution: z.boolean(),
-    harvestWindAverageId: z.string().optional().or(z.literal('')),
-    harvestWindGustId: z.string().optional().or(z.literal('')),
-    harvestWindDirectionId: z.string().optional().or(z.literal('')),
-    harvestTemperatureId: z.string().optional().or(z.literal('')),
-    harvestCookie: z.string().optional().or(z.literal('')),
-    gwWindAverageFieldName: z.string().optional().or(z.literal('')),
-    gwWindGustFieldName: z.string().optional().or(z.literal('')),
-    gwWindBearingFieldName: z.string().optional().or(z.literal('')),
-    gwTemperatureFieldName: z.string().optional().or(z.literal('')),
-    weatherlinkCookie: z.string().optional().or(z.literal(''))
-  });
+const formSchema = z.object({
+  name: z.string().min(1, 'Required'),
+  type: z.string().min(1, 'Required'),
+  externalLink: z.url('Enter a valid URL'),
+  externalId: z.string().optional().or(z.literal('')),
+  coordinates: coordinatesSchema,
+  elevation: z.string().regex(/^-?\d+$/, 'Must be a number'),
+  validBearings: validBearingsSchema,
+  popupMessage: z.string().optional().or(z.literal('')),
+  isDisabled: z.boolean(),
+  isHighResolution: z.boolean(),
+  harvestWindAverageId: z.string().optional().or(z.literal('')),
+  harvestWindGustId: z.string().optional().or(z.literal('')),
+  harvestWindDirectionId: z.string().optional().or(z.literal('')),
+  harvestTemperatureId: z.string().optional().or(z.literal('')),
+  harvestCookie: z.string().optional().or(z.literal('')),
+  gwWindAverageFieldName: z.string().optional().or(z.literal('')),
+  gwWindGustFieldName: z.string().optional().or(z.literal('')),
+  gwWindBearingFieldName: z.string().optional().or(z.literal('')),
+  gwTemperatureFieldName: z.string().optional().or(z.literal('')),
+  weatherlinkCookie: z.string().optional().or(z.literal(''))
+});
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -436,11 +435,7 @@ export default function AdminEditStation() {
                     )}
                   />
                   <div className="flex items-end">
-                    <Button
-                      type="button"
-                      onClick={handleAutoElevation}
-                      disabled={elevationLoading}
-                    >
+                    <Button type="button" onClick={handleAutoElevation} disabled={elevationLoading}>
                       {elevationLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                       Auto
                     </Button>

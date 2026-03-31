@@ -24,12 +24,13 @@ import type { ICam } from '@/models/cam.model';
 import { getMinutesAgo } from '@/lib/utils';
 import type { ISite } from '@/models/site.model';
 import type { ILanding } from '@/models/landing.model';
+import { AdminDonationsPanel } from '@/pages/AdminDonationsPanel';
 
 const STALE_CHECK_TIMESTAMP = Date.now();
 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
 interface AdminDashboardProps {
-  tab?: 'stations' | 'webcams' | 'soundings' | 'sites' | 'landings';
+  tab?: 'stations' | 'webcams' | 'soundings' | 'sites' | 'landings' | 'donations';
 }
 
 export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps) {
@@ -60,6 +61,10 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
   // Landings state
   const [landings, setLandings] = useState<ILanding[]>([]);
   const [landingSearch, setLandingSearch] = useState('');
+
+  useEffect(() => {
+    setActiveTab(tab);
+  }, [tab]);
 
   useEffect(() => {
     async function loadStations() {
@@ -188,7 +193,7 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
 
   const handleSignOut = () => {
     sessionStorage.removeItem('adminKey');
-    navigate(-1);
+    navigate('/');
   };
 
   const handleTabChange = (value: string) => {
@@ -197,7 +202,8 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
       value === 'webcams' ||
       value === 'soundings' ||
       value === 'sites' ||
-      value === 'landings'
+      value === 'landings' ||
+      value === 'donations'
     ) {
       setActiveTab(value);
       navigate(`/admin/${value}`, { replace: true });
@@ -224,6 +230,7 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
             <TabsTrigger value="soundings">Soundings</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="landings">Landings</TabsTrigger>
+            <TabsTrigger value="donations">Donations</TabsTrigger>
           </TabsList>
 
           {/* Stations Tab */}
@@ -257,9 +264,9 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead className="w-[100px]">Type</TableHead>
-                    <TableHead className="w-[100px]">Status</TableHead>
-                    <TableHead className="w-[40px]"></TableHead>
+                    <TableHead className="w-25">Type</TableHead>
+                    <TableHead className="w-25">Status</TableHead>
+                    <TableHead className="w-10"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -337,10 +344,10 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead className="w-[100px]">Type</TableHead>
-                    <TableHead className="w-[100px]">Status</TableHead>
-                    <TableHead className="w-[100px]">Last Updated</TableHead>
-                    <TableHead className="w-[40px]"></TableHead>
+                    <TableHead className="w-25">Type</TableHead>
+                    <TableHead className="w-25">Status</TableHead>
+                    <TableHead className="w-25">Last Updated</TableHead>
+                    <TableHead className="w-10"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -423,8 +430,8 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead className="w-[150px]">Rasp ID</TableHead>
-                    <TableHead className="w-[100px]">Last Updated</TableHead>
+                    <TableHead className="w-37.5">Rasp ID</TableHead>
+                    <TableHead className="w-25">Last Updated</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -486,7 +493,7 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead className="w-[100px]">Status</TableHead>
+                    <TableHead className="w-25">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -541,7 +548,7 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead className="w-[100px]">Status</TableHead>
+                    <TableHead className="w-25">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -572,6 +579,11 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                 </TableBody>
               </Table>
             </div>
+          </TabsContent>
+
+          {/* Donations Tab */}
+          <TabsContent value="donations" className="mt-4">
+            <AdminDonationsPanel />
           </TabsContent>
         </Tabs>
       </main>

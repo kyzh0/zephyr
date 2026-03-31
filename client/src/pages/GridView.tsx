@@ -33,7 +33,6 @@ export default function GridView() {
   const requestLocation = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        console.log('Got user location:', pos.coords);
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocationError(false);
       },

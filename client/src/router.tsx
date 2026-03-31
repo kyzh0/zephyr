@@ -9,7 +9,11 @@ import Sounding from './pages/Sounding';
 import Site from './pages/Site';
 import Landing from './pages/Landing';
 import GridView from './pages/GridView';
+import HelpDialog from './pages/HelpDialog';
+import ContactDialog from './pages/ContactDialog';
+import DonateDialog from './pages/DonateDialog';
 import ExportMapData from './pages/ExportMapData';
+
 import AdminDashboard from './pages/AdminDashboard';
 import AdminAddStation from './pages/AdminAddStation';
 import AdminAddWebcam from './pages/AdminAddWebcam';
@@ -62,6 +66,18 @@ export const router = createBrowserRouter([
             element: <GridView />
           },
           {
+            path: 'help',
+            element: <HelpDialog />
+          },
+          {
+            path: 'donate',
+            element: <DonateDialog />
+          },
+          {
+            path: 'contact',
+            element: <ContactDialog />
+          },
+          {
             path: 'export-map-data',
             element: <ExportMapData />
           }
@@ -94,6 +110,10 @@ export const router = createBrowserRouter([
           {
             path: 'landings',
             element: <AdminDashboard tab="landings" />
+          },
+          {
+            path: 'donations',
+            element: <AdminDashboard tab="donations" />
           },
           {
             path: 'stations/add',
