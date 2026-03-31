@@ -44,8 +44,8 @@ export default function DonateDialog() {
   const [boardError, setBoardError] = useState<string | null>(null);
 
   const topDonors = donors.slice(0, 3);
-  const remainingDonors = donors.slice(3); 
-  
+  const remainingDonors = donors.slice(3);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -80,7 +80,7 @@ export default function DonateDialog() {
     <Dialog open onOpenChange={() => navigate('/')}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto text-center">
         <DialogHeader className="text-center sm:text-center space-y-0">
-          <DialogTitle className="text-xl text-center w-full pr-6">Donate</DialogTitle>
+          <DialogTitle className="text-xl text-center w-full">Donate</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 text-center items-center">
           {/* hide focus on load */}
