@@ -22,7 +22,7 @@ export async function startCamScheduler(): Promise<void> {
       `----- Webcam scraper finished, ${Math.floor((Date.now() - ts) / 1000)}s elapsed -----`,
       { service: 'cam' }
     );
-  });
+  }, { noOverlap: true });
 
   // cleanup
   cron.schedule('5 0 * * *', async () => {

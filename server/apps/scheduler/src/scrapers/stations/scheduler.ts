@@ -32,7 +32,7 @@ export async function startStationScheduler(): Promise<void> {
     logger.info(`----- Process json output end - ${Date.now() - ts}ms elapsed. -----`, {
       service: 'json'
     });
-  });
+  }, { noOverlap: true });
 
   // hi res stations
   cron.schedule('*/2 * * * *', async () => {
@@ -55,7 +55,7 @@ export async function startStationScheduler(): Promise<void> {
       `----- Process high resolution json output end - ${Date.now() - ts}ms elapsed. -----`,
       { service: 'json' }
     );
-  });
+  }, { noOverlap: true });
 
   // missed readings
   cron.schedule('3,13,23,33,43,53,6,16,26,36,46,56,35 * * * *', async () => {
@@ -67,7 +67,7 @@ export async function startStationScheduler(): Promise<void> {
     logger.info(`--- Check missed readings end - ${Date.now() - ts}ms elapsed. -----`, {
       service: 'miss'
     });
-  });
+  }, { noOverlap: true });
 
   // errors
   cron.schedule('5 */6 * * *', async () => {

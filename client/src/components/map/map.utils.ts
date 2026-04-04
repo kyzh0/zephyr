@@ -57,7 +57,8 @@ export function getStationGeoJson(stations: IStation[] | undefined): GeoJson | n
         currentGust: gust,
         currentBearing: station.currentBearing == null ? null : Math.round(station.currentBearing),
         validBearings: station.validBearings,
-        isOffline: station.isOffline
+        isOffline: station.isOffline,
+        lastUpdate: station.lastUpdate ?? null
       },
       geometry: station.location as {
         type: string;

@@ -111,9 +111,9 @@ export function useStationData(
 
       setAllData(extendedData);
 
-      // for non-high-res stations, table data is the same as chart data
+      // pad non high res data
       if (!s.isHighResolution) {
-        setAllTableData(extendedData);
+        setAllTableData(padData(extendedData, id));
       }
 
       // calculate 10 min averages for high-res stations
@@ -168,6 +168,46 @@ export function useStationData(
     isLoading,
     isRefreshing
   };
+}
+
+/**
+ * Pad non-high-res station table data to fill gaps
+ */
+function padData(extendedData: ExtendedStationData[], stationId: string): ExtendedStationData[] {
+  if (extendedData.length === 0) return extendedData;
+
+  const MS_10_MIN = 10 * 60 * 1000;
+
+  const startBucket = Math.floor(new Date(extendedData[0].time).getTime() / MS_10_MIN) * MS_10_MIN;
+  const endBucket = Math.floor(Date.now() / MS_10_MIN) * MS_10_MIN;
+
+  const dataByBucket = new Map<number, ExtendedStationData>();
+  for (const item of extendedData) {
+    const bucketTime = Math.floor(new Date(item.time).getTime() / MS_10_MIN) * MS_10_MIN;
+    dataByBucket.set(bucketTime, item);
+  }
+
+  const result: ExtendedStationData[] = [];
+  for (let t = startBucket; t <= endBucket; t += MS_10_MIN) {
+    if (dataByBucket.has(t)) {
+      result.push(dataByBucket.get(t)!);
+    } else {
+      const bucketDate = new Date(t);
+      result.push({
+        time: bucketDate,
+        windAverage: undefined,
+        windGust: undefined,
+        windBearing: undefined,
+        temperature: undefined,
+        _id: stationId,
+        timeLabel: formatInTimeZone(bucketDate, 'Pacific/Auckland', 'HH:mm'),
+        windAverageKt: null,
+        windGustKt: null
+      });
+    }
+  }
+
+  return result;
 }
 
 /**

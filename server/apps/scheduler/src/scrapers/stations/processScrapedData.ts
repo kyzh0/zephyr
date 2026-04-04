@@ -23,7 +23,6 @@ export default async function processScrapedData(
     temperature ?? null
   );
 
-  const lastUpdate = new Date();
   const currentAverage = data.windAverage ?? null;
   const currentGust = data.windGust ?? null;
   const currentBearing = data.windBearing ?? null;
@@ -42,7 +41,6 @@ export default async function processScrapedData(
 
   // save station flags
   const updates = {
-    lastUpdate: lastUpdate,
     currentAverage: currentAverage,
     currentGust: currentGust,
     currentBearing: currentBearing,
@@ -50,6 +48,7 @@ export default async function processScrapedData(
   } as Partial<StationAttrs>;
 
   if (data.windAverage != null || data.windGust != null) {
+    updates.lastUpdate = new Date();
     updates.isOffline = false;
   }
   if (
