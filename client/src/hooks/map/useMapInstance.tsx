@@ -77,6 +77,9 @@ export function useMapInstance({
     setStoredValue('zoom', Number(zoom.toFixed(2)));
   }, [zoom]);
 
+  const locationMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const locationMarkerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Trigger geolocation programmatically
   const triggerGeolocate = useCallback(async (): Promise<void> => {
     if (!map.current) return;
@@ -87,10 +90,30 @@ export function useMapInstance({
       });
     });
 
-    map.current.flyTo({
-      center: [position.coords.longitude, position.coords.latitude],
-      zoom: 10
-    });
+    const { longitude, latitude } = position.coords;
+
+    map.current.flyTo({ center: [longitude, latitude], zoom: Math.max(map.current.getZoom(), 10) });
+
+    // Remove any existing marker and pending timeout
+    if (locationMarkerTimeoutRef.current) {
+      clearTimeout(locationMarkerTimeoutRef.current);
+      locationMarkerTimeoutRef.current = null;
+    }
+    locationMarkerRef.current?.remove();
+
+    const el = document.createElement('div');
+    el.style.cssText =
+      'width:15px;height:15px;border-radius:50%;background:rgba(59,130,246);border:2px solid white;box-sizing:border-box;';
+
+    locationMarkerRef.current = new mapboxgl.Marker({ element: el })
+      .setLngLat([longitude, latitude])
+      .addTo(map.current);
+
+    locationMarkerTimeoutRef.current = setTimeout(() => {
+      locationMarkerRef.current?.remove();
+      locationMarkerRef.current = null;
+      locationMarkerTimeoutRef.current = null;
+    }, 60_000);
   }, []);
 
   return { map, isLoaded, zoom, triggerGeolocate };
