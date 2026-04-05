@@ -192,6 +192,7 @@ export const getStationTypeName = (code: string) => {
     case 'lpc':
       return 'Lyttelton Port Company';
     case 'levin':
+    case 'guildford':
       return 'Ecowitt';
     case 'mrc':
       return 'Mountain Research Centre';
