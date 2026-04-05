@@ -23,11 +23,6 @@ export default async function processScrapedData(
     temperature ?? null
   );
 
-  const currentAverage = data.windAverage ?? null;
-  const currentGust = data.windGust ?? null;
-  const currentBearing = data.windBearing ?? null;
-  const currentTemperature = data.temperature ?? null;
-
   // add data
   const d = new StationData({
     time: getFlooredTime(station.isHighResolution ? 2 : 10),
@@ -39,18 +34,18 @@ export default async function processScrapedData(
   });
   await d.save();
 
-  // save station flags
-  const updates = {
-    currentAverage: currentAverage,
-    currentGust: currentGust,
-    currentBearing: currentBearing,
-    currentTemperature: currentTemperature
-  } as Partial<StationAttrs>;
+  // Only update current values and lastUpdate when real wind data was scraped
+  const updates = {} as Partial<StationAttrs>;
 
   if (data.windAverage != null || data.windGust != null) {
-    updates.lastUpdate = new Date();
     updates.isOffline = false;
+    updates.lastUpdate = new Date();
+    updates.currentAverage = data.windAverage ?? null;
+    updates.currentGust = data.windGust ?? null;
+    updates.currentBearing = data.windBearing ?? null;
+    updates.currentTemperature = data.temperature ?? null;
   }
+
   if (
     data.windAverage != null &&
     data.windGust != null &&
