@@ -43,14 +43,15 @@ interface StationProperties {
   lastUpdate: string | null;
 }
 
-const STALE_MS = 20 * 60 * 1000; // 20 min — dim the marker
+const SEMI_STALE_MS = 10 * 60 * 1000; // 10 min — transparency
+const STALE_MS = 20 * 60 * 1000; // 20 min — more transparency
 const EXPIRED_MS = 60 * 60 * 1000; // 60 min — render as empty circle
 
 /** Reduced opacity for stale data */
 function getMarkerOpacity(lastUpdate: string | null): string {
   if (!lastUpdate) return '1';
   const ageMs = Date.now() - new Date(lastUpdate).getTime();
-  return ageMs > STALE_MS ? '0.3' : '1';
+  return ageMs > SEMI_STALE_MS ? (ageMs > STALE_MS ? '0.3' : '0.6') : '1';
 }
 
 function isDataExpired(lastUpdate: string | null): boolean {
