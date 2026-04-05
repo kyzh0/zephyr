@@ -43,15 +43,15 @@ interface StationProperties {
   lastUpdate: string | null;
 }
 
-const SEMI_STALE_MS = 10 * 60 * 1000; // 10 min — transparency
+const FRESH_MS = 10 * 60 * 1000; // 10 min — transparency
 const STALE_MS = 20 * 60 * 1000; // 20 min — more transparency
-const EXPIRED_MS = 60 * 60 * 1000; // 60 min — render as empty circle
+const EXPIRED_MS = 60 * 60 * 1000; // 60 min — empty circle
 
 /** Reduced opacity for stale data */
 function getMarkerOpacity(lastUpdate: string | null): string {
   if (!lastUpdate) return '1';
   const ageMs = Date.now() - new Date(lastUpdate).getTime();
-  return ageMs > SEMI_STALE_MS ? (ageMs > STALE_MS ? '0.3' : '0.6') : '1';
+  return ageMs > FRESH_MS ? (ageMs > STALE_MS ? '0.3' : '0.6') : '1';
 }
 
 function isDataExpired(lastUpdate: string | null): boolean {
@@ -170,6 +170,7 @@ function createMarkerElement(
   container.dataset.isOffline = String(isOffline ?? false);
   container.dataset.validBearings = validBearings ?? '';
   container.dataset.lastUpdate = lastUpdate ?? '';
+  container.dataset.expired = String(isDataExpired(lastUpdate));
   container.style.zIndex = validBearings ? '4' : isOffline ? '2' : '3'; // valid bearings above normal, offline below
   container.style.opacity = getMarkerOpacity(lastUpdate);
 
@@ -198,6 +199,7 @@ function updateMarkerElement(
   marker.dataset.isOffline = String(props.isOffline ?? false);
   marker.dataset.validBearings = props.validBearings ?? '';
   marker.dataset.lastUpdate = props.lastUpdate ?? '';
+  marker.dataset.expired = String(isDataExpired(props.lastUpdate));
   marker.style.opacity = getMarkerOpacity(props.lastUpdate);
 
   const arrow = marker.querySelector<HTMLDivElement>('.marker-arrow');
@@ -597,6 +599,49 @@ export function useStationMarkers({
     }
   }, [withErrorHandling]);
 
+  // Re-evaluate staleness (opacity + expired state) for every marker each tick.
+  // This is needed because stations with no new data are never returned by
+  // listStationsUpdatedSince, so their visual state must be updated independently
+  // as wall-clock time crosses the STALE / EXPIRED thresholds.
+  const refreshMarkerStaleness = useCallback(() => {
+    for (const item of markersRef.current) {
+      const lastUpdate = item.marker.dataset.lastUpdate ?? null;
+      const isOffline = item.marker.dataset.isOffline === 'true';
+
+      item.marker.style.opacity = getMarkerOpacity(lastUpdate);
+
+      const expired = isDataExpired(lastUpdate);
+      const prevExpired = item.marker.dataset.expired === 'true';
+      if (expired === prevExpired) continue;
+
+      item.marker.dataset.expired = String(expired);
+
+      const arrow = item.marker.querySelector<HTMLDivElement>('.marker-arrow');
+      if (!arrow) continue;
+
+      const avg = item.marker.dataset.avg === '' ? null : Number(item.marker.dataset.avg);
+      const gust = item.marker.dataset.gust === '' ? null : Number(item.marker.dataset.gust);
+      const bearing =
+        item.marker.dataset.bearing === '' ? null : Number(item.marker.dataset.bearing);
+      const validBearings =
+        item.marker.dataset.validBearings !== ''
+          ? (item.marker.dataset.validBearings ?? null)
+          : null;
+
+      arrow.innerHTML = renderToStaticMarkup(
+        <StationMarker
+          bearing={expired ? undefined : (bearing ?? undefined)}
+          speed={expired ? undefined : (avg ?? undefined)}
+          gust={expired ? undefined : (gust ?? undefined)}
+          validBearings={validBearings ?? undefined}
+          isOffline={isOffline}
+          unit={unitRef.current}
+          sport={sportRef.current}
+        />
+      );
+    }
+  }, []);
+
   // Initialize when map loads
   useEffect(() => {
     if (isMapLoaded && !isInitialized) {
@@ -610,10 +655,11 @@ export function useStationMarkers({
 
     const intervalId = setInterval(() => {
       void refresh();
+      refreshMarkerStaleness();
     }, REFRESH_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [isHistoricData, isMapLoaded, refresh]);
+  }, [isHistoricData, isMapLoaded, refresh, refreshMarkerStaleness]);
 
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {

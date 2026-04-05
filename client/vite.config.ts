@@ -43,10 +43,9 @@ export default defineConfig({
               cacheableResponse: { statuses: [0, 200] }
             }
           },
-          // Station list — stale-while-revalidate; 1h TTL so an offline session
-          // longer than that serves no cached markers rather than stale ones
+          // Station list — stale-while-revalidate; 1h TTL
           {
-            urlPattern: /\/stations(\?.*)?$/,
+            urlPattern: /^https:\/\/api(\.test)?\.zephyrapp\.nz\/stations(\?.*)?$/,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'station-list',
@@ -59,7 +58,7 @@ export default defineConfig({
           },
           // Station detail / data endpoints — same 1h TTL
           {
-            urlPattern: /\/stations\/.+/,
+            urlPattern: /^https:\/\/api(\.test)?\.zephyrapp\.nz\/stations\/.+/,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'station-data',
