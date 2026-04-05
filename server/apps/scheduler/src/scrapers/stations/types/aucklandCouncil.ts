@@ -2,6 +2,7 @@ import pLimit from 'p-limit';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type AucklandCouncilRow = {
   time: string; // unix seconds as string
@@ -36,11 +37,9 @@ export default async function scrapeAucklandCouncilData(
           if (data?.data?.length === 1) {
             const d = data.data[0];
 
-            // ignore data older than 40 mins
+            // skip stale data
             const unix = Number(d.time);
-            const isFresh = Number.isFinite(unix) && Date.now() - unix * 1000 < 40 * 60 * 1000;
-
-            if (d.invalid === '0' && isFresh) {
+            if (d.invalid === '0' && isTimestampFresh(unix)) {
               const avg = Number(d.Uw);
               if (avg !== null && Number.isFinite(avg)) {
                 windAverage = avg * 3.6;

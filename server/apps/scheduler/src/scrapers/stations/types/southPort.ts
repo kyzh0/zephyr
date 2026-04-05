@@ -3,6 +3,7 @@ import { parse } from 'date-fns';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type SouthPortResponse = {
   lastReading: string; // "yyyy-MM-dd HH:mm:ss"
@@ -33,7 +34,7 @@ export default async function scrapeSouthPortData(stations: WithId<StationAttrs>
         'Pacific/Auckland'
       );
 
-      if (Date.now() - time.getTime() < 20 * 60 * 1000) {
+      if (isTimestampFresh(time)) {
         windAverage = Math.round(data.AveSpeed * 1.852 * 10) / 10; // kt -> km/h
         windGust = Math.round(data.GustSpeed * 1.852 * 10) / 10;
         windBearing = Number(data.AveDirection);

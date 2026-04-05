@@ -3,6 +3,7 @@ import { parse } from 'date-fns';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type PotSumLiveFetch = {
   Wind: string;
@@ -68,8 +69,8 @@ export default async function scrapeWindicatorData(
       const ts = fetch.Timestamp.replace('71/', '7/'); // 7/XX/20XX returns as 71/XX/20XX
       const time = fromZonedTime(parse(ts, 'dd/MM/yyyy HH:mm', new Date()), 'Pacific/Auckland');
 
-      // skip if older than 20 min
-      if (Date.now() - time.getTime() < 20 * 60 * 1000) {
+      // skip stale data
+      if (isTimestampFresh(time)) {
         const avg = parseNumeric(fetch.Wind);
         const gust = parseNumeric(fetch.Gust);
         windAverage = avg === null ? null : avg * 1.852; // kt -> km/h

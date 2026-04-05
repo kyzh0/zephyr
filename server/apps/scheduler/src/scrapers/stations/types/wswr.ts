@@ -1,5 +1,6 @@
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type WswrRow = {
   record_time: string; // e.g. "2026-01-12T01:23:45"
@@ -29,11 +30,10 @@ export default async function scrapeWswrData(stations: WithId<StationAttrs>[]): 
 
     if (data?.length) {
       const d = data[0];
-
       const time = new Date(`${d.record_time}.000Z`);
-      const ts = time.getTime();
 
-      if (!Number.isNaN(ts) && Date.now() - ts < 20 * 60 * 1000) {
+      // skip stale data
+      if (isTimestampFresh(time)) {
         windAverage = Math.round(d.windspd_10mnavg * 1.852 * 10) / 10; // kt -> km/h
         windGust = Math.round(d.windgst_10mnmax * 1.852 * 10) / 10;
         windBearing = d.winddir_10mnavg;

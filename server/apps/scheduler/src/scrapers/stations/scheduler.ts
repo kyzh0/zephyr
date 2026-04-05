@@ -15,59 +15,71 @@ export async function startStationScheduler(): Promise<void> {
   });
 
   // stations
-  cron.schedule('*/10 * * * *', async () => {
-    logger.info('----- Starting station scraper -----', { service: 'station' });
+  cron.schedule(
+    '*/10 * * * *',
+    async () => {
+      logger.info('----- Starting station scraper -----', { service: 'station' });
 
-    let ts = Date.now();
-    await runScraper(false);
+      let ts = Date.now();
+      await runScraper(false);
 
-    logger.info(
-      `----- Station scraper finished, ${Math.floor((Date.now() - ts) / 1000)}s elapsed -----`,
-      { service: 'station' }
-    );
+      logger.info(
+        `----- Station scraper finished, ${Math.floor((Date.now() - ts) / 1000)}s elapsed -----`,
+        { service: 'station' }
+      );
 
-    logger.info('----- Process json output start -----', { service: 'json' });
-    ts = Date.now();
-    await processStationJson();
-    logger.info(`----- Process json output end - ${Date.now() - ts}ms elapsed. -----`, {
-      service: 'json'
-    });
-  }, { noOverlap: true });
+      logger.info('----- Process json output start -----', { service: 'json' });
+      ts = Date.now();
+      await processStationJson();
+      logger.info(`----- Process json output end - ${Date.now() - ts}ms elapsed. -----`, {
+        service: 'json'
+      });
+    },
+    { noOverlap: true }
+  );
 
   // hi res stations
-  cron.schedule('*/2 * * * *', async () => {
-    logger.info('----- Starting high resolution station scraper -----', {
-      service: 'station'
-    });
+  cron.schedule(
+    '*/2 * * * *',
+    async () => {
+      logger.info('----- Starting high resolution station scraper -----', {
+        service: 'station'
+      });
 
-    let ts = Date.now();
-    await runScraper(true);
+      let ts = Date.now();
+      await runScraper(true);
 
-    logger.info(
-      `----- High resolution station scraper finished, ${Math.floor((Date.now() - ts) / 1000)}s elapsed -----`,
-      { service: 'station' }
-    );
+      logger.info(
+        `----- High resolution station scraper finished, ${Math.floor((Date.now() - ts) / 1000)}s elapsed -----`,
+        { service: 'station' }
+      );
 
-    logger.info('----- Process high resolution json output start -----', { service: 'json' });
-    ts = Date.now();
-    await processHighResolutionStationJson();
-    logger.info(
-      `----- Process high resolution json output end - ${Date.now() - ts}ms elapsed. -----`,
-      { service: 'json' }
-    );
-  }, { noOverlap: true });
+      logger.info('----- Process high resolution json output start -----', { service: 'json' });
+      ts = Date.now();
+      await processHighResolutionStationJson();
+      logger.info(
+        `----- Process high resolution json output end - ${Date.now() - ts}ms elapsed. -----`,
+        { service: 'json' }
+      );
+    },
+    { noOverlap: true }
+  );
 
   // missed readings
-  cron.schedule('3,13,23,33,43,53,6,16,26,36,46,56,35 * * * *', async () => {
-    logger.info('----- Check missed readings start -----', { service: 'miss' });
+  cron.schedule(
+    '3,13,23,33,43,53,6,16,26,36,46,56,35 * * * *',
+    async () => {
+      logger.info('----- Check missed readings start -----', { service: 'miss' });
 
-    const ts = Date.now();
-    await rerunScraper();
+      const ts = Date.now();
+      await rerunScraper();
 
-    logger.info(`--- Check missed readings end - ${Date.now() - ts}ms elapsed. -----`, {
-      service: 'miss'
-    });
-  }, { noOverlap: true });
+      logger.info(`--- Check missed readings end - ${Date.now() - ts}ms elapsed. -----`, {
+        service: 'miss'
+      });
+    },
+    { noOverlap: true }
+  );
 
   // errors
   cron.schedule('5 */6 * * *', async () => {

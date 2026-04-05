@@ -4,6 +4,7 @@ import { parse } from 'date-fns';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type OmaramaResponse = {
   average_speed?: number | string;
@@ -147,12 +148,12 @@ export default async function scrapeNavigatusData(stations: WithId<StationAttrs>
                 'Pacific/Auckland'
               );
 
-              // skip if data older than 20 min
-              if (Date.now() - lastUpdate.getTime() < 20 * 60 * 1000) {
+              // skip stale data
+              if (isTimestampFresh(lastUpdate)) {
                 const avg = Number(data.wind_speed);
                 if (data.wind_speed !== null && Number.isFinite(avg)) {
                   windAverage = Math.round(avg * 1.852 * 100) / 100;
-                } // kt -> km/h
+                }
 
                 const gust = Number(data.wind_gust);
                 if (data.wind_gust !== null && Number.isFinite(gust)) {

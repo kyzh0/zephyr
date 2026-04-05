@@ -2,6 +2,7 @@ import pLimit from 'p-limit';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type EcowittMetric = {
   time: string | number;
@@ -39,23 +40,21 @@ export default async function scrapeEcowittData(stations: WithId<StationAttrs>[]
             `https://api.ecowitt.net/api/v3/device/real_time?api_key=${ECOWITT_API_KEY}&application_key=${ECOWITT_APPLICATION_KEY}&mac=${station.externalId}&wind_speed_unitid=7&temp_unitid=1`
           );
 
-          const timeNow = Math.round(Date.now() / 1000); // epoch time in s
-
           const d = data?.data;
           if (d) {
             const w = d.wind;
-            if (w?.wind_speed && timeNow - Number(w.wind_speed.time) < 20 * 60) {
+            if (w?.wind_speed && isTimestampFresh(Number(w.wind_speed.time))) {
               windAverage = Number(w.wind_speed.value);
             }
-            if (w?.wind_gust && timeNow - Number(w.wind_gust.time) < 20 * 60) {
+            if (w?.wind_gust && isTimestampFresh(Number(w.wind_gust.time))) {
               windGust = Number(w.wind_gust.value);
             }
-            if (w?.wind_direction && timeNow - Number(w.wind_direction.time) < 20 * 60) {
+            if (w?.wind_direction && isTimestampFresh(Number(w.wind_direction.time))) {
               windBearing = Number(w.wind_direction.value);
             }
 
             const temp = d.outdoor?.temperature;
-            if (temp && timeNow - Number(temp.time) < 20 * 60) {
+            if (temp && isTimestampFresh(Number(temp.time))) {
               temperature = Number(temp.value);
             }
           }

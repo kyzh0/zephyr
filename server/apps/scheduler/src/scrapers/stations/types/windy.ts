@@ -2,6 +2,7 @@ import pLimit from 'p-limit';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type WindyResponse = {
   data: WindyData;
@@ -40,9 +41,10 @@ export default async function scrapeWindyData(stations: WithId<StationAttrs>[]):
             data.data.ts.length == data.data.temp.length
           ) {
             const i = data.data.ts.length - 1;
-            const ts = new Date(data.data.ts[i]).getTime();
-            // skip if data is older than 20 mins
-            if (!Number.isNaN(ts) && Date.now() - ts < 20 * 60 * 1000) {
+            const ts = new Date(data.data.ts[i]);
+
+            // skip stale data
+            if (isTimestampFresh(ts)) {
               windAverage = Math.round(data.data.wind[i] * 3.6 * 100) / 100; // m/s -> km/h
               windGust = Math.round(data.data.gust[i] * 3.6 * 100) / 100;
               windBearing = data.data.windDir[i];
