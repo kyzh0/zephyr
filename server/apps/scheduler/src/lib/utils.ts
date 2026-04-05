@@ -1,6 +1,6 @@
 const FRESHNESS_THRESHOLD_MS = 15 * 60 * 1000;
 
-export function isTimestampFresh(timestamp?: Date | number | null): boolean {
+export function isTimestampFresh(timestamp?: Date | number | null, overrideMins?: number): boolean {
   if (timestamp == null) {
     return false;
   }
@@ -17,5 +17,6 @@ export function isTimestampFresh(timestamp?: Date | number | null): boolean {
       : timestamp < 1e10
         ? timestamp * 1000
         : timestamp;
-  return !Number.isNaN(ms) && Date.now() - ms < FRESHNESS_THRESHOLD_MS;
+  const threshold = overrideMins ? overrideMins * 60 * 1000 : FRESHNESS_THRESHOLD_MS;
+  return Number.isFinite(ms) && Date.now() - ms < threshold;
 }

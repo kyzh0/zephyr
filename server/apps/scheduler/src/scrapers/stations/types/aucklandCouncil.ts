@@ -39,7 +39,7 @@ export default async function scrapeAucklandCouncilData(
 
             // skip stale data
             const unix = Number(d.time);
-            if (d.invalid === '0' && isTimestampFresh(unix)) {
+            if (d.invalid === '0' && isTimestampFresh(unix, 40)) {
               const avg = Number(d.Uw);
               if (avg !== null && Number.isFinite(avg)) {
                 windAverage = avg * 3.6;
