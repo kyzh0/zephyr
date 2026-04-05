@@ -282,8 +282,10 @@ export const getMinutesAgo = (date: Date): string => {
     return '1 min ago';
   } else if (minutes > 60 * 24) {
     return `${Math.floor(minutes / (60 * 24))} days ago`;
-  } else if (minutes > 60) {
+  } else if (minutes > 120) {
     return `${Math.floor(minutes / 60)} hours ago`;
+  } else if (minutes > 60) {
+    return 'an hour ago';
   } else {
     return `${minutes} mins ago`;
   }
