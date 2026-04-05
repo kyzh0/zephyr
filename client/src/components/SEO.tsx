@@ -28,9 +28,7 @@ export default function SEO({
   noindex = false,
   jsonLd
 }: SEOProps) {
-  const pageTitle = title
-    ? `${title} | ${SITE_NAME}`
-    : `${SITE_NAME} — Live Wind & Weather for NZ Free Flying`;
+  const pageTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} — Live Wind & Weather NZ`;
   const canonicalUrl = `${BASE_URL}${path}`;
 
   return (

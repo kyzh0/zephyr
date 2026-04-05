@@ -4,17 +4,18 @@ import axios from 'axios';
 
 import { logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type HilltopPoint = { t: string; v: string | number };
 type HilltopResponse = { Data?: HilltopPoint[] };
 
-// check data is less than 40 mins old
+// skip stale data
 function getFreshValue(point: HilltopPoint | undefined): number | null {
   if (!point?.t) {
     return null;
   }
   const lastUpdate = new Date(point.t);
-  if (Number.isNaN(lastUpdate.getTime()) || Date.now() - lastUpdate.getTime() >= 40 * 60 * 1000) {
+  if (!isTimestampFresh(lastUpdate)) {
     logger.warn('hbrc stale data', {
       service: 'station',
       type: 'hbrc'

@@ -4,6 +4,7 @@ import { parse } from 'date-fns';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 function extractNumber(html: string, startStr: string, endStr: string): number | null {
   const i = html.indexOf(startStr);
@@ -53,8 +54,8 @@ export default async function scrapeWeatherProData(
               }
             }
 
-            // skip if older than 20 mins
-            if (time && Date.now() - time.getTime() < 20 * 60 * 1000) {
+            // skip stale data
+            if (isTimestampFresh(time)) {
               windAverage = extractNumber(
                 data,
                 'Wind Speed</td><td style="font-size:200%;">:',

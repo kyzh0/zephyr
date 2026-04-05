@@ -6,12 +6,14 @@ import { startStationScheduler } from './scrapers/stations/scheduler';
 import { startCamScheduler } from './scrapers/cams/scheduler';
 import { startSoundingScheduler } from './scrapers/soundings/scheduler';
 
-const { NODE_ENV, DB_CONNECTION_STRING } = process.env;
+const { NODE_ENV } = process.env;
 
 if (NODE_ENV !== 'production' && NODE_ENV !== 'staging') {
   dotenv.config({ path: new URL('../../../.env', import.meta.url).pathname });
   dotenv.config({ path: new URL('../.env', import.meta.url).pathname });
 }
+
+const { DB_CONNECTION_STRING } = process.env;
 
 if (!DB_CONNECTION_STRING) {
   logger.error('DB_CONNECTION_STRING is not set');

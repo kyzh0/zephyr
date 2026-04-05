@@ -9,6 +9,7 @@ import {
   type WithId
 } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 export default async function scrapeWhanganuiInletData(
   stations: WithId<StationAttrs>[]
@@ -41,11 +42,8 @@ export default async function scrapeWhanganuiInletData(
             'Pacific/Auckland'
           );
 
-          // skip if data older than 20 min
-          if (
-            !Number.isNaN(lastUpdate.getTime()) &&
-            Date.now() - lastUpdate.getTime() < 20 * 60 * 1000
-          ) {
+          // skip stale data
+          if (isTimestampFresh(lastUpdate)) {
             skipUpdate = false;
           }
         }

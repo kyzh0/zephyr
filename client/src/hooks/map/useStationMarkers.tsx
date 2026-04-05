@@ -40,10 +40,27 @@ interface StationProperties {
   currentBearing: number | null;
   validBearings: string | null;
   isOffline: boolean | null;
+  lastUpdate: string | null;
+}
+
+const FRESH_MS = 10 * 60 * 1000; // 10 min — transparency
+const STALE_MS = 20 * 60 * 1000; // 20 min — more transparency
+const EXPIRED_MS = 60 * 60 * 1000; // 60 min — empty circle
+
+/** Reduced opacity for stale data */
+function getMarkerOpacity(lastUpdate: string | null): string {
+  if (!lastUpdate) return '1';
+  const ageMs = Date.now() - new Date(lastUpdate).getTime();
+  return ageMs > FRESH_MS ? (ageMs > STALE_MS ? '0.3' : '0.6') : '1';
+}
+
+function isDataExpired(lastUpdate: string | null): boolean {
+  if (!lastUpdate) return false;
+  return Date.now() - new Date(lastUpdate).getTime() > EXPIRED_MS;
 }
 
 /**
- * Extract station properties from GeoJSON feature with proper typing
+ * Extract station properties from GeoJSON feature
  */
 const extractStationProperties = (properties: Record<string, unknown>): StationProperties => ({
   dbId: properties.dbId as string,
@@ -53,7 +70,8 @@ const extractStationProperties = (properties: Record<string, unknown>): StationP
   currentGust: properties.currentGust as number | null,
   currentBearing: properties.currentBearing as number | null,
   validBearings: properties.validBearings as string | null,
-  isOffline: properties.isOffline as boolean | null
+  isOffline: properties.isOffline as boolean | null,
+  lastUpdate: (properties.lastUpdate as string | null) ?? null
 });
 
 /**
@@ -98,8 +116,16 @@ function createMarkerElement(
   onHover: (popup: mapboxgl.Popup, show: boolean) => void,
   popup: mapboxgl.Popup
 ): HTMLDivElement {
-  const { dbId, elevation, currentAverage, currentGust, currentBearing, validBearings, isOffline } =
-    props;
+  const {
+    dbId,
+    elevation,
+    currentAverage,
+    currentGust,
+    currentBearing,
+    validBearings,
+    isOffline,
+    lastUpdate
+  } = props;
 
   // Arrow icon (div with background image)
   const arrow = document.createElement('div');
@@ -108,11 +134,12 @@ function createMarkerElement(
   // Wind speed marker
   arrow.style.backgroundImage = '';
   arrow.style.transform = '';
+  const expired = isDataExpired(lastUpdate);
   arrow.innerHTML = renderToStaticMarkup(
     <StationMarker
-      bearing={currentBearing ?? undefined}
-      speed={currentAverage ?? undefined}
-      gust={currentGust ?? undefined}
+      bearing={expired ? undefined : (currentBearing ?? undefined)}
+      speed={expired ? undefined : (currentAverage ?? undefined)}
+      gust={expired ? undefined : (currentGust ?? undefined)}
       validBearings={validBearings ?? undefined}
       isOffline={isOffline ?? undefined}
       unit={unit}
@@ -142,7 +169,10 @@ function createMarkerElement(
   container.dataset.bearing = currentBearing != null ? String(currentBearing) : '';
   container.dataset.isOffline = String(isOffline ?? false);
   container.dataset.validBearings = validBearings ?? '';
+  container.dataset.lastUpdate = lastUpdate ?? '';
+  container.dataset.expired = String(isDataExpired(lastUpdate));
   container.style.zIndex = validBearings ? '4' : isOffline ? '2' : '3'; // valid bearings above normal, offline below
+  container.style.opacity = getMarkerOpacity(lastUpdate);
 
   container.appendChild(arrow);
 
@@ -168,16 +198,20 @@ function updateMarkerElement(
   marker.dataset.bearing = currentBearing != null ? String(currentBearing) : '';
   marker.dataset.isOffline = String(props.isOffline ?? false);
   marker.dataset.validBearings = props.validBearings ?? '';
+  marker.dataset.lastUpdate = props.lastUpdate ?? '';
+  marker.dataset.expired = String(isDataExpired(props.lastUpdate));
+  marker.style.opacity = getMarkerOpacity(props.lastUpdate);
 
   const arrow = marker.querySelector<HTMLDivElement>('.marker-arrow');
   if (arrow) {
+    const expired = isDataExpired(props.lastUpdate);
     arrow.style.backgroundImage = '';
     arrow.style.transform = '';
     arrow.innerHTML = renderToStaticMarkup(
       <StationMarker
-        bearing={currentBearing ?? undefined}
-        speed={currentAverage ?? undefined}
-        gust={currentGust ?? undefined}
+        bearing={expired ? undefined : (currentBearing ?? undefined)}
+        speed={expired ? undefined : (currentAverage ?? undefined)}
+        gust={expired ? undefined : (currentGust ?? undefined)}
         validBearings={props.validBearings ?? undefined}
         isOffline={props.isOffline ?? undefined}
         unit={unit}
@@ -431,7 +465,8 @@ export function useStationMarkers({
           item.marker.dataset.validBearings !== ''
             ? (item.marker.dataset.validBearings ?? null)
             : null,
-        isOffline: item.marker.dataset.isOffline === 'true'
+        isOffline: item.marker.dataset.isOffline === 'true',
+        lastUpdate: item.marker.dataset.lastUpdate ?? null
       };
       updateMarkerElement(
         item.marker,
@@ -505,7 +540,8 @@ export function useStationMarkers({
           currentGust: windGust,
           currentBearing: windBearing,
           validBearings,
-          isOffline: false
+          isOffline: false,
+          lastUpdate: null // full opacity
         };
 
         updateMarkerElement(
@@ -552,7 +588,8 @@ export function useStationMarkers({
         currentGust: station.currentGust ?? null,
         currentBearing: station.currentBearing ?? null,
         validBearings: station.validBearings ?? null,
-        isOffline: station.isOffline ?? false
+        isOffline: station.isOffline ?? false,
+        lastUpdate: station.lastUpdate ?? null
       };
 
       updateMarkerElement(item.marker, props, Date.now(), unitRef.current, sportRef.current);
@@ -561,6 +598,49 @@ export function useStationMarkers({
       item.popup.setHTML(createPopupHtml(props, unitRef.current));
     }
   }, [withErrorHandling]);
+
+  // Re-evaluate staleness (opacity + expired state) for every marker each tick.
+  // This is needed because stations with no new data are never returned by
+  // listStationsUpdatedSince, so their visual state must be updated independently
+  // as wall-clock time crosses the STALE / EXPIRED thresholds.
+  const refreshMarkerStaleness = useCallback(() => {
+    for (const item of markersRef.current) {
+      const lastUpdate = item.marker.dataset.lastUpdate ?? null;
+      const isOffline = item.marker.dataset.isOffline === 'true';
+
+      item.marker.style.opacity = getMarkerOpacity(lastUpdate);
+
+      const expired = isDataExpired(lastUpdate);
+      const prevExpired = item.marker.dataset.expired === 'true';
+      if (expired === prevExpired) continue;
+
+      item.marker.dataset.expired = String(expired);
+
+      const arrow = item.marker.querySelector<HTMLDivElement>('.marker-arrow');
+      if (!arrow) continue;
+
+      const avg = item.marker.dataset.avg === '' ? null : Number(item.marker.dataset.avg);
+      const gust = item.marker.dataset.gust === '' ? null : Number(item.marker.dataset.gust);
+      const bearing =
+        item.marker.dataset.bearing === '' ? null : Number(item.marker.dataset.bearing);
+      const validBearings =
+        item.marker.dataset.validBearings !== ''
+          ? (item.marker.dataset.validBearings ?? null)
+          : null;
+
+      arrow.innerHTML = renderToStaticMarkup(
+        <StationMarker
+          bearing={expired ? undefined : (bearing ?? undefined)}
+          speed={expired ? undefined : (avg ?? undefined)}
+          gust={expired ? undefined : (gust ?? undefined)}
+          validBearings={validBearings ?? undefined}
+          isOffline={isOffline}
+          unit={unitRef.current}
+          sport={sportRef.current}
+        />
+      );
+    }
+  }, []);
 
   // Initialize when map loads
   useEffect(() => {
@@ -575,10 +655,11 @@ export function useStationMarkers({
 
     const intervalId = setInterval(() => {
       void refresh();
+      refreshMarkerStaleness();
     }, REFRESH_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [isHistoricData, isMapLoaded, refresh]);
+  }, [isHistoricData, isMapLoaded, refresh, refreshMarkerStaleness]);
 
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {

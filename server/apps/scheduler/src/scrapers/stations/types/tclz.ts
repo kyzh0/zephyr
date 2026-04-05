@@ -1,5 +1,6 @@
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type TclzData = {
   timestamp: string;
@@ -28,11 +29,11 @@ export default async function scrapeTclzData(stations: WithId<StationAttrs>[]): 
       `https://wzdkygbgawkfiqxhkxfs.supabase.co/rest/v1/wxtclz_data_latest?apikey=${process.env.TCLZ_KEY}`
     );
 
-    // skip if older than 20 min
+    // skip stale data
     if (data && data.length) {
       const d = data[0];
       const ts = new Date(d.timestamp);
-      if (Date.now() - ts.getTime() < 20 * 60 * 1000) {
+      if (isTimestampFresh(ts)) {
         windAverage = d.wind_speed;
         windGust = d.wind_gust;
         windBearing = d.wind_direction;

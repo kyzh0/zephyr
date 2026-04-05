@@ -2,6 +2,7 @@ import pLimit from 'p-limit';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type HarvestSite = { site_id: string };
 type HarvestSiteListResponse = {
@@ -148,10 +149,9 @@ function extractFreshHarvestValue(resp: HarvestGetDataResponse): number | null {
   }
 
   const unix = Number(row.unix_time.replace('.000', ''));
-  const ts = new Date(unix * 1000);
 
-  // skip data older than 40 mins
-  if (Number.isNaN(ts.getTime()) || Date.now() - ts.getTime() >= 40 * 60 * 1000) {
+  // skip stale data
+  if (!isTimestampFresh(unix)) {
     logger.warn('harvest stale data', {
       service: 'station',
       type: 'harvest'

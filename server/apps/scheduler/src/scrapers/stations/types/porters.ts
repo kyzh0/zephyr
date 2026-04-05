@@ -6,6 +6,7 @@ import { parse } from 'date-fns';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type PorterResult = {
   id: string;
@@ -98,8 +99,8 @@ export default async function scrapePortersData(stations: WithId<StationAttrs>[]
     let text = await ocr(worker, dir, 'portersbasetime.jpg', croppedBuf);
     let time = parsePortersTime(text);
 
-    // ignore if data is older than 30 mins
-    if (time && Date.now() - time.getTime() < 30 * 60 * 1000) {
+    // skip stale data
+    if (isTimestampFresh(time)) {
       // avg
       croppedBuf = await crop(imgBuff, { left: 195, top: 7115, width: 70, height: 20 });
       text = await ocr(worker, dir, 'portersbaseavg.jpg', croppedBuf);
@@ -143,7 +144,7 @@ export default async function scrapePortersData(stations: WithId<StationAttrs>[]
     text = await ocr(worker, dir, 'porterstbartime.jpg', croppedBuf);
     time = parsePortersTime(text);
 
-    if (time && Date.now() - time.getTime() < 30 * 60 * 1000) {
+    if (isTimestampFresh(time)) {
       // avg
       croppedBuf = await crop(imgBuff, { left: 478, top: 7112, width: 70, height: 20 });
       text = await ocr(worker, dir, 'porterstbaravg.jpg', croppedBuf);
@@ -184,7 +185,7 @@ export default async function scrapePortersData(stations: WithId<StationAttrs>[]
     text = await ocr(worker, dir, 'portersridgelinetime.jpg', croppedBuf);
     time = parsePortersTime(text);
 
-    if (time && Date.now() - time.getTime() < 30 * 60 * 1000) {
+    if (isTimestampFresh(time)) {
       // avg
       croppedBuf = await crop(imgBuff, { left: 760, top: 7112, width: 70, height: 20 });
       text = await ocr(worker, dir, 'portersridgelineavg.jpg', croppedBuf);

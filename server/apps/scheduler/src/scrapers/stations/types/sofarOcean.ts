@@ -2,6 +2,7 @@ import pLimit from 'p-limit';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type SofarOceanWind = {
   speed: number; // m/s
@@ -43,10 +44,10 @@ export default async function scrapeSofarOceanData(
           const current = data?.data?.currentConditions;
           if (current?.length === 1) {
             const cc = current[0];
-            const lastUpdate = new Date(cc.timeLastUpdatedUTC).getTime();
+            const lastUpdate = new Date(cc.timeLastUpdatedUTC);
 
-            // only update if data is less than 40 min old
-            if (!Number.isNaN(lastUpdate) && Date.now() - lastUpdate < 40 * 60 * 1000) {
+            // skip stale data
+            if (isTimestampFresh(lastUpdate)) {
               temperature = cc.temperature ?? null;
 
               const wind = cc.wind;

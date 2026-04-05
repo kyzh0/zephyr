@@ -2,6 +2,7 @@ import pLimit from 'p-limit';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 type WindGuruResponse = {
   wind_avg?: number; // kt
@@ -32,10 +33,9 @@ export default async function scrapeWindGuruData(stations: WithId<StationAttrs>[
             }
           );
 
-          if (data && data.unixtime) {
-            const time = new Date(data.unixtime * 1000);
-
-            if (time && Date.now() - time.getTime() < 20 * 60 * 1000) {
+          if (data) {
+            // skip stale data
+            if (isTimestampFresh(data.unixtime)) {
               const avg = Number(data.wind_avg);
               if (data.wind_avg !== null && Number.isFinite(avg)) {
                 windAverage = Math.round(avg * 1.852 * 100) / 100;
