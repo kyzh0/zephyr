@@ -20,9 +20,12 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form';
+
 import { addLanding } from '@/services/landing.service';
 import type { ILanding } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
+import { ApiError } from '@/services/api-error';
+import { useInvalidateLandings } from '@/hooks';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -64,6 +67,7 @@ function parseCoordinates(
 
 export default function AdminAddLanding() {
   const navigate = useNavigate();
+  const invalidateLandings = useInvalidateLandings();
   const [elevationLoading, setElevationLoading] = useState(false);
 
   const form = useForm<FormValues>({
@@ -136,10 +140,12 @@ export default function AdminAddLanding() {
 
     try {
       await addLanding(landing);
+      await invalidateLandings();
       toast.success('Landing added successfully');
       navigate('/admin/landings');
     } catch (error) {
-      toast.error(`Failed to add landing: ${(error as Error).message}`);
+      const msg = error instanceof ApiError ? error.message : 'Unknown error';
+      toast.error(`Failed to add landing: ${msg}`);
     }
   }
 

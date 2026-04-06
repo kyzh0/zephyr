@@ -2,32 +2,32 @@ import { useCallback, useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { formatInTimeZone } from 'date-fns-tz';
 
-import { getCamById, listCamsUpdatedSince } from '@/services/cam.service';
-import type { ICam } from '@/models/cam.model';
+import { useWebcams } from '@/hooks';
 import { getWebcamGeoJson } from '@/components/map';
 import { useNavigate } from 'react-router-dom';
-import { REFRESH_INTERVAL_MS } from '@/lib/utils';
-import { useWebcams } from '@/hooks';
 
 interface UseWebcamMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
   isMapLoaded: boolean;
   isVisible: boolean;
-  onRefresh?: (updatedIds: string[]) => void;
+}
+
+interface UseWebcamMarkersResult {
+  markers: React.RefObject<HTMLDivElement[]>;
+  setVisibility: (visible: boolean) => void;
+  error: Error | null;
 }
 
 export function useWebcamMarkers({
   map,
   isMapLoaded,
-  isVisible,
-  onRefresh
-}: UseWebcamMarkersOptions) {
+  isVisible
+}: UseWebcamMarkersOptions): UseWebcamMarkersResult {
   const navigate = useNavigate();
   const markersRef = useRef<HTMLDivElement[]>([]);
-  const lastRefreshRef = useRef(0);
   const isVisibleRef = useRef(isVisible);
 
-  const { webcams, isLoading: webcamsLoading } = useWebcams();
+  const { webcams, isLoading: webcamsLoading, error } = useWebcams();
 
   // Keep visibility ref in sync
   useEffect(() => {
@@ -74,7 +74,7 @@ export function useWebcamMarkers({
       el.style.zIndex = '10';
       el.id = dbId;
       el.className = 'webcam py-[18px] px-2 rounded-lg cursor-pointer';
-      el.dataset.timestamp = String(timestamp);
+
       el.addEventListener('click', () => navigate(`/webcams/${dbId}`));
       el.appendChild(text);
       el.appendChild(img);
@@ -85,91 +85,71 @@ export function useWebcamMarkers({
     [navigate]
   );
 
-  // Check for missed webcam updates
-  const checkMissedUpdates = useCallback(async (): Promise<ReturnType<typeof getWebcamGeoJson>> => {
-    const distinctTimestamps = [...new Set(markersRef.current.map((m) => m.dataset.timestamp))];
-    if (distinctTimestamps.length < 2) return null;
+  // Track mapbox Marker instances so we can remove them on cleanup
+  const mapboxMarkersRef = useRef<mapboxgl.Marker[]>([]);
 
-    const sorted = distinctTimestamps.map(Number).sort((a, b) => a - b);
-    const min = sorted[0];
-    const secondMin = sorted[1];
+  // Sync markers whenever webcam data changes
+  useEffect(() => {
+    if (!isMapLoaded || !map.current || webcamsLoading || !webcams?.length) return;
 
-    if (secondMin - min <= 1.1 * REFRESH_INTERVAL_MS) return null;
+    const geoJson = getWebcamGeoJson(webcams);
+    if (!geoJson?.features.length) return;
 
-    const cams: ICam[] = [];
-    const oldestMarkers = markersRef.current.filter((m) => Number(m.dataset.timestamp) === min);
+    const timestamp = Date.now();
 
-    for (const m of oldestMarkers) {
-      const cam = await getCamById(m.id);
-      if (cam) cams.push(cam);
-    }
+    if (markersRef.current.length === 0) {
+      // Initial creation
+      for (const f of geoJson.features) {
+        const name = f.properties.name as string;
+        const dbId = f.properties.dbId as string;
+        const currentTime = f.properties.currentTime as Date;
+        const currentUrl = f.properties.currentUrl as string;
 
-    return getWebcamGeoJson(cams);
-  }, []);
-
-  // Refresh webcams
-  const refresh = useCallback(async () => {
-    if (document.visibilityState !== 'visible') return;
-    if (!isVisibleRef.current) return;
-    if (!markersRef.current.length) return;
-
-    let timestamp = Date.now();
-    if (timestamp - lastRefreshRef.current < REFRESH_INTERVAL_MS) return;
-
-    lastRefreshRef.current = timestamp;
-
-    const newestMarker = markersRef.current.reduce((prev, current) =>
-      Number(prev.dataset.timestamp) > Number(current.dataset.timestamp) ? prev : current
-    );
-
-    const webcams = await listCamsUpdatedSince(
-      Math.round(Number(newestMarker.dataset.timestamp) / 1000)
-    );
-    let geoJson = getWebcamGeoJson(webcams);
-
-    if (!geoJson?.features.length) {
-      geoJson = await checkMissedUpdates();
-      if (geoJson) {
-        const distinctTimestamps = [...new Set(markersRef.current.map((m) => m.dataset.timestamp))];
-        const sorted = distinctTimestamps.map(Number).sort((a, b) => a - b);
-        if (sorted.length >= 2) timestamp = sorted[1];
+        const el = createWebcamMarker(dbId, name, currentTime, currentUrl, timestamp);
+        el.style.visibility = isVisibleRef.current ? 'visible' : 'hidden';
+        markersRef.current.push(el);
+        const mbMarker = new mapboxgl.Marker(el)
+          .setLngLat(f.geometry.coordinates)
+          .addTo(map.current);
+        mapboxMarkersRef.current.push(mbMarker);
       }
-      if (!geoJson) return;
-    }
+    } else {
+      // Update existing markers with fresh data
+      for (const item of markersRef.current) {
+        const match = geoJson.features.find((f) => f.properties.dbId === item.id);
+        if (!match) continue;
 
-    const updatedIds: string[] = [];
-    for (const item of markersRef.current) {
-      const match = geoJson.features.find((f) => f.properties.dbId === item.id);
-      if (!match) continue;
+        const currentTime = match.properties.currentTime as Date;
+        const currentUrl = match.properties.currentUrl as string;
+        const isStale = timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000;
 
-      const currentTime = match.properties.currentTime as Date;
-      const currentUrl = match.properties.currentUrl as string;
-      const isStale = timestamp - currentTime.getTime() > 24 * 60 * 60 * 1000;
-
-      // eslint-disable-next-line react-hooks/immutability
-      item.dataset.timestamp = String(timestamp);
-
-      for (const child of Array.from(item.children)) {
-        if ((child as HTMLElement).className === 'webcam-img') {
-          (child as HTMLImageElement).src = isStale
-            ? ''
-            : `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${currentUrl}`;
-        } else if ((child as HTMLElement).className.includes('items-end')) {
-          if (isStale) {
-            child.innerHTML = 'No images in the last 24h.';
-            (child as HTMLElement).style.color = '#ff4261';
-          } else {
-            child.innerHTML = formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm');
-            (child as HTMLElement).style.color = '';
+        for (const child of Array.from(item.children)) {
+          if ((child as HTMLElement).className === 'webcam-img') {
+            (child as HTMLImageElement).src = isStale
+              ? ''
+              : `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${currentUrl}`;
+          } else if ((child as HTMLElement).className.includes('items-end')) {
+            if (isStale) {
+              child.innerHTML = 'No images in the last 24h.';
+              (child as HTMLElement).style.color = '#ff4261';
+            } else {
+              child.innerHTML = formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm');
+              (child as HTMLElement).style.color = '';
+            }
           }
         }
       }
-
-      updatedIds.push(item.id);
     }
+  }, [webcams, webcamsLoading, isMapLoaded, map, createWebcamMarker]);
 
-    onRefresh?.(updatedIds);
-  }, [checkMissedUpdates, onRefresh]);
+  // Cleanup markers only on unmount
+  useEffect(() => {
+    return () => {
+      mapboxMarkersRef.current.forEach((m) => m.remove());
+      mapboxMarkersRef.current = [];
+      markersRef.current = [];
+    };
+  }, []);
 
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {
@@ -179,41 +159,14 @@ export function useWebcamMarkers({
     }
   }, []);
 
-  // Initialize when map is loaded (only once - markersRef empty)
-  useEffect(() => {
-    if (!isMapLoaded || webcamsLoading || !webcams?.length || !map.current) return;
-    if (markersRef.current.length > 0) return;
-
-    const geoJson = getWebcamGeoJson(webcams);
-    if (!geoJson?.features.length) return;
-
-    const timestamp = Date.now();
-    lastRefreshRef.current = timestamp;
-
-    for (const f of geoJson.features) {
-      const name = f.properties.name as string;
-      const dbId = f.properties.dbId as string;
-      const currentTime = f.properties.currentTime as Date;
-      const currentUrl = f.properties.currentUrl as string;
-
-      const el = createWebcamMarker(dbId, name, currentTime, currentUrl, timestamp);
-      el.style.visibility = isVisible ? 'visible' : 'hidden';
-      markersRef.current.push(el);
-      new mapboxgl.Marker(el).setLngLat(f.geometry.coordinates).addTo(map.current);
-    }
-  }, [isMapLoaded, webcamsLoading, webcams, isVisible, createWebcamMarker, map]);
-
   // Update visibility when prop changes
   useEffect(() => {
     setVisibility(isVisible);
-    if (isVisible) {
-      void refresh();
-    }
-  }, [isVisible, setVisibility, refresh]);
+  }, [isVisible, setVisibility]);
 
   return {
     markers: markersRef,
-    refresh,
-    setVisibility
+    setVisibility,
+    error
   };
 }

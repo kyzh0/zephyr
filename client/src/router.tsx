@@ -24,6 +24,7 @@ import AdminEditStation from './pages/AdminEditStation';
 import AdminEditSite from './pages/AdminEditSite';
 import AdminEditLanding from './pages/AdminEditLanding';
 import AdminEditWebcam from './pages/AdminEditWebcam';
+import AdminEditSounding from './pages/AdminEditSounding';
 import ProtectedRoute from './pages/ProtectedRoute';
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -150,6 +151,10 @@ export const router = createBrowserRouter([
           {
             path: 'webcams/:id',
             element: <AdminEditWebcam />
+          },
+          {
+            path: 'soundings/:id',
+            element: <AdminEditSounding />
           }
         ]
       }

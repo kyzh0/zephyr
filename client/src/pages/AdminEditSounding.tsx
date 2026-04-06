@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -28,11 +27,18 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
-import { deleteCam, patchCam } from '@/services/cam.service';
+import { deleteSounding, patchSounding } from '@/services/sounding.service';
+import { RASP_REGIONS, type ISounding } from '@/models/sounding.model';
 import { ApiError } from '@/services/api-error';
-import type { ICam } from '@/models/cam.model';
-import { useWebcam, useInvalidateWebcams } from '@/hooks';
+import { useSounding, useInvalidateSoundings } from '@/hooks';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -46,11 +52,9 @@ const coordinatesSchema = z.string().refine(
 
 const formSchema = z.object({
   name: z.string().min(1, 'Required'),
-  externalId: z.string(),
-  externalLink: z.url('Enter a valid URL'),
-  type: z.string().min(1, 'Required'),
-  coordinates: coordinatesSchema,
-  isDisabled: z.boolean()
+  raspRegion: z.enum(RASP_REGIONS.map((r) => r.value)),
+  raspId: z.string().min(1, 'Required'),
+  coordinates: coordinatesSchema
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -61,11 +65,11 @@ function formatCoordinates(location?: { coordinates: [number, number] }): string
   return `${lat}, ${lon}`;
 }
 
-export default function AdminEditWebcam() {
+export default function AdminEditSounding() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { webcam: cam, isLoading, refetch } = useWebcam({ id });
-  const invalidateWebcams = useInvalidateWebcams();
+  const { sounding, isLoading, refetch } = useSounding(id);
+  const invalidateSoundings = useInvalidateSoundings();
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleDelete() {
@@ -73,13 +77,13 @@ export default function AdminEditWebcam() {
 
     setIsDeleting(true);
     try {
-      await deleteCam(id);
-      await invalidateWebcams();
-      toast.success('Webcam deleted');
-      navigate('/admin/webcams');
+      await deleteSounding(id);
+      await invalidateSoundings();
+      toast.success('Sounding deleted');
+      navigate('/admin/soundings');
     } catch (error) {
       const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to delete webcam: ' + msg);
+      toast.error('Failed to delete sounding: ' + msg);
       setIsDeleting(false);
     }
   }
@@ -91,33 +95,31 @@ export default function AdminEditWebcam() {
 
     const updates = {
       name: values.name,
-      externalId: values.externalId || undefined,
-      externalLink: values.externalLink,
-      type: values.type,
-      coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6] as [number, number],
-      isDisabled: values.isDisabled
+      raspRegion: values.raspRegion,
+      raspId: values.raspId,
+      coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6] as [number, number]
     };
 
     try {
-      await patchCam(id, updates);
-      await Promise.all([invalidateWebcams(), refetch()]);
-      toast.success('Webcam updated');
-      navigate('/admin/webcams');
+      await patchSounding(id, updates);
+      await Promise.all([invalidateSoundings(), refetch()]);
+      toast.success('Sounding updated');
+      navigate('/admin/soundings');
     } catch (error) {
       const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to update webcam: ' + msg);
+      toast.error('Failed to update sounding: ' + msg);
     }
   }
 
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b bg-white px-6 py-4 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/webcams')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/soundings')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-xl font-semibold">Edit Webcam</h1>
-          {cam && <p className="text-sm text-muted-foreground">{cam.name}</p>}
+          <h1 className="text-xl font-semibold">Edit Sounding</h1>
+          {sounding && <p className="text-sm text-muted-foreground">{sounding.name}</p>}
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -132,9 +134,9 @@ export default function AdminEditWebcam() {
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Webcam</AlertDialogTitle>
+              <AlertDialogTitle>Delete Sounding</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{cam?.name}"? This action cannot be undone.
+                Are you sure you want to delete "{sounding?.name}"? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -152,32 +154,30 @@ export default function AdminEditWebcam() {
       </header>
 
       <main className="flex-1 p-6">
-        {isLoading || !cam ? (
+        {isLoading || !sounding ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <WebcamForm cam={cam} onSubmit={handleSubmit} />
+          <SoundingForm sounding={sounding} onSubmit={handleSubmit} />
         )}
       </main>
     </div>
   );
 }
 
-function WebcamForm({
-  cam,
+function SoundingForm({
+  sounding,
   onSubmit
 }: {
-  cam: ICam;
+  sounding: ISounding;
   onSubmit: (values: FormValues) => Promise<void>;
 }) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: cam.name,
-      externalId: cam.externalId ?? '',
-      externalLink: cam.externalLink,
-      type: cam.type,
-      coordinates: formatCoordinates(cam.location),
-      isDisabled: cam.isDisabled ?? false
+      name: sounding.name,
+      raspRegion: sounding.raspRegion as FormValues['raspRegion'],
+      raspId: sounding.raspId,
+      coordinates: formatCoordinates(sounding.location)
     }
   });
 
@@ -191,7 +191,7 @@ function WebcamForm({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Webcam Name</FormLabel>
+              <FormLabel>Sounding Name</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -202,40 +202,37 @@ function WebcamForm({
 
         <FormField
           control={form.control}
-          name="externalId"
+          name="raspRegion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>External ID (optional)</FormLabel>
+              <FormLabel>RASP Region</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select region" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {RASP_REGIONS.map(({ value, label }) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="raspId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>RASP ID</FormLabel>
               <FormControl>
                 <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="externalLink"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>External Link</FormLabel>
-              <FormControl>
-                <Input {...field} type="url" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Type</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="e.g. weatherlink, windy" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -252,21 +249,6 @@ function WebcamForm({
                 <Input {...field} placeholder="-41.2865, 174.7762" />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="isDisabled"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border p-4">
-              <FormControl>
-                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>Disabled</FormLabel>
-              </div>
             </FormItem>
           )}
         />

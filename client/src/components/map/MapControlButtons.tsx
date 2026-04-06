@@ -26,8 +26,8 @@ import {
   getRecentStations,
   RECENT_STATIONS_UPDATED_EVENT,
   type RecentStation
-} from '@/services/recentStations.service';
-import { useIsMobile } from '@/hooks/useIsMobile';
+} from '@/services/recent-stations.service';
+import { useIsMobile } from '@/hooks';
 import { useAppContext } from '@/context/AppContext';
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import {

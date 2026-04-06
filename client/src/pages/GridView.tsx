@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getStoredValue } from '@/components/map/map.utils';
 import type { WindUnit } from '@/components/map/map.types';
-import { useNearbyStations } from '@/hooks';
+import { useNearbyStations, usePersistedState } from '@/hooks';
 
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -22,7 +21,7 @@ export default function GridView() {
   const navigate = useNavigate();
   const [radius, setRadius] = useState(50);
   const [threshold, setThreshold] = useState(0);
-  const unit = getStoredValue<WindUnit>('unit', 'kmh');
+  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
 
   // Get user's location (fallback to 0,0 if not available)
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({

@@ -1,24 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
-import { listDonations } from '@/services/donation.service';
+import { useQuery } from '@tanstack/react-query';
+import { fetchRecognitionLeaderboard, listDonations } from '@/services/donation.service';
 import type { IDonation } from '@/models/donation.model';
 
-export function useDonations() {
-  const [donations, setDonations] = useState<IDonation[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+export function useLeaderboard() {
+  return useQuery({
+    queryKey: ['leaderboard'],
+    queryFn: fetchRecognitionLeaderboard
+  });
+}
 
-  const fetchDonations = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await listDonations();
-      setDonations(data);
-    } finally {
-      setLoading(false);
+interface UseDonationsResult {
+  donations: IDonation[];
+  isLoading: boolean;
+  error: Error | null;
+  refetch: () => Promise<void>;
+}
+
+export function useDonations(): UseDonationsResult {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['donations'],
+    queryFn: listDonations
+  });
+
+  return {
+    donations: data ?? [],
+    isLoading,
+    error,
+    refetch: async () => {
+      await refetch();
     }
-  }, []);
-
-  useEffect(() => {
-    fetchDonations();
-  }, [fetchDonations]);
-
-  return { donations, loading, refetch: fetchDonations };
+  };
 }

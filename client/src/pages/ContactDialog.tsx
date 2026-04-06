@@ -120,7 +120,7 @@ export default function ContactDialog() {
               />
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+                <Button type="button" variant="outline" onClick={() => navigate('/')}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={form.formState.isSubmitting}>

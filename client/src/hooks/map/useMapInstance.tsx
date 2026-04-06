@@ -6,7 +6,6 @@ import { getStoredValue, setStoredValue } from '@/components/map';
 
 interface UseMapInstanceOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
-  onLoad?: () => void;
 }
 
 interface UseMapInstanceReturn {
@@ -16,10 +15,7 @@ interface UseMapInstanceReturn {
   triggerGeolocate: () => Promise<void>;
 }
 
-export function useMapInstance({
-  containerRef,
-  onLoad
-}: UseMapInstanceOptions): UseMapInstanceReturn {
+export function useMapInstance({ containerRef }: UseMapInstanceOptions): UseMapInstanceReturn {
   const map = useRef<mapboxgl.Map | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const posInitRef = useRef(false);
@@ -31,7 +27,7 @@ export function useMapInstance({
     getStoredValue('zoom', window.innerWidth > 1000 ? 5.1 : 4.3)
   );
 
-  // Map initialization
+  // Map initialization — runs once. lon/lat/zoom/onLoad are initial values, not reactive.
   useEffect(() => {
     if (map.current || !containerRef.current) return;
 
@@ -53,8 +49,8 @@ export function useMapInstance({
     map.current.touchZoomRotate.disableRotation();
 
     map.current.on('load', () => {
+      map.current?.resize();
       setIsLoaded(true);
-      onLoad?.();
     });
 
     map.current.on('move', () => {
@@ -63,7 +59,15 @@ export function useMapInstance({
       setStoredValue('lon', Number(map.current.getCenter().lng.toFixed(4)));
       setStoredValue('lat', Number(map.current.getCenter().lat.toFixed(4)));
     });
-  }, [containerRef, lon, lat, zoom, onLoad]);
+
+    // Resize map when container dimensions change (e.g. flex layout settling)
+    const container = containerRef.current;
+    const ro = new ResizeObserver(() => map.current?.resize());
+    ro.observe(container);
+
+    return () => ro.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Fly to saved position after load
   useEffect(() => {

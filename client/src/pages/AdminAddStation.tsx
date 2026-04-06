@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -21,10 +22,12 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+
 import { addStation } from '@/services/station.service';
 import { STATION_TYPES, type INewStation } from '@/models/station.model';
-import { toast } from 'sonner';
 import { lookupElevation } from '@/lib/utils';
+import { ApiError } from '@/services/api-error';
+import { useInvalidateStations } from '@/hooks';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -92,6 +95,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function AdminAddStation() {
   const navigate = useNavigate();
+  const invalidateStations = useInvalidateStations();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -146,15 +150,21 @@ export default function AdminAddStation() {
       station.gwTemperatureFieldName = v.gwTemperatureFieldName;
     }
 
-    await addStation(station);
-    toast.success('Station added successfully');
-    navigate('/admin/dashboard');
+    try {
+      await addStation(station);
+      await invalidateStations();
+      toast.success('Station added successfully');
+      navigate('/admin/stations');
+    } catch (error) {
+      const msg = error instanceof ApiError ? error.message : 'Unknown error';
+      toast.error('Failed to add station: ' + msg);
+    }
   }
 
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b bg-white px-6 py-4 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/dashboard')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/stations')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <h1 className="text-xl font-semibold">Add New Station</h1>

@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import SEO from '@/components/SEO';
-import { useAppContext } from '@/context/AppContext';
-import { MapControlButtons, getStoredValue } from '@/components/map';
 
+import SEO from '@/components/SEO';
+import { MapControlButtons } from '@/components/map';
+import type { MapOverlay, WindUnit } from '@/components/map/map.types';
+
+import { useAppContext } from '@/context/AppContext';
+import { usePersistedState } from '@/hooks';
 import {
   useMapInstance,
   useMapControls,
@@ -14,10 +17,12 @@ import {
   useSiteMarkers,
   useLandingMarkers
 } from '@/hooks/map';
-import { REFRESH_INTERVAL_MS } from '@/lib/utils';
 
 export default function Map() {
-  const { setRefreshedStations, setRefreshedWebcams, flyingMode } = useAppContext();
+  const { flyingMode } = useAppContext();
+  const [overlay] = usePersistedState<MapOverlay>('overlay', null);
+  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
+  const [viewMode] = usePersistedState<'stations' | 'sites'>('viewMode', 'stations');
 
   // Map container ref
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -33,7 +38,6 @@ export default function Map() {
 
   // Initialize station markers
   const {
-    refresh: refreshStations,
     renderHistoricalData,
     renderCurrentData,
     setInteractive: setStationMarkersInteractive
@@ -41,25 +45,23 @@ export default function Map() {
     map,
     isMapLoaded: isLoaded,
     isHistoricData,
-    unit: getStoredValue('unit', 'kmh'), // initial unit only; hook re-renders on unit change via controls
-    isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'stations',
-    mapZoom: zoom,
-    onRefresh: setRefreshedStations
+    unit,
+    isVisible: viewMode === 'stations',
+    mapZoom: zoom
   });
 
   // Initialize webcam markers
-  const { refresh: refreshWebcams } = useWebcamMarkers({
+  useWebcamMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: getStoredValue('showWebcams', false),
-    onRefresh: setRefreshedWebcams
+    isVisible: overlay === 'webcams'
   });
 
   // Initialize sounding markers
-  const { refresh: refreshSoundings } = useSoundingMarkers({
+  useSoundingMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: getStoredValue('showSoundings', false),
+    isVisible: overlay === 'soundings',
     isHistoricData
   });
 
@@ -67,14 +69,14 @@ export default function Map() {
   const { setTransparent: setLandingTransparent } = useLandingMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'sites'
+    isVisible: viewMode === 'sites'
   });
 
   // Initialize site markers
   const { setWindDirectionFilter: setSiteDirectionFilter } = useSiteMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: getStoredValue<'stations' | 'sites'>('viewMode', 'stations') === 'sites'
+    isVisible: viewMode === 'sites'
   });
 
   // All UI control state and handlers
@@ -87,45 +89,15 @@ export default function Map() {
     setLandingTransparent,
     setStationMarkersInteractive,
     setSiteDirectionFilter,
-    refreshWebcams,
-    refreshSoundings,
     renderHistoricalData,
     renderCurrentData
   });
-
-  // Auto-refresh interval (disabled when in history mode)
-  useEffect(() => {
-    if (!isLoaded || isHistoricData) return;
-
-    const interval = setInterval(async () => {
-      try {
-        await refreshStations();
-        await refreshWebcams();
-        await refreshSoundings();
-      } catch {
-        clearInterval(interval);
-      }
-    }, REFRESH_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [isLoaded, isHistoricData, refreshStations, refreshWebcams, refreshSoundings]);
-
-  // Refresh on tab visibility change
-  useEffect(() => {
-    const handleVisibilityChange = async () => {
-      await refreshStations();
-      await refreshWebcams();
-      await refreshSoundings();
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [refreshStations, refreshWebcams, refreshSoundings]);
 
   // Filter markers by elevation
   useEffect(() => {
     const markers = document.querySelectorAll('div.marker');
     markers.forEach((m) => {
-      const elevation = Number(m.getAttribute('elevation'));
+      const elevation = Number((m as HTMLElement).dataset.elevation);
       m.classList.toggle('hidden', elevation < controls.stationElevationFilter);
     });
   }, [controls.stationElevationFilter]);

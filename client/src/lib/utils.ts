@@ -2,16 +2,12 @@ import type { SportType } from '@/components/map';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-export const REFRESH_INTERVAL_MS = 60 * 1000;
+/** Standard polling interval for live data  */
+export const REFRESH_INTERVAL_MS = 60_000;
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-// Common error handling utility
-export const handleError = (err: unknown, defaultMessage: string): Error => {
-  return err instanceof Error ? err : new Error(defaultMessage);
-};
 
 export const getWindDirectionFromBearing = (bearing: number) => {
   if (bearing < 0) {

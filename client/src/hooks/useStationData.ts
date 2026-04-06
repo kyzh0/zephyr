@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { formatInTimeZone } from 'date-fns-tz';
-import { getStationById, loadStationData } from '@/services/station.service';
-import { useAppContext } from '@/context/AppContext';
+import { REFRESH_INTERVAL_MS } from '@/lib/utils';
+import { loadStationData } from '@/services/station.service';
+import { ApiError } from '@/services/api-error';
+import { useStation } from './useStations';
 import type { IStation } from '@/models/station.model';
 import type { IStationData } from '@/models/station-data.model';
 import type { ExtendedStationData } from '@/components/station/types';
@@ -15,7 +17,7 @@ interface UseStationDataReturn {
   tableData: ExtendedStationData[];
   bearingPairCount: number;
   isLoading: boolean;
-  isRefreshing: boolean;
+  error: Error | null;
 }
 
 function filterByTimeRange<T extends { time: Date | string }>(data: T[], hours: TimeRange): T[] {
@@ -28,145 +30,77 @@ export function useStationData(
   id: string | undefined,
   timeRange: TimeRange = '12'
 ): UseStationDataReturn {
-  const navigate = useNavigate();
-  const { refreshedStations } = useAppContext();
+  const { station, isLoading: stationLoading, error: stationError } = useStation(id);
+  const hr = station?.isHighResolution ?? false;
 
-  const [station, setStation] = useState<IStation | null>(null);
-  const [allData, setAllData] = useState<ExtendedStationData[]>([]);
-  const [allTableData, setAllTableData] = useState<ExtendedStationData[]>([]);
-  const [bearingPairCount, setBearingPairCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const dataQuery = useQuery({
+    queryKey: ['station-data', id, hr],
+    queryFn: async () => {
+      const rawData = await loadStationData(id!, hr);
+      const items = Array.isArray(rawData) ? rawData : [];
+      return (items as IStationData[]).sort(
+        (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+      );
+    },
+    enabled: !!id && !!station && !station.isOffline,
+    refetchInterval: REFRESH_INTERVAL_MS,
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
+  });
 
-  const initialLoadRef = useRef(true);
+  const { data, tableData, bearingPairCount } = useMemo(() => {
+    if (!id || !station || !dataQuery.data?.length) {
+      return {
+        data: [] as ExtendedStationData[],
+        tableData: [] as ExtendedStationData[],
+        bearingPairCount: 0
+      };
+    }
 
-  // Filter data based on time range (memoized to prevent re-renders)
-  const data = useMemo(() => filterByTimeRange(allData, timeRange), [allData, timeRange]);
-
-  const tableData = useMemo(
-    () => filterByTimeRange(allTableData, timeRange),
-    [allTableData, timeRange]
-  );
-
-  async function fetchData(isRefresh = false) {
-    if (!id) return;
-
-    try {
-      if (isRefresh) {
-        setIsRefreshing(true);
-      } else {
-        setIsLoading(true);
+    // Parse valid bearings
+    const validBearings: [number, number][] = [];
+    const pairs = station.validBearings ? station.validBearings.split(',') : [];
+    for (const p of pairs) {
+      const temp = p.split('-');
+      const b1 = Number(temp[0]);
+      const b2 = Number(temp[1]);
+      if (b1 <= b2) validBearings.push([b1, b2]);
+      else {
+        validBearings.push([b1, 360]);
+        validBearings.push([0, b2]);
       }
-      const s = await getStationById(id);
-      if (!s) {
-        navigate(-1);
-        return;
-      }
-      setStation(s);
-      if (s.isOffline) {
-        setIsLoading(false);
-        return;
-      }
+    }
 
-      const validBearings: [number, number][] = [];
-      const pairs = s.validBearings ? s.validBearings.split(',') : [];
-      for (const p of pairs) {
-        const temp = p.split('-');
-        const b1 = Number(temp[0]);
-        const b2 = Number(temp[1]);
-        if (b1 <= b2) {
-          validBearings.push([b1, b2]);
-        } else {
-          validBearings.push([b1, 360]);
-          validBearings.push([0, b2]);
-        }
-      }
-
-      const rawData = await loadStationData(id, s.isHighResolution ?? false);
-      if (!rawData || !Array.isArray(rawData)) {
-        setIsLoading(false);
-        return;
-      }
-
-      const stationData = rawData as unknown as IStationData[];
-      stationData.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-
-      const extendedData: ExtendedStationData[] = stationData.map((d) => {
-        const extended: ExtendedStationData = {
-          ...d,
-          timeLabel: formatInTimeZone(new Date(d.time), 'Pacific/Auckland', 'HH:mm'),
-          windAverageKt: d.windAverage == null ? null : Math.round(d.windAverage / 1.852),
-          windGustKt: d.windGust == null ? null : Math.round(d.windGust / 1.852)
-        };
-
-        if (validBearings.length) {
-          setBearingPairCount(validBearings.length);
-          validBearings.forEach((vb, i) => {
-            extended[`validBearings${i}`] = vb;
-          });
-        }
-
-        return extended;
+    const extendedData: ExtendedStationData[] = dataQuery.data.map((d) => {
+      const extended: ExtendedStationData = {
+        ...d,
+        timeLabel: formatInTimeZone(new Date(d.time), 'Pacific/Auckland', 'HH:mm'),
+        windAverageKt: d.windAverage == null ? null : Math.round(d.windAverage / 1.852),
+        windGustKt: d.windGust == null ? null : Math.round(d.windGust / 1.852)
+      };
+      validBearings.forEach((vb, i) => {
+        extended[`validBearings${i}`] = vb;
       });
+      return extended;
+    });
 
-      setAllData(extendedData);
+    const allTableData = station.isHighResolution
+      ? calculateHighResAverages(extendedData, id)
+      : padData(extendedData, id);
 
-      // pad non high res data
-      if (!s.isHighResolution) {
-        setAllTableData(padData(extendedData, id));
-      }
-
-      // calculate 10 min averages for high-res stations
-      if (s.isHighResolution && extendedData.length) {
-        const averagedData = calculateHighResAverages(extendedData, id);
-        setAllTableData(averagedData);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }
-
-  // initial load
-  useEffect(() => {
-    if (!id) return;
-
-    initialLoadRef.current = false;
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
-  // on refresh trigger (ignore initial load)
-  useEffect(() => {
-    if (!id || initialLoadRef.current || !refreshedStations?.includes(id)) {
-      return;
-    }
-
-    fetchData(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, refreshedStations]);
-
-  // Auto-refresh every minute
-  useEffect(() => {
-    if (!id || !station || station.isOffline) return;
-
-    const intervalId = setInterval(() => {
-      void fetchData(true);
-    }, 60 * 1000);
-
-    return () => clearInterval(intervalId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, station?.isOffline]);
+    return {
+      data: filterByTimeRange(extendedData, timeRange),
+      tableData: filterByTimeRange(allTableData, timeRange),
+      bearingPairCount: validBearings.length
+    };
+  }, [station, dataQuery.data, timeRange, id]);
 
   return {
     station,
     data,
     tableData,
     bearingPairCount,
-    isLoading,
-    isRefreshing
+    isLoading: stationLoading || dataQuery.isLoading,
+    error: stationError ?? dataQuery.error ?? null
   };
 }
 

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,10 +31,12 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form';
-import { deleteStation, getStationById, patchStation } from '@/services/station.service';
+
+import { deleteStation, patchStation } from '@/services/station.service';
+import { useStation, useInvalidateStations } from '@/hooks';
 import type { IStation } from '@/models/station.model';
 import { lookupElevation } from '@/lib/utils';
-import { useState } from 'react';
+import { ApiError } from '@/services/api-error';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -100,122 +102,27 @@ function formatCoordinates(location?: { coordinates: [number, number] }): string
 export default function AdminEditStation() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [station, setStation] = useState<IStation | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [elevationLoading, setElevationLoading] = useState(false);
+  const { station, isLoading, refetch } = useStation(id);
+  const invalidateStations = useInvalidateStations();
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      type: '',
-      externalLink: '',
-      externalId: '',
-      coordinates: '',
-      elevation: '0',
-      validBearings: '',
-      popupMessage: '',
-      isDisabled: false,
-      isHighResolution: false,
-      harvestWindAverageId: '',
-      harvestWindGustId: '',
-      harvestWindDirectionId: '',
-      harvestTemperatureId: '',
-      harvestCookie: '',
-      gwWindAverageFieldName: '',
-      gwWindGustFieldName: '',
-      gwWindBearingFieldName: '',
-      gwTemperatureFieldName: '',
-      weatherlinkCookie: ''
-    }
-  });
-
-  const stationType = form.watch('type');
-  const isSubmitting = form.formState.isSubmitting;
-
-  useEffect(() => {
-    if (!id) {
-      navigate('/admin/stations');
-      return;
-    }
-
-    async function load() {
-      const data = await getStationById(id!);
-      if (data) {
-        setStation(data);
-        form.reset({
-          name: data.name,
-          type: data.type,
-          externalLink: data.externalLink,
-          externalId: data.externalId ?? '',
-          coordinates: formatCoordinates(data.location),
-          elevation: String(data.elevation ?? 0),
-          validBearings: data.validBearings ?? '',
-          popupMessage: data.popupMessage ?? '',
-          isDisabled: data.isDisabled ?? false,
-          isHighResolution: data.isHighResolution ?? false,
-          harvestWindAverageId: data.harvestWindAverageId ?? '',
-          harvestWindGustId: data.harvestWindGustId ?? '',
-          harvestWindDirectionId: data.harvestWindDirectionId ?? '',
-          harvestTemperatureId: data.harvestTemperatureId ?? '',
-          harvestCookie: data.harvestCookie ?? '',
-          gwWindAverageFieldName: data.gwWindAverageFieldName ?? '',
-          gwWindGustFieldName: data.gwWindGustFieldName ?? '',
-          gwWindBearingFieldName: data.gwWindBearingFieldName ?? '',
-          gwTemperatureFieldName: data.gwTemperatureFieldName ?? '',
-          weatherlinkCookie: data.weatherlinkCookie ?? ''
-        });
-      }
-      setIsLoading(false);
-    }
-    load();
-  }, [id, navigate, form]);
 
   async function handleDelete() {
     if (!id) return;
 
     setIsDeleting(true);
-    const adminKey = sessionStorage.getItem('adminKey') ?? '';
     try {
-      await deleteStation(id, adminKey);
+      await deleteStation(id);
+      await invalidateStations();
       toast.success('Station deleted');
       navigate('/admin/stations');
     } catch (error) {
-      toast.error('Failed to delete station: ' + (error as Error).message);
+      const msg = error instanceof ApiError ? error.message : 'Unknown error';
+      toast.error('Failed to delete station: ' + msg);
       setIsDeleting(false);
     }
   }
 
-  async function handleAutoElevation() {
-    const coordsValue = form.getValues('coordinates');
-    if (!coordsValue?.trim()) {
-      toast.error('Please set coordinates first');
-      return;
-    }
-    const parts = coordsValue.replace(/\s/g, '').split(',');
-    if (parts.length !== 2) {
-      toast.error('Invalid coordinates');
-      return;
-    }
-    const [lat, lon] = parts.map(Number);
-    if (isNaN(lat) || isNaN(lon)) {
-      toast.error('Invalid coordinates');
-      return;
-    }
-    try {
-      setElevationLoading(true);
-      const elevation = await lookupElevation(lat, lon);
-      form.setValue('elevation', String(elevation), { shouldDirty: true, shouldValidate: true });
-      toast.success(`Elevation set to ${elevation} m`);
-    } catch (err) {
-      toast.error((err as Error).message);
-    } finally {
-      setElevationLoading(false);
-    }
-  }
-
-  async function onSubmit(values: FormValues) {
+  async function handleSubmit(values: FormValues) {
     if (!station || !id) return;
 
     const patch: Record<string, unknown> = {};
@@ -286,13 +193,14 @@ export default function AdminEditStation() {
       remove.weatherlinkCookie = true;
     }
 
-    const adminKey = sessionStorage.getItem('adminKey') ?? '';
     try {
-      await patchStation(id, { patch, remove } as unknown as Partial<IStation>, adminKey);
+      await patchStation(id, { patch, remove } as unknown as Partial<IStation>);
+      await Promise.all([invalidateStations(), refetch()]);
       toast.success('Station updated');
       navigate('/admin/stations');
     } catch (error) {
-      toast.error('Failed to update station: ' + (error as Error).message);
+      const msg = error instanceof ApiError ? error.message : 'Unknown error';
+      toast.error('Failed to update station: ' + msg);
     }
   }
 
@@ -340,331 +248,398 @@ export default function AdminEditStation() {
       </header>
 
       <main className="flex-1 p-6 overflow-auto">
-        {isLoading ? (
+        {isLoading || !station ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl space-y-6">
-              <div className="space-y-4">
-                <h2 className="text-lg font-medium">Basic Information</h2>
-
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Station Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Type</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g. harvest, gw, wl, wu" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="externalLink"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>External Link</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="url" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="externalId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>External ID (optional)</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="coordinates"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Coordinates (lat, lon)</FormLabel>
-                      <FormDescription>Click on the map to set the location</FormDescription>
-                      <CoordinatesPicker value={field.value} onChange={field.onChange} />
-                      <FormControl>
-                        <Input {...field} placeholder="-41.2865, 174.7762" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-3 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="elevation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Elevation (m)</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="number" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex items-end">
-                    <Button type="button" onClick={handleAutoElevation} disabled={elevationLoading}>
-                      {elevationLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      Auto
-                    </Button>
-                  </div>
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="validBearings"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valid Bearings (optional)</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="000-090,180-270" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="popupMessage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Popup Message (optional)</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={2} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="space-y-4 rounded-lg border p-4">
-                  <h3 className="text-sm font-medium">Flags</h3>
-                  <div className="flex flex-wrap gap-6">
-                    <FormField
-                      control={form.control}
-                      name="isDisabled"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                          </FormControl>
-                          <FormLabel className="font-normal">Disabled</FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="isHighResolution"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                          </FormControl>
-                          <FormLabel className="font-normal">High Resolution</FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {stationType === 'harvest' && (
-                <div className="space-y-4">
-                  <h2 className="text-lg font-medium">Harvest Configuration</h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="harvestWindAverageId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Wind Average ID</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="harvestWindGustId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Wind Gust ID</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="harvestWindDirectionId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Wind Direction ID</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="harvestTemperatureId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Temperature ID</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="harvestCookie"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Harvest Cookie</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {stationType === 'gw' && (
-                <div className="space-y-4">
-                  <h2 className="text-lg font-medium">Greater Wellington Configuration</h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="gwWindAverageFieldName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Wind Average Field</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="gwWindGustFieldName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Wind Gust Field</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="gwWindBearingFieldName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Wind Bearing Field</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="gwTemperatureFieldName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Temperature Field</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {stationType === 'wl' && (
-                <div className="space-y-4">
-                  <h2 className="text-lg font-medium">Weatherlink Configuration</h2>
-                  <FormField
-                    control={form.control}
-                    name="weatherlinkCookie"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Weatherlink Cookie</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isSubmitting || !form.formState.isDirty}
-              >
-                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Save Changes
-              </Button>
-            </form>
-          </Form>
+          <StationForm station={station} onSubmit={handleSubmit} />
         )}
       </main>
     </div>
+  );
+}
+
+function StationForm({
+  station,
+  onSubmit
+}: {
+  station: IStation;
+  onSubmit: (values: FormValues) => Promise<void>;
+}) {
+  const [elevationLoading, setElevationLoading] = useState(false);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: station.name,
+      type: station.type,
+      externalLink: station.externalLink,
+      externalId: station.externalId ?? '',
+      coordinates: formatCoordinates(station.location),
+      elevation: String(station.elevation ?? 0),
+      validBearings: station.validBearings ?? '',
+      popupMessage: station.popupMessage ?? '',
+      isDisabled: station.isDisabled ?? false,
+      isHighResolution: station.isHighResolution ?? false,
+      harvestWindAverageId: station.harvestWindAverageId ?? '',
+      harvestWindGustId: station.harvestWindGustId ?? '',
+      harvestWindDirectionId: station.harvestWindDirectionId ?? '',
+      harvestTemperatureId: station.harvestTemperatureId ?? '',
+      harvestCookie: station.harvestCookie ?? '',
+      gwWindAverageFieldName: station.gwWindAverageFieldName ?? '',
+      gwWindGustFieldName: station.gwWindGustFieldName ?? '',
+      gwWindBearingFieldName: station.gwWindBearingFieldName ?? '',
+      gwTemperatureFieldName: station.gwTemperatureFieldName ?? '',
+      weatherlinkCookie: station.weatherlinkCookie ?? ''
+    }
+  });
+
+  const stationType = form.watch('type');
+  const isSubmitting = form.formState.isSubmitting;
+
+  async function handleAutoElevation() {
+    const coordsValue = form.getValues('coordinates');
+    if (!coordsValue?.trim()) {
+      toast.error('Please set coordinates first');
+      return;
+    }
+    const parts = coordsValue.replace(/\s/g, '').split(',');
+    if (parts.length !== 2) {
+      toast.error('Invalid coordinates');
+      return;
+    }
+    const [lat, lon] = parts.map(Number);
+    if (isNaN(lat) || isNaN(lon)) {
+      toast.error('Invalid coordinates');
+      return;
+    }
+    try {
+      setElevationLoading(true);
+      const elevation = await lookupElevation(lat, lon);
+      form.setValue('elevation', String(elevation), { shouldDirty: true, shouldValidate: true });
+      toast.success(`Elevation set to ${elevation} m`);
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setElevationLoading(false);
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl space-y-6">
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium">Basic Information</h2>
+
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Station Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Type</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="e.g. harvest, gw, wl, wu" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="externalLink"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>External Link</FormLabel>
+                <FormControl>
+                  <Input {...field} type="url" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="externalId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>External ID (optional)</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="coordinates"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Coordinates (lat, lon)</FormLabel>
+                <FormDescription>Click on the map to set the location</FormDescription>
+                <CoordinatesPicker value={field.value} onChange={field.onChange} />
+                <FormControl>
+                  <Input {...field} placeholder="-41.2865, 174.7762" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-3 gap-2">
+            <FormField
+              control={form.control}
+              name="elevation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Elevation (m)</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="number" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex items-end">
+              <Button type="button" onClick={handleAutoElevation} disabled={elevationLoading}>
+                {elevationLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Auto
+              </Button>
+            </div>
+          </div>
+
+          <FormField
+            control={form.control}
+            name="validBearings"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Valid Bearings (optional)</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="000-090,180-270" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="popupMessage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Popup Message (optional)</FormLabel>
+                <FormControl>
+                  <Textarea {...field} rows={2} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="space-y-4 rounded-lg border p-4">
+            <h3 className="text-sm font-medium">Flags</h3>
+            <div className="flex flex-wrap gap-6">
+              <FormField
+                control={form.control}
+                name="isDisabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <FormLabel className="font-normal">Disabled</FormLabel>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isHighResolution"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <FormLabel className="font-normal">High Resolution</FormLabel>
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
+        {stationType === 'harvest' && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-medium">Harvest Configuration</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="harvestWindAverageId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wind Average ID</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="harvestWindGustId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wind Gust ID</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="harvestWindDirectionId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wind Direction ID</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="harvestTemperatureId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Temperature ID</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="harvestCookie"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Harvest Cookie</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        )}
+
+        {stationType === 'gw' && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-medium">Greater Wellington Configuration</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="gwWindAverageFieldName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wind Average Field</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="gwWindGustFieldName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wind Gust Field</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="gwWindBearingFieldName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wind Bearing Field</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="gwTemperatureFieldName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Temperature Field</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        )}
+
+        {stationType === 'wl' && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-medium">Weatherlink Configuration</h2>
+            <FormField
+              control={form.control}
+              name="weatherlinkCookie"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Weatherlink Cookie</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
+        <Button type="submit" className="w-full" disabled={isSubmitting || !form.formState.isDirty}>
+          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          Save Changes
+        </Button>
+      </form>
+    </Form>
   );
 }

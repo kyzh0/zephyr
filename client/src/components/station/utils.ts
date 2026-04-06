@@ -1,4 +1,3 @@
-import { getStoredValue } from '../map';
 import type { WindUnit } from './types';
 
 /**
@@ -28,13 +27,6 @@ export function getDirectionColor(
     }
   }
   return '';
-}
-
-/**
- * Get unit preference from localStorage
- */
-export function getUnit(): WindUnit {
-  return getStoredValue<WindUnit>('unit', 'kmh');
 }
 
 /**

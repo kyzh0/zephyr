@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 
-import { rerunScraper, runScraper } from './orchestrator';
+import { rerunPorters, rerunScraper, runScraper } from './orchestrator';
 import { logger } from '@zephyr/shared';
 import {
   checkForErrors,
@@ -76,6 +76,22 @@ export async function startStationScheduler(): Promise<void> {
 
       logger.info(`--- Check missed readings end - ${Date.now() - ts}ms elapsed. -----`, {
         service: 'miss'
+      });
+    },
+    { noOverlap: true }
+  );
+
+  // porters retry — source updates just after the 10-min mark
+  cron.schedule(
+    '2,12,22,32,42,52 * * * *',
+    async () => {
+      logger.info('----- Porters retry start -----', { service: 'porters-retry' });
+
+      const ts = Date.now();
+      await rerunPorters();
+
+      logger.info(`----- Porters retry end - ${Date.now() - ts}ms elapsed -----`, {
+        service: 'porters-retry'
       });
     },
     { noOverlap: true }

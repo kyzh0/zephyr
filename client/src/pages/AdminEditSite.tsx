@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,11 +32,12 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { deleteSite, getSiteById, patchSite } from '@/services/site.service';
-import { listLandings } from '@/services/landing.service';
+import { deleteSite, updateSite } from '@/services/site.service';
+import { useSite, useLandings, useInvalidateSites } from '@/hooks';
 import type { ISite, UpdateSiteDto } from '@/models/site.model';
 import type { ILanding } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
+import { ApiError } from '@/services/api-error';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -104,68 +105,11 @@ function parseCoordinates(
 
 export default function AdminEditSite() {
   const navigate = useNavigate();
-  const [elevationLoading, setElevationLoading] = useState(false);
   const { id } = useParams<{ id: string }>();
 
-  const [site, setSite] = useState<ISite | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const [landings, setLandings] = useState<ILanding[]>([]);
-  useEffect(() => {
-    async function fetchLandings() {
-      const landings = (await listLandings()) ?? [];
-      landings.sort((a, b) => a.name.localeCompare(b.name));
-      setLandings(landings);
-    }
-    fetchLandings();
-  }, []);
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      coordinates: '',
-      elevation: '',
-      validBearings: '',
-      landingIds: [],
-      isDisabled: false,
-      description: '',
-      siteGuideUrl: '',
-      hazards: '',
-      access: ''
-    }
-  });
-
-  const isSubmitting = form.formState.isSubmitting;
-
-  useEffect(() => {
-    if (!id) {
-      navigate('/admin/sites');
-      return;
-    }
-
-    async function load() {
-      const data = await getSiteById(id!);
-      if (data) {
-        setSite(data);
-        form.reset({
-          name: data.name,
-          coordinates: formatCoordinates(data.location),
-          elevation: data.elevation.toString(),
-          validBearings: data.validBearings,
-          landingIds: data.landings?.map((l) => l.landingId) ?? [],
-          isDisabled: data.isDisabled,
-          description: data.description ?? '',
-          mandatoryNotices: data.mandatoryNotices ?? '',
-          siteGuideUrl: data.siteGuideUrl ?? '',
-          hazards: data.hazards ?? '',
-          access: data.access ?? ''
-        });
-      }
-      setIsLoading(false);
-    }
-    load();
-  }, [id, navigate, form]);
+  const { site, isLoading, refetch } = useSite(id);
+  const { landings } = useLandings();
+  const invalidateSites = useInvalidateSites();
 
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -173,55 +117,19 @@ export default function AdminEditSite() {
     if (!id) return;
 
     setIsDeleting(true);
-    const adminKey = sessionStorage.getItem('adminKey') ?? '';
     try {
-      await deleteSite(id, adminKey);
+      await deleteSite(id);
+      await invalidateSites();
       toast.success('Site deleted');
       navigate('/admin/sites');
     } catch (error) {
-      toast.error('Failed to delete site: ' + (error as Error).message);
+      const msg = error instanceof ApiError ? error.message : 'Unknown error';
+      toast.error('Failed to delete site: ' + msg);
       setIsDeleting(false);
     }
   }
 
-  async function handleAutoElevation() {
-    const coordsValue = form.getValues('coordinates');
-
-    if (!coordsValue?.trim()) {
-      toast.error('Please select coordinates first');
-      return;
-    }
-
-    const parts = coordsValue.replace(/\s/g, '').split(',');
-    if (parts.length !== 2) {
-      toast.error('Invalid coordinates');
-      return;
-    }
-
-    const [lat, lon] = parts.map(Number);
-    if (isNaN(lat) || isNaN(lon)) {
-      toast.error('Invalid coordinates');
-      return;
-    }
-
-    try {
-      setElevationLoading(true);
-
-      const elevation = await lookupElevation(lat, lon);
-      form.setValue('elevation', elevation.toString(), {
-        shouldDirty: true,
-        shouldValidate: true
-      });
-
-      toast.success(`Elevation set to ${elevation} m`);
-    } catch (err) {
-      toast.error((err as Error).message);
-    } finally {
-      setElevationLoading(false);
-    }
-  }
-
-  async function onSubmit(values: FormValues) {
+  async function handleSubmit(values: FormValues) {
     if (!site) return;
 
     const updates: UpdateSiteDto = {
@@ -245,13 +153,14 @@ export default function AdminEditSite() {
       updates.location = location;
     }
 
-    const adminKey = sessionStorage.getItem('adminKey') ?? '';
     try {
-      await patchSite(id!, updates, adminKey);
+      await updateSite(id!, updates);
+      await Promise.all([invalidateSites(), refetch()]);
       toast.success('Site updated');
       navigate(`/admin/sites`);
     } catch (error) {
-      toast.error('Failed to update site: ' + (error as Error).message);
+      const msg = error instanceof ApiError ? error.message : 'Unknown error';
+      toast.error('Failed to update site: ' + msg);
     }
   }
 
@@ -298,231 +207,297 @@ export default function AdminEditSite() {
       </header>
 
       <main className="flex-1 p-6">
-        {isLoading ? (
+        {isLoading || !site ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl space-y-6">
-              {/* Basic Info */}
-              <div className="space-y-4">
-                <h2 className="text-lg font-medium">Basic Information</h2>
-
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Site Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="landingIds"
-                  render={({ field }) => {
-                    const selectedIds = field.value ?? [];
-
-                    return (
-                      <FormItem>
-                        <FormLabel>Landings</FormLabel>
-
-                        <div className="space-y-2 rounded-md border p-3">
-                          <div className="max-h-[140px] overflow-y-auto space-y-1">
-                            {landings.map((landing) => {
-                              const checked = selectedIds.includes(landing._id);
-
-                              return (
-                                <div key={landing._id} className="flex items-center space-x-2">
-                                  <Checkbox
-                                    checked={checked}
-                                    onCheckedChange={(isChecked) => {
-                                      if (isChecked) {
-                                        field.onChange([...selectedIds, landing._id]);
-                                      } else {
-                                        field.onChange(
-                                          selectedIds.filter((id) => id !== landing._id)
-                                        );
-                                      }
-                                    }}
-                                  />
-                                  <span className="text-sm">{landing.name}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="isDisabled"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border p-4">
-                      <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Disabled</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Location */}
-              <div className="space-y-4">
-                <h2 className="text-lg font-medium">Location</h2>
-
-                <FormField
-                  control={form.control}
-                  name="coordinates"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Coordinates (lat, lon)</FormLabel>
-                      <FormDescription>Click on the map to set the location</FormDescription>
-                      <CoordinatesPicker value={field.value} onChange={field.onChange} />
-                      <FormControl>
-                        <Input {...field} placeholder="-41.2865, 174.7762" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-3 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="elevation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Elevation (m)</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="number" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="flex items-end">
-                    <Button type="button" onClick={handleAutoElevation} disabled={elevationLoading}>
-                      {elevationLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      Auto
-                    </Button>
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="validBearings"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Valid Bearings</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="000-090,180-270" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              {/* Details */}
-              <div className="space-y-4">
-                <h2 className="text-lg font-medium">Details</h2>
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description - Optional</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={4} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="mandatoryNotices"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mandatory Notices - Optional</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={4} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="siteGuideUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Site Guide URL</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="url" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="hazards"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Hazards - Optional</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={4} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="access"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Access - Optional</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={4} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isSubmitting || !form.formState.isDirty}
-              >
-                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Save Changes
-              </Button>
-            </form>
-          </Form>
+          <SiteForm site={site} landings={landings} onSubmit={handleSubmit} />
         )}
       </main>
     </div>
+  );
+}
+
+function SiteForm({
+  site,
+  landings,
+  onSubmit
+}: {
+  site: ISite;
+  landings: ILanding[];
+  onSubmit: (values: FormValues) => Promise<void>;
+}) {
+  const [elevationLoading, setElevationLoading] = useState(false);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: site.name,
+      coordinates: formatCoordinates(site.location),
+      elevation: site.elevation.toString(),
+      validBearings: site.validBearings,
+      landingIds: site.landings?.map((l) => l.landingId) ?? [],
+      isDisabled: site.isDisabled,
+      description: site.description ?? '',
+      mandatoryNotices: site.mandatoryNotices ?? '',
+      siteGuideUrl: site.siteGuideUrl ?? '',
+      hazards: site.hazards ?? '',
+      access: site.access ?? ''
+    }
+  });
+
+  const isSubmitting = form.formState.isSubmitting;
+
+  async function handleAutoElevation() {
+    const coordsValue = form.getValues('coordinates');
+
+    if (!coordsValue?.trim()) {
+      toast.error('Please select coordinates first');
+      return;
+    }
+
+    const parts = coordsValue.replace(/\s/g, '').split(',');
+    if (parts.length !== 2) {
+      toast.error('Invalid coordinates');
+      return;
+    }
+
+    const [lat, lon] = parts.map(Number);
+    if (isNaN(lat) || isNaN(lon)) {
+      toast.error('Invalid coordinates');
+      return;
+    }
+
+    try {
+      setElevationLoading(true);
+
+      const elevation = await lookupElevation(lat, lon);
+      form.setValue('elevation', elevation.toString(), {
+        shouldDirty: true,
+        shouldValidate: true
+      });
+
+      toast.success(`Elevation set to ${elevation} m`);
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setElevationLoading(false);
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl space-y-6">
+        {/* Basic Info */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium">Basic Information</h2>
+
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Site Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="landingIds"
+            render={({ field }) => {
+              const selectedIds = field.value ?? [];
+
+              return (
+                <FormItem>
+                  <FormLabel>Landings</FormLabel>
+
+                  <div className="space-y-2 rounded-md border p-3">
+                    <div className="max-h-35 overflow-y-auto space-y-1">
+                      {landings.map((landing) => {
+                        const checked = selectedIds.includes(landing._id);
+
+                        return (
+                          <div key={landing._id} className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(isChecked) => {
+                                if (isChecked) {
+                                  field.onChange([...selectedIds, landing._id]);
+                                } else {
+                                  field.onChange(selectedIds.filter((id) => id !== landing._id));
+                                }
+                              }}
+                            />
+                            <span className="text-sm">{landing.name}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+
+          <FormField
+            control={form.control}
+            name="isDisabled"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border p-4">
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>Disabled</FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Location */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium">Location</h2>
+
+          <FormField
+            control={form.control}
+            name="coordinates"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Coordinates (lat, lon)</FormLabel>
+                <FormDescription>Click on the map to set the location</FormDescription>
+                <CoordinatesPicker value={field.value} onChange={field.onChange} />
+                <FormControl>
+                  <Input {...field} placeholder="-41.2865, 174.7762" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-3 gap-2">
+            <FormField
+              control={form.control}
+              name="elevation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Elevation (m)</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="number" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex items-end">
+              <Button type="button" onClick={handleAutoElevation} disabled={elevationLoading}>
+                {elevationLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Auto
+              </Button>
+            </div>
+
+            <FormField
+              control={form.control}
+              name="validBearings"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Valid Bearings</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="000-090,180-270" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Details */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium">Details</h2>
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description - Optional</FormLabel>
+                <FormControl>
+                  <Textarea {...field} rows={4} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="mandatoryNotices"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Mandatory Notices - Optional</FormLabel>
+                <FormControl>
+                  <Textarea {...field} rows={4} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="siteGuideUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Site Guide URL</FormLabel>
+                <FormControl>
+                  <Input {...field} type="url" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="hazards"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hazards - Optional</FormLabel>
+                <FormControl>
+                  <Textarea {...field} rows={4} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="access"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Access - Optional</FormLabel>
+                <FormControl>
+                  <Textarea {...field} rows={4} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <Button type="submit" className="w-full" disabled={isSubmitting || !form.formState.isDirty}>
+          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          Save Changes
+        </Button>
+      </form>
+    </Form>
   );
 }

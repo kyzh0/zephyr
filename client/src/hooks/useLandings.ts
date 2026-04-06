@@ -1,78 +1,68 @@
-import { useEffect, useState, useCallback } from 'react';
-import { listLandings } from '@/services/landing.service';
+import { useCallback, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getLandingById, listLandings } from '@/services/landing.service';
+import { ApiError } from '@/services/api-error';
 import type { ILanding } from '@/models/landing.model';
-import { handleError } from '@/lib/utils';
-
-// Module-level singleton cache for landings
-let cachedLandings: ILanding[] | null = null;
-let cachedError: Error | null = null;
-let cachedLoading = false;
-let listeners: (() => void)[] = [];
-
-async function fetchLandingsAndNotify() {
-  cachedLoading = true;
-  notifyListeners();
-  try {
-    const result = await listLandings();
-    cachedLandings = result ?? [];
-    cachedError = null;
-  } catch (err) {
-    cachedError = handleError(err, 'Operation failed');
-    cachedLandings = [];
-  } finally {
-    cachedLoading = false;
-    notifyListeners();
-  }
-}
-
-function notifyListeners() {
-  listeners.forEach((fn) => fn());
-}
-
-interface UseLandingsOptions {
-  autoLoad?: boolean;
-}
 
 export interface UseLandingsResult {
   landings: ILanding[];
   isLoading: boolean;
   error: Error | null;
+}
+
+interface UseLandingsOptions {
+  includeDisabled?: boolean;
+}
+
+export function useLandings(options?: UseLandingsOptions): UseLandingsResult {
+  const includeDisabled = options?.includeDisabled ?? false;
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: includeDisabled ? ['landings', { includeDisabled }] : ['landings'],
+    queryFn: () => listLandings(includeDisabled)
+  });
+
+  const landings = useMemo(
+    () => [...(data ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+    [data]
+  );
+
+  return {
+    landings,
+    isLoading,
+    error
+  };
+}
+
+interface UseLandingResult {
+  landing: ILanding | null;
+  isLoading: boolean;
+  error: Error | null;
   refetch: () => Promise<void>;
 }
 
-/**
- * Hook for fetching all landings
- * @param options - Configuration options
- * @param options.autoLoad - Whether to automatically load landings (default: true)
- * @returns All landings with loading and error states
- */
-export function useLandings({ autoLoad = true }: UseLandingsOptions = {}): UseLandingsResult {
-  const [, forceUpdate] = useState(0);
-
-  // Subscribe to cache updates
-  useEffect(() => {
-    const update = () => forceUpdate((n) => n + 1);
-    listeners.push(update);
-    return () => {
-      listeners = listeners.filter((fn) => fn !== update);
-    };
-  }, []);
-
-  // Fetch once if needed
-  useEffect(() => {
-    if (autoLoad && cachedLandings === null && !cachedLoading) {
-      fetchLandingsAndNotify();
-    }
-  }, [autoLoad]);
-
-  const refetch = useCallback(async () => {
-    await fetchLandingsAndNotify();
-  }, []);
+export function useLanding(id: string | undefined): UseLandingResult {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['landing', id],
+    queryFn: () => getLandingById(id!),
+    enabled: !!id,
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
+  });
 
   return {
-    landings: cachedLandings ?? [],
-    isLoading: cachedLoading || cachedLandings === null,
-    error: cachedError,
-    refetch
+    landing: data ?? null,
+    isLoading,
+    error,
+    refetch: async () => {
+      await refetch();
+    }
   };
+}
+
+export function useInvalidateLandings(): () => Promise<void> {
+  const queryClient = useQueryClient();
+  return useCallback(
+    async () => await queryClient.invalidateQueries({ queryKey: ['landings'] }),
+    [queryClient]
+  );
 }

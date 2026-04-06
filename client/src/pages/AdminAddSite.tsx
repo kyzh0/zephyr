@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,10 +22,10 @@ import {
 } from '@/components/ui/form';
 
 import { addSite } from '@/services/site.service';
-import { listLandings } from '@/services/landing.service';
+import { useLandings, useInvalidateSites } from '@/hooks';
 import type { CreateSiteDto } from '@/models/site.model';
-import type { ILanding } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
+import { ApiError } from '@/services/api-error';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -87,17 +87,10 @@ function parseCoordinates(
 
 export default function AdminAddSite() {
   const navigate = useNavigate();
+  const invalidateSites = useInvalidateSites();
   const [elevationLoading, setElevationLoading] = useState(false);
 
-  const [landings, setLandings] = useState<ILanding[]>([]);
-  useEffect(() => {
-    async function fetchLandings() {
-      const landings = (await listLandings()) ?? [];
-      landings.sort((a, b) => a.name.localeCompare(b.name));
-      setLandings(landings);
-    }
-    fetchLandings();
-  }, []);
+  const { landings } = useLandings();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -175,10 +168,12 @@ export default function AdminAddSite() {
 
     try {
       await addSite(site);
+      await invalidateSites();
       toast.success('Site added successfully');
       navigate('/admin/sites');
     } catch (error) {
-      toast.error(`Failed to add site: ${(error as Error).message}`);
+      const msg = error instanceof ApiError ? error.message : 'Unknown error';
+      toast.error(`Failed to add site: ${msg}`);
     }
   }
 

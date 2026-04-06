@@ -211,6 +211,13 @@ export function getLandingGeoJson(landings: ILanding[] | undefined): GeoJson | n
   return geoJson;
 }
 
+const FRESH_MS = 10 * 60 * 1000;
+
+function isStale(lastUpdate: string | null): boolean {
+  if (!lastUpdate) return false;
+  return Date.now() - new Date(lastUpdate).getTime() > FRESH_MS;
+}
+
 // Sort stations for rendering order
 export function sortStationFeatures(features: GeoJsonFeature[]): void {
   features.sort((a, b) => {
@@ -225,6 +232,15 @@ export function sortStationFeatures(features: GeoJsonFeature[]): void {
     if (a.properties.currentAverage == null && b.properties.currentAverage != null) {
       return -1;
     } else if (a.properties.currentAverage != null && b.properties.currentAverage == null) {
+      return 1;
+    }
+
+    // Render stale stations below fresh stations
+    const aStale = isStale(a.properties.lastUpdate as string | null);
+    const bStale = isStale(b.properties.lastUpdate as string | null);
+    if (aStale && !bStale) {
+      return -1;
+    } else if (!aStale && bStale) {
       return 1;
     }
 

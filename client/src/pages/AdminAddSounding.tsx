@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -21,8 +22,11 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+
 import { addSounding } from '@/services/sounding.service';
 import { RASP_REGIONS } from '@/models/sounding.model';
+import { ApiError } from '@/services/api-error';
+import { useInvalidateSoundings } from '@/hooks';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -45,6 +49,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function AdminAddSounding() {
   const navigate = useNavigate();
+  const invalidateSoundings = useInvalidateSoundings();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -68,14 +73,21 @@ export default function AdminAddSounding() {
       coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6]
     };
 
-    await addSounding(sounding);
-    navigate('/admin/dashboard');
+    try {
+      await addSounding(sounding);
+      await invalidateSoundings();
+      toast.success('Sounding added successfully');
+      navigate('/admin/soundings');
+    } catch (error) {
+      const msg = error instanceof ApiError ? error.message : 'Unknown error';
+      toast.error('Failed to add sounding: ' + msg);
+    }
   }
 
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b bg-white px-6 py-4 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/dashboard')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/soundings')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <h1 className="text-xl font-semibold">Add New Sounding</h1>

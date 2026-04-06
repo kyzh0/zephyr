@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,8 +15,10 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form';
+
 import { addCam } from '@/services/cam.service';
-import { toast } from 'sonner';
+import { ApiError } from '@/services/api-error';
+import { useInvalidateWebcams } from '@/hooks';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -39,6 +42,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function AdminAddWebcam() {
   const navigate = useNavigate();
+  const invalidateWebcams = useInvalidateWebcams();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -64,15 +68,21 @@ export default function AdminAddWebcam() {
       coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6]
     };
 
-    await addCam(cam);
-    toast.success('Webcam added successfully');
-    navigate('/admin/dashboard');
+    try {
+      await addCam(cam);
+      await invalidateWebcams();
+      toast.success('Webcam added successfully');
+      navigate('/admin/webcams');
+    } catch (error) {
+      const msg = error instanceof ApiError ? error.message : 'Unknown error';
+      toast.error('Failed to add webcam: ' + msg);
+    }
   }
 
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b bg-white px-6 py-4 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/dashboard')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/webcams')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <h1 className="text-xl font-semibold">Add New Webcam</h1>

@@ -1,13 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+/* eslint-disable react-hooks/immutability */
+
+import { useCallback, useEffect, useRef } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import mapboxgl from 'mapbox-gl';
-import { getWindDirectionFromBearing, handleError, REFRESH_INTERVAL_MS } from '@/lib/utils';
-import { useAppContext } from '@/context/AppContext';
-import {
-  listStations,
-  listStationsUpdatedSince,
-  loadAllStationDataAtTimestamp
-} from '@/services/station.service';
-import type { IHistoricalStationData } from '@/models/station-data.model';
+import { useQueryClient } from '@tanstack/react-query';
+
 import { getStationGeoJson, sortStationFeatures, convertWindSpeed } from '@/components/map';
 import { StationMarker } from '@/components/map/StationMarker';
 import type {
@@ -15,20 +14,21 @@ import type {
   SportType,
   WindUnit
 } from '@/components/map/map.types';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { useNavigate } from 'react-router-dom';
-import type { IStation } from '@/models/station.model';
-import type { RefObject } from 'react';
-import { toast } from 'sonner';
+
+import { getWindDirectionFromBearing, REFRESH_INTERVAL_MS } from '@/lib/utils';
+import { useAppContext } from '@/context/AppContext';
+import { loadAllStationDataAtTimestamp } from '@/services/station.service';
+import { useStations } from '@/hooks';
+import type { IHistoricalStationData } from '@/models/station-data.model';
+import { ApiError } from '@/services/api-error';
 
 interface UseStationMarkersOptions {
-  map: RefObject<mapboxgl.Map | null>;
+  map: React.RefObject<mapboxgl.Map | null>;
   isMapLoaded: boolean;
   isHistoricData: boolean;
   unit: WindUnit;
   isVisible: boolean;
   mapZoom?: number;
-  onRefresh?: (updatedIds: string[]) => void;
 }
 
 interface StationProperties {
@@ -41,6 +41,15 @@ interface StationProperties {
   validBearings: string | null;
   isOffline: boolean | null;
   lastUpdate: string | null;
+}
+
+interface UseStationMarkersResult {
+  markers: React.RefObject<IStationMarker[]>;
+  renderHistoricalData: (time: Date) => Promise<void>;
+  renderCurrentData: () => Promise<void>;
+  setInteractive: (interactive: boolean) => void;
+  setVisibility: (visible: boolean) => void;
+  error: Error | null;
 }
 
 const FRESH_MS = 10 * 60 * 1000; // 10 min — transparency
@@ -109,7 +118,6 @@ function createPopupHtml(props: StationProperties, unit: WindUnit): string {
  */
 function createMarkerElement(
   props: StationProperties,
-  timestamp: number,
   unit: WindUnit,
   sport: SportType,
   onNavigate: (dbId: string) => void,
@@ -161,8 +169,8 @@ function createMarkerElement(
   const container = document.createElement('div');
   container.id = dbId;
   container.className = 'marker';
-  container.setAttribute('elevation', String(elevation));
-  container.dataset.timestamp = String(timestamp);
+  container.dataset.elevation = String(elevation);
+
   container.dataset.avg = currentAverage != null ? String(currentAverage) : '';
   container.dataset.gust = currentGust != null ? String(currentGust) : '';
   container.dataset.name = props.name;
@@ -171,7 +179,7 @@ function createMarkerElement(
   container.dataset.validBearings = validBearings ?? '';
   container.dataset.lastUpdate = lastUpdate ?? '';
   container.dataset.expired = String(isDataExpired(lastUpdate));
-  container.style.zIndex = validBearings ? '4' : isOffline ? '2' : '3'; // valid bearings above normal, offline below
+  container.style.zIndex = isOffline ? '2' : validBearings ? '4' : '3';
   container.style.opacity = getMarkerOpacity(lastUpdate);
 
   container.appendChild(arrow);
@@ -185,13 +193,11 @@ function createMarkerElement(
 function updateMarkerElement(
   marker: HTMLDivElement,
   props: StationProperties,
-  timestamp: number,
   unit: WindUnit,
   sport: SportType
 ): void {
   const { currentAverage, currentGust, currentBearing } = props;
 
-  marker.dataset.timestamp = String(timestamp);
   marker.dataset.avg = currentAverage != null ? String(currentAverage) : '';
   marker.dataset.gust = currentGust != null ? String(currentGust) : '';
   marker.dataset.name = props.name;
@@ -223,34 +229,49 @@ function updateMarkerElement(
 
 const GUST_LABEL_MIN_ZOOM = 10;
 
+function readPropsFromDataset(marker: HTMLDivElement): StationProperties {
+  return {
+    dbId: marker.id,
+    name: marker.dataset.name ?? '',
+    elevation: Number(marker.dataset.elevation),
+    currentAverage: marker.dataset.avg !== '' ? Number(marker.dataset.avg) : null,
+    currentGust: marker.dataset.gust !== '' ? Number(marker.dataset.gust) : null,
+    currentBearing: marker.dataset.bearing !== '' ? Number(marker.dataset.bearing) : null,
+    validBearings:
+      marker.dataset.validBearings !== '' ? (marker.dataset.validBearings ?? null) : null,
+    isOffline: marker.dataset.isOffline === 'true',
+    lastUpdate: marker.dataset.lastUpdate ?? null
+  };
+}
+
 export function useStationMarkers({
   map,
   isMapLoaded,
   isHistoricData,
   unit,
   isVisible,
-  mapZoom,
-  onRefresh
-}: UseStationMarkersOptions) {
+  mapZoom
+}: UseStationMarkersOptions): UseStationMarkersResult {
   const isVisibleRef = useRef(isVisible);
   const showGustLabelRef = useRef((mapZoom ?? 0) >= GUST_LABEL_MIN_ZOOM);
+  const isHistoricDataRef = useRef(isHistoricData);
 
-  // Keep visibility ref in sync
+  // Keep refs in sync
   useEffect(() => {
     isVisibleRef.current = isVisible;
   }, [isVisible]);
+  useEffect(() => {
+    isHistoricDataRef.current = isHistoricData;
+  }, [isHistoricData]);
+
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { sport } = useAppContext();
   const markersRef = useRef<IStationMarker[]>([]);
-  const lastRefreshRef = useRef(0);
   const unitRef = useRef<WindUnit>(unit);
   const sportRef = useRef(sport);
-  const refreshAbortController = useRef<AbortController | null>(null);
 
-  const isRefreshingRef = useRef(false);
-  const [stations, setStations] = useState<IStation[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const { stations, error } = useStations();
 
   useEffect(() => {
     unitRef.current = unit;
@@ -269,41 +290,21 @@ export function useStationMarkers({
     }
   }, [mapZoom]);
 
-  // Cleanup abort controller on unmount
-  useEffect(() => {
-    return () => {
-      refreshAbortController.current?.abort();
-    };
-  }, []);
-
-  // Wrapper for async operations with error handling
-  const withErrorHandling = useCallback(
-    async <T,>(operation: () => Promise<T>, errorMessage: string): Promise<T | null> => {
-      try {
-        setError(null);
-        return await operation();
-      } catch (err) {
-        console.error(errorMessage, err);
-        setError(handleError(err, errorMessage).message);
-        toast.error(handleError(err, errorMessage).message);
-        return null;
-      }
-    },
-    []
-  );
-
   // Create a station marker with popup
   const createStationMarker = useCallback(
-    (props: StationProperties, timestamp: number): IStationMarker => {
+    (props: StationProperties): IStationMarker => {
+      const expired = isDataExpired(props.lastUpdate);
+      const popupProps: StationProperties = expired
+        ? { ...props, currentAverage: null, currentGust: null, currentBearing: null }
+        : props;
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
         offset: [0, -15]
-      }).setHTML(createPopupHtml(props, unitRef.current));
+      }).setHTML(createPopupHtml(popupProps, unitRef.current));
 
       const marker = createMarkerElement(
         props,
-        timestamp,
         unitRef.current,
         sportRef.current,
         (dbId) => {
@@ -325,169 +326,76 @@ export function useStationMarkers({
   );
 
   // Update existing marker
-  const updateStationMarker = useCallback(
-    (item: IStationMarker, props: StationProperties, timestamp: number) => {
-      updateMarkerElement(item.marker, props, timestamp, unitRef.current, sportRef.current);
-      item.popup.setHTML(createPopupHtml(props, unitRef.current));
-    },
-    []
-  );
+  const updateStationMarker = useCallback((item: IStationMarker, props: StationProperties) => {
+    updateMarkerElement(item.marker, props, unitRef.current, sportRef.current);
+    item.popup.setHTML(createPopupHtml(props, unitRef.current));
+  }, []);
 
-  // Initialize all station markers
-  const initialize = useCallback(async () => {
-    if (isInitialized || !map.current) return;
+  // Track mapbox Marker instances so we can remove them on cleanup
+  const mapboxMarkersRef = useRef<mapboxgl.Marker[]>([]);
 
-    const allStations = await withErrorHandling(
-      () => listStations(false),
-      'Failed to load stations'
-    );
+  // Sync markers whenever station data changes
+  useEffect(() => {
+    if (!isMapLoaded || !map.current || !stations.length) return;
+    // Don't update markers while in history mode
+    if (isHistoricDataRef.current) return;
 
-    if (!allStations?.length) {
-      setIsInitialized(true);
-      return;
-    }
+    const geoJson = getStationGeoJson(stations);
+    if (!geoJson?.features.length) return;
 
-    setStations(allStations);
-    const geoJson = getStationGeoJson(allStations);
-    if (!geoJson?.features.length) {
-      setIsInitialized(true);
-      return;
-    }
+    if (markersRef.current.length === 0) {
+      // Initial creation — sort features for render order
+      sortStationFeatures(geoJson.features);
 
-    const timestamp = Date.now();
-    lastRefreshRef.current = timestamp;
-    sortStationFeatures(geoJson.features);
-
-    // Clear existing markers
-    markersRef.current = [];
-
-    for (const feature of geoJson.features) {
-      const props = extractStationProperties(feature.properties);
-      const { marker, popup } = createStationMarker(props, timestamp);
-
-      // Set initial visibility based on isVisible prop
-      marker.style.visibility = isVisibleRef.current ? 'visible' : 'hidden';
-
-      markersRef.current.push({ marker, popup });
-      new mapboxgl.Marker(marker)
-        .setLngLat(feature.geometry.coordinates)
-        .setPopup(popup)
-        .addTo(map.current);
-    }
-
-    setIsInitialized(true);
-  }, [map, createStationMarker, withErrorHandling, isInitialized]);
-
-  // Refresh updated stations
-  const refresh = useCallback(async () => {
-    // We don't update map when showing historical data
-    if (isHistoricData) return;
-
-    if (
-      document.visibilityState !== 'visible' ||
-      !markersRef.current.length ||
-      isRefreshingRef.current
-    ) {
-      return;
-    }
-
-    const timestamp = Date.now();
-    if (timestamp - lastRefreshRef.current < REFRESH_INTERVAL_MS) return;
-
-    // Cancel any ongoing refresh
-    refreshAbortController.current?.abort();
-    refreshAbortController.current = new AbortController();
-
-    lastRefreshRef.current = timestamp;
-    isRefreshingRef.current = true;
-
-    try {
-      // Find newest marker timestamp
-      const newestTimestamp =
-        stations.length > 0
-          ? Math.max(...stations.map((s) => new Date(s.lastUpdate).getTime() || 0))
-          : 0;
-
-      // Fetch stations updated since then
-      const updatedStations = await withErrorHandling(
-        () => listStationsUpdatedSince(Math.round(newestTimestamp / 1000)),
-        'Failed to refresh station data'
-      );
-
-      if (refreshAbortController.current?.signal.aborted) {
-        return;
+      for (const feature of geoJson.features) {
+        const props = extractStationProperties(feature.properties);
+        const { marker, popup } = createStationMarker(props);
+        marker.style.visibility = isVisibleRef.current ? 'visible' : 'hidden';
+        markersRef.current.push({ marker, popup });
+        const mbMarker = new mapboxgl.Marker(marker)
+          .setLngLat(feature.geometry.coordinates)
+          .setPopup(popup)
+          .addTo(map.current);
+        mapboxMarkersRef.current.push(mbMarker);
       }
-
-      if (!updatedStations) {
-        return;
-      }
-
-      const geoJson = getStationGeoJson(updatedStations);
-
-      if (!geoJson?.features.length) {
-        return;
-      }
-
-      const updatedIds: string[] = [];
+    } else {
+      // Update existing markers with fresh data
       for (const item of markersRef.current) {
         const feature = geoJson.features.find((f) => f.properties.dbId === item.marker.id);
         if (!feature) continue;
-
         const props = extractStationProperties(feature.properties);
-        updateStationMarker(item, props, timestamp);
-        updatedIds.push(item.marker.id);
+        updateStationMarker(item, props);
       }
-
-      onRefresh?.(updatedIds);
-    } catch (err) {
-      console.error('Failed to refresh station markers', err);
-      toast.error(handleError(err, 'Failed to refresh station markers').message);
-    } finally {
-      isRefreshingRef.current = false;
     }
-  }, [stations, onRefresh, updateStationMarker, withErrorHandling, isHistoricData]);
+  }, [stations, isMapLoaded, map, createStationMarker, updateStationMarker, isHistoricData]);
+
+  // Cleanup markers only on unmount
+  useEffect(() => {
+    return () => {
+      mapboxMarkersRef.current.forEach((m) => m.remove());
+      mapboxMarkersRef.current = [];
+      markersRef.current = [];
+    };
+  }, []);
 
   // Re-render all markers from their stored dataset values
-  const refreshAllMarkerElements = useCallback((u: WindUnit, s: SportType) => {
+  const rerenderAllMarkers = useCallback((u: WindUnit, s: SportType) => {
     for (const item of markersRef.current) {
-      const avg = item.marker.dataset.avg === '' ? null : Number(item.marker.dataset.avg);
-      const gust = item.marker.dataset.gust === '' ? null : Number(item.marker.dataset.gust);
-      const bearing =
-        item.marker.dataset.bearing === '' ? null : Number(item.marker.dataset.bearing);
-      const stationProps: StationProperties = {
-        dbId: item.marker.id,
-        name: item.marker.dataset.name ?? '',
-        elevation: Number(item.marker.getAttribute('elevation')),
-        currentAverage: avg,
-        currentGust: gust,
-        currentBearing: bearing,
-        validBearings:
-          item.marker.dataset.validBearings !== ''
-            ? (item.marker.dataset.validBearings ?? null)
-            : null,
-        isOffline: item.marker.dataset.isOffline === 'true',
-        lastUpdate: item.marker.dataset.lastUpdate ?? null
-      };
-      updateMarkerElement(
-        item.marker,
-        stationProps,
-        Number(item.marker.dataset.timestamp ?? Date.now()),
-        u,
-        s
-      );
-      item.popup.setHTML(createPopupHtml(stationProps, u));
+      const props = readPropsFromDataset(item.marker);
+      updateMarkerElement(item.marker, props, u, s);
+      item.popup.setHTML(createPopupHtml(props, u));
     }
   }, []);
 
   // Update all markers when unit changes
   useEffect(() => {
-    refreshAllMarkerElements(unit, sportRef.current);
-  }, [unit, refreshAllMarkerElements]);
+    rerenderAllMarkers(unit, sportRef.current);
+  }, [unit, rerenderAllMarkers]);
 
   // Update all markers when sport changes
   useEffect(() => {
-    refreshAllMarkerElements(unitRef.current, sport);
-  }, [sport, refreshAllMarkerElements]);
+    rerenderAllMarkers(unitRef.current, sport);
+  }, [sport, rerenderAllMarkers]);
 
   // Cache historical responses by timestamp to avoid refetching when user revisits a time
   const historicalCacheRef = useRef<
@@ -496,65 +404,56 @@ export function useStationMarkers({
   const MAX_HISTORICAL_CACHE = 50;
 
   // Render historical data at a specific timestamp
-  const renderHistoricalData = useCallback(
-    async (time: Date): Promise<void> => {
-      if (!markersRef.current.length) return;
+  const renderHistoricalData = useCallback(async (time: Date): Promise<void> => {
+    if (!markersRef.current.length) return;
 
-      const key = time.getTime();
-      let data = historicalCacheRef.current.get(key);
+    const key = time.getTime();
+    let data = historicalCacheRef.current.get(key);
 
-      if (!data) {
-        data =
-          (await withErrorHandling(
-            () => loadAllStationDataAtTimestamp(time),
-            'Failed to load historical data'
-          )) ?? undefined;
-        if (data) {
-          historicalCacheRef.current.set(key, data);
-          if (historicalCacheRef.current.size > MAX_HISTORICAL_CACHE) {
-            const oldestKey = historicalCacheRef.current.keys().next().value;
-            if (oldestKey !== undefined) historicalCacheRef.current.delete(oldestKey);
-          }
+    if (!data) {
+      try {
+        data = (await loadAllStationDataAtTimestamp(time)) ?? undefined;
+      } catch (error) {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error('Failed to load historical data: ' + msg);
+        return;
+      }
+      if (data) {
+        historicalCacheRef.current.set(key, data);
+        if (historicalCacheRef.current.size > MAX_HISTORICAL_CACHE) {
+          const oldestKey = historicalCacheRef.current.keys().next().value;
+          if (oldestKey !== undefined) historicalCacheRef.current.delete(oldestKey);
         }
       }
+    }
 
-      if (!data?.values?.length) return;
+    if (!data?.values?.length) return;
 
-      // Update each marker with historical data
-      for (const item of markersRef.current) {
-        const stationData = data.values.find(
-          (d: IHistoricalStationData) => d.id === item.marker.id
-        );
+    // Update each marker with historical data
+    for (const item of markersRef.current) {
+      const stationData = data.values.find((d: IHistoricalStationData) => d.id === item.marker.id);
 
-        // Use data if found, otherwise show empty state
-        const windAverage = stationData?.windAverage ?? null;
-        const windGust = stationData?.windGust ?? null;
-        const windBearing = stationData?.windBearing ?? null;
-        const validBearings = stationData?.validBearings ?? null;
+      // Use data if found, otherwise show empty state
+      const windAverage = stationData?.windAverage ?? null;
+      const windGust = stationData?.windGust ?? null;
+      const windBearing = stationData?.windBearing ?? null;
+      const validBearings = stationData?.validBearings ?? null;
 
-        const historicalProps: StationProperties = {
-          dbId: item.marker.id,
-          name: item.marker.dataset.name ?? '',
-          elevation: Number(item.marker.getAttribute('elevation')),
-          currentAverage: windAverage,
-          currentGust: windGust,
-          currentBearing: windBearing,
-          validBearings,
-          isOffline: false,
-          lastUpdate: null // full opacity
-        };
+      const historicalProps: StationProperties = {
+        dbId: item.marker.id,
+        name: item.marker.dataset.name ?? '',
+        elevation: Number(item.marker.dataset.elevation),
+        currentAverage: windAverage,
+        currentGust: windGust,
+        currentBearing: windBearing,
+        validBearings,
+        isOffline: false,
+        lastUpdate: null // full opacity
+      };
 
-        updateMarkerElement(
-          item.marker,
-          historicalProps,
-          Date.now(),
-          unitRef.current,
-          sportRef.current
-        );
-      }
-    },
-    [withErrorHandling]
-  );
+      updateMarkerElement(item.marker, historicalProps, unitRef.current, sportRef.current);
+    }
+  }, []);
 
   // Set marker interactivity (enable/disable click handlers)
   const setInteractive = useCallback((interactive: boolean) => {
@@ -564,102 +463,40 @@ export function useStationMarkers({
     }
   }, []);
 
-  // Render current (live) data
+  // Render current (live) data — invalidate to force a fresh fetch
   const renderCurrentData = useCallback(async (): Promise<void> => {
-    if (!markersRef.current.length) return;
-
-    const stations = await withErrorHandling(
-      () => listStations(false),
-      'Failed to load current station data'
-    );
-    if (!stations?.length) return;
-
-    setStations(stations);
-
-    for (const item of markersRef.current) {
-      const station = stations.find((s) => s._id === item.marker.id);
-      if (!station) continue;
-
-      const props: StationProperties = {
-        dbId: station._id,
-        name: station.name,
-        elevation: station.elevation ?? 0,
-        currentAverage: station.currentAverage ?? null,
-        currentGust: station.currentGust ?? null,
-        currentBearing: station.currentBearing ?? null,
-        validBearings: station.validBearings ?? null,
-        isOffline: station.isOffline ?? false,
-        lastUpdate: station.lastUpdate ?? null
-      };
-
-      updateMarkerElement(item.marker, props, Date.now(), unitRef.current, sportRef.current);
-
-      // Update popup
-      item.popup.setHTML(createPopupHtml(props, unitRef.current));
+    try {
+      await queryClient.refetchQueries({ queryKey: ['stations'] });
+    } catch (error) {
+      toast.error('Failed to refresh station data: ' + (error as Error).message);
     }
-  }, [withErrorHandling]);
+  }, [queryClient]);
 
-  // Re-evaluate staleness (opacity + expired state) for every marker each tick.
-  // This is needed because stations with no new data are never returned by
-  // listStationsUpdatedSince, so their visual state must be updated independently
-  // as wall-clock time crosses the STALE / EXPIRED thresholds.
-  const refreshMarkerStaleness = useCallback(() => {
+  // Check marker staleness periodically against current time and update appearance
+  const updateMarkerStaleness = useCallback(() => {
     for (const item of markersRef.current) {
-      const lastUpdate = item.marker.dataset.lastUpdate ?? null;
-      const isOffline = item.marker.dataset.isOffline === 'true';
+      const props = readPropsFromDataset(item.marker);
 
-      item.marker.style.opacity = getMarkerOpacity(lastUpdate);
+      item.marker.style.opacity = getMarkerOpacity(props.lastUpdate);
 
-      const expired = isDataExpired(lastUpdate);
+      const expired = isDataExpired(props.lastUpdate);
       const prevExpired = item.marker.dataset.expired === 'true';
       if (expired === prevExpired) continue;
 
-      item.marker.dataset.expired = String(expired);
-
-      const arrow = item.marker.querySelector<HTMLDivElement>('.marker-arrow');
-      if (!arrow) continue;
-
-      const avg = item.marker.dataset.avg === '' ? null : Number(item.marker.dataset.avg);
-      const gust = item.marker.dataset.gust === '' ? null : Number(item.marker.dataset.gust);
-      const bearing =
-        item.marker.dataset.bearing === '' ? null : Number(item.marker.dataset.bearing);
-      const validBearings =
-        item.marker.dataset.validBearings !== ''
-          ? (item.marker.dataset.validBearings ?? null)
-          : null;
-
-      arrow.innerHTML = renderToStaticMarkup(
-        <StationMarker
-          bearing={expired ? undefined : (bearing ?? undefined)}
-          speed={expired ? undefined : (avg ?? undefined)}
-          gust={expired ? undefined : (gust ?? undefined)}
-          validBearings={validBearings ?? undefined}
-          isOffline={isOffline}
-          unit={unitRef.current}
-          sport={sportRef.current}
-        />
-      );
+      updateMarkerElement(item.marker, props, unitRef.current, sportRef.current);
+      item.popup.setHTML(createPopupHtml(props, unitRef.current));
     }
   }, []);
 
-  // Initialize when map loads
-  useEffect(() => {
-    if (isMapLoaded && !isInitialized) {
-      void initialize();
-    }
-  }, [isMapLoaded, isInitialized, initialize]);
-
-  // Auto-refresh every minute
   useEffect(() => {
     if (!isMapLoaded) return;
 
     const intervalId = setInterval(() => {
-      void refresh();
-      refreshMarkerStaleness();
+      updateMarkerStaleness();
     }, REFRESH_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [isHistoricData, isMapLoaded, refresh, refreshMarkerStaleness]);
+  }, [isMapLoaded, updateMarkerStaleness]);
 
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {
@@ -675,12 +512,10 @@ export function useStationMarkers({
 
   return {
     markers: markersRef,
-    refresh,
     renderHistoricalData,
     renderCurrentData,
     setInteractive,
     setVisibility,
-    error,
-    isInitialized
+    error
   };
 }

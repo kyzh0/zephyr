@@ -1,10 +1,5 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getLandingById } from '@/services/landing.service';
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
 import {
   PlaneLanding,
   AlertCircleIcon,
@@ -13,10 +8,11 @@ import {
   ExternalLink,
   TriangleAlertIcon
 } from 'lucide-react';
-import { useState } from 'react';
-import type { ILanding } from '@/models/landing.model';
-import { useIsMobile } from '@/hooks';
-import { useAppContext } from '@/context/AppContext';
+
+import SEO from '@/components/SEO';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Item,
@@ -26,45 +22,23 @@ import {
   ItemMedia,
   ItemTitle
 } from '@/components/ui/item';
-import { getButtonStyle, getIconStyle, handleError } from '@/lib/utils';
-import SEO from '@/components/SEO';
 
-export default function Site() {
+import { getButtonStyle, getIconStyle } from '@/lib/utils';
+import { ApiError } from '@/services/api-error';
+import { useIsMobile, useLanding } from '@/hooks';
+import { useAppContext } from '@/context/AppContext';
+
+export default function Landing() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { flyingMode } = useAppContext();
-  const [landing, setLanding] = useState<ILanding | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchLanding = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const data = await getLandingById(id);
-        if (!data) {
-          throw new Error('Landing not found');
-        }
-        setLanding(data);
-      } catch (err) {
-        setError(handleError(err, 'Failed to load landing details'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void fetchLanding();
-  }, [id]);
+  const { landing, isLoading, error } = useLanding(id);
 
   // Navigate back if landing not found
   useEffect(() => {
-    if (error) {
-      navigate(-1);
-    }
+    if (error instanceof ApiError && error.status === 404) navigate('/', { replace: true });
   }, [error, navigate]);
 
   // Shared header content
