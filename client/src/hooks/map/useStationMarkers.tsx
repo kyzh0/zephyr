@@ -7,7 +7,14 @@ import { toast } from 'sonner';
 import mapboxgl from 'mapbox-gl';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { getStationGeoJson, sortStationFeatures, convertWindSpeed, attachTouchGuard, escapeHtml, type TouchGuard } from '@/components/map';
+import {
+  getStationGeoJson,
+  sortStationFeatures,
+  convertWindSpeed,
+  attachTouchGuard,
+  escapeHtml,
+  type TouchGuard
+} from '@/components/map';
 import { StationMarker } from '@/components/map/StationMarker';
 import type {
   StationMarker as IStationMarker,
@@ -214,7 +221,9 @@ function createMarkerElement(
   return {
     container,
     touchGuard,
-    resetHover: () => { isHovering = false; }
+    resetHover: () => {
+      isHovering = false;
+    }
   };
 }
 
@@ -434,13 +443,16 @@ export function useStationMarkers({
   }, []);
 
   // Re-render all markers from their stored dataset values
-  const rerenderAllMarkers = useCallback((u: WindUnit, s: SportType) => {
-    for (const item of markersRef.current) {
-      const props = readPropsFromDataset(item.marker);
-      refreshMarker(item.marker, props, u, s);
-      item.popup.setHTML(createPopupHtml(props, u));
-    }
-  }, [refreshMarker]);
+  const rerenderAllMarkers = useCallback(
+    (u: WindUnit, s: SportType) => {
+      for (const item of markersRef.current) {
+        const props = readPropsFromDataset(item.marker);
+        refreshMarker(item.marker, props, u, s);
+        item.popup.setHTML(createPopupHtml(props, u));
+      }
+    },
+    [refreshMarker]
+  );
 
   // Update all markers when unit changes
   useEffect(() => {

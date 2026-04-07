@@ -102,7 +102,16 @@ export const StationMarker = ({
         )}
 
         {/* Circle (core color) - drawn outside rotation so it appears cleanly on top */}
-        <circle className="interactive-circle" cx={cx} cy={cy} r={R} fill={coreColor} stroke="none" pointerEvents="auto" />
+        {/* Attach pointerevents to this circle only, so interactivity is bounded to the circle only */}
+        <circle
+          className="interactive-circle"
+          cx={cx}
+          cy={cy}
+          r={R}
+          fill={coreColor}
+          stroke="none"
+          pointerEvents="auto"
+        />
 
         {/* White/gold border on circle only — drawn on top so it covers the tail join */}
         <circle
