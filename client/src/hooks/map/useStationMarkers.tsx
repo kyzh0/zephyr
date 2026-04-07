@@ -186,11 +186,11 @@ function createMarkerElement(
   // circle (pointer-events: auto) still reach it.
   arrow.style.pointerEvents = 'none';
 
-  const isTouching = attachTouchGuard(arrow);
+  const touchGuard = attachTouchGuard(arrow);
   let isHovering = false;
 
   arrow.addEventListener('mouseover', () => {
-    if (isHovering || isTouching()) return;
+    if (isHovering || touchGuard.isTouching()) return;
     isHovering = true;
     onShow(popup);
   });
@@ -198,7 +198,7 @@ function createMarkerElement(
     if (!isHovering) return;
     if (e.relatedTarget && arrow.contains(e.relatedTarget as Node)) return;
     isHovering = false;
-    if (!isTouching()) onHide(popup);
+    if (!touchGuard.isTouching()) onHide(popup);
   });
   arrow.addEventListener('click', () => {
     onHide(popup);

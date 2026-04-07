@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import mapboxgl from 'mapbox-gl';
 import { LandingMarker } from '@/components/map/LandingMarker';
-import { getLandingGeoJson, attachTouchGuard } from '@/components/map';
+import { getLandingGeoJson, attachTouchGuard, type TouchGuard } from '@/components/map';
 import { useNavigate } from 'react-router-dom';
 import { useLandings } from '../useLandings';
 
@@ -16,6 +16,8 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
   const navigate = useNavigate();
   const { landings, isLoading: landingsLoading } = useLandings();
   const markersRef = useRef<{ marker: HTMLDivElement; popup: mapboxgl.Popup }[]>([]);
+  const mapboxMarkersRef = useRef<mapboxgl.Marker[]>([]);
+  const touchGuardsRef = useRef<TouchGuard[]>([]);
   const isVisibleRef = useRef(isVisible);
 
   // Keep visibility ref in sync
@@ -29,7 +31,7 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
       dbId: string,
       name: string,
       isOfficial: boolean
-    ): { marker: HTMLDivElement; popup: mapboxgl.Popup } => {
+    ): { marker: HTMLDivElement; popup: mapboxgl.Popup; touchGuard: TouchGuard } => {
       // Create popup
       const popup = new mapboxgl.Popup({
         closeButton: false,
@@ -47,29 +49,31 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
       el.innerHTML = renderToStaticMarkup(<LandingMarker isOfficial={isOfficial} />);
 
       // Event handlers
-      const isTouching = attachTouchGuard(el);
+      const touchGuard = attachTouchGuard(el);
 
       el.addEventListener('click', () => {
         popup.remove();
         navigate(`/landings/${dbId}`);
       });
       el.addEventListener('mouseenter', () => {
-        if (!isTouching() && map.current) popup.addTo(map.current);
+        if (!touchGuard.isTouching() && map.current) popup.addTo(map.current);
       });
       el.addEventListener('mouseleave', () => {
-        if (!isTouching()) popup.remove();
+        if (!touchGuard.isTouching()) popup.remove();
       });
 
-      return { marker: el, popup };
+      return { marker: el, popup, touchGuard };
     },
     [navigate, map]
   );
 
-  // Initialize landings
-  const initialize = useCallback(() => {
-    if (!map.current || landingsLoading || !landings?.length) return;
+  // Sync markers whenever landing data changes
+  useEffect(() => {
+    if (!isMapLoaded || !map.current || landingsLoading || !landings?.length) return;
 
-    // Also try to load real landings from API
+    // Already created — skip
+    if (markersRef.current.length > 0) return;
+
     try {
       const geoJson = getLandingGeoJson(landings);
 
@@ -79,23 +83,36 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
           const dbId = f.properties.dbId as string;
           const isOfficial = f.properties.siteGuideUrl ? true : false;
 
-          const { marker, popup } = createLandingMarker(dbId, name, isOfficial);
+          const { marker, popup, touchGuard } = createLandingMarker(dbId, name, isOfficial);
           popup.setLngLat(f.geometry.coordinates);
           markersRef.current.push({ marker, popup });
-          new mapboxgl.Marker(marker)
+          touchGuardsRef.current.push(touchGuard);
+          const mbMarker = new mapboxgl.Marker(marker)
             .setLngLat(f.geometry.coordinates)
             .addTo(map.current);
+          mapboxMarkersRef.current.push(mbMarker);
         }
       }
     } catch (error) {
-      console.error('❌ Error loading real landings:', error);
+      console.error('Error loading landings:', error);
     }
 
     // Set initial visibility after all markers are created
     for (const item of markersRef.current) {
       item.marker.style.visibility = isVisibleRef.current ? 'visible' : 'hidden';
     }
-  }, [map, landings, landingsLoading, createLandingMarker]);
+  }, [isMapLoaded, map, landings, landingsLoading, createLandingMarker]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      touchGuardsRef.current.forEach((tg) => tg.cleanup());
+      touchGuardsRef.current = [];
+      mapboxMarkersRef.current.forEach((m) => m.remove());
+      mapboxMarkersRef.current = [];
+      markersRef.current = [];
+    };
+  }, []);
 
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {
@@ -112,13 +129,6 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
       item.marker.style.opacity = transparent ? '0.1' : '1';
     }
   }, []);
-
-  // Initialize when map is loaded
-  useEffect(() => {
-    if (isMapLoaded) {
-      void initialize();
-    }
-  }, [isMapLoaded, initialize]);
 
   // Update visibility when prop changes
   useEffect(() => {

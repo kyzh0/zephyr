@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import mapboxgl from 'mapbox-gl';
 import { SiteMarker } from '@/components/map/SiteMarker';
-import { getSiteGeoJson, attachTouchGuard } from '@/components/map';
+import { getSiteGeoJson, attachTouchGuard, type TouchGuard } from '@/components/map';
 import { useNavigate } from 'react-router-dom';
 import { useSites } from '../useSites';
 import { isWindBearingInRange } from '@/lib/utils';
@@ -17,6 +17,8 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
   const navigate = useNavigate();
   const { sites, isLoading: sitesLoading } = useSites();
   const markersRef = useRef<{ marker: HTMLDivElement; popup: mapboxgl.Popup }[]>([]);
+  const mapboxMarkersRef = useRef<mapboxgl.Marker[]>([]);
+  const touchGuardsRef = useRef<TouchGuard[]>([]);
   const isVisibleRef = useRef(isVisible);
 
   // Keep visibility ref in sync
@@ -31,7 +33,7 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
       name: string,
       validBearings: string,
       isOfficial: boolean
-    ): { marker: HTMLDivElement; popup: mapboxgl.Popup } => {
+    ): { marker: HTMLDivElement; popup: mapboxgl.Popup; touchGuard: TouchGuard } => {
       // Create popup
       const popup = new mapboxgl.Popup({
         closeButton: false,
@@ -54,29 +56,31 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
       if (validBearings) el.dataset.validBearings = validBearings;
 
       // Event handlers
-      const isTouching = attachTouchGuard(el);
+      const touchGuard = attachTouchGuard(el);
 
       el.addEventListener('click', () => {
         popup.remove();
         navigate(`/sites/${dbId}`);
       });
       el.addEventListener('mouseenter', () => {
-        if (!isTouching() && map.current) popup.addTo(map.current);
+        if (!touchGuard.isTouching() && map.current) popup.addTo(map.current);
       });
       el.addEventListener('mouseleave', () => {
-        if (!isTouching()) popup.remove();
+        if (!touchGuard.isTouching()) popup.remove();
       });
 
-      return { marker: el, popup };
+      return { marker: el, popup, touchGuard };
     },
     [navigate, map]
   );
 
-  // Initialize sites
-  const initialize = useCallback(() => {
-    if (!map.current || sitesLoading || !sites?.length) return;
+  // Sync markers whenever site data changes
+  useEffect(() => {
+    if (!isMapLoaded || !map.current || sitesLoading || !sites?.length) return;
 
-    // Also try to load real sites from API
+    // Already created — skip
+    if (markersRef.current.length > 0) return;
+
     try {
       const geoJson = getSiteGeoJson(sites);
 
@@ -87,23 +91,41 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
           const validBearings = f.properties.validBearings as string;
           const isOfficial = f.properties.siteGuideUrl ? true : false;
 
-          const { marker, popup } = createSiteMarker(dbId, name, validBearings, isOfficial);
+          const { marker, popup, touchGuard } = createSiteMarker(
+            dbId,
+            name,
+            validBearings,
+            isOfficial
+          );
           popup.setLngLat(f.geometry.coordinates);
           markersRef.current.push({ marker, popup });
-          new mapboxgl.Marker(marker)
+          touchGuardsRef.current.push(touchGuard);
+          const mbMarker = new mapboxgl.Marker(marker)
             .setLngLat(f.geometry.coordinates)
             .addTo(map.current);
+          mapboxMarkersRef.current.push(mbMarker);
         }
       }
     } catch (error) {
-      console.error('❌ Error loading real sites:', error);
+      console.error('Error loading sites:', error);
     }
 
     // Set initial visibility after all markers are created
     for (const item of markersRef.current) {
       item.marker.style.visibility = isVisibleRef.current ? 'visible' : 'hidden';
     }
-  }, [map, sites, sitesLoading, createSiteMarker]);
+  }, [isMapLoaded, map, sites, sitesLoading, createSiteMarker]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      touchGuardsRef.current.forEach((tg) => tg.cleanup());
+      touchGuardsRef.current = [];
+      mapboxMarkersRef.current.forEach((m) => m.remove());
+      mapboxMarkersRef.current = [];
+      markersRef.current = [];
+    };
+  }, []);
 
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {
@@ -122,13 +144,6 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
       item.marker.style.opacity = matches ? '1' : '0.1';
     }
   }, []);
-
-  // Initialize when map is loaded
-  useEffect(() => {
-    if (isMapLoaded) {
-      void initialize();
-    }
-  }, [isMapLoaded, initialize]);
 
   // Update visibility when prop changes
   useEffect(() => {

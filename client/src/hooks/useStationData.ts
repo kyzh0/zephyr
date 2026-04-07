@@ -113,7 +113,11 @@ function padData(extendedData: ExtendedStationData[], stationId: string): Extend
   const MS_10_MIN = 10 * 60 * 1000;
 
   const startBucket = Math.floor(new Date(extendedData[0].time).getTime() / MS_10_MIN) * MS_10_MIN;
-  const endBucket = Math.floor((Date.now() - 120_000) / MS_10_MIN) * MS_10_MIN;
+  const now = Date.now();
+  const endBucket = Math.floor(now / MS_10_MIN) * MS_10_MIN;
+  // Allow time for fresh data to arrive before padding an empty column at the current interval
+  const SCRAPER_GRACE_MS = 120_000;
+  const padCutoff = Math.floor((now - SCRAPER_GRACE_MS) / MS_10_MIN) * MS_10_MIN;
 
   const dataByBucket = new Map<number, ExtendedStationData>();
   for (const item of extendedData) {
@@ -125,7 +129,7 @@ function padData(extendedData: ExtendedStationData[], stationId: string): Extend
   for (let t = startBucket; t <= endBucket; t += MS_10_MIN) {
     if (dataByBucket.has(t)) {
       result.push(dataByBucket.get(t)!);
-    } else {
+    } else if (t <= padCutoff) {
       const bucketDate = new Date(t);
       result.push({
         time: bucketDate,
