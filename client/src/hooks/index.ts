@@ -5,13 +5,41 @@ export {
   useWebcamWithImages,
   useWebcams,
   useNearbyWebcams,
-  useInvalidateWebcams
+  useAddWebcam,
+  useUpdateWebcam,
+  useDeleteWebcam
 } from './useWebcam';
-export { useNearbySites, useSite, useSites, useInvalidateSites } from './useSites';
-export { useNearbyStations, useStation, useStations, useInvalidateStations } from './useStations';
-export { useDonations, useLeaderboard } from './useDonations';
-export { useLanding, useLandings, useInvalidateLandings } from './useLandings';
-export { useSounding, useSoundings, useInvalidateSoundings } from './useSoundings';
+export {
+  useNearbySites,
+  useSite,
+  useSites,
+  useAddSite,
+  useUpdateSite,
+  useDeleteSite
+} from './useSites';
+export {
+  useNearbyStations,
+  useStation,
+  useStations,
+  useAddStation,
+  useUpdateStation,
+  useDeleteStation
+} from './useStations';
+export { useDonations, useLeaderboard, useAddDonation, useDeleteDonation } from './useDonations';
+export {
+  useLanding,
+  useLandings,
+  useAddLanding,
+  useUpdateLanding,
+  useDeleteLanding
+} from './useLandings';
+export {
+  useSounding,
+  useSoundings,
+  useAddSounding,
+  useUpdateSounding,
+  useDeleteSounding
+} from './useSoundings';
 export { usePersistedState } from './usePersistedState';
 
 export interface UseNearbyLocationsOptions {

@@ -43,8 +43,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 import { DONATION_REGIONS, type IDonation } from '@/models/donation.model';
-import { createDonation, deleteDonation } from '@/services/donation.service';
-import { useDonations } from '@/hooks';
+import { useAddDonation, useDeleteDonation, useDonations } from '@/hooks';
 import { ApiError } from '@/services/api-error';
 
 const formSchema = z.object({
@@ -67,7 +66,9 @@ interface DonorGroup {
 }
 
 export function AdminDonationsPanel() {
-  const { donations, isLoading, refetch } = useDonations();
+  const { donations, isLoading } = useDonations();
+  const addMutation = useAddDonation();
+  const deleteMutation = useDeleteDonation();
   const [donationSearch, setDonationSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -113,39 +114,44 @@ export function AdminDonationsPanel() {
     }
   });
 
-  async function onAdd(values: FormValues) {
-    try {
-      await createDonation({
+  function onAdd(values: FormValues) {
+    addMutation.mutate(
+      {
         donorName: values.donorName.trim(),
         amount: Number(values.amount),
         donatedAt: new Date(values.donatedAt + 'T12:00:00').toISOString(),
         region: values.region
-      });
-      toast.success('Donation added');
-      form.reset({
-        donorName: '',
-        amount: '',
-        donatedAt: new Date().toLocaleDateString('en-NZ'),
-        region: 'Unknown'
-      });
-      await refetch();
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to add donation: ' + msg);
-    }
+      },
+      {
+        onSuccess: () => {
+          toast.success('Donation added');
+          form.reset({
+            donorName: '',
+            amount: '',
+            donatedAt: new Date().toLocaleDateString('en-NZ'),
+            region: 'Unknown'
+          });
+        },
+        onError: (error) => {
+          const msg = error instanceof ApiError ? error.message : 'Unknown error';
+          toast.error('Failed to add donation: ' + msg);
+        }
+      }
+    );
   }
 
-  async function confirmDelete() {
+  function confirmDelete() {
     if (!deleteId) return;
-    try {
-      await deleteDonation(deleteId);
-      setDeleteId(null);
-      toast.success('Donation removed');
-      await refetch();
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to delete donation: ' + msg);
-    }
+    deleteMutation.mutate(deleteId, {
+      onSuccess: () => {
+        setDeleteId(null);
+        toast.success('Donation removed');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error('Failed to delete donation: ' + msg);
+      }
+    });
   }
 
   return (
@@ -223,7 +229,10 @@ export function AdminDonationsPanel() {
                 )}
               />
               <div className="sm:col-span-2">
-                <Button type="submit" disabled={isLoading}>
+                <Button type="submit" disabled={addMutation.isPending || isLoading}>
+                  {(addMutation.isPending || isLoading) && (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  )}
                   Add donation
                 </Button>
               </div>

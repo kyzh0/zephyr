@@ -1,6 +1,12 @@
-import { useMemo, useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getStationById, listStations } from '@/services/station.service';
+import { useMemo } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  addStation,
+  deleteStation,
+  getStationById,
+  listStations,
+  patchStation
+} from '@/services/station.service';
 import { ApiError } from '@/services/api-error';
 import type { IStation } from '@/models/station.model';
 import { getDistance, REFRESH_INTERVAL_MS } from '@/lib/utils';
@@ -36,11 +42,10 @@ interface UseStationResult {
   station: IStation | null;
   isLoading: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
 }
 
 export function useStation(id: string | undefined): UseStationResult {
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['station', id],
     queryFn: () => getStationById(id!),
     enabled: !!id,
@@ -51,19 +56,39 @@ export function useStation(id: string | undefined): UseStationResult {
   return {
     station: data ?? null,
     isLoading,
-    error,
-    refetch: async () => {
-      await refetch();
-    }
+    error
   };
 }
 
-export function useInvalidateStations(): () => Promise<void> {
+export function useAddStation() {
   const queryClient = useQueryClient();
-  return useCallback(
-    async () => await queryClient.invalidateQueries({ queryKey: ['stations'] }),
-    [queryClient]
-  );
+  return useMutation({
+    mutationFn: addStation,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['stations'] })
+  });
+}
+
+export function useUpdateStation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<IStation> }) =>
+      patchStation(id, updates),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['stations'] });
+      queryClient.invalidateQueries({ queryKey: ['station', id] });
+    }
+  });
+}
+
+export function useDeleteStation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteStation,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['stations'] });
+      queryClient.removeQueries({ queryKey: ['station', id] });
+    }
+  });
 }
 
 export function useNearbyStations({

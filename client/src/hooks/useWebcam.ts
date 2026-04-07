@@ -1,6 +1,13 @@
-import { useCallback, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getCamById, loadCamImages, listCams } from '@/services/cam.service';
+import { useMemo } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  addCam,
+  deleteCam,
+  getCamById,
+  listCams,
+  loadCamImages,
+  patchCam
+} from '@/services/cam.service';
 import type { ICam, ICamImage } from '@/models/cam.model';
 import { getDistance, REFRESH_INTERVAL_MS } from '@/lib/utils';
 import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from '.';
@@ -16,7 +23,6 @@ export interface UseWebcamResult {
   webcam: ICam | null;
   isLoading: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
 }
 
 export interface UseWebcamWithImagesResult extends UseWebcamResult {
@@ -39,10 +45,7 @@ export function useWebcam({ id }: UseWebcamOptions = {}): UseWebcamResult {
   return {
     webcam: webcamQuery.data ?? null,
     isLoading: webcamQuery.isLoading,
-    error: webcamQuery.error ?? null,
-    refetch: async () => {
-      await webcamQuery.refetch();
-    }
+    error: webcamQuery.error ?? null
   };
 }
 
@@ -77,11 +80,7 @@ export function useWebcamWithImages({ id }: UseWebcamOptions = {}): UseWebcamWit
     images: imagesQuery.data ?? [],
     isLoading: webcamQuery.isLoading,
     isStale,
-    error: webcamQuery.error ?? imagesQuery.error ?? null,
-    refetch: async () => {
-      await webcamQuery.refetch();
-      await imagesQuery.refetch();
-    }
+    error: webcamQuery.error ?? imagesQuery.error ?? null
   };
 }
 
@@ -105,12 +104,36 @@ export function useWebcams(options?: UseWebcamsOptions) {
   };
 }
 
-export function useInvalidateWebcams(): () => Promise<void> {
+export function useAddWebcam() {
   const queryClient = useQueryClient();
-  return useCallback(
-    async () => await queryClient.invalidateQueries({ queryKey: ['webcams'] }),
-    [queryClient]
-  );
+  return useMutation({
+    mutationFn: addCam,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['webcams'] })
+  });
+}
+
+export function useUpdateWebcam() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Parameters<typeof patchCam>[1] }) =>
+      patchCam(id, updates),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['webcams'] });
+      queryClient.invalidateQueries({ queryKey: ['webcam', id] });
+    }
+  });
+}
+
+export function useDeleteWebcam() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteCam,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['webcams'] });
+      queryClient.removeQueries({ queryKey: ['webcam', id] });
+      queryClient.removeQueries({ queryKey: ['webcam-images', id] });
+    }
+  });
 }
 
 export function useNearbyWebcams({

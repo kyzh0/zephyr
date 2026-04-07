@@ -27,15 +27,12 @@ export default function HelpDialog() {
         navigate('/');
       }}
     >
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto pb-2">
+      <DialogContent
+        className="sm:max-w-lg max-h-[85vh] overflow-y-auto pb-2"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader className="text-center sm:text-center">
           <div className="hidden sm:flex justify-between items-start">
-            {/* hide focus on load */}
-            <Button
-              style={{ width: 0, height: 0, opacity: 0, position: 'absolute' }}
-              aria-hidden
-              tabIndex={0}
-            />
             <Button
               variant="link"
               onClick={() => setSignInOpen(true)}

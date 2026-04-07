@@ -32,8 +32,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { deleteStation, patchStation } from '@/services/station.service';
-import { useStation, useInvalidateStations } from '@/hooks';
+import { useStation, useUpdateStation, useDeleteStation } from '@/hooks';
 import type { IStation } from '@/models/station.model';
 import { lookupElevation } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
@@ -102,28 +101,26 @@ function formatCoordinates(location?: { coordinates: [number, number] }): string
 export default function AdminEditStation() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { station, isLoading, refetch } = useStation(id);
-  const invalidateStations = useInvalidateStations();
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { station, isLoading } = useStation(id);
+  const updateMutation = useUpdateStation();
+  const deleteMutation = useDeleteStation();
 
-  async function handleDelete() {
-    if (!id) return;
-
-    setIsDeleting(true);
-    try {
-      await deleteStation(id);
-      await invalidateStations();
-      toast.success('Station deleted');
-      navigate('/admin/stations');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to delete station: ' + msg);
-      setIsDeleting(false);
-    }
+  function handleDelete() {
+    if (!id || !station) return;
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success('Station deleted');
+        navigate('/admin/stations');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error('Failed to delete station: ' + msg);
+      }
+    });
   }
 
-  async function handleSubmit(values: FormValues) {
-    if (!station || !id) return;
+  function handleSubmit(values: FormValues) {
+    if (!id || !station) return;
 
     const patch: Record<string, unknown> = {};
     const remove: Record<string, boolean> = {};
@@ -193,15 +190,19 @@ export default function AdminEditStation() {
       remove.weatherlinkCookie = true;
     }
 
-    try {
-      await patchStation(id, { patch, remove } as unknown as Partial<IStation>);
-      await Promise.all([invalidateStations(), refetch()]);
-      toast.success('Station updated');
-      navigate('/admin/stations');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to update station: ' + msg);
-    }
+    updateMutation.mutate(
+      { id, updates: { patch, remove } as unknown as Partial<IStation> },
+      {
+        onSuccess: () => {
+          toast.success('Station updated');
+          navigate('/admin/stations');
+        },
+        onError: (error) => {
+          const msg = error instanceof ApiError ? error.message : 'Unknown error';
+          toast.error('Failed to update station: ' + msg);
+        }
+      }
+    );
   }
 
   return (
@@ -216,8 +217,8 @@ export default function AdminEditStation() {
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" disabled={isDeleting}>
-              {isDeleting ? (
+            <Button variant="destructive" size="sm" disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Trash2 className="h-4 w-4" />
@@ -251,7 +252,11 @@ export default function AdminEditStation() {
         {isLoading || !station ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <StationForm station={station} onSubmit={handleSubmit} />
+          <StationForm
+            station={station}
+            onSubmit={handleSubmit}
+            isPending={updateMutation.isPending}
+          />
         )}
       </main>
     </div>
@@ -260,10 +265,12 @@ export default function AdminEditStation() {
 
 function StationForm({
   station,
-  onSubmit
+  onSubmit,
+  isPending
 }: {
   station: IStation;
-  onSubmit: (values: FormValues) => Promise<void>;
+  onSubmit: (values: FormValues) => void;
+  isPending: boolean;
 }) {
   const [elevationLoading, setElevationLoading] = useState(false);
 
@@ -294,7 +301,6 @@ function StationForm({
   });
 
   const stationType = form.watch('type');
-  const isSubmitting = form.formState.isSubmitting;
 
   async function handleAutoElevation() {
     const coordsValue = form.getValues('coordinates');
@@ -635,8 +641,8 @@ function StationForm({
           </div>
         )}
 
-        <Button type="submit" className="w-full" disabled={isSubmitting || !form.formState.isDirty}>
-          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+        <Button type="submit" className="w-full" disabled={isPending || !form.formState.isDirty}>
+          {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Save Changes
         </Button>
       </form>

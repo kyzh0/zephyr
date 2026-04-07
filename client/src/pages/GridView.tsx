@@ -73,7 +73,10 @@ export default function GridView() {
         description="View nearby weather stations sorted by distance. Live wind speed, gust, and direction data for free flying in New Zealand."
         path="/grid"
       />
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
+      <DialogContent
+        className="sm:max-w-4xl max-h-[90vh] flex flex-col"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Nearby Stations</DialogTitle>
           <DialogDescription>

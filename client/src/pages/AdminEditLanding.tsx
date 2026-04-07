@@ -32,8 +32,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { deleteLanding, updateLanding } from '@/services/landing.service';
-import { useLanding, useInvalidateLandings } from '@/hooks';
+import { useLanding, useUpdateLanding, useDeleteLanding } from '@/hooks';
 import type { ILanding } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
@@ -86,29 +85,26 @@ export default function AdminEditLanding() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
-  const { landing, isLoading, refetch } = useLanding(id);
-  const invalidateLandings = useInvalidateLandings();
+  const { landing, isLoading } = useLanding(id);
+  const updateMutation = useUpdateLanding();
+  const deleteMutation = useDeleteLanding();
 
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  async function handleDelete() {
-    if (!id) return;
-
-    setIsDeleting(true);
-    try {
-      await deleteLanding(id);
-      await invalidateLandings();
-      toast.success('Landing deleted');
-      navigate('/admin/landings');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to delete landing: ' + msg);
-      setIsDeleting(false);
-    }
+  function handleDelete() {
+    if (!id || !landing) return;
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success('Landing deleted');
+        navigate('/admin/landings');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error('Failed to delete landing: ' + msg);
+      }
+    });
   }
 
-  async function handleSubmit(values: FormValues) {
-    if (!landing) return;
+  function handleSubmit(values: FormValues) {
+    if (!id || !landing) return;
 
     const updates: Partial<ILanding> = {
       name: values.name,
@@ -126,15 +122,19 @@ export default function AdminEditLanding() {
       updates.location = location;
     }
 
-    try {
-      await updateLanding(id!, updates);
-      await Promise.all([invalidateLandings(), refetch()]);
-      toast.success('Landing updated');
-      navigate(`/admin/landings`);
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to update landing: ' + msg);
-    }
+    updateMutation.mutate(
+      { id, updates },
+      {
+        onSuccess: () => {
+          toast.success('Landing updated');
+          navigate('/admin/landings');
+        },
+        onError: (error) => {
+          const msg = error instanceof ApiError ? error.message : 'Unknown error';
+          toast.error('Failed to update landing: ' + msg);
+        }
+      }
+    );
   }
 
   return (
@@ -149,8 +149,8 @@ export default function AdminEditLanding() {
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" disabled={isDeleting}>
-              {isDeleting ? (
+            <Button variant="destructive" size="sm" disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Trash2 className="h-4 w-4" />
@@ -183,7 +183,11 @@ export default function AdminEditLanding() {
         {isLoading || !landing ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <LandingForm landing={landing} onSubmit={handleSubmit} />
+          <LandingForm
+            landing={landing}
+            onSubmit={handleSubmit}
+            isPending={updateMutation.isPending}
+          />
         )}
       </main>
     </div>
@@ -192,10 +196,12 @@ export default function AdminEditLanding() {
 
 function LandingForm({
   landing,
-  onSubmit
+  onSubmit,
+  isPending
 }: {
   landing: ILanding;
-  onSubmit: (values: FormValues) => Promise<void>;
+  onSubmit: (values: FormValues) => void;
+  isPending: boolean;
 }) {
   const [elevationLoading, setElevationLoading] = useState(false);
 
@@ -212,8 +218,6 @@ function LandingForm({
       siteGuideUrl: landing.siteGuideUrl ?? ''
     }
   });
-
-  const isSubmitting = form.formState.isSubmitting;
 
   async function handleAutoElevation() {
     const coordsValue = form.getValues('coordinates');
@@ -393,8 +397,8 @@ function LandingForm({
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={isSubmitting || !form.formState.isDirty}>
-          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+        <Button type="submit" className="w-full" disabled={isPending || !form.formState.isDirty}>
+          {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Save Changes
         </Button>
       </form>

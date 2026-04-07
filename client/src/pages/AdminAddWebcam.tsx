@@ -16,9 +16,8 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { addCam } from '@/services/cam.service';
 import { ApiError } from '@/services/api-error';
-import { useInvalidateWebcams } from '@/hooks';
+import { useAddWebcam } from '@/hooks';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -42,7 +41,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function AdminAddWebcam() {
   const navigate = useNavigate();
-  const invalidateWebcams = useInvalidateWebcams();
+  const addMutation = useAddWebcam();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -55,9 +54,7 @@ export default function AdminAddWebcam() {
     }
   });
 
-  const isSubmitting = form.formState.isSubmitting;
-
-  async function onSubmit(values: FormValues) {
+  function onSubmit(values: FormValues) {
     const [lat, lon] = values.coordinates.replace(/\s/g, '').split(',').map(Number);
 
     const cam = {
@@ -68,15 +65,16 @@ export default function AdminAddWebcam() {
       coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6]
     };
 
-    try {
-      await addCam(cam);
-      await invalidateWebcams();
-      toast.success('Webcam added successfully');
-      navigate('/admin/webcams');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to add webcam: ' + msg);
-    }
+    addMutation.mutate(cam, {
+      onSuccess: () => {
+        toast.success('Webcam added successfully');
+        navigate('/admin/webcams');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error('Failed to add webcam: ' + msg);
+      }
+    });
   }
 
   return (
@@ -161,8 +159,8 @@ export default function AdminAddWebcam() {
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={addMutation.isPending}>
+              {addMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Add Webcam
             </Button>
           </form>

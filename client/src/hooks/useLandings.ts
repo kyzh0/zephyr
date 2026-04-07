@@ -1,6 +1,12 @@
-import { useCallback, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getLandingById, listLandings } from '@/services/landing.service';
+import { useMemo } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  addLanding,
+  deleteLanding,
+  getLandingById,
+  listLandings,
+  updateLanding
+} from '@/services/landing.service';
 import { ApiError } from '@/services/api-error';
 import type { ILanding } from '@/models/landing.model';
 
@@ -38,11 +44,10 @@ interface UseLandingResult {
   landing: ILanding | null;
   isLoading: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
 }
 
 export function useLanding(id: string | undefined): UseLandingResult {
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['landing', id],
     queryFn: () => getLandingById(id!),
     enabled: !!id,
@@ -52,17 +57,37 @@ export function useLanding(id: string | undefined): UseLandingResult {
   return {
     landing: data ?? null,
     isLoading,
-    error,
-    refetch: async () => {
-      await refetch();
-    }
+    error
   };
 }
 
-export function useInvalidateLandings(): () => Promise<void> {
+export function useAddLanding() {
   const queryClient = useQueryClient();
-  return useCallback(
-    async () => await queryClient.invalidateQueries({ queryKey: ['landings'] }),
-    [queryClient]
-  );
+  return useMutation({
+    mutationFn: addLanding,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['landings'] })
+  });
+}
+
+export function useUpdateLanding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<ILanding> }) =>
+      updateLanding(id, updates),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['landings'] });
+      queryClient.invalidateQueries({ queryKey: ['landing', id] });
+    }
+  });
+}
+
+export function useDeleteLanding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteLanding,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['landings'] });
+      queryClient.removeQueries({ queryKey: ['landing', id] });
+    }
+  });
 }

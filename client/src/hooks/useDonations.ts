@@ -1,5 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-import { fetchRecognitionLeaderboard, listDonations } from '@/services/donation.service';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  createDonation,
+  deleteDonation,
+  fetchRecognitionLeaderboard,
+  listDonations
+} from '@/services/donation.service';
 import type { IDonation } from '@/models/donation.model';
 
 export function useLeaderboard() {
@@ -13,11 +18,10 @@ interface UseDonationsResult {
   donations: IDonation[];
   isLoading: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
 }
 
 export function useDonations(): UseDonationsResult {
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['donations'],
     queryFn: listDonations
   });
@@ -25,9 +29,28 @@ export function useDonations(): UseDonationsResult {
   return {
     donations: data ?? [],
     isLoading,
-    error,
-    refetch: async () => {
-      await refetch();
-    }
+    error
   };
+}
+
+export function useAddDonation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createDonation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['donations'] });
+      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+    }
+  });
+}
+
+export function useDeleteDonation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteDonation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['donations'] });
+      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+    }
+  });
 }

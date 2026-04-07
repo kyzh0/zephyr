@@ -1,8 +1,13 @@
-import { useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { REFRESH_INTERVAL_MS } from '@/lib/utils';
-import { getSoundingById, listSoundings } from '@/services/sounding.service';
+import {
+  addSounding,
+  deleteSounding,
+  getSoundingById,
+  listSoundings,
+  patchSounding
+} from '@/services/sounding.service';
 import { ApiError } from '@/services/api-error';
 import type { ISounding } from '@/models/sounding.model';
 
@@ -24,19 +29,41 @@ interface UseSoundingResult {
   sounding: ISounding | null;
   isLoading: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
 }
 
-export function useInvalidateSoundings(): () => Promise<void> {
+export function useAddSounding() {
   const queryClient = useQueryClient();
-  return useCallback(
-    async () => await queryClient.invalidateQueries({ queryKey: ['soundings'] }),
-    [queryClient]
-  );
+  return useMutation({
+    mutationFn: addSounding,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['soundings'] })
+  });
+}
+
+export function useUpdateSounding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Parameters<typeof patchSounding>[1] }) =>
+      patchSounding(id, updates),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['soundings'] });
+      queryClient.invalidateQueries({ queryKey: ['sounding', id] });
+    }
+  });
+}
+
+export function useDeleteSounding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteSounding,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['soundings'] });
+      queryClient.removeQueries({ queryKey: ['sounding', id] });
+    }
+  });
 }
 
 export function useSounding(id: string | undefined): UseSoundingResult {
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['sounding', id],
     queryFn: () => getSoundingById(id!),
     enabled: !!id,
@@ -47,9 +74,6 @@ export function useSounding(id: string | undefined): UseSoundingResult {
   return {
     sounding: data ?? null,
     isLoading,
-    error,
-    refetch: async () => {
-      await refetch();
-    }
+    error
   };
 }

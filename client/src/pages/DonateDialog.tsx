@@ -54,17 +54,14 @@ export default function DonateDialog() {
 
   return (
     <Dialog open onOpenChange={() => navigate('/')}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto text-center">
+      <DialogContent
+        className="sm:max-w-4xl max-h-[90vh] overflow-y-auto text-center"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader className="text-center sm:text-center space-y-0">
           <DialogTitle className="text-xl text-center w-full">Donate</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 text-center items-center">
-          {/* hide focus on load */}
-          <Button
-            style={{ width: 0, height: 0, opacity: 0, position: 'absolute' }}
-            aria-hidden
-            tabIndex={0}
-          />
           <DialogDescription className="text-center">
             Zephyr will always be free and available for the New Zealand free-flying community.
           </DialogDescription>

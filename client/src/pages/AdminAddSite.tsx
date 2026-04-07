@@ -21,8 +21,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { addSite } from '@/services/site.service';
-import { useLandings, useInvalidateSites } from '@/hooks';
+import { useLandings, useAddSite } from '@/hooks';
 import type { CreateSiteDto } from '@/models/site.model';
 import { lookupElevation } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
@@ -87,7 +86,7 @@ function parseCoordinates(
 
 export default function AdminAddSite() {
   const navigate = useNavigate();
-  const invalidateSites = useInvalidateSites();
+  const addMutation = useAddSite();
   const [elevationLoading, setElevationLoading] = useState(false);
 
   const { landings } = useLandings();
@@ -146,9 +145,7 @@ export default function AdminAddSite() {
     }
   }
 
-  const isSubmitting = form.formState.isSubmitting;
-
-  async function onSubmit(values: FormValues) {
+  function onSubmit(values: FormValues) {
     const location = parseCoordinates(values.coordinates);
     if (!location) return;
 
@@ -166,15 +163,16 @@ export default function AdminAddSite() {
       access: values.access
     };
 
-    try {
-      await addSite(site);
-      await invalidateSites();
-      toast.success('Site added successfully');
-      navigate('/admin/sites');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error(`Failed to add site: ${msg}`);
-    }
+    addMutation.mutate(site, {
+      onSuccess: () => {
+        toast.success('Site added successfully');
+        navigate('/admin/sites');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error(`Failed to add site: ${msg}`);
+      }
+    });
   }
 
   return (
@@ -397,8 +395,8 @@ export default function AdminAddSite() {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={addMutation.isPending}>
+              {addMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Add Site
             </Button>
           </form>

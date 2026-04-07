@@ -21,11 +21,10 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { addLanding } from '@/services/landing.service';
 import type { ILanding } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
-import { useInvalidateLandings } from '@/hooks';
+import { useAddLanding } from '@/hooks';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -67,7 +66,7 @@ function parseCoordinates(
 
 export default function AdminAddLanding() {
   const navigate = useNavigate();
-  const invalidateLandings = useInvalidateLandings();
+  const addMutation = useAddLanding();
   const [elevationLoading, setElevationLoading] = useState(false);
 
   const form = useForm<FormValues>({
@@ -121,9 +120,7 @@ export default function AdminAddLanding() {
     }
   }
 
-  const isSubmitting = form.formState.isSubmitting;
-
-  async function onSubmit(values: FormValues) {
+  function onSubmit(values: FormValues) {
     const location = parseCoordinates(values.coordinates);
     if (!location) return;
 
@@ -138,15 +135,16 @@ export default function AdminAddLanding() {
       siteGuideUrl: values.siteGuideUrl
     };
 
-    try {
-      await addLanding(landing);
-      await invalidateLandings();
-      toast.success('Landing added successfully');
-      navigate('/admin/landings');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error(`Failed to add landing: ${msg}`);
-    }
+    addMutation.mutate(landing, {
+      onSuccess: () => {
+        toast.success('Landing added successfully');
+        navigate('/admin/landings');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error(`Failed to add landing: ${msg}`);
+      }
+    });
   }
 
   return (
@@ -299,8 +297,8 @@ export default function AdminAddLanding() {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={addMutation.isPending}>
+              {addMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Add Landing
             </Button>
           </form>

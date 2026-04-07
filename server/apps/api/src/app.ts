@@ -35,4 +35,29 @@ app.use('/soundings', soundingRoute);
 app.use('/stations', stationRoute);
 app.use('/donations', donationRoute);
 
+// proxy for opentopodata elevation lookup
+app.get('/elevation', async (req, res) => {
+  const lat = Number(req.query.lat);
+  const lon = Number(req.query.lon);
+
+  if (Number.isNaN(lat) || Number.isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    res.status(400).json({ error: 'Invalid lat/lon' });
+    return;
+  }
+
+  try {
+    const response = await fetch(`https://api.opentopodata.org/v1/nzdem8m?locations=${lat},${lon}`);
+
+    if (!response.ok) {
+      res.status(response.status).json({ error: 'Upstream elevation API error' });
+      return;
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch {
+    res.status(502).json({ error: 'Failed to reach elevation API' });
+  }
+});
+
 export default app;

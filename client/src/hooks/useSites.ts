@@ -1,6 +1,6 @@
-import { useMemo, useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getSiteById, listSites } from '@/services/site.service';
+import { useMemo } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { addSite, deleteSite, getSiteById, listSites, updateSite } from '@/services/site.service';
 import { ApiError } from '@/services/api-error';
 import type { ISite } from '@/models/site.model';
 import { getDistance } from '@/lib/utils';
@@ -71,11 +71,10 @@ interface UseSiteResult {
   site: ISite | null;
   isLoading: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
 }
 
 export function useSite(id: string | undefined): UseSiteResult {
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['site', id],
     queryFn: () => getSiteById(id!),
     enabled: !!id,
@@ -85,17 +84,37 @@ export function useSite(id: string | undefined): UseSiteResult {
   return {
     site: data ?? null,
     isLoading,
-    error,
-    refetch: async () => {
-      await refetch();
-    }
+    error
   };
 }
 
-export function useInvalidateSites(): () => Promise<void> {
+export function useAddSite() {
   const queryClient = useQueryClient();
-  return useCallback(
-    async () => await queryClient.invalidateQueries({ queryKey: ['sites'] }),
-    [queryClient]
-  );
+  return useMutation({
+    mutationFn: addSite,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sites'] })
+  });
+}
+
+export function useUpdateSite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<ISite> }) =>
+      updateSite(id, updates),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+      queryClient.invalidateQueries({ queryKey: ['site', id] });
+    }
+  });
+}
+
+export function useDeleteSite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteSite,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+      queryClient.removeQueries({ queryKey: ['site', id] });
+    }
+  });
 }

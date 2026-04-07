@@ -23,10 +23,9 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
-import { addSounding } from '@/services/sounding.service';
 import { RASP_REGIONS } from '@/models/sounding.model';
 import { ApiError } from '@/services/api-error';
-import { useInvalidateSoundings } from '@/hooks';
+import { useAddSounding } from '@/hooks';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -49,7 +48,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function AdminAddSounding() {
   const navigate = useNavigate();
-  const invalidateSoundings = useInvalidateSoundings();
+  const addMutation = useAddSounding();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -61,9 +60,7 @@ export default function AdminAddSounding() {
     }
   });
 
-  const isSubmitting = form.formState.isSubmitting;
-
-  async function onSubmit(values: FormValues) {
+  function onSubmit(values: FormValues) {
     const [lat, lon] = values.coordinates.replace(/\s/g, '').split(',').map(Number);
 
     const sounding = {
@@ -73,15 +70,16 @@ export default function AdminAddSounding() {
       coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6]
     };
 
-    try {
-      await addSounding(sounding);
-      await invalidateSoundings();
-      toast.success('Sounding added successfully');
-      navigate('/admin/soundings');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to add sounding: ' + msg);
-    }
+    addMutation.mutate(sounding, {
+      onSuccess: () => {
+        toast.success('Sounding added successfully');
+        navigate('/admin/soundings');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error('Failed to add sounding: ' + msg);
+      }
+    });
   }
 
   return (
@@ -163,8 +161,8 @@ export default function AdminAddSounding() {
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={addMutation.isPending}>
+              {addMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Add Sounding
             </Button>
           </form>

@@ -32,8 +32,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { deleteSite, updateSite } from '@/services/site.service';
-import { useSite, useLandings, useInvalidateSites } from '@/hooks';
+import { useSite, useLandings, useUpdateSite, useDeleteSite } from '@/hooks';
 import type { ISite, UpdateSiteDto } from '@/models/site.model';
 import type { ILanding } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
@@ -107,30 +106,27 @@ export default function AdminEditSite() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
-  const { site, isLoading, refetch } = useSite(id);
+  const { site, isLoading } = useSite(id);
   const { landings } = useLandings();
-  const invalidateSites = useInvalidateSites();
+  const updateMutation = useUpdateSite();
+  const deleteMutation = useDeleteSite();
 
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  async function handleDelete() {
-    if (!id) return;
-
-    setIsDeleting(true);
-    try {
-      await deleteSite(id);
-      await invalidateSites();
-      toast.success('Site deleted');
-      navigate('/admin/sites');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to delete site: ' + msg);
-      setIsDeleting(false);
-    }
+  function handleDelete() {
+    if (!id || !site) return;
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success('Site deleted');
+        navigate('/admin/sites');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error('Failed to delete site: ' + msg);
+      }
+    });
   }
 
-  async function handleSubmit(values: FormValues) {
-    if (!site) return;
+  function handleSubmit(values: FormValues) {
+    if (!id || !site) return;
 
     const updates: UpdateSiteDto = {
       _id: site._id,
@@ -153,15 +149,19 @@ export default function AdminEditSite() {
       updates.location = location;
     }
 
-    try {
-      await updateSite(id!, updates);
-      await Promise.all([invalidateSites(), refetch()]);
-      toast.success('Site updated');
-      navigate(`/admin/sites`);
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to update site: ' + msg);
-    }
+    updateMutation.mutate(
+      { id, updates },
+      {
+        onSuccess: () => {
+          toast.success('Site updated');
+          navigate('/admin/sites');
+        },
+        onError: (error) => {
+          const msg = error instanceof ApiError ? error.message : 'Unknown error';
+          toast.error('Failed to update site: ' + msg);
+        }
+      }
+    );
   }
 
   return (
@@ -176,8 +176,8 @@ export default function AdminEditSite() {
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" disabled={isDeleting}>
-              {isDeleting ? (
+            <Button variant="destructive" size="sm" disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Trash2 className="h-4 w-4" />
@@ -210,7 +210,12 @@ export default function AdminEditSite() {
         {isLoading || !site ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <SiteForm site={site} landings={landings} onSubmit={handleSubmit} />
+          <SiteForm
+            site={site}
+            landings={landings}
+            onSubmit={handleSubmit}
+            isPending={updateMutation.isPending}
+          />
         )}
       </main>
     </div>
@@ -220,11 +225,13 @@ export default function AdminEditSite() {
 function SiteForm({
   site,
   landings,
-  onSubmit
+  onSubmit,
+  isPending
 }: {
   site: ISite;
   landings: ILanding[];
-  onSubmit: (values: FormValues) => Promise<void>;
+  onSubmit: (values: FormValues) => void;
+  isPending: boolean;
 }) {
   const [elevationLoading, setElevationLoading] = useState(false);
 
@@ -244,8 +251,6 @@ function SiteForm({
       access: site.access ?? ''
     }
   });
-
-  const isSubmitting = form.formState.isSubmitting;
 
   async function handleAutoElevation() {
     const coordsValue = form.getValues('coordinates');
@@ -493,8 +498,8 @@ function SiteForm({
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={isSubmitting || !form.formState.isDirty}>
-          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+        <Button type="submit" className="w-full" disabled={isPending || !form.formState.isDirty}>
+          {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Save Changes
         </Button>
       </form>

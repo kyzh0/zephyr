@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,10 +34,9 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
-import { deleteSounding, patchSounding } from '@/services/sounding.service';
 import { RASP_REGIONS, type ISounding } from '@/models/sounding.model';
 import { ApiError } from '@/services/api-error';
-import { useSounding, useInvalidateSoundings } from '@/hooks';
+import { useSounding, useUpdateSounding, useDeleteSounding } from '@/hooks';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -68,28 +66,26 @@ function formatCoordinates(location?: { coordinates: [number, number] }): string
 export default function AdminEditSounding() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { sounding, isLoading, refetch } = useSounding(id);
-  const invalidateSoundings = useInvalidateSoundings();
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { sounding, isLoading } = useSounding(id);
+  const updateMutation = useUpdateSounding();
+  const deleteMutation = useDeleteSounding();
 
-  async function handleDelete() {
-    if (!id) return;
-
-    setIsDeleting(true);
-    try {
-      await deleteSounding(id);
-      await invalidateSoundings();
-      toast.success('Sounding deleted');
-      navigate('/admin/soundings');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to delete sounding: ' + msg);
-      setIsDeleting(false);
-    }
+  function handleDelete() {
+    if (!id || !sounding) return;
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success('Sounding deleted');
+        navigate('/admin/soundings');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error('Failed to delete sounding: ' + msg);
+      }
+    });
   }
 
-  async function handleSubmit(values: FormValues) {
-    if (!id) return;
+  function handleSubmit(values: FormValues) {
+    if (!id || !sounding) return;
 
     const [lat, lon] = values.coordinates.replace(/\s/g, '').split(',').map(Number);
 
@@ -100,15 +96,19 @@ export default function AdminEditSounding() {
       coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6] as [number, number]
     };
 
-    try {
-      await patchSounding(id, updates);
-      await Promise.all([invalidateSoundings(), refetch()]);
-      toast.success('Sounding updated');
-      navigate('/admin/soundings');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to update sounding: ' + msg);
-    }
+    updateMutation.mutate(
+      { id, updates },
+      {
+        onSuccess: () => {
+          toast.success('Sounding updated');
+          navigate('/admin/soundings');
+        },
+        onError: (error) => {
+          const msg = error instanceof ApiError ? error.message : 'Unknown error';
+          toast.error('Failed to update sounding: ' + msg);
+        }
+      }
+    );
   }
 
   return (
@@ -123,8 +123,8 @@ export default function AdminEditSounding() {
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" disabled={isDeleting}>
-              {isDeleting ? (
+            <Button variant="destructive" size="sm" disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Trash2 className="h-4 w-4" />
@@ -157,7 +157,11 @@ export default function AdminEditSounding() {
         {isLoading || !sounding ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <SoundingForm sounding={sounding} onSubmit={handleSubmit} />
+          <SoundingForm
+            sounding={sounding}
+            onSubmit={handleSubmit}
+            isPending={updateMutation.isPending}
+          />
         )}
       </main>
     </div>
@@ -166,10 +170,12 @@ export default function AdminEditSounding() {
 
 function SoundingForm({
   sounding,
-  onSubmit
+  onSubmit,
+  isPending
 }: {
   sounding: ISounding;
-  onSubmit: (values: FormValues) => Promise<void>;
+  onSubmit: (values: FormValues) => void;
+  isPending: boolean;
 }) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -180,8 +186,6 @@ function SoundingForm({
       coordinates: formatCoordinates(sounding.location)
     }
   });
-
-  const isSubmitting = form.formState.isSubmitting;
 
   return (
     <Form {...form}>
@@ -253,8 +257,8 @@ function SoundingForm({
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isSubmitting || !form.formState.isDirty}>
-          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+        <Button type="submit" className="w-full" disabled={isPending || !form.formState.isDirty}>
+          {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Save Changes
         </Button>
       </form>

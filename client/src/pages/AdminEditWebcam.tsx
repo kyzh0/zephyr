@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,10 +28,9 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { deleteCam, patchCam } from '@/services/cam.service';
 import { ApiError } from '@/services/api-error';
 import type { ICam } from '@/models/cam.model';
-import { useWebcam, useInvalidateWebcams } from '@/hooks';
+import { useWebcam, useUpdateWebcam, useDeleteWebcam } from '@/hooks';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -64,28 +62,26 @@ function formatCoordinates(location?: { coordinates: [number, number] }): string
 export default function AdminEditWebcam() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { webcam: cam, isLoading, refetch } = useWebcam({ id });
-  const invalidateWebcams = useInvalidateWebcams();
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { webcam: cam, isLoading } = useWebcam({ id });
+  const updateMutation = useUpdateWebcam();
+  const deleteMutation = useDeleteWebcam();
 
-  async function handleDelete() {
-    if (!id) return;
-
-    setIsDeleting(true);
-    try {
-      await deleteCam(id);
-      await invalidateWebcams();
-      toast.success('Webcam deleted');
-      navigate('/admin/webcams');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to delete webcam: ' + msg);
-      setIsDeleting(false);
-    }
+  function handleDelete() {
+    if (!id || !cam) return;
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success('Webcam deleted');
+        navigate('/admin/webcams');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error('Failed to delete webcam: ' + msg);
+      }
+    });
   }
 
-  async function handleSubmit(values: FormValues) {
-    if (!id) return;
+  function handleSubmit(values: FormValues) {
+    if (!id || !cam) return;
 
     const [lat, lon] = values.coordinates.replace(/\s/g, '').split(',').map(Number);
 
@@ -98,15 +94,19 @@ export default function AdminEditWebcam() {
       isDisabled: values.isDisabled
     };
 
-    try {
-      await patchCam(id, updates);
-      await Promise.all([invalidateWebcams(), refetch()]);
-      toast.success('Webcam updated');
-      navigate('/admin/webcams');
-    } catch (error) {
-      const msg = error instanceof ApiError ? error.message : 'Unknown error';
-      toast.error('Failed to update webcam: ' + msg);
-    }
+    updateMutation.mutate(
+      { id, updates },
+      {
+        onSuccess: () => {
+          toast.success('Webcam updated');
+          navigate('/admin/webcams');
+        },
+        onError: (error) => {
+          const msg = error instanceof ApiError ? error.message : 'Unknown error';
+          toast.error('Failed to update webcam: ' + msg);
+        }
+      }
+    );
   }
 
   return (
@@ -121,8 +121,8 @@ export default function AdminEditWebcam() {
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" disabled={isDeleting}>
-              {isDeleting ? (
+            <Button variant="destructive" size="sm" disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Trash2 className="h-4 w-4" />
@@ -155,7 +155,7 @@ export default function AdminEditWebcam() {
         {isLoading || !cam ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <WebcamForm cam={cam} onSubmit={handleSubmit} />
+          <WebcamForm cam={cam} onSubmit={handleSubmit} isPending={updateMutation.isPending} />
         )}
       </main>
     </div>
@@ -164,10 +164,12 @@ export default function AdminEditWebcam() {
 
 function WebcamForm({
   cam,
-  onSubmit
+  onSubmit,
+  isPending
 }: {
   cam: ICam;
-  onSubmit: (values: FormValues) => Promise<void>;
+  onSubmit: (values: FormValues) => void;
+  isPending: boolean;
 }) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -180,8 +182,6 @@ function WebcamForm({
       isDisabled: cam.isDisabled ?? false
     }
   });
-
-  const isSubmitting = form.formState.isSubmitting;
 
   return (
     <Form {...form}>
@@ -271,8 +271,8 @@ function WebcamForm({
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isSubmitting || !form.formState.isDirty}>
-          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+        <Button type="submit" className="w-full" disabled={isPending || !form.formState.isDirty}>
+          {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Save Changes
         </Button>
       </form>
