@@ -28,7 +28,8 @@ export function useStations(options?: UseStationsOptions): UseStationsResult {
   const { data, isLoading, error } = useQuery({
     queryKey: includeDisabled ? ['stations', { includeDisabled }] : ['stations'],
     queryFn: () => listStations(includeDisabled),
-    refetchInterval: includeDisabled ? undefined : REFRESH_INTERVAL_MS
+    refetchInterval: includeDisabled ? undefined : REFRESH_INTERVAL_MS,
+    refetchIntervalInBackground: true
   });
 
   return {
@@ -50,6 +51,7 @@ export function useStation(id: string | undefined): UseStationResult {
     queryFn: () => getStationById(id!),
     enabled: !!id,
     refetchInterval: REFRESH_INTERVAL_MS,
+    refetchIntervalInBackground: true,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
   });
 

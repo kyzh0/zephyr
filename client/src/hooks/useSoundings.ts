@@ -15,7 +15,8 @@ export function useSoundings() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['soundings'],
     queryFn: () => listSoundings(),
-    refetchInterval: 30 * REFRESH_INTERVAL_MS
+    refetchInterval: 30 * REFRESH_INTERVAL_MS,
+    refetchIntervalInBackground: true
   });
 
   return {
@@ -68,6 +69,7 @@ export function useSounding(id: string | undefined): UseSoundingResult {
     queryFn: () => getSoundingById(id!),
     enabled: !!id,
     refetchInterval: 30 * REFRESH_INTERVAL_MS,
+    refetchIntervalInBackground: true,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
   });
 
