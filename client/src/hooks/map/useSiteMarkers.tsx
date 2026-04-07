@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import mapboxgl from 'mapbox-gl';
 import { SiteMarker } from '@/components/map/SiteMarker';
-import { getSiteGeoJson } from '@/components/map';
+import { getSiteGeoJson, attachTouchGuard } from '@/components/map';
 import { useNavigate } from 'react-router-dom';
 import { useSites } from '../useSites';
 import { isWindBearingInRange } from '@/lib/utils';
@@ -54,31 +54,18 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
       if (validBearings) el.dataset.validBearings = validBearings;
 
       // Event handlers
-      let isTouching = false;
+      const isTouching = attachTouchGuard(el);
 
-      const handleClick = () => {
+      el.addEventListener('click', () => {
         popup.remove();
         navigate(`/sites/${dbId}`);
-      };
-      const handleEnter = () => {
-        if (!isTouching && map.current) popup.addTo(map.current);
-      };
-      const handleLeave = () => {
-        if (!isTouching) popup.remove();
-      };
-      const handleTouchStart = () => {
-        isTouching = true;
-      };
-      const handleTouchEnd = () => {
-        setTimeout(() => { isTouching = false; }, 300);
-      };
-
-      el.addEventListener('click', handleClick);
-      el.addEventListener('mouseenter', handleEnter);
-      el.addEventListener('mouseleave', handleLeave);
-      el.addEventListener('touchstart', handleTouchStart, { passive: true });
-      el.addEventListener('touchend', handleTouchEnd);
-      el.addEventListener('touchcancel', handleTouchEnd);
+      });
+      el.addEventListener('mouseenter', () => {
+        if (!isTouching() && map.current) popup.addTo(map.current);
+      });
+      el.addEventListener('mouseleave', () => {
+        if (!isTouching()) popup.remove();
+      });
 
       return { marker: el, popup };
     },

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import mapboxgl from 'mapbox-gl';
 import { LandingMarker } from '@/components/map/LandingMarker';
-import { getLandingGeoJson } from '@/components/map';
+import { getLandingGeoJson, attachTouchGuard } from '@/components/map';
 import { useNavigate } from 'react-router-dom';
 import { useLandings } from '../useLandings';
 
@@ -47,31 +47,18 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
       el.innerHTML = renderToStaticMarkup(<LandingMarker isOfficial={isOfficial} />);
 
       // Event handlers
-      let isTouching = false;
+      const isTouching = attachTouchGuard(el);
 
-      const handleClick = () => {
+      el.addEventListener('click', () => {
         popup.remove();
         navigate(`/landings/${dbId}`);
-      };
-      const handleEnter = () => {
-        if (!isTouching && map.current) popup.addTo(map.current);
-      };
-      const handleLeave = () => {
-        if (!isTouching) popup.remove();
-      };
-      const handleTouchStart = () => {
-        isTouching = true;
-      };
-      const handleTouchEnd = () => {
-        setTimeout(() => { isTouching = false; }, 300);
-      };
-
-      el.addEventListener('click', handleClick);
-      el.addEventListener('mouseenter', handleEnter);
-      el.addEventListener('mouseleave', handleLeave);
-      el.addEventListener('touchstart', handleTouchStart, { passive: true });
-      el.addEventListener('touchend', handleTouchEnd);
-      el.addEventListener('touchcancel', handleTouchEnd);
+      });
+      el.addEventListener('mouseenter', () => {
+        if (!isTouching() && map.current) popup.addTo(map.current);
+      });
+      el.addEventListener('mouseleave', () => {
+        if (!isTouching()) popup.remove();
+      });
 
       return { marker: el, popup };
     },

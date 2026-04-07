@@ -113,7 +113,7 @@ function padData(extendedData: ExtendedStationData[], stationId: string): Extend
   const MS_10_MIN = 10 * 60 * 1000;
 
   const startBucket = Math.floor(new Date(extendedData[0].time).getTime() / MS_10_MIN) * MS_10_MIN;
-  const endBucket = Math.floor(Date.now() / MS_10_MIN) * MS_10_MIN;
+  const endBucket = Math.floor((Date.now() - 120_000) / MS_10_MIN) * MS_10_MIN;
 
   const dataByBucket = new Map<number, ExtendedStationData>();
   for (const item of extendedData) {

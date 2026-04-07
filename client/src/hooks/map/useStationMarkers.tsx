@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import mapboxgl from 'mapbox-gl';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { getStationGeoJson, sortStationFeatures, convertWindSpeed } from '@/components/map';
+import { getStationGeoJson, sortStationFeatures, convertWindSpeed, attachTouchGuard } from '@/components/map';
 import { StationMarker } from '@/components/map/StationMarker';
 import type {
   StationMarker as IStationMarker,
@@ -186,11 +186,11 @@ function createMarkerElement(
   // circle (pointer-events: auto) still reach it.
   arrow.style.pointerEvents = 'none';
 
-  let isTouching = false;
+  const isTouching = attachTouchGuard(arrow);
   let isHovering = false;
 
   arrow.addEventListener('mouseover', () => {
-    if (isHovering || isTouching) return;
+    if (isHovering || isTouching()) return;
     isHovering = true;
     onShow(popup);
   });
@@ -198,18 +198,11 @@ function createMarkerElement(
     if (!isHovering) return;
     if (e.relatedTarget && arrow.contains(e.relatedTarget as Node)) return;
     isHovering = false;
-    if (!isTouching) onHide(popup);
+    if (!isTouching()) onHide(popup);
   });
   arrow.addEventListener('click', () => {
     onHide(popup);
     onNavigate(dbId);
-  });
-  arrow.addEventListener('touchstart', () => { isTouching = true; }, { passive: true });
-  arrow.addEventListener('touchend', () => {
-    setTimeout(() => { isTouching = false; }, 300);
-  });
-  arrow.addEventListener('touchcancel', () => {
-    setTimeout(() => { isTouching = false; }, 300);
   });
 
   return container;
@@ -356,16 +349,19 @@ export function useStationMarkers({
 
   // Reapply interactive state to a marker's circle after innerHTML replacement
   const applyInteractivity = useCallback((marker: HTMLDivElement) => {
-    const circle = marker.querySelector<SVGCircleElement>('.marker-arrow circle');
+    const circle = marker.querySelector<SVGCircleElement>('.interactive-circle');
     if (circle) circle.style.pointerEvents = interactiveRef.current ? 'auto' : 'none';
   }, []);
 
   // Update existing marker
-  const updateStationMarker = useCallback((item: IStationMarker, props: StationProperties) => {
-    updateMarkerElement(item.marker, props, unitRef.current, sportRef.current);
-    applyInteractivity(item.marker);
-    item.popup.setHTML(createPopupHtml(props, unitRef.current));
-  }, [applyInteractivity]);
+  const updateStationMarker = useCallback(
+    (item: IStationMarker, props: StationProperties) => {
+      updateMarkerElement(item.marker, props, unitRef.current, sportRef.current);
+      applyInteractivity(item.marker);
+      item.popup.setHTML(createPopupHtml(props, unitRef.current));
+    },
+    [applyInteractivity]
+  );
 
   // Track mapbox Marker instances so we can remove them on cleanup
   const mapboxMarkersRef = useRef<mapboxgl.Marker[]>([]);
@@ -422,7 +418,7 @@ export function useStationMarkers({
       applyInteractivity(item.marker);
       item.popup.setHTML(createPopupHtml(props, u));
     }
-  }, []);
+  }, [applyInteractivity]);
 
   // Update all markers when unit changes
   useEffect(() => {
@@ -441,66 +437,74 @@ export function useStationMarkers({
   const MAX_HISTORICAL_CACHE = 50;
 
   // Render historical data at a specific timestamp
-  const renderHistoricalData = useCallback(async (time: Date): Promise<void> => {
-    if (!markersRef.current.length) return;
+  const renderHistoricalData = useCallback(
+    async (time: Date): Promise<void> => {
+      if (!markersRef.current.length) return;
 
-    const key = time.getTime();
-    let data = historicalCacheRef.current.get(key);
+      const key = time.getTime();
+      let data = historicalCacheRef.current.get(key);
 
-    if (!data) {
-      try {
-        data = (await loadAllStationDataAtTimestamp(time)) ?? undefined;
-      } catch (error) {
-        const msg = error instanceof ApiError ? error.message : 'Unknown error';
-        toast.error('Failed to load historical data: ' + msg);
-        return;
-      }
-      if (data) {
-        historicalCacheRef.current.set(key, data);
-        if (historicalCacheRef.current.size > MAX_HISTORICAL_CACHE) {
-          const oldestKey = historicalCacheRef.current.keys().next().value;
-          if (oldestKey !== undefined) historicalCacheRef.current.delete(oldestKey);
+      if (!data) {
+        try {
+          data = (await loadAllStationDataAtTimestamp(time)) ?? undefined;
+        } catch (error) {
+          const msg = error instanceof ApiError ? error.message : 'Unknown error';
+          toast.error('Failed to load historical data: ' + msg);
+          return;
+        }
+        if (data) {
+          historicalCacheRef.current.set(key, data);
+          if (historicalCacheRef.current.size > MAX_HISTORICAL_CACHE) {
+            const oldestKey = historicalCacheRef.current.keys().next().value;
+            if (oldestKey !== undefined) historicalCacheRef.current.delete(oldestKey);
+          }
         }
       }
-    }
 
-    if (!data?.values?.length) return;
+      if (!data?.values?.length) return;
 
-    // Update each marker with historical data
-    for (const item of markersRef.current) {
-      const stationData = data.values.find((d: IHistoricalStationData) => d.id === item.marker.id);
+      // Update each marker with historical data
+      for (const item of markersRef.current) {
+        const stationData = data.values.find(
+          (d: IHistoricalStationData) => d.id === item.marker.id
+        );
 
-      // Use data if found, otherwise show empty state
-      const windAverage = stationData?.windAverage ?? null;
-      const windGust = stationData?.windGust ?? null;
-      const windBearing = stationData?.windBearing ?? null;
-      const validBearings = stationData?.validBearings ?? null;
+        // Use data if found, otherwise show empty state
+        const windAverage = stationData?.windAverage ?? null;
+        const windGust = stationData?.windGust ?? null;
+        const windBearing = stationData?.windBearing ?? null;
+        const validBearings = stationData?.validBearings ?? null;
 
-      const historicalProps: StationProperties = {
-        dbId: item.marker.id,
-        name: item.marker.dataset.name ?? '',
-        elevation: Number(item.marker.dataset.elevation),
-        currentAverage: windAverage,
-        currentGust: windGust,
-        currentBearing: windBearing,
-        validBearings,
-        isOffline: false,
-        lastUpdate: null // full opacity
-      };
+        const historicalProps: StationProperties = {
+          dbId: item.marker.id,
+          name: item.marker.dataset.name ?? '',
+          elevation: Number(item.marker.dataset.elevation),
+          currentAverage: windAverage,
+          currentGust: windGust,
+          currentBearing: windBearing,
+          validBearings,
+          isOffline: false,
+          lastUpdate: null // full opacity
+        };
 
-      updateMarkerElement(item.marker, historicalProps, unitRef.current, sportRef.current);
-      applyInteractivity(item.marker);
-    }
-  }, [applyInteractivity]);
+        updateMarkerElement(item.marker, historicalProps, unitRef.current, sportRef.current);
+        applyInteractivity(item.marker);
+      }
+    },
+    [applyInteractivity]
+  );
 
   // Set marker interactivity (enable/disable click handlers)
-  const setInteractive = useCallback((interactive: boolean) => {
-    interactiveRef.current = interactive;
-    for (const item of markersRef.current) {
-      applyInteractivity(item.marker);
-      item.marker.style.cursor = interactive ? 'pointer' : 'default';
-    }
-  }, [applyInteractivity]);
+  const setInteractive = useCallback(
+    (interactive: boolean) => {
+      interactiveRef.current = interactive;
+      for (const item of markersRef.current) {
+        applyInteractivity(item.marker);
+        item.marker.style.cursor = interactive ? 'pointer' : 'default';
+      }
+    },
+    [applyInteractivity]
+  );
 
   // Render current (live) data — invalidate to force a fresh fetch
   const renderCurrentData = useCallback(async (): Promise<void> => {

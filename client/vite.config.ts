@@ -27,7 +27,7 @@ export default defineConfig({
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60
               },
-              cacheableResponse: { statuses: [0, 200] }
+              cacheableResponse: { statuses: [200] }
             }
           },
           // Station detail / data endpoints — network-first with cache fallback
@@ -40,7 +40,7 @@ export default defineConfig({
                 maxEntries: 300,
                 maxAgeSeconds: 60 * 60
               },
-              cacheableResponse: { statuses: [0, 200] }
+              cacheableResponse: { statuses: [200] }
             }
           },
           // Webcam list
@@ -53,7 +53,7 @@ export default defineConfig({
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60
               },
-              cacheableResponse: { statuses: [0, 200] }
+              cacheableResponse: { statuses: [200] }
             }
           },
           // Webcam detail / images endpoints
@@ -66,7 +66,7 @@ export default defineConfig({
                 maxEntries: 300,
                 maxAgeSeconds: 60 * 60
               },
-              cacheableResponse: { statuses: [0, 200] }
+              cacheableResponse: { statuses: [200] }
             }
           },
           // Webcam images from file server
@@ -79,59 +79,59 @@ export default defineConfig({
                 maxEntries: 200,
                 maxAgeSeconds: 60 * 60
               },
-              cacheableResponse: { statuses: [0, 200] }
+              cacheableResponse: { statuses: [200] }
             }
           },
           // Sites
           {
             urlPattern: /^https:\/\/api(\.test)?\.zephyrapp\.nz\/sites(\?.*)?$/,
-            handler: 'NetworkFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'site-list',
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60
               },
-              cacheableResponse: { statuses: [0, 200] }
+              cacheableResponse: { statuses: [200] }
             }
           },
           // Site detail endpoints
           {
             urlPattern: /^https:\/\/api(\.test)?\.zephyrapp\.nz\/sites\/.+/,
-            handler: 'NetworkFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'site-data',
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60
               },
-              cacheableResponse: { statuses: [0, 200] }
+              cacheableResponse: { statuses: [200] }
             }
           },
           // Landings
           {
             urlPattern: /^https:\/\/api(\.test)?\.zephyrapp\.nz\/landings(\?.*)?$/,
-            handler: 'NetworkFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'landing-list',
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60
               },
-              cacheableResponse: { statuses: [0, 200] }
+              cacheableResponse: { statuses: [200] }
             }
           },
           // Landing detail endpoints
           {
             urlPattern: /^https:\/\/api(\.test)?\.zephyrapp\.nz\/landings\/.+/,
-            handler: 'NetworkFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'landing-data',
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60
               },
-              cacheableResponse: { statuses: [0, 200] }
+              cacheableResponse: { statuses: [200] }
             }
           }
         ]
