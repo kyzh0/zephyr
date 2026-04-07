@@ -87,7 +87,11 @@ const extractStationProperties = (properties: Record<string, unknown>): StationP
  * Generate popup HTML content for a station marker
  */
 function createPopupHtml(props: StationProperties, unit: WindUnit): string {
-  const { name, currentAverage, currentGust, currentBearing, isOffline } = props;
+  const { name, isOffline, lastUpdate } = props;
+  const expired = isDataExpired(lastUpdate);
+  const currentAverage = expired ? null : props.currentAverage;
+  const currentGust = expired ? null : props.currentGust;
+  const currentBearing = expired ? null : props.currentBearing;
 
   const header = `<p align="center"><strong>${name}</strong></p>`;
 
