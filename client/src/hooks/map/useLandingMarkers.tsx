@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import mapboxgl from 'mapbox-gl';
 import { LandingMarker } from '@/components/map/LandingMarker';
-import { getLandingGeoJson, attachTouchGuard, type TouchGuard } from '@/components/map';
+import { getLandingGeoJson, attachTouchGuard, escapeHtml, type TouchGuard } from '@/components/map';
 import { useNavigate } from 'react-router-dom';
 import { useLandings } from '../useLandings';
 
@@ -37,7 +37,7 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
         closeButton: false,
         closeOnClick: false,
         offset: [0, -15]
-      }).setHTML(`<p align="center"><strong>${name}</strong></p>`);
+      }).setHTML(`<p align="center"><strong>${escapeHtml(name)}</strong></p>`);
 
       const el = document.createElement('div');
       el.id = dbId;
@@ -67,7 +67,8 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
     [navigate, map]
   );
 
-  // Sync markers whenever landing data changes
+  // Create markers once when landing data first arrives.
+  // Landings are near-static so we don't support in-place updates; changes require a remount.
   useEffect(() => {
     if (!isMapLoaded || !map.current || landingsLoading || !landings?.length) return;
 

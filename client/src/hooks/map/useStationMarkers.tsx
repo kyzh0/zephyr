@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import mapboxgl from 'mapbox-gl';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { getStationGeoJson, sortStationFeatures, convertWindSpeed, attachTouchGuard } from '@/components/map';
+import { getStationGeoJson, sortStationFeatures, convertWindSpeed, attachTouchGuard, escapeHtml, type TouchGuard } from '@/components/map';
 import { StationMarker } from '@/components/map/StationMarker';
 import type {
   StationMarker as IStationMarker,
@@ -21,6 +21,12 @@ import { loadAllStationDataAtTimestamp } from '@/services/station.service';
 import { useStations } from '@/hooks';
 import type { IHistoricalStationData } from '@/models/station-data.model';
 import { ApiError } from '@/services/api-error';
+
+interface StationMarkerHandle {
+  marker: HTMLDivElement;
+  touchGuard: TouchGuard;
+  resetHover: () => void;
+}
 
 interface UseStationMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -93,7 +99,7 @@ function createPopupHtml(props: StationProperties, unit: WindUnit): string {
   const currentGust = expired ? null : props.currentGust;
   const currentBearing = expired ? null : props.currentBearing;
 
-  const header = `<p align="center"><strong>${name}</strong></p>`;
+  const header = `<p align="center"><strong>${escapeHtml(name)}</strong></p>`;
 
   if (isOffline) {
     return header + '<p style="color: #ff4261;" align="center">Offline</p>';
@@ -128,7 +134,7 @@ function createMarkerElement(
   onShow: (popup: mapboxgl.Popup) => void,
   onHide: (popup: mapboxgl.Popup) => void,
   popup: mapboxgl.Popup
-): HTMLDivElement {
+): { container: HTMLDivElement; touchGuard: TouchGuard; resetHover: () => void } {
   const {
     dbId,
     elevation,
@@ -205,7 +211,11 @@ function createMarkerElement(
     onNavigate(dbId);
   });
 
-  return container;
+  return {
+    container,
+    touchGuard,
+    resetHover: () => { isHovering = false; }
+  };
 }
 
 /**
@@ -289,6 +299,7 @@ export function useStationMarkers({
   const queryClient = useQueryClient();
   const { sport } = useAppContext();
   const markersRef = useRef<IStationMarker[]>([]);
+  const touchGuardsRef = useRef<StationMarkerHandle[]>([]);
   const interactiveRef = useRef(true);
   const unitRef = useRef<WindUnit>(unit);
   const sportRef = useRef(sport);
@@ -325,7 +336,7 @@ export function useStationMarkers({
         offset: [0, -15]
       }).setHTML(createPopupHtml(popupProps, unitRef.current));
 
-      const marker = createMarkerElement(
+      const { container, touchGuard, resetHover } = createMarkerElement(
         props,
         unitRef.current,
         sportRef.current,
@@ -340,9 +351,10 @@ export function useStationMarkers({
         popup
       );
 
-      if (!showGustLabelRef.current) marker.classList.add('gust-label-hidden');
+      if (!showGustLabelRef.current) container.classList.add('gust-label-hidden');
+      touchGuardsRef.current.push({ marker: container, touchGuard, resetHover });
 
-      return { marker, popup };
+      return { marker: container, popup };
     },
     [navigate, map]
   );
@@ -353,14 +365,23 @@ export function useStationMarkers({
     if (circle) circle.style.pointerEvents = interactiveRef.current ? 'auto' : 'none';
   }, []);
 
+  // Wrap updateMarkerElement with post-update hooks (reset hover state, reapply interactivity)
+  const refreshMarker = useCallback(
+    (marker: HTMLDivElement, props: StationProperties, unit: WindUnit, sport: SportType) => {
+      updateMarkerElement(marker, props, unit, sport);
+      touchGuardsRef.current.find((h) => h.marker === marker)?.resetHover();
+      applyInteractivity(marker);
+    },
+    [applyInteractivity]
+  );
+
   // Update existing marker
   const updateStationMarker = useCallback(
     (item: IStationMarker, props: StationProperties) => {
-      updateMarkerElement(item.marker, props, unitRef.current, sportRef.current);
-      applyInteractivity(item.marker);
+      refreshMarker(item.marker, props, unitRef.current, sportRef.current);
       item.popup.setHTML(createPopupHtml(props, unitRef.current));
     },
-    [applyInteractivity]
+    [refreshMarker]
   );
 
   // Track mapbox Marker instances so we can remove them on cleanup
@@ -404,6 +425,8 @@ export function useStationMarkers({
   // Cleanup markers only on unmount
   useEffect(() => {
     return () => {
+      touchGuardsRef.current.forEach((h) => h.touchGuard.cleanup());
+      touchGuardsRef.current = [];
       mapboxMarkersRef.current.forEach((m) => m.remove());
       mapboxMarkersRef.current = [];
       markersRef.current = [];
@@ -414,11 +437,10 @@ export function useStationMarkers({
   const rerenderAllMarkers = useCallback((u: WindUnit, s: SportType) => {
     for (const item of markersRef.current) {
       const props = readPropsFromDataset(item.marker);
-      updateMarkerElement(item.marker, props, u, s);
-      applyInteractivity(item.marker);
+      refreshMarker(item.marker, props, u, s);
       item.popup.setHTML(createPopupHtml(props, u));
     }
-  }, [applyInteractivity]);
+  }, [refreshMarker]);
 
   // Update all markers when unit changes
   useEffect(() => {
@@ -487,11 +509,10 @@ export function useStationMarkers({
           lastUpdate: null // full opacity
         };
 
-        updateMarkerElement(item.marker, historicalProps, unitRef.current, sportRef.current);
-        applyInteractivity(item.marker);
+        refreshMarker(item.marker, historicalProps, unitRef.current, sportRef.current);
       }
     },
-    [applyInteractivity]
+    [refreshMarker]
   );
 
   // Set marker interactivity (enable/disable click handlers)
@@ -526,11 +547,10 @@ export function useStationMarkers({
       const prevExpired = item.marker.dataset.expired === 'true';
       if (expired === prevExpired) continue;
 
-      updateMarkerElement(item.marker, props, unitRef.current, sportRef.current);
-      applyInteractivity(item.marker);
+      refreshMarker(item.marker, props, unitRef.current, sportRef.current);
       item.popup.setHTML(createPopupHtml(props, unitRef.current));
     }
-  }, [applyInteractivity]);
+  }, [refreshMarker]);
 
   useEffect(() => {
     if (!isMapLoaded) return;

@@ -250,6 +250,10 @@ export function attachTouchGuard(el: HTMLElement): TouchGuard {
   };
 }
 
+export function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 const FRESH_MS = 10 * 60 * 1000;
 
 function isStale(lastUpdate: string | null): boolean {

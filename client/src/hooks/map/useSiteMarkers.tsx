@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import mapboxgl from 'mapbox-gl';
 import { SiteMarker } from '@/components/map/SiteMarker';
-import { getSiteGeoJson, attachTouchGuard, type TouchGuard } from '@/components/map';
+import { getSiteGeoJson, attachTouchGuard, escapeHtml, type TouchGuard } from '@/components/map';
 import { useNavigate } from 'react-router-dom';
 import { useSites } from '../useSites';
 import { isWindBearingInRange } from '@/lib/utils';
@@ -39,7 +39,7 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
         closeButton: false,
         closeOnClick: false,
         offset: [0, -15]
-      }).setHTML(`<p align="center"><strong>${name}</strong></p>`);
+      }).setHTML(`<p align="center"><strong>${escapeHtml(name)}</strong></p>`);
 
       const el = document.createElement('div');
       el.id = dbId;
@@ -74,7 +74,8 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
     [navigate, map]
   );
 
-  // Sync markers whenever site data changes
+  // Create markers once when site data first arrives.
+  // Sites are near-static so we don't support in-place updates; changes require a remount.
   useEffect(() => {
     if (!isMapLoaded || !map.current || sitesLoading || !sites?.length) return;
 
