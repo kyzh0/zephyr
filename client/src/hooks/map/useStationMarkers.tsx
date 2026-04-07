@@ -125,7 +125,8 @@ function createMarkerElement(
   unit: WindUnit,
   sport: SportType,
   onNavigate: (dbId: string) => void,
-  onHover: (popup: mapboxgl.Popup, show: boolean) => void,
+  onShow: (popup: mapboxgl.Popup) => void,
+  onHide: (popup: mapboxgl.Popup) => void,
   popup: mapboxgl.Popup
 ): HTMLDivElement {
   const {
@@ -158,16 +159,6 @@ function createMarkerElement(
       sport={sport}
     />
   );
-  const handleClick = () => {
-    popup.remove();
-    onNavigate(dbId);
-  };
-  const handleEnter = () => onHover(popup, true);
-  const handleLeave = () => onHover(popup, false);
-
-  arrow.addEventListener('click', handleClick);
-  arrow.addEventListener('mouseenter', handleEnter);
-  arrow.addEventListener('mouseleave', handleLeave);
 
   // Container
   const container = document.createElement('div');
@@ -185,8 +176,41 @@ function createMarkerElement(
   container.dataset.expired = String(isDataExpired(lastUpdate));
   container.style.zIndex = isOffline ? '2' : validBearings ? '4' : '3';
   container.style.opacity = getMarkerOpacity(lastUpdate);
+  container.style.pointerEvents = 'none';
 
   container.appendChild(arrow);
+
+  // --- Event handling ---
+  // Listeners go on the arrow (survives innerHTML replacement).
+  // The arrow has pointer-events: none but bubbled events from the
+  // circle (pointer-events: auto) still reach it.
+  arrow.style.pointerEvents = 'none';
+
+  let isTouching = false;
+  let isHovering = false;
+
+  arrow.addEventListener('mouseover', () => {
+    if (isHovering || isTouching) return;
+    isHovering = true;
+    onShow(popup);
+  });
+  arrow.addEventListener('mouseout', (e: MouseEvent) => {
+    if (!isHovering) return;
+    if (e.relatedTarget && arrow.contains(e.relatedTarget as Node)) return;
+    isHovering = false;
+    if (!isTouching) onHide(popup);
+  });
+  arrow.addEventListener('click', () => {
+    onHide(popup);
+    onNavigate(dbId);
+  });
+  arrow.addEventListener('touchstart', () => { isTouching = true; }, { passive: true });
+  arrow.addEventListener('touchend', () => {
+    setTimeout(() => { isTouching = false; }, 300);
+  });
+  arrow.addEventListener('touchcancel', () => {
+    setTimeout(() => { isTouching = false; }, 300);
+  });
 
   return container;
 }
@@ -272,6 +296,7 @@ export function useStationMarkers({
   const queryClient = useQueryClient();
   const { sport } = useAppContext();
   const markersRef = useRef<IStationMarker[]>([]);
+  const interactiveRef = useRef(true);
   const unitRef = useRef<WindUnit>(unit);
   const sportRef = useRef(sport);
 
@@ -315,10 +340,10 @@ export function useStationMarkers({
           popup.remove();
           void navigate(`/stations/${dbId}`);
         },
-        (p, show) => {
-          if (show && map.current) p.addTo(map.current);
-          else p.remove();
+        (p) => {
+          if (map.current) p.addTo(map.current);
         },
+        (p) => p.remove(),
         popup
       );
 
@@ -329,11 +354,18 @@ export function useStationMarkers({
     [navigate, map]
   );
 
+  // Reapply interactive state to a marker's circle after innerHTML replacement
+  const applyInteractivity = useCallback((marker: HTMLDivElement) => {
+    const circle = marker.querySelector<SVGCircleElement>('.marker-arrow circle');
+    if (circle) circle.style.pointerEvents = interactiveRef.current ? 'auto' : 'none';
+  }, []);
+
   // Update existing marker
   const updateStationMarker = useCallback((item: IStationMarker, props: StationProperties) => {
     updateMarkerElement(item.marker, props, unitRef.current, sportRef.current);
+    applyInteractivity(item.marker);
     item.popup.setHTML(createPopupHtml(props, unitRef.current));
-  }, []);
+  }, [applyInteractivity]);
 
   // Track mapbox Marker instances so we can remove them on cleanup
   const mapboxMarkersRef = useRef<mapboxgl.Marker[]>([]);
@@ -354,11 +386,11 @@ export function useStationMarkers({
       for (const feature of geoJson.features) {
         const props = extractStationProperties(feature.properties);
         const { marker, popup } = createStationMarker(props);
+        popup.setLngLat(feature.geometry.coordinates);
         marker.style.visibility = isVisibleRef.current ? 'visible' : 'hidden';
         markersRef.current.push({ marker, popup });
         const mbMarker = new mapboxgl.Marker(marker)
           .setLngLat(feature.geometry.coordinates)
-          .setPopup(popup)
           .addTo(map.current);
         mapboxMarkersRef.current.push(mbMarker);
       }
@@ -387,6 +419,7 @@ export function useStationMarkers({
     for (const item of markersRef.current) {
       const props = readPropsFromDataset(item.marker);
       updateMarkerElement(item.marker, props, u, s);
+      applyInteractivity(item.marker);
       item.popup.setHTML(createPopupHtml(props, u));
     }
   }, []);
@@ -456,16 +489,18 @@ export function useStationMarkers({
       };
 
       updateMarkerElement(item.marker, historicalProps, unitRef.current, sportRef.current);
+      applyInteractivity(item.marker);
     }
-  }, []);
+  }, [applyInteractivity]);
 
   // Set marker interactivity (enable/disable click handlers)
   const setInteractive = useCallback((interactive: boolean) => {
+    interactiveRef.current = interactive;
     for (const item of markersRef.current) {
-      item.marker.style.pointerEvents = interactive ? 'auto' : 'none';
+      applyInteractivity(item.marker);
       item.marker.style.cursor = interactive ? 'pointer' : 'default';
     }
-  }, []);
+  }, [applyInteractivity]);
 
   // Render current (live) data — invalidate to force a fresh fetch
   const renderCurrentData = useCallback(async (): Promise<void> => {
@@ -488,9 +523,10 @@ export function useStationMarkers({
       if (expired === prevExpired) continue;
 
       updateMarkerElement(item.marker, props, unitRef.current, sportRef.current);
+      applyInteractivity(item.marker);
       item.popup.setHTML(createPopupHtml(props, unitRef.current));
     }
-  }, []);
+  }, [applyInteractivity]);
 
   useEffect(() => {
     if (!isMapLoaded) return;

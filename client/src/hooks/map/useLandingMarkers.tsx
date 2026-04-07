@@ -47,20 +47,31 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
       el.innerHTML = renderToStaticMarkup(<LandingMarker isOfficial={isOfficial} />);
 
       // Event handlers
+      let isTouching = false;
+
       const handleClick = () => {
         popup.remove();
         navigate(`/landings/${dbId}`);
       };
       const handleEnter = () => {
-        if (map.current) popup.addTo(map.current);
+        if (!isTouching && map.current) popup.addTo(map.current);
       };
       const handleLeave = () => {
-        popup.remove();
+        if (!isTouching) popup.remove();
+      };
+      const handleTouchStart = () => {
+        isTouching = true;
+      };
+      const handleTouchEnd = () => {
+        setTimeout(() => { isTouching = false; }, 300);
       };
 
       el.addEventListener('click', handleClick);
       el.addEventListener('mouseenter', handleEnter);
       el.addEventListener('mouseleave', handleLeave);
+      el.addEventListener('touchstart', handleTouchStart, { passive: true });
+      el.addEventListener('touchend', handleTouchEnd);
+      el.addEventListener('touchcancel', handleTouchEnd);
 
       return { marker: el, popup };
     },
@@ -82,10 +93,10 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
           const isOfficial = f.properties.siteGuideUrl ? true : false;
 
           const { marker, popup } = createLandingMarker(dbId, name, isOfficial);
+          popup.setLngLat(f.geometry.coordinates);
           markersRef.current.push({ marker, popup });
           new mapboxgl.Marker(marker)
             .setLngLat(f.geometry.coordinates)
-            .setPopup(popup)
             .addTo(map.current);
         }
       }

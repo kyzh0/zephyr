@@ -55,7 +55,6 @@ export function useWebcamWithImages({ id }: UseWebcamOptions = {}): UseWebcamWit
     queryFn: () => getCamById(id!),
     enabled: !!id,
     refetchInterval: REFRESH_INTERVAL_MS,
-    refetchIntervalInBackground: true,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
   });
 
@@ -95,8 +94,7 @@ export function useWebcams(options?: UseWebcamsOptions) {
   const { data, isLoading, error } = useQuery({
     queryKey: includeDisabled ? ['webcams', { includeDisabled }] : ['webcams'],
     queryFn: () => listCams(includeDisabled),
-    refetchInterval: includeDisabled ? undefined : REFRESH_INTERVAL_MS,
-    refetchIntervalInBackground: true
+    refetchInterval: includeDisabled ? undefined : REFRESH_INTERVAL_MS
   });
 
   return {

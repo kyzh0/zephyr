@@ -54,20 +54,31 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
       if (validBearings) el.dataset.validBearings = validBearings;
 
       // Event handlers
+      let isTouching = false;
+
       const handleClick = () => {
         popup.remove();
         navigate(`/sites/${dbId}`);
       };
       const handleEnter = () => {
-        if (map.current) popup.addTo(map.current);
+        if (!isTouching && map.current) popup.addTo(map.current);
       };
       const handleLeave = () => {
-        popup.remove();
+        if (!isTouching) popup.remove();
+      };
+      const handleTouchStart = () => {
+        isTouching = true;
+      };
+      const handleTouchEnd = () => {
+        setTimeout(() => { isTouching = false; }, 300);
       };
 
       el.addEventListener('click', handleClick);
       el.addEventListener('mouseenter', handleEnter);
       el.addEventListener('mouseleave', handleLeave);
+      el.addEventListener('touchstart', handleTouchStart, { passive: true });
+      el.addEventListener('touchend', handleTouchEnd);
+      el.addEventListener('touchcancel', handleTouchEnd);
 
       return { marker: el, popup };
     },
@@ -90,10 +101,10 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
           const isOfficial = f.properties.siteGuideUrl ? true : false;
 
           const { marker, popup } = createSiteMarker(dbId, name, validBearings, isOfficial);
+          popup.setLngLat(f.geometry.coordinates);
           markersRef.current.push({ marker, popup });
           new mapboxgl.Marker(marker)
             .setLngLat(f.geometry.coordinates)
-            .setPopup(popup)
             .addTo(map.current);
         }
       }

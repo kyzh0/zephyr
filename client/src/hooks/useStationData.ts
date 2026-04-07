@@ -44,7 +44,6 @@ export function useStationData(
     },
     enabled: !!id && !!station && !station.isOffline,
     refetchInterval: REFRESH_INTERVAL_MS,
-    refetchIntervalInBackground: true,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
   });
 

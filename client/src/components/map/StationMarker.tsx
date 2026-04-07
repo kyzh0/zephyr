@@ -102,7 +102,7 @@ export const StationMarker = ({
         )}
 
         {/* Circle (core color) - drawn outside rotation so it appears cleanly on top */}
-        <circle cx={cx} cy={cy} r={R} fill={coreColor} stroke="none" />
+        <circle cx={cx} cy={cy} r={R} fill={coreColor} stroke="none" pointerEvents="auto" />
 
         {/* White/gold border on circle only — drawn on top so it covers the tail join */}
         <circle
@@ -112,6 +112,7 @@ export const StationMarker = ({
           fill="none"
           stroke={isBearingValid ? 'gold' : 'black'}
           strokeWidth={isBearingValid ? borderWidth * 5 : borderWidth}
+          pointerEvents="none"
         />
 
         {/* Extra black borders for the gold for contrast */}
@@ -123,6 +124,7 @@ export const StationMarker = ({
             fill="none"
             stroke="black"
             strokeWidth={borderWidth}
+            pointerEvents="none"
           />
         )}
         {isBearingValid && (
@@ -133,6 +135,7 @@ export const StationMarker = ({
             fill="none"
             stroke="black"
             strokeWidth={borderWidth}
+            pointerEvents="none"
           />
         )}
 
@@ -146,6 +149,7 @@ export const StationMarker = ({
           fontSize={fontSize}
           fontWeight="600"
           fill={isOffline ? 'red' : getTextColor(coreColor)}
+          pointerEvents="none"
         >
           {isOffline ? 'X' : speed !== undefined ? convertWindSpeed(speed, unit) : '-'}
         </text>
