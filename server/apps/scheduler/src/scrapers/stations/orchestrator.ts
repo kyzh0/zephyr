@@ -1,6 +1,6 @@
 import { QueryFilter } from 'mongoose';
 
-import { logger, Station, StationData, type StationAttrs, type WithId } from '@zephyr/shared';
+import { logger, Station, type StationAttrs, type WithId } from '@zephyr/shared';
 import scrapers, { type StationScraperType, type StationScraper } from './index';
 
 type GroupedStations = Record<StationScraperType | string, WithId<StationAttrs>[]>;
@@ -125,45 +125,4 @@ export async function rerunScraper(): Promise<void> {
   });
 
   await Promise.allSettled(jobs);
-}
-
-export async function rerunPorters(): Promise<void> {
-  const cutoff = new Date(Date.now() - 10 * 60 * 1000);
-
-  const stations = await Station.aggregate<WithId<StationAttrs>>([
-    { $match: { type: 'porters', isDisabled: { $ne: true } } },
-    {
-      $lookup: {
-        from: 'stationdatas',
-        localField: '_id',
-        foreignField: 'station',
-        pipeline: [{ $match: { time: { $gte: cutoff }, windAverage: null } }, { $limit: 1 }],
-        as: 'nullData'
-      }
-    },
-    { $match: { 'nullData.0': { $exists: true } } },
-    { $project: { nullData: 0 } }
-  ]);
-
-  if (!stations.length) {
-    return;
-  }
-
-  // Delete null entries to prevent duplicates
-  const stationIds = stations.map((s) => s._id);
-  await StationData.deleteMany({
-    station: { $in: stationIds },
-    time: { $gte: cutoff },
-    windAverage: null
-  });
-
-  try {
-    const scraper = (scrapers as Record<string, StationScraper | undefined>)['porters'];
-    if (scraper) {
-      await scraper(stations);
-    }
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    logger.error(`Porters retry failed: ${msg}`, { service: 'porters-retry' });
-  }
 }
