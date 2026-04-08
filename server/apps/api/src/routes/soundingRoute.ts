@@ -15,6 +15,13 @@ type CreateSoundingBody = {
   raspId: string;
 };
 
+type PatchSoundingBody = {
+  name?: string;
+  coordinates?: [number, number];
+  raspRegion?: string;
+  raspId?: string;
+};
+
 router.get('/', async (req: Request<Record<string, never>>, res: Response) => {
   const soundings = await Sounding.find().lean();
   res.json(soundings);
@@ -51,6 +58,80 @@ router.post(
     } catch (err) {
       res.status(500).json(err);
     }
+  }
+);
+
+router.patch(
+  '/:id',
+  async (req: Request<IdParams, unknown, PatchSoundingBody, ApiKeyQuery>, res: Response) => {
+    const user = await User.findOne({ key: req.query.key }).lean();
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
+
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const sounding = await Sounding.findOne({ _id: new ObjectId(id) });
+    if (!sounding) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const { name, coordinates, raspRegion, raspId } = req.body;
+
+    if (name !== undefined) {
+      sounding.name = name;
+    }
+    if (coordinates !== undefined) {
+      sounding.location = { type: 'Point', coordinates };
+    }
+    if (raspRegion !== undefined) {
+      sounding.raspRegion = raspRegion;
+    }
+    if (raspId !== undefined) {
+      sounding.raspId = raspId;
+    }
+
+    try {
+      await sounding.save();
+      const updated = await Sounding.findById(id).lean();
+      res.json(updated);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+);
+
+router.delete(
+  '/:id',
+  async (req: Request<IdParams, unknown, unknown, ApiKeyQuery>, res: Response) => {
+    const user = await User.findOne({ key: req.query.key }).lean();
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
+
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const sounding = await Sounding.findOne({ _id: new ObjectId(id) }).lean();
+    if (!sounding) {
+      res.sendStatus(404);
+      return;
+    }
+
+    await Sounding.deleteOne({ _id: new ObjectId(id) });
+    res.sendStatus(204);
   }
 );
 

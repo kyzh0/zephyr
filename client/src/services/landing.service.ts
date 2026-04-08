@@ -1,64 +1,54 @@
 import type { ILanding } from '@/models/landing.model';
+import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
-export const getLandingById = async (id: string) => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/landings/${id}`);
-    return (await res.json()) as ILanding;
-  } catch (error) {
-    console.error(error);
-  }
-};
+export async function getLandingById(id: string) {
+  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/landings/${id}`);
+  await throwIfNotOk(res);
+  return (await res.json()) as ILanding;
+}
 
-export const listLandings = async (includeDisabled?: boolean) => {
-  try {
-    let url = `${import.meta.env.VITE_API_PREFIX}/landings`;
-    if (includeDisabled) url += '?includeDisabled=true';
-    const res = await fetch(url);
-    return (await res.json()) as ILanding[];
-  } catch (error) {
-    console.error(error);
-  }
-};
+export async function listLandings(includeDisabled?: boolean) {
+  let url = `${import.meta.env.VITE_API_PREFIX}/landings`;
+  if (includeDisabled) url += '?includeDisabled=true';
+  const res = await fetch(url);
+  await throwIfNotOk(res);
+  return (await res.json()) as ILanding[];
+}
 
-export async function addLanding(landing: Partial<ILanding>) {
-  try {
-    const key = sessionStorage.getItem('adminKey') ?? '';
-    await fetch(`${import.meta.env.VITE_API_PREFIX}/landings?key=${key}`, {
+export async function addLanding(landing: Partial<ILanding>): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/landings?${getKeyQueryThrowIfInvalid()}`,
+    {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(landing)
-    });
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+    }
+  );
+  await throwIfNotOk(res);
 }
 
-export async function patchLanding(id: string, updates: Partial<ILanding>, key: string) {
-  try {
-    await fetch(`${import.meta.env.VITE_API_PREFIX}/landings/${id}?key=${key}`, {
+export async function updateLanding(id: string, updates: Partial<ILanding>): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/landings/${id}?${getKeyQueryThrowIfInvalid()}`,
+    {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(updates)
-    });
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+    }
+  );
+  await throwIfNotOk(res);
 }
 
-export async function deleteLanding(id: string, key: string) {
-  try {
-    await fetch(`${import.meta.env.VITE_API_PREFIX}/landings/${id}?key=${key}`, {
+export async function deleteLanding(id: string): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/landings/${id}?${getKeyQueryThrowIfInvalid()}`,
+    {
       method: 'DELETE'
-    });
-    return { success: true };
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+    }
+  );
+  await throwIfNotOk(res);
 }

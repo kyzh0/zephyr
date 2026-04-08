@@ -1,38 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getSoundingById } from '@/services/sounding.service';
-import type { ISounding } from '@/models/sounding.model';
 import { formatInTimeZone } from 'date-fns-tz';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { ApiError } from '@/services/api-error';
+import { useSounding } from '@/hooks';
 
 export default function Sounding() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [sounding, setSounding] = useState<ISounding | null>(null);
   const [index, setIndex] = useState(0);
 
+  const { sounding, error } = useSounding(id);
+
+  // Navigate back if sounding not found
   useEffect(() => {
-    if (!id) return;
-    void (async () => {
-      const data = await getSoundingById(id);
-      if (!data) return navigate(-1);
-      setSounding(data);
+    if (error instanceof ApiError && error.status === 404) navigate('/', { replace: true });
+  }, [error, navigate]);
 
-      if (!data.images?.length) return;
+  // Sort images and pick initial index when data arrives
+  const sortedImages = sounding?.images;
+  const images = useMemo(() => {
+    if (!sortedImages?.length) return [];
+    return [...sortedImages].sort(
+      (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+    );
+  }, [sortedImages]);
 
-      data.images.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-      const future = data.images.findIndex(
-        (img) => new Date(img.time).getTime() > Date.now() - 1800000
-      );
-      setIndex(future >= 0 ? future : data.images.length - 1);
-    })();
-  }, [id, navigate]);
-
-  const images = sounding?.images ?? [];
+  // Set initial index to first future image when images change
+  useEffect(() => {
+    if (!images.length) return;
+    const future = images.findIndex(
+      (img) => new Date(img.time).getTime() > Date.now() - 1800000 // 30 min
+    );
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIndex(future >= 0 ? future : images.length - 1);
+  }, [images]);
   const raspLink = sounding
     ? `http://rasp.nz/rasp/view.php?region=${sounding.raspRegion}&mod=%2B0&date=${formatInTimeZone(
         images[0]?.time ? new Date(images[0].time) : new Date(),

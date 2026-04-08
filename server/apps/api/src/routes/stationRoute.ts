@@ -1,5 +1,4 @@
 import express, { type Request, type Response } from 'express';
-import * as geofire from 'geofire-common';
 import { ObjectId } from 'mongodb';
 import { QueryFilter } from 'mongoose';
 
@@ -10,10 +9,6 @@ const router = express.Router();
 type ApiKeyQuery = { key?: string };
 
 type StationsListQuery = {
-  unixTimeFrom?: string;
-  lat?: string;
-  lon?: string;
-  radius?: string;
   err?: string;
   includeDisabled?: string;
 };
@@ -61,11 +56,6 @@ router.get(
     req: Request<Record<string, never>, unknown, unknown, StationsListQuery>,
     res: Response
   ) => {
-    const time = Number(req.query.unixTimeFrom);
-    const latitude = Number(req.query.lat);
-    const longitude = Number(req.query.lon);
-    const rad = Number(req.query.radius);
-
     const query: QueryFilter<StationAttrs> = {};
     const orderby: Record<string, 1 | -1> = {};
 
@@ -79,39 +69,7 @@ router.get(
       query.isDisabled = { $ne: true };
     }
 
-    if (Number.isFinite(latitude) && Number.isFinite(longitude) && Number.isFinite(rad)) {
-      query.location = {
-        $geoWithin: {
-          $centerSphere: [[longitude, latitude], rad / 6378]
-        }
-      };
-    }
-
-    if (Number.isFinite(time)) {
-      query.lastUpdate = { $gte: new Date(time * 1000) };
-    }
-
     const stations = await Station.find(query).sort(orderby).lean();
-
-    if (Number.isFinite(latitude) && Number.isFinite(longitude) && Number.isFinite(rad)) {
-      // add distance field and sort by it
-      const stationsWithDistance = stations.map((s) => {
-        const distance =
-          Math.round(
-            geofire.distanceBetween(
-              [s.location.coordinates[1], s.location.coordinates[0]], // [lat,lng]
-              [latitude, longitude]
-            ) * 10
-          ) / 10;
-
-        return { ...s, distance };
-      });
-
-      stationsWithDistance.sort((a, b) => a.distance - b.distance);
-      res.json(stationsWithDistance);
-      return;
-    }
-
     res.json(stations);
   }
 );

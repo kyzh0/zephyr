@@ -1,14 +1,8 @@
-import { createContext, use, useCallback, useMemo, useState, type ReactNode } from 'react';
-import { getStoredValue, setStoredValue } from '@/components/map/map.utils';
+import { createContext, use, useCallback, useMemo, type ReactNode } from 'react';
+import { usePersistedState } from '@/hooks';
 import { type SportType } from '@/components/map';
 
 interface AppContextType {
-  user?: unknown;
-  isLoading?: boolean;
-  refreshedStations: string[];
-  setRefreshedStations: (ids: string[]) => void;
-  refreshedWebcams: string[];
-  setRefreshedWebcams: (ids: string[]) => void;
   flyingMode: boolean;
   toggleFlyingMode: () => void;
   sport: SportType;
@@ -17,45 +11,17 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-interface AppProviderProps {
-  children: ReactNode;
-}
-
-export function AppProvider({ children }: AppProviderProps) {
-  const [refreshedStations, setRefreshedStations] = useState<string[]>([]);
-  const [refreshedWebcams, setRefreshedWebcams] = useState<string[]>([]);
-  const [flyingMode, setFlyingMode] = useState(() => getStoredValue('flyingMode', false));
-  const [sport, setSportState] = useState<SportType>(() =>
-    getStoredValue<SportType>('sport', 'paragliding')
-  );
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [flyingMode, setFlyingMode] = usePersistedState('flyingMode', false);
+  const [sport, setSport] = usePersistedState<SportType>('sport', 'paragliding');
 
   const toggleFlyingMode = useCallback(() => {
-    setFlyingMode((prev) => {
-      const next = !prev;
-      setStoredValue('flyingMode', next);
-      return next;
-    });
-  }, []);
-
-  const setSport = useCallback((newSport: SportType) => {
-    setSportState(newSport);
-    setStoredValue('sport', newSport);
-  }, []);
+    setFlyingMode((prev) => !prev);
+  }, [setFlyingMode]);
 
   const value = useMemo<AppContextType>(
-    () => ({
-      user: null,
-      isLoading: false,
-      refreshedStations,
-      setRefreshedStations,
-      refreshedWebcams,
-      setRefreshedWebcams,
-      flyingMode,
-      toggleFlyingMode,
-      sport,
-      setSport
-    }),
-    [refreshedStations, refreshedWebcams, flyingMode, toggleFlyingMode, sport, setSport]
+    () => ({ flyingMode, toggleFlyingMode, sport, setSport }),
+    [flyingMode, toggleFlyingMode, sport, setSport]
   );
 
   return <AppContext value={value}>{children}</AppContext>;

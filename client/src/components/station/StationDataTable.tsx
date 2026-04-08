@@ -1,5 +1,7 @@
 import { cn, getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
-import { getDirectionColor, convertWindSpeed, getUnit } from './utils';
+import { usePersistedState } from '@/hooks';
+import { getDirectionColor, convertWindSpeed } from './utils';
+import type { WindUnit } from './types';
 import { useAppContext } from '@/context/AppContext';
 import { DirectionArrow } from '@/components/ui/DirectionArrow';
 import type { ExtendedStationData } from './types';
@@ -16,16 +18,15 @@ export const StationDataTable = function StationDataTable({
 }: StationDataTableProps & {
   ref?: React.RefObject<HTMLTableRowElement | null>;
 }) {
-  const unit = getUnit();
+  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
   const { sport } = useAppContext();
 
   return (
-    <div className="overflow-x-auto rounded-lg border bg-white sm:min-h-0">
-      <table className="min-w-[650px] text-sm">
+    <div className="overflow-x-auto rounded-lg border bg-white mt-2 mb-4 sm:min-h-0">
+      <table className="text-sm">
         <tbody>
           {/* Time row */}
           <tr ref={ref}>
-            <th className="sticky left-0 bg-white" />
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
@@ -41,9 +42,6 @@ export const StationDataTable = function StationDataTable({
 
           {/* Average row */}
           <tr>
-            <th className="sticky left-0 bg-white text-left text-xs sm:text-sm py-0 pl-0.5 pr-0.5 sm:p-0.8">
-              Avg
-            </th>
             {tableData.map((d) => {
               const windColor = getWindColorForSport(d.windAverage ?? null, sport);
               return (
@@ -63,9 +61,6 @@ export const StationDataTable = function StationDataTable({
 
           {/* Gust row */}
           <tr>
-            <th className="sticky left-0 bg-white text-left text-xs sm:text-sm py-0 pl-0.5 pr-0.5 sm:p-0.8">
-              Gust
-            </th>
             {tableData.map((d) => {
               const gustColor = getWindColorForSport(d.windGust ?? null, sport);
               return (
@@ -85,7 +80,6 @@ export const StationDataTable = function StationDataTable({
 
           {/* Direction text row */}
           <tr>
-            <th className="sticky left-0 bg-white" />
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
@@ -100,7 +94,6 @@ export const StationDataTable = function StationDataTable({
 
           {/* Direction arrow row */}
           <tr>
-            <th className="sticky left-0 bg-white z-10" />
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
@@ -130,7 +123,6 @@ export const StationDataTable = function StationDataTable({
 
           {/* Bearing degrees row */}
           <tr>
-            <th className="sticky left-0 bg-white" />
             {tableData.map((d) => (
               <td
                 key={String(d.time)}
@@ -145,7 +137,6 @@ export const StationDataTable = function StationDataTable({
 
           {/* Temperature row */}
           <tr>
-            <th className="sticky left-0 bg-white" />
             {tableData.map((d) => (
               <td
                 key={String(d.time)}

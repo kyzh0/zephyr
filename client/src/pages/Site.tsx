@@ -1,23 +1,23 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getSiteById } from '@/services/site.service';
-import { StationPreview } from '@/components/station/StationPreview';
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
 import {
   AlertCircleIcon,
   TriangleAlertIcon,
   PlaneLanding,
   ArrowLeft,
   ChevronRightIcon,
+  ChevronDown,
   ExternalLink
 } from 'lucide-react';
-import { useState } from 'react';
-import type { ISite } from '@/models/site.model';
-import { useIsMobile } from '@/hooks';
-import { useAppContext } from '@/context/AppContext';
+
+import SEO from '@/components/SEO';
+import { WebcamPreview } from '@/components/webcam/WebcamPreview';
+import { WindCompass } from '@/components/station';
+import { StationPreview } from '@/components/station/StationPreview';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Item,
@@ -27,47 +27,21 @@ import {
   ItemMedia,
   ItemTitle
 } from '@/components/ui/item';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
-import { useNearbyWebcams } from '@/hooks/useWebcam';
-import { useNearbyStations } from '@/hooks/useStations';
-import { getButtonStyle, getIconStyle, handleError } from '@/lib/utils';
-import { WebcamPreview } from '@/components/webcam/WebcamPreview';
-import { WindCompass } from '@/components/station';
-import SEO from '@/components/SEO';
+
+import { getButtonStyle, getIconStyle } from '@/lib/utils';
+import { ApiError } from '@/services/api-error';
+import { useAppContext } from '@/context/AppContext';
+import { useIsMobile, useNearbyWebcams, useNearbyStations, useSite } from '@/hooks';
 
 export default function Site() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { flyingMode } = useAppContext();
-  const [site, setSite] = useState<ISite | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
   const [webcamsOpen, setWebcamsOpen] = useState(false);
   const [stationsOpen, setStationsOpen] = useState(false);
 
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchSite = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const data = await getSiteById(id);
-        if (!data) {
-          throw new Error('Site not found');
-        }
-        setSite(data);
-      } catch (err) {
-        setError(handleError(err, 'Failed to load site details'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void fetchSite();
-  }, [id]);
+  const { site, isLoading, error } = useSite(id);
 
   const { data: nearbyWebcamData } = useNearbyWebcams({
     lon: site?.location.coordinates[0] ?? 0,
@@ -81,9 +55,7 @@ export default function Site() {
 
   // Navigate back if site not found
   useEffect(() => {
-    if (error) {
-      navigate(-1);
-    }
+    if (error instanceof ApiError && error.status === 404) navigate('/', { replace: true });
   }, [error, navigate]);
 
   // Shared header content

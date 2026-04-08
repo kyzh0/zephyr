@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import mapboxgl from 'mapbox-gl';
 import { SiteMarker } from '@/components/map/SiteMarker';
-import { getSiteGeoJson } from '@/components/map';
+import { getSiteGeoJson, escapeHtml, POPUP_OFFSET } from '@/components/map';
 import { useNavigate } from 'react-router-dom';
 import { useSites } from '../useSites';
 import { isWindBearingInRange } from '@/lib/utils';
@@ -17,6 +17,7 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
   const navigate = useNavigate();
   const { sites, isLoading: sitesLoading } = useSites();
   const markersRef = useRef<{ marker: HTMLDivElement; popup: mapboxgl.Popup }[]>([]);
+  const mapboxMarkersRef = useRef<mapboxgl.Marker[]>([]);
   const isVisibleRef = useRef(isVisible);
 
   // Keep visibility ref in sync
@@ -36,14 +37,13 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
-        offset: [0, -15]
-      }).setHTML(`<p align="center"><strong>${name}</strong></p>`);
+        offset: POPUP_OFFSET
+      }).setHTML(`<p align="center"><strong>${escapeHtml(name)}</strong></p>`);
 
       const el = document.createElement('div');
       el.id = dbId;
-      el.className = 'site-marker cursor-pointer';
+      el.className = 'z-2 site-marker cursor-pointer';
       el.style.visibility = 'hidden';
-      el.style.zIndex = '2';
 
       // Render the SiteMarker component to HTML
       el.innerHTML = renderToStaticMarkup(
@@ -53,32 +53,33 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
       // Store validBearings for wind filter comparisons
       if (validBearings) el.dataset.validBearings = validBearings;
 
-      // Event handlers
-      const handleClick = () => {
+      // Event handlers — popups on mouse only
+      el.addEventListener('pointerenter', (e: PointerEvent) => {
+        if (e.pointerType !== 'mouse') return;
+        if (map.current) popup.addTo(map.current);
+      });
+      el.addEventListener('pointerleave', (e: PointerEvent) => {
+        if (e.pointerType !== 'mouse') return;
+        popup.remove();
+      });
+      el.addEventListener('click', () => {
         popup.remove();
         navigate(`/sites/${dbId}`);
-      };
-      const handleEnter = () => {
-        if (map.current) popup.addTo(map.current);
-      };
-      const handleLeave = () => {
-        popup.remove();
-      };
-
-      el.addEventListener('click', handleClick);
-      el.addEventListener('mouseenter', handleEnter);
-      el.addEventListener('mouseleave', handleLeave);
+      });
 
       return { marker: el, popup };
     },
     [navigate, map]
   );
 
-  // Initialize sites
-  const initialize = useCallback(() => {
-    if (!map.current || sitesLoading || !sites?.length) return;
+  // Create markers once when site data first arrives.
+  // Sites are near-static so we don't support in-place updates; changes require a remount.
+  useEffect(() => {
+    if (!isMapLoaded || !map.current || sitesLoading || !sites?.length) return;
 
-    // Also try to load real sites from API
+    // Already created — skip
+    if (markersRef.current.length > 0) return;
+
     try {
       const geoJson = getSiteGeoJson(sites);
 
@@ -90,22 +91,32 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
           const isOfficial = f.properties.siteGuideUrl ? true : false;
 
           const { marker, popup } = createSiteMarker(dbId, name, validBearings, isOfficial);
+          popup.setLngLat(f.geometry.coordinates);
           markersRef.current.push({ marker, popup });
-          new mapboxgl.Marker(marker)
+          const mbMarker = new mapboxgl.Marker(marker)
             .setLngLat(f.geometry.coordinates)
-            .setPopup(popup)
             .addTo(map.current);
+          mapboxMarkersRef.current.push(mbMarker);
         }
       }
     } catch (error) {
-      console.error('❌ Error loading real sites:', error);
+      console.error('Error loading sites:', error);
     }
 
     // Set initial visibility after all markers are created
     for (const item of markersRef.current) {
       item.marker.style.visibility = isVisibleRef.current ? 'visible' : 'hidden';
     }
-  }, [map, sites, sitesLoading, createSiteMarker]);
+  }, [isMapLoaded, map, sites, sitesLoading, createSiteMarker]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      mapboxMarkersRef.current.forEach((m) => m.remove());
+      mapboxMarkersRef.current = [];
+      markersRef.current = [];
+    };
+  }, []);
 
   // Toggle visibility
   const setVisibility = useCallback((visible: boolean) => {
@@ -124,13 +135,6 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
       item.marker.style.opacity = matches ? '1' : '0.1';
     }
   }, []);
-
-  // Initialize when map is loaded
-  useEffect(() => {
-    if (isMapLoaded) {
-      void initialize();
-    }
-  }, [isMapLoaded, initialize]);
 
   // Update visibility when prop changes
   useEffect(() => {

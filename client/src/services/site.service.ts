@@ -1,64 +1,54 @@
 import type { ISite } from '@/models/site.model';
+import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
-export const getSiteById = async (id: string) => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/sites/${id}`);
-    return (await res.json()) as ISite;
-  } catch (error) {
-    console.error(error);
-  }
-};
+export async function getSiteById(id: string) {
+  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/sites/${id}`);
+  await throwIfNotOk(res);
+  return (await res.json()) as ISite;
+}
 
-export const listSites = async (includeDisabled?: boolean) => {
-  try {
-    let url = `${import.meta.env.VITE_API_PREFIX}/sites`;
-    if (includeDisabled) url += '?includeDisabled=true';
-    const res = await fetch(url);
-    return (await res.json()) as ISite[];
-  } catch (error) {
-    console.error(error);
-  }
-};
+export async function listSites(includeDisabled?: boolean) {
+  let url = `${import.meta.env.VITE_API_PREFIX}/sites`;
+  if (includeDisabled) url += '?includeDisabled=true';
+  const res = await fetch(url);
+  await throwIfNotOk(res);
+  return (await res.json()) as ISite[];
+}
 
-export async function addSite(site: Partial<ISite>) {
-  try {
-    const key = sessionStorage.getItem('adminKey') ?? '';
-    await fetch(`${import.meta.env.VITE_API_PREFIX}/sites?key=${key}`, {
+export async function addSite(site: Partial<ISite>): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/sites?${getKeyQueryThrowIfInvalid()}`,
+    {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(site)
-    });
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+    }
+  );
+  await throwIfNotOk(res);
 }
 
-export async function patchSite(id: string, updates: Partial<ISite>, key: string) {
-  try {
-    await fetch(`${import.meta.env.VITE_API_PREFIX}/sites/${id}?key=${key}`, {
+export async function updateSite(id: string, updates: Partial<ISite>): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/sites/${id}?${getKeyQueryThrowIfInvalid()}`,
+    {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(updates)
-    });
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+    }
+  );
+  await throwIfNotOk(res);
 }
 
-export async function deleteSite(id: string, key: string) {
-  try {
-    await fetch(`${import.meta.env.VITE_API_PREFIX}/sites/${id}?key=${key}`, {
+export async function deleteSite(id: string): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/sites/${id}?${getKeyQueryThrowIfInvalid()}`,
+    {
       method: 'DELETE'
-    });
-    return { success: true };
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+    }
+  );
+  await throwIfNotOk(res);
 }

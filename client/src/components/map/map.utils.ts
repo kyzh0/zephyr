@@ -211,33 +211,24 @@ export function getLandingGeoJson(landings: ILanding[] | undefined): GeoJson | n
   return geoJson;
 }
 
-// Sort stations for rendering order
-export function sortStationFeatures(features: GeoJsonFeature[]): void {
-  features.sort((a, b) => {
-    // Render offline stations on bottom
-    if (a.properties.isOffline && !b.properties.isOffline) {
-      return -1;
-    } else if (!a.properties.isOffline && b.properties.isOffline) {
-      return 1;
-    }
+export const POPUP_OFFSET: Record<string, [number, number]> = {
+  top: [0, 20],
+  'top-left': [15, 20],
+  'top-right': [-15, 20],
+  bottom: [0, -20],
+  'bottom-left': [15, -20],
+  'bottom-right': [-15, -20],
+  left: [20, 0],
+  right: [-20, 0]
+};
 
-    // Render stations with no data on bottom
-    if (a.properties.currentAverage == null && b.properties.currentAverage != null) {
-      return -1;
-    } else if (a.properties.currentAverage != null && b.properties.currentAverage == null) {
-      return 1;
-    }
-
-    // Render stations with valid bearings on top
-    if (!a.properties.validBearings && b.properties.validBearings) {
-      return -1;
-    } else if (a.properties.validBearings && !b.properties.validBearings) {
-      return 1;
-    }
-
-    // Render stations with higher reading on top
-    return (a.properties.currentAverage as number) - (b.properties.currentAverage as number);
-  });
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // Calculate history time from offset

@@ -8,8 +8,8 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import { getUnit } from './utils';
-import type { ExtendedStationData } from './types';
+import { usePersistedState } from '@/hooks';
+import type { ExtendedStationData, WindUnit } from './types';
 
 interface WindSpeedChartProps {
   data: ExtendedStationData[];
@@ -22,10 +22,10 @@ const chartStyle = {
 };
 
 export function WindSpeedChart({ data }: WindSpeedChartProps) {
-  const unit = getUnit();
+  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
 
   return (
-    <div className="h-[20vh] min-h-[120px] w-full">
+    <div className="h-[20vh] min-h-30 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />

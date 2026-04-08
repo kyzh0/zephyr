@@ -13,17 +13,8 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { listStations } from '@/services/station.service';
-import { listSoundings } from '@/services/sounding.service';
-import { listSites } from '@/services/site.service';
-import { listLandings } from '@/services/landing.service';
-import { listCams } from '@/services/cam.service';
-import type { IStation } from '@/models/station.model';
-import type { ISounding } from '@/models/sounding.model';
-import type { ICam } from '@/models/cam.model';
+import { useStations, useWebcams, useSites, useLandings, useSoundings } from '@/hooks';
 import { getMinutesAgo } from '@/lib/utils';
-import type { ISite } from '@/models/site.model';
-import type { ILanding } from '@/models/landing.model';
 import { AdminDonationsPanel } from '@/pages/AdminDonationsPanel';
 
 const STALE_CHECK_TIMESTAMP = Date.now();
@@ -37,79 +28,22 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState(tab);
-
-  // Stations state
-  const [stations, setStations] = useState<IStation[]>([]);
-  const [stationsLoading, setStationsLoading] = useState(true);
   const [stationSearch, setStationSearch] = useState('');
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
-
-  // Webcams state
-  const [webcams, setWebcams] = useState<ICam[]>([]);
-  const [webcamsLoading, setWebcamsLoading] = useState(true);
   const [webcamSearch, setWebcamSearch] = useState('');
-
-  // Soundings state
-  const [soundings, setSoundings] = useState<ISounding[]>([]);
-  const [soundingsLoading, setSoundingsLoading] = useState(true);
   const [soundingSearch, setSoundingSearch] = useState('');
-
-  // Sites state
-  const [sites, setSites] = useState<ISite[]>([]);
   const [siteSearch, setSiteSearch] = useState('');
-
-  // Landings state
-  const [landings, setLandings] = useState<ILanding[]>([]);
   const [landingSearch, setLandingSearch] = useState('');
+
+  const { stations, isLoading: stationsLoading } = useStations({ includeDisabled: true });
+  const { webcams, isLoading: webcamsLoading } = useWebcams({ includeDisabled: true });
+  const { soundings, isLoading: soundingsLoading } = useSoundings();
+  const { sites } = useSites({ includeDisabled: true });
+  const { landings } = useLandings({ includeDisabled: true });
 
   useEffect(() => {
     setActiveTab(tab);
   }, [tab]);
-
-  useEffect(() => {
-    async function loadStations() {
-      const data = await listStations(true);
-      if (data?.length) setStations(data);
-      setStationsLoading(false);
-    }
-    loadStations();
-  }, []);
-
-  useEffect(() => {
-    async function loadSoundings() {
-      const data = await listSoundings();
-      if (data?.length) setSoundings(data);
-      setSoundingsLoading(false);
-    }
-    loadSoundings();
-  }, []);
-
-  useEffect(() => {
-    async function loadSites() {
-      const data = await listSites(true);
-      if (data?.length) setSites(data);
-      setStationsLoading(false);
-    }
-    loadSites();
-  }, []);
-
-  useEffect(() => {
-    async function loadLandings() {
-      const data = await listLandings(true);
-      if (data?.length) setLandings(data);
-      setStationsLoading(false);
-    }
-    loadLandings();
-  }, []);
-
-  useEffect(() => {
-    async function loadWebcams() {
-      const data = await listCams(true);
-      if (data) setWebcams(data);
-      setWebcamsLoading(false);
-    }
-    loadWebcams();
-  }, []);
 
   const filteredStations = useMemo(() => {
     if (!stations.length) return [];
@@ -193,7 +127,7 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
 
   const handleSignOut = () => {
     sessionStorage.removeItem('adminKey');
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   const handleTabChange = (value: string) => {
@@ -454,7 +388,11 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
                           ? sounding.images.map((s) => new Date(s.time))[sounding.images.length - 1]
                           : null;
                       return (
-                        <TableRow key={sounding.raspId}>
+                        <TableRow
+                          key={sounding._id}
+                          className="cursor-pointer"
+                          onClick={() => navigate(`/admin/soundings/${sounding._id}`)}
+                        >
                           <TableCell className="font-medium">{sounding.name}</TableCell>
                           <TableCell>
                             {sounding.raspRegion} - {sounding.raspId}

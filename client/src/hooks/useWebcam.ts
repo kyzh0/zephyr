@@ -1,201 +1,152 @@
-import { useEffect, useState, useCallback, useMemo, useSyncExternalStore } from 'react';
-import { getCamById, loadCamImages, listCams } from '@/services/cam.service';
+import { useMemo } from 'react';
+import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  addCam,
+  deleteCam,
+  getCamById,
+  listCams,
+  loadCamImages,
+  patchCam
+} from '@/services/cam.service';
 import type { ICam, ICamImage } from '@/models/cam.model';
-import { getDistance, handleError } from '@/lib/utils';
+import { getDistance, REFRESH_INTERVAL_MS } from '@/lib/utils';
 import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from '.';
+import { ApiError } from '@/services/api-error';
 
-// Module-level singleton cache for webcams
-let cachedWebcams: ICam[] | null = null;
-let cachedWebcamsError: Error | null = null;
-let cachedWebcamsLoading = false;
-let webcamsListeners: (() => void)[] = [];
+export const webcamKeys = {
+  all: ['webcams'] as const,
+  list: (opts?: { includeDisabled?: boolean }) =>
+    opts?.includeDisabled ? (['webcams', { includeDisabled: true }] as const) : webcamKeys.all,
+  detail: (id: string) => ['webcam', id] as const,
+  images: (id: string) => ['webcam-images', id] as const
+};
 
-async function fetchWebcamsAndNotify() {
-  cachedWebcamsLoading = true;
-  notifyWebcamsListeners();
-  try {
-    const result = await listCams();
-    cachedWebcams = result ?? [];
-    cachedWebcamsError = null;
-  } catch (err) {
-    cachedWebcamsError = handleError(err, 'Operation failed');
-    cachedWebcams = [];
-  } finally {
-    cachedWebcamsLoading = false;
-    notifyWebcamsListeners();
-  }
-}
-
-function notifyWebcamsListeners() {
-  webcamsListeners.forEach((fn) => fn());
-}
-
-interface UseWebcamOptions {
-  id?: string;
-  autoLoad?: boolean;
-}
+const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export interface UseWebcamResult {
   webcam: ICam | null;
-  images: ICamImage[];
   isLoading: boolean;
-  isStale: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
-  loadImages: () => Promise<void>;
 }
 
-/**
- * Hook for fetching and managing webcam data
- * @param options - Configuration options
- * @param options.id - Webcam ID to fetch. If not provided, no initial fetch occurs
- * @param options.autoLoad - Whether to automatically load images (default: true)
- * @returns Webcam data and control functions
- */
-export function useWebcam({ id, autoLoad = true }: UseWebcamOptions = {}): UseWebcamResult {
-  const [webcam, setWebcam] = useState<ICam | null>(null);
-  const [images, setImages] = useState<ICamImage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isStale, setIsStale] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+export interface UseWebcamWithImagesResult extends UseWebcamResult {
+  images: ICamImage[];
+  isStale: boolean;
+}
 
-  const loadImages = useCallback(async () => {
-    if (!id || !webcam) return;
+function sortImages(imgs: ICamImage[]): ICamImage[] {
+  return [...imgs].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+}
 
-    try {
-      const imgs = await loadCamImages(id);
-      if (imgs) {
-        imgs.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-        setImages(imgs);
-      }
-    } catch (err) {
-      setError(handleError(err, 'Failed to load webcam images'));
-    }
-  }, [id, webcam]);
-
-  const refetch = useCallback(async () => {
-    if (!id) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const cam = await getCamById(id);
-      if (!cam) {
-        throw new Error('Webcam not found');
-      }
-
-      setWebcam(cam);
-
-      // Check if webcam is stale (no images in last 24 hours)
-      const stale = Date.now() - new Date(cam.currentTime).getTime() >= 86400000;
-      setIsStale(stale);
-
-      // Load images if not stale and autoLoad is enabled
-      if (!stale && autoLoad) {
-        const imgs = await loadCamImages(id);
-        if (imgs) {
-          imgs.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-          setImages(imgs);
-        }
-      }
-    } catch (err) {
-      setError(handleError(err, 'Failed to load webcam data'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [id, autoLoad]);
-
-  // Initial fetch when id changes
-  useEffect(() => {
-    if (id) {
-      void refetch();
-    }
-  }, [id, refetch]);
+export function useWebcam(id: string | undefined): UseWebcamResult {
+  const webcamQuery = useQuery({
+    queryKey: webcamKeys.detail(id ?? ''),
+    queryFn: id ? () => getCamById(id) : skipToken,
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
+  });
 
   return {
-    webcam,
-    images,
-    isLoading,
+    webcam: webcamQuery.data ?? null,
+    isLoading: webcamQuery.isLoading,
+    error: webcamQuery.error ?? null
+  };
+}
+
+export function useWebcamWithImages(id: string | undefined): UseWebcamWithImagesResult {
+  const webcamQuery = useQuery({
+    queryKey: webcamKeys.detail(id ?? ''),
+    queryFn: id ? () => getCamById(id) : skipToken,
+    refetchInterval: REFRESH_INTERVAL_MS,
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
+  });
+
+  // Derive staleness from dataUpdatedAt
+  const isStale = useMemo(() => {
+    if (!webcamQuery.data) return false;
+    const camTime = new Date(webcamQuery.data.currentTime).getTime();
+    return webcamQuery.dataUpdatedAt - camTime >= STALE_THRESHOLD_MS;
+  }, [webcamQuery.data, webcamQuery.dataUpdatedAt]);
+
+  const imagesQuery = useQuery({
+    queryKey: webcamKeys.images(id ?? ''),
+    queryFn: async (): Promise<ICamImage[]> => {
+      const imgs = await loadCamImages(id!);
+      return sortImages(imgs);
+    },
+    enabled: !!id && !!webcamQuery.data && !isStale,
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
+  });
+
+  return {
+    webcam: webcamQuery.data ?? null,
+    images: imagesQuery.data ?? [],
+    isLoading: webcamQuery.isLoading || imagesQuery.isLoading,
     isStale,
-    error,
-    refetch,
-    loadImages
+    error: webcamQuery.error ?? imagesQuery.error ?? null
   };
 }
 
-function subscribeWebcams(callback: () => void) {
-  webcamsListeners.push(callback);
-  return () => {
-    webcamsListeners = webcamsListeners.filter((fn) => fn !== callback);
-  };
+interface UseWebcamsOptions {
+  includeDisabled?: boolean;
 }
 
-function getWebcamsSnapshot() {
-  return { webcams: cachedWebcams, error: cachedWebcamsError, isLoading: cachedWebcamsLoading };
-}
+export function useWebcams(options?: UseWebcamsOptions) {
+  const includeDisabled = options?.includeDisabled ?? false;
 
-// Keep a stable reference when the snapshot values haven't changed
-let lastWebcamsSnapshot = getWebcamsSnapshot();
-function getStableWebcamsSnapshot() {
-  const next = getWebcamsSnapshot();
-  if (
-    next.webcams === lastWebcamsSnapshot.webcams &&
-    next.error === lastWebcamsSnapshot.error &&
-    next.isLoading === lastWebcamsSnapshot.isLoading
-  ) {
-    return lastWebcamsSnapshot;
-  }
-  lastWebcamsSnapshot = next;
-  return next;
-}
-
-/**
- * Hook for fetching all webcams
- * @returns List of all webcams with loading and error states
- */
-export function useWebcams() {
-  const snapshot = useSyncExternalStore(subscribeWebcams, getStableWebcamsSnapshot);
-
-  // Fetch once if needed
-  useEffect(() => {
-    if (cachedWebcams === null && !cachedWebcamsLoading) {
-      fetchWebcamsAndNotify();
-    }
-  }, []);
-
-  const refetch = useCallback(async () => {
-    await fetchWebcamsAndNotify();
-  }, []);
+  const { data, isLoading, error } = useQuery({
+    queryKey: webcamKeys.list(includeDisabled ? { includeDisabled } : undefined),
+    queryFn: () => listCams(includeDisabled),
+    refetchInterval: REFRESH_INTERVAL_MS
+  });
 
   return {
-    webcams: snapshot.webcams ?? [],
-    isLoading: snapshot.isLoading || snapshot.webcams === null,
-    error: snapshot.error,
-    refetch
+    webcams: data ?? [],
+    isLoading,
+    error
   };
 }
 
-/**
- * Hook for fetching nearby webcams filtered by distance
- * @param options - Configuration options
- * @param options.latitude - Center point latitude
- * @param options.longitude - Center point longitude
- * @param options.maxDistance - Maximum distance in meters (default: 5000m / 5km)
- * @param options.limit - Maximum number of results to return
- * @returns Nearby webcams sorted by distance with loading and error states
- */
+export function useAddWebcam() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: addCam,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: webcamKeys.all })
+  });
+}
+
+export function useUpdateWebcam() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Parameters<typeof patchCam>[1] }) =>
+      patchCam(id, updates),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: webcamKeys.all });
+      queryClient.invalidateQueries({ queryKey: webcamKeys.detail(id) });
+    }
+  });
+}
+
+export function useDeleteWebcam() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteCam,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: webcamKeys.all });
+      queryClient.removeQueries({ queryKey: webcamKeys.detail(id) });
+      queryClient.removeQueries({ queryKey: webcamKeys.images(id) });
+    }
+  });
+}
+
 export function useNearbyWebcams({
   lat,
   lon,
   maxDistance = 5000,
   limit
 }: UseNearbyLocationsOptions): UseNearbyLocationsResult<ICam> {
-  const { webcams: allWebcams, isLoading, error, refetch } = useWebcams();
+  const { webcams: allWebcams, isLoading, error } = useWebcams();
 
-  // Filter and sort webcams by distance
   const nearbyWebcams = useMemo(() => {
-    // Don't compute if webcams haven't loaded yet or coordinates are invalid
     if (isLoading || !allWebcams?.length || (lat === 0 && lon === 0)) {
       return [];
     }
@@ -208,10 +159,7 @@ export function useNearbyWebcams({
           cam.location.coordinates[0],
           cam.location.coordinates[1]
         );
-        return {
-          data: cam,
-          distance
-        };
+        return { data: cam, distance };
       })
       .filter((cam) => cam.distance <= maxDistance)
       .sort((a, b) => a.distance - b.distance);
@@ -222,7 +170,6 @@ export function useNearbyWebcams({
   return {
     data: nearbyWebcams,
     isLoading,
-    error,
-    refetch
+    error
   };
 }

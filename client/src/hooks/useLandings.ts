@@ -1,78 +1,99 @@
-import { useEffect, useState, useCallback } from 'react';
-import { listLandings } from '@/services/landing.service';
+import { useMemo } from 'react';
+import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  addLanding,
+  deleteLanding,
+  getLandingById,
+  listLandings,
+  updateLanding
+} from '@/services/landing.service';
+import { ApiError } from '@/services/api-error';
 import type { ILanding } from '@/models/landing.model';
-import { handleError } from '@/lib/utils';
 
-// Module-level singleton cache for landings
-let cachedLandings: ILanding[] | null = null;
-let cachedError: Error | null = null;
-let cachedLoading = false;
-let listeners: (() => void)[] = [];
-
-async function fetchLandingsAndNotify() {
-  cachedLoading = true;
-  notifyListeners();
-  try {
-    const result = await listLandings();
-    cachedLandings = result ?? [];
-    cachedError = null;
-  } catch (err) {
-    cachedError = handleError(err, 'Operation failed');
-    cachedLandings = [];
-  } finally {
-    cachedLoading = false;
-    notifyListeners();
-  }
-}
-
-function notifyListeners() {
-  listeners.forEach((fn) => fn());
-}
-
-interface UseLandingsOptions {
-  autoLoad?: boolean;
-}
+export const landingKeys = {
+  all: ['landings'] as const,
+  list: (opts?: { includeDisabled?: boolean }) =>
+    opts?.includeDisabled ? (['landings', { includeDisabled: true }] as const) : landingKeys.all,
+  detail: (id: string) => ['landing', id] as const
+};
 
 export interface UseLandingsResult {
   landings: ILanding[];
   isLoading: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
 }
 
-/**
- * Hook for fetching all landings
- * @param options - Configuration options
- * @param options.autoLoad - Whether to automatically load landings (default: true)
- * @returns All landings with loading and error states
- */
-export function useLandings({ autoLoad = true }: UseLandingsOptions = {}): UseLandingsResult {
-  const [, forceUpdate] = useState(0);
+interface UseLandingsOptions {
+  includeDisabled?: boolean;
+}
 
-  // Subscribe to cache updates
-  useEffect(() => {
-    const update = () => forceUpdate((n) => n + 1);
-    listeners.push(update);
-    return () => {
-      listeners = listeners.filter((fn) => fn !== update);
-    };
-  }, []);
+export function useLandings(options?: UseLandingsOptions): UseLandingsResult {
+  const includeDisabled = options?.includeDisabled ?? false;
 
-  // Fetch once if needed
-  useEffect(() => {
-    if (autoLoad && cachedLandings === null && !cachedLoading) {
-      fetchLandingsAndNotify();
-    }
-  }, [autoLoad]);
+  const { data, isLoading, error } = useQuery({
+    queryKey: landingKeys.list(includeDisabled ? { includeDisabled } : undefined),
+    queryFn: () => listLandings(includeDisabled)
+  });
 
-  const refetch = useCallback(async () => {
-    await fetchLandingsAndNotify();
-  }, []);
+  const landings = useMemo(
+    () => [...(data ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+    [data]
+  );
 
   return {
-    landings: cachedLandings ?? [],
-    isLoading: cachedLoading || cachedLandings === null,
-    error: cachedError,
-    refetch
+    landings,
+    isLoading,
+    error
   };
+}
+
+interface UseLandingResult {
+  landing: ILanding | null;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export function useLanding(id: string | undefined): UseLandingResult {
+  const { data, isLoading, error } = useQuery({
+    queryKey: landingKeys.detail(id ?? ''),
+    queryFn: id ? () => getLandingById(id) : skipToken,
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
+  });
+
+  return {
+    landing: data ?? null,
+    isLoading,
+    error
+  };
+}
+
+export function useAddLanding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: addLanding,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: landingKeys.all })
+  });
+}
+
+export function useUpdateLanding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<ILanding> }) =>
+      updateLanding(id, updates),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: landingKeys.all });
+      queryClient.invalidateQueries({ queryKey: landingKeys.detail(id) });
+    }
+  });
+}
+
+export function useDeleteLanding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteLanding,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: landingKeys.all });
+      queryClient.removeQueries({ queryKey: landingKeys.detail(id) });
+    }
+  });
 }

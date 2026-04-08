@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useWebcam } from '@/hooks';
-import { getWebcamTypeName } from '@/lib/utils';
 import { formatInTimeZone } from 'date-fns-tz';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+import SEO from '@/components/SEO';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import SEO from '@/components/SEO';
+
+import { getWebcamTypeName } from '@/lib/utils';
+import { useWebcamWithImages } from '@/hooks';
+import { ApiError } from '@/services/api-error';
 
 export default function Webcam() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { webcam, images, isStale, error } = useWebcam({ id });
+  const { webcam, images, isStale, error } = useWebcamWithImages(id);
   const [index, setIndex] = useState(0);
 
   // Set index to last image when images load
@@ -25,9 +28,7 @@ export default function Webcam() {
 
   // Navigate back if webcam not found
   useEffect(() => {
-    if (error) {
-      navigate(-1);
-    }
+    if (error instanceof ApiError && error.status === 404) navigate('/', { replace: true });
   }, [error, navigate]);
 
   return (
@@ -92,7 +93,7 @@ export default function Webcam() {
           )}
         </div>
 
-        {webcam && (
+        {webcam && webcam.type !== 'metservice' && (
           <div className="flex items-center justify-end">
             <a
               href={webcam.externalLink}

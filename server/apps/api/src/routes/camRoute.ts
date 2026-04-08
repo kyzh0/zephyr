@@ -7,7 +7,6 @@ import { User, Cam, CamAttrs, type CamImage } from '@zephyr/shared';
 const router = express.Router();
 
 type CamsListQuery = {
-  unixTimeFrom?: string;
   includeDisabled?: string;
 };
 
@@ -46,14 +45,9 @@ type CamImagesAggResult = {
 router.get(
   '/',
   async (req: Request<Record<string, never>, unknown, unknown, CamsListQuery>, res: Response) => {
-    const time = Number(req.query.unixTimeFrom);
-
     const query: QueryFilter<CamAttrs> = {};
     if (String(req.query.includeDisabled).toLowerCase() !== 'true') {
       query.isDisabled = { $ne: true };
-    }
-    if (time) {
-      query.lastUpdate = { $gte: new Date(time * 1000) };
     }
 
     const cams = await Cam.find(query, { images: 0 }).sort({ currentTime: 1 }).lean();
@@ -164,6 +158,33 @@ router.patch(
     } catch (err) {
       res.status(500).json(err);
     }
+  }
+);
+
+router.delete(
+  '/:id',
+  async (req: Request<IdParams, unknown, unknown, ApiKeyQuery>, res: Response) => {
+    const user = await User.findOne({ key: req.query.key }).lean();
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
+
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const cam = await Cam.findOne({ _id: new ObjectId(id) }).lean();
+    if (!cam) {
+      res.sendStatus(404);
+      return;
+    }
+
+    await Cam.deleteOne({ _id: new ObjectId(id) });
+    res.sendStatus(204);
   }
 );
 

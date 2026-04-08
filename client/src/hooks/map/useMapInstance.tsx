@@ -4,9 +4,14 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { getStoredValue, setStoredValue } from '@/components/map';
 
+mapboxgl.accessToken = (
+  Math.random() > 0.5
+    ? import.meta.env.VITE_MAPBOX_GL_KEY
+    : import.meta.env.VITE_MAPBOX_GL_KEY_BACKUP
+) as string;
+
 interface UseMapInstanceOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
-  onLoad?: () => void;
 }
 
 interface UseMapInstanceReturn {
@@ -16,13 +21,9 @@ interface UseMapInstanceReturn {
   triggerGeolocate: () => Promise<void>;
 }
 
-export function useMapInstance({
-  containerRef,
-  onLoad
-}: UseMapInstanceOptions): UseMapInstanceReturn {
+export function useMapInstance({ containerRef }: UseMapInstanceOptions): UseMapInstanceReturn {
   const map = useRef<mapboxgl.Map | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const posInitRef = useRef(false);
 
   // Load saved map position and zoom
   const lon = getStoredValue('lon', 172.5);
@@ -31,17 +32,14 @@ export function useMapInstance({
     getStoredValue('zoom', window.innerWidth > 1000 ? 5.1 : 4.3)
   );
 
-  // Map initialization
+  // Map initialization — runs once. lon/lat/zoom are initial values, not reactive.
   useEffect(() => {
-    if (map.current || !containerRef.current) return;
+    if (!containerRef.current) return;
 
-    const evenDay = new Date().getDate() % 2 === 0;
-    mapboxgl.accessToken = (
-      evenDay ? import.meta.env.VITE_MAPBOX_GL_KEY : import.meta.env.VITE_MAPBOX_GL_KEY_BACKUP
-    ) as string;
+    const container = containerRef.current;
 
     map.current = new mapboxgl.Map({
-      container: containerRef.current,
+      container,
       style: 'mapbox://styles/mapbox/outdoors-v11',
       center: [lon, lat],
       zoom,
@@ -53,8 +51,9 @@ export function useMapInstance({
     map.current.touchZoomRotate.disableRotation();
 
     map.current.on('load', () => {
+      if (!map.current) return;
+      map.current.resize();
       setIsLoaded(true);
-      onLoad?.();
     });
 
     map.current.on('move', () => {
@@ -63,14 +62,18 @@ export function useMapInstance({
       setStoredValue('lon', Number(map.current.getCenter().lng.toFixed(4)));
       setStoredValue('lat', Number(map.current.getCenter().lat.toFixed(4)));
     });
-  }, [containerRef, lon, lat, zoom, onLoad]);
 
-  // Fly to saved position after load
-  useEffect(() => {
-    if (posInitRef.current || !map.current) return;
-    map.current.flyTo({ center: [lon, lat], zoom });
-    posInitRef.current = true;
-  }, [lon, lat, zoom]);
+    // Resize map when container dimensions change (e.g. flex layout settling)
+    const ro = new ResizeObserver(() => map.current?.resize());
+    ro.observe(container);
+
+    return () => {
+      ro.disconnect();
+      map.current?.remove();
+      map.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Persist zoom to localStorage when it changes from map interaction
   useEffect(() => {

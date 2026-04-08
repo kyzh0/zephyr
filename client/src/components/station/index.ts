@@ -13,7 +13,6 @@ export type { ExtendedStationData, WindUnit } from './types';
 // Utils
 export {
   getDirectionColor,
-  getUnit,
   convertWindSpeed,
   formatTemperature,
   parseValidBearings

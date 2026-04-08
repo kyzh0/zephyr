@@ -41,9 +41,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
+
 import { DONATION_REGIONS, type IDonation } from '@/models/donation.model';
-import { createDonation, deleteDonation } from '@/services/donation.service';
-import { useDonations } from '@/hooks/useDonations';
+import { useAddDonation, useDeleteDonation, useDonations } from '@/hooks';
+import { ApiError } from '@/services/api-error';
 
 const formSchema = z.object({
   donorName: z.string().min(1, 'Name is required'),
@@ -65,7 +66,9 @@ interface DonorGroup {
 }
 
 export function AdminDonationsPanel() {
-  const { donations, loading, refetch } = useDonations();
+  const { donations, isLoading } = useDonations();
+  const addMutation = useAddDonation();
+  const deleteMutation = useDeleteDonation();
   const [donationSearch, setDonationSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -111,37 +114,44 @@ export function AdminDonationsPanel() {
     }
   });
 
-  async function onAdd(values: FormValues) {
-    const ok = await createDonation({
-      donorName: values.donorName.trim(),
-      amount: Number(values.amount),
-      donatedAt: new Date(values.donatedAt + 'T12:00:00').toISOString(),
-      region: values.region
-    });
-    if (!ok) {
-      toast.error('Failed to add donation');
-      return;
-    }
-    toast.success('Donation added');
-    form.reset({
-      donorName: '',
-      amount: '',
-      donatedAt: new Date().toLocaleDateString('en-NZ'),
-      region: 'Unknown'
-    });
-    await refetch();
+  function onAdd(values: FormValues) {
+    addMutation.mutate(
+      {
+        donorName: values.donorName.trim(),
+        amount: Number(values.amount),
+        donatedAt: new Date(values.donatedAt + 'T12:00:00').toISOString(),
+        region: values.region
+      },
+      {
+        onSuccess: () => {
+          toast.success('Donation added');
+          form.reset({
+            donorName: '',
+            amount: '',
+            donatedAt: new Date().toLocaleDateString('en-NZ'),
+            region: 'Unknown'
+          });
+        },
+        onError: (error) => {
+          const msg = error instanceof ApiError ? error.message : 'Unknown error';
+          toast.error('Failed to add donation: ' + msg);
+        }
+      }
+    );
   }
 
-  async function confirmDelete() {
+  function confirmDelete() {
     if (!deleteId) return;
-    const ok = await deleteDonation(deleteId);
-    setDeleteId(null);
-    if (!ok) {
-      toast.error('Failed to delete');
-      return;
-    }
-    toast.success('Donation removed');
-    await refetch();
+    deleteMutation.mutate(deleteId, {
+      onSuccess: () => {
+        setDeleteId(null);
+        toast.success('Donation removed');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error('Failed to delete donation: ' + msg);
+      }
+    });
   }
 
   return (
@@ -219,7 +229,10 @@ export function AdminDonationsPanel() {
                 )}
               />
               <div className="sm:col-span-2">
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={addMutation.isPending || isLoading}>
+                  {(addMutation.isPending || isLoading) && (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  )}
                   Add donation
                 </Button>
               </div>
@@ -239,7 +252,7 @@ export function AdminDonationsPanel() {
             />
           </div>
 
-          {loading ? (
+          {isLoading ? (
             <p className="text-muted-foreground">
               <Loader2 className="inline h-4 w-4 animate-spin mr-2" />
               Loading...

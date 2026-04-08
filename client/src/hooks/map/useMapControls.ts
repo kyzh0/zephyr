@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
-import type { RefObject, Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { toast } from 'sonner';
-import { getStoredValue, setStoredValue } from '@/components/map/map.utils';
+import { usePersistedState } from '@/hooks';
 import type { MapControlsState, MapOverlay, WindUnit } from '@/components/map/map.types';
 
 function getSnapshotTime(offset: number): Date {
@@ -16,7 +16,7 @@ function getSnapshotTime(offset: number): Date {
 }
 
 export interface UseMapControlsParams {
-  map: RefObject<{ setStyle: (style: string) => void } | null>;
+  map: React.RefObject<{ setStyle: (style: string) => void } | null>;
   triggerGeolocate: () => Promise<void>;
   flyingMode: boolean;
   // historyOffset is owned by Map.tsx so marker hooks can read it reactively
@@ -25,8 +25,6 @@ export interface UseMapControlsParams {
   setLandingTransparent: (visible: boolean) => void;
   setStationMarkersInteractive: (interactive: boolean) => void;
   setSiteDirectionFilter: (bearing: number | null) => void;
-  refreshWebcams: () => Promise<void>;
-  refreshSoundings: () => Promise<void>;
   renderHistoricalData: ((time: Date) => Promise<void>) | undefined;
   renderCurrentData: (() => Promise<void>) | undefined;
 }
@@ -40,47 +38,29 @@ export function useMapControls({
   setLandingTransparent,
   setStationMarkersInteractive,
   setSiteDirectionFilter,
-  refreshWebcams,
-  refreshSoundings,
   renderHistoricalData,
   renderCurrentData
 }: UseMapControlsParams): MapControlsState {
-  const [viewMode, setViewMode] = useState<'stations' | 'sites'>(() =>
-    getStoredValue<'stations' | 'sites'>('viewMode', 'stations')
-  );
-  const [unit, setUnit] = useState<WindUnit>(() => getStoredValue<WindUnit>('unit', 'kmh'));
+  const [viewMode, setViewMode] = usePersistedState<'stations' | 'sites'>('viewMode', 'stations');
+  const [unit, setUnit] = usePersistedState<WindUnit>('unit', 'kmh');
   const [isSatellite, setIsSatellite] = useState(false);
   const [stationElevationFilter, setStationElevationFilter] = useState(0);
-  const [minimizeRecents, setMinimizeRecents] = useState(() =>
-    getStoredValue('minimizeRecents', true)
-  );
+  const [minimizeRecents, setMinimizeRecents] = usePersistedState('minimizeRecents', true);
   const [selectedSiteDirection, setSelectedSiteDirection] = useState<number | null>(null);
 
   const historyFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isHistoricData = historyOffset < 0;
 
-  const [overlay, setOverlay] = useState<MapOverlay>(() => {
-    if (getStoredValue('showWebcams', false)) return 'webcams';
-    if (getStoredValue('showSoundings', false)) return 'soundings';
-    return null;
-  });
+  const [overlay, setOverlay] = usePersistedState<MapOverlay>('overlay', null);
 
-  const onWebcamClick = useCallback(async () => {
-    const newOverlay: MapOverlay = overlay === 'webcams' ? null : 'webcams';
-    setOverlay(newOverlay);
-    setStoredValue('showWebcams', newOverlay === 'webcams');
-    setStoredValue('showSoundings', false);
-    if (newOverlay === 'webcams') await refreshWebcams();
-  }, [overlay, setOverlay, refreshWebcams]);
+  const onWebcamClick = useCallback(() => {
+    setOverlay((prev) => (prev === 'webcams' ? null : 'webcams'));
+  }, [setOverlay]);
 
-  const onSoundingClick = useCallback(async () => {
-    const newOverlay: MapOverlay = overlay === 'soundings' ? null : 'soundings';
-    setOverlay(newOverlay);
-    setStoredValue('showSoundings', newOverlay === 'soundings');
-    setStoredValue('showWebcams', false);
-    if (newOverlay === 'soundings') await refreshSoundings();
-  }, [overlay, setOverlay, refreshSoundings]);
+  const onSoundingClick = useCallback(() => {
+    setOverlay((prev) => (prev === 'soundings' ? null : 'soundings'));
+  }, [setOverlay]);
 
   const onLayerToggle = useCallback(() => {
     if (!map.current) return;
@@ -96,9 +76,8 @@ export function useMapControls({
   const onUnitToggle = useCallback(() => {
     const newUnit: WindUnit = unit === 'kmh' ? 'kt' : 'kmh';
     setUnit(newUnit);
-    setStoredValue('unit', newUnit);
     toast.info(`Switched to ${newUnit === 'kmh' ? 'km/h' : 'knots'}`);
-  }, [unit]);
+  }, [unit, setUnit]);
 
   const onHistoryChange = useCallback(
     async (offset: number) => {
@@ -107,8 +86,6 @@ export function useMapControls({
 
       if (enteringHistoryMode) {
         setOverlay(null);
-        setStoredValue('showWebcams', false);
-        setStoredValue('showSoundings', false);
         setStationMarkersInteractive(false);
       } else if (exitingHistoryMode) {
         setStationMarkersInteractive(true);
@@ -145,10 +122,8 @@ export function useMapControls({
   );
 
   const onRecentsToggle = useCallback(() => {
-    const newValue = !minimizeRecents;
-    setMinimizeRecents(newValue);
-    setStoredValue('minimizeRecents', newValue);
-  }, [minimizeRecents]);
+    setMinimizeRecents((prev) => !prev);
+  }, [setMinimizeRecents]);
 
   const onSiteDirectionFilterChange = useCallback(
     (bearing: number | null) => {
@@ -159,11 +134,12 @@ export function useMapControls({
     [setSiteDirectionFilter, setLandingTransparent]
   );
 
-  const onToggleViewMode = useCallback((mode: 'stations' | 'sites') => {
-    // Visibility is controlled by localstorage
-    setViewMode(mode);
-    setStoredValue('viewMode', mode);
-  }, []);
+  const onToggleViewMode = useCallback(
+    (mode: 'stations' | 'sites') => {
+      setViewMode(mode);
+    },
+    [setViewMode]
+  );
 
   return {
     overlay,

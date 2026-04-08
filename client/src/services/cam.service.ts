@@ -1,63 +1,50 @@
 import type { ICam, ICamImage } from '@/models/cam.model';
+import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
-export const getCamById = async (id: string) => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/cams/${id}`);
-    return (await res.json()) as ICam;
-  } catch (error) {
-    console.error(error);
-  }
-};
+export async function getCamById(id: string) {
+  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/cams/${id}`);
+  await throwIfNotOk(res);
+  return (await res.json()) as ICam;
+}
 
-export const listCams = async (includeDisabled?: boolean) => {
-  try {
-    let url = `${import.meta.env.VITE_API_PREFIX}/cams`;
-    if (includeDisabled) {
-      url += '?includeDisabled=true';
-    }
-    const res = await fetch(url);
-    return (await res.json()) as ICam[];
-  } catch (error) {
-    console.error(error);
+export async function listCams(includeDisabled?: boolean) {
+  let url = `${import.meta.env.VITE_API_PREFIX}/cams`;
+  if (includeDisabled) {
+    url += '?includeDisabled=true';
   }
-};
-
-export async function listCamsUpdatedSince(unixTime: number, includeDisabled?: boolean) {
-  try {
-    let url = `${import.meta.env.VITE_API_PREFIX}/cams?unixTimeFrom=${unixTime}`;
-    if (includeDisabled) {
-      url += '&includeDisabled=true';
-    }
-    const res = await fetch(url);
-    return (await res.json()) as ICam[];
-  } catch (error) {
-    console.error(error);
-  }
+  const res = await fetch(url);
+  await throwIfNotOk(res);
+  return (await res.json()) as ICam[];
 }
 
 export async function loadCamImages(id: string) {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/cams/${id}/images`);
-    return (await res.json()) as ICamImage[];
-  } catch (error) {
-    console.error(error);
-  }
+  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/cams/${id}/images`);
+  await throwIfNotOk(res);
+  return (await res.json()) as ICamImage[];
 }
 
-export async function addCam(cam: Partial<ICam>) {
-  try {
-    const key = sessionStorage.getItem('adminKey') ?? '';
-    const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/cams?key=${key}`, {
+export async function addCam(cam: Partial<ICam>): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/cams?${getKeyQueryThrowIfInvalid()}`,
+    {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(cam)
-    });
-    return (await res.json()) as ICam;
-  } catch (error) {
-    console.error(error);
-  }
+    }
+  );
+  await throwIfNotOk(res);
+}
+
+export async function deleteCam(id: string): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/cams/${id}?${getKeyQueryThrowIfInvalid()}`,
+    {
+      method: 'DELETE'
+    }
+  );
+  await throwIfNotOk(res);
 }
 
 export async function patchCam(
@@ -69,21 +56,17 @@ export async function patchCam(
     externalLink?: string;
     externalId?: string;
     isDisabled?: boolean;
-  },
-  key: string
-) {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/cams/${id}?key=${key}`, {
+  }
+): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/cams/${id}?${getKeyQueryThrowIfInvalid()}`,
+    {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(updates)
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return (await res.json()) as ICam;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+    }
+  );
+  await throwIfNotOk(res);
 }

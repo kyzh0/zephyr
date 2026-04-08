@@ -3,11 +3,13 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { formatInTimeZone } from 'date-fns-tz';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 
-import { getButtonStyle, getIconStyle, getMinutesAgo, getStationTypeName } from '@/lib/utils';
-import { useStationData, useIsMobile, type TimeRange } from '@/hooks';
-import { useAppContext } from '@/context/AppContext';
-import { useNearbyWebcams } from '@/hooks/useWebcam';
-import { useNearbySites } from '@/hooks/useSites';
+import SEO from '@/components/SEO';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { addRecentStation } from '@/services/recent-stations.service';
+import { WebcamPreview } from '@/components/webcam/WebcamPreview';
 import {
   CurrentConditions,
   StationDataTable,
@@ -16,13 +18,17 @@ import {
   InfoPopup,
   Skeleton
 } from '@/components/station';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { addRecentStation } from '@/services/recentStations.service';
-import { WebcamPreview } from '@/components/webcam/WebcamPreview';
-import SEO from '@/components/SEO';
+
+import { getButtonStyle, getIconStyle, getMinutesAgo, getStationTypeName } from '@/lib/utils';
+import {
+  useStationData,
+  useIsMobile,
+  useNearbyWebcams,
+  useNearbySites,
+  type TimeRange
+} from '@/hooks';
+import { ApiError } from '@/services/api-error';
+import { useAppContext } from '@/context/AppContext';
 
 export default function Station() {
   const { id } = useParams<{ id: string }>();
@@ -32,7 +38,12 @@ export default function Station() {
 
   const [timeRange, setTimeRange] = useState<TimeRange>('6');
 
-  const { station, data, tableData, bearingPairCount } = useStationData(id, timeRange);
+  const { station, data, tableData, bearingPairCount, error } = useStationData(id, timeRange);
+
+  // Navigate back if station not found
+  useEffect(() => {
+    if (error instanceof ApiError && error.status === 404) navigate('/', { replace: true });
+  }, [error, navigate]);
 
   const { data: nearbyWebcamData } = useNearbyWebcams({
     lon: station?.location.coordinates[0] ?? 0,
@@ -119,6 +130,13 @@ export default function Station() {
       {station ? (
         station.isOffline ? null : data.length > 0 && tableData.length > 0 ? (
           <>
+            <StationDataTable
+              ref={tableRef}
+              tableData={tableData}
+              validBearings={station.validBearings}
+            />
+            <WindSpeedChart data={data} />
+            <WindDirectionChart data={data} bearingPairCount={bearingPairCount} />
             <div className="flex flex-row items-center justify-end text-xs sm:text-sm text-muted-foreground gap-2 sm:gap-4">
               Showing data for last{' '}
               <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
@@ -138,13 +156,6 @@ export default function Station() {
                 </TabsList>
               </Tabs>
             </div>
-            <StationDataTable
-              ref={tableRef}
-              tableData={tableData}
-              validBearings={station.validBearings}
-            />
-            <WindSpeedChart data={data} />
-            <WindDirectionChart data={data} bearingPairCount={bearingPairCount} />
           </>
         ) : (
           <Skeleton width="100%" height={400} className="mt-4" />
@@ -220,14 +231,16 @@ export default function Station() {
             {getMinutesAgo(new Date(station.lastUpdate))}
             {')'}
           </p>
-          <a
-            href={station.externalLink}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs sm:text-sm text-muted-foreground hover:underline"
-          >
-            Source: {getStationTypeName(station.type)}
-          </a>
+          {station.type !== 'metservice' && (
+            <a
+              href={station.externalLink}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs sm:text-sm text-muted-foreground hover:underline"
+            >
+              Source: {getStationTypeName(station.type)}
+            </a>
+          )}
         </div>
       )}
     </div>

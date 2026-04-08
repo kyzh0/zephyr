@@ -3,7 +3,9 @@ import { cn, getTextColor, getWindColorForSport, getWindDirectionFromBearing } f
 import { useAppContext } from '@/context/AppContext';
 import type { IStation } from '@/models/station.model';
 import { WindCompass } from './WindCompass';
-import { convertWindSpeed, formatTemperature, getUnit } from './utils';
+import { usePersistedState } from '@/hooks';
+import { convertWindSpeed, formatTemperature } from './utils';
+import type { WindUnit } from './types';
 
 interface CurrentConditionsProps {
   station: IStation;
@@ -19,7 +21,7 @@ export function CurrentConditions({
   onInfoIconClick,
   onInfoIconHover
 }: CurrentConditionsProps) {
-  const unit = getUnit();
+  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
   const { sport } = useAppContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState<{

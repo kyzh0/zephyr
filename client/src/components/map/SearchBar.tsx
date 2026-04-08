@@ -1,21 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, Camera } from 'lucide-react';
+
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { listStations } from '@/services/station.service';
-import { listCams } from '@/services/cam.service';
+import { SiteMarker } from './SiteMarker';
+import { LandingMarker } from './LandingMarker';
+import { StationMarker } from './StationMarker';
+
+import { cn } from '@/lib/utils';
+import type { WindUnit } from '../station';
 import type { IStation } from '@/models/station.model';
 import type { ISite } from '@/models/site.model';
 import type { ILanding } from '@/models/landing.model';
 import type { ICam } from '@/models/cam.model';
-import { useSites } from '@/hooks/useSites';
-import { useLandings } from '@/hooks/useLandings';
-import { cn } from '@/lib/utils';
-import { SiteMarker } from './SiteMarker';
-import { LandingMarker } from './LandingMarker';
-import { StationMarker } from './StationMarker';
-import { getUnit } from '../station';
+import { useStations, useWebcams, useSites, useLandings, usePersistedState } from '@/hooks';
 import { useAppContext } from '@/context/AppContext';
 
 interface SearchBarProps {
@@ -31,33 +30,18 @@ type SearchResult =
 
 export function SearchBar({ className, disabled }: SearchBarProps) {
   const navigate = useNavigate();
-  const unit = getUnit();
+  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
   const { sport } = useAppContext();
   const [isExpanded, setIsExpanded] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [stations, setStations] = useState<IStation[]>([]);
-  const [webcams, setWebcams] = useState<ICam[]>([]);
+  const { stations } = useStations();
+  const { webcams } = useWebcams();
   const { sites } = useSites();
   const { landings } = useLandings();
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Load stations and webcams on mount
-  useEffect(() => {
-    const loadData = async () => {
-      const stationsData = await listStations(false);
-      if (stationsData) {
-        setStations(stationsData);
-      }
-      const webcamsData = await listCams();
-      if (webcamsData) {
-        setWebcams(webcamsData);
-      }
-    };
-    void loadData();
-  }, []);
 
   // Filter stations, webcams, and sites based on query
   useEffect(() => {

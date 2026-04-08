@@ -129,15 +129,21 @@
   display: none;
 }
 
-/* Webcam and sounding overlays */
-.webcam {
-  z-index: 10;
-}
-
 .mapboxgl-ctrl-logo {
   display: none !important;
 }
 
 .mapboxgl-popup {
   z-index: 10000 !important;
+}
+
+.mapboxgl-popup-content {
+  max-width: 150px;
+  text-wrap: balance;
+  border-radius: 8px !important;
+  padding: 10px !important;
+}
+
+.mapboxgl-popup-tip {
+  border-width: 6px !important;
 }

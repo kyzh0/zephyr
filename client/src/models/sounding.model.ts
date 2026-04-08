@@ -1,6 +1,7 @@
 import type { ILocation } from './location.model';
 
 interface ISounding {
+  _id: string;
   name: string;
   location: ILocation;
   raspRegion: string;

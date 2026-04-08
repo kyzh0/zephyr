@@ -2,16 +2,12 @@ import type { SportType } from '@/components/map';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-export const REFRESH_INTERVAL_MS = 60 * 1000;
+/** Standard polling interval for live data  */
+export const REFRESH_INTERVAL_MS = 60_000;
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-// Common error handling utility
-export const handleError = (err: unknown, defaultMessage: string): Error => {
-  return err instanceof Error ? err : new Error(defaultMessage);
-};
 
 export const getWindDirectionFromBearing = (bearing: number) => {
   if (bearing < 0) {
@@ -382,8 +378,7 @@ export const isWindBearingInRange = (
 
 export const lookupElevation = async (lat: number, lon: number): Promise<number> => {
   const response = await fetch(
-    `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`,
-    { method: 'GET' }
+    `${import.meta.env.VITE_API_PREFIX}/elevation?lat=${lat}&lon=${lon}`
   );
 
   if (!response.ok) {
@@ -391,14 +386,20 @@ export const lookupElevation = async (lat: number, lon: number): Promise<number>
   }
 
   const data = (await response.json()) as {
-    elevation: number[];
+    results: { elevation: number }[];
+    status: string;
   };
 
-  if (!data.elevation?.length) {
+  if (data.status !== 'OK' || !data.results?.length) {
     throw new Error('No elevation data returned');
   }
 
-  return Math.round(data.elevation[0]);
+  const elevation = data.results[0].elevation;
+  if (elevation === null || elevation === undefined) {
+    throw new Error('Elevation not available for this location');
+  }
+
+  return Math.round(elevation);
 };
 
 export const getButtonStyle = (flyingMode: boolean) =>

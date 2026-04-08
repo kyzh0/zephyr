@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Copy, Loader2, Medal } from 'lucide-react';
 import { toast } from 'sonner';
@@ -18,8 +17,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { fetchRecognitionLeaderboard } from '@/services/donation.service';
-import type { LeaderboardDonorRow, LeaderboardRegionRow } from '@/models/donation.model';
+import { useLeaderboard } from '@/hooks';
 
 function PlaceMedal({ rank }: { rank: number }) {
   if (rank > 2) return null;
@@ -38,36 +36,14 @@ export default function DonateDialog() {
 
   const bankAccount = (import.meta.env.VITE_DONATION_BANK_ACCOUNT ?? '') as string;
 
-  const [boardLoading, setBoardLoading] = useState(false);
-  const [donors, setDonors] = useState<LeaderboardDonorRow[]>([]);
-  const [regions, setRegions] = useState<LeaderboardRegionRow[]>([]);
-  const [boardError, setBoardError] = useState<string | null>(null);
+  const { data: leaderboard, isLoading: boardLoading, error: boardError } = useLeaderboard();
+  const donors = leaderboard?.donors ?? [];
+  const regions = leaderboard?.regions ?? [];
+  const error =
+    boardError || (!boardLoading && !leaderboard) ? 'Could not load recognition boards.' : null;
 
   const topDonors = donors.slice(0, 3);
   const remainingDonors = donors.slice(3);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setBoardLoading(true);
-      setBoardError(null);
-      const data = await fetchRecognitionLeaderboard();
-      if (cancelled) return;
-      if (!data) {
-        setBoardError('Could not load recognition boards.');
-        setDonors([]);
-        setRegions([]);
-      } else {
-        setDonors(data.donors);
-        setRegions(data.regions);
-      }
-      setBoardLoading(false);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const handleCopy = async () => {
     if (bankAccount) {
@@ -78,17 +54,14 @@ export default function DonateDialog() {
 
   return (
     <Dialog open onOpenChange={() => navigate('/')}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto text-center">
+      <DialogContent
+        className="sm:max-w-4xl max-h-[90vh] overflow-y-auto text-center"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader className="text-center sm:text-center space-y-0">
           <DialogTitle className="text-xl text-center w-full">Donate</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 text-center items-center">
-          {/* hide focus on load */}
-          <Button
-            style={{ width: 0, height: 0, opacity: 0, position: 'absolute' }}
-            aria-hidden
-            tabIndex={0}
-          />
           <DialogDescription className="text-center">
             Zephyr will always be free and available for the New Zealand free-flying community.
           </DialogDescription>
@@ -115,8 +88,8 @@ export default function DonateDialog() {
             <div className="flex justify-center py-8 w-full">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : boardError ? (
-            <p className="text-sm text-destructive text-center w-full">{boardError}</p>
+          ) : error ? (
+            <p className="text-sm text-destructive text-center w-full">{error}</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 pt-2 w-full">
               <section className="space-y-2 w-full">

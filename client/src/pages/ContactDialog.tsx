@@ -58,7 +58,7 @@ export default function ContactDialog() {
       );
 
       setSuccess(true);
-      toast.success('Thanks for your feedback!');
+      toast.success('Feedback received.');
       form.reset();
     } catch (error) {
       toast.error('Something went wrong, please try again.');
@@ -120,7 +120,7 @@ export default function ContactDialog() {
               />
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+                <Button type="button" variant="outline" onClick={() => navigate('/')}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={form.formState.isSubmitting}>

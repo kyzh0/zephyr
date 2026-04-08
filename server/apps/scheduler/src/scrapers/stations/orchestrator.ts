@@ -56,7 +56,7 @@ export async function runScraper(highResolution: boolean): Promise<void> {
 }
 
 type StationWithLatestData = WithId<StationAttrs> & {
-  data: Array<{ time: Date | string }>;
+  data: { time: Date | string }[];
 };
 
 export async function rerunScraper(): Promise<void> {

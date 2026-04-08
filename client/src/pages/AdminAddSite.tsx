@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,11 +21,10 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { addSite } from '@/services/site.service';
-import { listLandings } from '@/services/landing.service';
+import { useLandings, useAddSite } from '@/hooks';
 import type { CreateSiteDto } from '@/models/site.model';
-import type { ILanding } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
+import { ApiError } from '@/services/api-error';
 
 const coordinatesSchema = z.string().refine(
   (val) => {
@@ -87,17 +86,10 @@ function parseCoordinates(
 
 export default function AdminAddSite() {
   const navigate = useNavigate();
+  const addMutation = useAddSite();
   const [elevationLoading, setElevationLoading] = useState(false);
 
-  const [landings, setLandings] = useState<ILanding[]>([]);
-  useEffect(() => {
-    async function fetchLandings() {
-      const landings = (await listLandings()) ?? [];
-      landings.sort((a, b) => a.name.localeCompare(b.name));
-      setLandings(landings);
-    }
-    fetchLandings();
-  }, []);
+  const { landings } = useLandings();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -153,9 +145,7 @@ export default function AdminAddSite() {
     }
   }
 
-  const isSubmitting = form.formState.isSubmitting;
-
-  async function onSubmit(values: FormValues) {
+  function onSubmit(values: FormValues) {
     const location = parseCoordinates(values.coordinates);
     if (!location) return;
 
@@ -173,13 +163,16 @@ export default function AdminAddSite() {
       access: values.access
     };
 
-    try {
-      await addSite(site);
-      toast.success('Site added successfully');
-      navigate('/admin/sites');
-    } catch (error) {
-      toast.error(`Failed to add site: ${(error as Error).message}`);
-    }
+    addMutation.mutate(site, {
+      onSuccess: () => {
+        toast.success('Site added successfully');
+        navigate('/admin/sites');
+      },
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error(`Failed to add site: ${msg}`);
+      }
+    });
   }
 
   return (
@@ -402,8 +395,8 @@ export default function AdminAddSite() {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={addMutation.isPending}>
+              {addMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Add Site
             </Button>
           </form>

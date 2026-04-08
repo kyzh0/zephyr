@@ -1,20 +1,17 @@
 import type { IDonation, LeaderboardResponse } from '@/models/donation.model';
+import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
-export async function fetchRecognitionLeaderboard(): Promise<LeaderboardResponse | null> {
+export async function fetchRecognitionLeaderboard(): Promise<LeaderboardResponse> {
   const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/donations/leaderboard`);
-  if (!res.ok) return null;
+  await throwIfNotOk(res);
   return res.json() as Promise<LeaderboardResponse>;
 }
 
-function keyQuery(): string {
-  const key = sessionStorage.getItem('adminKey');
-  if (!key) throw new Error('Not signed in');
-  return `key=${encodeURIComponent(key)}`;
-}
-
 export async function listDonations(): Promise<IDonation[]> {
-  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/donations?${keyQuery()}`);
-  if (res.status === 401 || !res.ok) return [];
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/donations?${getKeyQueryThrowIfInvalid()}`
+  );
+  await throwIfNotOk(res);
   return res.json() as Promise<IDonation[]>;
 }
 
@@ -23,18 +20,24 @@ export async function createDonation(body: {
   amount: number;
   donatedAt: string;
   region: string;
-}): Promise<boolean> {
-  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/donations?${keyQuery()}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  return res.ok;
+}): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/donations?${getKeyQueryThrowIfInvalid()}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }
+  );
+  await throwIfNotOk(res);
 }
 
-export async function deleteDonation(id: string): Promise<boolean> {
-  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/donations/${id}?${keyQuery()}`, {
-    method: 'DELETE'
-  });
-  return res.ok;
+export async function deleteDonation(id: string): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/donations/${id}?${getKeyQueryThrowIfInvalid()}`,
+    {
+      method: 'DELETE'
+    }
+  );
+  await throwIfNotOk(res);
 }
