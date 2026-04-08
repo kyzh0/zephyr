@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import mapboxgl from 'mapbox-gl';
 import { SiteMarker } from '@/components/map/SiteMarker';
-import { getSiteGeoJson, escapeHtml } from '@/components/map';
+import { getSiteGeoJson, escapeHtml, POPUP_OFFSET } from '@/components/map';
 import { useNavigate } from 'react-router-dom';
 import { useSites } from '../useSites';
 import { isWindBearingInRange } from '@/lib/utils';
@@ -37,7 +37,7 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
-        offset: [0, -15]
+        offset: POPUP_OFFSET
       }).setHTML(`<p align="center"><strong>${escapeHtml(name)}</strong></p>`);
 
       const el = document.createElement('div');

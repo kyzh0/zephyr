@@ -11,7 +11,8 @@ import {
   getStationGeoJson,
   sortStationFeatures,
   convertWindSpeed,
-  escapeHtml
+  escapeHtml,
+  POPUP_OFFSET
 } from '@/components/map';
 import { StationMarker } from '@/components/map/StationMarker';
 import type {
@@ -321,7 +322,7 @@ export function useStationMarkers({
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
-        offset: [0, -15]
+        offset: POPUP_OFFSET
       }).setHTML(createPopupHtml(popupProps, unitRef.current));
 
       const { container } = createMarkerElement(

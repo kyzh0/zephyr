@@ -211,6 +211,17 @@ export function getLandingGeoJson(landings: ILanding[] | undefined): GeoJson | n
   return geoJson;
 }
 
+export const POPUP_OFFSET: Record<string, [number, number]> = {
+  top: [0, 20],
+  'top-left': [15, 20],
+  'top-right': [-15, 20],
+  bottom: [0, -20],
+  'bottom-left': [15, -20],
+  'bottom-right': [-15, -20],
+  left: [20, 0],
+  right: [-20, 0]
+};
+
 export function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')

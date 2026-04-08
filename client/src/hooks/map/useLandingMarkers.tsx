@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import mapboxgl from 'mapbox-gl';
 import { LandingMarker } from '@/components/map/LandingMarker';
-import { getLandingGeoJson, escapeHtml } from '@/components/map';
+import { getLandingGeoJson, escapeHtml, POPUP_OFFSET } from '@/components/map';
 import { useNavigate } from 'react-router-dom';
 import { useLandings } from '../useLandings';
 
@@ -35,7 +35,7 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
       const popup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
-        offset: [0, -15]
+        offset: POPUP_OFFSET
       }).setHTML(`<p align="center"><strong>${escapeHtml(name)}</strong></p>`);
 
       const el = document.createElement('div');
