@@ -93,7 +93,7 @@ export default function Webcam() {
           )}
         </div>
 
-        {webcam && (
+        {webcam && webcam.type !== 'metservice' && (
           <div className="flex items-center justify-end">
             <a
               href={webcam.externalLink}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Grid3X3, Mountain, Wind } from 'lucide-react';
+import { Camera, Grid3X3, Wind } from 'lucide-react';
 
 import {
   Dialog,
@@ -70,9 +70,7 @@ export default function HelpDialog() {
                 sport="paragliding"
               />
             </div>
-            <div className="flex items-center">
-              Core colour indicates wind speed, tail colour wind gusts with label
-            </div>
+            <div className="flex items-center">Body colour shows wind speed, tail shows gusts</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
@@ -88,15 +86,15 @@ export default function HelpDialog() {
               />
             </div>
             <div className="flex items-center">
-              Gold border indicates valid wind direction near flying sites
+              Gold border means direction is suitable for nearby sites
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
-            <div className="flex justify-center items-center w-10 shrink-0">
-              <Wind className="w-5 h-5 sm:w-6 sm:h-6" />
+            <div className="flex justify-center items-center w-10 shrink-0 marker gust-label-hidden opacity-30">
+              <StationMarker speed={15} bearing={240} unit="kmh" size={40} sport="paragliding" />
             </div>
-            <div className="flex items-center">Change sport to update wind colours</div>
+            <div className="flex items-center">Stale data appears faded</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
@@ -122,9 +120,9 @@ export default function HelpDialog() {
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
             <div className="flex justify-center items-center w-10 shrink-0">
-              <Mountain className="w-5 h-5 sm:w-6 sm:h-6" />
+              <Wind className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="flex items-center">Filter stations by elevation</div>
+            <div className="flex items-center">Change sport to update wind colours</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">

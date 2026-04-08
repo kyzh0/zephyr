@@ -231,14 +231,16 @@ export default function Station() {
             {getMinutesAgo(new Date(station.lastUpdate))}
             {')'}
           </p>
-          <a
-            href={station.externalLink}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs sm:text-sm text-muted-foreground hover:underline"
-          >
-            Source: {getStationTypeName(station.type)}
-          </a>
+          {station.type !== 'metservice' && (
+            <a
+              href={station.externalLink}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs sm:text-sm text-muted-foreground hover:underline"
+            >
+              Source: {getStationTypeName(station.type)}
+            </a>
+          )}
         </div>
       )}
     </div>

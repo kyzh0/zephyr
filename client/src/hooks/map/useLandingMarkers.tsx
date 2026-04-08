@@ -40,9 +40,8 @@ export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMar
 
       const el = document.createElement('div');
       el.id = dbId;
-      el.className = 'site-marker cursor-pointer';
+      el.className = 'z-1 site-marker cursor-pointer';
       el.style.visibility = 'hidden';
-      el.style.zIndex = '1';
 
       // Render the LandingMarker component to HTML
       el.innerHTML = renderToStaticMarkup(<LandingMarker isOfficial={isOfficial} />);

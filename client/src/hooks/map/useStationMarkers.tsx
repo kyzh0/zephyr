@@ -7,13 +7,7 @@ import { toast } from 'sonner';
 import mapboxgl from 'mapbox-gl';
 import { useQueryClient } from '@tanstack/react-query';
 
-import {
-  getStationGeoJson,
-  sortStationFeatures,
-  convertWindSpeed,
-  escapeHtml,
-  POPUP_OFFSET
-} from '@/components/map';
+import { getStationGeoJson, convertWindSpeed, escapeHtml, POPUP_OFFSET } from '@/components/map';
 import { StationMarker } from '@/components/map/StationMarker';
 import type {
   StationMarker as IStationMarker,
@@ -71,9 +65,24 @@ function getMarkerOpacity(lastUpdate: string | null): string {
   return (1 - t * 0.7).toFixed(2); // 1.0 → 0.3
 }
 
-function isDataExpired(lastUpdate: string | null): boolean {
+function isExpired(lastUpdate: string | null): boolean {
   if (!lastUpdate) return false;
   return Date.now() - new Date(lastUpdate).getTime() > EXPIRED_MS;
+}
+
+function isStale(lastUpdate: string | null): boolean {
+  if (!lastUpdate) return false;
+  return Date.now() - new Date(lastUpdate).getTime() > STALE_MS;
+}
+
+/** z-index: offline < stale < active (sorted by wind speed) < valid bearings */
+function markerZIndex(props: StationProperties): string {
+  if (props.isOffline) return '8';
+  if (isStale(props.lastUpdate) || !props.currentAverage) return '9';
+  const avg = Math.min(Math.abs(props.currentAverage), 100);
+  const normalized = 10 + (avg / 100) * 25; // 10.0–35.0
+  const boost = props.validBearings ? 100 : 0;
+  return String(Math.min(Math.floor(normalized + boost), 36));
 }
 
 /**
@@ -96,7 +105,7 @@ const extractStationProperties = (properties: Record<string, unknown>): StationP
  */
 function createPopupHtml(props: StationProperties, unit: WindUnit): string {
   const { name, isOffline, lastUpdate } = props;
-  const expired = isDataExpired(lastUpdate);
+  const expired = isExpired(lastUpdate);
   const currentAverage = expired ? null : props.currentAverage;
   const currentGust = expired ? null : props.currentGust;
   const currentBearing = expired ? null : props.currentBearing;
@@ -155,7 +164,7 @@ function createMarkerElement(
   // Wind speed marker
   arrow.style.backgroundImage = '';
   arrow.style.transform = '';
-  const expired = isDataExpired(lastUpdate);
+  const expired = isExpired(lastUpdate);
   arrow.innerHTML = renderToStaticMarkup(
     <StationMarker
       bearing={expired ? undefined : (currentBearing ?? undefined)}
@@ -181,8 +190,8 @@ function createMarkerElement(
   container.dataset.isOffline = String(isOffline ?? false);
   container.dataset.validBearings = validBearings ?? '';
   container.dataset.lastUpdate = lastUpdate ?? '';
-  container.dataset.expired = String(isDataExpired(lastUpdate));
-  container.style.zIndex = isOffline ? '2' : validBearings ? '4' : '3';
+  container.dataset.expired = String(isExpired(lastUpdate));
+  container.style.zIndex = markerZIndex(props);
   container.style.opacity = getMarkerOpacity(lastUpdate);
   container.style.pointerEvents = 'none';
 
@@ -228,12 +237,13 @@ function updateMarkerElement(
   marker.dataset.isOffline = String(props.isOffline ?? false);
   marker.dataset.validBearings = props.validBearings ?? '';
   marker.dataset.lastUpdate = props.lastUpdate ?? '';
-  marker.dataset.expired = String(isDataExpired(props.lastUpdate));
+  marker.dataset.expired = String(isExpired(props.lastUpdate));
   marker.style.opacity = getMarkerOpacity(props.lastUpdate);
+  marker.style.zIndex = markerZIndex(props);
 
   const arrow = marker.querySelector<HTMLDivElement>('.marker-arrow');
   if (arrow) {
-    const expired = isDataExpired(props.lastUpdate);
+    const expired = isExpired(props.lastUpdate);
     arrow.style.backgroundImage = '';
     arrow.style.transform = '';
     arrow.innerHTML = renderToStaticMarkup(
@@ -317,7 +327,7 @@ export function useStationMarkers({
   // Create a station marker with popup
   const createStationMarker = useCallback(
     (props: StationProperties): IStationMarker => {
-      const expired = isDataExpired(props.lastUpdate);
+      const expired = isExpired(props.lastUpdate);
       const popupProps: StationProperties = expired
         ? { ...props, currentAverage: null, currentGust: null, currentBearing: null }
         : props;
@@ -386,9 +396,6 @@ export function useStationMarkers({
     if (!geoJson?.features.length) return;
 
     if (markersRef.current.length === 0) {
-      // Initial creation — sort features for render order
-      sortStationFeatures(geoJson.features);
-
       for (const feature of geoJson.features) {
         const props = extractStationProperties(feature.properties);
         const { marker, popup } = createStationMarker(props);
@@ -533,7 +540,7 @@ export function useStationMarkers({
 
       item.marker.style.opacity = getMarkerOpacity(props.lastUpdate);
 
-      const expired = isDataExpired(props.lastUpdate);
+      const expired = isExpired(props.lastUpdate);
       const prevExpired = item.marker.dataset.expired === 'true';
       if (expired === prevExpired) continue;
 

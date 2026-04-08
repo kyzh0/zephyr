@@ -42,9 +42,8 @@ export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOp
 
       const el = document.createElement('div');
       el.id = dbId;
-      el.className = 'site-marker cursor-pointer';
+      el.className = 'z-2 site-marker cursor-pointer';
       el.style.visibility = 'hidden';
-      el.style.zIndex = '2';
 
       // Render the SiteMarker component to HTML
       el.innerHTML = renderToStaticMarkup(

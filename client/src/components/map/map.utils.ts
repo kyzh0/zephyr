@@ -231,51 +231,6 @@ export function escapeHtml(str: string): string {
     .replace(/'/g, '&#39;');
 }
 
-const FRESH_MS = 10 * 60 * 1000;
-
-function isStale(lastUpdate: string | null): boolean {
-  if (!lastUpdate) return false;
-  return Date.now() - new Date(lastUpdate).getTime() > FRESH_MS;
-}
-
-// Sort stations for rendering order
-export function sortStationFeatures(features: GeoJsonFeature[]): void {
-  features.sort((a, b) => {
-    // Render offline stations on bottom
-    if (a.properties.isOffline && !b.properties.isOffline) {
-      return -1;
-    } else if (!a.properties.isOffline && b.properties.isOffline) {
-      return 1;
-    }
-
-    // Render stations with no data on bottom
-    if (a.properties.currentAverage == null && b.properties.currentAverage != null) {
-      return -1;
-    } else if (a.properties.currentAverage != null && b.properties.currentAverage == null) {
-      return 1;
-    }
-
-    // Render stale stations below fresh stations
-    const aStale = isStale(a.properties.lastUpdate as string | null);
-    const bStale = isStale(b.properties.lastUpdate as string | null);
-    if (aStale && !bStale) {
-      return -1;
-    } else if (!aStale && bStale) {
-      return 1;
-    }
-
-    // Render stations with valid bearings on top
-    if (!a.properties.validBearings && b.properties.validBearings) {
-      return -1;
-    } else if (a.properties.validBearings && !b.properties.validBearings) {
-      return 1;
-    }
-
-    // Render stations with higher reading on top
-    return (a.properties.currentAverage as number) - (b.properties.currentAverage as number);
-  });
-}
-
 // Calculate history time from offset
 export function getHistoryTime(offset: number): Date {
   const t = new Date();

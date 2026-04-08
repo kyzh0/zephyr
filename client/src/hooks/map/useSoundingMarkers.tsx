@@ -51,24 +51,22 @@ export function useSoundingMarkers({
 
       const text = document.createElement('span');
       text.className =
-        'absolute bottom-0 left-0 z-10 w-full h-full font-semibold text-sm text-center flex justify-center items-start';
+        'absolute bottom-0 left-0 w-full h-full font-semibold text-sm text-center flex justify-center items-start';
       text.style.fontFamily = 'Arial, Helvetica, sans-serif';
       text.innerHTML = name;
 
       const timeText = document.createElement('span');
       timeText.className =
-        'absolute bottom-0 left-0 z-10 w-full h-full text-sm text-center flex justify-center items-end';
+        'absolute bottom-0 left-0 w-full h-full text-sm text-center flex justify-center items-end';
       timeText.style.fontFamily = 'Arial, Helvetica, sans-serif';
       timeText.innerHTML = currentTime
         ? formatInTimeZone(currentTime, 'Pacific/Auckland', 'dd MMM HH:mm')
         : 'Click to view more...';
 
       const el = document.createElement('div');
-      el.style.backgroundColor = 'white';
       el.style.visibility = 'hidden';
-      el.style.zIndex = '10';
       el.id = dbId;
-      el.className = 'webcam py-[18px] px-2 rounded-lg cursor-pointer';
+      el.className = 'z-40 bg-white py-[18px] px-2 rounded-lg cursor-pointer';
 
       el.addEventListener('click', () => navigate(`/soundings/${dbId}`));
       el.appendChild(text);
