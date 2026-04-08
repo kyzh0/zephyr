@@ -211,45 +211,6 @@ export function getLandingGeoJson(landings: ILanding[] | undefined): GeoJson | n
   return geoJson;
 }
 
-const TOUCH_DEBOUNCE_MS = 300;
-
-export interface TouchGuard {
-  isTouching: () => boolean;
-  cleanup: () => void;
-}
-
-/**
- * Used to disable hover-equivalent events on mobile
- */
-export function attachTouchGuard(el: HTMLElement): TouchGuard {
-  let touching = false;
-  let timer: ReturnType<typeof setTimeout> | null = null;
-
-  const onTouchStart = () => {
-    touching = true;
-  };
-  const reset = () => {
-    timer = setTimeout(() => {
-      touching = false;
-      timer = null;
-    }, TOUCH_DEBOUNCE_MS);
-  };
-
-  el.addEventListener('touchstart', onTouchStart, { passive: true });
-  el.addEventListener('touchend', reset);
-  el.addEventListener('touchcancel', reset);
-
-  return {
-    isTouching: () => touching,
-    cleanup: () => {
-      el.removeEventListener('touchstart', onTouchStart);
-      el.removeEventListener('touchend', reset);
-      el.removeEventListener('touchcancel', reset);
-      if (timer) clearTimeout(timer);
-    }
-  };
-}
-
 export function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')

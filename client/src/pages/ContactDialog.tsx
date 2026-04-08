@@ -58,7 +58,7 @@ export default function ContactDialog() {
       );
 
       setSuccess(true);
-      toast.success('Thanks for your feedback!');
+      toast.success('Feedback received.');
       form.reset();
     } catch (error) {
       toast.error('Something went wrong, please try again.');

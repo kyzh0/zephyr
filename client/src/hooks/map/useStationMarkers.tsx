@@ -11,9 +11,7 @@ import {
   getStationGeoJson,
   sortStationFeatures,
   convertWindSpeed,
-  attachTouchGuard,
-  escapeHtml,
-  type TouchGuard
+  escapeHtml
 } from '@/components/map';
 import { StationMarker } from '@/components/map/StationMarker';
 import type {
@@ -28,12 +26,6 @@ import { loadAllStationDataAtTimestamp } from '@/services/station.service';
 import { useStations } from '@/hooks';
 import type { IHistoricalStationData } from '@/models/station-data.model';
 import { ApiError } from '@/services/api-error';
-
-interface StationMarkerHandle {
-  marker: HTMLDivElement;
-  touchGuard: TouchGuard;
-  resetHover: () => void;
-}
 
 interface UseStationMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -141,7 +133,7 @@ function createMarkerElement(
   onShow: (popup: mapboxgl.Popup) => void,
   onHide: (popup: mapboxgl.Popup) => void,
   popup: mapboxgl.Popup
-): { container: HTMLDivElement; touchGuard: TouchGuard; resetHover: () => void } {
+): { container: HTMLDivElement } {
   const {
     dbId,
     elevation,
@@ -194,37 +186,25 @@ function createMarkerElement(
   container.appendChild(arrow);
 
   // --- Event handling ---
-  // Listeners go on the arrow (survives innerHTML replacement).
-  // The arrow has pointer-events: none but bubbled events from the
-  // circle (pointer-events: auto) still reach it.
+  // Listeners go on the arrow, events bubble from the circle
+  // Show popups on mouse hover only
   arrow.style.pointerEvents = 'none';
 
-  const touchGuard = attachTouchGuard(arrow);
-  let isHovering = false;
-
-  arrow.addEventListener('mouseover', () => {
-    if (isHovering || touchGuard.isTouching()) return;
-    isHovering = true;
+  arrow.addEventListener('pointerover', (e: PointerEvent) => {
+    if (e.pointerType !== 'mouse') return;
     onShow(popup);
   });
-  arrow.addEventListener('mouseout', (e: MouseEvent) => {
-    if (!isHovering) return;
+  arrow.addEventListener('pointerout', (e: PointerEvent) => {
+    if (e.pointerType !== 'mouse') return;
     if (e.relatedTarget && arrow.contains(e.relatedTarget as Node)) return;
-    isHovering = false;
-    if (!touchGuard.isTouching()) onHide(popup);
+    onHide(popup);
   });
   arrow.addEventListener('click', () => {
     onHide(popup);
     onNavigate(dbId);
   });
 
-  return {
-    container,
-    touchGuard,
-    resetHover: () => {
-      isHovering = false;
-    }
-  };
+  return { container };
 }
 
 /**
@@ -308,7 +288,6 @@ export function useStationMarkers({
   const queryClient = useQueryClient();
   const { sport } = useAppContext();
   const markersRef = useRef<IStationMarker[]>([]);
-  const touchGuardsRef = useRef<StationMarkerHandle[]>([]);
   const interactiveRef = useRef(true);
   const unitRef = useRef<WindUnit>(unit);
   const sportRef = useRef(sport);
@@ -345,7 +324,7 @@ export function useStationMarkers({
         offset: [0, -15]
       }).setHTML(createPopupHtml(popupProps, unitRef.current));
 
-      const { container, touchGuard, resetHover } = createMarkerElement(
+      const { container } = createMarkerElement(
         props,
         unitRef.current,
         sportRef.current,
@@ -361,7 +340,6 @@ export function useStationMarkers({
       );
 
       if (!showGustLabelRef.current) container.classList.add('gust-label-hidden');
-      touchGuardsRef.current.push({ marker: container, touchGuard, resetHover });
 
       return { marker: container, popup };
     },
@@ -374,11 +352,10 @@ export function useStationMarkers({
     if (circle) circle.style.pointerEvents = interactiveRef.current ? 'auto' : 'none';
   }, []);
 
-  // Wrap updateMarkerElement with post-update hooks (reset hover state, reapply interactivity)
+  // Wrap updateMarkerElement with post-update hooks (reapply interactivity)
   const refreshMarker = useCallback(
     (marker: HTMLDivElement, props: StationProperties, unit: WindUnit, sport: SportType) => {
       updateMarkerElement(marker, props, unit, sport);
-      touchGuardsRef.current.find((h) => h.marker === marker)?.resetHover();
       applyInteractivity(marker);
     },
     [applyInteractivity]
@@ -434,8 +411,6 @@ export function useStationMarkers({
   // Cleanup markers only on unmount
   useEffect(() => {
     return () => {
-      touchGuardsRef.current.forEach((h) => h.touchGuard.cleanup());
-      touchGuardsRef.current = [];
       mapboxMarkersRef.current.forEach((m) => m.remove());
       mapboxMarkersRef.current = [];
       markersRef.current = [];
