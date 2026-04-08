@@ -24,7 +24,7 @@ import type {
 import { getWindDirectionFromBearing, REFRESH_INTERVAL_MS } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
 import { loadAllStationDataAtTimestamp } from '@/services/station.service';
-import { useStations } from '@/hooks';
+import { stationKeys, useStations } from '@/hooks';
 import type { IHistoricalStationData } from '@/models/station-data.model';
 import { ApiError } from '@/services/api-error';
 
@@ -58,15 +58,17 @@ interface UseStationMarkersResult {
   error: Error | null;
 }
 
-const FRESH_MS = 10 * 60 * 1000; // 10 min — transparency
-const STALE_MS = 20 * 60 * 1000; // 20 min — more transparency
+const STALE_MS = 10 * 60 * 1000; // 10 min — start fading
 const EXPIRED_MS = 60 * 60 * 1000; // 60 min — empty circle
 
 /** Reduced opacity for stale data */
 function getMarkerOpacity(lastUpdate: string | null): string {
   if (!lastUpdate) return '1';
   const ageMs = Date.now() - new Date(lastUpdate).getTime();
-  return ageMs > FRESH_MS ? (ageMs > STALE_MS ? '0.3' : '0.6') : '1';
+  if (ageMs <= STALE_MS) return '1';
+  if (ageMs >= EXPIRED_MS) return '0.3';
+  const t = (ageMs - STALE_MS) / (EXPIRED_MS - STALE_MS);
+  return (1 - t * 0.7).toFixed(2); // 1.0 → 0.3
 }
 
 function isDataExpired(lastUpdate: string | null): boolean {
@@ -518,7 +520,7 @@ export function useStationMarkers({
   // Render current (live) data — invalidate to force a fresh fetch
   const renderCurrentData = useCallback(async (): Promise<void> => {
     try {
-      await queryClient.refetchQueries({ queryKey: ['stations'] });
+      await queryClient.refetchQueries({ queryKey: stationKeys.all });
     } catch (error) {
       toast.error('Failed to refresh station data: ' + (error as Error).message);
     }

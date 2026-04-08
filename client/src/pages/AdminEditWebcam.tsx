@@ -62,7 +62,7 @@ function formatCoordinates(location?: { coordinates: [number, number] }): string
 export default function AdminEditWebcam() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { webcam: cam, isLoading } = useWebcam({ id });
+  const { webcam: cam, isLoading } = useWebcam(id);
   const updateMutation = useUpdateWebcam();
   const deleteMutation = useDeleteWebcam();
 

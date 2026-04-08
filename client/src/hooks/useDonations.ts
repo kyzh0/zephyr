@@ -7,9 +7,14 @@ import {
 } from '@/services/donation.service';
 import type { IDonation } from '@/models/donation.model';
 
+export const donationKeys = {
+  all: ['donations'] as const,
+  leaderboard: ['donations', 'leaderboard'] as const
+};
+
 export function useLeaderboard() {
   return useQuery({
-    queryKey: ['leaderboard'],
+    queryKey: donationKeys.leaderboard,
     queryFn: fetchRecognitionLeaderboard
   });
 }
@@ -22,7 +27,7 @@ interface UseDonationsResult {
 
 export function useDonations(): UseDonationsResult {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['donations'],
+    queryKey: donationKeys.all,
     queryFn: listDonations
   });
 
@@ -38,8 +43,7 @@ export function useAddDonation() {
   return useMutation({
     mutationFn: createDonation,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['donations'] });
-      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+      queryClient.invalidateQueries({ queryKey: donationKeys.all });
     }
   });
 }
@@ -49,8 +53,7 @@ export function useDeleteDonation() {
   return useMutation({
     mutationFn: deleteDonation,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['donations'] });
-      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+      queryClient.invalidateQueries({ queryKey: donationKeys.all });
     }
   });
 }

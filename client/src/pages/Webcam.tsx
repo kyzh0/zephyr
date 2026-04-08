@@ -15,7 +15,7 @@ import { ApiError } from '@/services/api-error';
 export default function Webcam() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { webcam, images, isStale, error } = useWebcamWithImages({ id });
+  const { webcam, images, isStale, error } = useWebcamWithImages(id);
   const [index, setIndex] = useState(0);
 
   // Set index to last image when images load

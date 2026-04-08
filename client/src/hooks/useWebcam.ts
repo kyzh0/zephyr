@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   addCam,
   deleteCam,
@@ -13,11 +13,15 @@ import { getDistance, REFRESH_INTERVAL_MS } from '@/lib/utils';
 import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from '.';
 import { ApiError } from '@/services/api-error';
 
-const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
+export const webcamKeys = {
+  all: ['webcams'] as const,
+  list: (opts?: { includeDisabled?: boolean }) =>
+    opts?.includeDisabled ? (['webcams', { includeDisabled: true }] as const) : webcamKeys.all,
+  detail: (id: string) => ['webcam', id] as const,
+  images: (id: string) => ['webcam-images', id] as const
+};
 
-interface UseWebcamOptions {
-  id?: string;
-}
+const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export interface UseWebcamResult {
   webcam: ICam | null;
@@ -34,11 +38,10 @@ function sortImages(imgs: ICamImage[]): ICamImage[] {
   return [...imgs].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 }
 
-export function useWebcam({ id }: UseWebcamOptions = {}): UseWebcamResult {
+export function useWebcam(id: string | undefined): UseWebcamResult {
   const webcamQuery = useQuery({
-    queryKey: ['webcam', id],
-    queryFn: () => getCamById(id!),
-    enabled: !!id,
+    queryKey: webcamKeys.detail(id ?? ''),
+    queryFn: id ? () => getCamById(id) : skipToken,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
   });
 
@@ -49,11 +52,10 @@ export function useWebcam({ id }: UseWebcamOptions = {}): UseWebcamResult {
   };
 }
 
-export function useWebcamWithImages({ id }: UseWebcamOptions = {}): UseWebcamWithImagesResult {
+export function useWebcamWithImages(id: string | undefined): UseWebcamWithImagesResult {
   const webcamQuery = useQuery({
-    queryKey: ['webcam', id],
-    queryFn: () => getCamById(id!),
-    enabled: !!id,
+    queryKey: webcamKeys.detail(id ?? ''),
+    queryFn: id ? () => getCamById(id) : skipToken,
     refetchInterval: REFRESH_INTERVAL_MS,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
   });
@@ -66,7 +68,7 @@ export function useWebcamWithImages({ id }: UseWebcamOptions = {}): UseWebcamWit
   }, [webcamQuery.data, webcamQuery.dataUpdatedAt]);
 
   const imagesQuery = useQuery({
-    queryKey: ['webcam-images', id],
+    queryKey: webcamKeys.images(id ?? ''),
     queryFn: async (): Promise<ICamImage[]> => {
       const imgs = await loadCamImages(id!);
       return sortImages(imgs);
@@ -78,7 +80,7 @@ export function useWebcamWithImages({ id }: UseWebcamOptions = {}): UseWebcamWit
   return {
     webcam: webcamQuery.data ?? null,
     images: imagesQuery.data ?? [],
-    isLoading: webcamQuery.isLoading,
+    isLoading: webcamQuery.isLoading || imagesQuery.isLoading,
     isStale,
     error: webcamQuery.error ?? imagesQuery.error ?? null
   };
@@ -92,9 +94,9 @@ export function useWebcams(options?: UseWebcamsOptions) {
   const includeDisabled = options?.includeDisabled ?? false;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: includeDisabled ? ['webcams', { includeDisabled }] : ['webcams'],
+    queryKey: webcamKeys.list(includeDisabled ? { includeDisabled } : undefined),
     queryFn: () => listCams(includeDisabled),
-    refetchInterval: includeDisabled ? undefined : REFRESH_INTERVAL_MS
+    refetchInterval: REFRESH_INTERVAL_MS
   });
 
   return {
@@ -108,7 +110,7 @@ export function useAddWebcam() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: addCam,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['webcams'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: webcamKeys.all })
   });
 }
 
@@ -118,8 +120,8 @@ export function useUpdateWebcam() {
     mutationFn: ({ id, updates }: { id: string; updates: Parameters<typeof patchCam>[1] }) =>
       patchCam(id, updates),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['webcams'] });
-      queryClient.invalidateQueries({ queryKey: ['webcam', id] });
+      queryClient.invalidateQueries({ queryKey: webcamKeys.all });
+      queryClient.invalidateQueries({ queryKey: webcamKeys.detail(id) });
     }
   });
 }
@@ -129,9 +131,9 @@ export function useDeleteWebcam() {
   return useMutation({
     mutationFn: deleteCam,
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: ['webcams'] });
-      queryClient.removeQueries({ queryKey: ['webcam', id] });
-      queryClient.removeQueries({ queryKey: ['webcam-images', id] });
+      queryClient.invalidateQueries({ queryKey: webcamKeys.all });
+      queryClient.removeQueries({ queryKey: webcamKeys.detail(id) });
+      queryClient.removeQueries({ queryKey: webcamKeys.images(id) });
     }
   });
 }

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   addLanding,
   deleteLanding,
@@ -9,6 +9,13 @@ import {
 } from '@/services/landing.service';
 import { ApiError } from '@/services/api-error';
 import type { ILanding } from '@/models/landing.model';
+
+export const landingKeys = {
+  all: ['landings'] as const,
+  list: (opts?: { includeDisabled?: boolean }) =>
+    opts?.includeDisabled ? (['landings', { includeDisabled: true }] as const) : landingKeys.all,
+  detail: (id: string) => ['landing', id] as const
+};
 
 export interface UseLandingsResult {
   landings: ILanding[];
@@ -24,7 +31,7 @@ export function useLandings(options?: UseLandingsOptions): UseLandingsResult {
   const includeDisabled = options?.includeDisabled ?? false;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: includeDisabled ? ['landings', { includeDisabled }] : ['landings'],
+    queryKey: landingKeys.list(includeDisabled ? { includeDisabled } : undefined),
     queryFn: () => listLandings(includeDisabled)
   });
 
@@ -48,9 +55,8 @@ interface UseLandingResult {
 
 export function useLanding(id: string | undefined): UseLandingResult {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['landing', id],
-    queryFn: () => getLandingById(id!),
-    enabled: !!id,
+    queryKey: landingKeys.detail(id ?? ''),
+    queryFn: id ? () => getLandingById(id) : skipToken,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
   });
 
@@ -65,7 +71,7 @@ export function useAddLanding() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: addLanding,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['landings'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: landingKeys.all })
   });
 }
 
@@ -75,8 +81,8 @@ export function useUpdateLanding() {
     mutationFn: ({ id, updates }: { id: string; updates: Partial<ILanding> }) =>
       updateLanding(id, updates),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['landings'] });
-      queryClient.invalidateQueries({ queryKey: ['landing', id] });
+      queryClient.invalidateQueries({ queryKey: landingKeys.all });
+      queryClient.invalidateQueries({ queryKey: landingKeys.detail(id) });
     }
   });
 }
@@ -86,8 +92,8 @@ export function useDeleteLanding() {
   return useMutation({
     mutationFn: deleteLanding,
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: ['landings'] });
-      queryClient.removeQueries({ queryKey: ['landing', id] });
+      queryClient.invalidateQueries({ queryKey: landingKeys.all });
+      queryClient.removeQueries({ queryKey: landingKeys.detail(id) });
     }
   });
 }

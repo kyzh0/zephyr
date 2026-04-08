@@ -4,7 +4,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { REFRESH_INTERVAL_MS } from '@/lib/utils';
 import { loadStationData } from '@/services/station.service';
 import { ApiError } from '@/services/api-error';
-import { useStation } from './useStations';
+import { stationKeys, useStation } from './useStations';
 import type { IStation } from '@/models/station.model';
 import type { IStationData } from '@/models/station-data.model';
 import type { ExtendedStationData } from '@/components/station/types';
@@ -34,7 +34,7 @@ export function useStationData(
   const hr = station?.isHighResolution ?? false;
 
   const dataQuery = useQuery({
-    queryKey: ['station-data', id, hr],
+    queryKey: stationKeys.data(id ?? '', hr),
     queryFn: async () => {
       const rawData = await loadStationData(id!, hr);
       const items = Array.isArray(rawData) ? rawData : [];
