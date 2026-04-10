@@ -112,7 +112,7 @@ export default function Map() {
           name: 'Zephyr',
           url: 'https://www.zephyrapp.nz',
           description:
-            'Weather station aggregator built for free flying in New Zealand. Browse live wind and weather data from stations across the country on an interactive map.',
+            'Weather station aggregator built for free flying and wind sports in New Zealand. Browse live wind and weather data from stations across the country on an interactive map.',
           applicationCategory: 'WeatherApplication',
           operatingSystem: 'Any',
           areaServed: {

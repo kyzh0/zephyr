@@ -1,7 +1,7 @@
 {
   "short_name": "Zephyr",
-  "name": "Zephyr — Live Wind & Weather for NZ Free Flying",
-  "description": "Weather station aggregator built for free flying in New Zealand. Browse live wind and weather data from stations across the country.",
+  "name": "Zephyr — Live Wind NZ",
+  "description": "Weather station aggregator built for free flying and wind sports in New Zealand. Browse live wind and weather data from stations across the country.",
   "icons": [
     {
       "src": "favicon.ico",

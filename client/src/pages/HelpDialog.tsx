@@ -46,7 +46,7 @@ export default function HelpDialog() {
           </div>
           <DialogTitle className="text-lg sm:text-xl">Welcome to Zephyr</DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
-            Live weather data for free flying in New Zealand.
+            Live wind data for free flying and wind sports in New Zealand.
           </DialogDescription>
         </DialogHeader>
 
