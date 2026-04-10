@@ -162,7 +162,7 @@ export function getTextColor(hexColor: string): string {
   const brightness = (r * 299 + g * 587 + b * 114) / 1000;
 
   // Return white text for dark backgrounds, black for light
-  return brightness > 100 ? 'black' : 'white';
+  return brightness > 156 ? 'black' : 'white';
 }
 
 export const getStationTypeName = (code: string) => {
