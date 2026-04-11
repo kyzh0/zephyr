@@ -89,6 +89,14 @@ The `server` app requires [MongoDB](https://www.mongodb.com/docs/manual/installa
 
 Follow the instructions in `client/.env.example`, and `server/.env.example` to set up your own environment variables.
 
+### Git Hooks
+
+From the repo root, install the shared dev tooling (Husky, lint-staged, Prettier).
+
+```
+$ npm i
+```
+
 ### Server
 
 ```

@@ -44,24 +44,24 @@ export default async function processScrapedData(
     updates.currentGust = data.windGust ?? null;
     updates.currentBearing = data.windBearing ?? null;
     updates.currentTemperature = data.temperature ?? null;
-  }
 
-  if (
-    data.windAverage != null &&
-    data.windGust != null &&
-    data.windBearing != null &&
-    data.temperature != null
-  ) {
-    updates.isError = false;
-  }
-
-  await Station.updateOne(
-    { _id: station._id, __v: station.__v },
-    {
-      $set: updates,
-      $inc: { __v: 1 }
+    if (
+      data.windAverage != null &&
+      data.windGust != null &&
+      data.windBearing != null &&
+      data.temperature != null
+    ) {
+      updates.isError = false;
     }
-  );
+
+    await Station.updateOne(
+      { _id: station._id, __v: station.__v },
+      {
+        $set: updates,
+        $inc: { __v: 1 }
+      }
+    );
+  }
 
   if (!suppressLog) {
     logger.info(

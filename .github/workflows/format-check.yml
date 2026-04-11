@@ -1,0 +1,48 @@
+name: Lint & Format Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  lint-and-format:
+    name: Lint & format check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Install server dependencies
+        working-directory: server
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint client
+        working-directory: client
+        run: npm run lint
+
+      - name: Lint server
+        working-directory: server
+        run: pnpm run lint
+
+      - name: Check client formatting
+        working-directory: client
+        run: npx prettier --check .
+
+      - name: Check server formatting
+        working-directory: server
+        run: npx prettier --check .
