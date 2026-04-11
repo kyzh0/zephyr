@@ -95,11 +95,15 @@ export default function Map() {
 
   // Filter markers by elevation
   useEffect(() => {
-    const markers = document.querySelectorAll('div.marker');
-    markers.forEach((m) => {
+    if (!mapContainer.current) return;
+    const markers = mapContainer.current.querySelectorAll('div.marker');
+    const [minElev, maxElev] = controls.stationElevationFilter;
+    for (const m of markers) {
       const elevation = Number((m as HTMLElement).dataset.elevation);
-      m.classList.toggle('hidden', elevation < controls.stationElevationFilter);
-    });
+      if (!isNaN(elevation)) {
+        m.classList.toggle('hidden', elevation < minElev || elevation > maxElev);
+      }
+    }
   }, [controls.stationElevationFilter]);
 
   return (

@@ -6,10 +6,11 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getWindDirectionFromBearing } from '@/lib/utils';
 import { WindCompass } from '@/components/station/WindCompass';
+import { ELEVATION_FILTER_MIN, ELEVATION_FILTER_MAX } from './map.types';
 
 interface FilterDialogProps {
-  stationElevationFilter: number;
-  onStationElevationFilterChange: (value: number) => void;
+  stationElevationFilter: [number, number];
+  onStationElevationFilterChange: (value: [number, number]) => void;
   siteDirectionFilter: number | null;
   onSiteDirectionFilterChange: (bearing: number | null) => void;
   viewMode?: 'stations' | 'sites';
@@ -29,7 +30,8 @@ export function FilterDialog({
   const isStationsView = viewMode === 'stations';
   const isSitesView = viewMode === 'sites';
 
-  const isStationElevationActive = stationElevationFilter > 0;
+  const [minElev, maxElev] = stationElevationFilter;
+  const isStationElevationActive = minElev > ELEVATION_FILTER_MIN || maxElev < ELEVATION_FILTER_MAX;
   const isSiteDirectionActive = siteDirectionFilter !== null;
   const isFilterActive =
     (isStationsView && isStationElevationActive) || (isSitesView && isSiteDirectionActive);
@@ -53,22 +55,32 @@ export function FilterDialog({
             <div className={`flex flex-col gap-2 ${isStationsView ? '' : 'hidden'}`}>
               <div className="flex items-center gap-2">
                 <div
-                  className="flex flex-col items-center shrink-0 w-9 cursor-pointer"
-                  onClick={() => onStationElevationFilterChange(0)}
+                  className="flex flex-col items-center shrink-0 w-12 cursor-pointer"
+                  onClick={() =>
+                    onStationElevationFilterChange([ELEVATION_FILTER_MIN, ELEVATION_FILTER_MAX])
+                  }
                 >
                   <Mountain
                     className={`h-4 w-4 ${isStationElevationActive ? 'stroke-blue-500' : 'opacity-70'}`}
                   />
-                  <span className="text-[10px] text-muted-foreground mt-0.5">
-                    {stationElevationFilter > 0 ? `>${stationElevationFilter}m` : 'All'}
-                  </span>
+                  <div className="text-[10px] text-muted-foreground mt-0.5 text-center h-6 flex items-center justify-center">
+                    {isStationElevationActive ? (
+                      <span className="flex flex-col items-center leading-tight">
+                        <span>{minElev}m -</span>
+                        <span>{maxElev}m</span>
+                      </span>
+                    ) : (
+                      'All'
+                    )}
+                  </div>
                 </div>
                 <Slider
-                  value={[stationElevationFilter]}
-                  onValueChange={(v) => onStationElevationFilterChange(v[0])}
-                  min={0}
-                  max={1500}
-                  step={250}
+                  value={[minElev, maxElev]}
+                  onValueChange={(v) => onStationElevationFilterChange([v[0], v[1]])}
+                  min={ELEVATION_FILTER_MIN}
+                  max={ELEVATION_FILTER_MAX}
+                  step={100}
+                  minStepsBetweenThumbs={1}
                   className="flex-1 ml-1"
                 />
               </div>
