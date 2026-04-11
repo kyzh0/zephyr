@@ -95,11 +95,15 @@ export default function Map() {
 
   // Filter markers by elevation
   useEffect(() => {
-    const markers = document.querySelectorAll('div.marker');
-    markers.forEach((m) => {
+    if (!mapContainer.current) return;
+    const markers = mapContainer.current.querySelectorAll('div.marker');
+    const [minElev, maxElev] = controls.stationElevationFilter;
+    for (const m of markers) {
       const elevation = Number((m as HTMLElement).dataset.elevation);
-      m.classList.toggle('hidden', elevation < controls.stationElevationFilter);
-    });
+      if (!isNaN(elevation)) {
+        m.classList.toggle('hidden', elevation < minElev || elevation > maxElev);
+      }
+    }
   }, [controls.stationElevationFilter]);
 
   return (
@@ -112,7 +116,7 @@ export default function Map() {
           name: 'Zephyr',
           url: 'https://www.zephyrapp.nz',
           description:
-            'Weather station aggregator built for free flying in New Zealand. Browse live wind and weather data from stations across the country on an interactive map.',
+            'Weather station aggregator built for free flying and wind sports in New Zealand. Browse live wind and weather data from stations across the country on an interactive map.',
           applicationCategory: 'WeatherApplication',
           operatingSystem: 'Any',
           areaServed: {

@@ -1,7 +1,7 @@
 const SITE_NAME = 'Zephyr';
 const BASE_URL = 'https://www.zephyrapp.nz';
 const DEFAULT_DESCRIPTION =
-  'Zephyr is a weather station aggregator built for free flying in New Zealand. Browse live wind and weather data from stations across the country on an interactive map to make smarter, safer flying decisions.';
+  'Zephyr is a weather station aggregator built for free flying and wind sports in New Zealand. Browse live wind and weather data from stations across the country on an interactive map to make smarter, safer flying decisions.';
 const DEFAULT_OG_IMAGE = `${BASE_URL}/logo512.png`;
 
 interface SEOProps {
@@ -28,7 +28,7 @@ export default function SEO({
   noindex = false,
   jsonLd
 }: SEOProps) {
-  const pageTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} — Live Wind & Weather NZ`;
+  const pageTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} — Live Wind NZ`;
   const canonicalUrl = `${BASE_URL}${path}`;
 
   return (

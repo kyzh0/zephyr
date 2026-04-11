@@ -2,7 +2,13 @@ import { useCallback, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { toast } from 'sonner';
 import { usePersistedState } from '@/hooks';
-import type { MapControlsState, MapOverlay, WindUnit } from '@/components/map/map.types';
+import {
+  ELEVATION_FILTER_MIN,
+  ELEVATION_FILTER_MAX,
+  type MapControlsState,
+  type MapOverlay,
+  type WindUnit
+} from '@/components/map/map.types';
 
 function getSnapshotTime(offset: number): Date {
   const now = new Date();
@@ -44,7 +50,10 @@ export function useMapControls({
   const [viewMode, setViewMode] = usePersistedState<'stations' | 'sites'>('viewMode', 'stations');
   const [unit, setUnit] = usePersistedState<WindUnit>('unit', 'kmh');
   const [isSatellite, setIsSatellite] = useState(false);
-  const [stationElevationFilter, setStationElevationFilter] = useState(0);
+  const [stationElevationFilter, setStationElevationFilter] = useState<[number, number]>([
+    ELEVATION_FILTER_MIN,
+    ELEVATION_FILTER_MAX
+  ]);
   const [minimizeRecents, setMinimizeRecents] = usePersistedState('minimizeRecents', true);
   const [selectedSiteDirection, setSelectedSiteDirection] = useState<number | null>(null);
 

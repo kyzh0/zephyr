@@ -36,7 +36,7 @@ export default function Webcam() {
       {webcam && (
         <SEO
           title={`${webcam.name} Webcam`}
-          description={`Live webcam view of ${webcam.name}. Check current weather conditions visually for free flying in New Zealand.`}
+          description={`Live webcam view of ${webcam.name}. Check current weather conditions visually for free flying and wind sports in New Zealand.`}
           path={`/webcams/${id}`}
         />
       )}

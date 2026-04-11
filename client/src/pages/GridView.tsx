@@ -70,7 +70,7 @@ export default function GridView() {
     <Dialog open onOpenChange={() => navigate(-1)}>
       <SEO
         title="Nearby Stations"
-        description="View nearby weather stations sorted by distance. Live wind speed, gust, and direction data for free flying in New Zealand."
+        description="View nearby weather stations sorted by distance. Live wind speed, gust, and direction data for free flying and wind sports in New Zealand."
         path="/grid"
       />
       <DialogContent
