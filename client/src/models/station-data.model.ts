@@ -1,4 +1,4 @@
-interface IStationData {
+export interface StationData {
   _id: string;
   time: Date;
   windAverage?: number;
@@ -9,12 +9,10 @@ interface IStationData {
 }
 
 // Type for historical data API response (uses 'id' instead of '_id')
-interface IHistoricalStationData {
+export interface HistoricalStationData {
   id: string;
   windAverage: number | null;
   windGust: number | null;
   windBearing: number | null;
   validBearings: string | null;
 }
-
-export type { IStationData, IHistoricalStationData };

@@ -42,7 +42,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 
-import { DONATION_REGIONS, type IDonation } from '@/models/donation.model';
+import { DONATION_REGIONS, type Donation } from '@/models/donation.model';
 import { useAddDonation, useDeleteDonation, useDonations } from '@/hooks';
 import { ApiError } from '@/services/api-error';
 
@@ -61,7 +61,7 @@ type FormValues = z.infer<typeof formSchema>;
 interface DonorGroup {
   key: string;
   displayName: string;
-  items: IDonation[];
+  items: Donation[];
   totalAmount: number;
 }
 

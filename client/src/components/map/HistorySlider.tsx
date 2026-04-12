@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { formatInTimeZone } from 'date-fns-tz';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 

@@ -17,7 +17,7 @@ export const DONATION_REGIONS = [
 
 export type DonationRegion = (typeof DONATION_REGIONS)[number];
 
-export interface IDonation {
+export interface Donation {
   _id: string;
   __v: number;
   donorName: string;

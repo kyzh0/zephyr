@@ -8,7 +8,7 @@ export class ApiError extends Error {
   }
 }
 
-export async function throwIfNotOk(res: Response) {
+export async function throwIfNotOk(res: Response): Promise<void> {
   if (res.ok) return;
   const body = await res.text().catch(() => '');
   const message =

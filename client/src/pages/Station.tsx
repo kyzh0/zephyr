@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { addRecentStation } from '@/services/recent-stations.service';
 import { WebcamPreview } from '@/components/webcam/WebcamPreview';
 import {
   CurrentConditions,
@@ -20,6 +19,8 @@ import {
 } from '@/components/station';
 
 import { getButtonStyle, getIconStyle, getMinutesAgo, getStationTypeName } from '@/lib/utils';
+import { addRecentStation } from '@/services/recent-stations.service';
+import { ApiError } from '@/services/api-error';
 import {
   useStationData,
   useIsMobile,
@@ -27,7 +28,6 @@ import {
   useNearbySites,
   type TimeRange
 } from '@/hooks';
-import { ApiError } from '@/services/api-error';
 import { useAppContext } from '@/context/AppContext';
 
 export default function Station() {

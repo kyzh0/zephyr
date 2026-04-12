@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { WindUnit } from '@/components/map/map.types';
-import { useNearbyStations, usePersistedState } from '@/hooks';
 
+import SEO from '@/components/SEO';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,9 +12,11 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { StationPreview } from '@/components/station/StationPreview';
-import SEO from '@/components/SEO';
 import { Button } from '@/components/ui/button';
+import { StationPreview } from '@/components/station/StationPreview';
+import type { WindUnit } from '@/components/map/map.types';
+
+import { useNearbyStations, usePersistedState } from '@/hooks';
 
 export default function GridView() {
   const navigate = useNavigate();

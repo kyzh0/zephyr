@@ -13,12 +13,31 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { useStations, useWebcams, useSites, useLandings, useSoundings } from '@/hooks';
-import { getMinutesAgo } from '@/lib/utils';
 import { AdminDonationsPanel } from '@/pages/AdminDonationsPanel';
+
+import { getMinutesAgo } from '@/lib/utils';
+import { useStations, useWebcams, useSites, useLandings, useSoundings } from '@/hooks';
 
 const STALE_CHECK_TIMESTAMP = Date.now();
 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
+function filterAndSort<T extends { name: string; isDisabled?: boolean }>(
+  items: T[],
+  search: string
+): T[] {
+  if (!items?.length) return [];
+
+  let filtered = items;
+  if (search.trim()) {
+    const query = search.toLowerCase();
+    filtered = filtered.filter((item) => item.name.toLowerCase().includes(query));
+  }
+  return [...filtered].sort((a, b) => {
+    const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
+    if (disabledDiff !== 0) return disabledDiff;
+    return a.name.localeCompare(b.name);
+  });
+}
 
 interface AdminDashboardProps {
   tab?: 'stations' | 'webcams' | 'soundings' | 'sites' | 'landings' | 'donations';
@@ -46,17 +65,10 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
   }, [tab]);
 
   const filteredStations = useMemo(() => {
-    if (!stations.length) return [];
-    let filtered = stations;
-    filtered.sort((a, b) => {
-      const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
-      if (disabledDiff !== 0) return disabledDiff;
-      return a.name.localeCompare(b.name);
-    });
-
     if (showErrorsOnly) {
-      filtered = filtered
-        .filter((s) => s.isError)
+      const query = stationSearch.trim().toLowerCase();
+      return stations
+        .filter((s) => s.isError && (!query || s.name.toLowerCase().includes(query)))
         .sort((a, b) => {
           const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
           if (disabledDiff !== 0) return disabledDiff;
@@ -65,30 +77,17 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
           return a.name.localeCompare(b.name);
         });
     }
-    if (stationSearch.trim()) {
-      const query = stationSearch.toLowerCase();
-      filtered = filtered.filter((s) => s.name.toLowerCase().includes(query));
-    }
-    return filtered;
+    return filterAndSort(stations, stationSearch);
   }, [stations, stationSearch, showErrorsOnly]);
 
   const errorCount = useMemo(() => {
     return stations.filter((s) => s.isError).length;
   }, [stations]);
 
-  const filteredWebcams = useMemo(() => {
-    if (!webcams?.length) return [];
-    let filtered = webcams;
-    if (webcamSearch.trim()) {
-      const query = webcamSearch.toLowerCase();
-      filtered = filtered.filter((w) => w.name.toLowerCase().includes(query));
-    }
-    return filtered.sort((a, b) => {
-      const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
-      if (disabledDiff !== 0) return disabledDiff;
-      return a.name.localeCompare(b.name);
-    });
-  }, [webcams, webcamSearch]);
+  const filteredWebcams = useMemo(
+    () => filterAndSort(webcams, webcamSearch),
+    [webcams, webcamSearch]
+  );
 
   const filteredSoundings = useMemo(() => {
     if (!soundings.length) return [];
@@ -97,33 +96,12 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
     return soundings.filter((s) => s.name.toLowerCase().includes(query));
   }, [soundings, soundingSearch]);
 
-  const filteredSites = useMemo(() => {
-    if (!sites?.length) return [];
+  const filteredSites = useMemo(() => filterAndSort(sites, siteSearch), [sites, siteSearch]);
 
-    let filtered = sites;
-    if (siteSearch.trim())
-      filtered = filtered.filter((s) => s.name.toLowerCase().includes(siteSearch.toLowerCase()));
-
-    return filtered.sort((a, b) => {
-      const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
-      if (disabledDiff !== 0) return disabledDiff;
-      return a.name.localeCompare(b.name);
-    });
-  }, [sites, siteSearch]);
-
-  const filteredLandings = useMemo(() => {
-    if (!landings?.length) return [];
-
-    let filtered = landings;
-    if (landingSearch.trim())
-      filtered = filtered.filter((s) => s.name.toLowerCase().includes(landingSearch.toLowerCase()));
-
-    return filtered.sort((a, b) => {
-      const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
-      if (disabledDiff !== 0) return disabledDiff;
-      return a.name.localeCompare(b.name);
-    });
-  }, [landings, landingSearch]);
+  const filteredLandings = useMemo(
+    () => filterAndSort(landings, landingSearch),
+    [landings, landingSearch]
+  );
 
   const handleSignOut = () => {
     sessionStorage.removeItem('adminKey');

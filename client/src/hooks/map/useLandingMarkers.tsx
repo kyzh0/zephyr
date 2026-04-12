@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
+
 import { LandingMarker } from '@/components/map/LandingMarker';
 import { getLandingGeoJson, escapeHtml, POPUP_OFFSET } from '@/components/map';
-import { useNavigate } from 'react-router-dom';
+
 import { useLandings } from '../useLandings';
 
 interface UseLandingMarkersOptions {
@@ -12,7 +14,17 @@ interface UseLandingMarkersOptions {
   isVisible: boolean;
 }
 
-export function useLandingMarkers({ map, isMapLoaded, isVisible }: UseLandingMarkersOptions) {
+export interface UseLandingMarkersResult {
+  markers: React.RefObject<{ marker: HTMLDivElement; popup: mapboxgl.Popup }[]>;
+  setVisibility: (visible: boolean) => void;
+  setTransparent: (transparent: boolean) => void;
+}
+
+export function useLandingMarkers({
+  map,
+  isMapLoaded,
+  isVisible
+}: UseLandingMarkersOptions): UseLandingMarkersResult {
   const navigate = useNavigate();
   const { landings, isLoading: landingsLoading } = useLandings();
   const markersRef = useRef<{ marker: HTMLDivElement; popup: mapboxgl.Popup }[]>([]);

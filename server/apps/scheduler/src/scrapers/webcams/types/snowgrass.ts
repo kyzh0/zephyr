@@ -1,9 +1,9 @@
-import { httpClient, logger, type CamAttrs, type WithId } from '@zephyr/shared';
+import { httpClient, logger, type WebcamAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
-export default async function scrapeSnowgrassData(cams: WithId<CamAttrs>[]): Promise<void> {
-  const cam = cams[0];
-  if (!cam) {
+export default async function scrapeSnowgrassData(webcams: WithId<WebcamAttrs>[]): Promise<void> {
+  const webcam = webcams[0];
+  if (!webcam) {
     return;
   }
 
@@ -20,14 +20,14 @@ export default async function scrapeSnowgrassData(cams: WithId<CamAttrs>[]): Pro
     updated = lastModified ? new Date(lastModified) : new Date();
 
     // skip if image already up to date
-    if (updated > new Date(cam.lastUpdate)) {
+    if (updated > new Date(webcam.lastUpdate)) {
       base64 = Buffer.from(response.data).toString('base64');
     }
 
-    await processScrapedData(cam, updated, base64);
+    await processScrapedData(webcam, updated, base64);
   } catch {
     logger.warn('snowgrass error', {
-      service: 'cam',
+      service: 'webcam',
       type: 'snowgrass'
     });
   }

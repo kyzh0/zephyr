@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Copy, Loader2, Medal } from 'lucide-react';
 import { toast } from 'sonner';
+
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
+
 import { useLeaderboard } from '@/hooks';
 
 function PlaceMedal({ rank }: { rank: number }) {

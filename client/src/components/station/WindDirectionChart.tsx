@@ -9,6 +9,7 @@ import {
   Area,
   Line
 } from 'recharts';
+
 import type { ExtendedStationData } from './types';
 
 interface WindDirectionChartProps {

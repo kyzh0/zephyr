@@ -2,7 +2,7 @@ import pLimit from 'p-limit';
 import { fromZonedTime } from 'date-fns-tz';
 import { parse } from 'date-fns';
 
-import { httpClient, logger, type CamAttrs, type WithId } from '@zephyr/shared';
+import { httpClient, logger, type WebcamAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
 type SrsResponse = {
@@ -13,18 +13,18 @@ type SrsResponse = {
   }[];
 };
 
-export default async function scrapeSrsData(cams: WithId<CamAttrs>[]): Promise<void> {
+export default async function scrapeSrsData(webcams: WithId<WebcamAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(
-    cams.map((cam) =>
+    webcams.map((webcam) =>
       limit(async () => {
         try {
           let updated: Date | null = null;
           let base64: string | null = null;
 
           const { data } = await httpClient.get<SrsResponse>(
-            `https://hills.treshna.com/get_imagelist?camera=${cam.externalId}`
+            `https://hills.treshna.com/get_imagelist?camera=${webcam.externalId}`
           );
           if (data && data.images.length) {
             const img = data.images[data.images.length - 1];
@@ -40,10 +40,10 @@ export default async function scrapeSrsData(cams: WithId<CamAttrs>[]): Promise<v
             );
           }
 
-          await processScrapedData(cam, updated, base64);
+          await processScrapedData(webcam, updated, base64);
         } catch {
-          logger.warn(`summit road society error - ${cam.externalId}`, {
-            service: 'cam',
+          logger.warn(`summit road society error - ${webcam.externalId}`, {
+            service: 'webcam',
             type: 'srs'
           });
         }

@@ -65,7 +65,7 @@ async function main() {
   const [stations, sites, webcams, soundings, landings] = await Promise.all([
     fetchJson('/stations'),
     fetchJson('/sites'),
-    fetchJson('/cams'),
+    fetchJson('/webcams'),
     fetchJson('/soundings'),
     fetchJson('/landings')
   ]);

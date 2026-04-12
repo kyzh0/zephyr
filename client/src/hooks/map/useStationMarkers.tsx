@@ -19,7 +19,7 @@ import { getWindDirectionFromBearing, REFRESH_INTERVAL_MS } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
 import { loadAllStationDataAtTimestamp } from '@/services/station.service';
 import { stationKeys, useStations } from '@/hooks';
-import type { IHistoricalStationData } from '@/models/station-data.model';
+import type { HistoricalStationData } from '@/models/station-data.model';
 import { ApiError } from '@/services/api-error';
 
 interface UseStationMarkersOptions {
@@ -450,9 +450,9 @@ export function useStationMarkers({
   }, [sport, rerenderAllMarkers]);
 
   // Cache historical responses by timestamp to avoid refetching when user revisits a time
-  const historicalCacheRef = useRef<
-    Map<number, { time: string; values: IHistoricalStationData[] }>
-  >(new Map());
+  const historicalCacheRef = useRef<Map<number, { time: string; values: HistoricalStationData[] }>>(
+    new Map()
+  );
   const MAX_HISTORICAL_CACHE = 50;
 
   // Render historical data at a specific timestamp
@@ -484,9 +484,7 @@ export function useStationMarkers({
 
       // Update each marker with historical data
       for (const item of markersRef.current) {
-        const stationData = data.values.find(
-          (d: IHistoricalStationData) => d.id === item.marker.id
-        );
+        const stationData = data.values.find((d: HistoricalStationData) => d.id === item.marker.id);
 
         // Use data if found, otherwise show empty state
         const windAverage = stationData?.windAverage ?? null;

@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 import authRoute from './routes/authRoute';
-import camRoute from './routes/camRoute';
+import webcamRoute from './routes/webcamRoute';
 import landingRoute from './routes/landingRoute';
 import publicRoute from './routes/publicRoute';
 import siteRoute from './routes/siteRoute';
@@ -17,7 +17,9 @@ if (NODE_ENV !== 'production' && NODE_ENV !== 'staging') {
 }
 
 const app = express();
-app.use(cors({ origin: [/zephyrapp\.nz$/, /^http(s)?:\/\/localhost:\d{4}.*$/] }));
+app.use(
+  cors({ origin: [/^https:\/\/([a-z0-9-]+\.)*zephyrapp\.nz$/, /^http(s)?:\/\/localhost:\d{4}$/] })
+);
 app.use(express.json());
 
 // static files are served by caddy in prod
@@ -27,7 +29,7 @@ if (NODE_ENV !== 'production' && NODE_ENV !== 'staging') {
 
 // routes
 app.use('/auth', authRoute);
-app.use('/cams', camRoute);
+app.use('/webcams', webcamRoute);
 app.use('/landings', landingRoute);
 app.use('/v1', publicRoute);
 app.use('/sites', siteRoute);

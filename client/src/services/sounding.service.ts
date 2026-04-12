@@ -1,16 +1,16 @@
-import type { ISounding } from '@/models/sounding.model';
+import type { Sounding } from '@/models/sounding.model';
 import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
-export async function getSoundingById(id: string) {
+export async function getSoundingById(id: string): Promise<Sounding> {
   const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/soundings/${id}`);
   await throwIfNotOk(res);
-  return (await res.json()) as ISounding;
+  return (await res.json()) as Sounding;
 }
 
-export async function listSoundings() {
+export async function listSoundings(): Promise<Sounding[]> {
   const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/soundings`);
   await throwIfNotOk(res);
-  return (await res.json()) as ISounding[];
+  return (await res.json()) as Sounding[];
 }
 
 export async function patchSounding(
@@ -45,7 +45,7 @@ export async function deleteSounding(id: string): Promise<void> {
   await throwIfNotOk(res);
 }
 
-export async function addSounding(sounding: Partial<ISounding>): Promise<void> {
+export async function addSounding(sounding: Partial<Sounding>): Promise<void> {
   const res = await fetch(
     `${import.meta.env.VITE_API_PREFIX}/soundings?${getKeyQueryThrowIfInvalid()}`,
     {

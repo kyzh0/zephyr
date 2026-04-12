@@ -1,17 +1,17 @@
-import type { ILocation } from './location.model';
+import type { GeoPoint } from './location.model';
 
-export interface ISite {
+export interface Site {
   _id: string;
   __v: number;
 
   name: string;
-  location: ILocation;
+  location: GeoPoint;
   elevation: number;
   validBearings: string;
   landings: {
     landingId: string;
     landingName: string;
-    landingLocation: ILocation;
+    landingLocation: GeoPoint;
   }[];
   isDisabled: boolean;
 
@@ -24,7 +24,7 @@ export interface ISite {
 
 export interface CreateSiteDto {
   name: string;
-  location: ILocation;
+  location: GeoPoint;
   elevation: number;
   validBearings: string;
   landingIds: string[];
@@ -42,7 +42,7 @@ export interface UpdateSiteDto {
   __v: number;
 
   name: string;
-  location: ILocation;
+  location: GeoPoint;
   elevation: number;
   validBearings: string;
   landingIds: string[];

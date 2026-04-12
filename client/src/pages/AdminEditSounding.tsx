@@ -34,7 +34,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
-import { RASP_REGIONS, type ISounding } from '@/models/sounding.model';
+import { RASP_REGIONS, type Sounding } from '@/models/sounding.model';
 import { ApiError } from '@/services/api-error';
 import { useSounding, useUpdateSounding, useDeleteSounding } from '@/hooks';
 
@@ -173,7 +173,7 @@ function SoundingForm({
   onSubmit,
   isPending
 }: {
-  sounding: ISounding;
+  sounding: Sounding;
   onSubmit: (values: FormValues) => void;
   isPending: boolean;
 }) {

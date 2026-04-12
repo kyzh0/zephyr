@@ -2,7 +2,15 @@ import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 import mongoose, { QueryFilter } from 'mongoose';
 
-import { User, Site, SiteDoc, type SiteAttrs, type WithId, type GeoPoint } from '@zephyr/shared';
+import {
+  User,
+  Site,
+  SiteDoc,
+  type SiteAttrs,
+  type WithId,
+  type GeoPoint,
+  isValidLonLat
+} from '@zephyr/shared';
 
 const router = express.Router();
 
@@ -29,22 +37,6 @@ type CreateSiteDto = Omit<SiteAttrs, 'landings'> & {
   landingIds: string[];
 };
 type UpdateSiteDto = WithId<CreateSiteDto>;
-
-function isValidLonLat(coords: unknown): coords is [number, number] {
-  if (!Array.isArray(coords) || coords.length !== 2) {
-    return false;
-  }
-  const lon = Number(coords[0]);
-  const lat = Number(coords[1]);
-  return (
-    Number.isFinite(lon) &&
-    Number.isFinite(lat) &&
-    lon >= -180 &&
-    lon <= 180 &&
-    lat >= -90 &&
-    lat <= 90
-  );
-}
 
 // get sites
 router.get(

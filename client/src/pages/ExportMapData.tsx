@@ -9,11 +9,9 @@ import { format, startOfDay, endOfDay } from 'date-fns';
 import { fromZonedTime } from 'date-fns-tz';
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
+import { toast } from 'sonner';
 
-import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks';
-import { exportXlsx } from '@/services/public.service';
-
+import SEO from '@/components/SEO';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Form,
@@ -29,8 +27,10 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toast } from 'sonner';
-import SEO from '@/components/SEO';
+
+import { cn } from '@/lib/utils';
+import { exportXlsx } from '@/services/public.service';
+import { useIsMobile } from '@/hooks';
 
 const DEFAULT_LON = 172.5;
 const DEFAULT_LAT = -42;

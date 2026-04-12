@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
+
 import { SiteMarker } from '@/components/map/SiteMarker';
 import { getSiteGeoJson, escapeHtml, POPUP_OFFSET } from '@/components/map';
-import { useNavigate } from 'react-router-dom';
-import { useSites } from '../useSites';
+
 import { isWindBearingInRange } from '@/lib/utils';
+import { useSites } from '../useSites';
 
 interface UseSiteMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -13,7 +15,17 @@ interface UseSiteMarkersOptions {
   isVisible: boolean;
 }
 
-export function useSiteMarkers({ map, isMapLoaded, isVisible }: UseSiteMarkersOptions) {
+export interface UseSiteMarkersResult {
+  markers: React.RefObject<{ marker: HTMLDivElement; popup: mapboxgl.Popup }[]>;
+  setVisibility: (visible: boolean) => void;
+  setWindDirectionFilter: (bearing: number | null) => void;
+}
+
+export function useSiteMarkers({
+  map,
+  isMapLoaded,
+  isVisible
+}: UseSiteMarkersOptions): UseSiteMarkersResult {
   const navigate = useNavigate();
   const { sites, isLoading: sitesLoading } = useSites();
   const markersRef = useRef<{ marker: HTMLDivElement; popup: mapboxgl.Popup }[]>([]);

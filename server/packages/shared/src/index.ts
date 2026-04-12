@@ -7,7 +7,7 @@ export * from './lib/httpClient';
 export * from './lib/logger';
 export * from './lib/utils';
 
-export * from './models/camModel';
+export * from './models/webcamModel';
 export * from './models/clientModel';
 export * from './models/donationModel';
 export * from './models/landingModel';

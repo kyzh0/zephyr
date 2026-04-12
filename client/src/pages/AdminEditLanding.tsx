@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/form';
 
 import { useLanding, useUpdateLanding, useDeleteLanding } from '@/hooks';
-import type { ILanding } from '@/models/landing.model';
+import type { Landing } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
 
@@ -106,7 +106,7 @@ export default function AdminEditLanding() {
   function handleSubmit(values: FormValues) {
     if (!id || !landing) return;
 
-    const updates: Partial<ILanding> = {
+    const updates: Partial<Landing> = {
       name: values.name,
       elevation: parseInt(values.elevation, 10),
       isDisabled: values.isDisabled,
@@ -199,7 +199,7 @@ function LandingForm({
   onSubmit,
   isPending
 }: {
-  landing: ILanding;
+  landing: Landing;
   onSubmit: (values: FormValues) => void;
   isPending: boolean;
 }) {

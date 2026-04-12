@@ -1,15 +1,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { convertWindSpeed } from '../map';
-import { getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
-import { useAppContext } from '@/context/AppContext';
-import { usePersistedState } from '@/hooks';
 import DirectionArrow from '../ui/DirectionArrow';
 import type { WindUnit } from './types';
-import type { IStation } from '@/models/station.model';
+
+import { getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
+import type { Station } from '@/models/station.model';
+import { useAppContext } from '@/context/AppContext';
+import { usePersistedState } from '@/hooks';
 
 export const StationPreview: React.FC<{
-  data: IStation;
+  data: Station;
   distance: number | undefined;
 }> = ({ data, distance }) => {
   const navigate = useNavigate();
@@ -52,9 +54,7 @@ export const StationPreview: React.FC<{
         )}
         <p className="text-sm">{getWindDirectionFromBearing(data.currentBearing ?? -1)}</p>
       </div>
-      {distance && (
-        <p className="text-xs text-muted-foreground">{(distance / 1000).toFixed(1)} km away</p>
-      )}
+      {distance && <p className="text-xs">{(distance / 1000).toFixed(1)} km away</p>}
     </button>
   );
 };

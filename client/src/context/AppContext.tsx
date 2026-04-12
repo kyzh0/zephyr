@@ -1,6 +1,8 @@
 import { createContext, use, useCallback, useMemo, type ReactNode } from 'react';
-import { usePersistedState } from '@/hooks';
+
 import { type SportType } from '@/components/map';
+
+import { usePersistedState } from '@/hooks';
 
 interface AppContextType {
   flyingMode: boolean;

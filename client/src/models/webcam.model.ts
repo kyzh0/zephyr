@@ -1,23 +1,21 @@
-import type { ILocation } from './location.model';
+import type { GeoPoint } from './location.model';
 
-interface ICam {
+export interface Webcam {
   _id: string;
   currentTime: string;
   currentUrl: string;
   externalId: string;
   externalLink: string;
   lastUpdate: string;
-  location: ILocation;
+  location: GeoPoint;
   name: string;
   type: string;
   isDisabled?: boolean;
   __v?: number;
 }
 
-interface ICamImage {
+export interface WebcamImage {
   time: string;
   url: string;
   _id: string;
 }
-
-export type { ICam, ICamImage };

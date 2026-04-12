@@ -2,19 +2,19 @@ import cron from 'node-cron';
 
 import { runScraper } from './orchestrator';
 import { logger } from '@zephyr/shared';
-import { removeOldImages } from '@/services/camService';
+import { removeOldImages } from '@/services/webcamService';
 
-export async function startCamScheduler(): Promise<void> {
+export async function startWebcamScheduler(): Promise<void> {
   logger.info('----- Initialising webcam scheduler -----', {
-    service: 'cam'
+    service: 'webcam'
   });
 
-  // cams
+  // webcams
   cron.schedule(
     '*/10 * * * *',
     async () => {
       logger.info('----- Starting webcam scraper -----', {
-        service: 'cam'
+        service: 'webcam'
       });
 
       const ts = Date.now();
@@ -22,7 +22,7 @@ export async function startCamScheduler(): Promise<void> {
 
       logger.info(
         `----- Webcam scraper finished, ${Math.floor((Date.now() - ts) / 1000)}s elapsed -----`,
-        { service: 'cam' }
+        { service: 'webcam' }
       );
     },
     { noOverlap: true }

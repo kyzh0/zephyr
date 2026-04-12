@@ -3,10 +3,11 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { Toaster } from './components/ui/sonner';
+
 import './index.css';
 import { router } from './router';
 import { AppProvider } from './context/AppContext';
-import { Toaster } from './components/ui/sonner';
 
 const queryClient = new QueryClient({
   defaultOptions: {

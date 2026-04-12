@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/form';
 
 import { useStation, useUpdateStation, useDeleteStation } from '@/hooks';
-import type { IStation } from '@/models/station.model';
+import type { Station } from '@/models/station.model';
 import { lookupElevation } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
 
@@ -191,7 +191,7 @@ export default function AdminEditStation() {
     }
 
     updateMutation.mutate(
-      { id, updates: { patch, remove } as unknown as Partial<IStation> },
+      { id, updates: { patch, remove } as unknown as Partial<Station> },
       {
         onSuccess: () => {
           toast.success('Station updated');
@@ -268,7 +268,7 @@ function StationForm({
   onSubmit,
   isPending
 }: {
-  station: IStation;
+  station: Station;
   onSubmit: (values: FormValues) => void;
   isPending: boolean;
 }) {

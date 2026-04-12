@@ -41,6 +41,22 @@ export function getWindBearingFromDirection(direction?: string | null): number {
   }
 }
 
+export function isValidLonLat(coords: unknown): coords is [number, number] {
+  if (!Array.isArray(coords) || coords.length !== 2) {
+    return false;
+  }
+  const lon = Number(coords[0]);
+  const lat = Number(coords[1]);
+  return (
+    Number.isFinite(lon) &&
+    Number.isFinite(lat) &&
+    lon >= -180 &&
+    lon <= 180 &&
+    lat >= -90 &&
+    lat <= 90
+  );
+}
+
 export function getFlooredTime(interval: number): Date {
   if (!Number.isFinite(interval) || interval <= 0) {
     return new Date();

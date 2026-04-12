@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/form';
 
 import { ApiError } from '@/services/api-error';
-import type { ICam } from '@/models/cam.model';
+import type { Webcam } from '@/models/webcam.model';
 import { useWebcam, useUpdateWebcam, useDeleteWebcam } from '@/hooks';
 
 const coordinatesSchema = z.string().refine(
@@ -62,12 +62,12 @@ function formatCoordinates(location?: { coordinates: [number, number] }): string
 export default function AdminEditWebcam() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { webcam: cam, isLoading } = useWebcam(id);
+  const { webcam, isLoading } = useWebcam(id);
   const updateMutation = useUpdateWebcam();
   const deleteMutation = useDeleteWebcam();
 
   function handleDelete() {
-    if (!id || !cam) return;
+    if (!id || !webcam) return;
     deleteMutation.mutate(id, {
       onSuccess: () => {
         toast.success('Webcam deleted');
@@ -81,7 +81,7 @@ export default function AdminEditWebcam() {
   }
 
   function handleSubmit(values: FormValues) {
-    if (!id || !cam) return;
+    if (!id || !webcam) return;
 
     const [lat, lon] = values.coordinates.replace(/\s/g, '').split(',').map(Number);
 
@@ -117,7 +117,7 @@ export default function AdminEditWebcam() {
         </Button>
         <div className="flex-1">
           <h1 className="text-xl font-semibold">Edit Webcam</h1>
-          {cam && <p className="text-sm text-muted-foreground">{cam.name}</p>}
+          {webcam && <p className="text-sm text-muted-foreground">{webcam.name}</p>}
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -134,7 +134,7 @@ export default function AdminEditWebcam() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Webcam</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{cam?.name}"? This action cannot be undone.
+                Are you sure you want to delete "{webcam?.name}"? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -152,10 +152,14 @@ export default function AdminEditWebcam() {
       </header>
 
       <main className="flex-1 p-6">
-        {isLoading || !cam ? (
+        {isLoading || !webcam ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <WebcamForm cam={cam} onSubmit={handleSubmit} isPending={updateMutation.isPending} />
+          <WebcamForm
+            webcam={webcam}
+            onSubmit={handleSubmit}
+            isPending={updateMutation.isPending}
+          />
         )}
       </main>
     </div>
@@ -163,23 +167,23 @@ export default function AdminEditWebcam() {
 }
 
 function WebcamForm({
-  cam,
+  webcam,
   onSubmit,
   isPending
 }: {
-  cam: ICam;
+  webcam: Webcam;
   onSubmit: (values: FormValues) => void;
   isPending: boolean;
 }) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: cam.name,
-      externalId: cam.externalId ?? '',
-      externalLink: cam.externalLink,
-      type: cam.type,
-      coordinates: formatCoordinates(cam.location),
-      isDisabled: cam.isDisabled ?? false
+      name: webcam.name,
+      externalId: webcam.externalId ?? '',
+      externalLink: webcam.externalLink,
+      type: webcam.type,
+      coordinates: formatCoordinates(webcam.location),
+      isDisabled: webcam.isDisabled ?? false
     }
   });
 

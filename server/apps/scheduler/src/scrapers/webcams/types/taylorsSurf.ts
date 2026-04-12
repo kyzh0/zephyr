@@ -1,9 +1,9 @@
-import { httpClient, logger, type CamAttrs, type WithId } from '@zephyr/shared';
+import { httpClient, logger, type WebcamAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
-export default async function scrapeTaylorsSurfData(cams: WithId<CamAttrs>[]): Promise<void> {
-  const cam = cams[0];
-  if (!cam) {
+export default async function scrapeTaylorsSurfData(webcams: WithId<WebcamAttrs>[]): Promise<void> {
+  const webcam = webcams[0];
+  if (!webcam) {
     return;
   }
 
@@ -16,10 +16,10 @@ export default async function scrapeTaylorsSurfData(cams: WithId<CamAttrs>[]): P
     const base64 = Buffer.from(response.data).toString('base64');
     const updated = new Date();
 
-    await processScrapedData(cam, updated, base64);
+    await processScrapedData(webcam, updated, base64);
   } catch {
     logger.warn('taylors surf error', {
-      service: 'cam',
+      service: 'webcam',
       type: 'ts'
     });
   }

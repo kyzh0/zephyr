@@ -1,10 +1,10 @@
+import { DirectionArrow } from '@/components/ui/DirectionArrow';
+import { getDirectionColor, convertWindSpeed } from './utils';
+import type { WindUnit, ExtendedStationData } from './types';
+
 import { cn, getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
 import { usePersistedState } from '@/hooks';
-import { getDirectionColor, convertWindSpeed } from './utils';
-import type { WindUnit } from './types';
 import { useAppContext } from '@/context/AppContext';
-import { DirectionArrow } from '@/components/ui/DirectionArrow';
-import type { ExtendedStationData } from './types';
 
 interface StationDataTableProps {
   tableData: ExtendedStationData[];

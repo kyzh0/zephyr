@@ -1,11 +1,11 @@
-import type { ILocation } from './location.model';
+import type { GeoPoint } from './location.model';
 
-export interface ILanding {
+export interface Landing {
   _id: string;
   __v: number;
 
   name: string;
-  location: ILocation;
+  location: GeoPoint;
   elevation: number;
   isDisabled: boolean;
 

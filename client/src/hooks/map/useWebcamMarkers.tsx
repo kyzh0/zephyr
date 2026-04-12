@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import { formatInTimeZone } from 'date-fns-tz';
 
-import { useWebcams } from '@/hooks';
 import { getWebcamGeoJson } from '@/components/map';
-import { useNavigate } from 'react-router-dom';
+
+import { useWebcams } from '@/hooks';
 
 interface UseWebcamMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;

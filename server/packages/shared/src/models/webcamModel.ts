@@ -1,33 +1,33 @@
 import mongoose, { type HydratedDocument, type Model } from 'mongoose';
 
-export type CamImage = {
+export type WebcamImage = {
   time: Date;
   url: string;
   fileSize?: number;
   hash?: string;
 };
 
-export type CamLocation = {
+export type WebcamLocation = {
   type: 'Point';
   coordinates: [number, number]; // [lng, lat]
 };
 
-export type CamAttrs = {
+export type WebcamAttrs = {
   name: string;
   type: string;
-  location: CamLocation;
+  location: WebcamLocation;
   externalLink: string;
   externalId?: string;
   lastUpdate: Date;
   currentTime?: Date;
   currentUrl?: string;
-  images: CamImage[];
+  images: WebcamImage[];
   isDisabled?: boolean;
 };
 
-export type CamDoc = HydratedDocument<CamAttrs>;
+export type WebcamDoc = HydratedDocument<WebcamAttrs>;
 
-const camSchema = new mongoose.Schema<CamAttrs>(
+const webcamSchema = new mongoose.Schema<WebcamAttrs>(
   {
     name: { type: String, required: true },
     type: { type: String, required: true },
@@ -68,6 +68,6 @@ const camSchema = new mongoose.Schema<CamAttrs>(
   }
 );
 
-camSchema.index({ isDisabled: 1 });
+webcamSchema.index({ isDisabled: 1 });
 
-export const Cam: Model<CamAttrs> = mongoose.model<CamAttrs>('Cam', camSchema);
+export const Webcam: Model<WebcamAttrs> = mongoose.model<WebcamAttrs>('Webcam', webcamSchema);

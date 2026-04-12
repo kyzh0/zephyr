@@ -2,29 +2,20 @@ import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { QueryFilter } from 'mongoose';
 
-import { User, Landing, LandingDoc, type LandingAttrs, type WithId } from '@zephyr/shared';
+import {
+  User,
+  Landing,
+  LandingDoc,
+  type LandingAttrs,
+  type WithId,
+  isValidLonLat
+} from '@zephyr/shared';
 
 const router = express.Router();
 
 type ApiKeyQuery = { key?: string };
 type IncludeDisabledQuery = { includeDisabled?: string };
 type IdParams = { id: string };
-
-function isValidLonLat(coords: unknown): coords is [number, number] {
-  if (!Array.isArray(coords) || coords.length !== 2) {
-    return false;
-  }
-  const lon = Number(coords[0]);
-  const lat = Number(coords[1]);
-  return (
-    Number.isFinite(lon) &&
-    Number.isFinite(lat) &&
-    lon >= -180 &&
-    lon <= 180 &&
-    lat >= -90 &&
-    lat <= 90
-  );
-}
 
 // get landings
 router.get(

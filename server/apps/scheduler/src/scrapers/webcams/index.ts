@@ -1,7 +1,7 @@
-import { CamAttrs, type WithId } from '@zephyr/shared';
+import { WebcamAttrs, type WithId } from '@zephyr/shared';
 
 import scrapeArthursPassData from './types/arthursPass';
-import scrapeCamFtpData from './types/camFtp';
+import scrapeWebcamFtpData from './types/webcamFtp';
 import scrapeCastleHillData from './types/castleHill';
 import scrapeCgcData from './types/cgc';
 import scrapeCheesemanData from './types/cheeseman';
@@ -16,11 +16,11 @@ import scrapeSrsData from './types/srs';
 import scrapeTaylorsSurfData from './types/taylorsSurf';
 import scrapeWanakaAirportData from './types/wanakaAirport';
 
-export type CamScraper = (cams: WithId<CamAttrs>[]) => Promise<void>;
+export type WebcamScraper = (webcams: WithId<WebcamAttrs>[]) => Promise<void>;
 
 const scrapers = {
   ap: scrapeArthursPassData,
-  camftp: scrapeCamFtpData,
+  camftp: scrapeWebcamFtpData,
   ch: scrapeCastleHillData,
   cgc: scrapeCgcData,
   cm: scrapeCheesemanData,
@@ -34,8 +34,8 @@ const scrapers = {
   srs: scrapeSrsData,
   ts: scrapeTaylorsSurfData,
   wa: scrapeWanakaAirportData
-} satisfies Record<string, CamScraper>;
+} satisfies Record<string, WebcamScraper>;
 
-export type CamScraperType = keyof typeof scrapers;
+export type WebcamScraperType = keyof typeof scrapers;
 
 export default scrapers;

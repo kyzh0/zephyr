@@ -1,9 +1,9 @@
-import type { ILocation } from './location.model';
+import type { GeoPoint } from './location.model';
 
-interface ISounding {
+export interface Sounding {
   _id: string;
   name: string;
-  location: ILocation;
+  location: GeoPoint;
   raspRegion: string;
   raspId: string;
   images: {
@@ -18,5 +18,3 @@ export const RASP_REGIONS = [
   { value: 'NZSOUTH_N', label: 'NZSOUTH_N' },
   { value: 'NZSOUTH_S', label: 'NZSOUTH_S' }
 ] as const;
-
-export type { ISounding };

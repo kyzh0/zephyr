@@ -1,6 +1,4 @@
-interface ILocation {
+export interface GeoPoint {
   type: 'Point';
   coordinates: [number, number]; // [longitude, latitude]
 }
-
-export type { ILocation };

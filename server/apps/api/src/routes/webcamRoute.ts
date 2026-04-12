@@ -2,19 +2,19 @@ import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { QueryFilter } from 'mongoose';
 
-import { User, Cam, CamAttrs, type CamImage } from '@zephyr/shared';
+import { User, Webcam, WebcamAttrs, type WebcamImage } from '@zephyr/shared';
 
 const router = express.Router();
 
-type CamsListQuery = {
+type WebcamsListQuery = {
   includeDisabled?: string;
 };
 
-type CreateCamQuery = {
+type CreateWebcamQuery = {
   key?: string;
 };
 
-type CreateCamBody = {
+type CreateWebcamBody = {
   name: string;
   type: string;
   coordinates: [number, number]; // [lng, lat]
@@ -23,7 +23,7 @@ type CreateCamBody = {
   isDisabled?: boolean;
 };
 
-type PatchCamBody = {
+type PatchWebcamBody = {
   name?: string;
   type?: string;
   coordinates?: [number, number];
@@ -38,27 +38,30 @@ type IdParams = {
 
 type ApiKeyQuery = { key?: string };
 
-type CamImagesAggResult = {
-  images: CamImage[];
+type WebcamImagesAggResult = {
+  images: WebcamImage[];
 };
 
 router.get(
   '/',
-  async (req: Request<Record<string, never>, unknown, unknown, CamsListQuery>, res: Response) => {
-    const query: QueryFilter<CamAttrs> = {};
+  async (
+    req: Request<Record<string, never>, unknown, unknown, WebcamsListQuery>,
+    res: Response
+  ) => {
+    const query: QueryFilter<WebcamAttrs> = {};
     if (String(req.query.includeDisabled).toLowerCase() !== 'true') {
       query.isDisabled = { $ne: true };
     }
 
-    const cams = await Cam.find(query, { images: 0 }).sort({ currentTime: 1 }).lean();
-    res.json(cams);
+    const webcams = await Webcam.find(query, { images: 0 }).sort({ currentTime: 1 }).lean();
+    res.json(webcams);
   }
 );
 
 router.post(
   '/',
   async (
-    req: Request<Record<string, never>, unknown, CreateCamBody, CreateCamQuery>,
+    req: Request<Record<string, never>, unknown, CreateWebcamBody, CreateWebcamQuery>,
     res: Response
   ) => {
     const user = await User.findOne({ key: req.query.key }).lean();
@@ -68,7 +71,7 @@ router.post(
     }
 
     const { name, type, coordinates, externalLink, externalId, isDisabled } = req.body;
-    const cam = new Cam({
+    const webcam = new Webcam({
       name,
       type,
       location: {
@@ -81,8 +84,8 @@ router.post(
     });
 
     try {
-      await cam.save();
-      res.header('Location', `${req.protocol}://${req.get('host')}/cams/${cam._id}`);
+      await webcam.save();
+      res.header('Location', `${req.protocol}://${req.get('host')}/webcams/${webcam._id}`);
       res.sendStatus(201);
     } catch (err) {
       res.status(500).json(err);
@@ -98,18 +101,18 @@ router.get('/:id', async (req: Request<IdParams>, res: Response) => {
     return;
   }
 
-  const cam = await Cam.findOne({ _id: new ObjectId(id) }, { images: 0 }).lean();
-  if (!cam) {
+  const webcam = await Webcam.findOne({ _id: new ObjectId(id) }, { images: 0 }).lean();
+  if (!webcam) {
     res.sendStatus(404);
     return;
   }
 
-  res.json(cam);
+  res.json(webcam);
 });
 
 router.patch(
   '/:id',
-  async (req: Request<IdParams, PatchCamBody, unknown, ApiKeyQuery>, res: Response) => {
+  async (req: Request<IdParams, PatchWebcamBody, unknown, ApiKeyQuery>, res: Response) => {
     const { id } = req.params;
 
     const user = await User.findOne({ key: req.query.key }).lean();
@@ -123,37 +126,37 @@ router.patch(
       return;
     }
 
-    const cam = await Cam.findOne({ _id: new ObjectId(id) });
-    if (!cam) {
+    const webcam = await Webcam.findOne({ _id: new ObjectId(id) });
+    if (!webcam) {
       res.sendStatus(404);
       return;
     }
 
     const { name, type, coordinates, externalLink, externalId, isDisabled } =
-      req.body as PatchCamBody;
+      req.body as PatchWebcamBody;
 
     if (name !== undefined) {
-      cam.name = name;
+      webcam.name = name;
     }
     if (type !== undefined) {
-      cam.type = type;
+      webcam.type = type;
     }
     if (coordinates !== undefined) {
-      cam.location = { type: 'Point', coordinates };
+      webcam.location = { type: 'Point', coordinates };
     }
     if (externalLink !== undefined) {
-      cam.externalLink = externalLink;
+      webcam.externalLink = externalLink;
     }
     if (externalId !== undefined) {
-      cam.externalId = externalId;
+      webcam.externalId = externalId;
     }
     if (isDisabled !== undefined) {
-      cam.isDisabled = isDisabled;
+      webcam.isDisabled = isDisabled;
     }
 
     try {
-      await cam.save();
-      const updated = await Cam.findById(id, { images: 0 }).lean();
+      await webcam.save();
+      const updated = await Webcam.findById(id, { images: 0 }).lean();
       res.json(updated);
     } catch (err) {
       res.status(500).json(err);
@@ -177,13 +180,13 @@ router.delete(
       return;
     }
 
-    const cam = await Cam.findOne({ _id: new ObjectId(id) }).lean();
-    if (!cam) {
+    const webcam = await Webcam.findOne({ _id: new ObjectId(id) }).lean();
+    if (!webcam) {
       res.sendStatus(404);
       return;
     }
 
-    await Cam.deleteOne({ _id: new ObjectId(id) });
+    await Webcam.deleteOne({ _id: new ObjectId(id) });
     res.sendStatus(204);
   }
 );
@@ -196,7 +199,7 @@ router.get('/:id/images', async (req: Request<IdParams>, res: Response) => {
     return;
   }
 
-  const result = await Cam.aggregate<CamImagesAggResult>([
+  const result = await Webcam.aggregate<WebcamImagesAggResult>([
     { $match: { _id: new ObjectId(id) } },
     {
       $project: {

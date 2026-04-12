@@ -2,7 +2,7 @@ import pLimit from 'p-limit';
 import { fromZonedTime } from 'date-fns-tz';
 import { parse } from 'date-fns';
 
-import { httpClient, logger, type CamAttrs, type WithId } from '@zephyr/shared';
+import { httpClient, logger, type WebcamAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
 type LakeWanakaResponse = {
@@ -12,18 +12,18 @@ type LakeWanakaResponse = {
   };
 };
 
-export default async function scrapeLakeWanakaData(cams: WithId<CamAttrs>[]): Promise<void> {
+export default async function scrapeLakeWanakaData(webcams: WithId<WebcamAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(
-    cams.map((cam) =>
+    webcams.map((webcam) =>
       limit(async () => {
         try {
           let updated: Date | null = null;
           let base64: string | null = null;
 
           const { data } = await httpClient.get<LakeWanakaResponse>(
-            `https://api.lakewanaka.co.nz/webcam/feed/${cam.externalId}`
+            `https://api.lakewanaka.co.nz/webcam/feed/${webcam.externalId}`
           );
 
           const d = data.latest_image;
@@ -34,7 +34,7 @@ export default async function scrapeLakeWanakaData(cams: WithId<CamAttrs>[]): Pr
             );
 
             // skip if image already up to date
-            if (updated > new Date(cam.lastUpdate) && d.url) {
+            if (updated > new Date(webcam.lastUpdate) && d.url) {
               const response = await httpClient.get<ArrayBuffer>(d.url, {
                 responseType: 'arraybuffer'
               });
@@ -42,10 +42,10 @@ export default async function scrapeLakeWanakaData(cams: WithId<CamAttrs>[]): Pr
             }
           }
 
-          await processScrapedData(cam, updated, base64);
+          await processScrapedData(webcam, updated, base64);
         } catch {
-          logger.warn(`lake wanaka error - ${cam.externalId}`, {
-            service: 'cam',
+          logger.warn(`lake wanaka error - ${webcam.externalId}`, {
+            service: 'webcam',
             type: 'lw'
           });
         }

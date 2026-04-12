@@ -8,12 +8,13 @@ import { SiteMarker } from './SiteMarker';
 import { LandingMarker } from './LandingMarker';
 import { StationMarker } from './StationMarker';
 
-import { cn } from '@/lib/utils';
 import type { WindUnit } from '../station';
-import type { IStation } from '@/models/station.model';
-import type { ISite } from '@/models/site.model';
-import type { ILanding } from '@/models/landing.model';
-import type { ICam } from '@/models/cam.model';
+
+import { cn } from '@/lib/utils';
+import type { Station } from '@/models/station.model';
+import type { Site } from '@/models/site.model';
+import type { Landing } from '@/models/landing.model';
+import type { Webcam } from '@/models/webcam.model';
 import { useStations, useWebcams, useSites, useLandings, usePersistedState } from '@/hooks';
 import { useAppContext } from '@/context/AppContext';
 
@@ -23,10 +24,10 @@ interface SearchBarProps {
 }
 
 type SearchResult =
-  | { type: 'station'; item: IStation }
-  | { type: 'site'; item: ISite }
-  | { type: 'landing'; item: ILanding }
-  | { type: 'webcam'; item: ICam };
+  | { type: 'station'; item: Station }
+  | { type: 'site'; item: Site }
+  | { type: 'landing'; item: Landing }
+  | { type: 'webcam'; item: Webcam };
 
 export function SearchBar({ className, disabled }: SearchBarProps) {
   const navigate = useNavigate();
@@ -70,8 +71,8 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
       .map((landing) => ({ type: 'landing' as const, item: landing }));
 
     const filteredWebcams: SearchResult[] = webcams
-      .filter((cam) => cam.name.toLowerCase().includes(lowerQuery))
-      .map((cam) => ({ type: 'webcam' as const, item: cam }));
+      .filter((webcam) => webcam.name.toLowerCase().includes(lowerQuery))
+      .map((webcam) => ({ type: 'webcam' as const, item: webcam }));
 
     // Combine and limit results
     const combined = [
@@ -191,7 +192,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
             <Input
               ref={inputRef}
               type="text"
-              placeholder={'Stations, sites, cams'}
+              placeholder={'Stations, sites, webcams'}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}

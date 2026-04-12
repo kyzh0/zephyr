@@ -2,21 +2,21 @@ import pLimit from 'p-limit';
 import { fromZonedTime } from 'date-fns-tz';
 import { parse } from 'date-fns';
 
-import { httpClient, logger, type CamAttrs, type WithId } from '@zephyr/shared';
+import { httpClient, logger, type WebcamAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
-export default async function scrapeCheesemanData(cams: WithId<CamAttrs>[]): Promise<void> {
+export default async function scrapeCheesemanData(webcams: WithId<WebcamAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(
-    cams.map((cam) =>
+    webcams.map((webcam) =>
       limit(async () => {
         try {
           let updated: Date | null = null;
           let base64: string | null = null;
 
           const { data } = await httpClient.get<string>(
-            `https://www.mtcheeseman.co.nz/wp-content/webcam-player/?cam=${cam.externalId}`
+            `https://www.mtcheeseman.co.nz/wp-content/webcam-player/?cam=${webcam.externalId}`
           );
 
           if (data.length) {
@@ -35,7 +35,7 @@ export default async function scrapeCheesemanData(cams: WithId<CamAttrs>[]): Pro
                 );
 
                 // skip if image already up to date
-                if (updated > new Date(cam.lastUpdate)) {
+                if (updated > new Date(webcam.lastUpdate)) {
                   const response = await httpClient.get<ArrayBuffer>(
                     `https://www.mtcheeseman.co.nz${url}`,
                     { responseType: 'arraybuffer' }
@@ -46,10 +46,10 @@ export default async function scrapeCheesemanData(cams: WithId<CamAttrs>[]): Pro
             }
           }
 
-          await processScrapedData(cam, updated, base64);
+          await processScrapedData(webcam, updated, base64);
         } catch {
-          logger.warn(`cheeseman error - ${cam.externalId}`, {
-            service: 'cam',
+          logger.warn(`cheeseman error - ${webcam.externalId}`, {
+            service: 'webcam',
             type: 'cm'
           });
         }

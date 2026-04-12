@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 import { logger } from '@zephyr/shared';
 import { startStationScheduler } from './scrapers/stations/scheduler';
-import { startCamScheduler } from './scrapers/cams/scheduler';
+import { startWebcamScheduler } from './scrapers/webcams/scheduler';
 import { startSoundingScheduler } from './scrapers/soundings/scheduler';
 
 const { NODE_ENV } = process.env;
@@ -24,7 +24,7 @@ try {
   await mongoose.connect(DB_CONNECTION_STRING);
 
   await startStationScheduler();
-  await startCamScheduler();
+  await startWebcamScheduler();
   await startSoundingScheduler();
 } catch (error) {
   logger.error(error);

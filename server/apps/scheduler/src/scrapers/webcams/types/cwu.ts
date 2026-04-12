@@ -1,13 +1,13 @@
 import pLimit from 'p-limit';
 
-import { httpClient, logger, type CamAttrs, type WithId } from '@zephyr/shared';
+import { httpClient, logger, type WebcamAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
-export default async function scrapeCwuData(cams: WithId<CamAttrs>[]): Promise<void> {
+export default async function scrapeCwuData(webcams: WithId<WebcamAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(
-    cams.map((cam) =>
+    webcams.map((webcam) =>
       limit(async () => {
         try {
           let updated: Date | null = null;
@@ -55,7 +55,7 @@ export default async function scrapeCwuData(cams: WithId<CamAttrs>[]): Promise<v
           }
 
           const response = await httpClient.get<ArrayBuffer>(
-            `https://cwu.co.nz/temp/seeit-${cam.externalId}-${day}-${month}-${year}-${hour}-${minute}.jpg`,
+            `https://cwu.co.nz/temp/seeit-${webcam.externalId}-${day}-${month}-${year}-${hour}-${minute}.jpg`,
             { responseType: 'arraybuffer' }
           );
 
@@ -65,10 +65,10 @@ export default async function scrapeCwuData(cams: WithId<CamAttrs>[]): Promise<v
             updated = new Date();
           }
 
-          await processScrapedData(cam, updated, base64);
+          await processScrapedData(webcam, updated, base64);
         } catch {
-          logger.warn(`cwu error - ${cam.externalId}`, {
-            service: 'cam',
+          logger.warn(`cwu error - ${webcam.externalId}`, {
+            service: 'webcam',
             type: 'cwu'
           });
         }

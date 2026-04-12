@@ -1,45 +1,51 @@
-import type { IHistoricalStationData, IStationData } from '@/models/station-data.model';
-import type { INewStation, IStation } from '@/models/station.model';
+import type { HistoricalStationData, StationData } from '@/models/station-data.model';
+import type { NewStation, Station } from '@/models/station.model';
 import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
-export async function getStationById(id: string) {
+export async function getStationById(id: string): Promise<Station> {
   const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/stations/${id}`);
   await throwIfNotOk(res);
-  return (await res.json()) as IStation;
+  return (await res.json()) as Station;
 }
 
-export async function listStations(includeDisabled: boolean) {
+export async function listStations(includeDisabled: boolean): Promise<Station[]> {
   let url = `${import.meta.env.VITE_API_PREFIX}/stations`;
   if (includeDisabled) {
     url += '?includeDisabled=true';
   }
   const res = await fetch(url);
   await throwIfNotOk(res);
-  return (await res.json()) as IStation[];
+  return (await res.json()) as Station[];
 }
 
-export async function loadStationData(id: string, isHighResolution: boolean) {
+export async function loadStationData(
+  id: string,
+  isHighResolution: boolean
+): Promise<StationData[]> {
   let url = `${import.meta.env.VITE_API_PREFIX}/stations/${id}/data`;
   if (isHighResolution) {
     url += '?hr=true';
   }
   const res = await fetch(url);
   await throwIfNotOk(res);
-  return (await res.json()) as IStationData;
+  return (await res.json()) as StationData[];
 }
 
-export async function loadAllStationDataAtTimestamp(time: Date) {
+export async function loadAllStationDataAtTimestamp(time: Date): Promise<{
+  time: string;
+  values: HistoricalStationData[];
+}> {
   const res = await fetch(
     `${import.meta.env.VITE_API_PREFIX}/stations/data?time=${time.toISOString()}`
   );
   await throwIfNotOk(res);
   return (await res.json()) as {
     time: string;
-    values: IHistoricalStationData[];
+    values: HistoricalStationData[];
   };
 }
 
-export async function addStation(station: INewStation): Promise<void> {
+export async function addStation(station: NewStation): Promise<void> {
   const res = await fetch(
     `${import.meta.env.VITE_API_PREFIX}/stations?${getKeyQueryThrowIfInvalid()}`,
     {
@@ -53,7 +59,7 @@ export async function addStation(station: INewStation): Promise<void> {
   await throwIfNotOk(res);
 }
 
-export async function patchStation(id: string, updates: Partial<IStation>): Promise<void> {
+export async function patchStation(id: string, updates: Partial<Station>): Promise<void> {
   const res = await fetch(
     `${import.meta.env.VITE_API_PREFIX}/stations/${id}?${getKeyQueryThrowIfInvalid()}`,
     {

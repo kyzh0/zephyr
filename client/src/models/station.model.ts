@@ -1,10 +1,10 @@
-import type { ILocation } from './location.model';
+import type { GeoPoint } from './location.model';
 
-interface IStation {
+export interface Station {
   _id: string;
   name: string;
   type: string;
-  location: ILocation;
+  location: GeoPoint;
   externalLink: string;
   externalId: string;
   currentAverage?: number;
@@ -32,7 +32,7 @@ interface IStation {
   popupMessage?: string;
 }
 
-interface INewStation {
+export interface NewStation {
   name: string;
   type: string;
   coordinates: [number, number];
@@ -63,5 +63,3 @@ export const STATION_TYPES = [
   { value: 'windy', label: 'Windy' },
   { value: 'wl', label: 'Weatherlink' }
 ] as const;
-
-export type { IStation, INewStation };

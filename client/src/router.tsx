@@ -1,7 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Outlet } from 'react-router-dom';
-import { usePageTracking } from './hooks/usePageTracking';
 
-// Import the route components we've created
 import Map from './pages/Map';
 import Station from './pages/Station';
 import Webcam from './pages/Webcam';
@@ -12,25 +12,31 @@ import GridView from './pages/GridView';
 import HelpDialog from './pages/HelpDialog';
 import ContactDialog from './pages/ContactDialog';
 import DonateDialog from './pages/DonateDialog';
-import ExportMapData from './pages/ExportMapData';
 
-import AdminDashboard from './pages/AdminDashboard';
-import AdminAddStation from './pages/AdminAddStation';
-import AdminAddWebcam from './pages/AdminAddWebcam';
-import AdminAddSounding from './pages/AdminAddSounding';
-import AdminAddSite from './pages/AdminAddSite';
-import AdminAddLanding from './pages/AdminAddLanding';
-import AdminEditStation from './pages/AdminEditStation';
-import AdminEditSite from './pages/AdminEditSite';
-import AdminEditLanding from './pages/AdminEditLanding';
-import AdminEditWebcam from './pages/AdminEditWebcam';
-import AdminEditSounding from './pages/AdminEditSounding';
-import ProtectedRoute from './pages/ProtectedRoute';
+const ExportMapData = lazy(() => import('./pages/ExportMapData'));
 
-// eslint-disable-next-line react-refresh/only-export-components
+const ProtectedRoute = lazy(() => import('./pages/ProtectedRoute'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminAddStation = lazy(() => import('./pages/AdminAddStation'));
+const AdminAddWebcam = lazy(() => import('./pages/AdminAddWebcam'));
+const AdminAddSounding = lazy(() => import('./pages/AdminAddSounding'));
+const AdminAddSite = lazy(() => import('./pages/AdminAddSite'));
+const AdminAddLanding = lazy(() => import('./pages/AdminAddLanding'));
+const AdminEditStation = lazy(() => import('./pages/AdminEditStation'));
+const AdminEditSite = lazy(() => import('./pages/AdminEditSite'));
+const AdminEditLanding = lazy(() => import('./pages/AdminEditLanding'));
+const AdminEditWebcam = lazy(() => import('./pages/AdminEditWebcam'));
+const AdminEditSounding = lazy(() => import('./pages/AdminEditSounding'));
+
+import { usePageTracking } from './hooks/usePageTracking';
+
 function RootLayout() {
   usePageTracking();
-  return <Outlet />;
+  return (
+    <Suspense fallback={null}>
+      <Outlet />
+    </Suspense>
+  );
 }
 
 export const router = createBrowserRouter([

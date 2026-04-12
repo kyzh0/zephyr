@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import {
   addLanding,
   deleteLanding,
@@ -8,7 +9,7 @@ import {
   updateLanding
 } from '@/services/landing.service';
 import { ApiError } from '@/services/api-error';
-import type { ILanding } from '@/models/landing.model';
+import type { Landing } from '@/models/landing.model';
 
 export const landingKeys = {
   all: ['landings'] as const,
@@ -18,7 +19,7 @@ export const landingKeys = {
 };
 
 export interface UseLandingsResult {
-  landings: ILanding[];
+  landings: Landing[];
   isLoading: boolean;
   error: Error | null;
 }
@@ -48,7 +49,7 @@ export function useLandings(options?: UseLandingsOptions): UseLandingsResult {
 }
 
 interface UseLandingResult {
-  landing: ILanding | null;
+  landing: Landing | null;
   isLoading: boolean;
   error: Error | null;
 }
@@ -78,7 +79,7 @@ export function useAddLanding() {
 export function useUpdateLanding() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<ILanding> }) =>
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Landing> }) =>
       updateLanding(id, updates),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: landingKeys.all });

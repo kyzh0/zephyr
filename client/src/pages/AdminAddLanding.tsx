@@ -21,7 +21,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import type { ILanding } from '@/models/landing.model';
+import type { Landing } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
 import { useAddLanding } from '@/hooks';
@@ -124,7 +124,7 @@ export default function AdminAddLanding() {
     const location = parseCoordinates(values.coordinates);
     if (!location) return;
 
-    const landing: Partial<ILanding> = {
+    const landing: Partial<Landing> = {
       name: values.name,
       location: location,
       elevation: parseInt(values.elevation, 10),

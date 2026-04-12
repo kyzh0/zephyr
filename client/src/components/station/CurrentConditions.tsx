@@ -1,14 +1,16 @@
 import { useRef, useState, useEffect } from 'react';
-import { cn, getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
-import { useAppContext } from '@/context/AppContext';
-import type { IStation } from '@/models/station.model';
+
 import { WindCompass } from './WindCompass';
-import { usePersistedState } from '@/hooks';
 import { convertWindSpeed, formatTemperature } from './utils';
 import type { WindUnit } from './types';
 
+import { cn, getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
+import type { Station } from '@/models/station.model';
+import { useAppContext } from '@/context/AppContext';
+import { usePersistedState } from '@/hooks';
+
 interface CurrentConditionsProps {
-  station: IStation;
+  station: Station;
   popupMessage?: string;
   hoveringOnInfoIcon: boolean;
   onInfoIconClick: (e: React.MouseEvent) => void;

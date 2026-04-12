@@ -1,9 +1,9 @@
-import { httpClient, logger, type CamAttrs, type WithId } from '@zephyr/shared';
+import { httpClient, logger, type WebcamAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
-export default async function scrapeCamFtpData(cams: WithId<CamAttrs>[]): Promise<void> {
-  const cam = cams[0];
-  if (!cam) {
+export default async function scrapeWebcamFtpData(webcams: WithId<WebcamAttrs>[]): Promise<void> {
+  const webcam = webcams[0];
+  if (!webcam) {
     return;
   }
 
@@ -17,13 +17,13 @@ export default async function scrapeCamFtpData(cams: WithId<CamAttrs>[]): Promis
     const updated = lastModified ? new Date(lastModified) : new Date();
 
     // skip if image already up to date
-    const lastUpdate = cam.lastUpdate ? new Date(cam.lastUpdate) : new Date(0);
+    const lastUpdate = webcam.lastUpdate ? new Date(webcam.lastUpdate) : new Date(0);
     const base64 = updated > lastUpdate ? Buffer.from(response.data).toString('base64') : null;
 
-    await processScrapedData(cam, updated, base64);
+    await processScrapedData(webcam, updated, base64);
   } catch {
     logger.warn('camftp error', {
-      service: 'cam',
+      service: 'webcam',
       type: 'camftp'
     });
   }

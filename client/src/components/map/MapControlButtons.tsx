@@ -13,23 +13,13 @@ import {
   Hourglass,
   Undo2
 } from 'lucide-react';
+import { toast } from 'sonner';
+
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { HistorySlider } from './HistorySlider';
-import { FilterDialog } from './FilterDialog';
-import { SearchBar } from './SearchBar';
-import { SPORT_LABELS, type MapControlsState, type SportType } from './map.types';
 import { Toggle } from '@/components/ui/toggle';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  getRecentStations,
-  RECENT_STATIONS_UPDATED_EVENT,
-  type RecentStation
-} from '@/services/recent-stations.service';
-import { useIsMobile } from '@/hooks';
-import { useAppContext } from '@/context/AppContext';
-import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -37,7 +27,19 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { toast } from 'sonner';
+import { HistorySlider } from './HistorySlider';
+import { FilterDialog } from './FilterDialog';
+import { SearchBar } from './SearchBar';
+import { SPORT_LABELS, type MapControlsState, type SportType } from './map.types';
+
+import { getButtonStyle, getIconStyle } from '@/lib/utils';
+import {
+  getRecentStations,
+  RECENT_STATIONS_UPDATED_EVENT,
+  type RecentStation
+} from '@/services/recent-stations.service';
+import { useIsMobile } from '@/hooks';
+import { useAppContext } from '@/context/AppContext';
 
 export function MapControlButtons({
   overlay,

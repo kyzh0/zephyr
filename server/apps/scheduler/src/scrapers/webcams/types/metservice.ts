@@ -1,6 +1,6 @@
 import pLimit from 'p-limit';
 
-import { httpClient, logger, type CamAttrs, type WithId } from '@zephyr/shared';
+import { httpClient, logger, type WebcamAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
 type MetserviceResponse = {
@@ -22,18 +22,18 @@ type MetserviceResponse = {
   };
 };
 
-export default async function scrapeMetserviceData(cams: WithId<CamAttrs>[]): Promise<void> {
+export default async function scrapeMetserviceData(webcams: WithId<WebcamAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(
-    cams.map((cam) =>
+    webcams.map((webcam) =>
       limit(async () => {
         try {
           let updated: Date | null = null;
           let base64: string | null = null;
 
           const { data } = await httpClient.get<MetserviceResponse>(
-            `https://www.metservice.com/publicData/webdata/traffic-camera/${cam.externalId}`
+            `https://www.metservice.com/publicData/webdata/traffic-camera/${webcam.externalId}`
           );
 
           const modules = data.layout?.secondary?.slots?.major?.modules;
@@ -43,7 +43,7 @@ export default async function scrapeMetserviceData(cams: WithId<CamAttrs>[]): Pr
             updated = new Date(d.displayTime);
 
             // skip if image already up to date
-            if (updated > new Date(cam.lastUpdate) && d.url) {
+            if (updated > new Date(webcam.lastUpdate) && d.url) {
               const response = await httpClient.get<ArrayBuffer>(
                 `https://www.metservice.com${d.url}`,
                 { responseType: 'arraybuffer' }
@@ -52,10 +52,10 @@ export default async function scrapeMetserviceData(cams: WithId<CamAttrs>[]): Pr
             }
           }
 
-          await processScrapedData(cam, updated, base64);
+          await processScrapedData(webcam, updated, base64);
         } catch {
-          logger.warn(`metservice error - ${cam.externalId}`, {
-            service: 'cam',
+          logger.warn(`metservice error - ${webcam.externalId}`, {
+            service: 'webcam',
             type: 'metservice'
           });
         }

@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import {
   createDonation,
   deleteDonation,
   fetchRecognitionLeaderboard,
   listDonations
 } from '@/services/donation.service';
-import type { IDonation } from '@/models/donation.model';
+import type { Donation } from '@/models/donation.model';
 
 export const donationKeys = {
   all: ['donations'] as const,
@@ -20,7 +21,7 @@ export function useLeaderboard() {
 }
 
 interface UseDonationsResult {
-  donations: IDonation[];
+  donations: Donation[];
   isLoading: boolean;
   error: Error | null;
 }

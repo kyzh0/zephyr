@@ -33,8 +33,8 @@ import {
 } from '@/components/ui/form';
 
 import { useSite, useLandings, useUpdateSite, useDeleteSite } from '@/hooks';
-import type { ISite, UpdateSiteDto } from '@/models/site.model';
-import type { ILanding } from '@/models/landing.model';
+import type { Site, UpdateSiteDto } from '@/models/site.model';
+import type { Landing } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
 
@@ -228,8 +228,8 @@ function SiteForm({
   onSubmit,
   isPending
 }: {
-  site: ISite;
-  landings: ILanding[];
+  site: Site;
+  landings: Landing[];
   onSubmit: (values: FormValues) => void;
   isPending: boolean;
 }) {

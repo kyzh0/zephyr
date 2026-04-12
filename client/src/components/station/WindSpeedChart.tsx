@@ -8,8 +8,10 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import { usePersistedState } from '@/hooks';
+
 import type { ExtendedStationData, WindUnit } from './types';
+
+import { usePersistedState } from '@/hooks';
 
 interface WindSpeedChartProps {
   data: ExtendedStationData[];

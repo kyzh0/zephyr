@@ -16,6 +16,7 @@ export default defineConfig({
       workbox: {
         // Precache all built assets (JS/CSS/HTML chunks)
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globIgnores: ['**/Admin*.js', '**/ProtectedRoute*.js'],
         runtimeCaching: [
           // Station list — network-first with cache fallback for offline
           {
@@ -45,7 +46,7 @@ export default defineConfig({
           },
           // Webcam list
           {
-            urlPattern: /^https:\/\/api(\.test)?\.zephyrapp\.nz\/cams(\?.*)?$/,
+            urlPattern: /^https:\/\/api(\.test)?\.zephyrapp\.nz\/webcams(\?.*)?$/,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'webcam-list',
@@ -58,7 +59,7 @@ export default defineConfig({
           },
           // Webcam detail / images endpoints
           {
-            urlPattern: /^https:\/\/api(\.test)?\.zephyrapp\.nz\/cams\/.+/,
+            urlPattern: /^https:\/\/api(\.test)?\.zephyrapp\.nz\/webcams\/.+/,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'webcam-data',

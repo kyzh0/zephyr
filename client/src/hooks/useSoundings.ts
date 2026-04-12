@@ -9,14 +9,20 @@ import {
   patchSounding
 } from '@/services/sounding.service';
 import { ApiError } from '@/services/api-error';
-import type { ISounding } from '@/models/sounding.model';
+import type { Sounding } from '@/models/sounding.model';
 
 export const soundingKeys = {
   all: ['soundings'] as const,
   detail: (id: string) => ['sounding', id] as const
 };
 
-export function useSoundings() {
+export interface UseSoundingsResult {
+  soundings: Sounding[];
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export function useSoundings(): UseSoundingsResult {
   const { data, isLoading, error } = useQuery({
     queryKey: soundingKeys.all,
     queryFn: () => listSoundings(),
@@ -31,7 +37,7 @@ export function useSoundings() {
 }
 
 interface UseSoundingResult {
-  sounding: ISounding | null;
+  sounding: Sounding | null;
   isLoading: boolean;
   error: Error | null;
 }

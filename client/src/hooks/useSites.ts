@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { addSite, deleteSite, getSiteById, listSites, updateSite } from '@/services/site.service';
 import { ApiError } from '@/services/api-error';
-import type { ISite } from '@/models/site.model';
+import type { Site } from '@/models/site.model';
 import { getDistance } from '@/lib/utils';
 import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from '.';
 
@@ -14,7 +15,7 @@ export const siteKeys = {
 };
 
 export interface UseSitesResult {
-  sites: ISite[];
+  sites: Site[];
   isLoading: boolean;
   error: Error | null;
 }
@@ -43,7 +44,7 @@ export function useNearbySites({
   lon,
   maxDistance = 5000,
   limit
-}: UseNearbyLocationsOptions): UseNearbyLocationsResult<ISite> {
+}: UseNearbyLocationsOptions): UseNearbyLocationsResult<Site> {
   const { sites: allSites, isLoading, error } = useSites();
 
   const nearbySites = useMemo(() => {
@@ -51,7 +52,7 @@ export function useNearbySites({
       return [];
     }
 
-    const sitesWithDistance: { data: ISite; distance: number }[] = allSites
+    const sitesWithDistance: { data: Site; distance: number }[] = allSites
       .map((site) => {
         const distance = getDistance(
           lon,
@@ -75,7 +76,7 @@ export function useNearbySites({
 }
 
 interface UseSiteResult {
-  site: ISite | null;
+  site: Site | null;
   isLoading: boolean;
   error: Error | null;
 }
@@ -105,7 +106,7 @@ export function useAddSite() {
 export function useUpdateSite() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<ISite> }) =>
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Site> }) =>
       updateSite(id, updates),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: siteKeys.all });

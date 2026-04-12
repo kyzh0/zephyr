@@ -1,7 +1,7 @@
-import type { IStationData } from '@/models/station-data.model';
+import type { StationData } from '@/models/station-data.model';
 
 // Extended station data type with computed fields
-export interface ExtendedStationData extends IStationData {
+export interface ExtendedStationData extends StationData {
   timeLabel: string;
   windAverageKt: number | null;
   windGustKt: number | null;

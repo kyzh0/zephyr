@@ -1,4 +1,5 @@
 import { useCallback, useRef, useSyncExternalStore } from 'react';
+
 import { getStoredValue, setStoredValue } from '@/components/map/map.utils';
 
 // State that automatically syncs with localStorage via useSyncExternalStore

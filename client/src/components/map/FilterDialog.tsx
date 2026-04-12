@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Filter, Mountain } from 'lucide-react';
+
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { getWindDirectionFromBearing } from '@/lib/utils';
 import { WindCompass } from '@/components/station/WindCompass';
 import { ELEVATION_FILTER_MIN, ELEVATION_FILTER_MAX } from './map.types';
+
+import { getWindDirectionFromBearing } from '@/lib/utils';
 
 interface FilterDialogProps {
   stationElevationFilter: [number, number];

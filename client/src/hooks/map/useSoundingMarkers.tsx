@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import { formatInTimeZone } from 'date-fns-tz';
 
-import { useSoundings } from '@/hooks';
 import { getSoundingGeoJson } from '@/components/map';
-import { useNavigate } from 'react-router-dom';
+
+import { useSoundings } from '@/hooks';
 
 interface UseSoundingMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;

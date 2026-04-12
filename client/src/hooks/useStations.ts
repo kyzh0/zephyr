@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import {
   addStation,
   deleteStation,
@@ -8,7 +9,7 @@ import {
   patchStation
 } from '@/services/station.service';
 import { ApiError } from '@/services/api-error';
-import type { IStation } from '@/models/station.model';
+import type { Station } from '@/models/station.model';
 import { getDistance, REFRESH_INTERVAL_MS } from '@/lib/utils';
 import type { UseNearbyLocationsOptions, UseNearbyLocationsResult } from '.';
 
@@ -21,7 +22,7 @@ export const stationKeys = {
 };
 
 export interface UseStationsResult {
-  stations: IStation[];
+  stations: Station[];
   isLoading: boolean;
   error: Error | null;
 }
@@ -47,7 +48,7 @@ export function useStations(options?: UseStationsOptions): UseStationsResult {
 }
 
 interface UseStationResult {
-  station: IStation | null;
+  station: Station | null;
   isLoading: boolean;
   error: Error | null;
 }
@@ -78,7 +79,7 @@ export function useAddStation() {
 export function useUpdateStation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<IStation> }) =>
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Station> }) =>
       patchStation(id, updates),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: stationKeys.all });
@@ -103,7 +104,7 @@ export function useNearbyStations({
   lon,
   maxDistance = 5000,
   limit
-}: UseNearbyLocationsOptions): UseNearbyLocationsResult<IStation> {
+}: UseNearbyLocationsOptions): UseNearbyLocationsResult<Station> {
   const { stations: allStations, isLoading, error } = useStations();
 
   const nearbyStations = useMemo(() => {
@@ -111,7 +112,7 @@ export function useNearbyStations({
       return [];
     }
 
-    const stationsWithDistance: { data: IStation; distance: number }[] = allStations
+    const stationsWithDistance: { data: Station; distance: number }[] = allStations
       .map((station) => {
         const distance = getDistance(
           lon,

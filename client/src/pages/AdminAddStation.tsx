@@ -24,7 +24,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
-import { STATION_TYPES, type INewStation } from '@/models/station.model';
+import { STATION_TYPES, type NewStation } from '@/models/station.model';
 import { lookupElevation } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
 import { useAddStation } from '@/hooks';
@@ -125,7 +125,7 @@ export default function AdminAddStation() {
       setElevationLoading(false);
     }
 
-    const station: INewStation = {
+    const station: NewStation = {
       name: values.name,
       type: values.type,
       coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6],

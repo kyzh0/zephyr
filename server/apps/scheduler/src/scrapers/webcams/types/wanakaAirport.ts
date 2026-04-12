@@ -1,13 +1,15 @@
 import pLimit from 'p-limit';
 
-import { httpClient, logger, type CamAttrs, type WithId } from '@zephyr/shared';
+import { httpClient, logger, type WebcamAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
-export default async function scrapeWanakaAirportData(cams: WithId<CamAttrs>[]): Promise<void> {
+export default async function scrapeWanakaAirportData(
+  webcams: WithId<WebcamAttrs>[]
+): Promise<void> {
   const limit = pLimit(5);
 
   await Promise.allSettled(
-    cams.map((cam) =>
+    webcams.map((webcam) =>
       limit(async () => {
         try {
           let updated: Date | null = null;
@@ -52,7 +54,7 @@ export default async function scrapeWanakaAirportData(cams: WithId<CamAttrs>[]):
           }
 
           const response = await httpClient.get<ArrayBuffer>(
-            `https://www.wanakaairport.com/WebCam/${cam.externalId}.jpg?dt=${year}-${month}-${day}-${hour}-${minute}`,
+            `https://www.wanakaairport.com/WebCam/${webcam.externalId}.jpg?dt=${year}-${month}-${day}-${hour}-${minute}`,
             { responseType: 'arraybuffer' }
           );
 
@@ -62,10 +64,10 @@ export default async function scrapeWanakaAirportData(cams: WithId<CamAttrs>[]):
             updated = new Date();
           }
 
-          await processScrapedData(cam, updated, base64);
+          await processScrapedData(webcam, updated, base64);
         } catch {
-          logger.warn(`wanaka airport error - ${cam.externalId}`, {
-            service: 'cam',
+          logger.warn(`wanaka airport error - ${webcam.externalId}`, {
+            service: 'webcam',
             type: 'wa'
           });
         }

@@ -1,18 +1,19 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formatInTimeZone } from 'date-fns-tz';
+
+import type { ExtendedStationData } from '@/components/station/types';
+
 import { REFRESH_INTERVAL_MS } from '@/lib/utils';
 import { loadStationData } from '@/services/station.service';
 import { ApiError } from '@/services/api-error';
+import type { Station } from '@/models/station.model';
 import { stationKeys, useStation } from './useStations';
-import type { IStation } from '@/models/station.model';
-import type { IStationData } from '@/models/station-data.model';
-import type { ExtendedStationData } from '@/components/station/types';
 
 export type TimeRange = '3' | '6' | '12' | '24';
 
 interface UseStationDataReturn {
-  station: IStation | null;
+  station: Station | null;
   data: ExtendedStationData[];
   tableData: ExtendedStationData[];
   bearingPairCount: number;
@@ -36,11 +37,8 @@ export function useStationData(
   const dataQuery = useQuery({
     queryKey: stationKeys.data(id ?? '', hr),
     queryFn: async () => {
-      const rawData = await loadStationData(id!, hr);
-      const items = Array.isArray(rawData) ? rawData : [];
-      return (items as IStationData[]).sort(
-        (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
-      );
+      const items = await loadStationData(id!, hr);
+      return items.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
     },
     enabled: !!id && !!station && !station.isOffline,
     refetchInterval: REFRESH_INTERVAL_MS,

@@ -1,8 +1,10 @@
 import { type ReactNode } from 'react';
+
 import { convertWindSpeed } from './map.utils';
 import { type WindUnit } from '../station';
-import { getTextColor, getWindColorForSport, isWindBearingInRange } from '@/lib/utils';
 import type { SportType } from './map.types';
+
+import { getTextColor, getWindColorForSport, isWindBearingInRange } from '@/lib/utils';
 
 const DEFAULT_STATION_MARKER_SIZE = 50; // default bounding box size in pixels
 

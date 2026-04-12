@@ -5,11 +5,11 @@ import { twMerge } from 'tailwind-merge';
 /** Standard polling interval for live data  */
 export const REFRESH_INTERVAL_MS = 60_000;
 
-export function cn(...inputs: ClassValue[]) {
+export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-export const getWindDirectionFromBearing = (bearing: number) => {
+export const getWindDirectionFromBearing = (bearing: number): string => {
   if (bearing < 0) {
     return '';
   } else if (bearing <= 11.25) {
@@ -165,7 +165,7 @@ export function getTextColor(hexColor: string): string {
   return brightness > 156 ? 'black' : '#f1f1f1';
 }
 
-export const getStationTypeName = (code: string) => {
+export const getStationTypeName = (code: string): string => {
   switch (code) {
     case 'wu':
       return 'Weather Underground';
@@ -223,7 +223,7 @@ export const getStationTypeName = (code: string) => {
   }
 };
 
-export const getWebcamTypeName = (code: string) => {
+export const getWebcamTypeName = (code: string): string => {
   switch (code) {
     case 'lw':
       return 'Lake Wanaka';
@@ -288,7 +288,7 @@ export const getMinutesAgo = (date: Date): string => {
 };
 
 // Convert compass directions to degrees
-export const compassToDegrees = (direction: string): number => {
+const compassToDegrees = (direction: string): number => {
   const compass: Record<string, number> = {
     N: 0,
     NNE: 22.5,
@@ -402,7 +402,7 @@ export const lookupElevation = async (lat: number, lon: number): Promise<number>
   return Math.round(elevation);
 };
 
-export const getButtonStyle = (flyingMode: boolean) =>
+export const getButtonStyle = (flyingMode: boolean): string =>
   flyingMode ? 'h-[5rem] w-[5rem] shrink-0' : 'h-9 w-9 shrink-0';
-export const getIconStyle = (flyingMode: boolean) =>
+export const getIconStyle = (flyingMode: boolean): string =>
   flyingMode ? 'h-[2.5rem] w-[2.5rem]' : 'h-5 w-5';

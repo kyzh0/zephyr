@@ -1,4 +1,4 @@
-import type { IDonation, LeaderboardResponse } from '@/models/donation.model';
+import type { Donation, LeaderboardResponse } from '@/models/donation.model';
 import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
 export async function fetchRecognitionLeaderboard(): Promise<LeaderboardResponse> {
@@ -7,12 +7,12 @@ export async function fetchRecognitionLeaderboard(): Promise<LeaderboardResponse
   return res.json() as Promise<LeaderboardResponse>;
 }
 
-export async function listDonations(): Promise<IDonation[]> {
+export async function listDonations(): Promise<Donation[]> {
   const res = await fetch(
     `${import.meta.env.VITE_API_PREFIX}/donations?${getKeyQueryThrowIfInvalid()}`
   );
   await throwIfNotOk(res);
-  return res.json() as Promise<IDonation[]>;
+  return res.json() as Promise<Donation[]>;
 }
 
 export async function createDonation(body: {

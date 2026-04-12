@@ -57,7 +57,7 @@ export default function AdminAddWebcam() {
   function onSubmit(values: FormValues) {
     const [lat, lon] = values.coordinates.replace(/\s/g, '').split(',').map(Number);
 
-    const cam = {
+    const webcam = {
       name: values.name,
       externalId: values.externalId || undefined,
       externalLink: values.externalLink,
@@ -65,7 +65,7 @@ export default function AdminAddWebcam() {
       coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6]
     };
 
-    addMutation.mutate(cam, {
+    addMutation.mutate(webcam, {
       onSuccess: () => {
         toast.success('Webcam added successfully');
         navigate('/admin/webcams');

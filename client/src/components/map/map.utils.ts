@@ -1,9 +1,10 @@
-import type { IStation } from '@/models/station.model';
-import type { ICam } from '@/models/cam.model';
-import type { ISounding } from '@/models/sounding.model';
-import type { ISite } from '@/models/site.model';
-import type { ILanding } from '@/models/landing.model';
 import type { GeoJson, GeoJsonFeature, WindUnit } from './map.types';
+
+import type { Station } from '@/models/station.model';
+import type { Webcam } from '@/models/webcam.model';
+import type { Sounding } from '@/models/sounding.model';
+import type { Site } from '@/models/site.model';
+import type { Landing } from '@/models/landing.model';
 
 // localStorage helpers
 export function getStoredValue<T>(key: string, defaultValue: T): T {
@@ -30,7 +31,7 @@ export function convertWindSpeed(speed: number, unit: WindUnit): number {
 }
 
 // GeoJSON generators
-export function getStationGeoJson(stations: IStation[] | undefined): GeoJson | null {
+export function getStationGeoJson(stations: Station[] | undefined): GeoJson | null {
   if (!stations?.length) {
     return null;
   }
@@ -77,7 +78,7 @@ export function getStationGeoJson(stations: IStation[] | undefined): GeoJson | n
   return geoJson;
 }
 
-export function getWebcamGeoJson(webcams: ICam[] | undefined): GeoJson | null {
+export function getWebcamGeoJson(webcams: Webcam[] | undefined): GeoJson | null {
   if (!webcams?.length) {
     return null;
   }
@@ -87,16 +88,16 @@ export function getWebcamGeoJson(webcams: ICam[] | undefined): GeoJson | null {
     features: []
   };
 
-  for (const cam of webcams) {
+  for (const webcam of webcams) {
     const feature: GeoJsonFeature = {
       type: 'Feature',
       properties: {
-        name: cam.name,
-        dbId: cam._id,
-        currentTime: new Date(cam.currentTime),
-        currentUrl: cam.currentUrl
+        name: webcam.name,
+        dbId: webcam._id,
+        currentTime: new Date(webcam.currentTime),
+        currentUrl: webcam.currentUrl
       },
-      geometry: cam.location as {
+      geometry: webcam.location as {
         type: string;
         coordinates: [number, number];
       }
@@ -107,7 +108,7 @@ export function getWebcamGeoJson(webcams: ICam[] | undefined): GeoJson | null {
   return geoJson;
 }
 
-export function getSoundingGeoJson(soundings: ISounding[] | undefined): GeoJson | null {
+export function getSoundingGeoJson(soundings: Sounding[] | undefined): GeoJson | null {
   if (!soundings?.length) {
     return null;
   }
@@ -134,7 +135,7 @@ export function getSoundingGeoJson(soundings: ISounding[] | undefined): GeoJson 
       type: 'Feature',
       properties: {
         name: s.name,
-        dbId: (s as ISounding & { _id: string })._id,
+        dbId: (s as Sounding & { _id: string })._id,
         currentTime: time,
         currentUrl: url
       },
@@ -146,7 +147,7 @@ export function getSoundingGeoJson(soundings: ISounding[] | undefined): GeoJson 
   return geoJson;
 }
 
-export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
+export function getSiteGeoJson(sites: Site[] | undefined): GeoJson | null {
   if (!sites?.length) {
     return null;
   }
@@ -179,7 +180,7 @@ export function getSiteGeoJson(sites: ISite[] | undefined): GeoJson | null {
   return geoJson;
 }
 
-export function getLandingGeoJson(landings: ILanding[] | undefined): GeoJson | null {
+export function getLandingGeoJson(landings: Landing[] | undefined): GeoJson | null {
   if (!landings?.length) {
     return null;
   }
@@ -229,15 +230,4 @@ export function escapeHtml(str: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-
-// Calculate history time from offset
-export function getHistoryTime(offset: number): Date {
-  const t = new Date();
-  return new Date(
-    t.getTime() -
-      ((t.getMinutes() % 30) - offset) * 60 * 1000 -
-      t.getSeconds() * 1000 -
-      t.getMilliseconds()
-  );
 }
