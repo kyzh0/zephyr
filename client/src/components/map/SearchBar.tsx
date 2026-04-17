@@ -234,6 +234,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
                       unit={unit}
                       validBearings={result.item.validBearings ?? undefined}
                       size={30}
+                      isOffline={result.item.isOffline}
                       sport={sport}
                     />
                   ) : result.type === 'site' ? (

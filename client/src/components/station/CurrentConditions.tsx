@@ -63,7 +63,8 @@ export function CurrentConditions({
           <div className="flex flex-col items-center">
             <div className="flex items-center">
               <p className="text-md mr-8 hidden sm:block">
-                {station.currentBearing}° {getWindDirectionFromBearing(station.currentBearing)}
+                {`${Math.round(station.currentBearing).toString().padStart(3, '0')}°`}{' '}
+                {getWindDirectionFromBearing(station.currentBearing)}
               </p>
               <WindCompass
                 bearing={station.currentBearing}
@@ -72,7 +73,8 @@ export function CurrentConditions({
               />
             </div>
             <p className="text-xs sm:hidden">
-              {station.currentBearing}° {getWindDirectionFromBearing(station.currentBearing)}
+              {`${Math.round(station.currentBearing).toString().padStart(3, '0')}°`}{' '}
+              {getWindDirectionFromBearing(station.currentBearing)}
             </p>
           </div>
         )}

@@ -40,7 +40,7 @@ export const StationMarker = ({
   sport
 }: StationMarkerProps): ReactNode => {
   const isBearingValid = isWindBearingInRange(bearing, validBearings);
-  const coreColor = getWindColorForSport(speed ?? 0, sport);
+  const coreColor = isOffline ? 'white' : getWindColorForSport(speed ?? 0, sport);
   const gustColor = getWindColorForSport(gust ?? speed ?? 0, sport);
 
   const cx = size / 2;
@@ -95,7 +95,7 @@ export const StationMarker = ({
         viewBox={`0 0 ${size} ${size}`}
       >
         {/* Tail Shape rotated so tail tip points in wind direction (0 = North/up) */}
-        {speed !== undefined && bearing !== undefined && (
+        {!isOffline && speed !== undefined && bearing !== undefined && (
           <g transform={`rotate(${bearing},${cx},${cy})`}>
             {bearing !== undefined ? (
               <path d={tail_attr} fill={gustColor} stroke="black" strokeWidth={borderWidth} />
