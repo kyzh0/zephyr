@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { usePersistedState } from '@/hooks';
 import {
@@ -7,6 +8,7 @@ import {
   ELEVATION_FILTER_MAX,
   type MapControlsState,
   type MapOverlay,
+  type SearchResult,
   type WindUnit
 } from '@/components/map/map.types';
 
@@ -24,6 +26,7 @@ function getSnapshotTime(offset: number): Date {
 export interface UseMapControlsParams {
   map: React.RefObject<{ setStyle: (style: string) => void } | null>;
   triggerGeolocate: () => Promise<void>;
+  flyTo: (coordinates: [number, number]) => void;
   flyingMode: boolean;
   // historyOffset is owned by Map.tsx so marker hooks can read it reactively
   historyOffset: number;
@@ -38,6 +41,7 @@ export interface UseMapControlsParams {
 export function useMapControls({
   map,
   triggerGeolocate,
+  flyTo,
   flyingMode,
   historyOffset,
   setHistoryOffset,
@@ -47,6 +51,7 @@ export function useMapControls({
   renderHistoricalData,
   renderCurrentData
 }: UseMapControlsParams): MapControlsState {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = usePersistedState<'stations' | 'sites'>('viewMode', 'stations');
   const [unit, setUnit] = usePersistedState<WindUnit>('unit', 'kmh');
   const [isSatellite, setIsSatellite] = useState(false);
@@ -150,6 +155,31 @@ export function useMapControls({
     [setViewMode]
   );
 
+  const onSearchSelect = useCallback(
+    (result: SearchResult) => {
+      if (result.item.location?.coordinates) {
+        flyTo(result.item.location.coordinates);
+      }
+      if (result.type === 'station') {
+        onToggleViewMode('stations');
+        navigate(`/stations/${result.item._id}`);
+      } else if (result.type === 'site') {
+        onToggleViewMode('sites');
+        navigate(`/sites/${result.item._id}`);
+      } else if (result.type === 'landing') {
+        onToggleViewMode('sites');
+        navigate(`/landings/${result.item._id}`);
+      } else if (result.type === 'webcam') {
+        setOverlay('webcams');
+        navigate(`/webcams/${result.item._id}`);
+      } else {
+        setOverlay('soundings');
+        navigate(`/soundings/${result.item._id}`);
+      }
+    },
+    [flyTo, navigate, onToggleViewMode, setOverlay]
+  );
+
   return {
     overlay,
     viewMode,
@@ -169,6 +199,7 @@ export function useMapControls({
     onStationElevationFilterChange: setStationElevationFilter,
     onRecentsToggle,
     onToggleViewMode,
-    onSiteDirectionFilterChange
+    onSiteDirectionFilterChange,
+    onSearchSelect
   };
 }

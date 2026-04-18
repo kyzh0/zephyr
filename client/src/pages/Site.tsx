@@ -267,7 +267,10 @@ export default function Site() {
   return (
     <Dialog open onOpenChange={() => navigate('/')}>
       {site && <SEO title={site.name} description={siteDescription} path={`/sites/${id}`} />}
-      <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
+      <DialogContent
+        className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0 focus:outline-none"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader className="pb-2">
           <DialogTitle className="text-center mb-3">
             <div className="flex w-full justify-center items-center">

@@ -58,7 +58,10 @@ export default function Sounding() {
           path={`/soundings/${id}`}
         />
       )}
-      <DialogContent className="max-w-3xl p-4 sm:p-6">
+      <DialogContent
+        className="max-w-3xl p-4 sm:p-6 focus:outline-none"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-center text-base sm:text-lg">
             {sounding?.name ?? <Skeleton className="h-6 sm:h-7 w-36 sm:w-44 mx-auto" />}
@@ -67,7 +70,7 @@ export default function Sounding() {
 
         <div className="flex flex-col items-center gap-1.5 sm:gap-2">
           {!sounding ? (
-            <Skeleton className="w-full aspect-[3/4]" />
+            <Skeleton className="w-full aspect-3/4" />
           ) : !images.length ? (
             <p className="text-destructive">Error retrieving today's soundings.</p>
           ) : (

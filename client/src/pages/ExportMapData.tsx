@@ -400,7 +400,7 @@ export default function ExportMapData() {
   // Mobile: Full-screen layout
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col z-100">
         <SEO
           title="Export Data"
           description="Export historical wind and weather data from Zephyr stations in New Zealand. Download data as XLSX for analysis."

@@ -32,7 +32,7 @@ export default function Map() {
   const isHistoricData = historyOffset < 0;
 
   // Initialize map
-  const { map, isLoaded, zoom, triggerGeolocate } = useMapInstance({
+  const { map, isLoaded, zoom, triggerGeolocate, flyTo } = useMapInstance({
     containerRef: mapContainer
   });
 
@@ -83,6 +83,7 @@ export default function Map() {
   const controls = useMapControls({
     map,
     triggerGeolocate,
+    flyTo,
     flyingMode,
     historyOffset,
     setHistoryOffset,

@@ -176,7 +176,10 @@ export default function Landing() {
       {landing && (
         <SEO title={landing.name} description={landingDescription} path={`/landings/${id}`} />
       )}
-      <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
+      <DialogContent
+        className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0 focus:outline-none"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader className="pb-2">
           <DialogTitle className="flex w-full text-center justify-center items-center mb-3">
             <PlaneLanding className="mr-8" />

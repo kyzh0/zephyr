@@ -59,7 +59,8 @@ export function MapControlButtons({
   viewMode,
   onToggleViewMode,
   siteDirectionFilter,
-  onSiteDirectionFilterChange
+  onSiteDirectionFilterChange,
+  onSearchSelect
 }: MapControlsState) {
   const showWebcams = overlay === 'webcams';
   const showSoundings = overlay === 'soundings';
@@ -304,7 +305,7 @@ export function MapControlButtons({
                 <Undo2 className={`${getIconStyle(isFlyingMode)} opacity-70`} />
               </Toggle>
             )}
-            {!isFlyingMode && <SearchBar disabled={isHistoricData} />}
+            {!isFlyingMode && <SearchBar disabled={isHistoricData} onSelect={onSearchSelect} />}
             <Toggle
               variant="outline"
               size="sm"
@@ -328,7 +329,7 @@ export function MapControlButtons({
         ) : (
           <>
             {/* Large screens: Top-left group */}
-            <SearchBar disabled={isHistoricData} />
+            <SearchBar disabled={isHistoricData} onSelect={onSearchSelect} />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

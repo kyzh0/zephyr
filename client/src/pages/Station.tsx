@@ -286,7 +286,10 @@ export default function Station() {
       {station && (
         <SEO title={station.name} description={stationDescription} path={`/stations/${id}`} />
       )}
-      <DialogContent className="sm:max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0">
+      <DialogContent
+        className="sm:max-w-6xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col gap-0 focus:outline-none"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader className="sticky pb-2">
           <DialogTitle className="text-center">{headerContent}</DialogTitle>
         </DialogHeader>

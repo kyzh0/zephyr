@@ -57,7 +57,7 @@ export default function DonateDialog() {
   return (
     <Dialog open onOpenChange={() => navigate('/')}>
       <DialogContent
-        className="sm:max-w-4xl max-h-[90vh] overflow-y-auto text-center"
+        className="sm:max-w-4xl max-h-[90vh] overflow-y-auto text-center focus:outline-none"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader className="text-center sm:text-center space-y-0">

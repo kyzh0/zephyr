@@ -1,3 +1,16 @@
+import type { Station } from '@/models/station.model';
+import type { Site } from '@/models/site.model';
+import type { Landing } from '@/models/landing.model';
+import type { Webcam } from '@/models/webcam.model';
+import type { Sounding } from '@/models/sounding.model';
+
+export type SearchResult =
+  | { type: 'station'; item: Station }
+  | { type: 'site'; item: Site }
+  | { type: 'landing'; item: Landing }
+  | { type: 'webcam'; item: Webcam }
+  | { type: 'sounding'; item: Sounding };
+
 export interface StationMarker {
   marker: HTMLDivElement;
   popup: mapboxgl.Popup;
@@ -63,6 +76,7 @@ export interface MapControlsState {
   onRecentsToggle: () => void;
   onToggleViewMode: (value: 'stations' | 'sites') => void;
   onSiteDirectionFilterChange: (bearing: number | null) => void;
+  onSearchSelect: (result: SearchResult) => void;
 }
 
 export const ELEVATION_FILTER_MIN = 0;

@@ -28,7 +28,7 @@ export default function HelpDialog() {
       }}
     >
       <DialogContent
-        className="sm:max-w-lg max-h-[85vh] overflow-y-auto pb-2"
+        className="sm:max-w-lg max-h-[85vh] overflow-y-auto pb-2 focus:outline-none"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader className="text-center sm:text-center">

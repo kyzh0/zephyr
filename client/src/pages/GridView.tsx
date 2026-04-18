@@ -75,7 +75,7 @@ export default function GridView() {
         path="/grid"
       />
       <DialogContent
-        className="sm:max-w-4xl max-h-[90vh] flex flex-col"
+        className="sm:max-w-4xl max-h-[90vh] flex flex-col focus:outline-none"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>

@@ -40,7 +40,10 @@ export default function Webcam() {
           path={`/webcams/${id}`}
         />
       )}
-      <DialogContent className="sm:max-w-6xl w-[95vw] max-h-[90vh] p-4 sm:p-6">
+      <DialogContent
+        className="sm:max-w-6xl w-[95vw] max-h-[90vh] p-4 sm:p-6 focus:outline-none"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-center text-base sm:text-lg">
             {webcam?.name ?? <Skeleton className="h-6 sm:h-7 w-36 sm:w-44 mx-auto" />}

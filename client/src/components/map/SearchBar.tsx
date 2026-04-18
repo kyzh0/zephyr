@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Search, X, Camera } from 'lucide-react';
+import Fuse from 'fuse.js';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,26 +11,24 @@ import { StationMarker } from './StationMarker';
 import type { WindUnit } from '../station';
 
 import { cn } from '@/lib/utils';
-import type { Station } from '@/models/station.model';
-import type { Site } from '@/models/site.model';
-import type { Landing } from '@/models/landing.model';
-import type { Webcam } from '@/models/webcam.model';
-import { useStations, useWebcams, useSites, useLandings, usePersistedState } from '@/hooks';
 import { useAppContext } from '@/context/AppContext';
+import type { SearchResult } from './map.types';
+import {
+  useStations,
+  useWebcams,
+  useSites,
+  useLandings,
+  useSoundings,
+  usePersistedState
+} from '@/hooks';
 
 interface SearchBarProps {
   className?: string;
   disabled: boolean;
+  onSelect: (result: SearchResult) => void;
 }
 
-type SearchResult =
-  | { type: 'station'; item: Station }
-  | { type: 'site'; item: Site }
-  | { type: 'landing'; item: Landing }
-  | { type: 'webcam'; item: Webcam };
-
-export function SearchBar({ className, disabled }: SearchBarProps) {
-  const navigate = useNavigate();
+export function SearchBar({ className, disabled, onSelect }: SearchBarProps) {
   const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
   const { sport } = useAppContext();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -40,11 +38,23 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
   const { webcams } = useWebcams();
   const { sites } = useSites();
   const { landings } = useLandings();
+  const { soundings } = useSoundings();
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Filter stations, webcams, and sites based on query
+  const fuse = useMemo(() => {
+    const all: SearchResult[] = [
+      ...stations.filter((s) => !s.isDisabled).map((s) => ({ type: 'station' as const, item: s })),
+      ...sites.filter((s) => !s.isDisabled).map((s) => ({ type: 'site' as const, item: s })),
+      ...landings.filter((l) => !l.isDisabled).map((l) => ({ type: 'landing' as const, item: l })),
+      ...webcams.filter((w) => !w.isDisabled).map((w) => ({ type: 'webcam' as const, item: w })),
+      ...soundings.map((s) => ({ type: 'sounding' as const, item: s }))
+    ];
+    return new Fuse(all, { keys: ['item.name'], threshold: 0.3, includeScore: true });
+  }, [stations, sites, landings, webcams, soundings]);
+
+  // Fuzzy search across all item types
   useEffect(() => {
     if (!query.trim()) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -53,40 +63,35 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
       return;
     }
 
-    const lowerQuery = query.toLowerCase();
+    const normalize = (s: string) => s.replace(/[^a-z0-9]/gi, '').toLowerCase();
+    // Prefix matches first, then by type priority within each tier
+    const typeOrder: Record<SearchResult['type'], number> = {
+      station: 0,
+      webcam: 1,
+      sounding: 2,
+      site: 3,
+      landing: 4
+    };
+    const normalizedQuery = normalize(query);
 
-    // Filter stations
-    const filteredStations: SearchResult[] = stations
-      .filter((station) => station.name.toLowerCase().includes(lowerQuery))
-      .map((station) => ({ type: 'station' as const, item: station }));
+    const fuseResults = fuse.search(query, { limit: 20 });
+    const rank = (r: (typeof fuseResults)[number]) => ({
+      prefix: normalize(r.item.item.name).startsWith(normalizedQuery) ? 0 : 1,
+      type: typeOrder[r.item.type]
+    });
 
-    // Filter sites
-    const filteredSites: SearchResult[] = sites
-      .filter((site) => !site.isDisabled && site.name.toLowerCase().includes(lowerQuery))
-      .map((site) => ({ type: 'site' as const, item: site }));
+    const matches = fuseResults
+      .sort((a, b) => {
+        const ra = rank(a),
+          rb = rank(b);
+        return ra.prefix - rb.prefix || ra.type - rb.type;
+      })
+      .map((r) => r.item)
+      .slice(0, 5);
 
-    // Filter landings
-    const filteredLandings: SearchResult[] = landings
-      .filter((landing) => !landing.isDisabled && landing.name.toLowerCase().includes(lowerQuery))
-      .map((landing) => ({ type: 'landing' as const, item: landing }));
-
-    const filteredWebcams: SearchResult[] = webcams
-      .filter((webcam) => webcam.name.toLowerCase().includes(lowerQuery))
-      .map((webcam) => ({ type: 'webcam' as const, item: webcam }));
-
-    // Combine and limit results
-    const combined = [
-      ...filteredStations,
-      ...filteredSites,
-      ...filteredLandings,
-      ...filteredWebcams
-    ]
-      .sort((a, b) => a.item.name.localeCompare(b.item.name))
-      .slice(0, 8);
-
-    setResults(combined);
+    setResults(matches);
     setSelectedIndex(-1);
-  }, [query, stations, sites, landings, webcams]);
+  }, [query, fuse]);
 
   // Focus input when expanded
   useEffect(() => {
@@ -133,17 +138,9 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
       setQuery('');
       setResults([]);
       setSelectedIndex(-1);
-      if (result.type === 'station') {
-        navigate(`/stations/${result.item._id}`);
-      } else if (result.type === 'site') {
-        navigate(`/sites/${result.item._id}`);
-      } else if (result.type === 'landing') {
-        navigate(`/landings/${result.item._id}`);
-      } else {
-        navigate(`/webcams/${result.item._id}`);
-      }
+      onSelect(result);
     },
-    [navigate]
+    [onSelect]
   );
 
   const handleKeyDown = useCallback(
@@ -181,7 +178,7 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
           variant="ghost"
           size="sm"
           onClick={handleToggle}
-          className="h-9 w-9"
+          className="h-9 w-9 hover:bg-transparent"
           disabled={disabled}
         >
           <Search className="h-4 w-4 opacity-70" />
@@ -192,18 +189,18 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
             <Input
               ref={inputRef}
               type="text"
-              placeholder={'Stations, sites, webcams'}
+              placeholder={'Search...'}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="h-9 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
+              className="h-9 border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
             />
             {query && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleClear}
-                className="h-9 w-9 p-0 shrink-0"
+                className="h-9 w-9 p-0 shrink-0 hover:bg-transparent cursor-pointer"
               >
                 <X className="h-4 w-4 opacity-70" />
               </Button>
@@ -250,8 +247,14 @@ export function SearchBar({ className, disabled }: SearchBarProps) {
                       borderWidth={4}
                       isOfficial={result.item.siteGuideUrl ? true : false}
                     />
+                  ) : result.type === 'webcam' ? (
+                    <Camera className="w-5 h-5 scale-90" />
                   ) : (
-                    <Camera className="w-5 h-5" />
+                    <svg viewBox="0 0 18 18" className="w-5 h-5 opacity-70 scale-60">
+                      <g transform="rotate(-90, 9, 9)">
+                        <path d="m18,2.47l-9,6.53l-4.38,-4.38l-4.62,3.38l0,-2.48l4.83,-3.52l4.38,4.38l8.79,-6.38m0,12l-4.7,0l-4.17,3.34l-6.13,-5.93l-3,2.13l0,2.46l2.8,-2l6.2,6l5,-4l4,0l0,-2z" />
+                      </g>
+                    </svg>
                   )}
                 </div>
                 <span className="truncate">{result.item.name}</span>
