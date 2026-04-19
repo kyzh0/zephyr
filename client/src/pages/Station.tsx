@@ -18,7 +18,13 @@ import {
   Skeleton
 } from '@/components/station';
 
-import { getButtonStyle, getIconStyle, getMinutesAgo, getStationTypeName } from '@/lib/utils';
+import {
+  getButtonStyle,
+  getIconStyle,
+  getMinutesAgo,
+  getStationTypeName,
+  REFRESH_INTERVAL_MS
+} from '@/lib/utils';
 import { addRecentStation } from '@/services/recent-stations.service';
 import { ApiError } from '@/services/api-error';
 import {
@@ -29,6 +35,15 @@ import {
   type TimeRange
 } from '@/hooks';
 import { useAppContext } from '@/context/AppContext';
+
+function TimeSince({ date }: { date: string | Date }) {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), REFRESH_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, []);
+  return <>{getMinutesAgo(new Date(date))}</>;
+}
 
 export default function Station() {
   const { id } = useParams<{ id: string }>();
@@ -89,8 +104,8 @@ export default function Station() {
   }, [station, id]);
 
   const stationDescription = station
-    ? `Live wind and weather data for ${station.name}. Updated every minute.`
-    : `Live wind and weather data. Updated every minute.`;
+    ? `Live wind data for ${station.name}, updated every minute.`
+    : `Live wind data, updated every minute.`;
 
   // Shared header content
   const headerContent = station ? (
@@ -98,7 +113,7 @@ export default function Station() {
       <span className="text-lg sm:text-xl font-semibold leading-tight">{station.name}</span>
       <span className="text-muted-foreground text-xs sm:text-sm font-normal">
         Elevation {station.elevation}m • Updated{' '}
-        {station.lastUpdate ? `${getMinutesAgo(new Date(station.lastUpdate))}` : ''}
+        {station.lastUpdate ? <TimeSince date={station.lastUpdate} /> : ''}
       </span>
     </div>
   ) : (
@@ -228,7 +243,7 @@ export default function Station() {
           <p className="text-xs sm:text-sm text-muted-foreground">
             Updated {formatInTimeZone(new Date(station.lastUpdate), 'Pacific/Auckland', 'HH:mm')}
             {' ('}
-            {getMinutesAgo(new Date(station.lastUpdate))}
+            <TimeSince date={station.lastUpdate} />
             {')'}
           </p>
           {station.type !== 'metservice' && (
