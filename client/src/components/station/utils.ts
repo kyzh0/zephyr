@@ -1,4 +1,4 @@
-import type { WindUnit } from './types';
+import type { WindUnit } from '@/components/map';
 
 /**
  * Get direction color based on whether the bearing is within valid bearing ranges

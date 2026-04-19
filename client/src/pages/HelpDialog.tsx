@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, Grid3X3, Wind } from 'lucide-react';
 
+import { useAppStore } from '@/store';
+
 import {
   Dialog,
   DialogContent,
@@ -10,20 +12,19 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { SignInDialog } from '../components/map/SignInDialog';
-import { SiteMarker } from '../components/map/SiteMarker';
-import { LandingMarker } from '../components/map/LandingMarker';
-import { StationMarker } from '../components/map/StationMarker';
+import { SignInDialog } from '@/components/map/SignInDialog';
+import { SiteMarker, LandingMarker, StationMarker, WIND_UNITS } from '@/components/map';
 
 export default function HelpDialog() {
   const navigate = useNavigate();
   const [signInOpen, setSignInOpen] = useState(false);
+  const setWelcomeDismissed = useAppStore((s) => s.setWelcomeDismissed);
 
   return (
     <Dialog
       open
       onOpenChange={() => {
-        localStorage.setItem('welcomeDismissed', 'true');
+        setWelcomeDismissed(true);
         navigate('/');
       }}
     >
@@ -54,7 +55,13 @@ export default function HelpDialog() {
         <div className="flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm">
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
             <div className="flex justify-center items-center w-10 shrink-0 marker gust-label-hidden">
-              <StationMarker speed={15} bearing={240} unit="kmh" size={40} sport="paragliding" />
+              <StationMarker
+                speed={15}
+                bearing={240}
+                unit={WIND_UNITS.KMH}
+                size={40}
+                sport="paragliding"
+              />
             </div>
             <div className="flex items-center">Click a station for details</div>
           </div>
@@ -65,7 +72,7 @@ export default function HelpDialog() {
                 speed={15}
                 gust={30}
                 bearing={240}
-                unit="kmh"
+                unit={WIND_UNITS.KMH}
                 size={40}
                 sport="paragliding"
               />
@@ -80,7 +87,7 @@ export default function HelpDialog() {
                 gust={30}
                 bearing={240}
                 validBearings={'220-260'}
-                unit="kmh"
+                unit={WIND_UNITS.KMH}
                 size={40}
                 sport="paragliding"
               />
@@ -92,7 +99,13 @@ export default function HelpDialog() {
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
             <div className="flex justify-center items-center w-10 shrink-0 marker gust-label-hidden opacity-30">
-              <StationMarker speed={15} bearing={240} unit="kmh" size={40} sport="paragliding" />
+              <StationMarker
+                speed={15}
+                bearing={240}
+                unit={WIND_UNITS.KMH}
+                size={40}
+                sport="paragliding"
+              />
             </div>
             <div className="flex items-center">Stale data appears faded</div>
           </div>

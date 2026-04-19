@@ -1,24 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { convertWindSpeed } from '../map';
-import DirectionArrow from '../ui/DirectionArrow';
-import type { WindUnit } from './types';
+import { convertWindSpeed } from '@/components/map';
+import DirectionArrow from '@/components/ui/DirectionArrow';
 
 import { getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
 import type { Station } from '@/models/station.model';
-import { useAppContext } from '@/context/AppContext';
-import { usePersistedState } from '@/hooks';
+import { useAppStore, useMapStore } from '@/store';
 
 export const StationPreview: React.FC<{
   data: Station;
   distance: number | undefined;
 }> = ({ data, distance }) => {
   const navigate = useNavigate();
-  const { sport } = useAppContext();
+  const sport = useAppStore((s) => s.sport);
+  const unit = useMapStore((s) => s.unit);
 
   const color = getWindColorForSport(data.currentAverage ?? 0, sport);
-  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
 
   return (
     <button

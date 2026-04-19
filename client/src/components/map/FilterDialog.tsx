@@ -5,8 +5,13 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { WindCompass } from '@/components/station/WindCompass';
-import { ELEVATION_FILTER_MIN, ELEVATION_FILTER_MAX } from './map.types';
+import { WindCompass } from '@/components/station';
+import {
+  ELEVATION_FILTER_MIN,
+  ELEVATION_FILTER_MAX,
+  MAP_VIEW_MODES,
+  type MapViewMode
+} from './map.types';
 
 import { getWindDirectionFromBearing } from '@/lib/utils';
 
@@ -15,7 +20,7 @@ interface FilterDialogProps {
   onStationElevationFilterChange: (value: [number, number]) => void;
   siteDirectionFilter: number | null;
   onSiteDirectionFilterChange: (bearing: number | null) => void;
-  viewMode?: 'stations' | 'sites';
+  viewMode?: MapViewMode;
 }
 
 const BEARING_STEP = 22.5;
@@ -29,8 +34,8 @@ export function FilterDialog({
 }: FilterDialogProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const isStationsView = viewMode === 'stations';
-  const isSitesView = viewMode === 'sites';
+  const isStationsView = viewMode === MAP_VIEW_MODES.STATIONS;
+  const isSitesView = viewMode === MAP_VIEW_MODES.SITES;
 
   const [minElev, maxElev] = stationElevationFilter;
   const isStationElevationActive = minElev > ELEVATION_FILTER_MIN || maxElev < ELEVATION_FILTER_MAX;

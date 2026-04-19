@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 
 import { convertWindSpeed } from './map.utils';
-import { type WindUnit } from '../station';
+import { type WindUnit } from './map.types';
 import type { SportType } from './map.types';
 
 import { getTextColor, getWindColorForSport, isWindBearingInRange } from '@/lib/utils';

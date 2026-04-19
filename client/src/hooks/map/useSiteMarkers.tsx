@@ -3,11 +3,10 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 
-import { SiteMarker } from '@/components/map/SiteMarker';
-import { getSiteGeoJson, escapeHtml, POPUP_OFFSET } from '@/components/map';
+import { SiteMarker, getSiteGeoJson, escapeHtml, POPUP_OFFSET } from '@/components/map';
 
 import { isWindBearingInRange } from '@/lib/utils';
-import { useSites } from '../useSites';
+import { useSites } from '@/hooks';
 
 interface UseSiteMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;

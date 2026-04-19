@@ -1,10 +1,9 @@
 import { DirectionArrow } from '@/components/ui/DirectionArrow';
 import { getDirectionColor, convertWindSpeed } from './utils';
-import type { WindUnit, ExtendedStationData } from './types';
+import type { ExtendedStationData } from './types';
 
 import { cn, getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
-import { usePersistedState } from '@/hooks';
-import { useAppContext } from '@/context/AppContext';
+import { useAppStore, useMapStore } from '@/store';
 
 interface StationDataTableProps {
   tableData: ExtendedStationData[];
@@ -18,8 +17,8 @@ export const StationDataTable = function StationDataTable({
 }: StationDataTableProps & {
   ref?: React.RefObject<HTMLTableRowElement | null>;
 }) {
-  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
-  const { sport } = useAppContext();
+  const unit = useMapStore((s) => s.unit);
+  const sport = useAppStore((s) => s.sport);
 
   return (
     <div className="overflow-x-auto rounded-lg border bg-white mt-2 mb-4 sm:min-h-0">

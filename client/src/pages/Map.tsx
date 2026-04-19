@@ -1,13 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import SEO from '@/components/SEO';
-import { MapControlButtons } from '@/components/map';
-import type { MapOverlay, WindUnit } from '@/components/map/map.types';
+import { MapControlButtons, MAP_OVERLAYS, MAP_VIEW_MODES } from '@/components/map';
 
-import { useAppContext } from '@/context/AppContext';
-import { usePersistedState } from '@/hooks';
+import { useMapStore } from '@/store';
 import {
   useMapInstance,
   useMapControls,
@@ -19,24 +17,19 @@ import {
 } from '@/hooks/map';
 
 export default function Map() {
-  const { flyingMode } = useAppContext();
-  const [overlay] = usePersistedState<MapOverlay>('overlay', null);
-  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
-  const [viewMode] = usePersistedState<'stations' | 'sites'>('viewMode', 'stations');
-
-  // Map container ref
-  const mapContainer = useRef<HTMLDivElement>(null);
-
-  // historyOffset lives here so marker hooks can read isHistoricData reactively
-  const [historyOffset, setHistoryOffset] = useState(0);
+  const overlay = useMapStore((s) => s.overlay);
+  const unit = useMapStore((s) => s.unit);
+  const viewMode = useMapStore((s) => s.viewMode);
+  const historyOffset = useMapStore((s) => s.historyOffset);
+  const stationElevationFilter = useMapStore((s) => s.stationElevationFilter);
   const isHistoricData = historyOffset < 0;
 
-  // Initialize map
+  const mapContainer = useRef<HTMLDivElement>(null);
+
   const { map, isLoaded, zoom, triggerGeolocate, flyTo } = useMapInstance({
     containerRef: mapContainer
   });
 
-  // Initialize station markers
   const {
     renderHistoricalData,
     renderCurrentData,
@@ -46,47 +39,39 @@ export default function Map() {
     isMapLoaded: isLoaded,
     isHistoricData,
     unit,
-    isVisible: viewMode === 'stations',
+    isVisible: viewMode === MAP_VIEW_MODES.STATIONS,
     mapZoom: zoom
   });
 
-  // Initialize webcam markers
   useWebcamMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: overlay === 'webcams'
+    isVisible: overlay === MAP_OVERLAYS.WEBCAMS
   });
 
-  // Initialize sounding markers
   useSoundingMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: overlay === 'soundings',
+    isVisible: overlay === MAP_OVERLAYS.SOUNDINGS,
     isHistoricData
   });
 
-  // Initialize landing markers below sites
   const { setTransparent: setLandingTransparent } = useLandingMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: viewMode === 'sites'
+    isVisible: viewMode === MAP_VIEW_MODES.SITES
   });
 
-  // Initialize site markers
   const { setWindDirectionFilter: setSiteDirectionFilter } = useSiteMarkers({
     map,
     isMapLoaded: isLoaded,
-    isVisible: viewMode === 'sites'
+    isVisible: viewMode === MAP_VIEW_MODES.SITES
   });
 
-  // All UI control state and handlers
-  const controls = useMapControls({
+  const handlers = useMapControls({
     map,
     triggerGeolocate,
     flyTo,
-    flyingMode,
-    historyOffset,
-    setHistoryOffset,
     setLandingTransparent,
     setStationMarkersInteractive,
     setSiteDirectionFilter,
@@ -98,14 +83,14 @@ export default function Map() {
   useEffect(() => {
     if (!mapContainer.current) return;
     const markers = mapContainer.current.querySelectorAll('div.marker');
-    const [minElev, maxElev] = controls.stationElevationFilter;
+    const [minElev, maxElev] = stationElevationFilter;
     for (const m of markers) {
       const elevation = Number((m as HTMLElement).dataset.elevation);
       if (!isNaN(elevation)) {
         m.classList.toggle('hidden', elevation < minElev || elevation > maxElev);
       }
     }
-  }, [controls.stationElevationFilter]);
+  }, [stationElevationFilter]);
 
   return (
     <div className="absolute top-0 left-0 h-dvh w-screen flex flex-col">
@@ -132,7 +117,7 @@ export default function Map() {
         <div className="absolute inset-0 border-4 border-red-500 pointer-events-none z-40" />
       )}
 
-      <MapControlButtons {...controls} />
+      <MapControlButtons {...handlers} />
 
       <div ref={mapContainer} className="w-full h-full" />
       <Outlet />

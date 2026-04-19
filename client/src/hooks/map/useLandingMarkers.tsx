@@ -3,10 +3,9 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 
-import { LandingMarker } from '@/components/map/LandingMarker';
-import { getLandingGeoJson, escapeHtml, POPUP_OFFSET } from '@/components/map';
+import { LandingMarker, getLandingGeoJson, escapeHtml, POPUP_OFFSET } from '@/components/map';
 
-import { useLandings } from '../useLandings';
+import { useLandings } from '@/hooks';
 
 interface UseLandingMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;

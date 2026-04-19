@@ -7,6 +7,3 @@ export interface ExtendedStationData extends StationData {
   windGustKt: number | null;
   [key: `validBearings${number}`]: [number, number];
 }
-
-// Unit type for wind speed display
-export type WindUnit = 'kt' | 'kmh';

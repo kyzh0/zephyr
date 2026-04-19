@@ -51,7 +51,6 @@ export {
   useUpdateSounding,
   useDeleteSounding
 } from './useSoundings';
-export { usePersistedState } from './usePersistedState';
 
 export interface UseNearbyLocationsOptions {
   lat: number;

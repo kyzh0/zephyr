@@ -1,16 +1,9 @@
-import { useCallback, useRef, useState } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
+import { useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { usePersistedState } from '@/hooks';
-import {
-  ELEVATION_FILTER_MIN,
-  ELEVATION_FILTER_MAX,
-  type MapControlsState,
-  type MapOverlay,
-  type SearchResult,
-  type WindUnit
-} from '@/components/map/map.types';
+
+import { useMapStore } from '@/store';
+import { MAP_OVERLAYS, MAP_VIEW_MODES } from '@/components/map/map.types';
+import type { MapControlHandlers, SearchResult } from '@/components/map/map.types';
 
 function getSnapshotTime(offset: number): Date {
   const now = new Date();
@@ -27,10 +20,6 @@ export interface UseMapControlsParams {
   map: React.RefObject<{ setStyle: (style: string) => void } | null>;
   triggerGeolocate: () => Promise<void>;
   flyTo: (coordinates: [number, number]) => void;
-  flyingMode: boolean;
-  // historyOffset is owned by Map.tsx so marker hooks can read it reactively
-  historyOffset: number;
-  setHistoryOffset: Dispatch<SetStateAction<number>>;
   setLandingTransparent: (visible: boolean) => void;
   setStationMarkersInteractive: (interactive: boolean) => void;
   setSiteDirectionFilter: (bearing: number | null) => void;
@@ -42,42 +31,23 @@ export function useMapControls({
   map,
   triggerGeolocate,
   flyTo,
-  flyingMode,
-  historyOffset,
-  setHistoryOffset,
   setLandingTransparent,
   setStationMarkersInteractive,
   setSiteDirectionFilter,
   renderHistoricalData,
   renderCurrentData
-}: UseMapControlsParams): MapControlsState {
+}: UseMapControlsParams): MapControlHandlers {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = usePersistedState<'stations' | 'sites'>('viewMode', 'stations');
-  const [unit, setUnit] = usePersistedState<WindUnit>('unit', 'kmh');
-  const [isSatellite, setIsSatellite] = useState(false);
-  const [stationElevationFilter, setStationElevationFilter] = useState<[number, number]>([
-    ELEVATION_FILTER_MIN,
-    ELEVATION_FILTER_MAX
-  ]);
-  const [minimizeRecents, setMinimizeRecents] = usePersistedState('minimizeRecents', true);
-  const [selectedSiteDirection, setSelectedSiteDirection] = useState<number | null>(null);
+  const setOverlay = useMapStore((s) => s.setOverlay);
+  const setViewMode = useMapStore((s) => s.setViewMode);
+  const setHistoryOffset = useMapStore((s) => s.setHistoryOffset);
+  const setSelectedSiteDirection = useMapStore((s) => s.setSelectedSiteDirection);
 
   const historyFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isHistoricData = historyOffset < 0;
-
-  const [overlay, setOverlay] = usePersistedState<MapOverlay>('overlay', null);
-
-  const onWebcamClick = useCallback(() => {
-    setOverlay((prev) => (prev === 'webcams' ? null : 'webcams'));
-  }, [setOverlay]);
-
-  const onSoundingClick = useCallback(() => {
-    setOverlay((prev) => (prev === 'soundings' ? null : 'soundings'));
-  }, [setOverlay]);
-
   const onLayerToggle = useCallback(() => {
     if (!map.current) return;
+    const { isSatellite, setIsSatellite } = useMapStore.getState();
     const newValue = !isSatellite;
     setIsSatellite(newValue);
     map.current.setStyle(
@@ -85,16 +55,11 @@ export function useMapControls({
         ? 'mapbox://styles/mapbox/satellite-streets-v11'
         : 'mapbox://styles/mapbox/outdoors-v11'
     );
-  }, [isSatellite, map]);
-
-  const onUnitToggle = useCallback(() => {
-    const newUnit: WindUnit = unit === 'kmh' ? 'kt' : 'kmh';
-    setUnit(newUnit);
-    toast.info(`Switched to ${newUnit === 'kmh' ? 'km/h' : 'knots'}`);
-  }, [unit, setUnit]);
+  }, [map]);
 
   const onHistoryChange = useCallback(
     async (offset: number) => {
+      const historyOffset = useMapStore.getState().historyOffset;
       const enteringHistoryMode = offset < 0 && historyOffset === 0;
       const exitingHistoryMode = offset === 0 && historyOffset < 0;
 
@@ -126,7 +91,6 @@ export function useMapControls({
       }
     },
     [
-      historyOffset,
       setHistoryOffset,
       setOverlay,
       setStationMarkersInteractive,
@@ -135,24 +99,13 @@ export function useMapControls({
     ]
   );
 
-  const onRecentsToggle = useCallback(() => {
-    setMinimizeRecents((prev) => !prev);
-  }, [setMinimizeRecents]);
-
   const onSiteDirectionFilterChange = useCallback(
     (bearing: number | null) => {
       setSelectedSiteDirection(bearing);
       setSiteDirectionFilter(bearing);
       setLandingTransparent(!!bearing);
     },
-    [setSiteDirectionFilter, setLandingTransparent]
-  );
-
-  const onToggleViewMode = useCallback(
-    (mode: 'stations' | 'sites') => {
-      setViewMode(mode);
-    },
-    [setViewMode]
+    [setSelectedSiteDirection, setSiteDirectionFilter, setLandingTransparent]
   );
 
   const onSearchSelect = useCallback(
@@ -161,44 +114,29 @@ export function useMapControls({
         flyTo(result.item.location.coordinates);
       }
       if (result.type === 'station') {
-        onToggleViewMode('stations');
+        setViewMode(MAP_VIEW_MODES.STATIONS);
         navigate(`/stations/${result.item._id}`);
       } else if (result.type === 'site') {
-        onToggleViewMode('sites');
+        setViewMode(MAP_VIEW_MODES.SITES);
         navigate(`/sites/${result.item._id}`);
       } else if (result.type === 'landing') {
-        onToggleViewMode('sites');
+        setViewMode(MAP_VIEW_MODES.SITES);
         navigate(`/landings/${result.item._id}`);
       } else if (result.type === 'webcam') {
-        setOverlay('webcams');
+        setOverlay(MAP_OVERLAYS.WEBCAMS);
         navigate(`/webcams/${result.item._id}`);
       } else {
-        setOverlay('soundings');
+        setOverlay(MAP_OVERLAYS.SOUNDINGS);
         navigate(`/soundings/${result.item._id}`);
       }
     },
-    [flyTo, navigate, onToggleViewMode, setOverlay]
+    [flyTo, navigate, setViewMode, setOverlay]
   );
 
   return {
-    overlay,
-    viewMode,
-    unit,
-    stationElevationFilter,
-    historyOffset,
-    isHistoricData,
-    // flyingMode forces recents to be minimised; respects user toggle otherwise
-    minimizeRecents: flyingMode ? true : minimizeRecents,
-    siteDirectionFilter: selectedSiteDirection,
-    onWebcamClick,
-    onSoundingClick,
     onLayerToggle,
     onLocateClick: triggerGeolocate,
-    onUnitToggle,
     onHistoryChange,
-    onStationElevationFilterChange: setStationElevationFilter,
-    onRecentsToggle,
-    onToggleViewMode,
     onSiteDirectionFilterChange,
     onSearchSelect
   };

@@ -43,38 +43,41 @@ export interface HistoryValue {
   isOffline: boolean | null;
 }
 
-export type WindUnit = 'kmh' | 'kt';
+export const WIND_UNITS = {
+  KMH: 'kmh',
+  KT: 'kt'
+} as const;
+export type WindUnit = (typeof WIND_UNITS)[keyof typeof WIND_UNITS];
 
-export type MapOverlay = 'webcams' | 'soundings' | null;
+export const MAP_OVERLAYS = {
+  WEBCAMS: 'webcams',
+  SOUNDINGS: 'soundings'
+} as const;
+export type MapOverlay = (typeof MAP_OVERLAYS)[keyof typeof MAP_OVERLAYS] | null;
 
-export type SportType = 'paragliding' | 'hanggliding' | 'kitesurfing';
+export const MAP_VIEW_MODES = {
+  STATIONS: 'stations',
+  SITES: 'sites'
+} as const;
+export type MapViewMode = (typeof MAP_VIEW_MODES)[keyof typeof MAP_VIEW_MODES];
+
+export const SPORTS = {
+  PARAGLIDING: 'paragliding',
+  HANGGLIDING: 'hanggliding',
+  KITESURFING: 'kitesurfing'
+} as const;
+export type SportType = (typeof SPORTS)[keyof typeof SPORTS];
 
 export const SPORT_LABELS: Record<SportType, string> = {
-  paragliding: 'Paragliding',
-  hanggliding: 'Hang Gliding',
-  kitesurfing: 'Kitesurfing'
+  [SPORTS.PARAGLIDING]: 'Paragliding',
+  [SPORTS.HANGGLIDING]: 'Hang Gliding',
+  [SPORTS.KITESURFING]: 'Kitesurfing'
 };
 
-export interface MapControlsState {
-  // State
-  overlay: MapOverlay;
-  viewMode: 'stations' | 'sites';
-  unit: WindUnit;
-  stationElevationFilter: [number, number];
-  historyOffset: number;
-  isHistoricData: boolean;
-  minimizeRecents: boolean;
-  siteDirectionFilter: number | null;
-  // Handlers
-  onWebcamClick: () => void;
-  onSoundingClick: () => void;
+export interface MapControlHandlers {
   onLayerToggle: () => void;
   onLocateClick: () => Promise<void>;
-  onUnitToggle: () => void;
   onHistoryChange: (offset: number) => Promise<void>;
-  onStationElevationFilterChange: (value: [number, number]) => void;
-  onRecentsToggle: () => void;
-  onToggleViewMode: (value: 'stations' | 'sites') => void;
   onSiteDirectionFilterChange: (bearing: number | null) => void;
   onSearchSelect: (result: SearchResult) => void;
 }

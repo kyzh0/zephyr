@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formatInTimeZone } from 'date-fns-tz';
 
-import type { ExtendedStationData } from '@/components/station/types';
+import type { ExtendedStationData } from '@/components/station';
 
 import { REFRESH_INTERVAL_MS } from '@/lib/utils';
 import { loadStationData } from '@/services/station.service';

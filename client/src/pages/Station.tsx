@@ -25,7 +25,6 @@ import {
   getStationTypeName,
   REFRESH_INTERVAL_MS
 } from '@/lib/utils';
-import { addRecentStation } from '@/services/recent-stations.service';
 import { ApiError } from '@/services/api-error';
 import {
   useStationData,
@@ -34,7 +33,7 @@ import {
   useNearbySites,
   type TimeRange
 } from '@/hooks';
-import { useAppContext } from '@/context/AppContext';
+import { useAppStore } from '@/store';
 
 function TimeSince({ date }: { date: string | Date }) {
   const [, setTick] = useState(0);
@@ -49,7 +48,7 @@ export default function Station() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { flyingMode } = useAppContext();
+  const flyingMode = useAppStore((s) => s.flyingMode);
 
   const [timeRange, setTimeRange] = useState<TimeRange>('6');
 
@@ -99,7 +98,7 @@ export default function Station() {
   // Track recently viewed station
   useEffect(() => {
     if (station && id) {
-      addRecentStation(id, station.name);
+      useAppStore.getState().addRecentStation(id, station.name);
     }
   }, [station, id]);
 

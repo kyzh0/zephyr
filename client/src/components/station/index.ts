@@ -8,7 +8,7 @@ export { InfoPopup } from './InfoPopup';
 export { Skeleton } from './Skeleton';
 
 // Types
-export type { ExtendedStationData, WindUnit } from './types';
+export type { ExtendedStationData } from './types';
 
 // Utils
 export {

@@ -30,14 +30,14 @@ import {
 
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
-import { useAppContext } from '@/context/AppContext';
+import { useAppStore } from '@/store';
 import { useIsMobile, useNearbyWebcams, useNearbyStations, useSite } from '@/hooks';
 
 export default function Site() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { flyingMode } = useAppContext();
+  const flyingMode = useAppStore((s) => s.flyingMode);
   const [webcamsOpen, setWebcamsOpen] = useState(false);
   const [stationsOpen, setStationsOpen] = useState(false);
 

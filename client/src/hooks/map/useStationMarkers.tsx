@@ -7,16 +7,19 @@ import { toast } from 'sonner';
 import mapboxgl from 'mapbox-gl';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { getStationGeoJson, convertWindSpeed, escapeHtml, POPUP_OFFSET } from '@/components/map';
-import { StationMarker } from '@/components/map/StationMarker';
-import type {
-  StationMarker as IStationMarker,
-  SportType,
-  WindUnit
-} from '@/components/map/map.types';
+import {
+  getStationGeoJson,
+  convertWindSpeed,
+  escapeHtml,
+  POPUP_OFFSET,
+  StationMarker,
+  type SportType,
+  type WindUnit
+} from '@/components/map';
+import type { StationMarker as IStationMarker } from '@/components/map/map.types';
 
 import { getWindDirectionFromBearing, REFRESH_INTERVAL_MS } from '@/lib/utils';
-import { useAppContext } from '@/context/AppContext';
+import { useAppStore } from '@/store';
 import { loadAllStationDataAtTimestamp } from '@/services/station.service';
 import { stationKeys, useStations } from '@/hooks';
 import type { HistoricalStationData } from '@/models/station-data.model';
@@ -299,7 +302,7 @@ export function useStationMarkers({
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { sport } = useAppContext();
+  const sport = useAppStore((s) => s.sport);
   const markersRef = useRef<IStationMarker[]>([]);
   const interactiveRef = useRef(true);
   const unitRef = useRef<WindUnit>(unit);

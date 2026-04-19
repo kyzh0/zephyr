@@ -2,12 +2,10 @@ import { useRef, useState, useEffect } from 'react';
 
 import { WindCompass } from './WindCompass';
 import { convertWindSpeed, formatTemperature } from './utils';
-import type { WindUnit } from './types';
 
 import { cn, getTextColor, getWindColorForSport, getWindDirectionFromBearing } from '@/lib/utils';
 import type { Station } from '@/models/station.model';
-import { useAppContext } from '@/context/AppContext';
-import { usePersistedState } from '@/hooks';
+import { useAppStore, useMapStore } from '@/store';
 
 interface CurrentConditionsProps {
   station: Station;
@@ -23,8 +21,8 @@ export function CurrentConditions({
   onInfoIconClick,
   onInfoIconHover
 }: CurrentConditionsProps) {
-  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
-  const { sport } = useAppContext();
+  const unit = useMapStore((s) => s.unit);
+  const sport = useAppStore((s) => s.sport);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState<{
     width: number;

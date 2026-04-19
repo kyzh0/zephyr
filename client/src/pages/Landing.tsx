@@ -26,13 +26,13 @@ import {
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
 import { useIsMobile, useLanding } from '@/hooks';
-import { useAppContext } from '@/context/AppContext';
+import { useAppStore } from '@/store';
 
 export default function Landing() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { flyingMode } = useAppContext();
+  const flyingMode = useAppStore((s) => s.flyingMode);
 
   const { landing, isLoading, error } = useLanding(id);
 

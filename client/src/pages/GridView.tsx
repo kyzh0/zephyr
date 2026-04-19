@@ -14,15 +14,14 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { StationPreview } from '@/components/station/StationPreview';
-import type { WindUnit } from '@/components/map/map.types';
-
-import { useNearbyStations, usePersistedState } from '@/hooks';
+import { useNearbyStations } from '@/hooks';
+import { useMapStore } from '@/store';
 
 export default function GridView() {
   const navigate = useNavigate();
   const [radius, setRadius] = useState(50);
   const [threshold, setThreshold] = useState(0);
-  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
+  const unit = useMapStore((s) => s.unit);
 
   // Get user's location (fallback to 0,0 if not available)
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({

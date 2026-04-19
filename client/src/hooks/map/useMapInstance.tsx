@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { getStoredValue, setStoredValue } from '@/components/map';
+import { useMapStore } from '@/store';
 
 mapboxgl.accessToken = (
   Math.random() > 0.5
@@ -39,9 +40,13 @@ export function useMapInstance({ containerRef }: UseMapInstanceOptions): UseMapI
 
     const container = containerRef.current;
 
+    const initialStyle = useMapStore.getState().isSatellite
+      ? 'mapbox://styles/mapbox/satellite-streets-v11'
+      : 'mapbox://styles/mapbox/outdoors-v11';
+
     map.current = new mapboxgl.Map({
       container,
-      style: 'mapbox://styles/mapbox/outdoors-v11',
+      style: initialStyle,
       center: [lon, lat],
       zoom,
       pitchWithRotate: false,

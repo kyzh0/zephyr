@@ -8,19 +8,10 @@ import { SiteMarker } from './SiteMarker';
 import { LandingMarker } from './LandingMarker';
 import { StationMarker } from './StationMarker';
 
-import type { WindUnit } from '../station';
-
 import { cn } from '@/lib/utils';
-import { useAppContext } from '@/context/AppContext';
 import type { SearchResult } from './map.types';
-import {
-  useStations,
-  useWebcams,
-  useSites,
-  useLandings,
-  useSoundings,
-  usePersistedState
-} from '@/hooks';
+import { useStations, useWebcams, useSites, useLandings, useSoundings } from '@/hooks';
+import { useAppStore, useMapStore } from '@/store';
 
 interface SearchBarProps {
   className?: string;
@@ -29,8 +20,8 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ className, disabled, onSelect }: SearchBarProps) {
-  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
-  const { sport } = useAppContext();
+  const unit = useMapStore((s) => s.unit);
+  const sport = useAppStore((s) => s.sport);
   const [isExpanded, setIsExpanded] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);

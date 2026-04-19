@@ -14,6 +14,7 @@ import {
   Undo2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useShallow } from 'zustand/react/shallow';
 
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Toggle } from '@/components/ui/toggle';
@@ -30,77 +31,86 @@ import {
 import { HistorySlider } from './HistorySlider';
 import { FilterDialog } from './FilterDialog';
 import { SearchBar } from './SearchBar';
-import { SPORT_LABELS, type MapControlsState, type SportType } from './map.types';
+import {
+  MAP_OVERLAYS,
+  MAP_VIEW_MODES,
+  WIND_UNITS,
+  SPORT_LABELS,
+  type MapControlHandlers,
+  type MapViewMode,
+  type SportType
+} from './map.types';
 
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
-import {
-  getRecentStations,
-  RECENT_STATIONS_UPDATED_EVENT,
-  type RecentStation
-} from '@/services/recent-stations.service';
 import { useIsMobile } from '@/hooks';
-import { useAppContext } from '@/context/AppContext';
+import { useAppStore, useMapStore } from '@/store';
+
+const VALID_VIEW_MODES = new Set<string>(Object.values(MAP_VIEW_MODES));
+function isMapViewMode(value: string): value is MapViewMode {
+  return VALID_VIEW_MODES.has(value);
+}
 
 export function MapControlButtons({
-  overlay,
-  onWebcamClick,
-  onSoundingClick,
   onLayerToggle,
   onLocateClick,
-  unit,
-  onUnitToggle,
-  historyOffset,
   onHistoryChange,
-  isHistoricData,
-  stationElevationFilter,
-  onStationElevationFilterChange,
-  minimizeRecents,
-  onRecentsToggle,
-  viewMode,
-  onToggleViewMode,
-  siteDirectionFilter,
   onSiteDirectionFilterChange,
   onSearchSelect
-}: MapControlsState) {
-  const showWebcams = overlay === 'webcams';
-  const showSoundings = overlay === 'soundings';
+}: MapControlHandlers) {
+  const {
+    overlay,
+    unit,
+    viewMode,
+    historyOffset,
+    stationElevationFilter,
+    selectedSiteDirection,
+    minimizeRecents,
+    toggleWebcams,
+    toggleSoundings,
+    setUnit,
+    setViewMode,
+    toggleMinimizeRecents,
+    setStationElevationFilter
+  } = useMapStore(
+    useShallow((s) => ({
+      overlay: s.overlay,
+      unit: s.unit,
+      viewMode: s.viewMode,
+      historyOffset: s.historyOffset,
+      stationElevationFilter: s.stationElevationFilter,
+      selectedSiteDirection: s.selectedSiteDirection,
+      minimizeRecents: s.minimizeRecents,
+      toggleWebcams: s.toggleWebcams,
+      toggleSoundings: s.toggleSoundings,
+      setUnit: s.setUnit,
+      setViewMode: s.setViewMode,
+      toggleMinimizeRecents: s.toggleMinimizeRecents,
+      setStationElevationFilter: s.setStationElevationFilter
+    }))
+  );
+  const { flyingMode, toggleFlyingMode, sport, setSport, welcomeDismissed, recentStations } =
+    useAppStore(
+      useShallow((s) => ({
+        flyingMode: s.flyingMode,
+        toggleFlyingMode: s.toggleFlyingMode,
+        sport: s.sport,
+        setSport: s.setSport,
+        welcomeDismissed: s.welcomeDismissed,
+        recentStations: s.recentStations
+      }))
+    );
+
+  const showWebcams = overlay === MAP_OVERLAYS.WEBCAMS;
+  const showSoundings = overlay === MAP_OVERLAYS.SOUNDINGS;
+  const isHistoricData = historyOffset < 0;
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { flyingMode, toggleFlyingMode, sport, setSport } = useAppContext();
   const isFlyingMode = flyingMode && isMobile;
+  // flyingMode forces recents minimised; user toggle takes effect otherwise
+  const effectiveMinimizeRecents = flyingMode ? true : minimizeRecents;
 
   const [isLocating, setIsLocating] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [recentStations, setRecentStations] = useState<RecentStation[]>([]);
-
-  // Load recent stations on mount and when localStorage changes
-  useEffect(() => {
-    const loadRecentStations = () => {
-      setRecentStations(getRecentStations());
-    };
-
-    loadRecentStations();
-
-    // Listen for storage changes (in case another tab updates)
-    window.addEventListener('storage', loadRecentStations);
-
-    // Listen for custom event when recent stations are updated
-    window.addEventListener(RECENT_STATIONS_UPDATED_EVENT, loadRecentStations);
-
-    // Also refresh when the component becomes visible again
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        loadRecentStations();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('storage', loadRecentStations);
-      window.removeEventListener(RECENT_STATIONS_UPDATED_EVENT, loadRecentStations);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
 
   useEffect(() => {
     if (!isLocating) return;
@@ -119,28 +129,35 @@ export function MapControlButtons({
   }, [isLocating, onLocateClick]);
 
   useEffect(() => {
-    if (localStorage.getItem('welcomeDismissed') !== 'true') {
+    if (!welcomeDismissed) {
       navigate('/help');
     }
-  }, [navigate]);
+  }, [navigate, welcomeDismissed]);
 
-  // Render menu button content
   const renderMenuContent = () => (
     <div className="flex flex-col gap-0">
       <div className="px-2 py-1.5">
         <Tabs
           value={viewMode}
           onValueChange={(value) => {
-            onToggleViewMode(value as 'stations' | 'sites');
+            if (isMapViewMode(value)) setViewMode(value);
             setMenuOpen(false);
           }}
           className="h-9"
         >
           <TabsList className="h-9 w-full">
-            <TabsTrigger disabled={isHistoricData} value="stations" className="h-8 flex-1">
+            <TabsTrigger
+              disabled={isHistoricData}
+              value={MAP_VIEW_MODES.STATIONS}
+              className="h-8 flex-1"
+            >
               Stations
             </TabsTrigger>
-            <TabsTrigger disabled={isHistoricData} value="sites" className="h-8 flex-1">
+            <TabsTrigger
+              disabled={isHistoricData}
+              value={MAP_VIEW_MODES.SITES}
+              className="h-8 flex-1"
+            >
               Sites
             </TabsTrigger>
           </TabsList>
@@ -155,7 +172,7 @@ export function MapControlButtons({
           onHistoryChange(-30);
           setMenuOpen(false);
         }}
-        disabled={isHistoricData || viewMode === 'sites'}
+        disabled={isHistoricData || viewMode === MAP_VIEW_MODES.SITES}
       >
         <Hourglass className={`${getIconStyle(isFlyingMode)} opacity-70`} />
         History View
@@ -178,7 +195,7 @@ export function MapControlButtons({
         size="sm"
         className="justify-start gap-2"
         onClick={() => {
-          onSoundingClick();
+          toggleSoundings();
           setMenuOpen(false);
         }}
         disabled={isHistoricData}
@@ -233,7 +250,7 @@ export function MapControlButtons({
           value={isFlyingMode ? 'on' : 'off'}
           onValueChange={(value) => {
             if ((value === 'on') !== isFlyingMode) {
-              onToggleViewMode('stations');
+              setViewMode(MAP_VIEW_MODES.STATIONS);
               toggleFlyingMode();
             }
             setMenuOpen(false);
@@ -309,7 +326,7 @@ export function MapControlButtons({
             <Toggle
               variant="outline"
               size="sm"
-              onClick={onWebcamClick}
+              onClick={toggleWebcams}
               disabled={isHistoricData}
               className={`${getButtonStyle(isFlyingMode)} bg-background ${showWebcams ? '*:[svg]:stroke-blue-500' : ''}`}
             >
@@ -376,7 +393,7 @@ export function MapControlButtons({
                   variant="outline"
                   size="sm"
                   onClick={() => onHistoryChange(isHistoricData ? 0 : -30)}
-                  disabled={viewMode === 'sites'}
+                  disabled={viewMode === MAP_VIEW_MODES.SITES}
                   className={`${getButtonStyle(isFlyingMode)} bg-background ${
                     historyOffset < 0 ? '*:[svg]:stroke-blue-500' : ''
                   }`}
@@ -405,7 +422,7 @@ export function MapControlButtons({
                 <Toggle
                   variant="outline"
                   size="sm"
-                  onClick={onWebcamClick}
+                  onClick={toggleWebcams}
                   disabled={isHistoricData}
                   className={`${getButtonStyle(isFlyingMode)} bg-background ${
                     showWebcams ? '*:[svg]:stroke-blue-500' : ''
@@ -421,7 +438,7 @@ export function MapControlButtons({
                 <Toggle
                   variant="outline"
                   size="sm"
-                  onClick={onSoundingClick}
+                  onClick={toggleSoundings}
                   disabled={isHistoricData}
                   className={`${getButtonStyle(isFlyingMode)} bg-background ${showSoundings ? 'fill-blue-500' : ''}`}
                 >
@@ -438,14 +455,24 @@ export function MapControlButtons({
               <TooltipTrigger asChild>
                 <Tabs
                   value={viewMode}
-                  onValueChange={(value) => onToggleViewMode(value as 'stations' | 'sites')}
+                  onValueChange={(value) => {
+                    if (isMapViewMode(value)) setViewMode(value);
+                  }}
                   className="h-9"
                 >
                   <TabsList className="h-9">
-                    <TabsTrigger disabled={isHistoricData} value="stations" className="h-8">
+                    <TabsTrigger
+                      disabled={isHistoricData}
+                      value={MAP_VIEW_MODES.STATIONS}
+                      className="h-8"
+                    >
                       Stations
                     </TabsTrigger>
-                    <TabsTrigger disabled={isHistoricData} value="sites" className="h-8">
+                    <TabsTrigger
+                      disabled={isHistoricData}
+                      value={MAP_VIEW_MODES.SITES}
+                      className="h-8"
+                    >
                       Sites
                     </TabsTrigger>
                   </TabsList>
@@ -503,14 +530,18 @@ export function MapControlButtons({
               <Toggle
                 variant="outline"
                 size="sm"
-                onClick={onUnitToggle}
+                onClick={() => {
+                  const newUnit = unit === WIND_UNITS.KMH ? WIND_UNITS.KT : WIND_UNITS.KMH;
+                  setUnit(newUnit);
+                  toast.info(`Switched to ${newUnit === WIND_UNITS.KMH ? 'km/h' : 'knots'}`);
+                }}
                 className={`${getButtonStyle(isFlyingMode)} text-xs font-semibold bg-background`}
               >
-                {unit === 'kt' ? 'kt' : 'km/h'}
+                {unit === WIND_UNITS.KT ? 'kt' : 'km/h'}
               </Toggle>
             </TooltipTrigger>
             <TooltipContent side="left">
-              Change unit to {unit === 'kt' ? 'km/h' : 'kt'}
+              Change unit to {unit === WIND_UNITS.KT ? 'km/h' : 'kt'}
             </TooltipContent>
           </Tooltip>
         )}
@@ -530,8 +561,8 @@ export function MapControlButtons({
         {!isFlyingMode && (
           <FilterDialog
             stationElevationFilter={stationElevationFilter}
-            onStationElevationFilterChange={onStationElevationFilterChange}
-            siteDirectionFilter={siteDirectionFilter}
+            onStationElevationFilterChange={setStationElevationFilter}
+            siteDirectionFilter={selectedSiteDirection}
             onSiteDirectionFilterChange={onSiteDirectionFilterChange}
             viewMode={viewMode}
           />
@@ -543,20 +574,20 @@ export function MapControlButtons({
         <HistorySlider
           historyOffset={historyOffset}
           onHistoryChange={onHistoryChange}
-          disabled={viewMode === 'sites'}
+          disabled={viewMode === MAP_VIEW_MODES.SITES}
         />
       )}
 
       {/* Bottom left - Recent Stations (hidden in history mode) */}
       {recentStations.length > 0 && !isFlyingMode && !isHistoricData && (
         <div className="absolute bottom-2.5 left-2.5 z-50">
-          {minimizeRecents ? (
+          {effectiveMinimizeRecents ? (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={onRecentsToggle}
+                  onClick={toggleMinimizeRecents}
                   className={getButtonStyle(isFlyingMode)}
                 >
                   <History className={`${getIconStyle(isFlyingMode)} opacity-70`} />
@@ -568,7 +599,7 @@ export function MapControlButtons({
             <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-50">
               <div
                 className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors"
-                onClick={onRecentsToggle}
+                onClick={toggleMinimizeRecents}
                 title="Click to minimize"
               >
                 <History className={`${getIconStyle(isFlyingMode)} h-3 w-3`} />

@@ -9,9 +9,9 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-import type { ExtendedStationData, WindUnit } from './types';
+import type { ExtendedStationData } from './types';
 
-import { usePersistedState } from '@/hooks';
+import { useMapStore } from '@/store';
 
 interface WindSpeedChartProps {
   data: ExtendedStationData[];
@@ -24,7 +24,7 @@ const chartStyle = {
 };
 
 export function WindSpeedChart({ data }: WindSpeedChartProps) {
-  const [unit] = usePersistedState<WindUnit>('unit', 'kmh');
+  const unit = useMapStore((s) => s.unit);
 
   return (
     <div className="h-[20vh] min-h-30 w-full">
