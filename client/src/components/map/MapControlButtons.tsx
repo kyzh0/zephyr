@@ -14,7 +14,6 @@ import {
   Undo2
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useShallow } from 'zustand/react/shallow';
 
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Toggle } from '@/components/ui/toggle';
@@ -57,48 +56,26 @@ export function MapControlButtons({
   onSiteDirectionFilterChange,
   onSearchSelect
 }: MapControlHandlers) {
-  const {
-    overlay,
-    unit,
-    viewMode,
-    historyOffset,
-    stationElevationFilter,
-    selectedSiteDirection,
-    minimizeRecents,
-    toggleWebcams,
-    toggleSoundings,
-    setUnit,
-    setViewMode,
-    toggleMinimizeRecents,
-    setStationElevationFilter
-  } = useMapStore(
-    useShallow((s) => ({
-      overlay: s.overlay,
-      unit: s.unit,
-      viewMode: s.viewMode,
-      historyOffset: s.historyOffset,
-      stationElevationFilter: s.stationElevationFilter,
-      selectedSiteDirection: s.selectedSiteDirection,
-      minimizeRecents: s.minimizeRecents,
-      toggleWebcams: s.toggleWebcams,
-      toggleSoundings: s.toggleSoundings,
-      setUnit: s.setUnit,
-      setViewMode: s.setViewMode,
-      toggleMinimizeRecents: s.toggleMinimizeRecents,
-      setStationElevationFilter: s.setStationElevationFilter
-    }))
-  );
-  const { flyingMode, toggleFlyingMode, sport, setSport, welcomeDismissed, recentStations } =
-    useAppStore(
-      useShallow((s) => ({
-        flyingMode: s.flyingMode,
-        toggleFlyingMode: s.toggleFlyingMode,
-        sport: s.sport,
-        setSport: s.setSport,
-        welcomeDismissed: s.welcomeDismissed,
-        recentStations: s.recentStations
-      }))
-    );
+  const overlay = useMapStore((s) => s.overlay);
+  const unit = useMapStore((s) => s.unit);
+  const viewMode = useMapStore((s) => s.viewMode);
+  const historyOffset = useMapStore((s) => s.historyOffset);
+  const stationElevationFilter = useMapStore((s) => s.stationElevationFilter);
+  const selectedSiteDirection = useMapStore((s) => s.selectedSiteDirection);
+  const minimizeRecents = useMapStore((s) => s.minimizeRecents);
+  const toggleWebcams = useMapStore((s) => s.toggleWebcams);
+  const toggleSoundings = useMapStore((s) => s.toggleSoundings);
+  const setUnit = useMapStore((s) => s.setUnit);
+  const setViewMode = useMapStore((s) => s.setViewMode);
+  const toggleMinimizeRecents = useMapStore((s) => s.toggleMinimizeRecents);
+  const setStationElevationFilter = useMapStore((s) => s.setStationElevationFilter);
+
+  const flyingMode = useAppStore((s) => s.flyingMode);
+  const toggleFlyingMode = useAppStore((s) => s.toggleFlyingMode);
+  const sport = useAppStore((s) => s.sport);
+  const setSport = useAppStore((s) => s.setSport);
+  const welcomeDismissed = useAppStore((s) => s.welcomeDismissed);
+  const recentStations = useAppStore((s) => s.recentStations);
 
   const showWebcams = overlay === MAP_OVERLAYS.WEBCAMS;
   const showSoundings = overlay === MAP_OVERLAYS.SOUNDINGS;
