@@ -161,9 +161,11 @@ async function exportData(
       }
 
       const ws = XLSX.utils.json_to_sheet(readings);
-      let name = stationNames[key] ?? key;
+      const baseName = (stationNames[key] ?? key).slice(0, 30);
+      let name = baseName;
+      let counter = 1;
       while (wsNames.includes(name)) {
-        name += '_';
+        name = baseName.slice(0, 29) + counter++;
       }
 
       wsNames.push(name);
