@@ -1,6 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
-import { lazy, Suspense } from 'react';
-import { createBrowserRouter, Outlet } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
+import { createBrowserRouter, Outlet, useNavigate } from 'react-router-dom';
+
+import { SW_MSG, type SWMessage } from '@/lib/sw-protocol';
 
 import Map from './pages/Map';
 import Station from './pages/Station';
@@ -12,6 +14,7 @@ import GridView from './pages/GridView';
 import HelpDialog from './pages/HelpDialog';
 import ContactDialog from './pages/ContactDialog';
 import DonateDialog from './pages/DonateDialog';
+import NotificationsPage from './pages/NotificationsPage';
 
 const ExportMapData = lazy(() => import('./pages/ExportMapData'));
 
@@ -32,6 +35,19 @@ import { usePageTracking } from './hooks/usePageTracking';
 
 function RootLayout() {
   usePageTracking();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+    const handler = (event: MessageEvent<SWMessage>) => {
+      if (event.data?.type === SW_MSG.NAVIGATE && event.data.url) {
+        navigate(event.data.url);
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', handler);
+    return () => navigator.serviceWorker.removeEventListener('message', handler);
+  }, [navigate]);
+
   return (
     <Suspense fallback={null}>
       <Outlet />
@@ -83,6 +99,10 @@ export const router = createBrowserRouter([
           {
             path: 'contact',
             element: <ContactDialog />
+          },
+          {
+            path: 'notifications',
+            element: <NotificationsPage />
           },
           {
             path: 'export-map-data',

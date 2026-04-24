@@ -9,45 +9,26 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-export const getWindDirectionFromBearing = (bearing: number): string => {
-  if (bearing < 0) {
-    return '';
-  } else if (bearing <= 11.25) {
-    return 'N';
-  } else if (bearing <= 33.75) {
-    return 'NNE';
-  } else if (bearing <= 56.25) {
-    return 'NE';
-  } else if (bearing <= 78.75) {
-    return 'ENE';
-  } else if (bearing <= 101.25) {
-    return 'E';
-  } else if (bearing <= 123.75) {
-    return 'ESE';
-  } else if (bearing <= 146.25) {
-    return 'SE';
-  } else if (bearing <= 168.75) {
-    return 'SSE';
-  } else if (bearing <= 191.25) {
-    return 'S';
-  } else if (bearing <= 213.75) {
-    return 'SSW';
-  } else if (bearing <= 236.25) {
-    return 'SW';
-  } else if (bearing <= 258.75) {
-    return 'WSW';
-  } else if (bearing <= 281.25) {
-    return 'W';
-  } else if (bearing <= 303.75) {
-    return 'WNW';
-  } else if (bearing <= 326.25) {
-    return 'NW';
-  } else if (bearing <= 348.75) {
-    return 'NNW';
-  } else {
-    return 'N';
-  }
-};
+export function getWindDirectionFromBearing(bearing: number): string {
+  if (bearing < 0) return '';
+  if (bearing <= 11.25) return 'N';
+  if (bearing <= 33.75) return 'NNE';
+  if (bearing <= 56.25) return 'NE';
+  if (bearing <= 78.75) return 'ENE';
+  if (bearing <= 101.25) return 'E';
+  if (bearing <= 123.75) return 'ESE';
+  if (bearing <= 146.25) return 'SE';
+  if (bearing <= 168.75) return 'SSE';
+  if (bearing <= 191.25) return 'S';
+  if (bearing <= 213.75) return 'SSW';
+  if (bearing <= 236.25) return 'SW';
+  if (bearing <= 258.75) return 'WSW';
+  if (bearing <= 281.25) return 'W';
+  if (bearing <= 303.75) return 'WNW';
+  if (bearing <= 326.25) return 'NW';
+  if (bearing <= 348.75) return 'NNW';
+  return 'N';
+}
 
 /**
  * Convert hex color to RGB values

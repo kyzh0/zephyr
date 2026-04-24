@@ -11,7 +11,8 @@ import {
   History,
   Mail,
   Hourglass,
-  Undo2
+  Undo2,
+  Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -221,6 +222,18 @@ export function MapControlButtons({
         <Mail className={`${getIconStyle(isFlyingMode)} opacity-70`} />
         Contact
       </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="justify-start gap-2"
+        onClick={() => {
+          setMenuOpen(false);
+          navigate('/notifications');
+        }}
+      >
+        <Bell className={`${getIconStyle(isFlyingMode)} opacity-70`} />
+        Notifications
+      </Button>
       <div className="border-t my-1" />
       <div className="px-2 py-1.5">
         <Tabs
@@ -362,6 +375,19 @@ export function MapControlButtons({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Contact</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={getButtonStyle(isFlyingMode)}
+                  onClick={() => navigate('/notifications')}
+                >
+                  <Bell className={`${getIconStyle(isFlyingMode)} opacity-70`} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Wind Alerts</TooltipContent>
             </Tooltip>
 
             <Tooltip>

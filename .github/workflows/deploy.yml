@@ -55,6 +55,7 @@ jobs:
           echo "VITE_DONATION_BANK_ACCOUNT=${{ vars.DONATION_BANK_ACCOUNT }}" >> .env
           echo "VITE_API_PREFIX=${{ vars.API_PREFIX }}" >> .env
           echo "VITE_FILE_SERVER_PREFIX=${{ vars.FILE_SERVER_PREFIX }}" >> .env
+          echo "VITE_VAPID_PUBLIC_KEY=${{ vars.VAPID_PUBLIC_KEY }}" >> .env
 
       - name: Build client
         run: |
@@ -227,6 +228,10 @@ jobs:
             EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE1_ID }}
             EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}
             EMAILJS_PRIVATE_KEY=${{ secrets.EMAILJS_PRIVATE_KEY }}
+
+            VAPID_PUBLIC_KEY=${{ vars.VAPID_PUBLIC_KEY }}
+            VAPID_PRIVATE_KEY=${{ secrets.VAPID_PRIVATE_KEY }}
+            VAPID_CONTACT=${{ vars.VAPID_CONTACT }}
             EOF
 
             # tags for docker-compose.yml

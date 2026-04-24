@@ -8,6 +8,7 @@ import {
   processStationJson,
   updateKeys
 } from '@/services/stationService';
+import { runNotificationService } from '@/services/notificationService';
 
 export async function startStationScheduler(): Promise<void> {
   logger.info('----- Initialising station scheduler -----', {
@@ -104,4 +105,13 @@ export async function startStationScheduler(): Promise<void> {
       service: 'keys'
     });
   });
+
+  // wind alert notifications — 1 min after station scrapers
+  cron.schedule(
+    '1,11,21,31,41,51 * * * *',
+    async () => {
+      await runNotificationService();
+    },
+    { noOverlap: true }
+  );
 }
