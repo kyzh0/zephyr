@@ -36,9 +36,7 @@ router.post(
             stationId: r.stationId,
             threshold: r.threshold,
             boundType: r.boundType,
-            directions: r.directions ?? [],
-            activeHours: r.activeHours,
-            enabledAt: r.enabledAt
+            directions: r.directions ?? []
           })),
           unit: unit ?? 'kmh',
           refreshedAt: new Date()

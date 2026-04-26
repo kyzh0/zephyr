@@ -50,7 +50,7 @@ export default function Sounding() {
     : '';
 
   return (
-    <Dialog open onOpenChange={() => navigate(-1)}>
+    <Dialog open onOpenChange={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}>
       {sounding && (
         <SEO
           title={`${sounding.name} Sounding`}

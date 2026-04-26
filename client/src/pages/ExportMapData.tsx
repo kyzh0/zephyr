@@ -283,7 +283,7 @@ export default function ExportMapData() {
   }
 
   function handleClose() {
-    navigate(-1);
+    window.history.length > 1 ? navigate(-1) : navigate('/');
   }
 
   const formContent = (

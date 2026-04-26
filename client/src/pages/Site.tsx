@@ -66,14 +66,16 @@ export default function Site() {
       <span className="text-lg sm:text-xl font-semibold leading-tight">{site?.name}</span>
 
       {site && (
-        <a
-          className="font-thin text-[10px] sm:text-xs"
-          href={`https://www.google.com/maps/place/${site?.location.coordinates[1]},${site?.location.coordinates[0]}`}
-          target="_blank"
-        >
-          [ {site.location.coordinates[1].toFixed(4)}, {site.location.coordinates[0].toFixed(4)} ]{' '}
-          {site.elevation}m
-        </a>
+        <div className="flex items-center gap-1 font-thin text-[10px] sm:text-xs">
+          <a
+            className="text-blue-600"
+            href={`https://www.google.com/maps/place/${site?.location.coordinates[1]},${site?.location.coordinates[0]}`}
+            target="_blank"
+          >
+            Open in Google Maps
+          </a>
+          <span>{site.elevation}m</span>
+        </div>
       )}
     </div>
   );
@@ -239,7 +241,7 @@ export default function Site() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(-1)}
+              onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
               className={getButtonStyle(flyingMode)}
             >
               <ArrowLeft className={getIconStyle(flyingMode)} />

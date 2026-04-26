@@ -134,7 +134,7 @@ registerRoute(
   })
 );
 
-// ─── Push notifications ───────────────────────────────────────────────────────
+// Push notifications
 
 function openTriggeredDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -166,7 +166,7 @@ async function markRuleTriggered(ruleId: string): Promise<void> {
 interface PushPayload {
   title: string;
   body: string;
-  ruleId: string;
+  ruleIds: string[];
   stationId: string;
   url: string;
 }
@@ -183,11 +183,13 @@ self.addEventListener('push', (event) => {
         return;
       }
 
-      await markRuleTriggered(data.ruleId);
+      for (const ruleId of data.ruleIds) {
+        await markRuleTriggered(ruleId);
+      }
 
-      // Notify any open app windows to disable the rule immediately
+      // Notify any open app windows to disable the rules immediately
       const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-      const msg: SWMessage = { type: SW_MSG.RULE_TRIGGERED, ruleId: data.ruleId };
+      const msg: SWMessage = { type: SW_MSG.RULE_TRIGGERED, ruleIds: data.ruleIds };
       for (const client of clients) {
         client.postMessage(msg);
       }
@@ -196,7 +198,7 @@ self.addEventListener('push', (event) => {
         body: data.body,
         icon: '/logo192.png',
         badge: '/badge.svg',
-        tag: data.ruleId,
+        tag: data.stationId,
         data: { stationId: data.stationId, url: data.url }
       });
     })()

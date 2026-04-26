@@ -8,8 +8,6 @@ export type AlertRuleAttrs = {
   threshold: number;
   boundType: 'above' | 'below';
   directions: WindDirection[];
-  activeHours: number;
-  enabledAt: number;
 };
 
 export type PushSubscriptionAttrs = {
@@ -32,9 +30,7 @@ const alertRuleSchema = new mongoose.Schema<AlertRuleAttrs>(
     stationId: { type: String, required: true },
     threshold: { type: Number, required: true },
     boundType: { type: String, required: true },
-    directions: [{ type: String }],
-    activeHours: { type: Number, required: true },
-    enabledAt: { type: Number, required: true }
+    directions: [{ type: String }]
   },
   { _id: false }
 );

@@ -273,7 +273,7 @@ export default function Station() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(-1)}
+              onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
               className={getButtonStyle(flyingMode)}
             >
               <ArrowLeft className={getIconStyle(flyingMode)} />

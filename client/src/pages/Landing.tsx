@@ -49,14 +49,16 @@ export default function Landing() {
       <span className="text-lg sm:text-xl font-semibold leading-tight">{landing?.name}</span>
 
       {landing && (
-        <a
-          className="font-thin text-[10px] sm:text-xs"
-          href={`https://www.google.com/maps/place/${landing?.location.coordinates[1]},${landing?.location.coordinates[0]}`}
-          target="_blank"
-        >
-          [ {landing.location.coordinates[1].toFixed(4)},{' '}
-          {landing.location.coordinates[0].toFixed(4)} ] {landing.elevation}m
-        </a>
+        <div className="flex items-center gap-1 font-thin text-[10px] sm:text-xs">
+          <a
+            className="text-blue-600"
+            href={`https://www.google.com/maps/place/${landing?.location.coordinates[1]},${landing?.location.coordinates[0]}`}
+            target="_blank"
+          >
+            Open in Google Maps
+          </a>
+          <span>{landing.elevation}m</span>
+        </div>
       )}
     </div>
   );
@@ -152,7 +154,7 @@ export default function Landing() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(-1)}
+              onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
               className={getButtonStyle(flyingMode)}
             >
               <ArrowLeft className={getIconStyle(flyingMode)} />

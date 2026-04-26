@@ -67,7 +67,7 @@ export default function GridView() {
   );
 
   return (
-    <Dialog open onOpenChange={() => navigate(-1)}>
+    <Dialog open onOpenChange={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}>
       <SEO
         title="Nearby Stations"
         description="View nearby weather stations sorted by distance. Live wind speed, gust, and direction data for free flying and wind sports in New Zealand."

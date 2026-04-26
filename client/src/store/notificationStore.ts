@@ -6,15 +6,23 @@ import type { AlertRule } from '@/models/notification.model';
 export const MAX_ALERT_RULES = 10;
 const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
+function startOfToday(): number {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
 interface NotificationStore {
   alertRules: AlertRule[];
   lastSynced: number | null;
+  lastResetDate: number | null;
   addRule: (rule: AlertRule) => void;
   updateRule: (id: string, updates: Partial<Omit<AlertRule, 'id'>>) => void;
   removeRule: (id: string) => void;
-  enableRule: (id: string, enabledAt: number) => void;
+  enableRule: (id: string) => void;
   disableRule: (id: string) => void;
   disableTriggeredRules: (ruleIds: string[]) => void;
+  resetDailyRules: () => void;
   setLastSynced: (ts: number) => void;
   shouldSyncOnLoad: () => boolean;
 }
@@ -24,6 +32,7 @@ export const useNotificationStore = create<NotificationStore>()(
     (set, get) => ({
       alertRules: [],
       lastSynced: null,
+      lastResetDate: null,
 
       addRule: (rule) => {
         const rules = get().alertRules;
@@ -41,19 +50,15 @@ export const useNotificationStore = create<NotificationStore>()(
         set({ alertRules: get().alertRules.filter((r) => r.id !== id) });
       },
 
-      enableRule: (id, enabledAt) => {
+      enableRule: (id) => {
         set({
-          alertRules: get().alertRules.map((r) =>
-            r.id === id ? { ...r, enabled: true, enabledAt } : r
-          )
+          alertRules: get().alertRules.map((r) => (r.id === id ? { ...r, enabled: true } : r))
         });
       },
 
       disableRule: (id) => {
         set({
-          alertRules: get().alertRules.map((r) =>
-            r.id === id ? { ...r, enabled: false, enabledAt: null } : r
-          )
+          alertRules: get().alertRules.map((r) => (r.id === id ? { ...r, enabled: false } : r))
         });
       },
 
@@ -61,8 +66,15 @@ export const useNotificationStore = create<NotificationStore>()(
         if (!ruleIds.length) return;
         set({
           alertRules: get().alertRules.map((r) =>
-            ruleIds.includes(r.id) ? { ...r, enabled: false, enabledAt: null } : r
+            ruleIds.includes(r.id) ? { ...r, enabled: false } : r
           )
+        });
+      },
+
+      resetDailyRules: () => {
+        set({
+          alertRules: get().alertRules.map((r) => ({ ...r, enabled: false })),
+          lastResetDate: startOfToday()
         });
       },
 
@@ -70,34 +82,14 @@ export const useNotificationStore = create<NotificationStore>()(
 
       shouldSyncOnLoad: () => {
         const { alertRules, lastSynced } = get();
-        const now = Date.now();
-        const hasEnabled = alertRules.some(
-          (r) => r.enabled && r.enabledAt != null && r.enabledAt + r.activeHours * 3_600_000 > now
-        );
-        if (!hasEnabled) return false;
+        if (!alertRules.some((r) => r.enabled)) return false;
         if (lastSynced == null) return true;
-        return now - lastSynced > SYNC_INTERVAL_MS;
+        return Date.now() - lastSynced > SYNC_INTERVAL_MS;
       }
     }),
     {
       name: 'zephyr-notifications',
-      version: 1,
-      onRehydrateStorage: () => (hydratedState, error) => {
-        if (error || !hydratedState) return;
-
-        const now = Date.now();
-        const expired = hydratedState.alertRules.filter(
-          (r) => r.enabled && r.enabledAt != null && r.enabledAt + r.activeHours * 3_600_000 <= now
-        );
-        if (expired.length > 0) {
-          const expiredIds = new Set(expired.map((r) => r.id));
-          useNotificationStore.setState({
-            alertRules: hydratedState.alertRules.map((r) =>
-              expiredIds.has(r.id) ? { ...r, enabled: false, enabledAt: null } : r
-            )
-          });
-        }
-      }
+      version: 1
     }
   )
 );

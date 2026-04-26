@@ -11,6 +11,8 @@ import {
   type WindDirection
 } from '@zephyr/shared';
 
+import { isTimestampFresh } from '@/lib/utils';
+
 const DIRECTION_RANGES: Record<WindDirection, [number, number]> = {
   N: [337.5, 22.5],
   NE: [22.5, 67.5],
@@ -44,7 +46,7 @@ function initVapid(): boolean {
   return true;
 }
 
-export async function runNotificationService(): Promise<void> {
+export async function processNotifications(): Promise<void> {
   if (!initVapid()) {
     logger.warn('VAPID keys not configured — skipping notification service', {
       service: 'notifications'
@@ -52,19 +54,12 @@ export async function runNotificationService(): Promise<void> {
     return;
   }
 
-  logger.info('--- Notification service start ---', { service: 'notifications' });
-
-  const now = Date.now();
-
   const subscriptions = await PushSubscription.find({}).lean();
   if (!subscriptions.length) {
     return;
   }
 
-  // Collect unique station IDs from non-expired rules across all subscriptions
-  const activeRules = subscriptions.flatMap((sub) =>
-    sub.rules.filter((r) => r.enabledAt + r.activeHours * 3_600_000 > now)
-  );
+  const activeRules = subscriptions.flatMap((sub) => sub.rules);
 
   const uniqueStationIds = [...new Set(activeRules.map((r) => r.stationId))];
   if (!uniqueStationIds.length) {
@@ -77,8 +72,8 @@ export async function runNotificationService(): Promise<void> {
 
   const stations = await Station.find({
     _id: { $in: objectIds },
-    isDisabled: false,
-    isOffline: false
+    isDisabled: { $ne: true },
+    isOffline: { $ne: true }
   }).lean();
 
   const stationMap = new Map(stations.map((s) => [s._id.toString(), s]));
@@ -87,6 +82,10 @@ export async function runNotificationService(): Promise<void> {
   const windMap = new Map<string, { average: number | null; bearing: number | null }>();
 
   for (const s of stations) {
+    if (!isTimestampFresh(s.lastUpdate)) {
+      continue;
+    }
+
     if (!s.isHighResolution) {
       windMap.set(s._id.toString(), {
         average: s.currentAverage ?? null,
@@ -95,7 +94,9 @@ export async function runNotificationService(): Promise<void> {
     }
   }
 
-  const hiResStations = stations.filter((s) => s.isHighResolution);
+  const hiResStations = stations.filter(
+    (s) => s.isHighResolution && isTimestampFresh(s.lastUpdate)
+  );
 
   const hiResResults = await Promise.all(
     hiResStations.map(async (s) => {
@@ -108,15 +109,18 @@ export async function runNotificationService(): Promise<void> {
     windMap.set(stationId, calculateWindAverage(records));
   }
 
+  let count = 0;
   // Evaluate rules per subscription
   for (const sub of subscriptions) {
     const triggeredRuleIds: string[] = [];
 
-    for (const rule of sub.rules) {
-      if (rule.enabledAt + rule.activeHours * 3_600_000 <= now) {
-        continue;
-      }
+    // Group triggered rules by station
+    const triggeredByStation = new Map<
+      string,
+      { ruleIds: string[]; wind: { average: number; bearing: number }; stationName: string }
+    >();
 
+    for (const rule of sub.rules) {
       const wind = windMap.get(rule.stationId);
       if (!wind || wind.average == null || wind.bearing == null) {
         continue;
@@ -138,24 +142,38 @@ export async function runNotificationService(): Promise<void> {
       }
 
       const station = stationMap.get(rule.stationId);
-      if (!station || !station.name) {
+      if (!station?.name) {
         continue;
       }
 
+      if (!triggeredByStation.has(rule.stationId)) {
+        const stationName =
+          station.name.length > 20 ? station.name.slice(0, 17) + '...' : station.name;
+        triggeredByStation.set(rule.stationId, {
+          ruleIds: [],
+          wind: { average: wind.average, bearing: wind.bearing },
+          stationName
+        });
+      }
+      triggeredByStation.get(rule.stationId)!.ruleIds.push(rule.id);
+    }
+
+    for (const [stationId, { ruleIds, wind, stationName }] of triggeredByStation) {
       const directionLabel = getWindDirectionFromBearing(wind.bearing);
       const speedStr = formatSpeed(wind.average, sub.unit);
 
       const payload = JSON.stringify({
         title: 'Wind Alert',
-        body: `${station.name}: ${speedStr} ${directionLabel}`,
-        ruleId: rule.id,
-        stationId: rule.stationId,
-        url: `/stations/${rule.stationId}`
+        body: `${stationName}: ${speedStr} ${directionLabel}`,
+        ruleIds,
+        stationId,
+        url: `/stations/${stationId}`
       });
 
       try {
         await webpush.sendNotification({ endpoint: sub.endpoint, keys: sub.keys }, payload);
-        triggeredRuleIds.push(rule.id);
+        triggeredRuleIds.push(...ruleIds);
+        count++;
       } catch (err: unknown) {
         const status = (err as { statusCode?: number }).statusCode;
         if (status === 410 || status === 404) {
@@ -176,5 +194,12 @@ export async function runNotificationService(): Promise<void> {
     }
   }
 
-  logger.info('--- Notification service end ---', { service: 'notifications' });
+  logger.info(`Notified ${count} subscriptions`, { service: 'notifications' });
+}
+
+export async function resetAlertRules(): Promise<void> {
+  const result = await PushSubscription.updateMany({}, { $set: { rules: [] } });
+  logger.info(`Midnight reset: cleared rules for ${result.modifiedCount} subscriptions`, {
+    service: 'notifications'
+  });
 }

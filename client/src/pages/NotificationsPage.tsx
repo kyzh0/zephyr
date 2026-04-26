@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   Bell,
   BellOff,
-  Clock,
   Plus,
   Pencil,
   Trash2,
-  TrendingDown,
-  TrendingUp,
-  Smartphone
+  Smartphone,
+  ArrowUpFromLine,
+  ArrowDownFromLine
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -50,21 +49,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Toggle } from '@/components/ui/toggle';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-const ACTIVE_HOURS_OPTIONS: { label: string; value: number }[] = [
-  { label: '2 hours', value: 2 },
-  { label: '6 hours', value: 6 },
-  { label: '12 hours', value: 12 },
-  { label: '24 hours', value: 24 }
-];
 
 const WIND_DIRECTIONS: WindDirection[] = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
@@ -80,34 +65,8 @@ function unitLabel(unit: 'kmh' | 'kt'): string {
   return unit === 'kt' ? 'kt' : 'km/h';
 }
 
-function localYmd(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-function formatActiveUntil(enabledAt: number, activeHours: number): string {
-  const expiresAt = new Date(enabledAt + activeHours * 3_600_000);
-  const timeStr = expiresAt.toLocaleTimeString('en-NZ', { hour: 'numeric', minute: '2-digit' });
-
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  return localYmd(expiresAt) === localYmd(tomorrow)
-    ? `Until tomorrow, ${timeStr}`
-    : `Until ${timeStr}`;
-}
-
 function isAnyDirection(directions: WindDirection[]): boolean {
   return directions.length === 0 || directions.length === WIND_DIRECTIONS.length;
-}
-
-function isRuleExpired(rule: AlertRule, now: number): boolean {
-  return rule.enabledAt != null && rule.enabledAt + rule.activeHours * 3_600_000 <= now;
-}
-
-function isRuleActive(rule: AlertRule, now: number): boolean {
-  return (
-    rule.enabled && rule.enabledAt != null && rule.enabledAt + rule.activeHours * 3_600_000 > now
-  );
 }
 
 async function getAndClearTriggeredRuleIds(): Promise<string[]> {
@@ -147,7 +106,6 @@ async function getAndClearTriggeredRuleIds(): Promise<string[]> {
 function AlertRuleCard({
   rule,
   unit,
-  isExpired,
   onEnable,
   onDisable,
   onEdit,
@@ -155,20 +113,12 @@ function AlertRuleCard({
 }: {
   rule: AlertRule;
   unit: 'kmh' | 'kt';
-  isExpired: boolean;
   onEnable: () => void;
   onDisable: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const isActive = rule.enabled && !isExpired;
-
-  const statusText =
-    isActive && rule.enabledAt
-      ? formatActiveUntil(rule.enabledAt, rule.activeHours)
-      : isExpired
-        ? 'Expired'
-        : 'Inactive';
+  const isActive = rule.enabled;
 
   const thresholdDisplay = `${kmhToDisplay(rule.threshold, unit)} ${unitLabel(unit)}`;
 
@@ -176,22 +126,36 @@ function AlertRuleCard({
     <Card className={`py-3 ${!isActive ? 'opacity-60' : ''}`}>
       <CardContent className="px-4 flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-medium text-sm truncate">{rule.stationName}</span>
-          <Switch
-            checked={isActive}
-            onCheckedChange={(checked) => (checked ? onEnable() : onDisable())}
-          />
+          <span className="font-medium text-sm truncate flex-1">
+            {rule.stationName.length > 30 ? rule.stationName.slice(0, 30) + '…' : rule.stationName}
+          </span>
+          <div className="flex items-center shrink-0">
+            <Button variant="ghost" size="sm" className="h-7 cursor-pointer" onClick={onEdit}>
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 cursor-pointer text-destructive hover:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+            <Switch
+              className="ml-4"
+              checked={isActive}
+              onCheckedChange={(checked) => (checked ? onEnable() : onDisable())}
+            />
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           {rule.boundType === 'above' ? (
-            <TrendingUp className="h-3.5 w-3.5 shrink-0" />
+            <ArrowUpFromLine className="h-3.5 w-3.5 shrink-0" />
           ) : (
-            <TrendingDown className="h-3.5 w-3.5 shrink-0" />
+            <ArrowDownFromLine className="h-3.5 w-3.5 shrink-0" />
           )}
-          <span>
-            {rule.boundType === 'above' ? 'Above' : 'Below'} {thresholdDisplay}
-          </span>
+          <span>{thresholdDisplay}</span>
           <div className="flex flex-wrap gap-1">
             {isAnyDirection(rule.directions) ? (
               <Badge variant="secondary" className="text-xs px-1.5 py-0">
@@ -206,26 +170,6 @@ function AlertRuleCard({
             )}
           </div>
         </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3 shrink-0" />
-            <span>{statusText}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" className="h-7 px-2 cursor-pointer" onClick={onEdit}>
-              <Pencil className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 cursor-pointer text-destructive hover:text-destructive"
-              onClick={onDelete}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
@@ -236,10 +180,9 @@ function AlertRuleCard({
 interface RuleFormState {
   stationId: string;
   stationName: string;
-  thresholdDisplay: number;
+  thresholdDisplay: string;
   boundType: BoundType;
   directions: WindDirection[];
-  activeHours: number;
 }
 
 function RuleDialog({
@@ -252,7 +195,7 @@ function RuleDialog({
   open: boolean;
   rule: AlertRule | null;
   unit: 'kmh' | 'kt';
-  onSave: (data: Omit<AlertRule, 'id' | 'enabledAt' | 'enabled'>) => void;
+  onSave: (data: Omit<AlertRule, 'id' | 'enabled'>) => void;
   onClose: () => void;
 }) {
   const { stations } = useStations();
@@ -260,24 +203,23 @@ function RuleDialog({
   const comboRef = useRef<HTMLDivElement>(null);
 
   const [stationSearch, setStationSearch] = useState(() => rule?.stationName ?? '');
+  const [errors, setErrors] = useState<{ station?: boolean; threshold?: boolean }>({});
 
   const [form, setForm] = useState<RuleFormState>(() =>
     rule
       ? {
           stationId: rule.stationId,
           stationName: rule.stationName,
-          thresholdDisplay: kmhToDisplay(rule.threshold, unit),
+          thresholdDisplay: String(kmhToDisplay(rule.threshold, unit)),
           boundType: rule.boundType,
-          directions: rule.directions,
-          activeHours: rule.activeHours
+          directions: rule.directions
         }
       : {
           stationId: '',
           stationName: '',
-          thresholdDisplay: 20,
+          thresholdDisplay: '20',
           boundType: 'above',
-          directions: [],
-          activeHours: 2
+          directions: []
         }
   );
 
@@ -308,21 +250,21 @@ function RuleDialog({
   }
 
   function handleSubmit() {
-    if (!form.stationId) {
-      toast.error('Please select a station');
-      return;
-    }
-    if (!form.thresholdDisplay || form.thresholdDisplay <= 0) {
-      toast.error('Please enter a valid threshold');
+    const threshold = parseInt(form.thresholdDisplay, 10);
+    const stationInvalid = !form.stationId;
+    const thresholdInvalid = !form.thresholdDisplay.trim() || isNaN(threshold) || threshold <= 0;
+    if (stationInvalid || thresholdInvalid) {
+      setErrors({ station: stationInvalid, threshold: thresholdInvalid });
+      if (stationInvalid) toast.error('Please select a station');
+      else toast.error('Please enter a valid threshold');
       return;
     }
     onSave({
       stationId: form.stationId,
       stationName: form.stationName,
-      threshold: displayToKmh(form.thresholdDisplay, unit),
+      threshold: displayToKmh(threshold, unit),
       boundType: form.boundType,
-      directions: form.directions,
-      activeHours: form.activeHours
+      directions: form.directions
     });
   }
 
@@ -344,11 +286,12 @@ function RuleDialog({
               <Input
                 placeholder="Search stations..."
                 value={stationSearch}
+                aria-invalid={errors.station}
                 onChange={(e) => {
                   setStationSearch(e.target.value);
                   setShowStationList(true);
-                  if (!e.target.value)
-                    setForm((prev) => ({ ...prev, stationId: '', stationName: '' }));
+                  setErrors((prev) => ({ ...prev, station: false }));
+                  setForm((prev) => ({ ...prev, stationId: '', stationName: '' }));
                 }}
                 onFocus={() => setShowStationList(true)}
                 autoComplete="off"
@@ -380,7 +323,7 @@ function RuleDialog({
 
           {/* Threshold */}
           <div className="flex flex-col gap-1.5">
-            <Label>Wind speed threshold</Label>
+            <Label>Wind average speed threshold</Label>
             <div className="flex gap-2 items-center">
               <Tabs
                 value={form.boundType}
@@ -389,10 +332,10 @@ function RuleDialog({
               >
                 <TabsList className="h-9">
                   <TabsTrigger value="above" className="h-8 text-xs gap-1">
-                    <TrendingUp className="h-3 w-3" /> Above
+                    <ArrowUpFromLine className="h-3 w-3" /> Above
                   </TabsTrigger>
                   <TabsTrigger value="below" className="h-8 text-xs gap-1">
-                    <TrendingDown className="h-3 w-3" /> Below
+                    <ArrowDownFromLine className="h-3 w-3" /> Below
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -402,12 +345,11 @@ function RuleDialog({
                   min={1}
                   max={999}
                   value={form.thresholdDisplay}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      thresholdDisplay: parseInt(e.target.value, 10) || 0
-                    }))
-                  }
+                  aria-invalid={errors.threshold}
+                  onChange={(e) => {
+                    setForm((prev) => ({ ...prev, thresholdDisplay: e.target.value }));
+                    setErrors((prev) => ({ ...prev, threshold: false }));
+                  }}
                   className="h-9"
                 />
                 <span className="text-sm text-muted-foreground shrink-0">{unitLabel(unit)}</span>
@@ -433,29 +375,6 @@ function RuleDialog({
                 </Toggle>
               ))}
             </div>
-          </div>
-
-          {/* Active window */}
-          <div className="flex flex-col gap-1.5">
-            <Label>Active for</Label>
-            <Select
-              value={String(form.activeHours)}
-              onValueChange={(v) => setForm((prev) => ({ ...prev, activeHours: parseInt(v, 10) }))}
-            >
-              <SelectTrigger className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ACTIVE_HOURS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={String(opt.value)}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              Alert will disable automatically after this period.
-            </p>
           </div>
 
           <Separator />
@@ -485,12 +404,15 @@ export default function NotificationsPage() {
   const enableRule = useNotificationStore((s) => s.enableRule);
   const disableRule = useNotificationStore((s) => s.disableRule);
   const disableTriggeredRules = useNotificationStore((s) => s.disableTriggeredRules);
+  const resetDailyRules = useNotificationStore((s) => s.resetDailyRules);
+  const lastResetDate = useNotificationStore((s) => s.lastResetDate);
   const setLastSynced = useNotificationStore((s) => s.setLastSynced);
 
   const [hasHydrated, setHasHydrated] = useState(() => useNotificationStore.persist.hasHydrated());
 
-  const isStandalone =
-    typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
+  // const isStandalone =
+  //   typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
+  const isStandalone = true; // DEBUG - REMOVE BEFORE COMMIT
 
   const [permission, setPermission] = useState<NotificationPermission>(() =>
     typeof Notification !== 'undefined' ? Notification.permission : 'denied'
@@ -499,8 +421,6 @@ export default function NotificationsPage() {
   const [addEditOpen, setAddEditOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-
-  const now = Date.now();
 
   async function doSync(rules: AlertRule[]) {
     try {
@@ -520,8 +440,8 @@ export default function NotificationsPage() {
     });
 
     const handler = (event: MessageEvent<SWMessage>) => {
-      if (event.data?.type === SW_MSG.RULE_TRIGGERED && event.data.ruleId) {
-        disableTriggeredRules([event.data.ruleId]);
+      if (event.data?.type === SW_MSG.RULE_TRIGGERED && event.data.ruleIds?.length) {
+        disableTriggeredRules(event.data.ruleIds);
       }
     };
     navigator.serviceWorker?.addEventListener('message', handler);
@@ -539,11 +459,35 @@ export default function NotificationsPage() {
     if (!hasHydrated) return;
     const state = useNotificationStore.getState();
     if (state.shouldSyncOnLoad()) {
-      const activeRules = state.alertRules.filter((r) => isRuleActive(r, Date.now()));
-      doSync(activeRules);
+      doSync(state.alertRules.filter((r) => r.enabled));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasHydrated]);
+
+  // Midnight reset: disable all rules at start of each new day
+  useEffect(() => {
+    function runReset() {
+      resetDailyRules();
+      doSync([]);
+    }
+
+    // On mount: check if we missed a midnight reset while the app was closed
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (lastResetDate === null || lastResetDate < today.getTime()) {
+      runReset();
+    }
+
+    // Set a timeout for the next midnight so the reset fires while app is open
+    const now = new Date();
+    const nextMidnight = new Date(now);
+    nextMidnight.setDate(nextMidnight.getDate() + 1);
+    nextMidnight.setHours(0, 0, 0, 0);
+    const msUntilMidnight = nextMidnight.getTime() - now.getTime();
+    const timer = setTimeout(runReset, msUntilMidnight);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleEnablePermission() {
     if (!('Notification' in window)) return;
@@ -553,8 +497,10 @@ export default function NotificationsPage() {
       setPermission(result);
       if (result !== 'granted') return;
 
-      const activeRules = alertRules.filter((r) => isRuleActive(r, Date.now()));
-      await subscribePush(activeRules, unit);
+      await subscribePush(
+        alertRules.filter((r) => r.enabled),
+        unit
+      );
       setLastSynced(Date.now());
       toast.success('Notifications enabled');
     } catch {
@@ -564,12 +510,13 @@ export default function NotificationsPage() {
     }
   }
 
-  function handleSave(data: Omit<AlertRule, 'id' | 'enabledAt' | 'enabled'>) {
+  function handleSave(data: Omit<AlertRule, 'id' | 'enabled'>) {
     if (editingRule) {
       updateRule(editingRule.id, data);
+      enableRule(editingRule.id);
       toast.success('Alert updated');
       const updated = useNotificationStore.getState().alertRules;
-      if (editingRule.enabled) doSync(updated.filter((r) => isRuleActive(r, Date.now())));
+      doSync(updated.filter((r) => r.enabled));
     } else {
       const sortedDirs = [...data.directions].sort();
       const currentRules = useNotificationStore.getState().alertRules;
@@ -580,24 +527,17 @@ export default function NotificationsPage() {
           r.boundType === data.boundType &&
           [...r.directions].sort().join() === sortedDirs.join()
       );
-      const enabledAt = Date.now();
       if (duplicate) {
-        updateRule(duplicate.id, { activeHours: data.activeHours });
-        enableRule(duplicate.id, enabledAt);
+        enableRule(duplicate.id);
         toast.success('Alert updated');
         const updated = useNotificationStore.getState().alertRules;
-        doSync(updated.filter((r) => isRuleActive(r, Date.now())));
+        doSync(updated.filter((r) => r.enabled));
       } else {
-        const newRule: AlertRule = {
-          ...data,
-          id: crypto.randomUUID(),
-          enabledAt,
-          enabled: true
-        };
+        const newRule: AlertRule = { ...data, id: crypto.randomUUID(), enabled: true };
         addRule(newRule);
         toast.success('Alert added');
         const updated = useNotificationStore.getState().alertRules;
-        doSync(updated.filter((r) => isRuleActive(r, Date.now())));
+        doSync(updated.filter((r) => r.enabled));
       }
     }
     setAddEditOpen(false);
@@ -605,22 +545,21 @@ export default function NotificationsPage() {
   }
 
   function handleEnable(id: string) {
-    const enabledAt = Date.now();
-    enableRule(id, enabledAt);
+    enableRule(id);
     const updated = useNotificationStore.getState().alertRules;
-    doSync(updated.filter((r) => isRuleActive(r, Date.now())));
+    doSync(updated.filter((r) => r.enabled));
   }
 
   function handleDisable(id: string) {
     disableRule(id);
     const updated = useNotificationStore.getState().alertRules;
-    doSync(updated.filter((r) => isRuleActive(r, Date.now())));
+    doSync(updated.filter((r) => r.enabled));
   }
 
   function handleDelete(id: string) {
     removeRule(id);
     const updated = useNotificationStore.getState().alertRules;
-    doSync(updated.filter((r) => isRuleActive(r, Date.now())));
+    doSync(updated.filter((r) => r.enabled));
     toast.success('Alert deleted');
     setDeleteConfirmId(null);
   }
@@ -637,6 +576,9 @@ export default function NotificationsPage() {
           <DialogHeader>
             <DialogTitle>Wind Alerts</DialogTitle>
             <DialogDescription>Get notified when conditions match your criteria.</DialogDescription>
+            <DialogDescription className="text-xs">
+              Alerts disable automatically after being triggered.
+            </DialogDescription>
           </DialogHeader>
 
           {/* Install required banner */}
@@ -722,7 +664,6 @@ export default function NotificationsPage() {
                   key={rule.id}
                   rule={rule}
                   unit={unit}
-                  isExpired={isRuleExpired(rule, now)}
                   onEnable={() => handleEnable(rule.id)}
                   onDisable={() => handleDisable(rule.id)}
                   onEdit={() => {
@@ -734,47 +675,47 @@ export default function NotificationsPage() {
               ))}
             </div>
           </div>
+
+          {/* Add / Edit rule dialog */}
+          <RuleDialog
+            key={`${editingRule?.id ?? 'new'}-${addEditOpen}`}
+            open={addEditOpen}
+            rule={editingRule}
+            unit={unit}
+            onSave={handleSave}
+            onClose={() => {
+              setAddEditOpen(false);
+              setEditingRule(null);
+            }}
+          />
+
+          {/* Delete confirmation */}
+          <AlertDialog
+            open={deleteConfirmId !== null}
+            onOpenChange={(o) => !o && setDeleteConfirmId(null)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete alert?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {ruleToDelete
+                    ? `Remove the alert for "${ruleToDelete.stationName}"? This cannot be undone.`
+                    : 'Remove this alert?'}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-row gap-2">
+                <AlertDialogCancel className="flex-1 mt-0 cursor-pointer">Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="flex-1 bg-destructive text-white cursor-pointer hover:bg-destructive/90"
+                  onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </DialogContent>
       </Dialog>
-
-      {/* Add / Edit rule dialog */}
-      <RuleDialog
-        key={`${editingRule?.id ?? 'new'}-${addEditOpen}`}
-        open={addEditOpen}
-        rule={editingRule}
-        unit={unit}
-        onSave={handleSave}
-        onClose={() => {
-          setAddEditOpen(false);
-          setEditingRule(null);
-        }}
-      />
-
-      {/* Delete confirmation */}
-      <AlertDialog
-        open={deleteConfirmId !== null}
-        onOpenChange={(o) => !o && setDeleteConfirmId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete alert?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {ruleToDelete
-                ? `Remove the alert for "${ruleToDelete.stationName}"? This cannot be undone.`
-                : 'Remove this alert?'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row gap-2">
-            <AlertDialogCancel className="flex-1 mt-0 cursor-pointer">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="flex-1 bg-destructive text-white cursor-pointer hover:bg-destructive/90"
-              onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

@@ -32,7 +32,7 @@ export default function Webcam() {
   }, [error, navigate]);
 
   return (
-    <Dialog open onOpenChange={() => navigate(-1)}>
+    <Dialog open onOpenChange={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}>
       {webcam && (
         <SEO
           title={`${webcam.name} Webcam`}

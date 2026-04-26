@@ -9,7 +9,5 @@ export interface AlertRule {
   threshold: number;
   boundType: BoundType;
   directions: WindDirection[];
-  activeHours: number;
-  enabledAt: number | null;
   enabled: boolean;
 }
