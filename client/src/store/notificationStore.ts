@@ -2,20 +2,11 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { AlertRule } from '@/models/notification.model';
-
-export const MAX_ALERT_RULES = 10;
-const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
-
-function startOfToday(): number {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.getTime();
-}
+import { MAX_ALERT_RULES, nzDateStr } from '@/lib/utils';
 
 interface NotificationStore {
   alertRules: AlertRule[];
-  lastSynced: number | null;
-  lastResetDate: number | null;
+  lastResetDate: string | null;
   addRule: (rule: AlertRule) => void;
   updateRule: (id: string, updates: Partial<Omit<AlertRule, 'id'>>) => void;
   removeRule: (id: string) => void;
@@ -23,15 +14,12 @@ interface NotificationStore {
   disableRule: (id: string) => void;
   disableTriggeredRules: (ruleIds: string[]) => void;
   resetDailyRules: () => void;
-  setLastSynced: (ts: number) => void;
-  shouldSyncOnLoad: () => boolean;
 }
 
 export const useNotificationStore = create<NotificationStore>()(
   persist(
     (set, get) => ({
       alertRules: [],
-      lastSynced: null,
       lastResetDate: null,
 
       addRule: (rule) => {
@@ -74,17 +62,8 @@ export const useNotificationStore = create<NotificationStore>()(
       resetDailyRules: () => {
         set({
           alertRules: get().alertRules.map((r) => ({ ...r, enabled: false })),
-          lastResetDate: startOfToday()
+          lastResetDate: nzDateStr()
         });
-      },
-
-      setLastSynced: (ts) => set({ lastSynced: ts }),
-
-      shouldSyncOnLoad: () => {
-        const { alertRules, lastSynced } = get();
-        if (!alertRules.some((r) => r.enabled)) return false;
-        if (lastSynced == null) return true;
-        return Date.now() - lastSynced > SYNC_INTERVAL_MS;
       }
     }),
     {

@@ -324,7 +324,7 @@ export const parseValidBearings = (
       let startAngle = bearing - 30;
       let endAngle = bearing + 30;
 
-      // Normalize angles
+      // Normalise angles
       if (startAngle < 0) startAngle += 360;
       if (endAngle > 360) endAngle -= 360;
 
@@ -387,3 +387,16 @@ export const getButtonStyle = (flyingMode: boolean): string =>
   flyingMode ? 'h-[5rem] w-[5rem] shrink-0' : 'h-9 w-9 shrink-0';
 export const getIconStyle = (flyingMode: boolean): string =>
   flyingMode ? 'h-[2.5rem] w-[2.5rem]' : 'h-5 w-5';
+
+export const MAX_ALERT_RULES = 10;
+
+export function nzDateStr(d: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Pacific/Auckland',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)!.value;
+  return `${get('year')}-${get('month')}-${get('day')}`;
+}

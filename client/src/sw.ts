@@ -1,5 +1,5 @@
 /// <reference lib="WebWorker" />
-import { precacheAndRoute } from 'workbox-precaching';
+import { precacheAndRoute, matchPrecache } from 'workbox-precaching';
 import { registerRoute, NavigationRoute } from 'workbox-routing';
 import { NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
@@ -20,10 +20,7 @@ precacheAndRoute(self.__WB_MANIFEST);
 
 // SPA shell fallback
 registerRoute(
-  new NavigationRoute(async () => {
-    const cache = await caches.open('workbox-precache-v2');
-    return (await cache.match('/index.html')) ?? fetch('/index.html');
-  })
+  new NavigationRoute(async () => (await matchPrecache('/index.html')) ?? fetch('/index.html'))
 );
 
 // Station list
@@ -196,7 +193,6 @@ self.addEventListener('push', (event) => {
 
       await self.registration.showNotification(data.title, {
         body: data.body,
-        icon: '/logo192.png',
         badge: '/badge.svg',
         tag: data.stationId,
         data: { stationId: data.stationId, url: data.url }

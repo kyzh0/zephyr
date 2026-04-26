@@ -59,9 +59,9 @@ export async function processNotifications(): Promise<void> {
     return;
   }
 
-  const activeRules = subscriptions.flatMap((sub) => sub.rules);
-
-  const uniqueStationIds = [...new Set(activeRules.map((r) => r.stationId))];
+  const uniqueStationIds = [
+    ...new Set(subscriptions.flatMap((sub) => sub.rules.map((r) => r.stationId)))
+  ];
   if (!uniqueStationIds.length) {
     return;
   }
@@ -98,9 +98,15 @@ export async function processNotifications(): Promise<void> {
     (s) => s.isHighResolution && isTimestampFresh(s.lastUpdate)
   );
 
+  const hiResWindowFrom = new Date(Date.now() - 10 * 60 * 1000);
   const hiResResults = await Promise.all(
     hiResStations.map(async (s) => {
-      const records = await StationData.find({ station: s._id }).sort({ time: -1 }).limit(5).lean();
+      const records = await StationData.find({
+        station: s._id,
+        time: { $gte: hiResWindowFrom }
+      })
+        .sort({ time: -1 })
+        .lean();
       return { stationId: s._id.toString(), records };
     })
   );
@@ -148,7 +154,7 @@ export async function processNotifications(): Promise<void> {
 
       if (!triggeredByStation.has(rule.stationId)) {
         const stationName =
-          station.name.length > 20 ? station.name.slice(0, 17) + '...' : station.name;
+          station.name.length > 20 ? station.name.slice(0, 17) + '…' : station.name;
         triggeredByStation.set(rule.stationId, {
           ruleIds: [],
           wind: { average: wind.average, bearing: wind.bearing },
@@ -171,7 +177,10 @@ export async function processNotifications(): Promise<void> {
       });
 
       try {
-        await webpush.sendNotification({ endpoint: sub.endpoint, keys: sub.keys }, payload);
+        await webpush.sendNotification({ endpoint: sub.endpoint, keys: sub.keys }, payload, {
+          urgency: 'high',
+          TTL: 3600
+        });
         triggeredRuleIds.push(...ruleIds);
         count++;
       } catch (err: unknown) {

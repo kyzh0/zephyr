@@ -12,8 +12,9 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { useNotificationStore, useMapStore, MAX_ALERT_RULES } from '@/store';
+import { useNotificationStore, useMapStore } from '@/store';
 import { useStations } from '@/hooks/useStations';
+import { MAX_ALERT_RULES, nzDateStr } from '@/lib/utils';
 import { subscribePush, syncSubscription, getPushSubscription } from '@/services/push.service';
 import type { AlertRule, BoundType, WindDirection } from '@/models/notification.model';
 import {
@@ -405,14 +406,11 @@ export default function NotificationsPage() {
   const disableRule = useNotificationStore((s) => s.disableRule);
   const disableTriggeredRules = useNotificationStore((s) => s.disableTriggeredRules);
   const resetDailyRules = useNotificationStore((s) => s.resetDailyRules);
-  const lastResetDate = useNotificationStore((s) => s.lastResetDate);
-  const setLastSynced = useNotificationStore((s) => s.setLastSynced);
 
   const [hasHydrated, setHasHydrated] = useState(() => useNotificationStore.persist.hasHydrated());
 
-  // const isStandalone =
-  //   typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
-  const isStandalone = true; // DEBUG - REMOVE BEFORE COMMIT
+  const isStandalone =
+    typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
 
   const [permission, setPermission] = useState<NotificationPermission>(() =>
     typeof Notification !== 'undefined' ? Notification.permission : 'denied'
@@ -425,9 +423,11 @@ export default function NotificationsPage() {
   async function doSync(rules: AlertRule[]) {
     try {
       const sub = await getPushSubscription();
-      if (!sub) return;
+      if (!sub) {
+        toast.error('Error - Reset notification permissions in browser settings');
+        return;
+      }
       await syncSubscription(sub, rules, unit);
-      setLastSynced(Date.now());
     } catch {
       toast.error('Something went wrong. Refresh and try again.');
     }
@@ -454,40 +454,39 @@ export default function NotificationsPage() {
     return useNotificationStore.persist.onFinishHydration(() => setHasHydrated(true));
   }, [hasHydrated]);
 
-  // Sync on load if due
+  // Watch for browser-side permission changes
+  useEffect(() => {
+    if (!('permissions' in navigator)) return;
+
+    let status: PermissionStatus | null = null;
+    let cancelled = false;
+    const handler = () => {
+      if (status) setPermission(status.state === 'prompt' ? 'default' : status.state);
+    };
+
+    navigator.permissions.query({ name: 'notifications' }).then((s) => {
+      if (cancelled) return;
+      status = s;
+      handler();
+      status.addEventListener('change', handler);
+    });
+
+    return () => {
+      cancelled = true;
+      status?.removeEventListener('change', handler);
+    };
+  }, []);
+
+  // Disable all rules if new day
   useEffect(() => {
     if (!hasHydrated) return;
-    const state = useNotificationStore.getState();
-    if (state.shouldSyncOnLoad()) {
-      doSync(state.alertRules.filter((r) => r.enabled));
-    }
+    if (useNotificationStore.getState().lastResetDate === nzDateStr()) return;
+
+    const hadEnabled = useNotificationStore.getState().alertRules.some((r) => r.enabled);
+    resetDailyRules();
+    if (hadEnabled) doSync([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasHydrated]);
-
-  // Midnight reset: disable all rules at start of each new day
-  useEffect(() => {
-    function runReset() {
-      resetDailyRules();
-      doSync([]);
-    }
-
-    // On mount: check if we missed a midnight reset while the app was closed
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (lastResetDate === null || lastResetDate < today.getTime()) {
-      runReset();
-    }
-
-    // Set a timeout for the next midnight so the reset fires while app is open
-    const now = new Date();
-    const nextMidnight = new Date(now);
-    nextMidnight.setDate(nextMidnight.getDate() + 1);
-    nextMidnight.setHours(0, 0, 0, 0);
-    const msUntilMidnight = nextMidnight.getTime() - now.getTime();
-    const timer = setTimeout(runReset, msUntilMidnight);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   async function handleEnablePermission() {
     if (!('Notification' in window)) return;
@@ -501,7 +500,6 @@ export default function NotificationsPage() {
         alertRules.filter((r) => r.enabled),
         unit
       );
-      setLastSynced(Date.now());
       toast.success('Notifications enabled');
     } catch {
       toast.error('Failed to enable notifications');
@@ -511,20 +509,24 @@ export default function NotificationsPage() {
   }
 
   function handleSave(data: Omit<AlertRule, 'id' | 'enabled'>) {
+    const normalised: Omit<AlertRule, 'id' | 'enabled'> = {
+      ...data,
+      directions: data.directions.length === WIND_DIRECTIONS.length ? [] : data.directions
+    };
     if (editingRule) {
-      updateRule(editingRule.id, data);
+      updateRule(editingRule.id, normalised);
       enableRule(editingRule.id);
       toast.success('Alert updated');
       const updated = useNotificationStore.getState().alertRules;
       doSync(updated.filter((r) => r.enabled));
     } else {
-      const sortedDirs = [...data.directions].sort();
+      const sortedDirs = [...normalised.directions].sort();
       const currentRules = useNotificationStore.getState().alertRules;
       const duplicate = currentRules.find(
         (r) =>
-          r.stationId === data.stationId &&
-          r.threshold === data.threshold &&
-          r.boundType === data.boundType &&
+          r.stationId === normalised.stationId &&
+          r.threshold === normalised.threshold &&
+          r.boundType === normalised.boundType &&
           [...r.directions].sort().join() === sortedDirs.join()
       );
       if (duplicate) {
@@ -533,7 +535,7 @@ export default function NotificationsPage() {
         const updated = useNotificationStore.getState().alertRules;
         doSync(updated.filter((r) => r.enabled));
       } else {
-        const newRule: AlertRule = { ...data, id: crypto.randomUUID(), enabled: true };
+        const newRule: AlertRule = { ...normalised, id: crypto.randomUUID(), enabled: true };
         addRule(newRule);
         toast.success('Alert added');
         const updated = useNotificationStore.getState().alertRules;
@@ -577,21 +579,20 @@ export default function NotificationsPage() {
             <DialogTitle>Wind Alerts</DialogTitle>
             <DialogDescription>Get notified when conditions match your criteria.</DialogDescription>
             <DialogDescription className="text-xs">
-              Alerts disable automatically after being triggered.
+              Alerts disable automatically at midnight, or when triggered.
             </DialogDescription>
           </DialogHeader>
 
           {/* Install required banner */}
           {!isStandalone && (
-            <Alert>
-              <Smartphone className="h-4 w-4" />
+            <Alert className="flex items-center">
+              <Smartphone className="h-8! w-8! mr-2" />
               <AlertDescription className="text-sm">
-                Wind alerts require Zephyr to be installed as an app.
-                <br />
-                <span className="text-muted-foreground">
-                  On Chrome: tap ⋮ → <em>Add to Home Screen</em>. On Safari: tap{' '}
-                  <em>Share → Add to Home Screen</em>.
-                </span>
+                <div className="flex flex-col">
+                  <span>Install Zephyr as an app to use alerts.</span>
+                  <span>Chrome: tap ⋮ → Add to Home Screen</span>
+                  <span>Safari: tap Share → Add to Home Screen</span>
+                </div>
               </AlertDescription>
             </Alert>
           )}
