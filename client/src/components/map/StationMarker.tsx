@@ -19,7 +19,7 @@ export interface StationMarkerProps {
   sport: SportType;
 }
 
-// ─── Core SVG builder ──────────────────────────────────────────────────────────
+// Core SVG builder
 
 /**
  * Generates SVG for a single wind direction marker.

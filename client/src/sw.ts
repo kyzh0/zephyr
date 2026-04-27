@@ -193,6 +193,7 @@ self.addEventListener('push', (event) => {
 
       await self.registration.showNotification(data.title, {
         body: data.body,
+        icon: '/logo192.png',
         badge: '/badge.svg',
         tag: data.stationId,
         data: { stationId: data.stationId, url: data.url }

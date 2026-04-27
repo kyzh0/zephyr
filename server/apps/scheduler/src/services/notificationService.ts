@@ -154,7 +154,7 @@ export async function processNotifications(): Promise<void> {
 
       if (!triggeredByStation.has(rule.stationId)) {
         const stationName =
-          station.name.length > 20 ? station.name.slice(0, 17) + '…' : station.name;
+          station.name.length > 17 ? station.name.slice(0, 16) + '…' : station.name;
         triggeredByStation.set(rule.stationId, {
           ruleIds: [],
           wind: { average: wind.average, bearing: wind.bearing },

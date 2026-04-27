@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   AlertCircleIcon,
   TriangleAlertIcon,
@@ -7,7 +8,8 @@ import {
   ArrowLeft,
   ChevronRightIcon,
   ChevronDown,
-  ExternalLink
+  ExternalLink,
+  Link2
 } from 'lucide-react';
 
 import SEO from '@/components/SEO';
@@ -32,6 +34,9 @@ import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
 import { useAppStore } from '@/store';
 import { useIsMobile, useNearbyWebcams, useNearbyStations, useSite } from '@/hooks';
+
+const isStandalone =
+  typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
 
 export default function Site() {
   const { id } = useParams<{ id: string }>();
@@ -261,6 +266,21 @@ export default function Site() {
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-4 pt-1 flex flex-col gap-4">{bodyContent}</div>
+
+        {/* Copy link */}
+        {site && isStandalone && (
+          <Button
+            variant="secondary"
+            size="icon"
+            className="fixed bottom-5 left-5 rounded-full shadow-md z-20"
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              toast.success('Site URL copied to clipboard');
+            }}
+          >
+            <Link2 className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     );
   }

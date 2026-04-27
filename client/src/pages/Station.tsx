@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { formatInTimeZone } from 'date-fns-tz';
-import { ArrowLeft, ChevronDown } from 'lucide-react';
+import { toast } from 'sonner';
+import { ArrowLeft, Bell, ChevronDown, Link2 } from 'lucide-react';
 
 import SEO from '@/components/SEO';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -34,6 +35,9 @@ import {
   type TimeRange
 } from '@/hooks';
 import { useAppStore } from '@/store';
+
+const isStandalone =
+  typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
 
 function TimeSince({ date }: { date: string | Date }) {
   const [, setTick] = useState(0);
@@ -238,7 +242,7 @@ export default function Station() {
 
       {/* Footer */}
       {station && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-2">
           <p className="text-xs sm:text-sm text-muted-foreground">
             Updated {formatInTimeZone(new Date(station.lastUpdate), 'Pacific/Auckland', 'HH:mm')}
             {' ('}
@@ -278,7 +282,23 @@ export default function Station() {
             >
               <ArrowLeft className={getIconStyle(flyingMode)} />
             </Button>
-            <div className="flex-1 text-center pr-10">{headerContent}</div>
+            <div className={`flex-1 text-center ${isStandalone ? '' : 'mr-10'}`}>
+              {headerContent}
+            </div>
+            {isStandalone && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className={getButtonStyle(flyingMode)}
+                onClick={() =>
+                  navigate('/notifications', {
+                    state: { prefillStation: { id: id!, name: station?.name ?? '' } }
+                  })
+                }
+              >
+                <Bell className={getIconStyle(flyingMode)} />
+              </Button>
+            )}
           </div>
         </div>
 
@@ -290,6 +310,21 @@ export default function Station() {
         >
           {bodyContent}
         </div>
+
+        {/* Copy link */}
+        {station && isStandalone && (
+          <Button
+            variant="secondary"
+            size="icon"
+            className="fixed bottom-5 left-5 rounded-full shadow-md z-20"
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              toast.success('Station URL copied to clipboard');
+            }}
+          >
+            <Link2 className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     );
   }

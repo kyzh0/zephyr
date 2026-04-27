@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Bell,
   BellOff,
@@ -102,8 +102,6 @@ async function getAndClearTriggeredRuleIds(): Promise<string[]> {
   });
 }
 
-// ─── Alert Rule Card ──────────────────────────────────────────────────────────
-
 function AlertRuleCard({
   rule,
   unit,
@@ -128,7 +126,7 @@ function AlertRuleCard({
       <CardContent className="px-4 flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
           <span className="font-medium text-sm truncate flex-1">
-            {rule.stationName.length > 30 ? rule.stationName.slice(0, 30) + '…' : rule.stationName}
+            {rule.stationName.length > 30 ? rule.stationName.slice(0, 29) + '…' : rule.stationName}
           </span>
           <div className="flex items-center shrink-0">
             <Button variant="ghost" size="sm" className="h-7 cursor-pointer" onClick={onEdit}>
@@ -176,7 +174,7 @@ function AlertRuleCard({
   );
 }
 
-// ─── Add / Edit Dialog ────────────────────────────────────────────────────────
+// Add / Edit Dialog
 
 interface RuleFormState {
   stationId: string;
@@ -190,12 +188,16 @@ function RuleDialog({
   open,
   rule,
   unit,
+  prefillStation,
+  atLimit,
   onSave,
   onClose
 }: {
   open: boolean;
   rule: AlertRule | null;
   unit: 'kmh' | 'kt';
+  prefillStation?: { id: string; name: string } | null;
+  atLimit: boolean;
   onSave: (data: Omit<AlertRule, 'id' | 'enabled'>) => void;
   onClose: () => void;
 }) {
@@ -203,7 +205,9 @@ function RuleDialog({
   const [showStationList, setShowStationList] = useState(false);
   const comboRef = useRef<HTMLDivElement>(null);
 
-  const [stationSearch, setStationSearch] = useState(() => rule?.stationName ?? '');
+  const [stationSearch, setStationSearch] = useState(
+    () => rule?.stationName ?? prefillStation?.name ?? ''
+  );
   const [errors, setErrors] = useState<{ station?: boolean; threshold?: boolean }>({});
 
   const [form, setForm] = useState<RuleFormState>(() =>
@@ -216,8 +220,8 @@ function RuleDialog({
           directions: rule.directions
         }
       : {
-          stationId: '',
-          stationName: '',
+          stationId: prefillStation?.id ?? '',
+          stationName: prefillStation?.name ?? '',
           thresholdDisplay: '20',
           boundType: 'above',
           directions: []
@@ -380,11 +384,19 @@ function RuleDialog({
 
           <Separator />
 
+          {!rule && atLimit && (
+            <p className="text-sm text-destructive text-center">
+              Maximum of {MAX_ALERT_RULES} alerts set up.
+            </p>
+          )}
+
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit}>{rule ? 'Save changes' : 'Add alert'}</Button>
+            <Button onClick={handleSubmit} disabled={!rule && atLimit}>
+              {rule ? 'Save changes' : 'Add alert'}
+            </Button>
           </div>
         </div>
       </DialogContent>
@@ -392,10 +404,9 @@ function RuleDialog({
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
 export default function NotificationsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const unit = useMapStore((s) => s.unit);
 
   const alertRules = useNotificationStore((s) => s.alertRules);
@@ -419,6 +430,9 @@ export default function NotificationsPage() {
   const [addEditOpen, setAddEditOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [prefillStation, setPrefillStation] = useState<{ id: string; name: string } | null>(
+    (location.state as { prefillStation?: { id: string; name: string } })?.prefillStation ?? null
+  );
 
   async function doSync(rules: AlertRule[]) {
     try {
@@ -432,6 +446,14 @@ export default function NotificationsPage() {
       toast.error('Something went wrong. Refresh and try again.');
     }
   }
+
+  // Auto-open add dialog when navigated here from a station's bell icon
+  useEffect(() => {
+    if (!prefillStation) return;
+    setEditingRule(null);
+    setAddEditOpen(true);
+    window.history.replaceState({}, '');
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // On mount: read IndexedDB for triggered rules + listen for SW postMessages
   useEffect(() => {
@@ -683,10 +705,13 @@ export default function NotificationsPage() {
             open={addEditOpen}
             rule={editingRule}
             unit={unit}
+            prefillStation={editingRule ? null : prefillStation}
+            atLimit={!editingRule && alertRules.length >= MAX_ALERT_RULES}
             onSave={handleSave}
             onClose={() => {
               setAddEditOpen(false);
               setEditingRule(null);
+              setPrefillStation(null);
             }}
           />
 
