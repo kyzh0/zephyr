@@ -6,9 +6,9 @@ import {
   Plus,
   Pencil,
   Trash2,
-  Smartphone,
   ArrowUpFromLine,
-  ArrowDownFromLine
+  ArrowDownFromLine,
+  Smartphone
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -222,7 +222,7 @@ function RuleDialog({
       : {
           stationId: prefillStation?.id ?? '',
           stationName: prefillStation?.name ?? '',
-          thresholdDisplay: '20',
+          thresholdDisplay: '',
           boundType: 'above',
           directions: []
         }
@@ -404,7 +404,7 @@ function RuleDialog({
   );
 }
 
-export default function NotificationsPage() {
+export default function AlertsDialog() {
   const navigate = useNavigate();
   const location = useLocation();
   const unit = useMapStore((s) => s.unit);
@@ -607,13 +607,16 @@ export default function NotificationsPage() {
 
           {/* Install required banner */}
           {!isStandalone && (
-            <Alert className="flex items-center">
-              <Smartphone className="h-8! w-8! mr-2" />
+            <Alert variant="destructive" className="flex items-center">
+              <Smartphone className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-4">
                   <span>Install Zephyr as an app to use alerts.</span>
-                  <span>Chrome: tap ⋮ → Add to Home Screen</span>
-                  <span>Safari: tap Share → Add to Home Screen</span>
+                  <div className="flex flex-col">
+                    <span>Chrome - ⋮ → Add to Home Screen</span>
+                    <span>Safari - Share → Add to Home Screen</span>
+                  </div>
+                  <span>Disable battery optimisations for the browser!</span>
                 </div>
               </AlertDescription>
             </Alert>
@@ -626,8 +629,8 @@ export default function NotificationsPage() {
               <Alert variant="destructive">
                 <BellOff className="h-4 w-4" />
                 <AlertDescription className="text-sm">
-                  Notifications are blocked. To re-enable, go to your browser settings and allow
-                  notifications for this site.
+                  Notifications are blocked. Allow notifications in your browser settings, then
+                  refresh.
                 </AlertDescription>
               </Alert>
             )}

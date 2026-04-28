@@ -179,7 +179,7 @@ export async function processNotifications(): Promise<void> {
       try {
         await webpush.sendNotification({ endpoint: sub.endpoint, keys: sub.keys }, payload, {
           urgency: 'high',
-          TTL: 3600
+          TTL: 1200
         });
         triggeredRuleIds.push(...ruleIds);
         count++;

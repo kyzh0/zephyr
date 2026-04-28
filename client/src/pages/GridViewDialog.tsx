@@ -17,7 +17,7 @@ import { StationPreview } from '@/components/station/StationPreview';
 import { useNearbyStations } from '@/hooks';
 import { useMapStore } from '@/store';
 
-export default function GridView() {
+export default function GridViewDialog() {
   const navigate = useNavigate();
   const [radius, setRadius] = useState(50);
   const [threshold, setThreshold] = useState(0);

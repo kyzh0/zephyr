@@ -379,19 +379,6 @@ export function MapControlButtons({
               </TooltipTrigger>
               <TooltipContent>Contact</TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={getButtonStyle(isFlyingMode)}
-                  onClick={() => navigate('/notifications')}
-                >
-                  <Bell className={`${getIconStyle(isFlyingMode)} opacity-70`} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Wind Alerts</TooltipContent>
-            </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -421,7 +408,7 @@ export function MapControlButtons({
                   <Grid3X3 className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Grid View of Nearby Weather Stations</TooltipContent>
+              <TooltipContent>Grid view of nearby stations</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -437,7 +424,7 @@ export function MapControlButtons({
                   <Camera className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Toggle>
               </TooltipTrigger>
-              <TooltipContent>{showWebcams ? 'Hide' : 'Show'} Webcams on Map</TooltipContent>
+              <TooltipContent>{showWebcams ? 'Hide' : 'Show'} webcams on map</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -455,7 +442,7 @@ export function MapControlButtons({
                   </svg>
                 </Toggle>
               </TooltipTrigger>
-              <TooltipContent>{showSoundings ? 'Hide' : 'Show'} Soundings on Map</TooltipContent>
+              <TooltipContent>{showSoundings ? 'Hide' : 'Show'} soundings on map</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -488,27 +475,29 @@ export function MapControlButtons({
                 Switch between viewing weather stations or flying sites
               </TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Select value={sport as string} onValueChange={(v) => setSport(v as SportType)}>
-                    <SelectTrigger className="h-9 text-sm bg-background">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(Object.entries(SPORT_LABELS) as [SportType, string][]).map(
-                        ([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        )
-                      )}
-                    </SelectContent>
-                  </Select>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="right">Wind colour scale for sport</TooltipContent>
-            </Tooltip>
+            {viewMode === MAP_VIEW_MODES.STATIONS && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Select value={sport as string} onValueChange={(v) => setSport(v as SportType)}>
+                      <SelectTrigger className="h-9 text-sm bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(Object.entries(SPORT_LABELS) as [SportType, string][]).map(
+                          ([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          )
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="right">Wind colours for sport</TooltipContent>
+              </Tooltip>
+            )}
           </>
         )}
       </div>
@@ -528,7 +517,7 @@ export function MapControlButtons({
               />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="left">Find My Location</TooltipContent>
+          <TooltipContent side="left">Find my location</TooltipContent>
         </Tooltip>
         {!isFlyingMode && (
           <Tooltip>
@@ -562,7 +551,7 @@ export function MapControlButtons({
               <Layers className={`${getIconStyle(isFlyingMode)} opacity-70`} />
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent side="left">Switch Map Layer</TooltipContent>
+          <TooltipContent side="left">Switch map layer</TooltipContent>
         </Tooltip>
         {!isFlyingMode && (
           <FilterDialog
@@ -599,7 +588,7 @@ export function MapControlButtons({
                   <History className={`${getIconStyle(isFlyingMode)} opacity-70`} />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Show Recent Stations</TooltipContent>
+              <TooltipContent>Show recent stations</TooltipContent>
             </Tooltip>
           ) : (
             <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-50">

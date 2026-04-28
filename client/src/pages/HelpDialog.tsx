@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Grid3X3, Wind } from 'lucide-react';
+import { Bell, Camera, Grid3X3, Wind } from 'lucide-react';
 
 import { useAppStore } from '@/store';
 
@@ -108,6 +108,13 @@ export default function HelpDialog() {
               />
             </div>
             <div className="flex items-center">Stale data appears faded</div>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center w-10 shrink-0">
+              <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div className="flex items-center">Set wind alerts on mobile</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">

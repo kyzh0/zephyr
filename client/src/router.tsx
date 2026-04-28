@@ -10,11 +10,11 @@ import Webcam from './pages/Webcam';
 import Sounding from './pages/Sounding';
 import Site from './pages/Site';
 import Landing from './pages/Landing';
-import GridView from './pages/GridView';
+import GridViewDialog from './pages/GridViewDialog';
 import HelpDialog from './pages/HelpDialog';
 import ContactDialog from './pages/ContactDialog';
 import DonateDialog from './pages/DonateDialog';
-import NotificationsPage from './pages/NotificationsPage';
+import AlertsDialog from './pages/AlertsDialog';
 
 const ExportMapData = lazy(() => import('./pages/ExportMapData'));
 
@@ -86,7 +86,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'grid',
-            element: <GridView />
+            element: <GridViewDialog />
           },
           {
             path: 'help',
@@ -102,7 +102,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'notifications',
-            element: <NotificationsPage />
+            element: <AlertsDialog />
           },
           {
             path: 'export-map-data',

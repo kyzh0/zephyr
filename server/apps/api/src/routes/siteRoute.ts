@@ -111,7 +111,7 @@ router.post(
       return;
     }
 
-    if (!elevation) {
+    if (elevation == null) {
       res.status(400).json({ error: 'Elevation is required' });
       return;
     }
@@ -238,7 +238,7 @@ router.put(
       return;
     }
 
-    if (!elevation) {
+    if (elevation == null) {
       res.status(400).json({ error: 'Elevation is required' });
       return;
     }
