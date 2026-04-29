@@ -54,7 +54,7 @@ export function SearchBar({ className, disabled, onSelect }: SearchBarProps) {
       return;
     }
 
-    const normalize = (s: string) => s.replace(/[^a-z0-9]/gi, '').toLowerCase();
+    const normalise = (s: string) => s.replace(/[^a-z0-9]/gi, '').toLowerCase();
     // Prefix matches first, then by type priority within each tier
     const typeOrder: Record<SearchResult['type'], number> = {
       station: 0,
@@ -63,11 +63,11 @@ export function SearchBar({ className, disabled, onSelect }: SearchBarProps) {
       site: 3,
       landing: 4
     };
-    const normalizedQuery = normalize(query);
+    const normalisedQuery = normalise(query);
 
     const fuseResults = fuse.search(query, { limit: 20 });
     const rank = (r: (typeof fuseResults)[number]) => ({
-      prefix: normalize(r.item.item.name).startsWith(normalizedQuery) ? 0 : 1,
+      prefix: normalise(r.item.item.name).startsWith(normalisedQuery) ? 0 : 1,
       type: typeOrder[r.item.type]
     });
 

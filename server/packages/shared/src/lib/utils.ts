@@ -1,3 +1,86 @@
+export function calculateWindAverage(
+  readings: { windAverage?: number | null; windBearing?: number | null }[]
+): { average: number | null; bearing: number | null } {
+  let count = 0;
+  let sumAvg = 0;
+  let sumBearingSin = 0;
+  let sumBearingCos = 0;
+
+  for (const r of readings) {
+    if (r.windAverage != null && r.windBearing != null) {
+      count++;
+      sumAvg += r.windAverage;
+      sumBearingSin += Math.sin((r.windBearing * Math.PI) / 180);
+      sumBearingCos += Math.cos((r.windBearing * Math.PI) / 180);
+    }
+  }
+
+  if (count === 0) {
+    return { average: null, bearing: null };
+  }
+
+  const raw = Math.round((Math.atan2(sumBearingSin, sumBearingCos) * 180) / Math.PI);
+  return {
+    average: Math.round(sumAvg / count),
+    bearing: raw < 0 ? raw + 360 : raw
+  };
+}
+
+export function getWindDirectionFromBearing(bearing: number): string {
+  if (bearing < 0) {
+    return '';
+  }
+  if (bearing <= 11.25) {
+    return 'N';
+  }
+  if (bearing <= 33.75) {
+    return 'NNE';
+  }
+  if (bearing <= 56.25) {
+    return 'NE';
+  }
+  if (bearing <= 78.75) {
+    return 'ENE';
+  }
+  if (bearing <= 101.25) {
+    return 'E';
+  }
+  if (bearing <= 123.75) {
+    return 'ESE';
+  }
+  if (bearing <= 146.25) {
+    return 'SE';
+  }
+  if (bearing <= 168.75) {
+    return 'SSE';
+  }
+  if (bearing <= 191.25) {
+    return 'S';
+  }
+  if (bearing <= 213.75) {
+    return 'SSW';
+  }
+  if (bearing <= 236.25) {
+    return 'SW';
+  }
+  if (bearing <= 258.75) {
+    return 'WSW';
+  }
+  if (bearing <= 281.25) {
+    return 'W';
+  }
+  if (bearing <= 303.75) {
+    return 'WNW';
+  }
+  if (bearing <= 326.25) {
+    return 'NW';
+  }
+  if (bearing <= 348.75) {
+    return 'NNW';
+  }
+  return 'N';
+}
+
 export function getWindBearingFromDirection(direction?: string | null): number {
   if (!direction) {
     return 0;

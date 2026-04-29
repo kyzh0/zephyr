@@ -12,7 +12,13 @@ import type { DateRange } from 'react-day-picker';
 import { toast } from 'sonner';
 
 import SEO from '@/components/SEO';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -283,7 +289,8 @@ export default function ExportMapData() {
   }
 
   function handleClose() {
-    navigate(-1);
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/');
   }
 
   const formContent = (
@@ -432,6 +439,9 @@ export default function ExportMapData() {
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-center">Export Data</DialogTitle>
+          <DialogDescription className="sr-only">
+            Export weather station data to XLSX.
+          </DialogDescription>
         </DialogHeader>
         {formContent}
       </DialogContent>

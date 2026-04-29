@@ -8,6 +8,7 @@ import {
   processStationJson,
   updateKeys
 } from '@/services/stationService';
+import { processNotifications, resetAlertRules } from '@/services/notificationService';
 
 export async function startStationScheduler(): Promise<void> {
   logger.info('----- Initialising station scheduler -----', {
@@ -33,6 +34,13 @@ export async function startStationScheduler(): Promise<void> {
       await processStationJson();
       logger.info(`----- Process json output end - ${Date.now() - ts}ms elapsed. -----`, {
         service: 'json'
+      });
+
+      logger.info('----- Process notifications start -----', { service: 'notifications' });
+      ts = Date.now();
+      await processNotifications();
+      logger.info(`----- Process notifications end - ${Date.now() - ts}ms elapsed. -----`, {
+        service: 'notifications'
       });
     },
     { noOverlap: true }
@@ -104,4 +112,15 @@ export async function startStationScheduler(): Promise<void> {
       service: 'keys'
     });
   });
+
+  // alert reset (NZ time)
+  cron.schedule(
+    '5 0 * * *',
+    async () => {
+      logger.info('----- Alert rule reset start -----', { service: 'notifications' });
+      await resetAlertRules();
+      logger.info('----- Alert rule reset end -----', { service: 'notifications' });
+    },
+    { timezone: 'Pacific/Auckland' }
+  );
 }

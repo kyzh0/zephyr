@@ -2,7 +2,7 @@ import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { QueryFilter } from 'mongoose';
 
-import { Station, StationAttrs, StationData, User } from '@zephyr/shared';
+import { Station, StationAttrs, StationData, User, calculateWindAverage } from '@zephyr/shared';
 
 const router = express.Router();
 
@@ -226,30 +226,20 @@ router.get(
     }
 
     const result = data.map((d) => {
-      let count = 0;
-      let sumAvg = 0;
-      let maxGust = null;
-      let sumBearingSin = 0;
-      let sumBearingCos = 0;
+      const { average, bearing } = calculateWindAverage(d.data);
 
+      let maxGust: number | null = null;
       for (const d1 of d.data) {
-        if (d1.windAverage != null && d1.windBearing != null) {
-          count++;
-          sumAvg += d1.windAverage;
+        if (d1.windGust != null) {
           maxGust = maxGust == null ? d1.windGust : Math.max(maxGust, d1.windGust ?? 0);
-          sumBearingSin += Math.sin((d1.windBearing * Math.PI) / 180);
-          sumBearingCos += Math.cos((d1.windBearing * Math.PI) / 180);
         }
       }
 
-      const bearing =
-        count > 0 ? Math.round(Math.atan2(sumBearingSin, sumBearingCos) / (Math.PI / 180)) : null;
-
       return {
         id: d._id,
-        windAverage: count > 0 ? Math.round(sumAvg / count) : null,
-        windGust: count > 0 ? maxGust : null,
-        windBearing: bearing == null ? null : bearing < 0 ? bearing + 360 : bearing,
+        windAverage: average,
+        windGust: average == null ? null : (maxGust ?? null),
+        windBearing: bearing,
         validBearings: d.validBearings
       };
     });

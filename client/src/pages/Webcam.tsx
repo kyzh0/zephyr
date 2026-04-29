@@ -4,7 +4,13 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import SEO from '@/components/SEO';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -32,7 +38,7 @@ export default function Webcam() {
   }, [error, navigate]);
 
   return (
-    <Dialog open onOpenChange={() => navigate(-1)}>
+    <Dialog open onOpenChange={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}>
       {webcam && (
         <SEO
           title={`${webcam.name} Webcam`}
@@ -48,6 +54,7 @@ export default function Webcam() {
           <DialogTitle className="text-center text-base sm:text-lg">
             {webcam?.name ?? <Skeleton className="h-6 sm:h-7 w-36 sm:w-44 mx-auto" />}
           </DialogTitle>
+          <DialogDescription className="sr-only">Webcam images and current view.</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col items-center gap-1.5 sm:gap-2">

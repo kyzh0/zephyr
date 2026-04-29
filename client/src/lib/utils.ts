@@ -9,45 +9,26 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-export const getWindDirectionFromBearing = (bearing: number): string => {
-  if (bearing < 0) {
-    return '';
-  } else if (bearing <= 11.25) {
-    return 'N';
-  } else if (bearing <= 33.75) {
-    return 'NNE';
-  } else if (bearing <= 56.25) {
-    return 'NE';
-  } else if (bearing <= 78.75) {
-    return 'ENE';
-  } else if (bearing <= 101.25) {
-    return 'E';
-  } else if (bearing <= 123.75) {
-    return 'ESE';
-  } else if (bearing <= 146.25) {
-    return 'SE';
-  } else if (bearing <= 168.75) {
-    return 'SSE';
-  } else if (bearing <= 191.25) {
-    return 'S';
-  } else if (bearing <= 213.75) {
-    return 'SSW';
-  } else if (bearing <= 236.25) {
-    return 'SW';
-  } else if (bearing <= 258.75) {
-    return 'WSW';
-  } else if (bearing <= 281.25) {
-    return 'W';
-  } else if (bearing <= 303.75) {
-    return 'WNW';
-  } else if (bearing <= 326.25) {
-    return 'NW';
-  } else if (bearing <= 348.75) {
-    return 'NNW';
-  } else {
-    return 'N';
-  }
-};
+export function getWindDirectionFromBearing(bearing: number): string {
+  if (bearing < 0) return '';
+  if (bearing <= 11.25) return 'N';
+  if (bearing <= 33.75) return 'NNE';
+  if (bearing <= 56.25) return 'NE';
+  if (bearing <= 78.75) return 'ENE';
+  if (bearing <= 101.25) return 'E';
+  if (bearing <= 123.75) return 'ESE';
+  if (bearing <= 146.25) return 'SE';
+  if (bearing <= 168.75) return 'SSE';
+  if (bearing <= 191.25) return 'S';
+  if (bearing <= 213.75) return 'SSW';
+  if (bearing <= 236.25) return 'SW';
+  if (bearing <= 258.75) return 'WSW';
+  if (bearing <= 281.25) return 'W';
+  if (bearing <= 303.75) return 'WNW';
+  if (bearing <= 326.25) return 'NW';
+  if (bearing <= 348.75) return 'NNW';
+  return 'N';
+}
 
 /**
  * Convert hex color to RGB values
@@ -343,7 +324,7 @@ export const parseValidBearings = (
       let startAngle = bearing - 30;
       let endAngle = bearing + 30;
 
-      // Normalize angles
+      // Normalise angles
       if (startAngle < 0) startAngle += 360;
       if (endAngle > 360) endAngle -= 360;
 
@@ -406,3 +387,16 @@ export const getButtonStyle = (flyingMode: boolean): string =>
   flyingMode ? 'h-[5rem] w-[5rem] shrink-0' : 'h-9 w-9 shrink-0';
 export const getIconStyle = (flyingMode: boolean): string =>
   flyingMode ? 'h-[2.5rem] w-[2.5rem]' : 'h-5 w-5';
+
+export const MAX_ALERT_RULES = 10;
+
+export function nzDateStr(d: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Pacific/Auckland',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)!.value;
+  return `${get('year')}-${get('month')}-${get('day')}`;
+}

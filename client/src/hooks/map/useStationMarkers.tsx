@@ -83,9 +83,9 @@ function markerZIndex(props: StationProperties): string {
   if (props.isOffline) return '8';
   if (isStale(props.lastUpdate) || !props.currentAverage) return '9';
   const avg = Math.min(Math.abs(props.currentAverage), 100);
-  const normalized = 10 + (avg / 100) * 25; // 10.0–35.0
+  const normalised = 10 + (avg / 100) * 25; // 10.0–35.0
   const boost = props.validBearings ? 100 : 0;
-  return String(Math.min(Math.floor(normalized + boost), 36));
+  return String(Math.min(Math.floor(normalised + boost), 36));
 }
 
 /**

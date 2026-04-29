@@ -17,5 +17,6 @@ export * from './models/soundingModel';
 export * from './models/stationDataModel';
 export * from './models/stationModel';
 export * from './models/userModel';
+export * from './models/pushSubscriptionModel';
 
 export * from './types/mongoose';

@@ -1,16 +1,24 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   PlaneLanding,
   AlertCircleIcon,
   ArrowLeft,
   ChevronRightIcon,
   ExternalLink,
-  TriangleAlertIcon
+  TriangleAlertIcon,
+  Link2
 } from 'lucide-react';
 
 import SEO from '@/components/SEO';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -27,6 +35,9 @@ import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
 import { useIsMobile, useLanding } from '@/hooks';
 import { useAppStore } from '@/store';
+
+const isStandalone =
+  typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
 
 export default function Landing() {
   const { id } = useParams<{ id: string }>();
@@ -49,14 +60,16 @@ export default function Landing() {
       <span className="text-lg sm:text-xl font-semibold leading-tight">{landing?.name}</span>
 
       {landing && (
-        <a
-          className="font-thin text-[10px] sm:text-xs"
-          href={`https://www.google.com/maps/place/${landing?.location.coordinates[1]},${landing?.location.coordinates[0]}`}
-          target="_blank"
-        >
-          [ {landing.location.coordinates[1].toFixed(4)},{' '}
-          {landing.location.coordinates[0].toFixed(4)} ] {landing.elevation}m
-        </a>
+        <div className="flex items-center gap-1 font-thin text-[10px] sm:text-xs">
+          <a
+            className="text-blue-600"
+            href={`https://www.google.com/maps/place/${landing?.location.coordinates[1]},${landing?.location.coordinates[0]}`}
+            target="_blank"
+          >
+            Open in Google Maps
+          </a>
+          <span>{landing.elevation}m</span>
+        </div>
       )}
     </div>
   );
@@ -152,7 +165,7 @@ export default function Landing() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(-1)}
+              onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
               className={getButtonStyle(flyingMode)}
             >
               <ArrowLeft className={getIconStyle(flyingMode)} />
@@ -166,6 +179,21 @@ export default function Landing() {
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-4 pt-1 flex flex-col gap-4">{bodyContent}</div>
+
+        {/* Copy link */}
+        {landing && isStandalone && (
+          <Button
+            variant="secondary"
+            size="icon"
+            className="fixed bottom-5 left-5 rounded-full shadow-md z-20"
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              toast.success('Landing URL copied to clipboard');
+            }}
+          >
+            <Link2 className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     );
   }
@@ -185,6 +213,7 @@ export default function Landing() {
             <PlaneLanding className="mr-8" />
             {headerContent}
           </DialogTitle>
+          <DialogDescription className="sr-only">Landing zone details.</DialogDescription>
         </DialogHeader>
 
         <div className="overflow-y-auto flex-1 p-1">{bodyContent}</div>

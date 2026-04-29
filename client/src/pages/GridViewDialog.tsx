@@ -17,7 +17,7 @@ import { StationPreview } from '@/components/station/StationPreview';
 import { useNearbyStations } from '@/hooks';
 import { useMapStore } from '@/store';
 
-export default function GridView() {
+export default function GridViewDialog() {
   const navigate = useNavigate();
   const [radius, setRadius] = useState(50);
   const [threshold, setThreshold] = useState(0);
@@ -67,7 +67,7 @@ export default function GridView() {
   );
 
   return (
-    <Dialog open onOpenChange={() => navigate(-1)}>
+    <Dialog open onOpenChange={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}>
       <SEO
         title="Nearby Stations"
         description="View nearby weather stations sorted by distance. Live wind speed, gust, and direction data for free flying and wind sports in New Zealand."
