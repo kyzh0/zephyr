@@ -21,8 +21,8 @@ export const StationDataTable = function StationDataTable({
   const sport = useAppStore((s) => s.sport);
 
   return (
-    <div className="overflow-x-auto rounded-lg border bg-white mt-2 mb-4 sm:min-h-0">
-      <table className="text-sm">
+    <div className="mt-2 mb-4 w-full overflow-x-auto rounded-lg border bg-white sm:min-h-0">
+      <table className="min-w-full text-sm">
         <tbody>
           {/* Time row */}
           <tr ref={ref}>
