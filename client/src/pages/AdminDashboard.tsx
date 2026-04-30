@@ -16,7 +16,23 @@ import {
 import { AdminDonationsPanel } from '@/pages/AdminDonationsPanel';
 
 import { getMinutesAgo } from '@/lib/utils';
-import { useStations, useWebcams, useSites, useLandings, useSoundings } from '@/hooks';
+import { useStations, useWebcams, useSites, useLandings, useSoundings, useClients } from '@/hooks';
+
+function getLastThreeMonths(): string[] {
+  const now = new Date();
+  return [2, 1, 0].map((offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  });
+}
+
+function formatMonthLabel(ym: string): string {
+  const [year, month] = ym.split('-');
+  return new Date(Number(year), Number(month) - 1, 1).toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric'
+  });
+}
 
 const STALE_CHECK_TIMESTAMP = Date.now();
 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
@@ -40,7 +56,7 @@ function filterAndSort<T extends { name: string; isDisabled?: boolean }>(
 }
 
 interface AdminDashboardProps {
-  tab?: 'stations' | 'webcams' | 'soundings' | 'sites' | 'landings' | 'donations';
+  tab?: 'stations' | 'webcams' | 'soundings' | 'sites' | 'landings' | 'donations' | 'clients';
 }
 
 export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps) {
@@ -52,18 +68,22 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
   const [soundingSearch, setSoundingSearch] = useState('');
   const [siteSearch, setSiteSearch] = useState('');
   const [landingSearch, setLandingSearch] = useState('');
+  const [clientSearch, setClientSearch] = useState('');
 
   const { stations, isLoading: stationsLoading } = useStations({ includeDisabled: true });
   const { webcams, isLoading: webcamsLoading } = useWebcams({ includeDisabled: true });
   const { soundings, isLoading: soundingsLoading } = useSoundings();
   const { sites } = useSites({ includeDisabled: true });
   const { landings } = useLandings({ includeDisabled: true });
+  const { clients, isLoading: clientsLoading } = useClients();
 
   const filteredStations = useMemo(() => {
     if (showErrorsOnly) {
       const query = stationSearch.trim().toLowerCase();
       return stations
-        .filter((s) => s.isError && (!query || s.name.toLowerCase().includes(query)))
+        .filter(
+          (s) => (s.isOffline || s.isError) && (!query || s.name.toLowerCase().includes(query))
+        )
         .sort((a, b) => {
           const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
           if (disabledDiff !== 0) return disabledDiff;
@@ -98,6 +118,16 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
     [landings, landingSearch]
   );
 
+  const clientMonths = useMemo(() => getLastThreeMonths(), []);
+
+  const filteredClients = useMemo(() => {
+    if (!clientSearch.trim()) return [...clients].sort((a, b) => a.name.localeCompare(b.name));
+    const query = clientSearch.toLowerCase();
+    return [...clients]
+      .filter((c) => c.name.toLowerCase().includes(query))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [clients, clientSearch]);
+
   const handleSignOut = () => {
     sessionStorage.removeItem('adminKey');
     navigate('/', { replace: true });
@@ -110,7 +140,8 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
       value === 'soundings' ||
       value === 'sites' ||
       value === 'landings' ||
-      value === 'donations'
+      value === 'donations' ||
+      value === 'clients'
     ) {
       navigate(`/admin/${value}`, { replace: true });
     }
@@ -137,6 +168,7 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="landings">Landings</TabsTrigger>
             <TabsTrigger value="donations">Donations</TabsTrigger>
+            <TabsTrigger value="clients">Clients</TabsTrigger>
           </TabsList>
 
           {/* Stations Tab */}
@@ -494,6 +526,78 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
           {/* Donations Tab */}
           <TabsContent value="donations" className="mt-4">
             <AdminDonationsPanel />
+          </TabsContent>
+
+          {/* Clients Tab */}
+          <TabsContent value="clients" className="mt-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search clients..."
+                  value={clientSearch}
+                  onChange={(e) => setClientSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Button onClick={() => navigate('/admin/clients/add')}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Client
+              </Button>
+            </div>
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    {clientMonths.map((m) => (
+                      <TableHead key={m} className="w-28 text-right">
+                        {formatMonthLabel(m)}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {clientsLoading ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={clientMonths.length + 1}
+                        className="text-muted-foreground"
+                      >
+                        Loading...
+                      </TableCell>
+                    </TableRow>
+                  ) : !filteredClients.length ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={clientMonths.length + 1}
+                        className="text-muted-foreground"
+                      >
+                        No clients found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredClients.map((client) => (
+                      <TableRow
+                        key={client._id}
+                        className="cursor-pointer"
+                        onClick={() => navigate(`/admin/clients/${client._id}`)}
+                      >
+                        <TableCell className="font-medium">{client.name}</TableCell>
+                        {clientMonths.map((m) => {
+                          const entry = client.usage?.find((u) => u.month === m);
+                          return (
+                            <TableCell key={m} className="text-right tabular-nums">
+                              {entry ? entry.apiCalls.toLocaleString() : '—'}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </TabsContent>
         </Tabs>
       </main>

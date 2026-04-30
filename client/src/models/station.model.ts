@@ -13,7 +13,7 @@ export interface Station {
   currentTemperature?: number;
   elevation: number;
   lastUpdate: string;
-  __v?: number;
+  __v: number;
   validBearings?: string;
   isError: boolean;
   isOffline: boolean;

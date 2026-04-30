@@ -223,7 +223,11 @@ router.put(
       res.sendStatus(404);
       return;
     }
-    if (__v === null || __v === undefined || site.__v !== __v) {
+    if (__v == null) {
+      res.sendStatus(400);
+      return;
+    }
+    if (site.__v !== __v) {
       res.sendStatus(409);
       return;
     }

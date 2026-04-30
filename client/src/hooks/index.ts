@@ -51,6 +51,14 @@ export {
   useUpdateSounding,
   useDeleteSounding
 } from './useSoundings';
+export {
+  clientKeys,
+  useClient,
+  useClients,
+  useAddClient,
+  useUpdateClient,
+  useDeleteClient
+} from './useClients';
 
 export interface UseNearbyLocationsOptions {
   lat: number;

@@ -16,6 +16,7 @@ type CreateSoundingBody = {
 };
 
 type PatchSoundingBody = {
+  __v?: number;
   name?: string;
   coordinates?: [number, number];
   raspRegion?: string;
@@ -83,7 +84,15 @@ router.patch(
       return;
     }
 
-    const { name, coordinates, raspRegion, raspId } = req.body;
+    const { __v, name, coordinates, raspRegion, raspId } = req.body;
+    if (__v == null) {
+      res.sendStatus(400);
+      return;
+    }
+    if (sounding.__v !== __v) {
+      res.sendStatus(409);
+      return;
+    }
 
     if (name !== undefined) {
       sounding.name = name;
@@ -100,8 +109,7 @@ router.patch(
 
     try {
       await sounding.save();
-      const updated = await Sounding.findById(id).lean();
-      res.json(updated);
+      res.json(sounding.toObject());
     } catch (err) {
       res.status(500).json(err);
     }

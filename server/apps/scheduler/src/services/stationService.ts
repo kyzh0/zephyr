@@ -257,7 +257,7 @@ export async function checkForErrors(): Promise<void> {
       await Station.updateOne(
         { _id: s._id, __v: s.__v },
         {
-          $set: { isOffline: true },
+          $set: { isOffline: true, isError: true },
           $inc: { __v: 1 }
         }
       );

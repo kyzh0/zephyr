@@ -2,6 +2,7 @@ import type { GeoPoint } from './location.model';
 
 export interface Sounding {
   _id: string;
+  __v: number;
   name: string;
   location: GeoPoint;
   raspRegion: string;

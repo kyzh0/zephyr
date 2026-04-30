@@ -16,6 +16,7 @@ export async function listSoundings(): Promise<Sounding[]> {
 export async function patchSounding(
   id: string,
   updates: {
+    __v?: number;
     name?: string;
     raspRegion?: string;
     raspId?: string;

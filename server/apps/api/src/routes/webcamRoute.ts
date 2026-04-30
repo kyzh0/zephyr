@@ -24,6 +24,7 @@ type CreateWebcamBody = {
 };
 
 type PatchWebcamBody = {
+  __v?: number;
   name?: string;
   type?: string;
   coordinates?: [number, number];
@@ -132,8 +133,16 @@ router.patch(
       return;
     }
 
-    const { name, type, coordinates, externalLink, externalId, isDisabled } =
+    const { __v, name, type, coordinates, externalLink, externalId, isDisabled } =
       req.body as PatchWebcamBody;
+    if (__v == null) {
+      res.sendStatus(400);
+      return;
+    }
+    if (webcam.__v !== __v) {
+      res.sendStatus(409);
+      return;
+    }
 
     if (name !== undefined) {
       webcam.name = name;
@@ -156,7 +165,7 @@ router.patch(
 
     try {
       await webcam.save();
-      const updated = await Webcam.findById(id, { images: 0 }).lean();
+      const updated = webcam.toObject();
       res.json(updated);
     } catch (err) {
       res.status(500).json(err);

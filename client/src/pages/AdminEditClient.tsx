@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import {
@@ -26,87 +26,61 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 
-import { RASP_REGIONS, type Sounding } from '@/models/sounding.model';
 import { ApiError } from '@/services/api-error';
-import { useSounding, useUpdateSounding, useDeleteSounding } from '@/hooks';
-
-const coordinatesSchema = z.string().refine(
-  (val) => {
-    const parts = val.replace(/\s/g, '').split(',');
-    if (parts.length !== 2) return false;
-    const [lat, lon] = parts.map(Number);
-    return !isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
-  },
-  { message: 'Enter valid coordinates: latitude, longitude' }
-);
+import type { Client } from '@/models/client.model';
+import { useClient, useUpdateClient, useDeleteClient } from '@/hooks';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Required'),
-  raspRegion: z.enum(RASP_REGIONS.map((r) => r.value)),
-  raspId: z.string().min(1, 'Required'),
-  coordinates: coordinatesSchema
+  apiKey: z.string().min(1, 'Required'),
+  monthlyLimit: z.number().int().min(0, 'Must be a non-negative integer')
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-function formatCoordinates(location?: { coordinates: [number, number] }): string {
-  if (!location?.coordinates) return '';
-  const [lon, lat] = location.coordinates;
-  return `${lat}, ${lon}`;
-}
-
-export default function AdminEditSounding() {
+export default function AdminEditClient() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { sounding, isLoading } = useSounding(id);
-  const updateMutation = useUpdateSounding();
-  const deleteMutation = useDeleteSounding();
+  const { client, isLoading } = useClient(id);
+  const updateMutation = useUpdateClient();
+  const deleteMutation = useDeleteClient();
 
   function handleDelete() {
-    if (!id || !sounding) return;
+    if (!id || !client) return;
     deleteMutation.mutate(id, {
       onSuccess: () => {
-        toast.success('Sounding deleted');
-        navigate('/admin/soundings');
+        toast.success('Client deleted');
+        navigate('/admin/clients');
       },
       onError: (error) => {
         const msg = error instanceof ApiError ? error.message : 'Unknown error';
-        toast.error('Failed to delete sounding: ' + msg);
+        toast.error('Failed to delete client: ' + msg);
       }
     });
   }
 
   function handleSubmit(values: FormValues) {
-    if (!id || !sounding) return;
-
-    const [lat, lon] = values.coordinates.replace(/\s/g, '').split(',').map(Number);
-
-    const updates = {
-      __v: sounding.__v,
-      name: values.name,
-      raspRegion: values.raspRegion,
-      raspId: values.raspId,
-      coordinates: [Math.round(lon * 1e6) / 1e6, Math.round(lat * 1e6) / 1e6] as [number, number]
-    };
+    if (!id || !client) return;
 
     updateMutation.mutate(
-      { id, updates },
+      {
+        id,
+        updates: {
+          __v: client.__v,
+          name: values.name,
+          apiKey: values.apiKey,
+          monthlyLimit: values.monthlyLimit
+        }
+      },
       {
         onSuccess: () => {
-          toast.success('Sounding updated');
-          navigate('/admin/soundings');
+          toast.success('Client updated');
+          navigate('/admin/clients');
         },
         onError: (error) => {
           const msg = error instanceof ApiError ? error.message : 'Unknown error';
-          toast.error('Failed to update sounding: ' + msg);
+          toast.error('Failed to update client: ' + msg);
         }
       }
     );
@@ -115,12 +89,12 @@ export default function AdminEditSounding() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b bg-white px-6 py-4 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/soundings')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/clients')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-xl font-semibold">Edit Sounding</h1>
-          {sounding && <p className="text-sm text-muted-foreground">{sounding.name}</p>}
+          <h1 className="text-xl font-semibold">Edit Client</h1>
+          {client && <p className="text-sm text-muted-foreground">{client.name}</p>}
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -135,9 +109,9 @@ export default function AdminEditSounding() {
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Sounding</AlertDialogTitle>
+              <AlertDialogTitle>Delete Client</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{sounding?.name}"? This action cannot be undone.
+                Are you sure you want to delete "{client?.name}"? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -155,11 +129,11 @@ export default function AdminEditSounding() {
       </header>
 
       <main className="flex-1 p-6">
-        {isLoading || !sounding ? (
+        {isLoading || !client ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <SoundingForm
-            sounding={sounding}
+          <ClientForm
+            client={client}
             onSubmit={handleSubmit}
             isPending={updateMutation.isPending}
           />
@@ -169,22 +143,21 @@ export default function AdminEditSounding() {
   );
 }
 
-function SoundingForm({
-  sounding,
+function ClientForm({
+  client,
   onSubmit,
   isPending
 }: {
-  sounding: Sounding;
+  client: Client;
   onSubmit: (values: FormValues) => void;
   isPending: boolean;
 }) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: sounding.name,
-      raspRegion: sounding.raspRegion as FormValues['raspRegion'],
-      raspId: sounding.raspId,
-      coordinates: formatCoordinates(sounding.location)
+      name: client.name,
+      apiKey: client.apiKey,
+      monthlyLimit: client.monthlyLimit
     }
   });
 
@@ -196,7 +169,7 @@ function SoundingForm({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Sounding Name</FormLabel>
+              <FormLabel>Client Name</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -207,24 +180,23 @@ function SoundingForm({
 
         <FormField
           control={form.control}
-          name="raspRegion"
+          name="apiKey"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>RASP Region</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <FormLabel>API Key</FormLabel>
+              <div className="flex gap-2">
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select region" />
-                  </SelectTrigger>
+                  <Input {...field} />
                 </FormControl>
-                <SelectContent>
-                  {RASP_REGIONS.map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => field.onChange(crypto.randomUUID())}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -232,26 +204,17 @@ function SoundingForm({
 
         <FormField
           control={form.control}
-          name="raspId"
+          name="monthlyLimit"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>RASP ID</FormLabel>
+              <FormLabel>Monthly Limit</FormLabel>
               <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="coordinates"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Latitude, Longitude</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="-41.2865, 174.7762" />
+                <Input
+                  {...field}
+                  type="number"
+                  min={0}
+                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

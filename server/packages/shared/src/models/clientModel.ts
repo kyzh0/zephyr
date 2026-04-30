@@ -17,7 +17,7 @@ export type ClientDoc = HydratedDocument<ClientAttrs>;
 const clientSchema = new mongoose.Schema<ClientAttrs>(
   {
     name: { type: String, required: true },
-    apiKey: { type: String, required: true },
+    apiKey: { type: String, required: true, unique: true },
     monthlyLimit: { type: Number, required: true },
     usage: [
       {

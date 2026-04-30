@@ -50,6 +50,7 @@ export async function deleteWebcam(id: string): Promise<void> {
 export async function patchWebcam(
   id: string,
   updates: {
+    __v?: number;
     name?: string;
     type?: string;
     coordinates?: [number, number];

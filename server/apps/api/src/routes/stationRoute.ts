@@ -45,6 +45,7 @@ type CreateStationBody = {
 };
 
 type PatchStationBody = {
+  __v?: number;
   patch: Record<string, unknown>;
   remove: Record<string, unknown>;
 };
@@ -285,7 +286,15 @@ router.patch(
         return;
       }
 
-      const { patch, remove } = req.body;
+      const { __v, patch, remove } = req.body;
+      if (__v == null) {
+        res.sendStatus(400);
+        return;
+      }
+      if (station.__v !== __v) {
+        res.sendStatus(409);
+        return;
+      }
 
       for (const key of Object.keys(patch)) {
         station.set(key, patch[key]);

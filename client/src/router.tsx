@@ -30,6 +30,8 @@ const AdminEditSite = lazy(() => import('./pages/AdminEditSite'));
 const AdminEditLanding = lazy(() => import('./pages/AdminEditLanding'));
 const AdminEditWebcam = lazy(() => import('./pages/AdminEditWebcam'));
 const AdminEditSounding = lazy(() => import('./pages/AdminEditSounding'));
+const AdminAddClient = lazy(() => import('./pages/AdminAddClient'));
+const AdminEditClient = lazy(() => import('./pages/AdminEditClient'));
 
 import { usePageTracking } from './hooks/usePageTracking';
 
@@ -181,6 +183,18 @@ export const router = createBrowserRouter([
           {
             path: 'soundings/:id',
             element: <AdminEditSounding />
+          },
+          {
+            path: 'clients',
+            element: <AdminDashboard tab="clients" />
+          },
+          {
+            path: 'clients/add',
+            element: <AdminAddClient />
+          },
+          {
+            path: 'clients/:id',
+            element: <AdminEditClient />
           }
         ]
       }

@@ -11,7 +11,7 @@ export interface Webcam {
   name: string;
   type: string;
   isDisabled?: boolean;
-  __v?: number;
+  __v: number;
 }
 
 export interface WebcamImage {

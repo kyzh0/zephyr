@@ -191,7 +191,7 @@ export default function AdminEditStation() {
     }
 
     updateMutation.mutate(
-      { id, updates: { patch, remove } as unknown as Partial<Station> },
+      { id, updates: { __v: station.__v, patch, remove } as unknown as Partial<Station> },
       {
         onSuccess: () => {
           toast.success('Station updated');

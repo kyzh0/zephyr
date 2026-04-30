@@ -86,6 +86,7 @@ export default function AdminEditWebcam() {
     const [lat, lon] = values.coordinates.replace(/\s/g, '').split(',').map(Number);
 
     const updates = {
+      __v: webcam.__v,
       name: values.name,
       externalId: values.externalId || undefined,
       externalLink: values.externalLink,
