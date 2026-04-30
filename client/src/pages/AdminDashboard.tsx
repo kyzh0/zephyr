@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Plus, Search, AlertCircle, SquareArrowOutUpRight } from 'lucide-react';
 
@@ -46,7 +46,6 @@ interface AdminDashboardProps {
 export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps) {
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState(tab);
   const [stationSearch, setStationSearch] = useState('');
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
   const [webcamSearch, setWebcamSearch] = useState('');
@@ -59,10 +58,6 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
   const { soundings, isLoading: soundingsLoading } = useSoundings();
   const { sites } = useSites({ includeDisabled: true });
   const { landings } = useLandings({ includeDisabled: true });
-
-  useEffect(() => {
-    setActiveTab(tab);
-  }, [tab]);
 
   const filteredStations = useMemo(() => {
     if (showErrorsOnly) {
@@ -117,7 +112,6 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
       value === 'landings' ||
       value === 'donations'
     ) {
-      setActiveTab(value);
       navigate(`/admin/${value}`, { replace: true });
     }
   };
@@ -135,7 +129,7 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
 
       {/* Main content */}
       <main className="flex-1 p-6">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="h-full">
+        <Tabs value={tab} onValueChange={handleTabChange} className="h-full">
           <TabsList>
             <TabsTrigger value="stations">Stations</TabsTrigger>
             <TabsTrigger value="webcams">Webcams</TabsTrigger>
