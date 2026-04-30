@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, Loader2, Trash2 } from 'lucide-react';
@@ -300,7 +300,7 @@ function StationForm({
     }
   });
 
-  const stationType = form.watch('type');
+  const stationType = useWatch({ control: form.control, name: 'type' });
 
   async function handleAutoElevation() {
     const coordsValue = form.getValues('coordinates');

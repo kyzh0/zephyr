@@ -427,7 +427,9 @@ export default function AlertsDialog() {
     typeof Notification !== 'undefined' ? Notification.permission : 'denied'
   );
   const [isSubscribing, setIsSubscribing] = useState(false);
-  const [addEditOpen, setAddEditOpen] = useState(false);
+  const [addEditOpen, setAddEditOpen] = useState(
+    () => !!(location.state as { prefillStation?: { id: string; name: string } })?.prefillStation
+  );
   const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [prefillStation, setPrefillStation] = useState<{ id: string; name: string } | null>(
@@ -447,11 +449,9 @@ export default function AlertsDialog() {
     }
   }
 
-  // Auto-open add dialog when navigated here from a station's bell icon
+  // Clear navigation state so refresh doesn't re-open dialog
   useEffect(() => {
     if (!prefillStation) return;
-    setEditingRule(null);
-    setAddEditOpen(true);
     window.history.replaceState({}, '');
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

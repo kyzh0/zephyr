@@ -253,7 +253,7 @@ export function MapControlButtons({
       <div className="border-t my-1" />
       <div className="px-2 py-1.5">
         <Select
-          value={sport as string}
+          value={sport}
           onValueChange={(v) => {
             setSport(v as SportType);
             setMenuOpen(false);
@@ -483,7 +483,7 @@ export function MapControlButtons({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span>
-                    <Select value={sport as string} onValueChange={(v) => setSport(v as SportType)}>
+                    <Select value={sport} onValueChange={(v) => setSport(v as SportType)}>
                       <SelectTrigger className="h-9 text-sm bg-background">
                         <SelectValue />
                       </SelectTrigger>

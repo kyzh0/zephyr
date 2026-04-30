@@ -61,10 +61,7 @@ export function getStationGeoJson(stations: Station[] | undefined): GeoJson | nu
         isOffline: station.isOffline,
         lastUpdate: station.lastUpdate ?? null
       },
-      geometry: station.location as {
-        type: string;
-        coordinates: [number, number];
-      }
+      geometry: station.location
     };
 
     // CWU stations sometimes show avg=0 even when gust is high
@@ -97,10 +94,7 @@ export function getWebcamGeoJson(webcams: Webcam[] | undefined): GeoJson | null 
         currentTime: new Date(webcam.currentTime),
         currentUrl: webcam.currentUrl
       },
-      geometry: webcam.location as {
-        type: string;
-        coordinates: [number, number];
-      }
+      geometry: webcam.location
     };
     geoJson.features.push(feature);
   }
@@ -139,7 +133,7 @@ export function getSoundingGeoJson(soundings: Sounding[] | undefined): GeoJson |
         currentTime: time,
         currentUrl: url
       },
-      geometry: s.location as { type: string; coordinates: [number, number] }
+      geometry: s.location
     };
     geoJson.features.push(feature);
   }
@@ -169,10 +163,7 @@ export function getSiteGeoJson(sites: Site[] | undefined): GeoJson | null {
         validBearings: site.validBearings,
         siteGuideUrl: site.siteGuideUrl
       },
-      geometry: site.location as {
-        type: string;
-        coordinates: [number, number];
-      }
+      geometry: site.location
     };
     geoJson.features.push(feature);
   }
@@ -201,10 +192,7 @@ export function getLandingGeoJson(landings: Landing[] | undefined): GeoJson | nu
         dbId: landing._id,
         siteGuideUrl: landing.siteGuideUrl
       },
-      geometry: landing.location as {
-        type: string;
-        coordinates: [number, number];
-      }
+      geometry: landing.location
     };
     geoJson.features.push(feature);
   }

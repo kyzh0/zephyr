@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import mapboxgl from 'mapbox-gl';
@@ -8,7 +8,6 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { format, startOfDay, endOfDay } from 'date-fns';
 import { fromZonedTime } from 'date-fns-tz';
 import { CalendarIcon, Loader2 } from 'lucide-react';
-import type { DateRange } from 'react-day-picker';
 import { toast } from 'sonner';
 
 import SEO from '@/components/SEO';
@@ -104,6 +103,34 @@ function MapView({ onCoordinatesChange, radiusKm }: MapViewProps) {
   const radiusRef = useRef<number | null>(null);
   const circleSourceId = 'circle-radius';
 
+  function updateCircle(lng: number, lat: number, radius: number) {
+    if (!map.current) return;
+
+    const source = map.current?.getSource(circleSourceId);
+    if (source?.type !== 'geojson') return;
+
+    // Create circle polygon using simple math (approximate)
+    const points = 64;
+    const km = radius;
+    const coordinates: [number, number][] = [];
+
+    for (let i = 0; i <= points; i++) {
+      const angle = (i / points) * 2 * Math.PI;
+      const dx = km / (111.32 * Math.cos((lat * Math.PI) / 180));
+      const dy = km / 110.574;
+      coordinates.push([lng + dx * Math.cos(angle), lat + dy * Math.sin(angle)]);
+    }
+
+    source.setData({
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Polygon',
+        coordinates: [coordinates]
+      }
+    });
+  }
+
   useEffect(() => {
     if (!mapContainer.current) return;
 
@@ -184,34 +211,6 @@ function MapView({ onCoordinatesChange, radiusKm }: MapViewProps) {
     }
   }, [radiusKm]);
 
-  function updateCircle(lng: number, lat: number, radius: number) {
-    if (!map.current) return;
-
-    const source = map.current?.getSource(circleSourceId);
-    if (source?.type !== 'geojson') return;
-
-    // Create circle polygon using simple math (approximate)
-    const points = 64;
-    const km = radius;
-    const coordinates: [number, number][] = [];
-
-    for (let i = 0; i <= points; i++) {
-      const angle = (i / points) * 2 * Math.PI;
-      const dx = km / (111.32 * Math.cos((lat * Math.PI) / 180));
-      const dy = km / 110.574;
-      coordinates.push([lng + dx * Math.cos(angle), lat + dy * Math.sin(angle)]);
-    }
-
-    source.setData({
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'Polygon',
-        coordinates: [coordinates]
-      }
-    });
-  }
-
   return (
     <div ref={mapContainer} className="w-full h-[40vh] sm:h-[45vh] rounded-md overflow-hidden" />
   );
@@ -237,8 +236,7 @@ export default function ExportMapData() {
     }
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const radius = form.watch('radius');
+  const radius = useWatch({ control: form.control, name: 'radius' });
 
   async function onSubmit(values: FormValues) {
     if (loading) return;
@@ -359,7 +357,7 @@ export default function ExportMapData() {
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="range"
-                    selected={field.value as DateRange}
+                    selected={field.value}
                     onSelect={(range) => {
                       if (range?.from && range?.to) {
                         field.onChange({ from: range.from, to: range.to });
