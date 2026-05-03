@@ -273,7 +273,7 @@ export default function Station() {
   // Mobile: Full-screen layout
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background flex flex-col z-100">
+      <div className="fixed inset-0 bg-background flex flex-col z-100">
         {station && (
           <SEO title={station.name} description={stationDescription} path={`/stations/${id}`} />
         )}
