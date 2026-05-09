@@ -38,8 +38,9 @@ import {
   SPORT_LABELS,
   type MapControlHandlers,
   type MapViewMode,
-  type SportType
-} from './map.types';
+  type SportType,
+  getStoredValue
+} from '@/components/map';
 
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import { useIsMobile } from '@/hooks';
@@ -274,6 +275,25 @@ export function MapControlButtons({
     </div>
   );
 
+  const DEFAULT_POS_ZOOM = {
+    lat: -43.5256,
+    lon: 172.6492,
+    zoom: 13.39
+  };
+
+  const getCurrentPosZoom = () => {
+    const lon = getStoredValue('lon', DEFAULT_POS_ZOOM.lon);
+    const lat = getStoredValue('lat', DEFAULT_POS_ZOOM.lat);
+    const zoom = getStoredValue('zoom', DEFAULT_POS_ZOOM.zoom);
+    console.log(`Current map position: ${lat}, ${lon}, zoom: ${zoom}`);
+  };
+
+  const setPosZoom = (lat: number, lon: number, zoom: number) => {
+    localStorage.setItem('lat', lat.toString());
+    localStorage.setItem('lon', lon.toString());
+    localStorage.setItem('zoom', zoom.toString());
+  };
+
   return (
     <>
       {/* Top left controls */}
@@ -344,6 +364,14 @@ export function MapControlButtons({
           <>
             {/* Large screens: Top-left group */}
             <SearchBar disabled={isHistoricData} onSelect={onSearchSelect} />
+            <Button onClick={getCurrentPosZoom}>Print current position zoom</Button>
+            <Button
+              onClick={() =>
+                setPosZoom(DEFAULT_POS_ZOOM.lat, DEFAULT_POS_ZOOM.lon, DEFAULT_POS_ZOOM.zoom)
+              }
+            >
+              Move to default pos zoom
+            </Button>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

@@ -19,7 +19,7 @@ function getSnapshotTime(offset: number): Date {
 export interface UseMapControlsParams {
   map: React.RefObject<{ setStyle: (style: string) => void } | null>;
   triggerGeolocate: () => Promise<void>;
-  flyTo: (coordinates: [number, number]) => void;
+  flyTo: (coordinates: [number, number], zoom?: number) => void;
   setLandingTransparent: (visible: boolean) => void;
   setStationMarkersInteractive: (interactive: boolean) => void;
   setSiteDirectionFilter: (bearing: number | null) => void;
