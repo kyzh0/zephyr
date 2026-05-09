@@ -30,6 +30,7 @@ interface MapStore {
   unit: WindUnit;
   viewMode: MapViewMode;
   minimizeRecents: boolean;
+  minimizeFavourites: boolean;
   isSatellite: boolean;
   // Ephemeral session state
   historyOffset: number;
@@ -42,6 +43,7 @@ interface MapStore {
   setUnit: (unit: WindUnit) => void;
   setViewMode: (mode: MapViewMode) => void;
   toggleMinimizeRecents: () => void;
+  toggleFavourites: () => void;
   setIsSatellite: (value: boolean) => void;
   setHistoryOffset: (offset: number) => void;
   setStationElevationFilter: (filter: [number, number]) => void;
@@ -55,6 +57,7 @@ export const useMapStore = create<MapStore>()(
       unit: WIND_UNITS.KMH,
       viewMode: MAP_VIEW_MODES.STATIONS,
       minimizeRecents: true,
+      minimizeFavourites: true,
       isSatellite: false,
       historyOffset: 0,
       stationElevationFilter: [ELEVATION_FILTER_MIN, ELEVATION_FILTER_MAX],
@@ -66,7 +69,10 @@ export const useMapStore = create<MapStore>()(
         set({ overlay: get().overlay === MAP_OVERLAYS.SOUNDINGS ? null : MAP_OVERLAYS.SOUNDINGS }),
       setUnit: (unit) => set({ unit }),
       setViewMode: (viewMode) => set({ viewMode }),
-      toggleMinimizeRecents: () => set({ minimizeRecents: !get().minimizeRecents }),
+      toggleMinimizeRecents: () =>
+        set({ minimizeRecents: !get().minimizeRecents, minimizeFavourites: true }),
+      toggleFavourites: () =>
+        set({ minimizeFavourites: !get().minimizeFavourites, minimizeRecents: true }),
       setIsSatellite: (isSatellite) => set({ isSatellite }),
       setHistoryOffset: (historyOffset) => set({ historyOffset }),
       setStationElevationFilter: (stationElevationFilter) => set({ stationElevationFilter }),

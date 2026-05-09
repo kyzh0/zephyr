@@ -5,6 +5,18 @@ import { SPORTS, type SportType } from '@/components/map';
 
 const VALID_SPORTS = new Set<string>(Object.values(SPORTS));
 const MAX_RECENT_STATIONS = 5;
+const MAX_FAVOURITES = 5; //TODO figure out better way to handle this
+
+//TODO remove test variable once saving new favourites working
+const TEST_DEFAULT_FAVOURITES: SavedFavourite[] = [
+  {
+    id: '6631d5ddcf26372d5b8040965',
+    name: 'Taylors Mistake',
+    lat: -43.5907,
+    lng: 172.7623,
+    zoom: 12.43
+  }
+];
 
 interface RecentStation {
   id: string;
@@ -12,15 +24,25 @@ interface RecentStation {
   viewedAt: number;
 }
 
+export interface SavedFavourite {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  zoom: number;
+}
+
 interface AppStore {
   flyingMode: boolean;
   sport: SportType;
   welcomeDismissed: boolean;
   recentStations: RecentStation[];
+  favourites: SavedFavourite[];
   toggleFlyingMode: () => void;
   setSport: (sport: SportType) => void;
   setWelcomeDismissed: (value: boolean) => void;
   addRecentStation: (id: string, name: string) => void;
+  addSavedFavourite: (id: string, name: string, lat: number, lng: number, zoom: number) => void;
 }
 
 export const useAppStore = create<AppStore>()(
@@ -30,6 +52,7 @@ export const useAppStore = create<AppStore>()(
       sport: SPORTS.PARAGLIDING,
       welcomeDismissed: false,
       recentStations: [],
+      favourites: TEST_DEFAULT_FAVOURITES, //[]
       toggleFlyingMode: () => set({ flyingMode: !get().flyingMode }),
       setSport: (sport) => set({ sport }),
       setWelcomeDismissed: (welcomeDismissed) => set({ welcomeDismissed }),
@@ -41,6 +64,12 @@ export const useAppStore = create<AppStore>()(
             MAX_RECENT_STATIONS
           )
         });
+      },
+      addSavedFavourite: (id, name, lat, lng, zoom) => {
+        const filtered = get().favourites.filter((s) => s.id !== id);
+        set({
+          favourites: [{ id, name, lat, lng, zoom }, ...filtered].slice(0, MAX_FAVOURITES)
+        });
       }
     }),
     {
@@ -50,7 +79,8 @@ export const useAppStore = create<AppStore>()(
         flyingMode: state.flyingMode,
         sport: state.sport,
         welcomeDismissed: state.welcomeDismissed,
-        recentStations: state.recentStations
+        recentStations: state.recentStations,
+        favourites: state.favourites
       }),
       onRehydrateStorage: () => {
         const hadExistingStore = localStorage.getItem('zephyr-app') !== null;
@@ -69,6 +99,9 @@ export const useAppStore = create<AppStore>()(
           }
           if (!Array.isArray(hydratedState.recentStations)) {
             useAppStore.setState({ recentStations: [] });
+          }
+          if (!Array.isArray(hydratedState.favourites)) {
+            useAppStore.setState({ favourites: TEST_DEFAULT_FAVOURITES }); //[]
           }
 
           if (hadExistingStore) return;
@@ -115,6 +148,20 @@ export const useAppStore = create<AppStore>()(
               /* malformed, ignore */
             }
             localStorage.removeItem('recentStations');
+          }
+
+          // favourites was stored as JSON under a flat key by favourites.service
+          const oldFavourites = localStorage.getItem('favourites');
+          if (oldFavourites !== null) {
+            try {
+              const parsed = JSON.parse(oldFavourites) as unknown;
+              if (Array.isArray(parsed)) {
+                useAppStore.setState({ favourites: parsed as SavedFavourite[] });
+              }
+            } catch {
+              /* malformed, ignore */
+            }
+            localStorage.removeItem('favourites');
           }
         };
       }

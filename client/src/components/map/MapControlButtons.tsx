@@ -12,7 +12,11 @@ import {
   Mail,
   Hourglass,
   Undo2,
-  Bell
+  Bell,
+  Heart,
+  HeartPlus,
+  X,
+  Check
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -45,6 +49,7 @@ import {
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import { useIsMobile } from '@/hooks';
 import { useAppStore, useMapStore } from '@/store';
+import type { SavedFavourite } from '@/store/appStore';
 
 const VALID_VIEW_MODES = new Set<string>(Object.values(MAP_VIEW_MODES));
 function isMapViewMode(value: string): value is MapViewMode {
@@ -65,11 +70,13 @@ export function MapControlButtons({
   const stationElevationFilter = useMapStore((s) => s.stationElevationFilter);
   const selectedSiteDirection = useMapStore((s) => s.selectedSiteDirection);
   const minimizeRecents = useMapStore((s) => s.minimizeRecents);
+  const minimizeFavourites = useMapStore((s) => s.minimizeFavourites);
   const toggleWebcams = useMapStore((s) => s.toggleWebcams);
   const toggleSoundings = useMapStore((s) => s.toggleSoundings);
   const setUnit = useMapStore((s) => s.setUnit);
   const setViewMode = useMapStore((s) => s.setViewMode);
   const toggleMinimizeRecents = useMapStore((s) => s.toggleMinimizeRecents);
+  const toggleMinimizeFavourites = useMapStore((s) => s.toggleFavourites);
   const setStationElevationFilter = useMapStore((s) => s.setStationElevationFilter);
 
   const flyingMode = useAppStore((s) => s.flyingMode);
@@ -78,6 +85,7 @@ export function MapControlButtons({
   const setSport = useAppStore((s) => s.setSport);
   const welcomeDismissed = useAppStore((s) => s.welcomeDismissed);
   const recentStations = useAppStore((s) => s.recentStations);
+  const savedFavourites = useAppStore((s) => s.favourites);
 
   const showWebcams = overlay === MAP_OVERLAYS.WEBCAMS;
   const showSoundings = overlay === MAP_OVERLAYS.SOUNDINGS;
@@ -292,6 +300,30 @@ export function MapControlButtons({
     localStorage.setItem('lat', lat.toString());
     localStorage.setItem('lon', lon.toString());
     localStorage.setItem('zoom', zoom.toString());
+  };
+
+  const flyToFavourite: (favourite: SavedFavourite) => void = (favourite) => {
+    console.log(favourite);
+
+    //TODO
+  };
+
+  const saveNewFavourite = () => {
+    console.log('save new');
+    //TODO get latlngzoom and name, generate new GUID and save to localstore
+  };
+
+  const deleteSavedFavourite = (favourite: SavedFavourite) => {
+    console.log('delete', favourite);
+
+    //TODO remove this item from localstorage
+  };
+
+  const [enteringNewFavourite, setEnteringNewFavourite] = useState(false);
+  const [newFavouriteName, setNewFavouriteName] = useState('');
+
+  const toggleEnteringNewFavourite = () => {
+    setEnteringNewFavourite(!enteringNewFavourite);
   };
 
   return (
@@ -649,6 +681,87 @@ export function MapControlButtons({
                     >
                       {displayName}
                     </Button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Bottom left - Favourites */}
+      {savedFavourites.length > 0 && !isFlyingMode && (
+        <div className={`absolute bottom-2.5 left-${effectiveMinimizeRecents ? 12.5 : 37.5} z-50`}>
+          {minimizeFavourites ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleMinimizeFavourites}
+                  className={btnClass}
+                >
+                  <Heart className={`${iconClass} opacity-70`} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Show Favourites</TooltipContent>
+            </Tooltip>
+          ) : (
+            <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-50">
+              <div
+                className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors"
+                onClick={toggleMinimizeFavourites}
+                title="Click to minimize"
+              >
+                <Heart className={`${iconClass} h-3 w-3`} />
+                <span>Favourites</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <div>
+                  {enteringNewFavourite ? (
+                    <div className="flex flex-row">
+                      <Button onClick={toggleEnteringNewFavourite}>
+                        <X />
+                      </Button>
+
+                      {/* TODO update this span to entry box, limit to X characters and update state when keystroke entered */}
+                      <span>entry here</span>
+
+                      {/* TODO disable button until name entered */}
+                      <Button onClick={saveNewFavourite}>
+                        <Check />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={toggleEnteringNewFavourite}
+                      className="bg-red-500 hover:bg-red-700"
+                    >
+                      <HeartPlus /> Save as favourite
+                    </Button>
+                  )}
+                </div>
+
+                {savedFavourites.map((favourite) => {
+                  const displayName = favourite.name;
+                  return (
+                    <div key={favourite.id} className="flex flex-row">
+                      <Button
+                        key={favourite.id}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          flyToFavourite(favourite);
+                        }}
+                        className="h-7 justify-start text-xs font-normal px-2 truncate"
+                        title={favourite.name}
+                      >
+                        {displayName}
+                      </Button>
+                      <Button className="h-7 justify-start text-xs font-normal px-2 truncate">
+                        x
+                      </Button>
+                    </div>
                   );
                 })}
               </div>
