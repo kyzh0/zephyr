@@ -3,6 +3,7 @@ import type { Site } from '@/models/site.model';
 import type { Landing } from '@/models/landing.model';
 import type { Webcam } from '@/models/webcam.model';
 import type { Sounding } from '@/models/sounding.model';
+import type { SavedFavourite } from '@/store/appStore';
 
 export type SearchResult =
   | { type: 'station'; item: Station }
@@ -80,6 +81,7 @@ export interface MapControlHandlers {
   onHistoryChange: (offset: number) => Promise<void>;
   onSiteDirectionFilterChange: (bearing: number | null) => void;
   onSearchSelect: (result: SearchResult) => void;
+  onSavedFavouriteSelect: (favourite: SavedFavourite) => void;
 }
 
 export const ELEVATION_FILTER_MIN = 0;

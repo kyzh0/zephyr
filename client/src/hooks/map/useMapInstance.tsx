@@ -127,7 +127,10 @@ export function useMapInstance({ containerRef }: UseMapInstanceOptions): UseMapI
 
   const flyTo = useCallback((coordinates: [number, number], zoom?: number): void => {
     if (!map.current) return;
-    // console.log({ center: coordinates, zoom: zoom ?? Math.max(map.current.getZoom(), 12) }, { center: coordinates, zoom: Math.max(map.current.getZoom(), 12) })
+    console.log(
+      { center: coordinates, zoom: zoom ?? Math.max(map.current.getZoom(), 12) },
+      { center: coordinates, zoom: Math.max(map.current.getZoom(), 12) }
+    );
     map.current.flyTo({ center: coordinates, zoom: zoom ?? Math.max(map.current.getZoom(), 12) });
   }, []);
 

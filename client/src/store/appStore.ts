@@ -15,6 +15,20 @@ const TEST_DEFAULT_FAVOURITES: SavedFavourite[] = [
     lat: -43.5907,
     lng: 172.7623,
     zoom: 12.43
+  },
+  {
+    id: '6631d5ddcf26372d5b8140965',
+    name: 'Caiggies',
+    lat: -43.2701,
+    lng: 171.762,
+    zoom: 9.41
+  },
+  {
+    id: '1631d5ddcf26372d5b8140965',
+    name: 'Auckland',
+    lat: -36.7913,
+    lng: 174.9057,
+    zoom: 8.5
   }
 ];
 

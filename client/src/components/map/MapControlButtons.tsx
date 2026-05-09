@@ -61,7 +61,8 @@ export function MapControlButtons({
   onLocateClick,
   onHistoryChange,
   onSiteDirectionFilterChange,
-  onSearchSelect
+  onSearchSelect,
+  onSavedFavouriteSelect
 }: MapControlHandlers) {
   const overlay = useMapStore((s) => s.overlay);
   const unit = useMapStore((s) => s.unit);
@@ -283,12 +284,14 @@ export function MapControlButtons({
     </div>
   );
 
+  //TODO remove
   const DEFAULT_POS_ZOOM = {
     lat: -43.5256,
     lon: 172.6492,
     zoom: 13.39
   };
 
+  //TODO remove
   const getCurrentPosZoom = () => {
     const lon = getStoredValue('lon', DEFAULT_POS_ZOOM.lon);
     const lat = getStoredValue('lat', DEFAULT_POS_ZOOM.lat);
@@ -304,6 +307,8 @@ export function MapControlButtons({
 
   const flyToFavourite: (favourite: SavedFavourite) => void = (favourite) => {
     console.log(favourite);
+
+    onSavedFavouriteSelect(favourite);
 
     //TODO
   };
@@ -396,14 +401,14 @@ export function MapControlButtons({
           <>
             {/* Large screens: Top-left group */}
             <SearchBar disabled={isHistoricData} onSelect={onSearchSelect} />
-            <Button onClick={getCurrentPosZoom}>Print current position zoom</Button>
-            <Button
+            {/* <Button onClick={getCurrentPosZoom}>Print current position zoom</Button> */}
+            {/* <Button
               onClick={() =>
                 setPosZoom(DEFAULT_POS_ZOOM.lat, DEFAULT_POS_ZOOM.lon, DEFAULT_POS_ZOOM.zoom)
               }
             >
               Move to default pos zoom
-            </Button>
+            </Button> */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
