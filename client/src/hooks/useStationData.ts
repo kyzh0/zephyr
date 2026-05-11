@@ -12,6 +12,9 @@ import { stationKeys, useStation } from './useStations';
 
 export type TimeRange = '3' | '6' | '12' | '24';
 
+const MS_10_MIN = 10 * 60 * 1000;
+const MS_2_MIN = 2 * 60 * 1000;
+
 interface UseStationDataReturn {
   station: Station | null;
   data: ExtendedStationData[];
@@ -85,8 +88,10 @@ export function useStationData(
       ? calculateHighResAverages(extendedData, id)
       : padData(extendedData, id);
 
+    const allChartData = padData(extendedData, id, station.isHighResolution ? MS_2_MIN : MS_10_MIN);
+
     return {
-      data: filterByTimeRange(extendedData, timeRange),
+      data: filterByTimeRange(allChartData, timeRange),
       tableData: filterByTimeRange(allTableData, timeRange),
       bearingPairCount: validBearings.length
     };
@@ -105,26 +110,29 @@ export function useStationData(
 /**
  * Pad non-high-res station table data to fill gaps
  */
-function padData(extendedData: ExtendedStationData[], stationId: string): ExtendedStationData[] {
+function padData(
+  extendedData: ExtendedStationData[],
+  stationId: string,
+  intervalMs: number = MS_10_MIN
+): ExtendedStationData[] {
   if (extendedData.length === 0) return extendedData;
 
-  const MS_10_MIN = 10 * 60 * 1000;
-
-  const startBucket = Math.floor(new Date(extendedData[0].time).getTime() / MS_10_MIN) * MS_10_MIN;
+  const startBucket =
+    Math.floor(new Date(extendedData[0].time).getTime() / intervalMs) * intervalMs;
   const now = Date.now();
-  const endBucket = Math.floor(now / MS_10_MIN) * MS_10_MIN;
+  const endBucket = Math.floor(now / intervalMs) * intervalMs;
   // Allow time for fresh data to arrive before padding an empty column at the current interval
-  const SCRAPER_GRACE_MS = 120_000;
-  const padCutoff = Math.floor((now - SCRAPER_GRACE_MS) / MS_10_MIN) * MS_10_MIN;
+  const SCRAPER_GRACE_MS = 90_000;
+  const padCutoff = Math.floor((now - SCRAPER_GRACE_MS) / intervalMs) * intervalMs;
 
   const dataByBucket = new Map<number, ExtendedStationData>();
   for (const item of extendedData) {
-    const bucketTime = Math.floor(new Date(item.time).getTime() / MS_10_MIN) * MS_10_MIN;
+    const bucketTime = Math.floor(new Date(item.time).getTime() / intervalMs) * intervalMs;
     dataByBucket.set(bucketTime, item);
   }
 
   const result: ExtendedStationData[] = [];
-  for (let t = startBucket; t <= endBucket; t += MS_10_MIN) {
+  for (let t = startBucket; t <= endBucket; t += intervalMs) {
     if (dataByBucket.has(t)) {
       result.push(dataByBucket.get(t)!);
     } else if (t <= padCutoff) {

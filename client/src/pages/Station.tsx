@@ -62,7 +62,7 @@ export default function Station() {
 
   const [timeRange, setTimeRange] = useState<TimeRange>('6');
 
-  const { station, tableData, bearingPairCount, error } = useStationData(id, timeRange);
+  const { station, data, tableData, bearingPairCount, error } = useStationData(id, timeRange);
 
   // Navigate back if station not found
   useEffect(() => {
@@ -159,8 +159,8 @@ export default function Station() {
               tableData={tableData}
               validBearings={station.validBearings}
             />
-            <WindSpeedChart data={tableData} />
-            <WindDirectionChart data={tableData} bearingPairCount={bearingPairCount} />
+            <WindSpeedChart data={data} />
+            <WindDirectionChart data={data} bearingPairCount={bearingPairCount} />
             <div className="flex flex-row items-center justify-end text-xs sm:text-sm text-muted-foreground gap-2 sm:gap-4">
               Showing data for last{' '}
               <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
