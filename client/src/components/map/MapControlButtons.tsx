@@ -49,7 +49,8 @@ import {
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import { useIsMobile } from '@/hooks';
 import { useAppStore, useMapStore } from '@/store';
-import type { SavedFavourite } from '@/store/appStore';
+import { MAX_FAVOURITES, type SavedFavourite } from '@/store/appStore';
+import { Input } from '../ui/input';
 
 const VALID_VIEW_MODES = new Set<string>(Object.values(MAP_VIEW_MODES));
 function isMapViewMode(value: string): value is MapViewMode {
@@ -87,6 +88,8 @@ export function MapControlButtons({
   const welcomeDismissed = useAppStore((s) => s.welcomeDismissed);
   const recentStations = useAppStore((s) => s.recentStations);
   const savedFavourites = useAppStore((s) => s.favourites);
+  const addSavedFavourite = useAppStore((s) => s.addSavedFavourite);
+  const removeSavedFavourite = useAppStore((s) => s.removeSavedFavourite);
 
   const showWebcams = overlay === MAP_OVERLAYS.WEBCAMS;
   const showSoundings = overlay === MAP_OVERLAYS.SOUNDINGS;
@@ -284,48 +287,35 @@ export function MapControlButtons({
     </div>
   );
 
-  //TODO remove
-  const DEFAULT_POS_ZOOM = {
-    lat: -43.5256,
-    lon: 172.6492,
-    zoom: 13.39
-  };
-
-  //TODO remove
-  const getCurrentPosZoom = () => {
-    const lon = getStoredValue('lon', DEFAULT_POS_ZOOM.lon);
-    const lat = getStoredValue('lat', DEFAULT_POS_ZOOM.lat);
-    const zoom = getStoredValue('zoom', DEFAULT_POS_ZOOM.zoom);
-    console.log(`Current map position: ${lat}, ${lon}, zoom: ${zoom}`);
-  };
-
-  const setPosZoom = (lat: number, lon: number, zoom: number) => {
-    localStorage.setItem('lat', lat.toString());
-    localStorage.setItem('lon', lon.toString());
-    localStorage.setItem('zoom', zoom.toString());
-  };
-
   const flyToFavourite: (favourite: SavedFavourite) => void = (favourite) => {
-    console.log(favourite);
-
     onSavedFavouriteSelect(favourite);
-
-    //TODO
   };
 
   const saveNewFavourite = () => {
-    console.log('save new');
+    const guid = crypto.randomUUID();
+    const lng = getStoredValue('lon', 0);
+    const lat = getStoredValue('lat', 0);
+    const zoom = getStoredValue('zoom', 0);
+    console.log('save new', newFavouriteName, lat, lng, zoom, guid);
     //TODO get latlngzoom and name, generate new GUID and save to localstore
+
+    addSavedFavourite(guid, newFavouriteName, lat, lng, zoom);
+
+    setNewFavouriteName('');
+    setEnteringNewFavourite(false);
   };
 
   const deleteSavedFavourite = (favourite: SavedFavourite) => {
     console.log('delete', favourite);
 
     //TODO remove this item from localstorage
+    removeSavedFavourite(favourite.id);
   };
 
   const [enteringNewFavourite, setEnteringNewFavourite] = useState(false);
   const [newFavouriteName, setNewFavouriteName] = useState('');
+
+  const MAX_FAVOURITE_LENGTH = 15;
 
   const toggleEnteringNewFavourite = () => {
     setEnteringNewFavourite(!enteringNewFavourite);
@@ -710,36 +700,46 @@ export function MapControlButtons({
                   <Heart className={`${iconClass} h-3 w-3`} />
                   <span>Favourites</span>
                 </div>
+
                 <div className="flex flex-col gap-1">
                   <div>
-                    {enteringNewFavourite ? (
-                      <div className="flex flex-row">
-                        <Button onClick={toggleEnteringNewFavourite}>
-                          <X />
-                        </Button>
+                    {savedFavourites.length < MAX_FAVOURITES ? (
+                      <>
+                        {enteringNewFavourite ? (
+                          <div className="flex flex-row">
+                            <Button onClick={toggleEnteringNewFavourite}>
+                              <X />
+                            </Button>
 
-                        {/* TODO update this span to entry box, limit to X characters and update state when keystroke entered */}
-                        <span>entry here</span>
+                            <Input
+                              placeholder="Nickname..."
+                              value={newFavouriteName}
+                              onChange={(e) => setNewFavouriteName(e.target.value)}
+                              maxLength={MAX_FAVOURITE_LENGTH}
+                            />
 
-                        {/* TODO disable button until name entered */}
-                        <Button onClick={saveNewFavourite}>
-                          <Check />
-                        </Button>
-                      </div>
+                            <Button onClick={saveNewFavourite} disabled={!newFavouriteName.length}>
+                              <Check />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            onClick={toggleEnteringNewFavourite}
+                            className="bg-red-500 hover:bg-red-700"
+                          >
+                            <HeartPlus /> + Favourite Area
+                          </Button>
+                        )}
+                      </>
                     ) : (
-                      <Button
-                        onClick={toggleEnteringNewFavourite}
-                        className="bg-red-500 hover:bg-red-700"
-                      >
-                        <HeartPlus /> Save as favourite
-                      </Button>
+                      <Button disabled={true}>Max {MAX_FAVOURITES} favourites</Button>
                     )}
                   </div>
 
                   {savedFavourites.map((favourite) => {
                     const displayName = favourite.name;
                     return (
-                      <div key={favourite.id} className="flex flex-row">
+                      <div key={favourite.id} className="flex flex-row justify-between">
                         <Button
                           key={favourite.id}
                           variant="ghost"
@@ -752,7 +752,10 @@ export function MapControlButtons({
                         >
                           {displayName}
                         </Button>
-                        <Button className="h-7 justify-start text-xs font-normal px-2 truncate">
+                        <Button
+                          className="h-7 justify-start text-xs font-normal px-2 truncate"
+                          onClick={() => deleteSavedFavourite(favourite)}
+                        >
                           x
                         </Button>
                       </div>

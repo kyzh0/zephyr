@@ -5,7 +5,7 @@ import { SPORTS, type SportType } from '@/components/map';
 
 const VALID_SPORTS = new Set<string>(Object.values(SPORTS));
 const MAX_RECENT_STATIONS = 5;
-const MAX_FAVOURITES = 5; //TODO figure out better way to handle this
+export const MAX_FAVOURITES = 5; //TODO figure out better way to handle this
 
 //TODO remove test variable once saving new favourites working
 const TEST_DEFAULT_FAVOURITES: SavedFavourite[] = [
@@ -57,6 +57,7 @@ interface AppStore {
   setWelcomeDismissed: (value: boolean) => void;
   addRecentStation: (id: string, name: string) => void;
   addSavedFavourite: (id: string, name: string, lat: number, lng: number, zoom: number) => void;
+  removeSavedFavourite: (id: string) => void;
 }
 
 export const useAppStore = create<AppStore>()(
@@ -83,6 +84,12 @@ export const useAppStore = create<AppStore>()(
         const filtered = get().favourites.filter((s) => s.id !== id);
         set({
           favourites: [{ id, name, lat, lng, zoom }, ...filtered].slice(0, MAX_FAVOURITES)
+        });
+      },
+      removeSavedFavourite: (id: string) => {
+        const filtered = get().favourites.filter((s) => s.id !== id);
+        set({
+          favourites: [...filtered]
         });
       }
     }),
