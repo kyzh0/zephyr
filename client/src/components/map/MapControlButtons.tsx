@@ -756,7 +756,7 @@ export function MapControlButtons({
                           className="h-7 justify-start text-xs font-normal px-2 truncate"
                           onClick={() => deleteSavedFavourite(favourite)}
                         >
-                          x
+                          <X />
                         </Button>
                       </div>
                     );
