@@ -691,14 +691,17 @@ export function MapControlButtons({
                 <TooltipContent>Show Favourites</TooltipContent>
               </Tooltip>
             ) : (
-              <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-50">
+              <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-60">
                 <div
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors justify-between"
                   onClick={toggleMinimizeFavourites}
                   title="Click to minimize"
                 >
-                  <Heart className={`${iconClass} h-3 w-3`} />
-                  <span>Favourites</span>
+                  <div className="flex flex-row gap-1.5">
+                    <Heart className={`${iconClass} h-3 w-3`} />
+                    <span>Favourites</span>
+                  </div>
+                  <X />
                 </div>
 
                 <div className="flex flex-col gap-1">
@@ -706,8 +709,13 @@ export function MapControlButtons({
                     {savedFavourites.length < MAX_FAVOURITES ? (
                       <>
                         {enteringNewFavourite ? (
-                          <div className="flex flex-row">
-                            <Button onClick={toggleEnteringNewFavourite}>
+                          <div className="flex flex-row gap-1 align-center ">
+                            <Button
+                              onClick={toggleEnteringNewFavourite}
+                              size="icon"
+                              className="px-0 bg-red-500 hover:bg-red-300 text-white"
+                              variant={'outline'}
+                            >
                               <X />
                             </Button>
 
@@ -718,7 +726,12 @@ export function MapControlButtons({
                               maxLength={MAX_FAVOURITE_LENGTH}
                             />
 
-                            <Button onClick={saveNewFavourite} disabled={!newFavouriteName.length}>
+                            <Button
+                              onClick={saveNewFavourite}
+                              disabled={!newFavouriteName.length}
+                              size="icon"
+                              className="bg-green-500 hover:bg-green-300"
+                            >
                               <Check />
                             </Button>
                           </div>
@@ -739,21 +752,23 @@ export function MapControlButtons({
                   {savedFavourites.map((favourite) => {
                     const displayName = favourite.name;
                     return (
-                      <div key={favourite.id} className="flex flex-row justify-between">
+                      <div key={favourite.id} className="flex flex-row gap-2">
                         <Button
                           key={favourite.id}
                           variant="ghost"
-                          size="sm"
+                          size="lg"
                           onClick={() => {
                             flyToFavourite(favourite);
                           }}
-                          className="h-7 justify-start text-xs font-normal px-2 truncate"
+                          className="flex-1 h-7 justify-start text-xs font-normal px-2 truncate"
                           title={favourite.name}
                         >
                           {displayName}
                         </Button>
                         <Button
-                          className="h-7 justify-start text-xs font-normal px-2 truncate"
+                          className="h-7 justify-center text-xs font-normal px-2 truncate bg-gray-400 hover:bg-gray-200 border border-radius-0 text-white"
+                          size={'icon-sm'}
+                          variant={'outline'}
                           onClick={() => deleteSavedFavourite(favourite)}
                         >
                           <X />
