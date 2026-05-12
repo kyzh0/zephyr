@@ -185,7 +185,7 @@ export default function Site() {
                   className={`h-4 w-4 transition-transform ${stationsOpen ? 'rotate-180' : ''}`}
                 />
               </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
+              <CollapsibleContent className="space-y-2 pt-2 flex flex-wrap gap-2">
                 {nearbyStationData.map((station) => (
                   <StationPreview
                     key={String(station.data._id)}
@@ -210,7 +210,7 @@ export default function Site() {
                   className={`h-4 w-4 transition-transform ${webcamsOpen ? 'rotate-180' : ''}`}
                 />
               </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
+              <CollapsibleContent className="space-y-2 pt-2 flex flex-wrap gap-2">
                 {nearbyWebcamData.map((webcam) => (
                   <WebcamPreview
                     key={webcam.data._id}

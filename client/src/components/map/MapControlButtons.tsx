@@ -16,12 +16,12 @@ import {
   Heart,
   HeartPlus,
   X,
-  Check
+  Check,
+  Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Toggle } from '@/components/ui/toggle';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { HistorySlider } from './HistorySlider';
 import { FilterDialog } from './FilterDialog';
 import { SearchBar } from './SearchBar';
@@ -49,13 +50,14 @@ import {
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import { useIsMobile } from '@/hooks';
 import { useAppStore, useMapStore } from '@/store';
-import { MAX_FAVOURITE_LENGTH, MAX_FAVOURITES } from '@/store/appStore';
-import { Input } from '../ui/input';
 
 const VALID_VIEW_MODES = new Set<string>(Object.values(MAP_VIEW_MODES));
 function isMapViewMode(value: string): value is MapViewMode {
   return VALID_VIEW_MODES.has(value);
 }
+
+const MAX_FAVOURITES = 5;
+const MAX_FAVOURITE_LENGTH = 15;
 
 export function MapControlButtons({
   onLayerToggle,
@@ -63,7 +65,7 @@ export function MapControlButtons({
   onHistoryChange,
   onSiteDirectionFilterChange,
   onSearchSelect,
-  onSavedFavouriteSelect
+  onFavouriteSelect
 }: MapControlHandlers) {
   const overlay = useMapStore((s) => s.overlay);
   const unit = useMapStore((s) => s.unit);
@@ -78,7 +80,7 @@ export function MapControlButtons({
   const setUnit = useMapStore((s) => s.setUnit);
   const setViewMode = useMapStore((s) => s.setViewMode);
   const toggleMinimizeRecents = useMapStore((s) => s.toggleMinimizeRecents);
-  const toggleMinimizeFavourites = useMapStore((s) => s.toggleFavourites);
+  const toggleMinimizeFavourites = useMapStore((s) => s.toggleMinimizeFavourites);
   const setStationElevationFilter = useMapStore((s) => s.setStationElevationFilter);
 
   const flyingMode = useAppStore((s) => s.flyingMode);
@@ -87,9 +89,9 @@ export function MapControlButtons({
   const setSport = useAppStore((s) => s.setSport);
   const welcomeDismissed = useAppStore((s) => s.welcomeDismissed);
   const recentStations = useAppStore((s) => s.recentStations);
-  const savedFavourites = useAppStore((s) => s.favourites);
-  const addSavedFavourite = useAppStore((s) => s.addSavedFavourite);
-  const removeSavedFavourite = useAppStore((s) => s.removeSavedFavourite);
+  const favourites = useAppStore((s) => s.favourites);
+  const addFavourite = useAppStore((s) => s.addFavourite);
+  const removeFavourite = useAppStore((s) => s.removeFavourite);
 
   const showWebcams = overlay === MAP_OVERLAYS.WEBCAMS;
   const showSoundings = overlay === MAP_OVERLAYS.SOUNDINGS;
@@ -99,8 +101,6 @@ export function MapControlButtons({
   const isFlyingMode = flyingMode && isMobile;
   const btnClass = getButtonStyle(isFlyingMode);
   const iconClass = getIconStyle(isFlyingMode);
-  // flyingMode forces recents minimised; user toggle takes effect otherwise
-  const effectiveMinimizeRecents = flyingMode ? true : minimizeRecents;
 
   const [isLocating, setIsLocating] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -136,13 +136,12 @@ export function MapControlButtons({
     const lat = getStoredValue('lat', 0);
     const zoom = getStoredValue('zoom', 0);
 
-    addSavedFavourite(guid, newFavouriteName, lat, lng, zoom);
-
-    setNewFavouriteName(''); //Clear text field for next time
-    setEnteringNewFavourite(false); //Reset back to base expanded view
+    addFavourite(guid, newFavouriteName, lat, lng, zoom);
+    setEnteringNewFavourite(false);
   };
 
   const toggleEnteringNewFavourite = () => {
+    setNewFavouriteName('');
     setEnteringNewFavourite(!enteringNewFavourite);
   };
 
@@ -328,19 +327,19 @@ export function MapControlButtons({
               </Popover>
             )}
             {isFlyingMode && (
-              <Toggle
-                variant="outline"
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={toggleFlyingMode}
                 className={`${btnClass} bg-background`}
               >
                 <Undo2 className={`${iconClass} opacity-70`} />
-              </Toggle>
+              </Button>
             )}
             {!isFlyingMode && <SearchBar disabled={isHistoricData} onSelect={onSearchSelect} />}
             {!isFlyingMode && (
-              <Toggle
-                variant="outline"
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => {
                   setMenuOpen(false);
@@ -350,26 +349,26 @@ export function MapControlButtons({
                 className={`${btnClass} bg-background`}
               >
                 <Bell className={`${iconClass} opacity-70`} />
-              </Toggle>
+              </Button>
             )}
-            <Toggle
-              variant="outline"
+            <Button
+              variant="ghost"
               size="sm"
               onClick={toggleWebcams}
               disabled={isHistoricData}
               className={`${btnClass} bg-background ${showWebcams ? '*:[svg]:stroke-blue-500' : ''}`}
             >
               <Camera className={`${iconClass} opacity-70`} />
-            </Toggle>
+            </Button>
             {isFlyingMode && (
-              <Toggle
-                variant="outline"
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => navigate('/grid')}
                 className={`${btnClass} bg-background`}
               >
                 <Grid3X3 className={`${iconClass} opacity-70`} />
-              </Toggle>
+              </Button>
             )}
           </>
         ) : (
@@ -418,8 +417,8 @@ export function MapControlButtons({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle
-                  variant="outline"
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => onHistoryChange(isHistoricData ? 0 : -30)}
                   disabled={viewMode === MAP_VIEW_MODES.SITES}
@@ -428,7 +427,7 @@ export function MapControlButtons({
                   }`}
                 >
                   <Hourglass className={`${iconClass} opacity-70`} />
-                </Toggle>
+                </Button>
               </TooltipTrigger>
               <TooltipContent>{historyOffset < 0 ? 'Hide' : 'Show'} History</TooltipContent>
             </Tooltip>
@@ -448,8 +447,8 @@ export function MapControlButtons({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle
-                  variant="outline"
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={toggleWebcams}
                   disabled={isHistoricData}
@@ -458,14 +457,14 @@ export function MapControlButtons({
                   }`}
                 >
                   <Camera className={`${iconClass} opacity-70`} />
-                </Toggle>
+                </Button>
               </TooltipTrigger>
               <TooltipContent>{showWebcams ? 'Hide' : 'Show'} webcams on map</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle
-                  variant="outline"
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={toggleSoundings}
                   disabled={isHistoricData}
@@ -476,7 +475,7 @@ export function MapControlButtons({
                       <path d="m18,2.47l-9,6.53l-4.38,-4.38l-4.62,3.38l0,-2.48l4.83,-3.52l4.38,4.38l8.79,-6.38m0,12l-4.7,0l-4.17,3.34l-6.13,-5.93l-3,2.13l0,2.46l2.8,-2l6.2,6l5,-4l4,0l0,-2z" />
                     </g>
                   </svg>
-                </Toggle>
+                </Button>
               </TooltipTrigger>
               <TooltipContent>{showSoundings ? 'Hide' : 'Show'} soundings on map</TooltipContent>
             </Tooltip>
@@ -558,8 +557,8 @@ export function MapControlButtons({
         {!isFlyingMode && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Toggle
-                variant="outline"
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => {
                   const newUnit = unit === WIND_UNITS.KMH ? WIND_UNITS.KT : WIND_UNITS.KMH;
@@ -569,7 +568,7 @@ export function MapControlButtons({
                 className={`${btnClass} text-xs font-semibold bg-background`}
               >
                 {unit === WIND_UNITS.KT ? 'kt' : 'km/h'}
-              </Toggle>
+              </Button>
             </TooltipTrigger>
             <TooltipContent side="left">
               Change unit to {unit === WIND_UNITS.KT ? 'km/h' : 'kt'}
@@ -578,14 +577,14 @@ export function MapControlButtons({
         )}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Toggle
-              variant="outline"
+            <Button
+              variant="ghost"
               size="sm"
               onClick={onLayerToggle}
               className={`${btnClass} bg-background`}
             >
               <Layers className={`${iconClass} opacity-70`} />
-            </Toggle>
+            </Button>
           </TooltipTrigger>
           <TooltipContent side="left">Switch map layer</TooltipContent>
         </Tooltip>
@@ -609,12 +608,12 @@ export function MapControlButtons({
         />
       )}
 
-      {/* Bottom left - Recent Stations (hidden in history mode) */}
+      {/* Bottom left - Recent Stations & Favourites (hidden in flying & history mode) */}
       {!isFlyingMode && !isHistoricData && (
-        <div className="absolute bottom-2.5 left-2.5 z-50 flex flex-row gap-1.5 items-end">
+        <div className="absolute bottom-2.5 left-2.5 z-50 flex flex-col gap-1.5 items-start">
           {recentStations.length > 0 && (
             <>
-              {effectiveMinimizeRecents ? (
+              {minimizeRecents ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -633,7 +632,6 @@ export function MapControlButtons({
                   <div
                     className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors"
                     onClick={toggleMinimizeRecents}
-                    title="Click to minimize"
                   >
                     <History className={`${iconClass} h-3 w-3`} />
                     <span>Recent Stations</span>
@@ -651,7 +649,6 @@ export function MapControlButtons({
                           size="sm"
                           onClick={() => navigate(`/stations/${station.id}`)}
                           className="h-7 justify-start text-xs font-normal px-2 truncate"
-                          title={station.name}
                         >
                           {displayName}
                         </Button>
@@ -675,90 +672,94 @@ export function MapControlButtons({
                   <Heart className={`${iconClass} opacity-70`} />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Show Favourites</TooltipContent>
+              <TooltipContent>Show favourites</TooltipContent>
             </Tooltip>
           ) : (
-            <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-60">
-              <div
-                className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors justify-between"
-                onClick={toggleMinimizeFavourites}
-                title="Click to minimize"
-              >
-                <div className="flex flex-row gap-1.5">
-                  <Heart className={`${iconClass} h-3 w-3`} />
+            <div
+              className={`bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-1 ${isMobile ? 'w-40' : 'w-60'}`}
+            >
+              <div className="flex justify-between mb-1.5 pr-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                <Button
+                  disabled={favourites.length >= MAX_FAVOURITES || enteringNewFavourite}
+                  variant="ghost"
+                  size="sm"
+                  className={`h-7 cursor-pointer ${favourites.length >= MAX_FAVOURITES || enteringNewFavourite ? '' : 'text-destructive hover:text-destructive'}`}
+                  onClick={toggleEnteringNewFavourite}
+                >
+                  <HeartPlus className="h-3.5 w-3.5" />
+                </Button>
+                <div
+                  className="flex flex-1 items-center justify-between"
+                  onClick={() => {
+                    toggleMinimizeFavourites();
+                    setEnteringNewFavourite(false);
+                  }}
+                >
+                  <span className="text-[10px]">
+                    {favourites.length}/{MAX_FAVOURITES}
+                  </span>
                   <span>Favourites</span>
                 </div>
-                <X />
               </div>
 
               <div className="flex flex-col gap-1">
                 <div>
-                  {savedFavourites.length < MAX_FAVOURITES ? (
-                    <>
-                      {enteringNewFavourite ? (
-                        <div className="flex flex-row gap-1 align-center ">
-                          <Button
-                            onClick={toggleEnteringNewFavourite}
-                            size="icon"
-                            className="px-0 bg-red-500 hover:bg-red-300 text-white"
-                            variant={'outline'}
-                          >
-                            <X />
-                          </Button>
-
-                          <Input
-                            placeholder="Nickname..."
-                            value={newFavouriteName}
-                            onChange={(e) => setNewFavouriteName(e.target.value)}
-                            maxLength={MAX_FAVOURITE_LENGTH}
-                          />
-
-                          <Button
-                            onClick={saveNewFavourite}
-                            disabled={!newFavouriteName.length}
-                            size="icon"
-                            className="bg-green-500 hover:bg-green-300"
-                          >
-                            <Check />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          onClick={toggleEnteringNewFavourite}
-                          className="bg-red-500 hover:bg-red-700"
-                        >
-                          <HeartPlus /> + Favourite Area
-                        </Button>
-                      )}
-                    </>
-                  ) : (
-                    <Button disabled={true}>Max {MAX_FAVOURITES} favourites</Button>
+                  {favourites.length < MAX_FAVOURITES && enteringNewFavourite && (
+                    <div className="flex gap-1 items-center">
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="h-7 cursor-pointer text-destructive hover:text-destructive"
+                        onClick={toggleEnteringNewFavourite}
+                      >
+                        <X />
+                      </Button>
+                      <Input
+                        placeholder="Nickname..."
+                        value={newFavouriteName}
+                        onChange={(e) => setNewFavouriteName(e.target.value)}
+                        onKeyDown={(e) =>
+                          e.key === 'Enter' && newFavouriteName.length && saveNewFavourite()
+                        }
+                        maxLength={MAX_FAVOURITE_LENGTH}
+                        className="h-7 text-xs"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="h-7 cursor-pointer text-green-500 hover:text-green-500"
+                        onClick={saveNewFavourite}
+                      >
+                        <Check />
+                      </Button>
+                    </div>
                   )}
                 </div>
 
-                {savedFavourites.map((favourite) => {
-                  const displayName = favourite.name;
+                {favourites.map((favourite) => {
                   return (
-                    <div key={favourite.id} className="flex flex-row gap-2">
+                    <div
+                      key={favourite.id}
+                      className="flex items-center
+                    "
+                    >
                       <Button
-                        key={favourite.id}
                         variant="ghost"
-                        size="lg"
+                        size="sm"
                         onClick={() => {
-                          onSavedFavouriteSelect(favourite);
+                          onFavouriteSelect(favourite);
                         }}
-                        className="flex-1 h-7 justify-start text-xs font-normal px-2 truncate"
-                        title={favourite.name}
+                        className="flex-1 justify-start text-xs font-normal px-2 truncate cursor-pointer"
                       >
-                        {displayName}
+                        {favourite.name}
                       </Button>
                       <Button
-                        className="h-7 justify-center text-xs font-normal px-2 truncate bg-gray-400 hover:bg-gray-200 border border-radius-0 text-white"
-                        size={'icon-sm'}
-                        variant={'outline'}
-                        onClick={() => removeSavedFavourite(favourite.id)}
+                        variant="ghost"
+                        size="xs"
+                        className="h-7 cursor-pointer text-destructive hover:text-destructive opacity-50"
+                        onClick={() => removeFavourite(favourite.id)}
                       >
-                        <X />
+                        <Trash2 className="size-3" />
                       </Button>
                     </div>
                   );

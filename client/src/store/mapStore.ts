@@ -43,7 +43,7 @@ interface MapStore {
   setUnit: (unit: WindUnit) => void;
   setViewMode: (mode: MapViewMode) => void;
   toggleMinimizeRecents: () => void;
-  toggleFavourites: () => void;
+  toggleMinimizeFavourites: () => void;
   setIsSatellite: (value: boolean) => void;
   setHistoryOffset: (offset: number) => void;
   setStationElevationFilter: (filter: [number, number]) => void;
@@ -71,7 +71,7 @@ export const useMapStore = create<MapStore>()(
       setViewMode: (viewMode) => set({ viewMode }),
       toggleMinimizeRecents: () =>
         set({ minimizeRecents: !get().minimizeRecents, minimizeFavourites: true }),
-      toggleFavourites: () =>
+      toggleMinimizeFavourites: () =>
         set({ minimizeFavourites: !get().minimizeFavourites, minimizeRecents: true }),
       setIsSatellite: (isSatellite) => set({ isSatellite }),
       setHistoryOffset: (historyOffset) => set({ historyOffset }),
@@ -86,9 +86,11 @@ export const useMapStore = create<MapStore>()(
         unit: state.unit,
         viewMode: state.viewMode,
         minimizeRecents: state.minimizeRecents,
+        minimizeFavourites: state.minimizeFavourites,
         isSatellite: state.isSatellite
       }),
       onRehydrateStorage: () => {
+        // TO BE REMOVED - OLD LOCALSTORAGE MIGRATION
         const hadExistingStore = localStorage.getItem('zephyr-map') !== null;
         return (hydratedState: MapStore | undefined, error: unknown) => {
           if (error || !hydratedState) return;

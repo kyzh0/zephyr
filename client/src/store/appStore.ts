@@ -1,12 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { SPORTS, type SportType } from '@/components/map';
+import { SPORTS, type SportType, type Favourite } from '@/components/map';
 
 const VALID_SPORTS = new Set<string>(Object.values(SPORTS));
 const MAX_RECENT_STATIONS = 5;
-export const MAX_FAVOURITES = 5;
-export const MAX_FAVOURITE_LENGTH = 15;
 
 interface RecentStation {
   id: string;
@@ -14,26 +12,18 @@ interface RecentStation {
   viewedAt: number;
 }
 
-export interface SavedFavourite {
-  id: string;
-  name: string;
-  lat: number;
-  lng: number;
-  zoom: number;
-}
-
 interface AppStore {
   flyingMode: boolean;
   sport: SportType;
   welcomeDismissed: boolean;
   recentStations: RecentStation[];
-  favourites: SavedFavourite[];
+  favourites: Favourite[];
   toggleFlyingMode: () => void;
   setSport: (sport: SportType) => void;
   setWelcomeDismissed: (value: boolean) => void;
   addRecentStation: (id: string, name: string) => void;
-  addSavedFavourite: (id: string, name: string, lat: number, lng: number, zoom: number) => void;
-  removeSavedFavourite: (id: string) => void;
+  addFavourite: (id: string, name: string, lat: number, lng: number, zoom: number) => void;
+  removeFavourite: (id: string) => void;
 }
 
 export const useAppStore = create<AppStore>()(
@@ -56,16 +46,14 @@ export const useAppStore = create<AppStore>()(
           )
         });
       },
-      addSavedFavourite: (id, name, lat, lng, zoom) => {
-        const filtered = get().favourites.filter((s) => s.id !== id);
+      addFavourite: (id, name, lat, lng, zoom) => {
         set({
-          favourites: [...filtered, { id, name, lat, lng, zoom }]
+          favourites: [...get().favourites, { id, name, lat, lng, zoom }]
         });
       },
-      removeSavedFavourite: (id: string) => {
-        const filtered = get().favourites.filter((s) => s.id !== id);
+      removeFavourite: (id: string) => {
         set({
-          favourites: [...filtered]
+          favourites: get().favourites.filter((s) => s.id !== id)
         });
       }
     }),
@@ -80,6 +68,7 @@ export const useAppStore = create<AppStore>()(
         favourites: state.favourites
       }),
       onRehydrateStorage: () => {
+        // TO BE REMOVED - OLD LOCALSTORAGE MIGRATION
         const hadExistingStore = localStorage.getItem('zephyr-app') !== null;
         return (hydratedState: AppStore | undefined, error: unknown) => {
           if (error || !hydratedState) return;
@@ -145,20 +134,6 @@ export const useAppStore = create<AppStore>()(
               /* malformed, ignore */
             }
             localStorage.removeItem('recentStations');
-          }
-
-          // favourites was stored as JSON under a flat key by favourites.service
-          const oldFavourites = localStorage.getItem('favourites');
-          if (oldFavourites !== null) {
-            try {
-              const parsed = JSON.parse(oldFavourites) as unknown;
-              if (Array.isArray(parsed)) {
-                useAppStore.setState({ favourites: parsed as SavedFavourite[] });
-              }
-            } catch {
-              /* malformed, ignore */
-            }
-            localStorage.removeItem('favourites');
           }
         };
       }

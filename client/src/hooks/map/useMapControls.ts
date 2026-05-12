@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useMapStore } from '@/store';
 import { MAP_OVERLAYS, MAP_VIEW_MODES } from '@/components/map/map.types';
-import type { MapControlHandlers, SearchResult } from '@/components/map/map.types';
-import type { SavedFavourite } from '@/store/appStore';
+import type { MapControlHandlers, SearchResult, Favourite } from '@/components/map/map.types';
 
 function getSnapshotTime(offset: number): Date {
   const now = new Date();
@@ -134,8 +133,8 @@ export function useMapControls({
     [flyTo, navigate, setViewMode, setOverlay]
   );
 
-  const onSavedFavouriteSelect = useCallback(
-    (favourite: SavedFavourite) => {
+  const onFavouriteSelect = useCallback(
+    (favourite: Favourite) => {
       const coords: [number, number] = [favourite.lng, favourite.lat];
       flyTo(coords, favourite.zoom);
     },
@@ -148,6 +147,6 @@ export function useMapControls({
     onHistoryChange,
     onSiteDirectionFilterChange,
     onSearchSelect,
-    onSavedFavouriteSelect
+    onFavouriteSelect
   };
 }
