@@ -610,162 +610,164 @@ export function MapControlButtons({
       )}
 
       {/* Bottom left - Recent Stations (hidden in history mode) */}
-      {(recentStations.length > 0 || savedFavourites.length > 0) &&
-        !isFlyingMode &&
-        !isHistoricData && (
-          <div className="absolute bottom-2.5 left-2.5 z-50 flex flex-row gap-1.5 items-end">
-            {effectiveMinimizeRecents ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
+      {!isFlyingMode && !isHistoricData && (
+        <div className="absolute bottom-2.5 left-2.5 z-50 flex flex-row gap-1.5 items-end">
+          {recentStations.length > 0 && (
+            <>
+              {effectiveMinimizeRecents ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={toggleMinimizeRecents}
+                      className={btnClass}
+                    >
+                      <History className={`${iconClass} opacity-70`} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Show recent stations</TooltipContent>
+                </Tooltip>
+              ) : (
+                <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-50">
+                  <div
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors"
                     onClick={toggleMinimizeRecents}
-                    className={btnClass}
+                    title="Click to minimize"
                   >
-                    <History className={`${iconClass} opacity-70`} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Show recent stations</TooltipContent>
-              </Tooltip>
-            ) : (
-              <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-50">
-                <div
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors"
-                  onClick={toggleMinimizeRecents}
-                  title="Click to minimize"
-                >
-                  <History className={`${iconClass} h-3 w-3`} />
-                  <span>Recent Stations</span>
-                </div>
-                <div className="flex flex-col gap-1">
-                  {recentStations.map((station) => {
-                    const displayName =
-                      station.name.length > 14
-                        ? `${station.name.slice(0, 7)}...${station.name.slice(-5)}`
-                        : station.name;
-                    return (
-                      <Button
-                        key={station.id}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/stations/${station.id}`)}
-                        className="h-7 justify-start text-xs font-normal px-2 truncate"
-                        title={station.name}
-                      >
-                        {displayName}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {minimizeFavourites ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={toggleMinimizeFavourites}
-                    className={btnClass}
-                  >
-                    <Heart className={`${iconClass} opacity-70`} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Show Favourites</TooltipContent>
-              </Tooltip>
-            ) : (
-              <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-60">
-                <div
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors justify-between"
-                  onClick={toggleMinimizeFavourites}
-                  title="Click to minimize"
-                >
-                  <div className="flex flex-row gap-1.5">
-                    <Heart className={`${iconClass} h-3 w-3`} />
-                    <span>Favourites</span>
+                    <History className={`${iconClass} h-3 w-3`} />
+                    <span>Recent Stations</span>
                   </div>
-                  <X />
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <div>
-                    {savedFavourites.length < MAX_FAVOURITES ? (
-                      <>
-                        {enteringNewFavourite ? (
-                          <div className="flex flex-row gap-1 align-center ">
-                            <Button
-                              onClick={toggleEnteringNewFavourite}
-                              size="icon"
-                              className="px-0 bg-red-500 hover:bg-red-300 text-white"
-                              variant={'outline'}
-                            >
-                              <X />
-                            </Button>
-
-                            <Input
-                              placeholder="Nickname..."
-                              value={newFavouriteName}
-                              onChange={(e) => setNewFavouriteName(e.target.value)}
-                              maxLength={MAX_FAVOURITE_LENGTH}
-                            />
-
-                            <Button
-                              onClick={saveNewFavourite}
-                              disabled={!newFavouriteName.length}
-                              size="icon"
-                              className="bg-green-500 hover:bg-green-300"
-                            >
-                              <Check />
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button
-                            onClick={toggleEnteringNewFavourite}
-                            className="bg-red-500 hover:bg-red-700"
-                          >
-                            <HeartPlus /> + Favourite Area
-                          </Button>
-                        )}
-                      </>
-                    ) : (
-                      <Button disabled={true}>Max {MAX_FAVOURITES} favourites</Button>
-                    )}
-                  </div>
-
-                  {savedFavourites.map((favourite) => {
-                    const displayName = favourite.name;
-                    return (
-                      <div key={favourite.id} className="flex flex-row gap-2">
+                  <div className="flex flex-col gap-1">
+                    {recentStations.map((station) => {
+                      const displayName =
+                        station.name.length > 14
+                          ? `${station.name.slice(0, 7)}...${station.name.slice(-5)}`
+                          : station.name;
+                      return (
                         <Button
-                          key={favourite.id}
+                          key={station.id}
                           variant="ghost"
-                          size="lg"
-                          onClick={() => {
-                            onSavedFavouriteSelect(favourite);
-                          }}
-                          className="flex-1 h-7 justify-start text-xs font-normal px-2 truncate"
-                          title={favourite.name}
+                          size="sm"
+                          onClick={() => navigate(`/stations/${station.id}`)}
+                          className="h-7 justify-start text-xs font-normal px-2 truncate"
+                          title={station.name}
                         >
                           {displayName}
                         </Button>
-                        <Button
-                          className="h-7 justify-center text-xs font-normal px-2 truncate bg-gray-400 hover:bg-gray-200 border border-radius-0 text-white"
-                          size={'icon-sm'}
-                          variant={'outline'}
-                          onClick={() => removeSavedFavourite(favourite.id)}
-                        >
-                          <X />
-                        </Button>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
+              )}
+            </>
+          )}
+
+          {minimizeFavourites ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleMinimizeFavourites}
+                  className={btnClass}
+                >
+                  <Heart className={`${iconClass} opacity-70`} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Show Favourites</TooltipContent>
+            </Tooltip>
+          ) : (
+            <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-2 max-w-60">
+              <div
+                className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 px-1 cursor-pointer hover:text-foreground transition-colors justify-between"
+                onClick={toggleMinimizeFavourites}
+                title="Click to minimize"
+              >
+                <div className="flex flex-row gap-1.5">
+                  <Heart className={`${iconClass} h-3 w-3`} />
+                  <span>Favourites</span>
+                </div>
+                <X />
               </div>
-            )}
-          </div>
-        )}
+
+              <div className="flex flex-col gap-1">
+                <div>
+                  {savedFavourites.length < MAX_FAVOURITES ? (
+                    <>
+                      {enteringNewFavourite ? (
+                        <div className="flex flex-row gap-1 align-center ">
+                          <Button
+                            onClick={toggleEnteringNewFavourite}
+                            size="icon"
+                            className="px-0 bg-red-500 hover:bg-red-300 text-white"
+                            variant={'outline'}
+                          >
+                            <X />
+                          </Button>
+
+                          <Input
+                            placeholder="Nickname..."
+                            value={newFavouriteName}
+                            onChange={(e) => setNewFavouriteName(e.target.value)}
+                            maxLength={MAX_FAVOURITE_LENGTH}
+                          />
+
+                          <Button
+                            onClick={saveNewFavourite}
+                            disabled={!newFavouriteName.length}
+                            size="icon"
+                            className="bg-green-500 hover:bg-green-300"
+                          >
+                            <Check />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          onClick={toggleEnteringNewFavourite}
+                          className="bg-red-500 hover:bg-red-700"
+                        >
+                          <HeartPlus /> + Favourite Area
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <Button disabled={true}>Max {MAX_FAVOURITES} favourites</Button>
+                  )}
+                </div>
+
+                {savedFavourites.map((favourite) => {
+                  const displayName = favourite.name;
+                  return (
+                    <div key={favourite.id} className="flex flex-row gap-2">
+                      <Button
+                        key={favourite.id}
+                        variant="ghost"
+                        size="lg"
+                        onClick={() => {
+                          onSavedFavouriteSelect(favourite);
+                        }}
+                        className="flex-1 h-7 justify-start text-xs font-normal px-2 truncate"
+                        title={favourite.name}
+                      >
+                        {displayName}
+                      </Button>
+                      <Button
+                        className="h-7 justify-center text-xs font-normal px-2 truncate bg-gray-400 hover:bg-gray-200 border border-radius-0 text-white"
+                        size={'icon-sm'}
+                        variant={'outline'}
+                        onClick={() => removeSavedFavourite(favourite.id)}
+                      >
+                        <X />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
