@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { SPORTS, type SportType } from '@/components/map';
+import { SPORTS, type SportType, type Favourite } from '@/components/map';
 
 const VALID_SPORTS = new Set<string>(Object.values(SPORTS));
 const MAX_RECENT_STATIONS = 5;
@@ -17,10 +17,13 @@ interface AppStore {
   sport: SportType;
   welcomeDismissed: boolean;
   recentStations: RecentStation[];
+  favourites: Favourite[];
   toggleFlyingMode: () => void;
   setSport: (sport: SportType) => void;
   setWelcomeDismissed: (value: boolean) => void;
   addRecentStation: (id: string, name: string) => void;
+  addFavourite: (id: string, name: string, lat: number, lng: number, zoom: number) => void;
+  removeFavourite: (id: string) => void;
 }
 
 export const useAppStore = create<AppStore>()(
@@ -30,6 +33,7 @@ export const useAppStore = create<AppStore>()(
       sport: SPORTS.PARAGLIDING,
       welcomeDismissed: false,
       recentStations: [],
+      favourites: [],
       toggleFlyingMode: () => set({ flyingMode: !get().flyingMode }),
       setSport: (sport) => set({ sport }),
       setWelcomeDismissed: (welcomeDismissed) => set({ welcomeDismissed }),
@@ -41,6 +45,16 @@ export const useAppStore = create<AppStore>()(
             MAX_RECENT_STATIONS
           )
         });
+      },
+      addFavourite: (id, name, lat, lng, zoom) => {
+        set({
+          favourites: [...get().favourites, { id, name, lat, lng, zoom }]
+        });
+      },
+      removeFavourite: (id: string) => {
+        set({
+          favourites: get().favourites.filter((s) => s.id !== id)
+        });
       }
     }),
     {
@@ -50,9 +64,11 @@ export const useAppStore = create<AppStore>()(
         flyingMode: state.flyingMode,
         sport: state.sport,
         welcomeDismissed: state.welcomeDismissed,
-        recentStations: state.recentStations
+        recentStations: state.recentStations,
+        favourites: state.favourites
       }),
       onRehydrateStorage: () => {
+        // TO BE REMOVED - OLD LOCALSTORAGE MIGRATION
         const hadExistingStore = localStorage.getItem('zephyr-app') !== null;
         return (hydratedState: AppStore | undefined, error: unknown) => {
           if (error || !hydratedState) return;
@@ -69,6 +85,9 @@ export const useAppStore = create<AppStore>()(
           }
           if (!Array.isArray(hydratedState.recentStations)) {
             useAppStore.setState({ recentStations: [] });
+          }
+          if (!Array.isArray(hydratedState.favourites)) {
+            useAppStore.setState({ favourites: [] });
           }
 
           if (hadExistingStore) return;

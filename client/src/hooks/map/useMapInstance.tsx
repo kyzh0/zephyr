@@ -20,7 +20,7 @@ interface UseMapInstanceReturn {
   isLoaded: boolean;
   zoom: number;
   triggerGeolocate: () => Promise<void>;
-  flyTo: (coordinates: [number, number]) => void;
+  flyTo: (coordinates: [number, number], zoom?: number) => void;
 }
 
 export function useMapInstance({ containerRef }: UseMapInstanceOptions): UseMapInstanceReturn {
@@ -125,9 +125,9 @@ export function useMapInstance({ containerRef }: UseMapInstanceOptions): UseMapI
     }, 60_000);
   }, []);
 
-  const flyTo = useCallback((coordinates: [number, number]): void => {
+  const flyTo = useCallback((coordinates: [number, number], zoom?: number): void => {
     if (!map.current) return;
-    map.current.flyTo({ center: coordinates, zoom: Math.max(map.current.getZoom(), 12) });
+    map.current.flyTo({ center: coordinates, zoom: zoom ?? Math.max(map.current.getZoom(), 12) });
   }, []);
 
   return { map, isLoaded, zoom, triggerGeolocate, flyTo };

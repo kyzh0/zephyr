@@ -250,7 +250,7 @@ export default function AdminAddSite() {
                 control={form.control}
                 name="isDisabled"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border p-4">
+                  <FormItem className="flex items-start space-x-3 space-y-0 rounded-lg border p-4">
                     <FormControl>
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>

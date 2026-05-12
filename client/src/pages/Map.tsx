@@ -93,7 +93,7 @@ export default function Map() {
   }, [stationElevationFilter]);
 
   return (
-    <div className="absolute top-0 left-0 h-dvh w-screen flex flex-col">
+    <div className="fixed inset-0 flex flex-col">
       <SEO
         path="/"
         jsonLd={{

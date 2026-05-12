@@ -43,6 +43,14 @@ export interface HistoryValue {
   isOffline: boolean | null;
 }
 
+export interface Favourite {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  zoom: number;
+}
+
 export const WIND_UNITS = {
   KMH: 'kmh',
   KT: 'kt'
@@ -80,6 +88,7 @@ export interface MapControlHandlers {
   onHistoryChange: (offset: number) => Promise<void>;
   onSiteDirectionFilterChange: (bearing: number | null) => void;
   onSearchSelect: (result: SearchResult) => void;
+  onFavouriteSelect: (favourite: Favourite) => void;
 }
 
 export const ELEVATION_FILTER_MIN = 0;

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useMapStore } from '@/store';
 import { MAP_OVERLAYS, MAP_VIEW_MODES } from '@/components/map/map.types';
-import type { MapControlHandlers, SearchResult } from '@/components/map/map.types';
+import type { MapControlHandlers, SearchResult, Favourite } from '@/components/map/map.types';
 
 function getSnapshotTime(offset: number): Date {
   const now = new Date();
@@ -19,7 +19,7 @@ function getSnapshotTime(offset: number): Date {
 export interface UseMapControlsParams {
   map: React.RefObject<{ setStyle: (style: string) => void } | null>;
   triggerGeolocate: () => Promise<void>;
-  flyTo: (coordinates: [number, number]) => void;
+  flyTo: (coordinates: [number, number], zoom?: number) => void;
   setLandingTransparent: (visible: boolean) => void;
   setStationMarkersInteractive: (interactive: boolean) => void;
   setSiteDirectionFilter: (bearing: number | null) => void;
@@ -133,11 +133,20 @@ export function useMapControls({
     [flyTo, navigate, setViewMode, setOverlay]
   );
 
+  const onFavouriteSelect = useCallback(
+    (favourite: Favourite) => {
+      const coords: [number, number] = [favourite.lng, favourite.lat];
+      flyTo(coords, favourite.zoom);
+    },
+    [flyTo]
+  );
+
   return {
     onLayerToggle,
     onLocateClick: triggerGeolocate,
     onHistoryChange,
     onSiteDirectionFilterChange,
-    onSearchSelect
+    onSearchSelect,
+    onFavouriteSelect
   };
 }

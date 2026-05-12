@@ -161,7 +161,7 @@ export default function Station() {
             />
             <WindSpeedChart data={data} />
             <WindDirectionChart data={data} bearingPairCount={bearingPairCount} />
-            <div className="flex flex-row items-center justify-end text-xs sm:text-sm text-muted-foreground gap-2 sm:gap-4">
+            <div className="flex items-center justify-end text-xs sm:text-sm text-muted-foreground gap-2 sm:gap-4">
               Showing data for last{' '}
               <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
                 <TabsList className="grid w-full grid-cols-4 h-7 sm:h-9">
@@ -201,7 +201,7 @@ export default function Station() {
               className={`h-4 w-4 transition-transform ${webcamsOpen ? 'rotate-180' : ''}`}
             />
           </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-2 pt-2 flex flex-row flex-wrap gap-4">
+          <CollapsibleContent className="space-y-2 pt-2 flex flex-wrap gap-2">
             {nearbyWebcamData.map((nearbyWebcamData) => (
               <WebcamPreview
                 key={nearbyWebcamData.data._id}
