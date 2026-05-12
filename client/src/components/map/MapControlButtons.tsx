@@ -49,7 +49,7 @@ import {
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import { useIsMobile } from '@/hooks';
 import { useAppStore, useMapStore } from '@/store';
-import { MAX_FAVOURITES, type SavedFavourite } from '@/store/appStore';
+import { MAX_FAVOURITE_LENGTH, MAX_FAVOURITES, type SavedFavourite } from '@/store/appStore';
 import { Input } from '../ui/input';
 
 const VALID_VIEW_MODES = new Set<string>(Object.values(MAP_VIEW_MODES));
@@ -105,6 +105,9 @@ export function MapControlButtons({
   const [isLocating, setIsLocating] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const [enteringNewFavourite, setEnteringNewFavourite] = useState(false);
+  const [newFavouriteName, setNewFavouriteName] = useState('');
+
   useEffect(() => {
     if (!isLocating) return;
 
@@ -126,6 +129,22 @@ export function MapControlButtons({
       navigate('/help');
     }
   }, [navigate, welcomeDismissed]);
+
+  const saveNewFavourite = () => {
+    const guid = crypto.randomUUID();
+    const lng = getStoredValue('lon', 0);
+    const lat = getStoredValue('lat', 0);
+    const zoom = getStoredValue('zoom', 0);
+
+    addSavedFavourite(guid, newFavouriteName, lat, lng, zoom);
+
+    setNewFavouriteName(''); //Clear text field for next time
+    setEnteringNewFavourite(false); //Reset back to base expanded view
+  };
+
+  const toggleEnteringNewFavourite = () => {
+    setEnteringNewFavourite(!enteringNewFavourite);
+  };
 
   const renderMenuContent = () => (
     <div className="flex flex-col gap-0">
@@ -286,40 +305,6 @@ export function MapControlButtons({
       </div>
     </div>
   );
-
-  const flyToFavourite: (favourite: SavedFavourite) => void = (favourite) => {
-    onSavedFavouriteSelect(favourite);
-  };
-
-  const saveNewFavourite = () => {
-    const guid = crypto.randomUUID();
-    const lng = getStoredValue('lon', 0);
-    const lat = getStoredValue('lat', 0);
-    const zoom = getStoredValue('zoom', 0);
-    console.log('save new', newFavouriteName, lat, lng, zoom, guid);
-    //TODO get latlngzoom and name, generate new GUID and save to localstore
-
-    addSavedFavourite(guid, newFavouriteName, lat, lng, zoom);
-
-    setNewFavouriteName('');
-    setEnteringNewFavourite(false);
-  };
-
-  const deleteSavedFavourite = (favourite: SavedFavourite) => {
-    console.log('delete', favourite);
-
-    //TODO remove this item from localstorage
-    removeSavedFavourite(favourite.id);
-  };
-
-  const [enteringNewFavourite, setEnteringNewFavourite] = useState(false);
-  const [newFavouriteName, setNewFavouriteName] = useState('');
-
-  const MAX_FAVOURITE_LENGTH = 15;
-
-  const toggleEnteringNewFavourite = () => {
-    setEnteringNewFavourite(!enteringNewFavourite);
-  };
 
   return (
     <>
@@ -758,7 +743,7 @@ export function MapControlButtons({
                           variant="ghost"
                           size="lg"
                           onClick={() => {
-                            flyToFavourite(favourite);
+                            onSavedFavouriteSelect(favourite);
                           }}
                           className="flex-1 h-7 justify-start text-xs font-normal px-2 truncate"
                           title={favourite.name}
@@ -769,7 +754,7 @@ export function MapControlButtons({
                           className="h-7 justify-center text-xs font-normal px-2 truncate bg-gray-400 hover:bg-gray-200 border border-radius-0 text-white"
                           size={'icon-sm'}
                           variant={'outline'}
-                          onClick={() => deleteSavedFavourite(favourite)}
+                          onClick={() => removeSavedFavourite(favourite.id)}
                         >
                           <X />
                         </Button>

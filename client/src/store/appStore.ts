@@ -5,32 +5,8 @@ import { SPORTS, type SportType } from '@/components/map';
 
 const VALID_SPORTS = new Set<string>(Object.values(SPORTS));
 const MAX_RECENT_STATIONS = 5;
-export const MAX_FAVOURITES = 5; //TODO figure out better way to handle this
-
-//TODO remove test variable once saving new favourites working
-const TEST_DEFAULT_FAVOURITES: SavedFavourite[] = [
-  {
-    id: '6631d5ddcf26372d5b8040965',
-    name: 'Taylors Mistake',
-    lat: -43.5907,
-    lng: 172.7623,
-    zoom: 12.43
-  },
-  {
-    id: '6631d5ddcf26372d5b8140965',
-    name: 'Caiggies',
-    lat: -43.2701,
-    lng: 171.762,
-    zoom: 9.41
-  },
-  {
-    id: '1631d5ddcf26372d5b8140965',
-    name: 'Auckland',
-    lat: -36.7913,
-    lng: 174.9057,
-    zoom: 8.5
-  }
-];
+export const MAX_FAVOURITES = 5;
+export const MAX_FAVOURITE_LENGTH = 15;
 
 interface RecentStation {
   id: string;
@@ -67,7 +43,7 @@ export const useAppStore = create<AppStore>()(
       sport: SPORTS.PARAGLIDING,
       welcomeDismissed: false,
       recentStations: [],
-      favourites: TEST_DEFAULT_FAVOURITES, //[]
+      favourites: [],
       toggleFlyingMode: () => set({ flyingMode: !get().flyingMode }),
       setSport: (sport) => set({ sport }),
       setWelcomeDismissed: (welcomeDismissed) => set({ welcomeDismissed }),
@@ -122,7 +98,7 @@ export const useAppStore = create<AppStore>()(
             useAppStore.setState({ recentStations: [] });
           }
           if (!Array.isArray(hydratedState.favourites)) {
-            useAppStore.setState({ favourites: TEST_DEFAULT_FAVOURITES }); //[]
+            useAppStore.setState({ favourites: [] });
           }
 
           if (hadExistingStore) return;
