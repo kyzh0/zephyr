@@ -49,7 +49,7 @@ import {
 import { getButtonStyle, getIconStyle } from '@/lib/utils';
 import { useIsMobile } from '@/hooks';
 import { useAppStore, useMapStore } from '@/store';
-import { MAX_FAVOURITE_LENGTH, MAX_FAVOURITES, type SavedFavourite } from '@/store/appStore';
+import { MAX_FAVOURITE_LENGTH, MAX_FAVOURITES } from '@/store/appStore';
 import { Input } from '../ui/input';
 
 const VALID_VIEW_MODES = new Set<string>(Object.values(MAP_VIEW_MODES));
