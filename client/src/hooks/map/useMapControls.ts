@@ -137,8 +137,6 @@ export function useMapControls({
   const onSavedFavouriteSelect = useCallback(
     (favourite: SavedFavourite) => {
       const coords: [number, number] = [favourite.lng, favourite.lat];
-      console.log('aa', coords, favourite.zoom);
-
       flyTo(coords, favourite.zoom);
     },
     [flyTo]

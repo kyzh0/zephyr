@@ -59,7 +59,7 @@ export const useAppStore = create<AppStore>()(
       addSavedFavourite: (id, name, lat, lng, zoom) => {
         const filtered = get().favourites.filter((s) => s.id !== id);
         set({
-          favourites: [{ id, name, lat, lng, zoom }, ...filtered].slice(0, MAX_FAVOURITES)
+          favourites: [...filtered, { id, name, lat, lng, zoom }]
         });
       },
       removeSavedFavourite: (id: string) => {
