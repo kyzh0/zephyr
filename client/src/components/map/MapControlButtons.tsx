@@ -715,14 +715,14 @@ export function MapControlButtons({
                         <X />
                       </Button>
                       <Input
-                        placeholder="Nickname..."
+                        placeholder="Name..."
                         value={newFavouriteName}
                         onChange={(e) => setNewFavouriteName(e.target.value)}
                         onKeyDown={(e) =>
                           e.key === 'Enter' && newFavouriteName.length && saveNewFavourite()
                         }
                         maxLength={MAX_FAVOURITE_LENGTH}
-                        className="h-7 text-xs"
+                        className="h-7"
                       />
                       <Button
                         variant="ghost"

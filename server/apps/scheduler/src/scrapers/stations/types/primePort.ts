@@ -31,7 +31,7 @@ export default async function scrapePrimePortData(stations: WithId<StationAttrs>
 
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const response = await ai.models.generateContent({
-      model: 'gemini-3.1-flash-lite-preview',
+      model: 'gemini-3.1-flash-lite',
       contents: [
         {
           inlineData: {
