@@ -41,6 +41,8 @@ import { ApiError } from '@/services/api-error';
 import { useAppStore } from '@/store';
 import { useIsMobile, useNearbyWebcams, useNearbyStations, useSite } from '@/hooks';
 
+const XCONTEST_FLIGHT_SEARCH_RADIUS = 1000;
+
 const isStandalone =
   typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
 
@@ -69,6 +71,8 @@ export default function Site() {
     if (error instanceof ApiError && error.status === 404) navigate('/', { replace: true });
   }, [error, navigate]);
 
+  const hasValidSiteCoordinates = site?.location?.coordinates?.length === 2;
+
   // Shared header content
   const headerContent = isLoading ? (
     <Skeleton className="h-7 w-48 mx-auto" />
@@ -76,10 +80,10 @@ export default function Site() {
     <div className="grid grid-cols-1">
       <span className="text-lg sm:text-xl font-semibold leading-tight">{site?.name}</span>
 
-      {site && (
+      {hasValidSiteCoordinates && (
         <div className="flex items-center gap-1 font-thin text-[10px] sm:text-xs">
           <a
-            className="text-blue-600"
+            className="text-blue-600 hover:underline"
             href={`https://www.google.com/maps/place/${site?.location.coordinates[1]},${site?.location.coordinates[0]}`}
             target="_blank"
           >
@@ -90,6 +94,10 @@ export default function Site() {
       )}
     </div>
   );
+
+  const siteRecentLaunchesLink = hasValidSiteCoordinates
+    ? `https://www.xcontest.org/world/en/flights-search/?list[sort]=time_start&filter[point]=${site?.location.coordinates[0]}%20${site?.location.coordinates[1]}&filter[radius]=${XCONTEST_FLIGHT_SEARCH_RADIUS}&filter[mode]=START`
+    : undefined;
 
   // Shared body content
   const bodyContent = (
@@ -223,6 +231,20 @@ export default function Site() {
                 ))}
               </CollapsibleContent>
             </Collapsible>
+          )}
+
+          {/* Description */}
+          {siteRecentLaunchesLink && (
+            <div className="my-4">
+              <a
+                className="cursor-pointer text-[14px] text-blue-600 hover:underline"
+                href={siteRecentLaunchesLink}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Recent flights from {site.name}
+              </a>
+            </div>
           )}
 
           {/* Disclaimer */}
