@@ -233,7 +233,7 @@ export default function Site() {
             </Collapsible>
           )}
 
-          {/* Description */}
+          {/* Recent launches from this site */}
           {siteRecentLaunchesLink && (
             <div className="my-4">
               <a
