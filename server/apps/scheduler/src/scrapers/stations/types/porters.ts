@@ -1,3 +1,4 @@
+import path from 'node:path';
 import fs from 'node:fs/promises';
 import sharp from 'sharp';
 import { createWorker, type Worker as TesseractWorker } from 'tesseract.js';
@@ -7,6 +8,8 @@ import { parse } from 'date-fns';
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 import { isTimestampFresh } from '@/lib/utils';
+
+const PUBLIC_DIR = process.env.PUBLIC_DIR ?? 'public';
 
 type PorterResult = {
   id: string;
@@ -82,7 +85,7 @@ export default async function scrapePortersData(stations: WithId<StationAttrs>[]
     const imgBuff = Buffer.from(response.data);
 
     // init OCR
-    const dir = 'public/temp/porters';
+    const dir = path.join(PUBLIC_DIR, 'temp', 'porters');
     await fs.mkdir(dir, { recursive: true });
 
     const worker = await createWorker('eng', 1, {

@@ -35,6 +35,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
+    "embla-carousel-react": "^8.6.0",
     "fuse.js": "^7.3.0",
     "lucide-react": "^1.14.0",
     "mapbox-gl": "^3.23.0",

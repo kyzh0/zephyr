@@ -1,3 +1,4 @@
+import path from 'node:path';
 import fs from 'node:fs/promises';
 import { formatInTimeZone } from 'date-fns-tz';
 import axios from 'axios';
@@ -11,6 +12,8 @@ import {
   WithId,
   StationAttrs
 } from '@zephyr/shared';
+
+const PUBLIC_DIR = process.env.PUBLIC_DIR ?? 'public';
 
 type StationJsonRow = {
   id: string;
@@ -87,18 +90,17 @@ export async function processStationJson(): Promise<void> {
 
     json.sort((a, b) => cmp(a.type, b.type) || cmp(a.name, b.name));
 
-    const dir = `public/data/${formatInTimeZone(date, 'UTC', 'yyyy/MM/dd')}`;
+    const dir = path.join(PUBLIC_DIR, 'data', formatInTimeZone(date, 'UTC', 'yyyy/MM/dd'));
     await fs.mkdir(dir, { recursive: true });
 
-    const filePath = `${dir}/zephyr-scrape-${date.getTime() / 1000}.json`;
+    const filePath = path.join(dir, `zephyr-scrape-${date.getTime() / 1000}.json`);
     await fs.writeFile(filePath, JSON.stringify(json));
 
     logger.info(`File created - ${filePath}`, { service: 'json' });
 
-    const prefix = process.env.FILE_SERVER_PREFIX ?? '';
     const output = new Output({
       time: date,
-      url: `${prefix}/${filePath.replace('public/', '')}`
+      url: `${process.env.FILE_SERVER_PREFIX}/${path.relative(PUBLIC_DIR, filePath)}`
     });
     await output.save();
   } catch (error) {
@@ -150,18 +152,17 @@ export async function processHighResolutionStationJson(): Promise<void> {
 
     json.sort((a, b) => cmp(a.type, b.type) || cmp(a.name, b.name));
 
-    const dir = `public/data/hr/${formatInTimeZone(date, 'UTC', 'yyyy/MM/dd')}`;
+    const dir = path.join(PUBLIC_DIR, 'data', 'hr', formatInTimeZone(date, 'UTC', 'yyyy/MM/dd'));
     await fs.mkdir(dir, { recursive: true });
 
-    const filePath = `${dir}/zephyr-scrape-${date.getTime() / 1000}.json`;
+    const filePath = path.join(dir, `zephyr-scrape-${date.getTime() / 1000}.json`);
     await fs.writeFile(filePath, JSON.stringify(json));
 
     logger.info(`File created - ${filePath}`, { service: 'json' });
 
-    const prefix = process.env.FILE_SERVER_PREFIX ?? '';
     const output = new Output({
       time: date,
-      url: `${prefix}/${filePath.replace('public/', '')}`,
+      url: `${process.env.FILE_SERVER_PREFIX}/${path.relative(PUBLIC_DIR, filePath)}`,
       isHighResolution: true
     });
     await output.save();

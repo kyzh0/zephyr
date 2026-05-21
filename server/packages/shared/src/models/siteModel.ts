@@ -1,6 +1,11 @@
 import mongoose, { type HydratedDocument, type Model } from 'mongoose';
 import type { GeoPoint } from '../types/mongoose';
 
+export type SiteImage = {
+  url: string;
+  caption: string;
+};
+
 export type SiteAttrs = {
   name: string;
   location: GeoPoint;
@@ -14,6 +19,7 @@ export type SiteAttrs = {
   siteGuideUrl?: string;
   hazards?: string;
   access?: string;
+  images?: SiteImage[];
 };
 
 export type SiteDoc = HydratedDocument<SiteAttrs>;
@@ -42,7 +48,16 @@ const siteSchema = new mongoose.Schema<SiteAttrs>(
     mandatoryNotices: { type: String },
     siteGuideUrl: { type: String },
     hazards: { type: String },
-    access: { type: String }
+    access: { type: String },
+    images: {
+      type: [
+        {
+          url: { type: String, required: true },
+          caption: { type: String, default: '' }
+        }
+      ],
+      default: []
+    }
   },
   {
     optimisticConcurrency: true

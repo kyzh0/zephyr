@@ -17,7 +17,10 @@ export {
   useSites,
   useAddSite,
   useUpdateSite,
-  useDeleteSite
+  useDeleteSite,
+  useUploadSiteImage,
+  useDeleteSiteImage,
+  useUpdateSiteImageCaption
 } from './useSites';
 export {
   stationKeys,

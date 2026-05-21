@@ -1,5 +1,10 @@
 import type { GeoPoint } from './location.model';
 
+export interface SiteImage {
+  url: string;
+  caption: string;
+}
+
 export interface Site {
   _id: string;
   __v: number;
@@ -20,6 +25,7 @@ export interface Site {
   siteGuideUrl: string;
   hazards: string;
   access: string;
+  images?: SiteImage[];
 }
 
 export interface CreateSiteDto {

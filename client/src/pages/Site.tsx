@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import SEO from '@/components/SEO';
+import { SiteImageCarousel } from '@/components/site/SiteImageCarousel';
 import { WebcamPreview } from '@/components/webcam/WebcamPreview';
 import { WindCompass } from '@/components/station';
 import { StationPreview } from '@/components/station/StationPreview';
@@ -170,6 +171,11 @@ export default function Site() {
               <h3 className="font-semibold text-sm mb-1">Access</h3>
               <p className="text-sm whitespace-pre-wrap">{site.access}</p>
             </div>
+          )}
+
+          {/* Photos */}
+          {site?.images && site.images.length > 0 && (
+            <SiteImageCarousel images={site.images} showArrows={!isMobile} />
           )}
 
           {/* Nearby Stations */}

@@ -1,7 +1,10 @@
+import path from 'node:path';
 import fs from 'node:fs/promises';
 import dir from 'node-dir';
 
 import { logger, Webcam, type WebcamAttrs, type WithId } from '@zephyr/shared';
+
+const PUBLIC_DIR = process.env.PUBLIC_DIR ?? 'public';
 
 export async function removeOldImages(): Promise<void> {
   try {
@@ -24,7 +27,7 @@ export async function removeOldImages(): Promise<void> {
     }
 
     await new Promise<void>((resolve, reject) => {
-      dir.files('public/webcams', async (error: unknown, files: string[]) => {
+      dir.files(path.join(PUBLIC_DIR, 'webcams'), async (error: unknown, files: string[]) => {
         if (error) {
           reject(error);
           return;

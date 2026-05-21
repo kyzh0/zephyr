@@ -1,7 +1,16 @@
 import { useMemo } from 'react';
 import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { addSite, deleteSite, getSiteById, listSites, updateSite } from '@/services/site.service';
+import {
+  addSite,
+  deleteSite,
+  deleteSiteImage,
+  getSiteById,
+  listSites,
+  updateSite,
+  updateSiteImageCaption,
+  uploadSiteImage
+} from '@/services/site.service';
 import { ApiError } from '@/services/api-error';
 import type { Site } from '@/models/site.model';
 import { getDistance } from '@/lib/utils';
@@ -123,5 +132,31 @@ export function useDeleteSite() {
       queryClient.invalidateQueries({ queryKey: siteKeys.all });
       queryClient.removeQueries({ queryKey: siteKeys.detail(id) });
     }
+  });
+}
+
+export function useUploadSiteImage(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ file, caption }: { file: File; caption: string }) =>
+      uploadSiteImage(id, file, caption),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: siteKeys.detail(id) })
+  });
+}
+
+export function useDeleteSiteImage(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (filename: string) => deleteSiteImage(id, filename),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: siteKeys.detail(id) })
+  });
+}
+
+export function useUpdateSiteImageCaption(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ filename, caption }: { filename: string; caption: string }) =>
+      updateSiteImageCaption(id, filename, caption),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: siteKeys.detail(id) })
   });
 }
