@@ -4,9 +4,12 @@ import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/reac
 import {
   addLanding,
   deleteLanding,
+  deleteLandingImage,
   getLandingById,
   listLandings,
-  updateLanding
+  updateLanding,
+  updateLandingImageCaption,
+  uploadLandingImage
 } from '@/services/landing.service';
 import { ApiError } from '@/services/api-error';
 import type { Landing } from '@/models/landing.model';
@@ -96,5 +99,31 @@ export function useDeleteLanding() {
       queryClient.invalidateQueries({ queryKey: landingKeys.all });
       queryClient.removeQueries({ queryKey: landingKeys.detail(id) });
     }
+  });
+}
+
+export function useUploadLandingImage(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ file, caption }: { file: File; caption: string }) =>
+      uploadLandingImage(id, file, caption),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: landingKeys.detail(id) })
+  });
+}
+
+export function useDeleteLandingImage(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (filename: string) => deleteLandingImage(id, filename),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: landingKeys.detail(id) })
+  });
+}
+
+export function useUpdateLandingImageCaption(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ filename, caption }: { filename: string; caption: string }) =>
+      updateLandingImageCaption(id, filename, caption),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: landingKeys.detail(id) })
   });
 }

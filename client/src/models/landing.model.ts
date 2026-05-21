@@ -1,5 +1,10 @@
 import type { GeoPoint } from './location.model';
 
+export interface LandingImage {
+  url: string;
+  caption: string;
+}
+
 export interface Landing {
   _id: string;
   __v: number;
@@ -13,4 +18,6 @@ export interface Landing {
   mandatoryNotices: string;
   hazards: string;
   siteGuideUrl: string;
+
+  images?: LandingImage[];
 }

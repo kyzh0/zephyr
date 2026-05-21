@@ -1,4 +1,4 @@
-import type { Landing } from '@/models/landing.model';
+import type { Landing, LandingImage } from '@/models/landing.model';
 import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
 export async function getLandingById(id: string): Promise<Landing> {
@@ -51,4 +51,45 @@ export async function deleteLanding(id: string): Promise<void> {
     }
   );
   await throwIfNotOk(res);
+}
+
+export async function uploadLandingImage(
+  id: string,
+  file: File,
+  caption: string
+): Promise<LandingImage[]> {
+  const body = new FormData();
+  body.append('file', file);
+  body.append('caption', caption);
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/landings/${id}/images?${getKeyQueryThrowIfInvalid()}`,
+    { method: 'POST', body }
+  );
+  await throwIfNotOk(res);
+  return (await res.json()) as LandingImage[];
+}
+
+export async function deleteLandingImage(id: string, filename: string): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/landings/${id}/images/${filename}?${getKeyQueryThrowIfInvalid()}`,
+    { method: 'DELETE' }
+  );
+  await throwIfNotOk(res);
+}
+
+export async function updateLandingImageCaption(
+  id: string,
+  filename: string,
+  caption: string
+): Promise<LandingImage[]> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/landings/${id}/images/${filename}?${getKeyQueryThrowIfInvalid()}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ caption })
+    }
+  );
+  await throwIfNotOk(res);
+  return (await res.json()) as LandingImage[];
 }

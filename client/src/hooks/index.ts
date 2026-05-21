@@ -44,7 +44,10 @@ export {
   useLandings,
   useAddLanding,
   useUpdateLanding,
-  useDeleteLanding
+  useDeleteLanding,
+  useUploadLandingImage,
+  useDeleteLandingImage,
+  useUpdateLandingImageCaption
 } from './useLandings';
 export {
   soundingKeys,

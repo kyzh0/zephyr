@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 import {
   Carousel,
@@ -19,10 +19,11 @@ interface Props {
   images: CarouselImage[];
   initialIndex?: number;
   maxHeight?: string;
+  contain?: boolean;
   showArrows?: boolean;
   showThumbnails?: boolean;
   showSlider?: boolean;
-  prefetch?: boolean;
+  instant?: boolean;
   alt?: string;
 }
 
@@ -30,14 +31,31 @@ export function ImageCarousel({
   images,
   initialIndex = 0,
   maxHeight = '60vh',
+  contain = false,
   showArrows = false,
   showThumbnails = false,
   showSlider = false,
-  prefetch = false,
+  instant = false,
   alt = 'Image'
 }: Props) {
   const [api, setApi] = useState<CarouselApi>();
   const [selectedIndex, setSelectedIndex] = useState(initialIndex);
+
+  // Set stable initial index
+  const carouselOpts = useMemo(
+    () => ({ startIndex: initialIndex, ...(instant && { duration: 0 }) }),
+    [initialIndex, instant]
+  );
+
+  // Only load src for slides near the current position; expand set as user scrubs
+  const [loadedSet, setLoadedSet] = useState<Set<number>>(() => {
+    const s = new Set<number>();
+    for (const offset of [-1, 0, 1]) {
+      const idx = initialIndex + offset;
+      if (idx >= 0 && idx < images.length) s.add(idx);
+    }
+    return s;
+  });
 
   useEffect(() => {
     if (!api) return;
@@ -48,17 +66,29 @@ export function ImageCarousel({
     };
   }, [api]);
 
+  // Handle initialIndex changes after mount (e.g. sounding async future-index)
+  const apiReadyRef = useRef(false);
   useEffect(() => {
     if (!api) return;
+    if (!apiReadyRef.current) {
+      apiReadyRef.current = true;
+      return;
+    }
     api.scrollTo(initialIndex, false);
   }, [api, initialIndex]);
 
+  // Expand loaded set as user navigates
   useEffect(() => {
-    if (!prefetch) return;
-    images.forEach((img) => {
-      new Image().src = img.url;
+    setLoadedSet((prev) => {
+      const toLoad = [-1, 0, 1]
+        .map((o) => selectedIndex + o)
+        .filter((i) => i >= 0 && i < images.length);
+      if (toLoad.every((i) => prev.has(i))) return prev;
+      const next = new Set(prev);
+      toLoad.forEach((i) => next.add(i));
+      return next;
     });
-  }, [prefetch, images]);
+  }, [selectedIndex, images.length]);
 
   if (!images.length) return null;
 
@@ -66,17 +96,28 @@ export function ImageCarousel({
 
   return (
     <div className="space-y-2">
-      <Carousel setApi={setApi} className="overflow-hidden rounded-md bg-muted">
+      <Carousel setApi={setApi} opts={carouselOpts} className="overflow-hidden rounded-md">
         <CarouselContent className="ml-0">
           {images.map((img, i) => (
-            <CarouselItem key={img.url} className="pl-0 flex items-center justify-center">
-              <img
-                src={img.url}
-                alt={img.label || `${alt} ${i + 1}`}
-                style={{ maxHeight }}
-                className="max-w-full w-auto h-auto"
-                draggable={false}
-              />
+            <CarouselItem key={img.url} className="pl-0">
+              {contain ? (
+                <div style={{ height: maxHeight }} className="w-full">
+                  <img
+                    src={loadedSet.has(i) ? img.url : undefined}
+                    alt={img.label || `${alt} ${i + 1}`}
+                    className="w-full h-full object-contain"
+                    draggable={false}
+                  />
+                </div>
+              ) : (
+                <img
+                  src={loadedSet.has(i) ? img.url : undefined}
+                  alt={img.label || `${alt} ${i + 1}`}
+                  style={{ maxHeight }}
+                  className="w-full h-auto"
+                  draggable={false}
+                />
+              )}
             </CarouselItem>
           ))}
         </CarouselContent>

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 
 import SEO from '@/components/SEO';
+import { ImageCarousel } from '@/components/ui/image-carousel';
 import {
   Dialog,
   DialogContent,
@@ -134,6 +135,21 @@ export default function Landing() {
             >
               <p className="text-sm whitespace-pre-wrap">{landing.description}</p>
             </div>
+          )}
+
+          {/* Photos */}
+          {landing.images && landing.images.length > 0 && (
+            <ImageCarousel
+              images={landing.images.map((img) => ({
+                url: `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${img.url}`,
+                label: img.caption || undefined
+              }))}
+              maxHeight="30vh"
+              contain
+              showArrows={!isMobile}
+              showThumbnails
+              alt="Landing photo"
+            />
           )}
 
           {/* Disclaimer */}

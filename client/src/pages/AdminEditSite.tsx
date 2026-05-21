@@ -597,7 +597,11 @@ function SitePhotos({ siteId, images }: { siteId: string; images: SiteImage[] })
           return (
             <div key={img.url} className="space-y-1">
               <div className="relative rounded-md overflow-hidden aspect-video bg-muted">
-                <img src={img.url} alt={img.caption} className="w-full h-full object-cover" />
+                <img
+                  src={`${import.meta.env.VITE_FILE_SERVER_PREFIX}/${img.url}`}
+                  alt={img.caption}
+                  className="w-full h-full object-cover"
+                />
                 <button
                   type="button"
                   onClick={() => handleDelete(filename)}

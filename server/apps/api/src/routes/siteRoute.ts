@@ -333,7 +333,7 @@ router.post(
       res.status(400).json({ error: 'No file provided' });
       return;
     }
-    const url = `${process.env.FILE_SERVER_PREFIX}/uploads/sites/${id}/${req.file.filename}`;
+    const url = `uploads/sites/${id}/${req.file.filename}`;
     const caption = req.body.caption ?? '';
 
     const site = await Site.findOne({ _id: new ObjectId(id) });
@@ -347,7 +347,16 @@ router.post(
       site.images = [];
     }
     site.images.push({ url, caption });
-    await site.save();
+    try {
+      await site.save();
+    } catch (err) {
+      if (err instanceof mongoose.Error.VersionError) {
+        await fs.unlink(req.file.path).catch(() => {});
+        res.sendStatus(409);
+        return;
+      }
+      throw err;
+    }
 
     res.json(site.images);
   }
@@ -383,7 +392,15 @@ router.delete(
     }
 
     site.images?.splice(index, 1);
-    await site.save();
+    try {
+      await site.save();
+    } catch (err) {
+      if (err instanceof mongoose.Error.VersionError) {
+        res.sendStatus(409);
+        return;
+      }
+      throw err;
+    }
 
     const filePath = path.join(PUBLIC_DIR, 'uploads', 'sites', id, filename);
     await fs.unlink(filePath).catch(() => {});
@@ -423,7 +440,15 @@ router.patch(
     }
 
     image.caption = caption ?? '';
-    await site.save();
+    try {
+      await site.save();
+    } catch (err) {
+      if (err instanceof mongoose.Error.VersionError) {
+        res.sendStatus(409);
+        return;
+      }
+      throw err;
+    }
 
     res.json(site.images);
   }

@@ -142,21 +142,34 @@ export default function Site() {
           )}
 
           {/* Landing */}
-          {site.landings?.map((l) => (
-            <Item key={l.landingId} variant="outline" size="sm" asChild className="py-2">
-              <a className="cursor-pointer" onClick={() => navigate(`/landings/${l.landingId}`)}>
-                <ItemMedia>
-                  <PlaneLanding className="h-4 w-4" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>{l.landingName}</ItemTitle>
-                </ItemContent>
-                <ItemActions>
-                  <ChevronRightIcon className="size-4" />
-                </ItemActions>
-              </a>
-            </Item>
-          ))}
+          {site.landings && site.landings.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {site.landings.map((l) => (
+                <Item
+                  key={l.landingId}
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="py-2 flex-1 basis-1/3 sm:basis-1/4 min-w-0"
+                >
+                  <a
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/landings/${l.landingId}`)}
+                  >
+                    <ItemMedia>
+                      <PlaneLanding className="h-4 w-4" />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{l.landingName}</ItemTitle>
+                    </ItemContent>
+                    <ItemActions>
+                      <ChevronRightIcon className="size-4" />
+                    </ItemActions>
+                  </a>
+                </Item>
+              ))}
+            </div>
+          )}
 
           {/* Description */}
           {site.description && (
@@ -176,7 +189,12 @@ export default function Site() {
           {/* Photos */}
           {site?.images && site.images.length > 0 && (
             <ImageCarousel
-              images={site.images}
+              images={site.images.map((img) => ({
+                url: `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${img.url}`,
+                label: img.caption || undefined
+              }))}
+              maxHeight="30vh"
+              contain
               showArrows={!isMobile}
               showThumbnails
               alt="Site photo"

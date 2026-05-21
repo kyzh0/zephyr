@@ -14,12 +14,13 @@ import { ImageCarousel } from '@/components/ui/image-carousel';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { getWebcamTypeName } from '@/lib/utils';
-import { useWebcamWithImages } from '@/hooks';
+import { useWebcamWithImages, useIsMobile } from '@/hooks';
 import { ApiError } from '@/services/api-error';
 
 export default function Webcam() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { webcam, images, isStale, error } = useWebcamWithImages(id);
 
   // Navigate back if webcam not found
@@ -37,7 +38,7 @@ export default function Webcam() {
         />
       )}
       <DialogContent
-        className="sm:max-w-6xl w-[95vw] max-h-[90vh] p-4 sm:p-6 focus:outline-none"
+        className={`${isMobile ? 'max-w-[95vw] lg:max-w-2xl md:max-w-md' : 'max-w-6xl'} max-h-[95vh] p-4 sm:p-6 focus:outline-none`}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -47,7 +48,7 @@ export default function Webcam() {
           <DialogDescription className="sr-only">Webcam images and current view.</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center gap-1.5 sm:gap-2">
+        <div className="flex flex-col items-center">
           {!webcam ? (
             <Skeleton className="w-full aspect-video" />
           ) : isStale ? (
@@ -59,9 +60,10 @@ export default function Webcam() {
                 label: formatInTimeZone(new Date(img.time), 'Pacific/Auckland', 'dd MMM HH:mm')
               }))}
               initialIndex={images.length - 1}
-              maxHeight="60vh"
+              maxHeight={isMobile ? '60vh' : '90vh'}
+              showArrows={!isMobile}
               showSlider
-              prefetch
+              instant
               alt={webcam.name}
             />
           ) : (

@@ -1,6 +1,11 @@
 import mongoose, { type HydratedDocument, type Model } from 'mongoose';
 import type { GeoPoint } from '../types/mongoose';
 
+export type LandingImage = {
+  url: string;
+  caption: string;
+};
+
 export type LandingAttrs = {
   name: string;
   location: GeoPoint;
@@ -11,6 +16,7 @@ export type LandingAttrs = {
   mandatoryNotices?: string;
   hazards?: string;
   siteGuideUrl?: string;
+  images?: LandingImage[];
 };
 
 export type LandingDoc = HydratedDocument<LandingAttrs>;
@@ -31,7 +37,11 @@ const landingSchema = new mongoose.Schema<LandingAttrs>(
     description: { type: String },
     mandatoryNotices: { type: String },
     hazards: { type: String },
-    siteGuideUrl: { type: String }
+    siteGuideUrl: { type: String },
+    images: {
+      type: [{ url: { type: String, required: true }, caption: { type: String, default: '' } }],
+      default: []
+    }
   },
   {
     optimisticConcurrency: true

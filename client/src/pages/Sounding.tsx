@@ -14,12 +14,13 @@ import { ImageCarousel } from '@/components/ui/image-carousel';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { ApiError } from '@/services/api-error';
-import { useSounding } from '@/hooks';
+import { useSounding, useIsMobile } from '@/hooks';
 
 export default function Sounding() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { sounding, error } = useSounding(id);
+  const isMobile = useIsMobile();
 
   // Navigate back if sounding not found
   useEffect(() => {
@@ -62,7 +63,7 @@ export default function Sounding() {
         />
       )}
       <DialogContent
-        className="max-w-3xl p-4 sm:p-6 focus:outline-none"
+        className="max-w-3xl lg:max-w-5xl p-4 sm:p-6 focus:outline-none"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -84,9 +85,10 @@ export default function Sounding() {
                 label: formatInTimeZone(new Date(img.time), 'Pacific/Auckland', 'dd MMM HH:mm')
               }))}
               initialIndex={initialIndex}
-              maxHeight="65vh"
+              maxHeight={isMobile ? '65vh' : '80vh'}
+              showArrows={!isMobile}
               showSlider
-              prefetch
+              instant
               alt={sounding.name}
             />
           )}
