@@ -343,7 +343,9 @@ router.post(
       return;
     }
 
-    if (!site.images) site.images = [];
+    if (!site.images) {
+      site.images = [];
+    }
     site.images.push({ url, caption });
     await site.save();
 

@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 import SEO from '@/components/SEO';
-import { SiteImageCarousel } from '@/components/site/SiteImageCarousel';
+import { ImageCarousel } from '@/components/ui/image-carousel';
 import { WebcamPreview } from '@/components/webcam/WebcamPreview';
 import { WindCompass } from '@/components/station';
 import { StationPreview } from '@/components/station/StationPreview';
@@ -175,7 +175,12 @@ export default function Site() {
 
           {/* Photos */}
           {site?.images && site.images.length > 0 && (
-            <SiteImageCarousel images={site.images} showArrows={!isMobile} />
+            <ImageCarousel
+              images={site.images}
+              showArrows={!isMobile}
+              showThumbnails
+              alt="Site photo"
+            />
           )}
 
           {/* Nearby Stations */}
