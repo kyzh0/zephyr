@@ -17,7 +17,9 @@ import {
   HeartPlus,
   X,
   Check,
-  Trash2
+  Trash2,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -65,7 +67,9 @@ export function MapControlButtons({
   onHistoryChange,
   onSiteDirectionFilterChange,
   onSearchSelect,
-  onFavouriteSelect
+  onFavouriteSelect,
+  onZoomIn,
+  onZoomOut
 }: MapControlHandlers) {
   const overlay = useMapStore((s) => s.overlay);
   const unit = useMapStore((s) => s.unit);
@@ -606,6 +610,28 @@ export function MapControlButtons({
           onHistoryChange={onHistoryChange}
           disabled={viewMode === MAP_VIEW_MODES.SITES}
         />
+      )}
+
+      {/* Bottom left - Zoom controls (flying mode only) */}
+      {isFlyingMode && (
+        <div className="absolute bottom-2.5 left-2.5 z-50 flex flex-col gap-1.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onZoomIn}
+            className={`${btnClass} bg-background`}
+          >
+            <ZoomIn className={`${iconClass} opacity-70`} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onZoomOut}
+            className={`${btnClass} bg-background`}
+          >
+            <ZoomOut className={`${iconClass} opacity-70`} />
+          </Button>
+        </div>
       )}
 
       {/* Bottom left - Recent Stations & Favourites (hidden in flying & history mode) */}

@@ -6,6 +6,11 @@ export type SiteImage = {
   caption: string;
 };
 
+export type SiteLink = {
+  link: string;
+  description: string;
+};
+
 export type SiteAttrs = {
   name: string;
   location: GeoPoint;
@@ -20,6 +25,7 @@ export type SiteAttrs = {
   hazards?: string;
   access?: string;
   images?: SiteImage[];
+  otherLinks?: SiteLink[];
 };
 
 export type SiteDoc = HydratedDocument<SiteAttrs>;
@@ -54,6 +60,15 @@ const siteSchema = new mongoose.Schema<SiteAttrs>(
         {
           url: { type: String, required: true },
           caption: { type: String, default: '' }
+        }
+      ],
+      default: []
+    },
+    otherLinks: {
+      type: [
+        {
+          link: { type: String, required: true },
+          description: { type: String, required: true }
         }
       ],
       default: []

@@ -115,7 +115,8 @@ router.post(
       mandatoryNotices,
       siteGuideUrl,
       hazards,
-      access
+      access,
+      otherLinks
     } = req.body;
 
     if (!name) {
@@ -156,7 +157,8 @@ router.post(
       mandatoryNotices,
       siteGuideUrl,
       hazards,
-      access
+      access,
+      otherLinks
     });
 
     try {
@@ -223,7 +225,8 @@ router.put(
       mandatoryNotices,
       siteGuideUrl,
       hazards,
-      access
+      access,
+      otherLinks
     } = req.body;
 
     if (!ObjectId.isValid(id)) {
@@ -287,6 +290,7 @@ router.put(
     site.siteGuideUrl = siteGuideUrl;
     site.hazards = hazards;
     site.access = access;
+    site.otherLinks = otherLinks;
 
     try {
       await site.save();

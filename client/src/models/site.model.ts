@@ -5,6 +5,11 @@ export interface SiteImage {
   caption: string;
 }
 
+export interface SiteLink {
+  link: string;
+  description: string;
+}
+
 export interface Site {
   _id: string;
   __v: number;
@@ -26,6 +31,7 @@ export interface Site {
   hazards: string;
   access: string;
   images?: SiteImage[];
+  otherLinks?: SiteLink[];
 }
 
 export interface CreateSiteDto {
@@ -41,6 +47,7 @@ export interface CreateSiteDto {
   siteGuideUrl?: string;
   hazards?: string;
   access?: string;
+  otherLinks?: { link: string; description: string }[];
 }
 
 export interface UpdateSiteDto {
@@ -59,4 +66,5 @@ export interface UpdateSiteDto {
   siteGuideUrl?: string;
   hazards?: string;
   access?: string;
+  otherLinks?: { link: string; description: string }[];
 }

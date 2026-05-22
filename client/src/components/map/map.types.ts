@@ -89,6 +89,8 @@ export interface MapControlHandlers {
   onSiteDirectionFilterChange: (bearing: number | null) => void;
   onSearchSelect: (result: SearchResult) => void;
   onFavouriteSelect: (favourite: Favourite) => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
 }
 
 export const ELEVATION_FILTER_MIN = 0;
