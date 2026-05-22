@@ -73,6 +73,9 @@ importers:
       multer:
         specifier: ^2.1.1
         version: 2.1.1
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
       xlsx:
         specifier: ^0.18.5
         version: 0.18.5
