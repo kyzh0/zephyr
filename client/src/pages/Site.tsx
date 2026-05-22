@@ -52,6 +52,7 @@ export default function Site() {
   const flyingMode = useAppStore((s) => s.flyingMode);
   const [webcamsOpen, setWebcamsOpen] = useState(false);
   const [stationsOpen, setStationsOpen] = useState(false);
+  const [linksOpen, setLinksOpen] = useState(false);
 
   const { site, isLoading, error } = useSite(id);
 
@@ -198,6 +199,38 @@ export default function Site() {
               showThumbnails
               alt="Site photo"
             />
+          )}
+
+          {/* Other Links */}
+          {site.otherLinks && site.otherLinks.length > 0 && (
+            <Collapsible open={linksOpen} onOpenChange={setLinksOpen}>
+              <CollapsibleTrigger
+                className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
+                  linksOpen ? 'bg-transparent' : 'bg-muted'
+                }`}
+              >
+                <span>Other Links ({site.otherLinks.length})</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${linksOpen ? 'rotate-180' : ''}`}
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {site.otherLinks.map((link) => (
+                    <a
+                      key={link.link}
+                      href={link.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted transition-colors min-w-0"
+                    >
+                      <ExternalLink className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{link.description}</span>
+                    </a>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           )}
 
           {/* Nearby Stations */}
