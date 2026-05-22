@@ -34,16 +34,19 @@ export default function Sounding() {
     );
   }, [sounding]);
 
-  const [initialIndex, setInitialIndex] = useState(0);
-
+  // Computed once when images first arrives. Null until known so we defer
+  // mounting the carousel — the carousel captures initialIndex at mount and
+  // ignores subsequent changes, which is what preserves user position when
+  // TanStack Query refetches and appends new images.
+  const [initialIndex, setInitialIndex] = useState<number | null>(null);
   useEffect(() => {
-    if (!images.length) return;
+    if (initialIndex !== null || !images.length) return;
     const future = images.findIndex(
       (img) => new Date(img.time).getTime() > Date.now() - 1800000 // 30 min
     );
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setInitialIndex(future >= 0 ? future : images.length - 1);
-  }, [images]);
+  }, [images, initialIndex]);
 
   const raspLink = sounding
     ? `http://rasp.nz/rasp/view.php?region=${sounding.raspRegion}&mod=%2B0&date=${formatInTimeZone(
@@ -63,7 +66,7 @@ export default function Sounding() {
         />
       )}
       <DialogContent
-        className={`${isMobile ? 'max-w-[95vw] sm:max-w-lg' : 'max-w-3xl'} max-h-[95vh] landscape:h-[95vh] overflow-hidden flex flex-col p-2 sm:p-6 focus:outline-none`}
+        className="portrait:w-[95vw] landscape:w-fit max-w-[95vw] max-h-[95vh] p-4 sm:p-6 gap-2 flex flex-col focus:outline-none"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -73,26 +76,25 @@ export default function Sounding() {
           <DialogDescription className="sr-only">Atmospheric sounding charts.</DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 min-h-0 overflow-hidden">
-          {!sounding ? (
-            <Skeleton className="w-full aspect-3/4" />
-          ) : !images.length ? (
-            <p className="text-destructive">Error retrieving today's soundings.</p>
-          ) : (
-            <ImageCarousel
-              images={images.map((img) => ({
-                url: `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${img.url}`,
-                label: formatInTimeZone(new Date(img.time), 'Pacific/Auckland', 'dd MMM HH:mm')
-              }))}
-              initialIndex={initialIndex}
-              center
-              showArrows={!isMobile}
-              showSlider
-              hideAnimation
-              alt={sounding.name}
-            />
-          )}
-        </div>
+        {!sounding ? (
+          <Skeleton className="landscape:h-[75vh] portrait:w-[80vw] aspect-3/4" />
+        ) : !images.length ? (
+          <p className="text-destructive">Error retrieving today's soundings.</p>
+        ) : initialIndex === null ? (
+          <Skeleton className="landscape:h-[75vh] portrait:w-[80vw] aspect-3/4" />
+        ) : (
+          <ImageCarousel
+            images={images.map((img) => ({
+              url: `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${img.url}`,
+              label: formatInTimeZone(new Date(img.time), 'Pacific/Auckland', 'dd MMM HH:mm')
+            }))}
+            initialIndex={initialIndex}
+            fit="intrinsic"
+            showArrows={!isMobile}
+            showSlider
+            alt={sounding.name}
+          />
+        )}
 
         {sounding && (
           <div className="flex items-center justify-end">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 
 import {
   Carousel,
@@ -9,8 +9,9 @@ import {
   type CarouselApi
 } from '@/components/ui/carousel';
 import { Slider } from '@/components/ui/slider';
+import { useIsPortrait } from '@/hooks';
 
-export interface CarouselImage {
+interface CarouselImage {
   url: string;
   label?: string;
 }
@@ -18,47 +19,91 @@ export interface CarouselImage {
 interface Props {
   images: CarouselImage[];
   initialIndex?: number;
-  maxHeight?: string;
-  contain?: boolean;
-  center?: boolean;
+  fit: 'contain' | 'intrinsic';
   showArrows?: boolean;
-  showThumbnails?: boolean;
   showSlider?: boolean;
-  hideAnimation?: boolean;
+  showThumbnails?: boolean;
   alt?: string;
+}
+
+/** Contain-mode carousel box height — full-width box, image object-contained. Tweak freely. */
+const CONTAIN_HEIGHT_LANDSCAPE = '20vh';
+const CONTAIN_HEIGHT_PORTRAIT = '30vh';
+
+/** Reserved vertical space (px) inside an intrinsic-mode dialog for header, padding, caption, slider, gaps. */
+const INTRINSIC_FOOTER_PX = 160;
+
+/** Number of images to keep loaded on each side of the current index. */
+const LAZY_WINDOW = 2;
+
+function windowAround(center: number, length: number): number[] {
+  const out: number[] = [];
+  for (let o = -LAZY_WINDOW; o <= LAZY_WINDOW; o++) {
+    const i = center + o;
+    if (i >= 0 && i < length) out.push(i);
+  }
+  return out;
 }
 
 export function ImageCarousel({
   images,
   initialIndex = 0,
-  maxHeight = '60vh',
-  contain = false,
-  center = false,
+  fit,
   showArrows = false,
-  showThumbnails = false,
   showSlider = false,
-  hideAnimation = false,
+  showThumbnails = false,
   alt = 'Image'
 }: Props) {
   const [api, setApi] = useState<CarouselApi>();
-  const [selectedIndex, setSelectedIndex] = useState(initialIndex);
+  // initialIndex is captured at mount and never re-applied. This preserves the
+  // user's current position when the parent updates `images` (e.g. TanStack
+  // Query refetches and appends new images).
+  const [mountIndex] = useState(initialIndex);
+  const [selectedIndex, setSelectedIndex] = useState(mountIndex);
+  const isPortrait = useIsPortrait();
 
-  // Set stable initial index
-  const carouselOpts = useMemo(
-    () => ({ startIndex: initialIndex, ...(hideAnimation && { duration: 0 }) }),
-    [initialIndex, hideAnimation]
+  // Intrinsic mode: measure AR of the first image off-DOM. All images in an
+  // intrinsic carousel are assumed to share the same AR (webcams, soundings).
+  const firstUrl = images[0]?.url;
+  const [measuredAR, setMeasuredAR] = useState<number | null>(null);
+  useEffect(() => {
+    if (fit !== 'intrinsic' || !firstUrl) return;
+    setMeasuredAR(null);
+    const img = new Image();
+    img.src = firstUrl;
+    const onLoad = () => {
+      if (img.naturalWidth && img.naturalHeight) {
+        setMeasuredAR(img.naturalWidth / img.naturalHeight);
+      }
+    };
+    img.addEventListener('load', onLoad);
+    return () => img.removeEventListener('load', onLoad);
+  }, [fit, firstUrl]);
+
+  // Lazy-load window: only set src on images near the current index. Loaded
+  // indices remain loaded so the browser keeps decoded bitmaps around.
+  const [loadedSet, setLoadedSet] = useState<Set<number>>(
+    () => new Set(windowAround(mountIndex, images.length))
   );
+  useEffect(() => {
+    setLoadedSet((prev) => {
+      const toAdd = windowAround(selectedIndex, images.length);
+      if (toAdd.every((i) => prev.has(i))) return prev;
+      const next = new Set(prev);
+      toAdd.forEach((i) => next.add(i));
+      return next;
+    });
+  }, [selectedIndex, images.length]);
 
-  // Only load src for slides near the current position; expand set as user scrubs
-  const [loadedSet, setLoadedSet] = useState<Set<number>>(() => {
-    const s = new Set<number>();
-    for (const offset of [-1, 0, 1]) {
-      const idx = initialIndex + offset;
-      if (idx >= 0 && idx < images.length) s.add(idx);
-    }
-    return s;
-  });
+  // Embla options. Intrinsic mode runs without slide animation per spec.
+  // Frozen at mount: passing a new opts object would not re-init embla anyway,
+  // and we explicitly don't want startIndex to change after mount.
+  const [carouselOpts] = useState(() => ({
+    startIndex: mountIndex,
+    ...(fit === 'intrinsic' && { duration: 0 })
+  }));
 
+  // Sync embla -> selectedIndex
   useEffect(() => {
     if (!api) return;
     const onSelect = () => setSelectedIndex(api.selectedScrollSnap());
@@ -68,92 +113,21 @@ export function ImageCarousel({
     };
   }, [api]);
 
-  // Sync slider/label position when initialIndex changes programmatically
-  useEffect(() => {
-    setSelectedIndex(initialIndex);
-  }, [initialIndex]);
-
-  // Scroll carousel when initialIndex changes after mount
-  const apiReadyRef = useRef(false);
-  useEffect(() => {
-    if (!api) return;
-    if (!apiReadyRef.current) {
-      apiReadyRef.current = true;
-      return;
-    }
-    api.scrollTo(initialIndex, false);
-  }, [api, initialIndex]);
-
-  // Expand loaded set as user navigates
-  useEffect(() => {
-    setLoadedSet((prev) => {
-      const toLoad = [-1, 0, 1]
-        .map((o) => selectedIndex + o)
-        .filter((i) => i >= 0 && i < images.length);
-      if (toLoad.every((i) => prev.has(i))) return prev;
-      const next = new Set(prev);
-      toLoad.forEach((i) => next.add(i));
-      return next;
-    });
-  }, [selectedIndex, images.length]);
-
   if (!images.length) return null;
 
   const current = images[selectedIndex];
 
-  return (
-    <div className={`space-y-2${center ? ' flex flex-col h-full' : ' w-full'}`}>
-      <Carousel
-        setApi={setApi}
-        opts={carouselOpts}
-        className={`overflow-hidden rounded-md${center ? ' flex-1 min-h-0' : ''}`}
-      >
-        <CarouselContent className="ml-0">
-          {images.map((img, i) => (
-            <CarouselItem key={img.url} className="pl-0">
-              {contain ? (
-                <div style={{ height: maxHeight }} className="w-full">
-                  <img
-                    src={loadedSet.has(i) ? img.url : undefined}
-                    alt={img.label || `${alt} ${i + 1}`}
-                    className="w-full h-full object-contain"
-                    draggable={false}
-                  />
-                </div>
-              ) : center ? (
-                <img
-                  src={loadedSet.has(i) ? img.url : undefined}
-                  alt={img.label || `${alt} ${i + 1}`}
-                  className="portrait:w-full portrait:h-auto landscape:h-full landscape:w-auto max-w-full block mx-auto"
-                  draggable={false}
-                />
-              ) : (
-                <img
-                  src={loadedSet.has(i) ? img.url : undefined}
-                  alt={img.label || `${alt} ${i + 1}`}
-                  style={{ maxHeight }}
-                  className="w-full h-auto"
-                  draggable={false}
-                />
-              )}
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-
-        {showArrows && (
-          <>
-            <CarouselPrevious className="left-2 border-0 bg-black/40 text-white hover:bg-black/60" />
-            <CarouselNext className="right-2 border-0 bg-black/40 text-white hover:bg-black/60" />
-          </>
-        )}
-      </Carousel>
-
+  // Caption + slider footer, shared between modes
+  const captionAndSlider = (
+    <>
       {current?.label && !showSlider && (
         <p className="text-xs text-muted-foreground text-center px-2">{current.label}</p>
       )}
-
       {showSlider && images.length > 1 && (
-        <div className="space-y-1 px-2 mt-4">
+        <div className="space-y-1 px-2">
+          {current?.label && (
+            <p className="text-xs text-muted-foreground text-center">{current.label}</p>
+          )}
           <Slider
             min={0}
             max={images.length - 1}
@@ -165,33 +139,116 @@ export function ImageCarousel({
               api?.scrollTo(i, false);
             }}
           />
-          {current?.label && (
-            <p className="text-xs text-muted-foreground text-center">{current.label}</p>
-          )}
         </div>
       )}
+    </>
+  );
 
-      {showThumbnails && images.length > 1 && (
-        <div className="flex gap-1.5 overflow-x-auto pb-1 justify-center">
+  // ─── Contain mode ─────────────────────────────────────────────────────────
+  // Fixed-height box, full parent width. Images preserve their natural AR
+  // inside via object-contain (letterboxes when needed).
+  if (fit === 'contain') {
+    const containHeight = isPortrait ? CONTAIN_HEIGHT_PORTRAIT : CONTAIN_HEIGHT_LANDSCAPE;
+    return (
+      <div className="w-full flex flex-col gap-2">
+        <Carousel setApi={setApi} opts={carouselOpts} className="w-full overflow-hidden rounded-md">
+          <CarouselContent className="ml-0">
+            {images.map((img, i) => (
+              <CarouselItem key={img.url} className="pl-0">
+                <div className="w-full" style={{ height: containHeight }}>
+                  <img
+                    src={loadedSet.has(i) ? img.url : undefined}
+                    alt={img.label || `${alt} ${i + 1}`}
+                    className="w-full h-full object-contain"
+                    draggable={false}
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          {showArrows && (
+            <>
+              <CarouselPrevious className="left-2 border-0 bg-black/40 text-white hover:bg-black/60" />
+              <CarouselNext className="right-2 border-0 bg-black/40 text-white hover:bg-black/60" />
+            </>
+          )}
+        </Carousel>
+
+        {captionAndSlider}
+
+        {showThumbnails && images.length > 1 && (
+          <div className="flex gap-1.5 overflow-x-auto pb-1 justify-center">
+            {images.map((img, i) => (
+              <button
+                key={img.url}
+                type="button"
+                onClick={() => api?.scrollTo(i)}
+                className={`shrink-0 w-10 h-10 rounded overflow-hidden border-2 transition-colors ${
+                  i === selectedIndex ? 'border-primary' : 'border-transparent'
+                }`}
+              >
+                <img
+                  src={img.url}
+                  alt={img.label || `Thumbnail ${i + 1}`}
+                  className="w-full h-full object-cover"
+                  draggable={false}
+                />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ─── Intrinsic mode ───────────────────────────────────────────────────────
+  // Dialog wraps the image's natural AR. Don't render until AR is known so the
+  // dialog pops to its final size in one step.
+  if (measuredAR === null) return null;
+
+  // Landscape viewport: height locked at (95vh - footer), width follows AR.
+  // Portrait viewport: fill the parent dialog's content width; aspect-ratio
+  // derives the height. The parent dialog supplies the 95vw outer cap, which
+  // — minus its own padding — becomes our `100%`.
+  const dims: CSSProperties = isPortrait
+    ? { width: '100%', aspectRatio: measuredAR }
+    : {
+        width: `calc((95vh - ${INTRINSIC_FOOTER_PX}px) * ${measuredAR})`,
+        height: `calc(95vh - ${INTRINSIC_FOOTER_PX}px)`
+      };
+
+  return (
+    <div
+      className="flex flex-col gap-2"
+      style={isPortrait ? { width: '100%' } : { width: dims.width }}
+    >
+      <Carousel
+        setApi={setApi}
+        opts={carouselOpts}
+        className="overflow-hidden rounded-md"
+        style={dims}
+      >
+        <CarouselContent className="ml-0 h-full">
           {images.map((img, i) => (
-            <button
-              key={img.url}
-              type="button"
-              onClick={() => api?.scrollTo(i)}
-              className={`shrink-0 w-10 h-10 rounded overflow-hidden border-2 transition-colors ${
-                i === selectedIndex ? 'border-primary' : 'border-transparent'
-              }`}
-            >
+            <CarouselItem key={img.url} className="pl-0 h-full">
               <img
-                src={img.url}
-                alt={img.label || `Thumbnail ${i + 1}`}
-                className="w-full h-full object-cover"
+                src={loadedSet.has(i) ? img.url : undefined}
+                alt={img.label || `${alt} ${i + 1}`}
+                className="w-full h-full object-contain block"
                 draggable={false}
               />
-            </button>
+            </CarouselItem>
           ))}
-        </div>
-      )}
+        </CarouselContent>
+        {showArrows && (
+          <>
+            <CarouselPrevious className="left-2 border-0 bg-black/40 text-white hover:bg-black/60" />
+            <CarouselNext className="right-2 border-0 bg-black/40 text-white hover:bg-black/60" />
+          </>
+        )}
+      </Carousel>
+
+      {captionAndSlider}
     </div>
   );
 }

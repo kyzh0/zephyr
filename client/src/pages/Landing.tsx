@@ -144,8 +144,7 @@ export default function Landing() {
                 url: `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${img.url}`,
                 label: img.caption || undefined
               }))}
-              maxHeight="30vh"
-              contain
+              fit="contain"
               showArrows={!isMobile}
               showThumbnails
               alt="Landing photo"

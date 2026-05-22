@@ -38,7 +38,7 @@ export default function Webcam() {
         />
       )}
       <DialogContent
-        className={`${isMobile ? 'max-w-[95vw] lg:max-w-2xl md:max-w-md' : 'max-w-6xl'} max-h-[95vh] p-4 sm:p-6 focus:outline-none`}
+        className="portrait:w-[95vw] landscape:w-fit max-w-[95vw] max-h-[95vh] p-4 sm:p-6 gap-2 flex flex-col focus:outline-none"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -48,28 +48,25 @@ export default function Webcam() {
           <DialogDescription className="sr-only">Webcam images and current view.</DialogDescription>
         </DialogHeader>
 
-        <div className="overflow-hidden">
-          {!webcam ? (
-            <Skeleton className="w-full aspect-video" />
-          ) : isStale ? (
-            <p className="text-destructive">No images in the last 24h.</p>
-          ) : images.length ? (
-            <ImageCarousel
-              images={images.map((img) => ({
-                url: `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${img.url}`,
-                label: formatInTimeZone(new Date(img.time), 'Pacific/Auckland', 'dd MMM HH:mm')
-              }))}
-              initialIndex={images.length - 1}
-              maxHeight={isMobile ? '60vh' : '90vh'}
-              showArrows={!isMobile}
-              showSlider
-              hideAnimation
-              alt={webcam.name}
-            />
-          ) : (
-            <Skeleton className="w-full aspect-video" />
-          )}
-        </div>
+        {!webcam ? (
+          <Skeleton className="landscape:h-[75vh] portrait:w-[90vw] aspect-video" />
+        ) : isStale ? (
+          <p className="text-destructive">No images in the last 24h.</p>
+        ) : images.length ? (
+          <ImageCarousel
+            images={images.map((img) => ({
+              url: `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${img.url}`,
+              label: formatInTimeZone(new Date(img.time), 'Pacific/Auckland', 'dd MMM HH:mm')
+            }))}
+            initialIndex={images.length - 1}
+            fit="intrinsic"
+            showArrows={!isMobile}
+            showSlider
+            alt={webcam.name}
+          />
+        ) : (
+          <Skeleton className="landscape:h-[75vh] portrait:w-[90vw] aspect-video" />
+        )}
 
         {webcam && webcam.type !== 'metservice' && (
           <div className="flex items-center justify-end">
