@@ -63,7 +63,7 @@ export default function Sounding() {
         />
       )}
       <DialogContent
-        className="max-w-3xl lg:max-w-5xl p-4 sm:p-6 focus:outline-none"
+        className={`${isMobile ? 'max-w-[95vw] sm:max-w-lg' : 'max-w-3xl'} max-h-[95vh] landscape:h-[95vh] overflow-hidden flex flex-col p-2 sm:p-6 focus:outline-none`}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -73,7 +73,7 @@ export default function Sounding() {
           <DialogDescription className="sr-only">Atmospheric sounding charts.</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center gap-1.5 sm:gap-2">
+        <div className="flex-1 min-h-0 overflow-hidden">
           {!sounding ? (
             <Skeleton className="w-full aspect-3/4" />
           ) : !images.length ? (
@@ -85,10 +85,10 @@ export default function Sounding() {
                 label: formatInTimeZone(new Date(img.time), 'Pacific/Auckland', 'dd MMM HH:mm')
               }))}
               initialIndex={initialIndex}
-              maxHeight={isMobile ? '65vh' : '80vh'}
+              center
               showArrows={!isMobile}
               showSlider
-              instant
+              hideAnimation
               alt={sounding.name}
             />
           )}

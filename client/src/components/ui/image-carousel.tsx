@@ -20,10 +20,11 @@ interface Props {
   initialIndex?: number;
   maxHeight?: string;
   contain?: boolean;
+  center?: boolean;
   showArrows?: boolean;
   showThumbnails?: boolean;
   showSlider?: boolean;
-  instant?: boolean;
+  hideAnimation?: boolean;
   alt?: string;
 }
 
@@ -32,10 +33,11 @@ export function ImageCarousel({
   initialIndex = 0,
   maxHeight = '60vh',
   contain = false,
+  center = false,
   showArrows = false,
   showThumbnails = false,
   showSlider = false,
-  instant = false,
+  hideAnimation = false,
   alt = 'Image'
 }: Props) {
   const [api, setApi] = useState<CarouselApi>();
@@ -43,8 +45,8 @@ export function ImageCarousel({
 
   // Set stable initial index
   const carouselOpts = useMemo(
-    () => ({ startIndex: initialIndex, ...(instant && { duration: 0 }) }),
-    [initialIndex, instant]
+    () => ({ startIndex: initialIndex, ...(hideAnimation && { duration: 0 }) }),
+    [initialIndex, hideAnimation]
   );
 
   // Only load src for slides near the current position; expand set as user scrubs
@@ -66,7 +68,12 @@ export function ImageCarousel({
     };
   }, [api]);
 
-  // Handle initialIndex changes after mount (e.g. sounding async future-index)
+  // Sync slider/label position when initialIndex changes programmatically
+  useEffect(() => {
+    setSelectedIndex(initialIndex);
+  }, [initialIndex]);
+
+  // Scroll carousel when initialIndex changes after mount
   const apiReadyRef = useRef(false);
   useEffect(() => {
     if (!api) return;
@@ -95,8 +102,12 @@ export function ImageCarousel({
   const current = images[selectedIndex];
 
   return (
-    <div className="space-y-2">
-      <Carousel setApi={setApi} opts={carouselOpts} className="overflow-hidden rounded-md">
+    <div className={`space-y-2${center ? ' flex flex-col h-full' : ' w-full'}`}>
+      <Carousel
+        setApi={setApi}
+        opts={carouselOpts}
+        className={`overflow-hidden rounded-md${center ? ' flex-1 min-h-0' : ''}`}
+      >
         <CarouselContent className="ml-0">
           {images.map((img, i) => (
             <CarouselItem key={img.url} className="pl-0">
@@ -109,6 +120,13 @@ export function ImageCarousel({
                     draggable={false}
                   />
                 </div>
+              ) : center ? (
+                <img
+                  src={loadedSet.has(i) ? img.url : undefined}
+                  alt={img.label || `${alt} ${i + 1}`}
+                  className="portrait:w-full portrait:h-auto landscape:h-full landscape:w-auto max-w-full block mx-auto"
+                  draggable={false}
+                />
               ) : (
                 <img
                   src={loadedSet.has(i) ? img.url : undefined}
@@ -135,7 +153,7 @@ export function ImageCarousel({
       )}
 
       {showSlider && images.length > 1 && (
-        <div className="space-y-1 px-2">
+        <div className="space-y-1 px-2 mt-4">
           <Slider
             min={0}
             max={images.length - 1}

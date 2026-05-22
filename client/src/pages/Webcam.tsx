@@ -48,7 +48,7 @@ export default function Webcam() {
           <DialogDescription className="sr-only">Webcam images and current view.</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center">
+        <div className="overflow-hidden">
           {!webcam ? (
             <Skeleton className="w-full aspect-video" />
           ) : isStale ? (
@@ -63,7 +63,7 @@ export default function Webcam() {
               maxHeight={isMobile ? '60vh' : '90vh'}
               showArrows={!isMobile}
               showSlider
-              instant
+              hideAnimation
               alt={webcam.name}
             />
           ) : (
