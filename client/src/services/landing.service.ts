@@ -1,4 +1,4 @@
-import type { Landing, LandingImage } from '@/models/landing.model';
+import type { Landing } from '@/models/landing.model';
 import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
 export async function getLandingById(id: string): Promise<Landing> {
@@ -53,11 +53,7 @@ export async function deleteLanding(id: string): Promise<void> {
   await throwIfNotOk(res);
 }
 
-export async function uploadLandingImage(
-  id: string,
-  file: File,
-  caption: string
-): Promise<LandingImage[]> {
+export async function uploadLandingImage(id: string, file: File, caption: string): Promise<void> {
   const body = new FormData();
   body.append('file', file);
   body.append('caption', caption);
@@ -66,7 +62,6 @@ export async function uploadLandingImage(
     { method: 'POST', body }
   );
   await throwIfNotOk(res);
-  return (await res.json()) as LandingImage[];
 }
 
 export async function deleteLandingImage(id: string, filename: string): Promise<void> {
@@ -81,7 +76,7 @@ export async function updateLandingImageCaption(
   id: string,
   filename: string,
   caption: string
-): Promise<LandingImage[]> {
+): Promise<void> {
   const res = await fetch(
     `${import.meta.env.VITE_API_PREFIX}/landings/${id}/images/${filename}?${getKeyQueryThrowIfInvalid()}`,
     {
@@ -91,5 +86,4 @@ export async function updateLandingImageCaption(
     }
   );
   await throwIfNotOk(res);
-  return (await res.json()) as LandingImage[];
 }

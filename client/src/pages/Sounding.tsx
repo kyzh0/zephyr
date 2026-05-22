@@ -14,13 +14,15 @@ import { ImageCarousel } from '@/components/ui/image-carousel';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { ApiError } from '@/services/api-error';
-import { useSounding, useIsMobile } from '@/hooks';
+import { useSounding, useIsMobile, useIsPortrait } from '@/hooks';
 
 export default function Sounding() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { sounding, error } = useSounding(id);
   const isMobile = useIsMobile();
+  const isPortrait = useIsPortrait();
+  const skeletonClass = `${isPortrait ? 'w-[80vw]' : 'h-[75vh]'} aspect-3/4`;
 
   // Navigate back if sounding not found
   useEffect(() => {
@@ -34,10 +36,7 @@ export default function Sounding() {
     );
   }, [sounding]);
 
-  // Computed once when images first arrives. Null until known so we defer
-  // mounting the carousel — the carousel captures initialIndex at mount and
-  // ignores subsequent changes, which is what preserves user position when
-  // TanStack Query refetches and appends new images.
+  // Computed once when images first arrives, preserved on image updates
   const [initialIndex, setInitialIndex] = useState<number | null>(null);
   useEffect(() => {
     if (initialIndex !== null || !images.length) return;
@@ -66,7 +65,9 @@ export default function Sounding() {
         />
       )}
       <DialogContent
-        className="portrait:w-[95vw] landscape:w-fit max-w-[95vw] max-h-[95vh] p-4 sm:p-6 gap-2 flex flex-col focus:outline-none"
+        className={`${
+          isPortrait ? 'w-[95vw]' : 'w-fit'
+        } max-w-[95vw] max-h-[95vh] p-2 sm:p-6 gap-2 flex flex-col focus:outline-none`}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -77,11 +78,11 @@ export default function Sounding() {
         </DialogHeader>
 
         {!sounding ? (
-          <Skeleton className="landscape:h-[75vh] portrait:w-[80vw] aspect-3/4" />
+          <Skeleton className={skeletonClass} />
         ) : !images.length ? (
           <p className="text-destructive">Error retrieving today's soundings.</p>
         ) : initialIndex === null ? (
-          <Skeleton className="landscape:h-[75vh] portrait:w-[80vw] aspect-3/4" />
+          <Skeleton className={skeletonClass} />
         ) : (
           <ImageCarousel
             images={images.map((img) => ({

@@ -20,34 +20,20 @@ const PUBLIC_DIR = process.env.PUBLIC_DIR
   ? path.resolve(process.env.PUBLIC_DIR)
   : path.resolve(process.cwd(), '../scheduler/public');
 
-const storage = multer.diskStorage({
-  destination: (req, _file, cb) => {
-    const { id } = req.params as IdParams;
-    const dir = path.join(PUBLIC_DIR, 'uploads', 'sites', id);
-    fs.mkdir(dir, { recursive: true })
-      .then(() => cb(null, dir))
-      .catch((err) => cb(err as Error, ''));
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
-    cb(null, `${randomUUID()}${ext}`);
-  }
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter: (_req, file, cb) => {
-    cb(null, file.mimetype.startsWith('image/'));
-  }
-});
-
 const router = express.Router();
 
 type ApiKeyQuery = { key?: string };
 type IncludeDisabledQuery = { includeDisabled?: string };
 type IdParams = { id: string };
 type ImageParams = { id: string; filename: string };
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    cb(null, file.mimetype.startsWith('image/'));
+  }
+});
 
 type LandingLean = {
   _id: mongoose.Types.ObjectId;
@@ -323,35 +309,36 @@ router.post(
     }
 
     const { id } = req.params;
-
     if (!ObjectId.isValid(id)) {
       res.sendStatus(404);
       return;
     }
-
     if (!req.file) {
       res.status(400).json({ error: 'No file provided' });
       return;
     }
-    const url = `uploads/sites/${id}/${req.file.filename}`;
-    const caption = req.body.caption ?? '';
 
     const site = await Site.findOne({ _id: new ObjectId(id) });
     if (!site) {
-      await fs.unlink(req.file.path).catch(() => {});
       res.sendStatus(404);
       return;
     }
 
-    if (!site.images) {
-      site.images = [];
-    }
-    site.images.push({ url, caption });
+    // write to disk
+    const ext = path.extname(req.file.originalname).toLowerCase() || '.jpg';
+    const filename = `${randomUUID()}${ext}`;
+    const dir = path.join(PUBLIC_DIR, 'uploads', 'sites', id);
+    const filePath = path.join(dir, filename);
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(filePath, req.file.buffer);
+
+    const url = `uploads/sites/${id}/${filename}`;
+    (site.images ??= []).push({ url, caption: req.body.caption ?? '' });
     try {
       await site.save();
     } catch (err) {
+      await fs.unlink(filePath).catch(() => {});
       if (err instanceof mongoose.Error.VersionError) {
-        await fs.unlink(req.file.path).catch(() => {});
         res.sendStatus(409);
         return;
       }

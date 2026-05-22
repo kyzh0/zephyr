@@ -1,4 +1,4 @@
-import type { Site, SiteImage } from '@/models/site.model';
+import type { Site } from '@/models/site.model';
 import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
 export async function getSiteById(id: string): Promise<Site> {
@@ -53,11 +53,7 @@ export async function deleteSite(id: string): Promise<void> {
   await throwIfNotOk(res);
 }
 
-export async function uploadSiteImage(
-  id: string,
-  file: File,
-  caption: string
-): Promise<SiteImage[]> {
+export async function uploadSiteImage(id: string, file: File, caption: string): Promise<void> {
   const body = new FormData();
   body.append('file', file);
   body.append('caption', caption);
@@ -66,7 +62,6 @@ export async function uploadSiteImage(
     { method: 'POST', body }
   );
   await throwIfNotOk(res);
-  return (await res.json()) as SiteImage[];
 }
 
 export async function deleteSiteImage(id: string, filename: string): Promise<void> {
@@ -81,7 +76,7 @@ export async function updateSiteImageCaption(
   id: string,
   filename: string,
   caption: string
-): Promise<SiteImage[]> {
+): Promise<void> {
   const res = await fetch(
     `${import.meta.env.VITE_API_PREFIX}/sites/${id}/images/${filename}?${getKeyQueryThrowIfInvalid()}`,
     {
@@ -91,5 +86,4 @@ export async function updateSiteImageCaption(
     }
   );
   await throwIfNotOk(res);
-  return (await res.json()) as SiteImage[];
 }

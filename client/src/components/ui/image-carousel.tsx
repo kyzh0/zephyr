@@ -26,24 +26,8 @@ interface Props {
   alt?: string;
 }
 
-/** Contain-mode carousel box height — full-width box, image object-contained. Tweak freely. */
-const CONTAIN_HEIGHT_LANDSCAPE = '20vh';
-const CONTAIN_HEIGHT_PORTRAIT = '30vh';
-
-/** Reserved vertical space (px) inside an intrinsic-mode dialog for header, padding, caption, slider, gaps. */
+/** Reserved vertical px inside an intrinsic-mode dialog for header, padding, caption, slider, gaps. */
 const INTRINSIC_FOOTER_PX = 160;
-
-/** Number of images to keep loaded on each side of the current index. */
-const LAZY_WINDOW = 2;
-
-function windowAround(center: number, length: number): number[] {
-  const out: number[] = [];
-  for (let o = -LAZY_WINDOW; o <= LAZY_WINDOW; o++) {
-    const i = center + o;
-    if (i >= 0 && i < length) out.push(i);
-  }
-  return out;
-}
 
 export function ImageCarousel({
   images,
@@ -55,15 +39,13 @@ export function ImageCarousel({
   alt = 'Image'
 }: Props) {
   const [api, setApi] = useState<CarouselApi>();
-  // initialIndex is captured at mount and never re-applied. This preserves the
-  // user's current position when the parent updates `images` (e.g. TanStack
-  // Query refetches and appends new images).
+  // initialIndex is captured at mount and never
+  // re-applied to preserve position when images updated
   const [mountIndex] = useState(initialIndex);
   const [selectedIndex, setSelectedIndex] = useState(mountIndex);
   const isPortrait = useIsPortrait();
 
-  // Intrinsic mode: measure AR of the first image off-DOM. All images in an
-  // intrinsic carousel are assumed to share the same AR (webcams, soundings).
+  // All instrinsic carousel images assumed to share same AR (webcams, soundings)
   const firstUrl = images[0]?.url;
   const [measuredAR, setMeasuredAR] = useState<number | null>(null);
   useEffect(() => {
@@ -80,24 +62,7 @@ export function ImageCarousel({
     return () => img.removeEventListener('load', onLoad);
   }, [fit, firstUrl]);
 
-  // Lazy-load window: only set src on images near the current index. Loaded
-  // indices remain loaded so the browser keeps decoded bitmaps around.
-  const [loadedSet, setLoadedSet] = useState<Set<number>>(
-    () => new Set(windowAround(mountIndex, images.length))
-  );
-  useEffect(() => {
-    setLoadedSet((prev) => {
-      const toAdd = windowAround(selectedIndex, images.length);
-      if (toAdd.every((i) => prev.has(i))) return prev;
-      const next = new Set(prev);
-      toAdd.forEach((i) => next.add(i));
-      return next;
-    });
-  }, [selectedIndex, images.length]);
-
-  // Embla options. Intrinsic mode runs without slide animation per spec.
-  // Frozen at mount: passing a new opts object would not re-init embla anyway,
-  // and we explicitly don't want startIndex to change after mount.
+  // Embla options - no slide animation for intrinsic
   const [carouselOpts] = useState(() => ({
     startIndex: mountIndex,
     ...(fit === 'intrinsic' && { duration: 0 })
@@ -117,14 +82,14 @@ export function ImageCarousel({
 
   const current = images[selectedIndex];
 
-  // Caption + slider footer, shared between modes
+  // Shared caption + slider footer
   const captionAndSlider = (
     <>
       {current?.label && !showSlider && (
         <p className="text-xs text-muted-foreground text-center px-2">{current.label}</p>
       )}
       {showSlider && images.length > 1 && (
-        <div className="space-y-1 px-2">
+        <div className="space-y-2 px-2 mb-1">
           {current?.label && (
             <p className="text-xs text-muted-foreground text-center">{current.label}</p>
           )}
@@ -136,7 +101,7 @@ export function ImageCarousel({
             onValueChange={(values) => {
               const i = values[0] ?? 0;
               setSelectedIndex(i);
-              api?.scrollTo(i, false);
+              api?.scrollTo(i);
             }}
           />
         </div>
@@ -148,7 +113,7 @@ export function ImageCarousel({
   // Fixed-height box, full parent width. Images preserve their natural AR
   // inside via object-contain (letterboxes when needed).
   if (fit === 'contain') {
-    const containHeight = isPortrait ? CONTAIN_HEIGHT_PORTRAIT : CONTAIN_HEIGHT_LANDSCAPE;
+    const containHeight = isPortrait ? '30vh' : '20vh';
     return (
       <div className="w-full flex flex-col gap-2">
         <Carousel setApi={setApi} opts={carouselOpts} className="w-full overflow-hidden rounded-md">
@@ -157,8 +122,9 @@ export function ImageCarousel({
               <CarouselItem key={img.url} className="pl-0">
                 <div className="w-full" style={{ height: containHeight }}>
                   <img
-                    src={loadedSet.has(i) ? img.url : undefined}
+                    src={img.url}
                     alt={img.label || `${alt} ${i + 1}`}
+                    loading="lazy"
                     className="w-full h-full object-contain"
                     draggable={false}
                   />
@@ -232,8 +198,9 @@ export function ImageCarousel({
           {images.map((img, i) => (
             <CarouselItem key={img.url} className="pl-0 h-full">
               <img
-                src={loadedSet.has(i) ? img.url : undefined}
+                src={img.url}
                 alt={img.label || `${alt} ${i + 1}`}
+                loading="lazy"
                 className="w-full h-full object-contain block"
                 draggable={false}
               />

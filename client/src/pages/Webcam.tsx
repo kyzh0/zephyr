@@ -14,14 +14,16 @@ import { ImageCarousel } from '@/components/ui/image-carousel';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { getWebcamTypeName } from '@/lib/utils';
-import { useWebcamWithImages, useIsMobile } from '@/hooks';
+import { useWebcamWithImages, useIsMobile, useIsPortrait } from '@/hooks';
 import { ApiError } from '@/services/api-error';
 
 export default function Webcam() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const isPortrait = useIsPortrait();
   const { webcam, images, isStale, error } = useWebcamWithImages(id);
+  const skeletonClass = isPortrait ? 'w-[90vw] aspect-video' : 'h-[75vh] aspect-video';
 
   // Navigate back if webcam not found
   useEffect(() => {
@@ -38,7 +40,9 @@ export default function Webcam() {
         />
       )}
       <DialogContent
-        className="portrait:w-[95vw] landscape:w-fit max-w-[95vw] max-h-[95vh] p-4 sm:p-6 gap-2 flex flex-col focus:outline-none"
+        className={`${
+          isPortrait ? 'w-[95vw]' : 'w-fit'
+        } max-w-[95vw] max-h-[95vh] p-2 sm:p-6 gap-2 flex flex-col focus:outline-none`}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -49,7 +53,7 @@ export default function Webcam() {
         </DialogHeader>
 
         {!webcam ? (
-          <Skeleton className="landscape:h-[75vh] portrait:w-[90vw] aspect-video" />
+          <Skeleton className={skeletonClass} />
         ) : isStale ? (
           <p className="text-destructive">No images in the last 24h.</p>
         ) : images.length ? (
@@ -65,7 +69,7 @@ export default function Webcam() {
             alt={webcam.name}
           />
         ) : (
-          <Skeleton className="landscape:h-[75vh] portrait:w-[90vw] aspect-video" />
+          <Skeleton className={skeletonClass} />
         )}
 
         {webcam && webcam.type !== 'metservice' && (
