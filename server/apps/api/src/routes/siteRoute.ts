@@ -5,6 +5,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
 import { randomUUID } from 'crypto';
+import sharp from 'sharp';
 
 import {
   User,
@@ -329,12 +330,11 @@ router.post(
     }
 
     // write to disk
-    const ext = path.extname(req.file.originalname).toLowerCase() || '.jpg';
-    const filename = `${randomUUID()}${ext}`;
+    const filename = `${randomUUID()}.webp`;
     const dir = path.join(PUBLIC_DIR, 'uploads', 'sites', id);
     const filePath = path.join(dir, filename);
     await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(filePath, req.file.buffer);
+    await sharp(req.file.buffer).webp({ quality: 80 }).toFile(filePath);
 
     const url = `uploads/sites/${id}/${filename}`;
     (site.images ??= []).push({ url, caption: req.body.caption ?? '' });

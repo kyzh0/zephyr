@@ -25,6 +25,11 @@ export function PhotosEditor({ images, uploadMutation, deleteMutation, captionMu
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image must be 10 MB or smaller');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
     uploadMutation.mutate(
       { file, caption: '' },
       {
