@@ -7,7 +7,7 @@ export default function ProtectedRoute() {
 
   useEffect(() => {
     if (!adminKey) {
-      navigate('/', { replace: true });
+      navigate('/admin/login', { replace: true });
     }
   }, [adminKey, navigate]);
 

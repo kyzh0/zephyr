@@ -19,6 +19,7 @@ import AlertsDialog from './pages/AlertsDialog';
 const ExportMapData = lazy(() => import('./pages/ExportMapData'));
 
 const ProtectedRoute = lazy(() => import('./pages/ProtectedRoute'));
+const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const AdminAddStation = lazy(() => import('./pages/AdminAddStation'));
 const AdminAddWebcam = lazy(() => import('./pages/AdminAddWebcam'));
@@ -114,87 +115,35 @@ export const router = createBrowserRouter([
       },
       {
         path: 'admin',
-        element: <ProtectedRoute />,
         children: [
           {
-            path: 'dashboard',
-            element: <AdminDashboard />
+            path: 'login',
+            element: <AdminLoginPage />
           },
           {
-            path: 'stations',
-            element: <AdminDashboard tab="stations" />
-          },
-          {
-            path: 'webcams',
-            element: <AdminDashboard tab="webcams" />
-          },
-          {
-            path: 'soundings',
-            element: <AdminDashboard tab="soundings" />
-          },
-          {
-            path: 'sites',
-            element: <AdminDashboard tab="sites" />
-          },
-          {
-            path: 'landings',
-            element: <AdminDashboard tab="landings" />
-          },
-          {
-            path: 'donations',
-            element: <AdminDashboard tab="donations" />
-          },
-          {
-            path: 'stations/add',
-            element: <AdminAddStation />
-          },
-          {
-            path: 'webcams/add',
-            element: <AdminAddWebcam />
-          },
-          {
-            path: 'soundings/add',
-            element: <AdminAddSounding />
-          },
-          {
-            path: 'sites/add',
-            element: <AdminAddSite />
-          },
-          {
-            path: 'landings/add',
-            element: <AdminAddLanding />
-          },
-          {
-            path: 'stations/:id',
-            element: <AdminEditStation />
-          },
-          {
-            path: 'sites/:id',
-            element: <AdminEditSite />
-          },
-          {
-            path: 'landings/:id',
-            element: <AdminEditLanding />
-          },
-          {
-            path: 'webcams/:id',
-            element: <AdminEditWebcam />
-          },
-          {
-            path: 'soundings/:id',
-            element: <AdminEditSounding />
-          },
-          {
-            path: 'clients',
-            element: <AdminDashboard tab="clients" />
-          },
-          {
-            path: 'clients/add',
-            element: <AdminAddClient />
-          },
-          {
-            path: 'clients/:id',
-            element: <AdminEditClient />
+            element: <ProtectedRoute />,
+            children: [
+              { path: 'dashboard', element: <AdminDashboard /> },
+              { path: 'stations', element: <AdminDashboard tab="stations" /> },
+              { path: 'webcams', element: <AdminDashboard tab="webcams" /> },
+              { path: 'soundings', element: <AdminDashboard tab="soundings" /> },
+              { path: 'sites', element: <AdminDashboard tab="sites" /> },
+              { path: 'landings', element: <AdminDashboard tab="landings" /> },
+              { path: 'donations', element: <AdminDashboard tab="donations" /> },
+              { path: 'clients', element: <AdminDashboard tab="clients" /> },
+              { path: 'stations/add', element: <AdminAddStation /> },
+              { path: 'webcams/add', element: <AdminAddWebcam /> },
+              { path: 'soundings/add', element: <AdminAddSounding /> },
+              { path: 'sites/add', element: <AdminAddSite /> },
+              { path: 'landings/add', element: <AdminAddLanding /> },
+              { path: 'clients/add', element: <AdminAddClient /> },
+              { path: 'stations/:id', element: <AdminEditStation /> },
+              { path: 'sites/:id', element: <AdminEditSite /> },
+              { path: 'landings/:id', element: <AdminEditLanding /> },
+              { path: 'webcams/:id', element: <AdminEditWebcam /> },
+              { path: 'soundings/:id', element: <AdminEditSounding /> },
+              { path: 'clients/:id', element: <AdminEditClient /> }
+            ]
           }
         ]
       }
