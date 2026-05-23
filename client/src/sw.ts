@@ -98,7 +98,7 @@ registerRoute(
 // Site detail
 registerRoute(
   ({ url }) => /^https:\/\/api(\.test)?\.zephyrapp\.nz\/sites\/.+/.test(url.href),
-  new StaleWhileRevalidate({
+  new NetworkFirst({
     cacheName: 'site-data',
     plugins: [
       new ExpirationPlugin({ maxEntries: 100, maxAgeSeconds: 3600 }),
@@ -122,7 +122,7 @@ registerRoute(
 // Landing detail
 registerRoute(
   ({ url }) => /^https:\/\/api(\.test)?\.zephyrapp\.nz\/landings\/.+/.test(url.href),
-  new StaleWhileRevalidate({
+  new NetworkFirst({
     cacheName: 'landing-data',
     plugins: [
       new ExpirationPlugin({ maxEntries: 100, maxAgeSeconds: 3600 }),

@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { formatInTimeZone } from 'date-fns-tz';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import SEO from '@/components/SEO';
 import {
@@ -11,26 +10,20 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { ImageCarousel } from '@/components/ui/image-carousel';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { getWebcamTypeName } from '@/lib/utils';
-import { useWebcamWithImages } from '@/hooks';
+import { useWebcamWithImages, useIsMobile, useIsPortrait } from '@/hooks';
 import { ApiError } from '@/services/api-error';
 
 export default function Webcam() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const isPortrait = useIsPortrait();
   const { webcam, images, isStale, error } = useWebcamWithImages(id);
-  const [index, setIndex] = useState(0);
-
-  // Set index to last image when images load
-  useEffect(() => {
-    if (images.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIndex(images.length - 1);
-    }
-  }, [images]);
+  const skeletonClass = isPortrait ? 'w-[90vw] aspect-video' : 'h-[75vh] aspect-video';
 
   // Navigate back if webcam not found
   useEffect(() => {
@@ -47,7 +40,9 @@ export default function Webcam() {
         />
       )}
       <DialogContent
-        className="sm:max-w-6xl w-[95vw] max-h-[90vh] p-4 sm:p-6 focus:outline-none"
+        className={`${
+          isPortrait ? 'w-[95vw]' : 'w-fit'
+        } max-w-[95vw] max-h-[95vh] p-2 sm:p-6 gap-2 flex flex-col focus:outline-none`}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -57,51 +52,25 @@ export default function Webcam() {
           <DialogDescription className="sr-only">Webcam images and current view.</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center gap-1.5 sm:gap-2">
-          {!webcam ? (
-            <Skeleton className="w-full aspect-video" />
-          ) : isStale ? (
-            <p className="text-destructive">No images in the last 24h.</p>
-          ) : images.length ? (
-            <>
-              <img
-                src={`${import.meta.env.VITE_FILE_SERVER_PREFIX}/${images[index].url}`}
-                alt={webcam.name}
-                loading="lazy"
-                className="w-full max-h-[60vh] object-contain"
-              />
-              <div className="flex items-center gap-2 sm:gap-4">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 sm:h-9 sm:w-9"
-                  onClick={() => setIndex((i) => i - 1)}
-                  disabled={index === 0}
-                >
-                  <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                </Button>
-                <span className="text-xs sm:text-sm min-w-24 sm:min-w-28 text-center">
-                  {formatInTimeZone(
-                    new Date(images[index].time),
-                    'Pacific/Auckland',
-                    'dd MMM HH:mm'
-                  )}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 sm:h-9 sm:w-9"
-                  onClick={() => setIndex((i) => i + 1)}
-                  disabled={index === images.length - 1}
-                >
-                  <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                </Button>
-              </div>
-            </>
-          ) : (
-            <Skeleton className="w-full aspect-video" />
-          )}
-        </div>
+        {!webcam ? (
+          <Skeleton className={skeletonClass} />
+        ) : isStale ? (
+          <p className="text-destructive">No images in the last 24h.</p>
+        ) : images.length ? (
+          <ImageCarousel
+            images={images.map((img) => ({
+              url: `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${img.url}`,
+              label: formatInTimeZone(new Date(img.time), 'Pacific/Auckland', 'dd MMM HH:mm')
+            }))}
+            initialIndex={images.length - 1}
+            fit="intrinsic"
+            showArrows={!isMobile}
+            showSlider
+            alt={webcam.name}
+          />
+        ) : (
+          <Skeleton className={skeletonClass} />
+        )}
 
         {webcam && webcam.type !== 'metservice' && (
           <div className="flex items-center justify-end">

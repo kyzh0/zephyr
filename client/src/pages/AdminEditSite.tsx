@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import {
@@ -32,7 +32,16 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { useSite, useLandings, useUpdateSite, useDeleteSite } from '@/hooks';
+import {
+  useSite,
+  useLandings,
+  useUpdateSite,
+  useDeleteSite,
+  useUploadSiteImage,
+  useDeleteSiteImage,
+  useUpdateSiteImageCaption
+} from '@/hooks';
+import { PhotosEditor, type PhotoImage } from '@/components/admin/PhotosEditor';
 import type { Site, UpdateSiteDto } from '@/models/site.model';
 import type { Landing } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
@@ -80,7 +89,15 @@ const formSchema = z.object({
   mandatoryNotices: z.string().optional(),
   siteGuideUrl: z.url('Enter a valid URL').or(z.literal('')).optional(),
   hazards: z.string().optional(),
-  access: z.string().optional()
+  access: z.string().optional(),
+  otherLinks: z
+    .array(
+      z.object({
+        link: z.url('Enter a valid URL'),
+        description: z.string().min(1, 'Description is required')
+      })
+    )
+    .optional()
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -141,7 +158,8 @@ export default function AdminEditSite() {
       mandatoryNotices: values.mandatoryNotices,
       siteGuideUrl: values.siteGuideUrl,
       hazards: values.hazards,
-      access: values.access
+      access: values.access,
+      otherLinks: values.otherLinks
     };
 
     const location = parseCoordinates(values.coordinates);
@@ -206,16 +224,19 @@ export default function AdminEditSite() {
         </AlertDialog>
       </header>
 
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 space-y-8">
         {isLoading || !site ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <SiteForm
-            site={site}
-            landings={landings}
-            onSubmit={handleSubmit}
-            isPending={updateMutation.isPending}
-          />
+          <>
+            <SiteForm
+              site={site}
+              landings={landings}
+              onSubmit={handleSubmit}
+              isPending={updateMutation.isPending}
+            />
+            <SitePhotos siteId={id!} images={site.images ?? []} />
+          </>
         )}
       </main>
     </div>
@@ -248,8 +269,18 @@ function SiteForm({
       mandatoryNotices: site.mandatoryNotices ?? '',
       siteGuideUrl: site.siteGuideUrl ?? '',
       hazards: site.hazards ?? '',
-      access: site.access ?? ''
+      access: site.access ?? '',
+      otherLinks: site.otherLinks ?? []
     }
+  });
+
+  const {
+    fields: linkFields,
+    append: appendLink,
+    remove: removeLink
+  } = useFieldArray({
+    control: form.control,
+    name: 'otherLinks'
   });
 
   async function handleAutoElevation() {
@@ -498,11 +529,77 @@ function SiteForm({
           />
         </div>
 
+        {/* Other Links */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium">Other Links - Optional</h2>
+
+          {linkFields.map((field, index) => (
+            <div key={field.id} className="flex gap-2 items-start">
+              <div className="flex-1 space-y-2">
+                <FormField
+                  control={form.control}
+                  name={`otherLinks.${index}.link`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...field} type="url" placeholder="https://" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`otherLinks.${index}.description`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...field} placeholder="Description" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="mt-1 shrink-0"
+                onClick={() => removeLink(index)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => appendLink({ link: '', description: '' })}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Link
+          </Button>
+        </div>
+
         <Button type="submit" className="w-full" disabled={isPending || !form.formState.isDirty}>
           {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Save Changes
         </Button>
       </form>
     </Form>
+  );
+}
+
+function SitePhotos({ siteId, images }: { siteId: string; images: PhotoImage[] }) {
+  return (
+    <PhotosEditor
+      images={images}
+      uploadMutation={useUploadSiteImage(siteId)}
+      deleteMutation={useDeleteSiteImage(siteId)}
+      captionMutation={useUpdateSiteImageCaption(siteId)}
+    />
   );
 }

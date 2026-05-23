@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import SEO from '@/components/SEO';
+import { ImageCarousel } from '@/components/ui/image-carousel';
 import { WebcamPreview } from '@/components/webcam/WebcamPreview';
 import { WindCompass } from '@/components/station';
 import { StationPreview } from '@/components/station/StationPreview';
@@ -51,6 +52,7 @@ export default function Site() {
   const flyingMode = useAppStore((s) => s.flyingMode);
   const [webcamsOpen, setWebcamsOpen] = useState(false);
   const [stationsOpen, setStationsOpen] = useState(false);
+  const [linksOpen, setLinksOpen] = useState(false);
 
   const { site, isLoading, error } = useSite(id);
 
@@ -141,21 +143,34 @@ export default function Site() {
           )}
 
           {/* Landing */}
-          {site.landings?.map((l) => (
-            <Item key={l.landingId} variant="outline" size="sm" asChild className="py-2">
-              <a className="cursor-pointer" onClick={() => navigate(`/landings/${l.landingId}`)}>
-                <ItemMedia>
-                  <PlaneLanding className="h-4 w-4" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>{l.landingName}</ItemTitle>
-                </ItemContent>
-                <ItemActions>
-                  <ChevronRightIcon className="size-4" />
-                </ItemActions>
-              </a>
-            </Item>
-          ))}
+          {site.landings && site.landings.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {site.landings.map((l) => (
+                <Item
+                  key={l.landingId}
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="py-2 flex-1 basis-1/3 sm:basis-1/4 min-w-0"
+                >
+                  <a
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/landings/${l.landingId}`)}
+                  >
+                    <ItemMedia>
+                      <PlaneLanding className="h-4 w-4" />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{l.landingName}</ItemTitle>
+                    </ItemContent>
+                    <ItemActions>
+                      <ChevronRightIcon className="size-4" />
+                    </ItemActions>
+                  </a>
+                </Item>
+              ))}
+            </div>
+          )}
 
           {/* Description */}
           {site.description && (
@@ -170,6 +185,52 @@ export default function Site() {
               <h3 className="font-semibold text-sm mb-1">Access</h3>
               <p className="text-sm whitespace-pre-wrap">{site.access}</p>
             </div>
+          )}
+
+          {/* Photos */}
+          {site?.images && site.images.length > 0 && (
+            <ImageCarousel
+              images={site.images.map((img) => ({
+                url: `${import.meta.env.VITE_FILE_SERVER_PREFIX}/${img.url}`,
+                label: img.caption || undefined
+              }))}
+              fit="contain"
+              showArrows={!isMobile}
+              showThumbnails
+              alt="Site photo"
+            />
+          )}
+
+          {/* Other Links */}
+          {site.otherLinks && site.otherLinks.length > 0 && (
+            <Collapsible open={linksOpen} onOpenChange={setLinksOpen}>
+              <CollapsibleTrigger
+                className={`flex items-center justify-between w-full py-2 text-sm font-medium hover:underline rounded px-3 ${
+                  linksOpen ? 'bg-transparent' : 'bg-muted'
+                }`}
+              >
+                <span>Other Links ({site.otherLinks.length})</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${linksOpen ? 'rotate-180' : ''}`}
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {site.otherLinks.map((link) => (
+                    <a
+                      key={link.link}
+                      href={link.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted transition-colors min-w-0"
+                    >
+                      <ExternalLink className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{link.description}</span>
+                    </a>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           )}
 
           {/* Nearby Stations */}

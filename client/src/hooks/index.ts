@@ -1,5 +1,6 @@
 export { useStationData, type TimeRange } from './useStationData';
 export { useIsMobile } from './useIsMobile';
+export { useIsPortrait } from './useIsPortrait';
 export {
   webcamKeys,
   useWebcam,
@@ -17,7 +18,10 @@ export {
   useSites,
   useAddSite,
   useUpdateSite,
-  useDeleteSite
+  useDeleteSite,
+  useUploadSiteImage,
+  useDeleteSiteImage,
+  useUpdateSiteImageCaption
 } from './useSites';
 export {
   stationKeys,
@@ -41,7 +45,10 @@ export {
   useLandings,
   useAddLanding,
   useUpdateLanding,
-  useDeleteLanding
+  useDeleteLanding,
+  useUploadLandingImage,
+  useDeleteLandingImage,
+  useUpdateLandingImageCaption
 } from './useLandings';
 export {
   soundingKeys,

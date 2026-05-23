@@ -1,9 +1,12 @@
+import path from 'node:path';
 import pLimit from 'p-limit';
 import sharp from 'sharp';
 import fs from 'node:fs/promises';
 import { fromZonedTime } from 'date-fns-tz';
 
 import { httpClient, logger, Sounding, type WithId, type SoundingAttrs } from '@zephyr/shared';
+
+const PUBLIC_DIR = process.env.PUBLIC_DIR ?? 'public';
 
 export default async function scrapeRaspData(soundings: WithId<SoundingAttrs>[]): Promise<void> {
   const limit = pLimit(5);
@@ -67,17 +70,21 @@ export default async function scrapeRaspData(soundings: WithId<SoundingAttrs>[])
           const resizedBuf = await sharp(imgBuff).resize({ width: 600 }).toBuffer();
 
           const timeStr = `${year}-${month}-${day}T${hr}:00:00`;
-          const filePath = `public/soundings/${sounding.raspRegion}/${sounding.raspId}/${timeStr}.png`;
+          const soundingDir = path.join(
+            PUBLIC_DIR,
+            'soundings',
+            sounding.raspRegion,
+            sounding.raspId
+          );
+          const filePath = path.join(soundingDir, `${timeStr}.png`);
 
-          await fs.mkdir(`public/soundings/${sounding.raspRegion}/${sounding.raspId}`, {
-            recursive: true
-          });
+          await fs.mkdir(soundingDir, { recursive: true });
 
           await fs.writeFile(filePath, resizedBuf);
 
           const img = {
             time: fromZonedTime(timeStr, 'Pacific/Auckland'),
-            url: filePath.replace('public/', '')
+            url: path.relative(PUBLIC_DIR, filePath)
           };
           images.push(img);
         }

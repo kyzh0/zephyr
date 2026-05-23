@@ -32,7 +32,15 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { useLanding, useUpdateLanding, useDeleteLanding } from '@/hooks';
+import {
+  useLanding,
+  useUpdateLanding,
+  useDeleteLanding,
+  useUploadLandingImage,
+  useDeleteLandingImage,
+  useUpdateLandingImageCaption
+} from '@/hooks';
+import { PhotosEditor, type PhotoImage } from '@/components/admin/PhotosEditor';
 import type { Landing } from '@/models/landing.model';
 import { lookupElevation } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
@@ -179,15 +187,18 @@ export default function AdminEditLanding() {
         </AlertDialog>
       </header>
 
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 space-y-8">
         {isLoading || !landing ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <LandingForm
-            landing={landing}
-            onSubmit={handleSubmit}
-            isPending={updateMutation.isPending}
-          />
+          <>
+            <LandingForm
+              landing={landing}
+              onSubmit={handleSubmit}
+              isPending={updateMutation.isPending}
+            />
+            <LandingPhotos landingId={id!} images={landing.images ?? []} />
+          </>
         )}
       </main>
     </div>
@@ -403,5 +414,16 @@ function LandingForm({
         </Button>
       </form>
     </Form>
+  );
+}
+
+function LandingPhotos({ landingId, images }: { landingId: string; images: PhotoImage[] }) {
+  return (
+    <PhotosEditor
+      images={images}
+      uploadMutation={useUploadLandingImage(landingId)}
+      deleteMutation={useDeleteLandingImage(landingId)}
+      captionMutation={useUpdateLandingImageCaption(landingId)}
+    />
   );
 }

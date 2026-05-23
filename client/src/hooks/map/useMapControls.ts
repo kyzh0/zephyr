@@ -17,7 +17,11 @@ function getSnapshotTime(offset: number): Date {
 }
 
 export interface UseMapControlsParams {
-  map: React.RefObject<{ setStyle: (style: string) => void } | null>;
+  map: React.RefObject<{
+    setStyle: (style: string) => void;
+    zoomIn: () => void;
+    zoomOut: () => void;
+  } | null>;
   triggerGeolocate: () => Promise<void>;
   flyTo: (coordinates: [number, number], zoom?: number) => void;
   setLandingTransparent: (visible: boolean) => void;
@@ -141,12 +145,22 @@ export function useMapControls({
     [flyTo]
   );
 
+  const onZoomIn = useCallback(() => {
+    map.current?.zoomIn();
+  }, [map]);
+
+  const onZoomOut = useCallback(() => {
+    map.current?.zoomOut();
+  }, [map]);
+
   return {
     onLayerToggle,
     onLocateClick: triggerGeolocate,
     onHistoryChange,
     onSiteDirectionFilterChange,
     onSearchSelect,
-    onFavouriteSelect
+    onFavouriteSelect,
+    onZoomIn,
+    onZoomOut
   };
 }

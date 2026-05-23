@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, Camera, Grid3X3, Wind } from 'lucide-react';
 
@@ -12,12 +11,10 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { SignInDialog } from '@/components/map/SignInDialog';
 import { SiteMarker, LandingMarker, StationMarker, WIND_UNITS } from '@/components/map';
 
 export default function HelpDialog() {
   const navigate = useNavigate();
-  const [signInOpen, setSignInOpen] = useState(false);
   const setWelcomeDismissed = useAppStore((s) => s.setWelcomeDismissed);
 
   return (
@@ -36,7 +33,7 @@ export default function HelpDialog() {
           <div className="hidden sm:flex justify-between items-start">
             <Button
               variant="link"
-              onClick={() => setSignInOpen(true)}
+              onClick={() => navigate('/admin/login')}
               className="text-xs text-transparent hover:text-transparent cursor-default select-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               admin
@@ -179,8 +176,6 @@ export default function HelpDialog() {
           </div>
         </div>
       </DialogContent>
-
-      <SignInDialog open={signInOpen} onOpenChange={setSignInOpen} />
     </Dialog>
   );
 }

@@ -52,3 +52,38 @@ export async function deleteSite(id: string): Promise<void> {
   );
   await throwIfNotOk(res);
 }
+
+export async function uploadSiteImage(id: string, file: File, caption: string): Promise<void> {
+  const body = new FormData();
+  body.append('file', file);
+  body.append('caption', caption);
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/sites/${id}/images?${getKeyQueryThrowIfInvalid()}`,
+    { method: 'POST', body }
+  );
+  await throwIfNotOk(res);
+}
+
+export async function deleteSiteImage(id: string, filename: string): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/sites/${id}/images/${filename}?${getKeyQueryThrowIfInvalid()}`,
+    { method: 'DELETE' }
+  );
+  await throwIfNotOk(res);
+}
+
+export async function updateSiteImageCaption(
+  id: string,
+  filename: string,
+  caption: string
+): Promise<void> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/sites/${id}/images/${filename}?${getKeyQueryThrowIfInvalid()}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ caption })
+    }
+  );
+  await throwIfNotOk(res);
+}

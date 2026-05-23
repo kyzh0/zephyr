@@ -1,8 +1,11 @@
+import path from 'node:path';
 import sharp from 'sharp';
 import md5 from 'md5';
 import fs from 'node:fs/promises';
 
 import { logger, Webcam, type WithId, type WebcamAttrs, type WebcamImage } from '@zephyr/shared';
+
+const PUBLIC_DIR = process.env.PUBLIC_DIR ?? 'public';
 
 const NO_EMBEDDED_TIMESTAMP_TYPES = new Set<string>([
   'qa',
@@ -56,14 +59,14 @@ export default async function processScrapedData(
       }
     }
 
-    const dir = `public/webcams/${webcam.type}/${webcam._id.toString()}`;
+    const dir = path.join(PUBLIC_DIR, 'webcams', webcam.type, webcam._id.toString());
     await fs.mkdir(dir, { recursive: true });
 
     const resizedBuf = await sharp(imgBuff).resize({ width: 600 }).toBuffer();
-    const filePath = `${dir}/${updated.toISOString()}.jpg`;
+    const filePath = path.join(dir, `${updated.toISOString()}.jpg`);
     await fs.writeFile(filePath, resizedBuf);
 
-    img.url = filePath.replace('public/', '');
+    img.url = path.relative(PUBLIC_DIR, filePath);
 
     // add image + update webcam
     await Webcam.updateOne(

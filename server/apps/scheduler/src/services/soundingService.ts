@@ -1,5 +1,8 @@
+import path from 'node:path';
 import fs from 'node:fs/promises';
 import { logger, Sounding, type SoundingAttrs, type WithId } from '@zephyr/shared';
+
+const PUBLIC_DIR = process.env.PUBLIC_DIR ?? 'public';
 
 export async function removeOldSoundings(): Promise<void> {
   try {
@@ -20,7 +23,7 @@ export async function removeOldSoundings(): Promise<void> {
       );
 
       // remove + recreate directory
-      const directory = `public/soundings/${s.raspRegion}/${s.raspId}`;
+      const directory = path.join(PUBLIC_DIR, 'soundings', s.raspRegion, s.raspId);
       await fs.rm(directory, { recursive: true, force: true });
       await fs.mkdir(directory, { recursive: true });
     }

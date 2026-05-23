@@ -64,7 +64,7 @@ jobs:
 
       - name: Deploy client
         if: github.event_name == 'push'
-        uses: easingthemes/ssh-deploy@v5.1.0
+        uses: easingthemes/ssh-deploy@v6.0.1
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SOURCE: "client/dist/"
@@ -160,7 +160,7 @@ jobs:
           cp "server/deploy/Caddyfile.${ENV}" server/deploy/Caddyfile
 
       - name: Upload deploy bundle
-        uses: easingthemes/ssh-deploy@v5.1.0
+        uses: easingthemes/ssh-deploy@v6.0.1
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SOURCE: "server/deploy/"
@@ -199,6 +199,7 @@ jobs:
             SEQ_INITIAL_PASSWORD=${{ secrets.SEQ_INITIAL_PASSWORD }}
 
             FILE_SERVER_PREFIX=${{ vars.FILE_SERVER_PREFIX }}
+            PUBLIC_DIR=/app/public
             EOF
 
             # scheduler .env
