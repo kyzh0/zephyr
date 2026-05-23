@@ -2,7 +2,7 @@ import type { Site } from '@/models/site.model';
 import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
 export async function getSiteById(id: string): Promise<Site> {
-  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/sites/${id}`);
+  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/sites/${id}`, { cache: 'no-store' });
   await throwIfNotOk(res);
   return (await res.json()) as Site;
 }
