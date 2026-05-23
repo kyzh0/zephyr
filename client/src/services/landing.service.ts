@@ -2,9 +2,7 @@ import type { Landing } from '@/models/landing.model';
 import { getKeyQueryThrowIfInvalid, throwIfNotOk } from './api-error';
 
 export async function getLandingById(id: string): Promise<Landing> {
-  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/landings/${id}`, {
-    cache: 'no-store'
-  });
+  const res = await fetch(`${import.meta.env.VITE_API_PREFIX}/landings/${id}`);
   await throwIfNotOk(res);
   return (await res.json()) as Landing;
 }
