@@ -5,6 +5,7 @@ import processScrapedData from '../processScrapedData';
 
 type TempestResponse = {
   current_conditions?: {
+    includes_station_data?: boolean;
     wind_avg?: number | null;
     wind_gust?: number | null;
     wind_direction?: number | null;
@@ -29,7 +30,7 @@ export default async function scrapeTempestData(stations: WithId<StationAttrs>[]
           );
 
           const cc = data.current_conditions;
-          if (cc) {
+          if (cc && cc.includes_station_data) {
             windAverage = cc.wind_avg ?? null;
             windGust = cc.wind_gust ?? null;
             windBearing = cc.wind_direction ?? null;
