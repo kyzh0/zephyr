@@ -32,6 +32,7 @@ export const StationPreview: React.FC<{
       }}
     >
       <p className="truncate text-xs">{data.name}</p>
+      <p className="text-[10px]">{data.elevation} m</p>
       <p className="text-lg font-medium">
         {data.currentAverage == null ? '-' : convertWindSpeed(data.currentAverage, unit)}
         {' | '}
