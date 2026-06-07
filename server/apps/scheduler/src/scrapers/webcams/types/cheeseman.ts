@@ -20,17 +20,20 @@ export default async function scrapeCheesemanData(webcams: WithId<WebcamAttrs>[]
           );
 
           if (data.length) {
-            const matches = data.match(
-              /\/wp-content\/webcam\/aframe\/\d{4}-\d{2}-\d{2}\/\d{12}\.jpg/g
+            const urlMatch = data.match(
+              new RegExp(
+                `\\/wp-content\\/webcam\\/${webcam.externalId}\\/\\d{4}-\\d{2}-\\d{2}\\/\\d{12}\\.jpg`,
+                'g'
+              )
             );
 
-            if (matches?.length) {
-              const url = matches[matches.length - 1];
-              const match = url.match(/\d{12}/g);
+            if (urlMatch?.length) {
+              const url = urlMatch[urlMatch.length - 1];
+              const timeMatch = url.match(/\d{12}/);
 
-              if (match?.[0]) {
+              if (timeMatch?.[0]) {
                 updated = fromZonedTime(
-                  parse(match[0], 'yyyyMMddHHmm', new Date()),
+                  parse(timeMatch[0], 'yyyyMMddHHmm', new Date()),
                   'Pacific/Auckland'
                 );
 
