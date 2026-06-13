@@ -19,12 +19,12 @@ if (!DB_CONNECTION_STRING) {
 try {
   await mongoose.connect(DB_CONNECTION_STRING);
 
-  if (scrapeType === 's') {
+  if (scrapeType === 'station') {
     await scrapeStation(type);
-  } else if (scrapeType === 'w') {
+  } else if (scrapeType === 'webcam') {
     await scrapeWebcam(type);
   } else {
-    console.error('Invalid scrapeType, must be "s" or "w"');
+    console.error('Invalid scrapeType, must be "station" or "webcam"');
     process.exit(1);
   }
 } catch (error) {

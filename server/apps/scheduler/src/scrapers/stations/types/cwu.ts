@@ -9,6 +9,36 @@ import {
 } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
+function parseNum(s: string | null): number | null {
+  if (!s) {
+    return null;
+  }
+  const match = s.match(/^-?[\d.]+/);
+  if (!match) {
+    return null;
+  }
+  const n = Number(match[0]);
+  return Number.isNaN(n) ? null : n;
+}
+
+function extractValue(html: string, labelText: string): string | null {
+  const labelIdx = html.indexOf(labelText);
+  if (labelIdx < 0) {
+    return null;
+  }
+  const valueTag = '<span class="value">';
+  const valueStart = html.indexOf(valueTag, labelIdx);
+  if (valueStart < 0) {
+    return null;
+  }
+  const contentStart = valueStart + valueTag.length;
+  const contentEnd = html.indexOf('</span>', contentStart);
+  if (contentEnd <= contentStart) {
+    return null;
+  }
+  return html.slice(contentStart, contentEnd).trim();
+}
+
 export default async function scrapeCwuData(stations: WithId<StationAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
@@ -27,50 +57,13 @@ export default async function scrapeCwuData(stations: WithId<StationAttrs>[]): P
           );
 
           if (data.length) {
-            // wind avg + direction
-            let startStr = 'Current Windspeed:&nbsp;</label><span>&nbsp;';
-            let i = data.indexOf(startStr);
-            if (i >= 0) {
-              const j = data.indexOf('km/h.</span>', i);
-              if (j > i) {
-                const tempArray = data
-                  .slice(i + startStr.length, j)
-                  .trim()
-                  .split(' ');
-                if (tempArray.length === 2) {
-                  windBearing = getWindBearingFromDirection(tempArray[0]);
-                  const temp1 = Number(tempArray[1]);
-                  if (!Number.isNaN(temp1)) {
-                    windAverage = temp1;
-                  }
-                }
-              }
-            }
+            temperature = parseNum(extractValue(data, 'TEMPERATURE'));
+            windAverage = parseNum(extractValue(data, 'WIND SPEED'));
+            windGust = parseNum(extractValue(data, 'WIND GUSTS'));
 
-            // wind gust
-            startStr = 'Wind Gusting To:&nbsp;</label><span>&nbsp;';
-            i = data.indexOf(startStr);
-            if (i >= 0) {
-              const j = data.indexOf('km/h.</span>', i);
-              if (j > i) {
-                const temp = Number(data.slice(i + startStr.length, j).trim());
-                if (!Number.isNaN(temp)) {
-                  windGust = temp;
-                }
-              }
-            }
-
-            // temperature
-            startStr = 'Now</span><br/>';
-            i = data.indexOf(startStr);
-            if (i >= 0) {
-              const j = data.indexOf('°C</p>', i);
-              if (j > i) {
-                const temp = Number(data.slice(i + startStr.length, j).trim());
-                if (!Number.isNaN(temp)) {
-                  temperature = temp;
-                }
-              }
+            const dirValue = extractValue(data, 'WIND DIRECTION');
+            if (dirValue) {
+              windBearing = getWindBearingFromDirection(dirValue);
             }
           }
 

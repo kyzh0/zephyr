@@ -33,5 +33,5 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
-  "packageManager": "pnpm@10.28.0"
+  "packageManager": "pnpm@11.6.0"
 }

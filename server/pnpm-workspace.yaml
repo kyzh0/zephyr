@@ -1,3 +1,13 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+overrides:
+  typescript: 5.9.3
+  tsup: 8.5.1
+allowedDeprecatedVersions:
+  node-domexception: '*'
+allowBuilds:
+  esbuild: true
+  protobufjs: true
+  sharp: true
+  tesseract.js: true

@@ -26,16 +26,5 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.0"
   },
-  "pnpm": {
-    "overrides": {
-      "typescript": "5.9.3",
-      "tsup": "8.5.1"
-    },
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp",
-      "tesseract.js"
-    ]
-  },
-  "packageManager": "pnpm@10.28.0"
+  "packageManager": "pnpm@11.6.0"
 }
