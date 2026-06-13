@@ -23,7 +23,7 @@ import {
 
 import { useLandings, useAddSite } from '@/hooks';
 import type { CreateSiteDto } from '@/models/site.model';
-import { lookupElevation } from '@/lib/utils';
+import { lookupElevation, uhfCbChannelToString } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
 
 const coordinatesSchema = z.string().refine(
@@ -68,6 +68,12 @@ const formSchema = z.object({
   mandatoryNotices: z.string().optional(),
   siteGuideUrl: z.url('Enter a valid URL').or(z.literal('')).optional(),
   hazards: z.string().optional(),
+  radioFrequency: z
+    .string()
+    .refine((val) => !val || (/^\d+$/.test(val) && parseInt(val) >= 1 && parseInt(val) <= 80), {
+      message: 'Enter a channel between 1 and 80'
+    })
+    .optional(),
   access: z.string().optional(),
   otherLinks: z
     .array(
@@ -112,6 +118,7 @@ export default function AdminAddSite() {
       mandatoryNotices: '',
       siteGuideUrl: '',
       hazards: '',
+      radioFrequency: '',
       access: '',
       otherLinks: []
     }
@@ -178,6 +185,9 @@ export default function AdminAddSite() {
       mandatoryNotices: values.mandatoryNotices,
       siteGuideUrl: values.siteGuideUrl,
       hazards: values.hazards,
+      radioFrequency: values.radioFrequency
+        ? uhfCbChannelToString(parseInt(values.radioFrequency))
+        : undefined,
       access: values.access,
       otherLinks: values.otherLinks
     };
@@ -393,6 +403,24 @@ export default function AdminAddSite() {
                     <FormLabel>Hazards - Optional</FormLabel>
                     <FormControl>
                       <Textarea {...field} rows={4} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="radioFrequency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Radio Channel - Optional</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        inputMode="numeric"
+                        onChange={(e) => field.onChange(e.target.value.replace(/\D/g, ''))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

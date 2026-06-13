@@ -29,6 +29,7 @@ export interface Site {
   mandatoryNotices: string;
   siteGuideUrl: string;
   hazards: string;
+  radioFrequency: string;
   access: string;
   images?: SiteImage[];
   otherLinks?: SiteLink[];
@@ -46,6 +47,7 @@ export interface CreateSiteDto {
   mandatoryNotices?: string;
   siteGuideUrl?: string;
   hazards?: string;
+  radioFrequency?: string;
   access?: string;
   otherLinks?: { link: string; description: string }[];
 }
@@ -65,6 +67,7 @@ export interface UpdateSiteDto {
   mandatoryNotices?: string;
   siteGuideUrl?: string;
   hazards?: string;
+  radioFrequency?: string;
   access?: string;
   otherLinks?: { link: string; description: string }[];
 }

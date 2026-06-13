@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import {
   AlertCircleIcon,
   TriangleAlertIcon,
+  Radio,
   PlaneLanding,
   ArrowLeft,
   ChevronRightIcon,
@@ -138,6 +139,16 @@ export default function Site() {
               <TriangleAlertIcon />
               <AlertDescription className="text-sm text-orange-600 whitespace-pre-wrap">
                 {site.hazards}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Radio Frequency */}
+          {site.radioFrequency && (
+            <Alert className="py-2 text-muted-foreground">
+              <Radio />
+              <AlertDescription className="text-sm text-muted-foreground whitespace-pre-wrap">
+                {site.radioFrequency}
               </AlertDescription>
             </Alert>
           )}

@@ -23,6 +23,7 @@ export type SiteAttrs = {
   mandatoryNotices?: string;
   siteGuideUrl?: string;
   hazards?: string;
+  radioFrequency?: string;
   access?: string;
   images?: SiteImage[];
   otherLinks?: SiteLink[];
@@ -54,6 +55,7 @@ const siteSchema = new mongoose.Schema<SiteAttrs>(
     mandatoryNotices: { type: String },
     siteGuideUrl: { type: String },
     hazards: { type: String },
+    radioFrequency: { type: String },
     access: { type: String },
     images: {
       type: [

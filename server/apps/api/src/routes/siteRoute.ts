@@ -116,6 +116,7 @@ router.post(
       mandatoryNotices,
       siteGuideUrl,
       hazards,
+      radioFrequency,
       access,
       otherLinks
     } = req.body;
@@ -158,6 +159,7 @@ router.post(
       mandatoryNotices,
       siteGuideUrl,
       hazards,
+      radioFrequency,
       access,
       otherLinks
     });
@@ -226,6 +228,7 @@ router.put(
       mandatoryNotices,
       siteGuideUrl,
       hazards,
+      radioFrequency,
       access,
       otherLinks
     } = req.body;
@@ -290,6 +293,7 @@ router.put(
     site.mandatoryNotices = mandatoryNotices ?? undefined;
     site.siteGuideUrl = siteGuideUrl;
     site.hazards = hazards;
+    site.radioFrequency = radioFrequency;
     site.access = access;
     site.otherLinks = otherLinks;
 

@@ -390,6 +390,20 @@ export const getIconStyle = (flyingMode: boolean): string =>
 
 export const MAX_ALERT_RULES = 10;
 
+export function uhfCbChannelToString(ch: number): string {
+  const mhz =
+    ch >= 1 && ch <= 40
+      ? ((476425 + (ch - 1) * 25) / 1000).toFixed(3)
+      : ((4764375 + (ch - 41) * 250) / 10000).toFixed(4);
+  return `CH ${ch} - ${mhz} MHz`;
+}
+
+export function parseUhfCbChannel(stored?: string): string {
+  if (!stored) return '';
+  const match = /^CH (\d+)/.exec(stored);
+  return match ? match[1] : '';
+}
+
 export function nzDateStr(d: Date = new Date()): string {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Pacific/Auckland',
