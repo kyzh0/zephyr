@@ -1,5 +1,9 @@
 api.zephyrapp.nz {
-	reverse_proxy api:{$NODE_PORT}
+	reverse_proxy api:{$API_PORT}
+}
+
+mcp.zephyrapp.nz {
+	reverse_proxy mcp:{$MCP_PORT}
 }
 
 zephyrapp.nz www.zephyrapp.nz {

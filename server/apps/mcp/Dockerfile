@@ -19,19 +19,19 @@ COPY apps ./apps
 # Install workspace deps
 RUN pnpm install --frozen-lockfile
 
-# Build shared + api
+# Build shared + mcp
 RUN pnpm --filter @zephyr/shared build
-RUN pnpm --filter @zephyr/api build
+RUN pnpm --filter @zephyr/mcp build
 
 # Create a portable prod bundle that includes workspace deps
-RUN pnpm --filter @zephyr/api --prod deploy /prod/api
+RUN pnpm --filter @zephyr/mcp --prod deploy /prod/mcp
 
 
 # ---------- runtime stage ----------
 FROM node:24-alpine AS runtime
 WORKDIR /app
 
-COPY --from=build /prod/api ./
+COPY --from=build /prod/mcp ./
 
-# Port is configured at runtime via API_PORT env var (default 5000)
+# Port is configured at runtime via MCP_PORT env var (default 5001)
 CMD ["node", "dist/index.js"]

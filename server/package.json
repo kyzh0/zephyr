@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev:api": "pnpm --filter @zephyr/api dev",
+    "dev:mcp": "pnpm --filter @zephyr/mcp dev",
     "dev:scheduler": "pnpm --filter @zephyr/scheduler dev",
     "build:api": "pnpm --filter @zephyr/api build",
+    "build:mcp": "pnpm --filter @zephyr/mcp build",
     "build:scheduler": "pnpm --filter @zephyr/scheduler build",
     "build": "pnpm -r build",
     "dev": "pnpm -r --parallel dev",

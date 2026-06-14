@@ -15,11 +15,23 @@ services:
       # API writes into /app/public so caddy can serve it via shared volume
       - caddy_fs:/app/public/
 
+  mcp:
+    build:
+      context: .
+      dockerfile: apps/mcp/Dockerfile
+    mem_limit: 2g
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    depends_on:
+      - mongodb
+      - seq
+
   scheduler:
     build:
       context: .
       dockerfile: apps/scheduler/Dockerfile
-    mem_limit: 12g
+    mem_limit: 10g
     restart: unless-stopped
     env_file:
       - ./.env
@@ -62,7 +74,8 @@ services:
     image: caddy:alpine
     restart: unless-stopped
     environment:
-      - NODE_PORT=${NODE_PORT}
+      - API_PORT=${API_PORT}
+      - MCP_PORT=${MCP_PORT}
       - SEQ_PORT=${SEQ_DOCKER_PORT}
     ports:
       - '80:80'

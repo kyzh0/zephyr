@@ -83,7 +83,7 @@ jobs:
           SCRIPT_AFTER_REQUIRED: true
 
   build-push-backend:
-    name: Build & push api + scheduler
+    name: Build & push backend images
     needs: configure-deployment
     if: needs.configure-deployment.outputs.backend_changed == 'true' && github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -143,6 +143,19 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Build & push MCP
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/apps/mcp/Dockerfile
+          push: true
+          platforms: linux/arm64
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/zephyr-mcp:${{ steps.tag.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/zephyr-mcp:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   deploy-backend:
     name: Deploy backend to VM
     needs: [configure-deployment, build-push-backend]
@@ -188,7 +201,8 @@ jobs:
             MONGO_DOCKER_PORT=${{ vars.MONGO_DOCKER_PORT }}
             DB_CONNECTION_STRING=${{ secrets.DB_CONNECTION_STRING }}
 
-            NODE_PORT=${{ vars.NODE_PORT }}
+            API_PORT=${{ vars.API_PORT }}
+            MCP_PORT=${{ vars.MCP_PORT }}
             NODE_ENV=${{ needs.configure-deployment.outputs.environment }}
 
             SEQ_LOCAL_PORT=${{ vars.SEQ_LOCAL_PORT }}
@@ -242,6 +256,6 @@ jobs:
             # Login to GHCR
             echo "${{ secrets.GHCR_READ_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
 
-            docker compose pull api scheduler
+            docker compose pull api scheduler mcp
             docker compose up -d --remove-orphans
             docker image prune -f

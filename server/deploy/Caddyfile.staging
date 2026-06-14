@@ -1,5 +1,9 @@
 api.test.zephyrapp.nz {
-	reverse_proxy api:{$NODE_PORT}
+	reverse_proxy api:{$API_PORT}
+}
+
+mcp.test.zephyrapp.nz {
+	reverse_proxy mcp:{$MCP_PORT}
 }
 
 test.zephyrapp.nz {
