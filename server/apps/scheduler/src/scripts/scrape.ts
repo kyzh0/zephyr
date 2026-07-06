@@ -1,6 +1,10 @@
 import scrapeStation from './scrapeStation';
 import scrapeWebcam from './scrapeWebcam';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: new URL('../../../../.env', import.meta.url).pathname });
+dotenv.config({ path: new URL('../../.env', import.meta.url).pathname });
 
 const scrapeType = process.argv[2];
 const type = process.argv[3];

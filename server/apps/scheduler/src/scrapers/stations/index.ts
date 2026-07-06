@@ -12,6 +12,7 @@ import scrapeHolfuyData from './types/holfuy';
 import scrapeHuttWeatherData from './types/huttWeather';
 import scrapeLevinMacData from './types/levinMac';
 import scrapeLpcData from './types/lpc';
+import scrapeMetdataData from './types/metdata';
 import scrapeMetserviceData from './types/metservice';
 import scrapeMfhbData from './types/mfhb';
 import scrapeMpycData from './types/mpyc';
@@ -51,6 +52,7 @@ const scrapers = {
   hw: scrapeHuttWeatherData,
   levin: scrapeLevinMacData,
   lpc: scrapeLpcData,
+  metdata: scrapeMetdataData,
   metservice: scrapeMetserviceData,
   mfhb: scrapeMfhbData,
   mpyc: scrapeMpycData,
