@@ -1,9 +1,18 @@
 import express, { type Request, type Response } from 'express';
 import { formatInTimeZone } from 'date-fns-tz';
 import { Worker } from 'node:worker_threads';
+import { ObjectId } from 'mongodb';
 import { QueryFilter } from 'mongoose';
 
-import { Output, OutputAttrs, Station, Client, logger } from '@zephyr/shared';
+import {
+  Output,
+  OutputAttrs,
+  Station,
+  StationData,
+  StationDataAttrs,
+  Client,
+  logger
+} from '@zephyr/shared';
 
 const router = express.Router();
 
@@ -29,6 +38,13 @@ type JsonOutputQuery = ApiKeyQuery & {
 type JsonOutputItem = {
   time: number; // unix seconds
   url: string;
+};
+
+type StationIdParams = { id: string };
+
+type StationDataQuery = ApiKeyQuery & {
+  dateFrom?: string;
+  dateTo?: string;
 };
 
 type ExportXlsxBody = {
@@ -75,8 +91,8 @@ async function authenticateApiKey(key: string | undefined): Promise<AuthResult> 
   const date = new Date();
   const currentMonth = formatInTimeZone(date, 'UTC', 'yyyy-MM');
 
-  const matches = client.usage.filter((c) => c.month === currentMonth);
-  if (matches.length) {
+  const matches = client.usage?.filter((c) => c.month === currentMonth);
+  if (matches?.length) {
     const usage = matches[0];
     if (usage.apiCalls >= client.monthlyLimit) {
       return {
@@ -291,6 +307,67 @@ router.post(
 
       const url = await runExportDataWorker(unixFrom, unixTo, lat, lon, radius);
       res.json({ url });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      logger.error(msg, { service: 'public' });
+      res.status(500).json({ error: 'Something went wrong...' });
+    }
+  }
+);
+
+router.get(
+  '/stations/:id/data',
+  async (req: Request<StationIdParams, unknown, unknown, StationDataQuery>, res: Response) => {
+    const { id } = req.params;
+    logger.info('Station data requested', { service: 'public' });
+
+    if (!ObjectId.isValid(id)) {
+      res.sendStatus(404);
+      return;
+    }
+
+    try {
+      const auth = await authenticateApiKey(req.query.key);
+      if (!auth.success) {
+        res.status(auth.httpCode).json({ error: auth.error });
+        return;
+      }
+
+      let dateFrom = parseDateInput(req.query.dateFrom);
+      let dateTo = parseDateInput(req.query.dateTo);
+
+      // limit 30 days
+      const ms30Days = 30 * 24 * 60 * 60 * 1000;
+
+      if (dateFrom && dateTo) {
+        if (dateTo.getTime() - dateFrom.getTime() > ms30Days) {
+          dateFrom = new Date(dateTo.getTime() - ms30Days);
+        }
+      } else if (dateFrom) {
+        dateTo = new Date(dateFrom.getTime() + ms30Days);
+      } else if (dateTo) {
+        dateFrom = new Date(dateTo.getTime() - ms30Days);
+      } else {
+        dateTo = new Date();
+        dateFrom = new Date(dateTo.getTime() - ms30Days);
+      }
+
+      const query: QueryFilter<StationDataAttrs> = {
+        station: new ObjectId(id),
+        time: { $gte: dateFrom, $lte: dateTo }
+      };
+
+      const result = await StationData.find(query).sort({ time: 1 }).lean();
+
+      res.json(
+        result.map((r) => ({
+          time: Math.round(new Date(r.time).getTime() / 1000),
+          windAverage: r.windAverage,
+          windGust: r.windGust,
+          windBearing: r.windBearing,
+          temperature: r.temperature
+        }))
+      );
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       logger.error(msg, { service: 'public' });

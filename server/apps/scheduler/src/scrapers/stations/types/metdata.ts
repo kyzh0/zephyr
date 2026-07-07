@@ -141,7 +141,7 @@ export default async function scrapeMetdataData(stations: WithId<StationAttrs>[]
           }
         }
 
-        var lastUpdate = null;
+        let lastUpdate = null;
         if (timestamp?.length) {
           lastUpdate = fromZonedTime(
             parse(timestamp, 'hh:mm aa dd/MM', new Date()),
