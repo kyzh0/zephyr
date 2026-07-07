@@ -1,4 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
+import { fromZonedTime } from 'date-fns-tz';
+import { parse } from 'date-fns';
 
 import {
   getWindBearingFromDirection,
@@ -8,6 +10,7 @@ import {
   type WithId
 } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
+import { isTimestampFresh } from '@/lib/utils';
 
 interface GeminiJsonResponse {
   stAnnePoint: GeminiStationData;
@@ -18,6 +21,7 @@ interface GeminiStationData {
   windGusting: number | null;
   windSpeed: number | null;
   windDirection: string | null;
+  timestamp: string | null;
 }
 
 export default async function scrapeMetdataData(stations: WithId<StationAttrs>[]): Promise<void> {
@@ -26,6 +30,7 @@ export default async function scrapeMetdataData(stations: WithId<StationAttrs>[]
     let windGust: number | null = null;
     let windBearing: number | null = null;
     const temperature: number | null = null;
+    let timestamp: string | null = null;
 
     // fetch img to bust caching
     const imgResponse = await httpClient.get<ArrayBuffer>(
@@ -69,9 +74,13 @@ export default async function scrapeMetdataData(stations: WithId<StationAttrs>[]
                 windDirection: {
                   type: 'string',
                   description: 'Cardinal wind direction'
+                },
+                timestamp: {
+                  type: 'string',
+                  description: 'Timestamp of the data in the string format hh:mm aa dd/MM'
                 }
               },
-              required: ['windGusting', 'windSpeed', 'windDirection']
+              required: ['windGusting', 'windSpeed', 'windDirection', 'timestamp']
             },
             copperPoint: {
               type: 'object',
@@ -87,9 +96,13 @@ export default async function scrapeMetdataData(stations: WithId<StationAttrs>[]
                 windDirection: {
                   type: 'string',
                   description: 'Cardinal wind direction'
+                },
+                timestamp: {
+                  type: 'string',
+                  description: 'Timestamp of the data in the string format hh:mm aa dd/MM'
                 }
               },
-              required: ['windGusting', 'windSpeed', 'windDirection']
+              required: ['windGusting', 'windSpeed', 'windDirection', 'timestamp']
             }
           },
           required: ['stAnnePoint', 'copperPoint']
@@ -101,6 +114,9 @@ export default async function scrapeMetdataData(stations: WithId<StationAttrs>[]
       const data: GeminiJsonResponse = JSON.parse(response.text);
       for (const s of stations) {
         if (s.externalId === 'stannepoint') {
+          if (data.stAnnePoint?.timestamp != null) {
+            timestamp = data.stAnnePoint?.timestamp;
+          }
           if (data.stAnnePoint?.windSpeed != null) {
             windAverage = Math.round(data.stAnnePoint.windSpeed * 1.852 * 100) / 100; // kt -> km/h
           }
@@ -111,6 +127,9 @@ export default async function scrapeMetdataData(stations: WithId<StationAttrs>[]
             windBearing = getWindBearingFromDirection(data.stAnnePoint.windDirection);
           }
         } else if (s.externalId === 'copperpoint') {
+          if (data.copperPoint?.timestamp != null) {
+            timestamp = data.copperPoint?.timestamp;
+          }
           if (data.copperPoint?.windSpeed != null) {
             windAverage = Math.round(data.copperPoint.windSpeed * 1.852 * 100) / 100; // kt -> km/h
           }
@@ -121,7 +140,22 @@ export default async function scrapeMetdataData(stations: WithId<StationAttrs>[]
             windBearing = getWindBearingFromDirection(data.copperPoint.windDirection);
           }
         }
-        await processScrapedData(s, windAverage, windGust, windBearing, temperature);
+
+        var lastUpdate = null;
+        if (timestamp?.length) {
+          lastUpdate = fromZonedTime(
+            parse(timestamp, 'hh:mm aa dd/MM', new Date()),
+            'Pacific/Auckland'
+          );
+        }
+        if (isTimestampFresh(lastUpdate)) {
+          await processScrapedData(s, windAverage, windGust, windBearing, temperature);
+        } else {
+          logger.warn('metdata stale data', {
+            service: 'station',
+            type: 'metdata'
+          });
+        }
       }
     }
   } catch (error) {
