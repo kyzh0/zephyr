@@ -22,6 +22,7 @@ import scrapePortersData from './types/porters';
 import scrapePortOtagoData from './types/portOtago';
 import scrapePredictWindData from './types/predictWind';
 import scrapePrimePortData from './types/primePort';
+import scrapeShpgData from './types/shpg';
 import scrapeSofarOceanData from './types/sofarOcean';
 import scrapeSouthPortData from './types/southPort';
 import scrapeTempestData from './types/tempest';
@@ -63,6 +64,7 @@ const scrapers = {
   pw: scrapePredictWindData,
   prime: scrapePrimePortData,
   sfo: scrapeSofarOceanData,
+  shpg: scrapeShpgData,
   sp: scrapeSouthPortData,
   tclz: scrapeTclzData,
   tempest: scrapeTempestData,

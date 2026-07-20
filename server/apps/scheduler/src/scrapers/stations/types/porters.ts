@@ -43,8 +43,12 @@ async function crop(imgBuff: Buffer, c: Crop): Promise<Buffer> {
 
 function parsePortersTime(text: string): Date | null {
   const start = text.indexOf(', ') + 2;
-  const end = text.indexOf('m.') + 2;
-  if (start < 2 || end < 2 || end <= start) {
+  let end = text.indexOf('am');
+  if (end === -1) {
+    end = text.indexOf('pm');
+  }
+  end += 3;
+  if (start < 2 || end < 3 || end <= start) {
     return null;
   }
 

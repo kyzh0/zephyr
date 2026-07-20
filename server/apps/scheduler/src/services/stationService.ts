@@ -293,7 +293,8 @@ export async function checkForErrors(): Promise<void> {
         'sp',
         'wl',
         'windicator',
-        'tclz'
+        'tclz',
+        'shpg'
       ];
 
       for (const [key, value] of Object.entries(g)) {

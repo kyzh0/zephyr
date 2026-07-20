@@ -197,6 +197,8 @@ export const getStationTypeName = (code: string): string => {
       return 'WSWR';
     case 'sp':
       return 'South Port';
+    case 'shpg':
+      return 'SHPG';
     case 'tclz':
       return 'Treble Cone WX';
     default:
