@@ -24,6 +24,7 @@ import { loadAllStationDataAtTimestamp } from '@/services/station.service';
 import { stationKeys, useStations } from '@/hooks';
 import type { HistoricalStationData } from '@/models/station-data.model';
 import { ApiError } from '@/services/api-error';
+import { StationTemperatureMarker } from '@/components/map/StationTemperatureMarker';
 
 interface UseStationMarkersOptions {
   map: React.RefObject<mapboxgl.Map | null>;
@@ -41,6 +42,7 @@ interface StationProperties {
   currentAverage: number | null;
   currentGust: number | null;
   currentBearing: number | null;
+  currentTemperature: number | null;
   validBearings: string | null;
   isOffline: boolean | null;
   lastUpdate: string | null;
@@ -98,6 +100,7 @@ const extractStationProperties = (properties: Record<string, unknown>): StationP
   currentAverage: properties.currentAverage as number | null,
   currentGust: properties.currentGust as number | null,
   currentBearing: properties.currentBearing as number | null,
+  currentTemperature: properties.currentTemperature as number | null,
   validBearings: properties.validBearings as string | null,
   isOffline: properties.isOffline as boolean | null,
   lastUpdate: (properties.lastUpdate as string | null) ?? null
@@ -155,6 +158,7 @@ function createMarkerElement(
     currentAverage,
     currentGust,
     currentBearing,
+    currentTemperature,
     validBearings,
     isOffline,
     lastUpdate
@@ -169,15 +173,22 @@ function createMarkerElement(
   arrow.style.transform = '';
   const expired = isExpired(lastUpdate);
   arrow.innerHTML = renderToStaticMarkup(
-    <StationMarker
-      bearing={expired ? undefined : (currentBearing ?? undefined)}
-      speed={expired ? undefined : (currentAverage ?? undefined)}
-      gust={expired ? undefined : (currentGust ?? undefined)}
-      validBearings={validBearings ?? undefined}
-      isOffline={isOffline ?? undefined}
-      unit={unit}
-      sport={sport}
-    />
+    sport === 'temperature' ? (
+      <StationTemperatureMarker
+        temperature={currentTemperature ?? null}
+        isOffline={isOffline ?? undefined}
+      />
+    ) : (
+      <StationMarker
+        bearing={expired ? undefined : (currentBearing ?? undefined)}
+        speed={expired ? undefined : (currentAverage ?? undefined)}
+        gust={expired ? undefined : (currentGust ?? undefined)}
+        validBearings={validBearings ?? undefined}
+        isOffline={isOffline ?? undefined}
+        unit={unit}
+        sport={sport}
+      />
+    )
   );
 
   // Container
@@ -231,12 +242,13 @@ function updateMarkerElement(
   unit: WindUnit,
   sport: SportType
 ): void {
-  const { currentAverage, currentGust, currentBearing } = props;
+  const { currentAverage, currentGust, currentBearing, currentTemperature } = props;
 
   marker.dataset.avg = currentAverage != null ? String(currentAverage) : '';
   marker.dataset.gust = currentGust != null ? String(currentGust) : '';
   marker.dataset.name = props.name;
   marker.dataset.bearing = currentBearing != null ? String(currentBearing) : '';
+  marker.dataset.temperature = currentTemperature != null ? String(currentTemperature) : '';
   marker.dataset.isOffline = String(props.isOffline ?? false);
   marker.dataset.validBearings = props.validBearings ?? '';
   marker.dataset.lastUpdate = props.lastUpdate ?? '';
@@ -250,15 +262,22 @@ function updateMarkerElement(
     arrow.style.backgroundImage = '';
     arrow.style.transform = '';
     arrow.innerHTML = renderToStaticMarkup(
-      <StationMarker
-        bearing={expired ? undefined : (currentBearing ?? undefined)}
-        speed={expired ? undefined : (currentAverage ?? undefined)}
-        gust={expired ? undefined : (currentGust ?? undefined)}
-        validBearings={props.validBearings ?? undefined}
-        isOffline={props.isOffline ?? undefined}
-        unit={unit}
-        sport={sport}
-      />
+      sport === 'temperature' ? (
+        <StationTemperatureMarker
+          temperature={currentTemperature ?? null}
+          isOffline={props.isOffline ?? undefined}
+        />
+      ) : (
+        <StationMarker
+          bearing={expired ? undefined : (currentBearing ?? undefined)}
+          speed={expired ? undefined : (currentAverage ?? undefined)}
+          gust={expired ? undefined : (currentGust ?? undefined)}
+          validBearings={props.validBearings ?? undefined}
+          isOffline={props.isOffline ?? undefined}
+          unit={unit}
+          sport={sport}
+        />
+      )
     );
   }
 }
@@ -273,6 +292,8 @@ function readPropsFromDataset(marker: HTMLDivElement): StationProperties {
     currentAverage: marker.dataset.avg !== '' ? Number(marker.dataset.avg) : null,
     currentGust: marker.dataset.gust !== '' ? Number(marker.dataset.gust) : null,
     currentBearing: marker.dataset.bearing !== '' ? Number(marker.dataset.bearing) : null,
+    currentTemperature:
+      marker.dataset.temperature !== '' ? Number(marker.dataset.temperature) : null,
     validBearings:
       marker.dataset.validBearings !== '' ? (marker.dataset.validBearings ?? null) : null,
     isOffline: marker.dataset.isOffline === 'true',
@@ -332,7 +353,13 @@ export function useStationMarkers({
     (props: StationProperties): IStationMarker => {
       const expired = isExpired(props.lastUpdate);
       const popupProps: StationProperties = expired
-        ? { ...props, currentAverage: null, currentGust: null, currentBearing: null }
+        ? {
+            ...props,
+            currentAverage: null,
+            currentGust: null,
+            currentBearing: null,
+            currentTemperature: null
+          }
         : props;
       const popup = new mapboxgl.Popup({
         closeButton: false,
@@ -502,6 +529,7 @@ export function useStationMarkers({
           currentAverage: windAverage,
           currentGust: windGust,
           currentBearing: windBearing,
+          currentTemperature: null,
           validBearings,
           isOffline: false,
           lastUpdate: null // full opacity
