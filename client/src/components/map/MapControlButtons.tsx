@@ -20,7 +20,8 @@ import {
   Trash2,
   ZoomIn,
   ZoomOut,
-  Wind
+  Wind,
+  ThermometerIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -527,7 +528,11 @@ export function MapControlButtons({
                         {(Object.entries(SPORT_LABELS) as [SportType, string][]).map(
                           ([value, label]) => (
                             <SelectItem key={value} value={value}>
-                              <Wind className="w-5 h-5 sm:w-6 sm:h-6" />
+                              {value === 'temperature' ? (
+                                <ThermometerIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                              ) : (
+                                <Wind className="w-5 h-5 sm:w-6 sm:h-6" />
+                              )}
                               {label}
                             </SelectItem>
                           )
