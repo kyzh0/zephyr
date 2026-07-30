@@ -201,6 +201,7 @@ function createMarkerElement(
   container.dataset.gust = currentGust != null ? String(currentGust) : '';
   container.dataset.name = props.name;
   container.dataset.bearing = currentBearing != null ? String(currentBearing) : '';
+  container.dataset.temperature = currentTemperature != null ? String(currentTemperature) : '';
   container.dataset.isOffline = String(isOffline ?? false);
   container.dataset.validBearings = validBearings ?? '';
   container.dataset.lastUpdate = lastUpdate ?? '';

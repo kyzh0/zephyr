@@ -21,7 +21,8 @@ export const StationTemperatureMarker = ({
   size = DEFAULT_STATION_MARKER_SIZE,
   isOffline
 }: StationTemperatureMarkerProps): ReactNode => {
-  const coreColor = isOffline ? 'white' : getWindColorForSport(temperature, 'temperature');
+  const hasTemperature = temperature !== null && !isOffline;
+  const coreColor = hasTemperature ? getWindColorForSport(temperature, 'temperature') : 'white';
 
   const cx = size / 2;
   const cy = size / 2;
@@ -38,6 +39,7 @@ export const StationTemperatureMarker = ({
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
+        opacity={hasTemperature ? 1 : 0.4}
       >
         {/* Circle (core color) - drawn outside rotation so it appears cleanly on top */}
         {/* Attach pointerevents to this circle only, so interactivity is bounded to the circle only */}

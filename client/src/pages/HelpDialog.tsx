@@ -139,7 +139,7 @@ export default function HelpDialog() {
             <div className="flex justify-center items-center w-10 shrink-0">
               <Wind className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="flex items-center">Change sport to update wind colours</div>
+            <div className="flex items-center">Change display mode to update map markers</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">

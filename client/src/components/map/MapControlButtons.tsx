@@ -19,7 +19,8 @@ import {
   Check,
   Trash2,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
+  Wind
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -526,6 +527,7 @@ export function MapControlButtons({
                         {(Object.entries(SPORT_LABELS) as [SportType, string][]).map(
                           ([value, label]) => (
                             <SelectItem key={value} value={value}>
+                              <Wind className="w-5 h-5 sm:w-6 sm:h-6" />
                               {label}
                             </SelectItem>
                           )
@@ -534,7 +536,7 @@ export function MapControlButtons({
                     </Select>
                   </span>
                 </TooltipTrigger>
-                <TooltipContent side="right">Wind colours for sport</TooltipContent>
+                <TooltipContent side="right">Display mode for map markers</TooltipContent>
               </Tooltip>
             )}
           </>
