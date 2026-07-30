@@ -18,7 +18,8 @@ export default defineConfig({
       manifest: false,
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        globIgnores: ['**/Admin*.js', '**/ProtectedRoute*.js']
+        globIgnores: ['**/Admin*.js', '**/ProtectedRoute*.js'],
+        maximumFileSizeToCacheInBytes: 3000000 // 3MB
       }
     })
   ],
@@ -28,18 +29,8 @@ export default defineConfig({
     }
   },
   build: {
-    // Split vendor chunks
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'map-vendor': ['mapbox-gl'],
-          'chart-vendor': ['recharts']
-        }
-      }
-    },
     // Enable minification
-    minify: 'esbuild',
+    minify: 'oxc',
     target: 'esnext',
     sourcemap: false,
     cssCodeSplit: true,

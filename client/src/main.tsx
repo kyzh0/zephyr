@@ -7,6 +7,7 @@ import { Toaster } from './components/ui/sonner';
 
 import './index.css';
 import { router } from './router';
+import { TooltipProvider } from './components/ui/tooltip';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,12 +22,14 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Suspense
-        fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}
-      >
-        <RouterProvider router={router} />
-        <Toaster />
-      </Suspense>
+      <TooltipProvider>
+        <Suspense
+          fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}
+        >
+          <RouterProvider router={router} />
+          <Toaster />
+        </Suspense>
+      </TooltipProvider>
     </QueryClientProvider>
   </StrictMode>
 );
