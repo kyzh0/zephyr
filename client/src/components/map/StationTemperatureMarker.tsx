@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 
-import { getTextColor, getWindColorForSport } from '@/lib/utils';
+import { getTextColor, interpolateColor } from '@/lib/utils';
 
 const DEFAULT_STATION_MARKER_SIZE = 50; // default bounding box size in pixels
 
@@ -9,6 +9,45 @@ export interface StationTemperatureMarkerProps {
   size?: number; // bounding box size in px (default: 50)
   isOffline?: boolean;
 }
+
+const getColorForTemperature = (temp: number | null): string => {
+  if (temp == null) return '#FFFFFF';
+
+  const nzMonthlyAverages: { high: number; medium: number; low: number }[] = [
+    { high: 25, medium: 18, low: 11 },
+    { high: 25, medium: 18, low: 10 },
+    { high: 23, medium: 15, low: 7 },
+    { high: 20, medium: 12, low: 4 },
+    { high: 18, medium: 10, low: 2 },
+    { high: 15, medium: 7, low: -2 },
+    { high: 14, medium: 6, low: -2 },
+    { high: 15, medium: 8, low: 0 },
+    { high: 16, medium: 9, low: 2 },
+    { high: 19, medium: 12, low: 4 },
+    { high: 21, medium: 15, low: 7 },
+    { high: 23, medium: 17, low: 9 }
+  ];
+
+  const currentMonthAvg = nzMonthlyAverages[new Date().getMonth()];
+
+  const colors = [
+    { temp: currentMonthAvg.low - 10, hex: '#f536ff' },
+    { temp: currentMonthAvg.low, hex: '#b1fffe' },
+    { temp: currentMonthAvg.medium, hex: '#91ffc4' },
+    { temp: currentMonthAvg.high, hex: '#f8ff71' },
+    { temp: currentMonthAvg.high + 10, hex: '#ff4d4d' }
+  ];
+
+  for (let i = 0; i < colors.length - 1; i++) {
+    if (temp >= colors[i].temp && temp <= colors[i + 1].temp) {
+      const tempRange = colors[i + 1].temp - colors[i].temp;
+      const factor = tempRange === 0 ? 0 : (temp - colors[i].temp) / tempRange;
+      return interpolateColor(colors[i].hex, colors[i + 1].hex, factor);
+    }
+  }
+
+  return colors[colors.length - 1].hex;
+};
 
 /**
  * Generates SVG for a single temperature marker.
@@ -22,7 +61,7 @@ export const StationTemperatureMarker = ({
   isOffline
 }: StationTemperatureMarkerProps): ReactNode => {
   const hasTemperature = temperature !== null && !isOffline;
-  const coreColor = hasTemperature ? getWindColorForSport(temperature, 'temperature') : 'white';
+  const coreColor = hasTemperature ? getColorForTemperature(temperature) : 'white';
 
   const cx = size / 2;
   const cy = size / 2;

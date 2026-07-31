@@ -53,7 +53,7 @@ function rgbToHex(r: number, g: number, b: number): string {
 /**
  * Interpolate between two hex colors
  */
-function interpolateColor(color1: string, color2: string, factor: number): string {
+export function interpolateColor(color1: string, color2: string, factor: number): string {
   const [r1, g1, b1] = hexToRgb(color1);
   const [r2, g2, b2] = hexToRgb(color2);
 
@@ -118,30 +118,17 @@ export const getWindColorForSport = (avgWindKph: number | null, sport: SportType
 
   const p = SPORT_PROFILES[sport];
 
-  // This prevents the 0 temp from showing up white
-  const colors =
-    sport === 'temperature'
-      ? [
-          { speed: p.min, hex: '#e1fbff' },
-          { speed: p.weak, hex: '#b1fffe' },
-          { speed: p.perfectLow, hex: '#91ffc4' },
-          { speed: p.perfectHigh, hex: '#82ff82' },
-          { speed: p.strong, hex: '#f8ff71' },
-          { speed: p.threshold, hex: '#ff9966' },
-          { speed: p.extreme, hex: '#ff4d4d' },
-          { speed: p.extreme * 1.5, hex: '#f536ff' }
-        ]
-      : [
-          { speed: 0, hex: '#FFFFFF' },
-          { speed: p.min, hex: '#e1fbff' },
-          { speed: p.weak, hex: '#b1fffe' },
-          { speed: p.perfectLow, hex: '#91ffc4' },
-          { speed: p.perfectHigh, hex: '#82ff82' },
-          { speed: p.strong, hex: '#f8ff71' },
-          { speed: p.threshold, hex: '#ff9966' },
-          { speed: p.extreme, hex: '#ff4d4d' },
-          { speed: p.extreme * 1.5, hex: '#f536ff' }
-        ];
+  const colors = [
+    { speed: 0, hex: '#FFFFFF' },
+    { speed: p.min, hex: '#e1fbff' },
+    { speed: p.weak, hex: '#b1fffe' },
+    { speed: p.perfectLow, hex: '#91ffc4' },
+    { speed: p.perfectHigh, hex: '#82ff82' },
+    { speed: p.strong, hex: '#f8ff71' },
+    { speed: p.threshold, hex: '#ff9966' },
+    { speed: p.extreme, hex: '#ff4d4d' },
+    { speed: p.extreme * 1.5, hex: '#f536ff' }
+  ];
 
   for (let i = 0; i < colors.length - 1; i++) {
     if (avgWindKph >= colors[i].speed && avgWindKph <= colors[i + 1].speed) {
