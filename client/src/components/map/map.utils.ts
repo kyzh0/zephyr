@@ -57,6 +57,7 @@ export function getStationGeoJson(stations: Station[] | undefined): GeoJson | nu
         currentAverage: avg,
         currentGust: gust,
         currentBearing: station.currentBearing == null ? null : Math.round(station.currentBearing),
+        currentTemperature: station.currentTemperature ?? null,
         validBearings: station.validBearings,
         isOffline: station.isOffline,
         lastUpdate: station.lastUpdate ?? null
