@@ -53,7 +53,7 @@ function rgbToHex(r: number, g: number, b: number): string {
 /**
  * Interpolate between two hex colors
  */
-function interpolateColor(color1: string, color2: string, factor: number): string {
+export function interpolateColor(color1: string, color2: string, factor: number): string {
   const [r1, g1, b1] = hexToRgb(color1);
   const [r2, g2, b2] = hexToRgb(color2);
 
@@ -101,6 +101,15 @@ const SPORT_PROFILES: Record<SportType, SportProfile> = {
     strong: 50,
     threshold: 56,
     extreme: 70
+  },
+  temperature: {
+    min: 0,
+    weak: 5,
+    perfectLow: 10,
+    perfectHigh: 15,
+    strong: 22,
+    threshold: 28,
+    extreme: 35
   }
 };
 
@@ -108,6 +117,7 @@ export const getWindColorForSport = (avgWindKph: number | null, sport: SportType
   if (avgWindKph == null) return '#FFFFFF';
 
   const p = SPORT_PROFILES[sport];
+
   const colors = [
     { speed: 0, hex: '#FFFFFF' },
     { speed: p.min, hex: '#e1fbff' },

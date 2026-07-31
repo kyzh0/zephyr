@@ -72,14 +72,16 @@ export type MapViewMode = (typeof MAP_VIEW_MODES)[keyof typeof MAP_VIEW_MODES];
 export const SPORTS = {
   PARAGLIDING: 'paragliding',
   HANGGLIDING: 'hanggliding',
-  KITESURFING: 'kitesurfing'
+  KITESURFING: 'kitesurfing',
+  TEMPERATURE: 'temperature'
 } as const;
 export type SportType = (typeof SPORTS)[keyof typeof SPORTS];
 
 export const SPORT_LABELS: Record<SportType, string> = {
   [SPORTS.PARAGLIDING]: 'Paragliding',
   [SPORTS.HANGGLIDING]: 'Hang Gliding',
-  [SPORTS.KITESURFING]: 'Kitesurfing'
+  [SPORTS.KITESURFING]: 'Kitesurfing',
+  [SPORTS.TEMPERATURE]: 'Temperature'
 };
 
 export interface MapControlHandlers {

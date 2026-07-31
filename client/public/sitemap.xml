@@ -31,16 +31,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804063</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804064</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804066</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -141,11 +131,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80407f</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804080</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -197,11 +182,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80408c</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80408d</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -292,11 +272,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040a6</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040a7</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -436,11 +411,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040c9</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040cb</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -481,11 +451,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040d3</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040d5</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -517,11 +482,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040db</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040dd</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -561,26 +521,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040e7</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040e8</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040e9</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040ea</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040eb</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -607,11 +547,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040f1</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040f2</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -666,17 +601,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040ff</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804100</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804101</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -692,11 +617,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804105</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804107</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -762,11 +682,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804117</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804118</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -881,27 +796,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804132</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804133</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804134</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804135</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804136</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -922,11 +822,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80413b</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80413c</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -981,11 +876,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804148</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804149</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -1016,22 +906,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80414f</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804151</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804152</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804153</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1072,11 +952,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80415b</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80415c</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1166,11 +1041,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80416e</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80416f</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -1182,11 +1052,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804171</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804172</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1216,17 +1081,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804178</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804179</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80417a</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1281,11 +1136,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804188</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804189</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -1336,27 +1186,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804195</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804197</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804198</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804199</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80419a</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1376,17 +1211,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80419e</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041a0</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041a2</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1401,17 +1226,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041a7</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041a8</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041aa</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1476,11 +1291,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041b8</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041ba</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -1531,11 +1341,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041ca</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041cb</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -1557,11 +1362,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041cf</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/663413a7e0465bb8142202d9</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1666,11 +1466,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/66671d918056c3be7d994b9f</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6669e60f95f17aeffabc17b7</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -1736,11 +1531,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/673bc0feef0e9161084e5853</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/67417dfdef0e9161089ba52f</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -1767,11 +1557,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/67461d8b3f739373215bc38b</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/67461edf3f739373215bcd84</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1821,17 +1606,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6754b7fc64310e38a97125f9</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/67571e5964310e38a9922694</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/67571ede64310e38a99228f9</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1842,11 +1617,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/67571fa964310e38a9922902</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6757200664310e38a9923634</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1877,11 +1647,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/675724d664310e38a9927015</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6757251b64310e38a9927027</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1926,11 +1691,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6765247c446bb8ce59a0f6ca</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6770e4ed609ec4d45d3ef869</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -1951,22 +1711,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/67b4f3314a5580e70341dfe9</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/67b9b3a70da9c52028eb451f</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/67bdfc130da9c520282c2e22</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/684d4c7777a383df56a8ac50</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2106,22 +1856,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/68f65c5ce3323e552ce3b384</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/68f66309e3323e552ce3bc46</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6906c504a899132dae030123</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6906f9fca899132dae033ce4</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2136,22 +1876,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6933dbf8c2ae0fa1234c34e8</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/stations/6933e76fc2ae0fa1234c3f8e</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6933eb2bc2ae0fa1234c4553</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6934bce8c2ae0fa1234d8370</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2171,6 +1901,86 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.zephyrapp.nz/stations/6997d5d107f79fd9e94ff042</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/699ceb302dc1854b618de6ac</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/699cebf02dc1854b618de7b5</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/699f5a242dc1854b6190a540</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/699f5c882dc1854b6190a8d8</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69e1724f22423dc446c4e9c0</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69e1ac2622423dc446c53012</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69e1ad6722423dc446c53218</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69e1ae3922423dc446c532a8</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69e1af2122423dc446c534cf</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69e1b0b422423dc446c536a8</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69e1b56022423dc446c53ca6</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69e1b67422423dc446c53eb0</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69e1b79122423dc446c53f41</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69e1b8ac22423dc446c54165</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69e56995ad03d3ab47012a20</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804079</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -2186,7 +1996,272 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80408f</loc>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040b3</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040ee</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040fb</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80410f</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804114</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804130</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804187</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041a3</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041be</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/664882b281747abe253630bd</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/66b46c434d74a5dd536f9383</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/691443d5a899132dae18670c</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6933e6b7c2ae0fa1234c3e3e</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804063</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804064</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040a7</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040e7</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040e8</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040e9</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040ea</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804118</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804132</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804133</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804148</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80414f</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804178</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80417a</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804188</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804195</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80419a</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80419e</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041a2</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041aa</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041b8</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041ca</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/66671d918056c3be7d994b9f</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/67461edf3f739373215bcd84</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/67571ede64310e38a99228f9</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6757200664310e38a9923634</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6757251b64310e38a9927027</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/684d4c7777a383df56a8ac50</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6887a73ae4de09b7db6a0e0b</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/68f65c5ce3323e552ce3b384</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6933dbf8c2ae0fa1234c34e8</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69bcad201bb2c055d1529489</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69d5ccb1644ebcb3195cd090</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69db418322423dc446bee2d9</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69df428022423dc446c2e344</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/69f7dd013fd033f10b5f8696</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6a1abc59c9e9274faee37c4d</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6a4c1e7884b55c1b772cfa15</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6a4c1ec984b55c1b772cfa8a</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6a5dca3b575b028ef257ce72</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6a65f7ba7cf673ca37756cb0</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2216,7 +2291,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040b3</loc>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040d3</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2226,52 +2301,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040dd</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040e5</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040ee</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040f4</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8040fb</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804106</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80410f</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804112</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804114</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804130</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804187</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2281,12 +2316,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80419f</loc>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b804197</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041a3</loc>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b80419f</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2296,27 +2331,27 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041be</loc>
+    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041a7</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6631d5ddcf26372d5b8041c5</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/664882b281747abe253630bd</loc>
-    <changefreq>always</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/stations/66b46c434d74a5dd536f9383</loc>
+    <loc>https://www.zephyrapp.nz/stations/673bc0feef0e9161084e5853</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/6740f97bef0e916108915ccc</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6754b7fc64310e38a97125f9</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/67b4f3314a5580e70341dfe9</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2331,7 +2366,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/691443d5a899132dae18670c</loc>
+    <loc>https://www.zephyrapp.nz/stations/6906f9fca899132dae033ce4</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2356,12 +2391,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6933e6b7c2ae0fa1234c3e3e</loc>
+    <loc>https://www.zephyrapp.nz/stations/6934b97dc2ae0fa1234d7de5</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/stations/6934b97dc2ae0fa1234d7de5</loc>
+    <loc>https://www.zephyrapp.nz/stations/6934bce8c2ae0fa1234d8370</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2387,6 +2422,11 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/stations/69673966a6000ed3a873922d</loc>
+    <changefreq>always</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/stations/6993a4fd8e7b4b577c944448</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
@@ -3441,22 +3481,317 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/webcams/698658198e7b4b577c8528ca</loc>
-    <changefreq>always</changefreq>
-    <priority>0.6</priority>
+    <loc>https://www.zephyrapp.nz/sites/698e438f8e7b4b577c8e0e7e</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/webcams/6757e7b1f9f981f1455b1d01</loc>
-    <changefreq>always</changefreq>
-    <priority>0.6</priority>
+    <loc>https://www.zephyrapp.nz/sites/6997920757755f40a5e9c205</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/webcams/6631d687c87f863ef5801d79</loc>
-    <changefreq>always</changefreq>
-    <priority>0.6</priority>
+    <loc>https://www.zephyrapp.nz/sites/699a3d052dc1854b618a9ae6</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/webcams/6631d687c87f863ef5801d7f</loc>
+    <loc>https://www.zephyrapp.nz/sites/699a650b2dc1854b618ae6fd</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699a657c2dc1854b618ae77f</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699a67022dc1854b618aeb3d</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699a69f52dc1854b618aef90</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699a6b8d2dc1854b618af382</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699a6c512dc1854b618af481</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699aa32b2dc1854b618b4f6e</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699aa5712dc1854b618b5219</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699aa84a2dc1854b618b5606</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699aaa1a2dc1854b618b577c</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699aad0d2dc1854b618b5c54</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699aae0f2dc1854b618b5cfb</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699ab0402dc1854b618b604f</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699ab2612dc1854b618b6312</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699ab3582dc1854b618b63d0</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699ab66a2dc1854b618b6769</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699ab7812dc1854b618b6810</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699cef372dc1854b618deca9</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699cf0062dc1854b618dee70</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699cf0ef2dc1854b618def39</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699cf1ad2dc1854b618df0c9</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699cf31d2dc1854b618df371</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699e1f152dc1854b618f43c4</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699e29622dc1854b618f5362</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699f5e922dc1854b6190ab7a</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699f5f342dc1854b6190ad42</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/699f5fd12dc1854b6190ae76</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69aa0d7fa1f0e1b3783991f3</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69aa6f51a1f0e1b3783a17ba</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69add83240cda99d6f9a37dd</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69b355a80eae8c0c1e092c30</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69b73737cda72fbb2f1174aa</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69c43d201bb2c055d15a8528</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69c43df41bb2c055d15a8702</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69c4455c1bb2c055d15a8f52</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69c449b91bb2c055d15a9495</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69c44a711bb2c055d15a951e</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69cec56994bb19a0c98704b2</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69d19b5694bb19a0c98a02da</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69d19d5b94bb19a0c98a0595</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69d19dc494bb19a0c98a0673</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69d19ec994bb19a0c98a0784</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69d1a27b94bb19a0c98a0d4e</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69d1a34e94bb19a0c98a0e95</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69d6001c644ebcb3195d0196</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69e165c822423dc446c4d83c</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69e169a422423dc446c4de3e</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69e6dc2dad03d3ab470281c3</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69f7db803fd033f10b5f852d</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/69f810133fd033f10b5fbb0c</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/6a10c941029232cea5f16902</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/6a12e417c9e9274faedc193f</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/6a14c629c9e9274faedddc3d</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/6a14cbd9c9e9274faedde21e</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/6a150381c9e9274faede1d73</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/6a179817c9e9274faee06fea</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/6a1b194fc9e9274faee3c8d1</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/6a1b19ffc9e9274faee3c8f7</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/sites/6a421798715131f8aa5e7d06</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/webcams/6631d687c87f863ef5801d7c</loc>
     <changefreq>always</changefreq>
     <priority>0.6</priority>
   </url>
@@ -3476,12 +3811,42 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/webcams/6631d687c87f863ef5801d76</loc>
+    <loc>https://www.zephyrapp.nz/webcams/69b518525e76c3ad13cf5945</loc>
     <changefreq>always</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/webcams/6797ea30974c0f7fe56a3418</loc>
+    <changefreq>always</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/webcams/6631d687c87f863ef5801d7f</loc>
+    <changefreq>always</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/webcams/6a250ea6c1419b725b8cb0f8</loc>
+    <changefreq>always</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/webcams/6757e7b1f9f981f1455b1d01</loc>
+    <changefreq>always</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/webcams/6631d687c87f863ef5801d79</loc>
+    <changefreq>always</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/webcams/6631d687c87f863ef5801d76</loc>
+    <changefreq>always</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/webcams/6669ee7995f17aeffabc49e9</loc>
     <changefreq>always</changefreq>
     <priority>0.6</priority>
   </url>
@@ -3502,21 +3867,6 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/webcams/6631d687c87f863ef5801d77</loc>
-    <changefreq>always</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/webcams/6631d687c87f863ef5801d7e</loc>
-    <changefreq>always</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/webcams/6631d687c87f863ef5801d7c</loc>
-    <changefreq>always</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.zephyrapp.nz/webcams/6669ee7995f17aeffabc49e9</loc>
     <changefreq>always</changefreq>
     <priority>0.6</priority>
   </url>
@@ -3951,11 +4301,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://www.zephyrapp.nz/landings/696e9d7485188df32465dcf2</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://www.zephyrapp.nz/landings/696e9fae85188df32465e08d</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -4182,6 +4527,56 @@
   </url>
   <url>
     <loc>https://www.zephyrapp.nz/landings/698004f78e7b4b577c7e75d9</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/landings/699a6c7e2dc1854b618af4ee</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/landings/699aba0d2dc1854b618b6ab5</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/landings/699aba2e2dc1854b618b6ae7</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/landings/699fa6862dc1854b619103ac</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/landings/69a8b69aa1f0e1b3783812f0</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/landings/69add88c40cda99d6f9a38a9</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/landings/69b355c80eae8c0c1e092c68</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/landings/69b73771cda72fbb2f1174cc</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/landings/69ceeeea94bb19a0c98744bc</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.zephyrapp.nz/landings/69e1675722423dc446c4dae0</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
