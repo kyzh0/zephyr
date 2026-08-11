@@ -1,6 +1,15 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Plus, Search, AlertCircle, SquareArrowOutUpRight } from 'lucide-react';
+import {
+  LogOut,
+  Plus,
+  Search,
+  AlertCircle,
+  SquareArrowOutUpRight,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +64,20 @@ function filterAndSort<T extends { name: string; isDisabled?: boolean }>(
   });
 }
 
+type StationSortField = 'name' | 'type' | 'status';
+type SortDirection = 'asc' | 'desc';
+
+function getStationStatusLabel(station: {
+  isDisabled?: boolean;
+  isOffline?: boolean;
+  isError?: boolean;
+}): string {
+  if (station.isDisabled) return 'Disabled';
+  if (station.isOffline) return 'Offline';
+  if (station.isError) return 'Error';
+  return 'OK';
+}
+
 interface AdminDashboardProps {
   tab?: 'stations' | 'webcams' | 'soundings' | 'sites' | 'landings' | 'donations' | 'clients';
 }
@@ -64,6 +87,8 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
 
   const [stationSearch, setStationSearch] = useState('');
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
+  const [stationSortField, setStationSortField] = useState<StationSortField>('name');
+  const [stationSortDirection, setStationSortDirection] = useState<SortDirection>('asc');
   const [webcamSearch, setWebcamSearch] = useState('');
   const [soundingSearch, setSoundingSearch] = useState('');
   const [siteSearch, setSiteSearch] = useState('');
@@ -77,23 +102,36 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
   const { landings } = useLandings({ includeDisabled: true });
   const { clients, isLoading: clientsLoading } = useClients();
 
-  const filteredStations = useMemo(() => {
-    if (showErrorsOnly) {
-      const query = stationSearch.trim().toLowerCase();
-      return stations
-        .filter(
-          (s) => (s.isOffline || s.isError) && (!query || s.name.toLowerCase().includes(query))
-        )
-        .sort((a, b) => {
-          const disabledDiff = Number(Boolean(a.isDisabled)) - Number(Boolean(b.isDisabled));
-          if (disabledDiff !== 0) return disabledDiff;
-          const offlineDiff = Number(Boolean(b.isOffline)) - Number(Boolean(a.isOffline));
-          if (offlineDiff !== 0) return offlineDiff;
-          return a.name.localeCompare(b.name);
-        });
+  const handleStationSort = (field: StationSortField) => {
+    if (field === stationSortField) {
+      setStationSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setStationSortField(field);
+      setStationSortDirection('asc');
     }
-    return filterAndSort(stations, stationSearch);
-  }, [stations, stationSearch, showErrorsOnly]);
+  };
+
+  const filteredStations = useMemo(() => {
+    const query = stationSearch.trim().toLowerCase();
+    let list = stations.filter((s) => !query || s.name.toLowerCase().includes(query));
+    if (showErrorsOnly) {
+      list = list.filter((s) => s.isOffline || s.isError);
+    }
+
+    const direction = stationSortDirection === 'asc' ? 1 : -1;
+    return [...list].sort((a, b) => {
+      let cmp = 0;
+      if (stationSortField === 'name') {
+        cmp = a.name.localeCompare(b.name);
+      } else if (stationSortField === 'type') {
+        cmp = (a.type || '').localeCompare(b.type || '');
+      } else {
+        cmp = getStationStatusLabel(a).localeCompare(getStationStatusLabel(b));
+      }
+      if (cmp === 0) cmp = a.name.localeCompare(b.name);
+      return cmp * direction;
+    });
+  }, [stations, stationSearch, showErrorsOnly, stationSortField, stationSortDirection]);
 
   const errorCount = useMemo(() => {
     return stations.filter((s) => s.isError).length;
@@ -201,9 +239,57 @@ export default function AdminDashboard({ tab = 'stations' }: AdminDashboardProps
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="w-25">Type</TableHead>
-                    <TableHead className="w-25">Status</TableHead>
+                    <TableHead
+                      className="cursor-pointer select-none"
+                      onClick={() => handleStationSort('name')}
+                    >
+                      <span className="flex items-center gap-1">
+                        Name
+                        {stationSortField === 'name' ? (
+                          stationSortDirection === 'asc' ? (
+                            <ArrowUp className="h-3 w-3" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="h-3 w-3 text-muted-foreground/50" />
+                        )}
+                      </span>
+                    </TableHead>
+                    <TableHead
+                      className="w-25 cursor-pointer select-none"
+                      onClick={() => handleStationSort('type')}
+                    >
+                      <span className="flex items-center gap-1">
+                        Type
+                        {stationSortField === 'type' ? (
+                          stationSortDirection === 'asc' ? (
+                            <ArrowUp className="h-3 w-3" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="h-3 w-3 text-muted-foreground/50" />
+                        )}
+                      </span>
+                    </TableHead>
+                    <TableHead
+                      className="w-25 cursor-pointer select-none"
+                      onClick={() => handleStationSort('status')}
+                    >
+                      <span className="flex items-center gap-1">
+                        Status
+                        {stationSortField === 'status' ? (
+                          stationSortDirection === 'asc' ? (
+                            <ArrowUp className="h-3 w-3" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="h-3 w-3 text-muted-foreground/50" />
+                        )}
+                      </span>
+                    </TableHead>
                     <TableHead className="w-10"></TableHead>
                   </TableRow>
                 </TableHeader>

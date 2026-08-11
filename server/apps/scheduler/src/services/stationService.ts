@@ -279,6 +279,7 @@ export async function checkForErrors(): Promise<void> {
       let msg = '';
       const g = groupBy(errors, 'type');
 
+      const stationsToExclude = ['hbrc'];
       const singleStations = [
         'lpc',
         'levin',
@@ -294,11 +295,15 @@ export async function checkForErrors(): Promise<void> {
         'wl',
         'windicator',
         'tclz',
-        'shpg'
+        'shpg',
+        'napier'
       ];
 
       for (const [key, value] of Object.entries(g)) {
-        if (singleStations.includes(key) || value.length > 2) {
+        if (
+          !stationsToExclude.includes(key) &&
+          (singleStations.includes(key) || value.length > 2)
+        ) {
           msg += `\n${key.toUpperCase()}\n\n`;
           msg += value.map((x) => x.msg).join('\n');
         }

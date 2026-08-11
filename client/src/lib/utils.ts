@@ -164,6 +164,8 @@ export const getStationTypeName = (code: string): string => {
       return 'Met Office WOW';
     case 'po':
       return 'Port Otago';
+    case 'napier':
+      return 'Port Napier';
     case 'wp':
       return 'Weather Pro';
     case 'cp':

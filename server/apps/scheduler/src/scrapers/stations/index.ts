@@ -20,6 +20,7 @@ import scrapeMrcData from './types/mrc';
 import scrapeNavigatusData from './types/navigatus';
 import scrapePortersData from './types/porters';
 import scrapePortOtagoData from './types/portOtago';
+import scrapePortNapierData from './types/portNapier';
 import scrapePredictWindData from './types/predictWind';
 import scrapePrimePortData from './types/primePort';
 import scrapeShpgData from './types/shpg';
@@ -61,6 +62,7 @@ const scrapers = {
   navigatus: scrapeNavigatusData,
   porters: scrapePortersData,
   po: scrapePortOtagoData,
+  napier: scrapePortNapierData,
   pw: scrapePredictWindData,
   prime: scrapePrimePortData,
   sfo: scrapeSofarOceanData,
