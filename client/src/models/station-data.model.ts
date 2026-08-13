@@ -15,4 +15,5 @@ export interface HistoricalStationData {
   windGust: number | null;
   windBearing: number | null;
   validBearings: string | null;
+  temperature: number | null;
 }
