@@ -49,6 +49,7 @@ export function useMapInstance({ containerRef }: UseMapInstanceOptions): UseMapI
       style: initialStyle,
       center: [lon, lat],
       zoom,
+      projection: 'mercator',
       pitchWithRotate: false,
       touchPitch: false
     });

@@ -83,6 +83,8 @@ export function MapControlButtons({
   const minimizeFavourites = useMapStore((s) => s.minimizeFavourites);
   const toggleWebcams = useMapStore((s) => s.toggleWebcams);
   const toggleSoundings = useMapStore((s) => s.toggleSoundings);
+  const showWindField = useMapStore((s) => s.showWindField);
+  const toggleWindField = useMapStore((s) => s.toggleWindField);
   const setUnit = useMapStore((s) => s.setUnit);
   const setViewMode = useMapStore((s) => s.setViewMode);
   const toggleMinimizeRecents = useMapStore((s) => s.toggleMinimizeRecents);
@@ -226,6 +228,18 @@ export function MapControlButtons({
           </g>
         </svg>
         <span className={showSoundings ? 'text-blue-500' : ''}>Soundings</span>
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="justify-start gap-2"
+        onClick={() => {
+          toggleWindField();
+          setMenuOpen(false);
+        }}
+      >
+        <Wind className={`${iconClass} opacity-70`} />
+        <span className={showWindField ? 'text-blue-500' : ''}>Wind field</span>
       </Button>
       <div className="border-t my-1" />
       <Button
@@ -376,6 +390,16 @@ export function MapControlButtons({
                 <Grid3X3 className={`${iconClass} opacity-70`} />
               </Button>
             )}
+            {!isFlyingMode && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleWindField}
+                className={`${btnClass} bg-background ${showWindField ? '*:[svg]:stroke-blue-500' : ''}`}
+              >
+                <Wind className={`${iconClass} opacity-70`} />
+              </Button>
+            )}
           </>
         ) : (
           <>
@@ -393,6 +417,19 @@ export function MapControlButtons({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Help</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleWindField}
+                  className={`${btnClass} bg-background ${showWindField ? '*:[svg]:stroke-blue-500' : ''}`}
+                >
+                  <Wind className={`${iconClass} opacity-70`} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{showWindField ? 'Hide' : 'Show'} wind field</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>

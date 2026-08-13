@@ -5,3 +5,4 @@ export { useWebcamMarkers } from './useWebcamMarkers';
 export { useSoundingMarkers } from './useSoundingMarkers';
 export { useSiteMarkers } from './useSiteMarkers';
 export { useLandingMarkers } from './useLandingMarkers';
+export { useWindFieldOverlay } from './useWindFieldOverlay';

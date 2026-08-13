@@ -32,6 +32,7 @@ interface MapStore {
   minimizeRecents: boolean;
   minimizeFavourites: boolean;
   isSatellite: boolean;
+  showWindField: boolean;
   // Ephemeral session state
   historyOffset: number;
   stationElevationFilter: [number, number];
@@ -40,6 +41,7 @@ interface MapStore {
   setOverlay: (overlay: MapOverlay) => void;
   toggleWebcams: () => void;
   toggleSoundings: () => void;
+  toggleWindField: () => void;
   setUnit: (unit: WindUnit) => void;
   setViewMode: (mode: MapViewMode) => void;
   toggleMinimizeRecents: () => void;
@@ -59,6 +61,7 @@ export const useMapStore = create<MapStore>()(
       minimizeRecents: true,
       minimizeFavourites: true,
       isSatellite: false,
+      showWindField: false,
       historyOffset: 0,
       stationElevationFilter: [ELEVATION_FILTER_MIN, ELEVATION_FILTER_MAX],
       selectedSiteDirection: null,
@@ -67,6 +70,7 @@ export const useMapStore = create<MapStore>()(
         set({ overlay: get().overlay === MAP_OVERLAYS.WEBCAMS ? null : MAP_OVERLAYS.WEBCAMS }),
       toggleSoundings: () =>
         set({ overlay: get().overlay === MAP_OVERLAYS.SOUNDINGS ? null : MAP_OVERLAYS.SOUNDINGS }),
+      toggleWindField: () => set({ showWindField: !get().showWindField }),
       setUnit: (unit) => set({ unit }),
       setViewMode: (viewMode) => set({ viewMode }),
       toggleMinimizeRecents: () =>
@@ -87,7 +91,8 @@ export const useMapStore = create<MapStore>()(
         viewMode: state.viewMode,
         minimizeRecents: state.minimizeRecents,
         minimizeFavourites: state.minimizeFavourites,
-        isSatellite: state.isSatellite
+        isSatellite: state.isSatellite,
+        showWindField: state.showWindField
       }),
       onRehydrateStorage: () => {
         // TO BE REMOVED - OLD LOCALSTORAGE MIGRATION
@@ -110,6 +115,9 @@ export const useMapStore = create<MapStore>()(
           }
           if (typeof hydratedState.minimizeRecents !== 'boolean') {
             useMapStore.setState({ minimizeRecents: true });
+          }
+          if (typeof hydratedState.showWindField !== 'boolean') {
+            useMapStore.setState({ showWindField: false });
           }
 
           if (hadExistingStore) return;

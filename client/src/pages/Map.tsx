@@ -5,7 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import SEO from '@/components/SEO';
 import { MapControlButtons, MAP_OVERLAYS, MAP_VIEW_MODES } from '@/components/map';
 
-import { useMapStore } from '@/store';
+import { useAppStore, useMapStore } from '@/store';
 import {
   useMapInstance,
   useMapControls,
@@ -13,7 +13,8 @@ import {
   useWebcamMarkers,
   useSoundingMarkers,
   useSiteMarkers,
-  useLandingMarkers
+  useLandingMarkers,
+  useWindFieldOverlay
 } from '@/hooks/map';
 
 export default function Map() {
@@ -21,6 +22,8 @@ export default function Map() {
   const unit = useMapStore((s) => s.unit);
   const viewMode = useMapStore((s) => s.viewMode);
   const historyOffset = useMapStore((s) => s.historyOffset);
+  const showWindField = useMapStore((s) => s.showWindField);
+  const sport = useAppStore((s) => s.sport);
   const stationElevationFilter = useMapStore((s) => s.stationElevationFilter);
   const isHistoricData = historyOffset < 0;
 
@@ -54,6 +57,14 @@ export default function Map() {
     isMapLoaded: isLoaded,
     isVisible: overlay === MAP_OVERLAYS.SOUNDINGS,
     isHistoricData
+  });
+
+  useWindFieldOverlay({
+    map,
+    isMapLoaded: isLoaded,
+    isVisible: showWindField,
+    historyOffset,
+    sport
   });
 
   const { setTransparent: setLandingTransparent } = useLandingMarkers({

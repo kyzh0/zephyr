@@ -5,7 +5,7 @@ import { useMapStore } from '@/store';
 import { MAP_OVERLAYS, MAP_VIEW_MODES } from '@/components/map/map.types';
 import type { MapControlHandlers, SearchResult, Favourite } from '@/components/map/map.types';
 
-function getSnapshotTime(offset: number): Date {
+export function getSnapshotTime(offset: number): Date {
   const now = new Date();
   const minutesPast30 = now.getMinutes() % 30;
   return new Date(
