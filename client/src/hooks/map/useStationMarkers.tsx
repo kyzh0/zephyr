@@ -515,23 +515,20 @@ export function useStationMarkers({
 
       // Update each marker with historical data
       for (const item of markersRef.current) {
-        const stationData = data.values.find((d: HistoricalStationData) => d.id === item.marker.id);
+        const historicStationData = data.values.find(
+          (d: HistoricalStationData) => d.id === item.marker.id
+        );
 
         // Use data if found, otherwise show empty state
-        const windAverage = stationData?.windAverage ?? null;
-        const windGust = stationData?.windGust ?? null;
-        const windBearing = stationData?.windBearing ?? null;
-        const validBearings = stationData?.validBearings ?? null;
-
         const historicalProps: StationProperties = {
           dbId: item.marker.id,
           name: item.marker.dataset.name ?? '',
           elevation: Number(item.marker.dataset.elevation),
-          currentAverage: windAverage,
-          currentGust: windGust,
-          currentBearing: windBearing,
-          currentTemperature: null,
-          validBearings,
+          currentAverage: historicStationData?.windAverage ?? null,
+          currentGust: historicStationData?.windGust ?? null,
+          currentBearing: historicStationData?.windBearing ?? null,
+          currentTemperature: historicStationData?.temperature ?? null,
+          validBearings: historicStationData?.validBearings ?? null,
           isOffline: false,
           lastUpdate: null // full opacity
         };
