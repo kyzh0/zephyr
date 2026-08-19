@@ -642,9 +642,9 @@ export function MapControlButtons({
       {isAirspaceVisible && (
         <div className="fixed inset-x-0 bottom-2 z-100 flex justify-center w-full px-4">
           <div className="flex items-center gap-1 bg-background px-4 pt-3 pb-2 rounded-lg shadow-lg text-xs">
-            Airspace data is provided without warranty and they are not to be construed as
-            constituting part of the official AIP. Verify current airspace information before
-            flight. Thanks to
+            Airspace data is provided without warranty and is not to be construed as constituting
+            part of the official AIP. Always verify current airspace information before flight.
+            Thanks to
             <a
               href="https://gliding.co.nz/pilots/pilot-resources/airspace-files/"
               target="_blank"

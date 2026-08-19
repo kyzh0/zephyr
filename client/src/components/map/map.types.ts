@@ -44,9 +44,11 @@ export interface AirspaceFeature {
 export interface AirspaceProperties {
   name: string;
   airspaceClass: AirspaceClass;
-  openAirClass: string;
-  upper: string;
-  lower: string;
+  openAirClass: string | null;
+  upper: string | null;
+  lower: string | null;
+  upperFeet: number | null;
+  lowerFeet: number | null;
 }
 
 export const AIRSPACE_CLASSES = {

@@ -57,40 +57,58 @@ function setLayerVisibility(map: React.RefObject<Map | null>, visible: boolean):
   }
 }
 
-function formatPropertyLabel(key: string): string {
-  return key
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/[-_]/g, ' ')
-    .replace(/^./, (character) => character.toUpperCase());
-}
-
 function isAirspaceProperties(value: unknown): value is AirspaceProperties {
   if (!value || typeof value !== 'object') return false;
   const properties = value as Record<string, unknown>;
-  return ['name', 'airspaceClass', 'openAirClass', 'upper', 'lower'].every(
-    (key) => typeof properties[key] === 'string'
+  return (
+    typeof properties.name === 'string' &&
+    typeof properties.airspaceClass === 'string' &&
+    ['openAirClass', 'upper', 'lower'].every(
+      (key) => typeof properties[key] === 'string' || properties[key] === null
+    ) &&
+    ['upperFeet', 'lowerFeet'].every(
+      (key) => typeof properties[key] === 'number' || properties[key] === null
+    )
   );
 }
 
-function createAirspacePopup(properties: AirspaceProperties): HTMLDivElement {
+function formatAltitude(feet: number | null, rawValue: string | null): string {
+  return feet === null ? (rawValue ?? 'Not specified') : `${feet.toLocaleString()} ft`;
+}
+
+function createAirspacePopup(airspaces: AirspaceProperties[]): HTMLDivElement {
   const content = document.createElement('div');
-  content.className = 'flex w-[min(600px,70vw)] flex-col gap-1 text-sm';
+  content.className = 'flex w-full flex-col gap-1 text-sm';
 
-  (Object.keys(properties) as (keyof AirspaceProperties)[])
-    .filter((key) => key !== 'openAirClass')
-    .forEach((key) => {
-      const value = properties[key];
-      const row = document.createElement('div');
-      row.className = 'grid grid-cols-[auto_1fr] gap-x-2';
+  airspaces
+    .sort((a, b) => (a.lowerFeet ?? 0) - (b.lowerFeet ?? 0))
+    .forEach((properties, index) => {
+      if (index > 0) {
+        const separator = document.createElement('hr');
+        separator.className = 'my-2 border-slate-200';
+        content.append(separator);
+      }
 
-      const label = document.createElement('strong');
-      label.textContent = `${formatPropertyLabel(key)}:`;
+      const rows = [
+        ['Name', properties.name],
+        ['Airspace Class', properties.airspaceClass],
+        ['Lower', formatAltitude(properties.lowerFeet, properties.lower)],
+        ['Upper', formatAltitude(properties.upperFeet, properties.upper)]
+      ];
 
-      const valueElement = document.createElement('span');
-      valueElement.textContent = value;
+      rows.forEach(([labelText, value]) => {
+        const row = document.createElement('div');
+        row.className = 'grid grid-cols-[auto_1fr] gap-x-2';
 
-      row.append(label, valueElement);
-      content.append(row);
+        const label = document.createElement('strong');
+        label.textContent = `${labelText}:`;
+
+        const valueElement = document.createElement('span');
+        valueElement.textContent = value;
+
+        row.append(label, valueElement);
+        content.append(row);
+      });
     });
 
   return content;
@@ -151,9 +169,20 @@ export function useAirspaceLayer({ map, isMapLoaded, isVisible }: UseAirspaceLay
 
       if (!hasPopupListenerRef.current) {
         const handleAirspaceClick = (event: MapMouseEvent) => {
-          const feature = event.features?.[0];
-          const properties = (feature as unknown as { properties?: unknown })?.properties;
-          if (!isAirspaceProperties(properties)) return;
+          const airspaces = (event.features ?? [])
+            .map((feature) => (feature as unknown as { properties?: unknown }).properties)
+            .filter(isAirspaceProperties)
+            .filter(
+              (properties, index, all) =>
+                all.findIndex(
+                  (airspace) =>
+                    airspace.name === properties.name &&
+                    airspace.airspaceClass === properties.airspaceClass &&
+                    airspace.upper === properties.upper &&
+                    airspace.lower === properties.lower
+                ) === index
+            );
+          if (airspaces.length === 0) return;
 
           popupRef.current?.remove();
           popupRef.current = new mapboxgl.Popup({
@@ -162,7 +191,7 @@ export function useAirspaceLayer({ map, isMapLoaded, isVisible }: UseAirspaceLay
             maxWidth: '70vw'
           })
             .setLngLat(event.lngLat)
-            .setDOMContent(createAirspacePopup(properties))
+            .setDOMContent(createAirspacePopup(airspaces))
             .addTo(mapInstance);
         };
 

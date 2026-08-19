@@ -129,6 +129,19 @@ function getNzAirspaceType(airspaceClass, name) {
   return classMap[airspaceClass] ?? airspaceClass ?? null;
 }
 
+function parseAltitudeFeet(value) {
+  if (!value) return null;
+  const normalizedValue = value.trim();
+
+  if (/^SFC(?:\b|\/)/i.test(normalizedValue)) return 0;
+
+  const flightLevelMatch = normalizedValue.match(/^FL\s*(\d+)\b/i);
+  if (flightLevelMatch) return Number(flightLevelMatch[1]) * 100;
+
+  const feetMatch = normalizedValue.match(/^(\d+(?:\.\d+)?)\s*(?:FT)?\b/i);
+  return feetMatch ? Number(feetMatch[1]) : null;
+}
+
 function parseAirspace(text) {
   const features = [];
   let current = null;
@@ -150,7 +163,9 @@ function parseAirspace(text) {
         airspaceClass: getNzAirspaceType(current.airspaceClass, current.name),
         openAirClass: current.airspaceClass ?? null,
         upper: current.upper ?? null,
-        lower: current.lower ?? null
+        lower: current.lower ?? null,
+        upperFeet: parseAltitudeFeet(current.upper),
+        lowerFeet: parseAltitudeFeet(current.lower)
       },
       geometry: { type: 'Polygon', coordinates: [coordinates] }
     });
