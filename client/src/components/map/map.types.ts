@@ -30,6 +30,47 @@ export interface GeoJson {
   features: GeoJsonFeature[];
 }
 
+export interface AirspaceGeoJson {
+  type: 'FeatureCollection';
+  features: AirspaceFeature[];
+}
+
+export interface AirspaceFeature {
+  type: 'Feature';
+  properties: AirspaceProperties;
+  geometry: AirspaceGeometry;
+}
+
+export interface AirspaceProperties {
+  name: string;
+  airspaceClass: AirspaceClass;
+  openAirClass: string;
+  upper: string;
+  lower: string;
+}
+
+export const AIRSPACE_CLASSES = {
+  CFZ: 'CFZ',
+  CTA_C: 'CTA C',
+  CTA_D: 'CTA D',
+  CTR: 'CTR',
+  D: 'D',
+  GAA: 'GAA',
+  GAA_TEMPORARY: 'GAA Temporary',
+  MBZ: 'MBZ',
+  MOA: 'MOA',
+  R: 'R',
+  R_TEMPORARY: 'R Temporary',
+  T: 'T',
+  VHZ: 'VHZ'
+} as const;
+export type AirspaceClass = (typeof AIRSPACE_CLASSES)[keyof typeof AIRSPACE_CLASSES];
+
+export interface AirspaceGeometry {
+  type: 'Polygon' | 'MultiPolygon';
+  coordinates: number[][][] | number[][][][];
+}
+
 export interface HistoryDataEntry {
   time: string;
   values: HistoryValue[];
