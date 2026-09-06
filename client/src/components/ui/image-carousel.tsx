@@ -26,9 +26,6 @@ interface Props {
   alt?: string;
 }
 
-/** Reserved vertical px inside an intrinsic-mode dialog for header, padding, caption, slider, gaps. */
-const INTRINSIC_FOOTER_PX = 160;
-
 export function ImageCarousel({
   images,
   initialIndex = 0,
