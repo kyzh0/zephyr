@@ -13,7 +13,8 @@ import {
   LandingDoc,
   type LandingAttrs,
   type WithId,
-  isValidLonLat
+  isValidLonLat,
+  logger
 } from '@zephyr/shared';
 
 const PUBLIC_DIR = process.env.PUBLIC_DIR
@@ -92,6 +93,8 @@ router.post(
       res.status(400).json({ error: 'Elevation is required' });
       return;
     }
+
+    logger.info(`Landing added by ${user.username}: ${name}`, { service: 'admin' });
 
     const landing: LandingDoc = new Landing({
       name,
@@ -194,6 +197,8 @@ router.put(
       return;
     }
 
+    logger.info(`Landing ${id} updated by ${user.username}: ${name}`, { service: 'admin' });
+
     landing.name = name;
     landing.location = location;
     landing.elevation = elevation;
@@ -235,6 +240,8 @@ router.delete(
       return;
     }
 
+    logger.info(`Landing deleted by ${user.username}: ${s.name} - ${id}`, { service: 'admin' });
+
     await Landing.deleteOne({ _id: new ObjectId(id) });
     res.sendStatus(204);
   }
@@ -266,6 +273,8 @@ router.post(
       res.sendStatus(404);
       return;
     }
+
+    logger.info(`Landing ${id} image added by ${user.username}`, { service: 'admin' });
 
     // write to disk
     const filename = `${randomUUID()}.webp`;
@@ -320,6 +329,10 @@ router.delete(
       return;
     }
 
+    logger.info(`Landing ${id} image deleted by ${user.username}: ${filename}`, {
+      service: 'admin'
+    });
+
     landing.images?.splice(index, 1);
     try {
       await landing.save();
@@ -367,6 +380,10 @@ router.patch(
       res.sendStatus(404);
       return;
     }
+
+    logger.info(`Landing ${id} image caption updated by ${user.username}: ${filename}`, {
+      service: 'admin'
+    });
 
     image.caption = caption ?? '';
     try {

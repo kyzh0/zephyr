@@ -83,6 +83,7 @@ const formSchema = z.object({
   harvestWindDirectionId: z.string().optional().or(z.literal('')),
   harvestTemperatureId: z.string().optional().or(z.literal('')),
   harvestCookie: z.string().optional().or(z.literal('')),
+  harvestKnots: z.boolean(),
   gwWindAverageFieldName: z.string().optional().or(z.literal('')),
   gwWindGustFieldName: z.string().optional().or(z.literal('')),
   gwWindBearingFieldName: z.string().optional().or(z.literal('')),
@@ -154,6 +155,7 @@ export default function AdminEditStation() {
       patch.harvestWindDirectionId = values.harvestWindDirectionId?.trim();
       patch.harvestTemperatureId = values.harvestTemperatureId?.trim();
       patch.harvestCookie = values.harvestCookie?.trim();
+      patch.harvestKnots = values.harvestKnots;
       if (values.harvestWindAverageId === '') remove.harvestWindAverageId = true;
       if (values.harvestWindGustId === '') remove.harvestWindGustId = true;
       if (values.harvestWindDirectionId === '') remove.harvestWindDirectionId = true;
@@ -165,6 +167,7 @@ export default function AdminEditStation() {
       remove.harvestWindDirectionId = true;
       remove.harvestTemperatureId = true;
       remove.harvestCookie = true;
+      remove.harvestKnots = true;
     }
 
     if (values.type === 'gw') {
@@ -292,6 +295,7 @@ function StationForm({
       harvestWindDirectionId: station.harvestWindDirectionId ?? '',
       harvestTemperatureId: station.harvestTemperatureId ?? '',
       harvestCookie: station.harvestCookie ?? '',
+      harvestKnots: station.harvestKnots ?? false,
       gwWindAverageFieldName: station.gwWindAverageFieldName ?? '',
       gwWindGustFieldName: station.gwWindGustFieldName ?? '',
       gwWindBearingFieldName: station.gwWindBearingFieldName ?? '',
@@ -555,6 +559,18 @@ function StationForm({
                       <Input {...field} />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="harvestKnots"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <FormLabel className="font-normal">Values are in knots</FormLabel>
                   </FormItem>
                 )}
               />

@@ -30,6 +30,7 @@ export type StationAttrs = {
   harvestWindDirectionId?: string;
   harvestTemperatureId?: string;
   harvestCookie?: string;
+  harvestKnots?: boolean;
 
   gwWindAverageFieldName?: string;
   gwWindGustFieldName?: string;
@@ -78,6 +79,7 @@ const stationSchema = new mongoose.Schema<StationAttrs>(
     harvestWindDirectionId: { type: String },
     harvestTemperatureId: { type: String },
     harvestCookie: { type: String },
+    harvestKnots: { type: Boolean },
 
     gwWindAverageFieldName: { type: String },
     gwWindGustFieldName: { type: String },

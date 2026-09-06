@@ -1,7 +1,14 @@
 import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 
-import { Donation, DonationDoc, DONATION_REGIONS, User, type DonationRegion } from '@zephyr/shared';
+import {
+  Donation,
+  DonationDoc,
+  DONATION_REGIONS,
+  User,
+  logger,
+  type DonationRegion
+} from '@zephyr/shared';
 
 const router = express.Router();
 
@@ -113,6 +120,10 @@ router.post(
       return;
     }
 
+    logger.info(`Donation added by ${user.username}: ${trimmed} - ${amt} - ${region}`, {
+      service: 'admin'
+    });
+
     const doc: DonationDoc = new Donation({
       donorName: trimmed,
       amount: amt,
@@ -151,6 +162,10 @@ router.delete(
       res.sendStatus(404);
       return;
     }
+
+    logger.info(`Donation deleted by ${user.username}: ${row.donorName} - ${id}`, {
+      service: 'admin'
+    });
 
     await Donation.deleteOne({ _id: new ObjectId(id) });
     res.sendStatus(204);

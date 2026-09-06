@@ -14,7 +14,8 @@ import {
   type SiteAttrs,
   type WithId,
   type GeoPoint,
-  isValidLonLat
+  isValidLonLat,
+  logger
 } from '@zephyr/shared';
 
 const PUBLIC_DIR = process.env.PUBLIC_DIR
@@ -147,6 +148,8 @@ router.post(
         return;
       }
     }
+
+    logger.info(`Site added by ${user.username}: ${name}`, { service: 'admin' });
 
     const site: SiteDoc = new Site({
       name,
@@ -283,6 +286,8 @@ router.put(
       }
     }
 
+    logger.info(`Site ${id} updated by ${user.username}: ${name}`, { service: 'admin' });
+
     site.name = name;
     site.location = location;
     site.elevation = elevation;
@@ -332,6 +337,8 @@ router.post(
       res.sendStatus(404);
       return;
     }
+
+    logger.info(`Site ${id} image added by ${user.username}`, { service: 'admin' });
 
     // write to disk
     const filename = `${randomUUID()}.webp`;
@@ -386,6 +393,10 @@ router.delete(
       return;
     }
 
+    logger.info(`Site ${id} image deleted by ${user.username}: ${filename}`, {
+      service: 'admin'
+    });
+
     site.images?.splice(index, 1);
     try {
       await site.save();
@@ -434,6 +445,10 @@ router.patch(
       return;
     }
 
+    logger.info(`Site ${id} image caption updated by ${user.username}: ${filename}`, {
+      service: 'admin'
+    });
+
     image.caption = caption ?? '';
     try {
       await site.save();
@@ -471,6 +486,8 @@ router.delete(
       res.sendStatus(404);
       return;
     }
+
+    logger.info(`Site deleted by ${user.username}: ${s.name} - ${id}`, { service: 'admin' });
 
     await Site.deleteOne({ _id: new ObjectId(id) });
     res.sendStatus(204);

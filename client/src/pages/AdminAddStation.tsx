@@ -8,6 +8,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -62,7 +63,8 @@ const harvestSchema = baseSchema.extend({
   harvestWindDirGraphId: z.string().regex(/^\d+$/, 'Must be numeric'),
   harvestWindDirTraceId: z.string().regex(/^\d+$/, 'Must be numeric'),
   harvestTempGraphId: z.string().regex(/^\d+$/, 'Must be numeric'),
-  harvestTempTraceId: z.string().regex(/^\d+$/, 'Must be numeric')
+  harvestTempTraceId: z.string().regex(/^\d+$/, 'Must be numeric'),
+  harvestKnots: z.boolean()
 });
 
 const gwSchema = baseSchema.extend({
@@ -105,7 +107,8 @@ export default function AdminAddStation() {
       externalLink: '',
       type: '' as FormValues['type'],
       coordinates: '',
-      bearings: ''
+      bearings: '',
+      harvestKnots: false
     }
   });
 
@@ -142,6 +145,7 @@ export default function AdminAddStation() {
       station.harvestWindGustId = `${v.harvestWindGustGraphId}_${v.harvestWindGustTraceId}`;
       station.harvestWindDirectionId = `${v.harvestWindDirGraphId}_${v.harvestWindDirTraceId}`;
       station.harvestTemperatureId = `${v.harvestTempGraphId}_${v.harvestTempTraceId}`;
+      station.harvestKnots = v.harvestKnots;
     }
 
     if (values.type === 'gw') {
@@ -397,6 +401,18 @@ export default function AdminAddStation() {
                     )}
                   />
                 </div>
+                <FormField
+                  control={form.control}
+                  name="harvestKnots"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center space-x-2 space-y-0">
+                      <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                      <FormLabel className="font-normal">Values are in knots</FormLabel>
+                    </FormItem>
+                  )}
+                />
               </div>
             )}
 

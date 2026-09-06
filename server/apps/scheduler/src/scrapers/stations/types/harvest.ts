@@ -273,10 +273,7 @@ async function scrapeHarvestStation(station: WithId<StationAttrs>): Promise<void
   }
 
   // these stations are in kt
-  if (
-    station.externalId &&
-    (station.externalId.startsWith('10243') || station.externalId.startsWith('11433'))
-  ) {
+  if (station.harvestKnots) {
     if (windAverage !== null) {
       windAverage = Math.round(windAverage * 1.852 * 100) / 100;
     }

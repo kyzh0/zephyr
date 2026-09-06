@@ -1,7 +1,7 @@
 import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 
-import { Client, User } from '@zephyr/shared';
+import { Client, User, logger } from '@zephyr/shared';
 
 const router = express.Router();
 
@@ -61,6 +61,10 @@ router.post(
       res.status(400).json({ error: 'Monthly limit must be a non-negative integer' });
       return;
     }
+
+    logger.info(`Client added by ${user.username}: ${name} - limit ${monthlyLimit}`, {
+      service: 'admin'
+    });
 
     const client = new Client({ name, apiKey, monthlyLimit, usage: [] });
 
@@ -129,6 +133,8 @@ router.patch(
       return;
     }
 
+    logger.info(`Client ${id} patched by ${user.username}: ${client.name}`, { service: 'admin' });
+
     if (name !== undefined) {
       client.name = name;
     }
@@ -169,6 +175,10 @@ router.delete(
       res.sendStatus(404);
       return;
     }
+
+    logger.info(`Client deleted by ${user.username}: ${client.name} - ${id}`, {
+      service: 'admin'
+    });
 
     await Client.deleteOne({ _id: new ObjectId(id) });
     res.sendStatus(204);

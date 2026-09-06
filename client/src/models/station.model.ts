@@ -24,6 +24,7 @@ export interface Station {
   harvestWindDirectionId?: string;
   harvestWindGustId?: string;
   harvestCookie?: string;
+  harvestKnots?: boolean;
   gwWindAverageFieldName?: string;
   gwWindGustFieldName?: string;
   gwWindBearingFieldName?: string;
@@ -44,6 +45,7 @@ export interface NewStation {
   harvestWindGustId?: string;
   harvestWindDirectionId?: string;
   harvestTemperatureId?: string;
+  harvestKnots?: boolean;
   gwWindAverageFieldName?: string;
   gwWindGustFieldName?: string;
   gwWindBearingFieldName?: string;
