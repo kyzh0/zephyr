@@ -192,7 +192,7 @@ export function ImageCarousel({
                 src={img.url}
                 alt={img.label || `${alt} ${i + 1}`}
                 loading="lazy"
-                className="w-full h-full object-contain block test"
+                className="w-full h-full object-contain block"
                 draggable={false}
               />
             </CarouselItem>
