@@ -13,7 +13,8 @@ import {
   useWebcamMarkers,
   useSoundingMarkers,
   useSiteMarkers,
-  useLandingMarkers
+  useLandingMarkers,
+  useAirspaceLayer
 } from '@/hooks/map';
 
 export default function Map() {
@@ -22,6 +23,7 @@ export default function Map() {
   const viewMode = useMapStore((s) => s.viewMode);
   const historyOffset = useMapStore((s) => s.historyOffset);
   const stationElevationFilter = useMapStore((s) => s.stationElevationFilter);
+  const isAirspaceVisible = useMapStore((s) => s.isAirspaceVisible);
   const isHistoricData = historyOffset < 0;
 
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -54,6 +56,12 @@ export default function Map() {
     isMapLoaded: isLoaded,
     isVisible: overlay === MAP_OVERLAYS.SOUNDINGS,
     isHistoricData
+  });
+
+  useAirspaceLayer({
+    map,
+    isMapLoaded: isLoaded,
+    isVisible: isAirspaceVisible
   });
 
   const { setTransparent: setLandingTransparent } = useLandingMarkers({

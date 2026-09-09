@@ -21,7 +21,9 @@ import {
   ZoomIn,
   ZoomOut,
   Wind,
-  ThermometerIcon
+  ThermometerIcon,
+  LocateOff,
+  Radar
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -83,6 +85,8 @@ export function MapControlButtons({
   const minimizeFavourites = useMapStore((s) => s.minimizeFavourites);
   const toggleWebcams = useMapStore((s) => s.toggleWebcams);
   const toggleSoundings = useMapStore((s) => s.toggleSoundings);
+  const isAirspaceVisible = useMapStore((s) => s.isAirspaceVisible);
+  const toggleAirspace = useMapStore((s) => s.toggleAirspace);
   const setUnit = useMapStore((s) => s.setUnit);
   const setViewMode = useMapStore((s) => s.setViewMode);
   const toggleMinimizeRecents = useMapStore((s) => s.toggleMinimizeRecents);
@@ -558,9 +562,11 @@ export function MapControlButtons({
               onClick={() => setIsLocating(true)}
               className={btnClass}
             >
-              <LocateFixed
-                className={`${iconClass} opacity-70 ${isLocating ? 'animate-ping' : ''}`}
-              />
+              {isLocating ? (
+                <LocateOff className={`${iconClass} opacity-70 animate-ping`} />
+              ) : (
+                <LocateFixed className={`${iconClass} opacity-70`} />
+              )}
             </Button>
           </TooltipTrigger>
           <TooltipContent side="left">Find my location</TooltipContent>
@@ -597,7 +603,7 @@ export function MapControlButtons({
               <Layers className={`${iconClass} opacity-70`} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="left">Switch map layer</TooltipContent>
+          <TooltipContent side="left">Switch to satellite</TooltipContent>
         </Tooltip>
         {!isFlyingMode && (
           <FilterDialog
@@ -608,6 +614,20 @@ export function MapControlButtons({
             viewMode={viewMode}
           />
         )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleAirspace}
+              disabled={isHistoricData}
+              className={`${btnClass} bg-background ${isAirspaceVisible ? '*:[svg]:stroke-blue-500' : ''}`}
+            >
+              <Radar className={`${iconClass} opacity-70`} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{isAirspaceVisible ? 'Hide' : 'Show'} airspace on map</TooltipContent>
+        </Tooltip>
       </div>
 
       {/* History Slider at bottom */}
@@ -617,6 +637,24 @@ export function MapControlButtons({
           onHistoryChange={onHistoryChange}
           disabled={viewMode === MAP_VIEW_MODES.SITES}
         />
+      )}
+
+      {isAirspaceVisible && (
+        <div className="fixed inset-x-0 bottom-2 z-100 flex justify-center w-full px-4">
+          <div className="flex items-center gap-1 bg-background px-4 pt-3 pb-2 rounded-lg shadow-lg text-xs">
+            Airspace data is provided without warranty and is not to be construed as constituting
+            part of the official AIP. Always verify current airspace information before flight.
+            Thanks to
+            <a
+              href="https://gliding.co.nz/pilots/pilot-resources/airspace-files/"
+              target="_blank"
+              rel="noreferrer"
+              className="underline hover:text-foreground"
+            >
+              Dave Dennison
+            </a>
+          </div>
+        </div>
       )}
 
       {/* Bottom left - Zoom controls (flying mode only) */}
