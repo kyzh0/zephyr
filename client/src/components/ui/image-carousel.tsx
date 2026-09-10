@@ -26,9 +26,6 @@ interface Props {
   alt?: string;
 }
 
-/** Reserved vertical px inside an intrinsic-mode dialog for header, padding, caption, slider, gaps. */
-const INTRINSIC_FOOTER_PX = 160;
-
 export function ImageCarousel({
   images,
   initialIndex = 0,
@@ -172,16 +169,7 @@ export function ImageCarousel({
   // dialog pops to its final size in one step.
   if (measuredAR === null) return null;
 
-  // Landscape viewport: height locked at (95vh - footer), width follows AR.
-  // Portrait viewport: fill the parent dialog's content width; aspect-ratio
-  // derives the height. The parent dialog supplies the 95vw outer cap, which
-  // — minus its own padding — becomes our `100%`.
-  const dims: CSSProperties = isPortrait
-    ? { width: '100%', aspectRatio: measuredAR }
-    : {
-        width: `calc((95vh - ${INTRINSIC_FOOTER_PX}px) * ${measuredAR})`,
-        height: `calc(95vh - ${INTRINSIC_FOOTER_PX}px)`
-      };
+  const dims: CSSProperties = { width: '100%', aspectRatio: measuredAR };
 
   return (
     <div
