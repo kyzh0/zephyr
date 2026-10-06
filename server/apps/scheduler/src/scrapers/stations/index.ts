@@ -4,6 +4,7 @@ import scrapeAttentisData from './types/attentis';
 import scrapeAucklandCouncilData from './types/aucklandCouncil';
 import scrapeCwuData from './types/cwu';
 import scrapeCentrePortData from './types/centrePort';
+import scrapeEnvdataData from './types/envdata';
 import scrapeGreaterWellingtonData from './types/greaterWellington';
 import scrapeGuildfordData from './types/guildford';
 import scrapeHarvestData from './types/harvest';
@@ -21,6 +22,7 @@ import scrapeNavigatusData from './types/navigatus';
 import scrapePortersData from './types/porters';
 import scrapePortOtagoData from './types/portOtago';
 import scrapePortNapierData from './types/portNapier';
+import scrapePortNelsonData from './types/portNelson';
 import scrapePredictWindData from './types/predictWind';
 import scrapePrimePortData from './types/primePort';
 import scrapeShpgData from './types/shpg';
@@ -46,6 +48,7 @@ const scrapers = {
   ac: scrapeAucklandCouncilData,
   cwu: scrapeCwuData,
   cp: scrapeCentrePortData,
+  envdata: scrapeEnvdataData,
   gw: scrapeGreaterWellingtonData,
   guildford: scrapeGuildfordData,
   harvest: scrapeHarvestData,
@@ -59,10 +62,11 @@ const scrapers = {
   mfhb: scrapeMfhbData,
   mpyc: scrapeMpycData,
   mrc: scrapeMrcData,
+  napier: scrapePortNapierData,
   navigatus: scrapeNavigatusData,
+  nelson: scrapePortNelsonData,
   porters: scrapePortersData,
   po: scrapePortOtagoData,
-  napier: scrapePortNapierData,
   pw: scrapePredictWindData,
   prime: scrapePrimePortData,
   sfo: scrapeSofarOceanData,

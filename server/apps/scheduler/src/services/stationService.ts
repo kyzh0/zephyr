@@ -296,7 +296,9 @@ export async function checkForErrors(): Promise<void> {
         'windicator',
         'tclz',
         'shpg',
-        'napier'
+        'napier',
+        'nelson',
+        'envdata'
       ];
 
       for (const [key, value] of Object.entries(g)) {
