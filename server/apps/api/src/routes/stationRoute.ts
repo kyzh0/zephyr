@@ -2,7 +2,14 @@ import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { QueryFilter } from 'mongoose';
 
-import { Station, StationAttrs, StationData, User, calculateWindAverage } from '@zephyr/shared';
+import {
+  Station,
+  StationAttrs,
+  StationData,
+  User,
+  calculateWindAverage,
+  logger
+} from '@zephyr/shared';
 
 const router = express.Router();
 
@@ -37,6 +44,7 @@ type CreateStationBody = {
   harvestWindGustId?: string;
   harvestWindDirectionId?: string;
   harvestTemperatureId?: string;
+  harvestKnots?: boolean;
 
   gwWindAverageFieldName?: string;
   gwWindGustFieldName?: string;
@@ -100,11 +108,16 @@ router.post(
       harvestWindGustId,
       harvestWindDirectionId,
       harvestTemperatureId,
+      harvestKnots,
       gwWindAverageFieldName,
       gwWindGustFieldName,
       gwWindBearingFieldName,
       gwTemperatureFieldName
     } = req.body;
+
+    logger.info(`Station added by ${user.username}: ${name} - ${type} - ${externalId}`, {
+      service: 'admin'
+    });
 
     const station = new Station({
       name,
@@ -134,6 +147,9 @@ router.post(
     }
     if (harvestTemperatureId) {
       station.harvestTemperatureId = harvestTemperatureId;
+    }
+    if (harvestKnots) {
+      station.harvestKnots = harvestKnots;
     }
 
     if (gwWindAverageFieldName) {
@@ -296,6 +312,13 @@ router.patch(
         return;
       }
 
+      logger.info(
+        `Station ${id} patched by ${user.username}: ${JSON.stringify(patch)}${
+          Object.keys(remove).length ? ` (removed: ${JSON.stringify(remove)})` : ''
+        }`,
+        { service: 'admin' }
+      );
+
       for (const key of Object.keys(patch)) {
         station.set(key, patch[key]);
       }
@@ -337,6 +360,10 @@ router.delete(
       res.sendStatus(404);
       return;
     }
+
+    logger.info(`Station deleted by ${user.username}: ${station.name} - ${id}`, {
+      service: 'admin'
+    });
 
     await StationData.deleteMany({ station: new ObjectId(id) });
     await Station.deleteOne({ _id: new ObjectId(id) });

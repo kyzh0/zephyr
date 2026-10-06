@@ -1,7 +1,7 @@
 import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 
-import { Sounding, User } from '@zephyr/shared';
+import { Sounding, User, logger } from '@zephyr/shared';
 
 const router = express.Router();
 
@@ -41,6 +41,10 @@ router.post(
     }
 
     const { name, coordinates, raspRegion, raspId } = req.body;
+
+    logger.info(`Sounding added by ${user.username}: ${name} - ${raspRegion} - ${raspId}`, {
+      service: 'admin'
+    });
 
     const sounding = new Sounding({
       name,
@@ -94,6 +98,10 @@ router.patch(
       return;
     }
 
+    logger.info(`Sounding ${id} patched by ${user.username}: ${sounding.name}`, {
+      service: 'admin'
+    });
+
     if (name !== undefined) {
       sounding.name = name;
     }
@@ -137,6 +145,10 @@ router.delete(
       res.sendStatus(404);
       return;
     }
+
+    logger.info(`Sounding deleted by ${user.username}: ${sounding.name} - ${id}`, {
+      service: 'admin'
+    });
 
     await Sounding.deleteOne({ _id: new ObjectId(id) });
     res.sendStatus(204);

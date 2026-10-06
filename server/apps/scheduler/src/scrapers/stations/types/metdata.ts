@@ -155,6 +155,7 @@ export default async function scrapeMetdataData(stations: WithId<StationAttrs>[]
             service: 'station',
             type: 'metdata'
           });
+          await processScrapedData(s, null, null, null, null);
         }
       }
     }

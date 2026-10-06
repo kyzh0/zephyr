@@ -213,6 +213,10 @@ export const getStationTypeName = (code: string): string => {
       return 'SHPG';
     case 'tclz':
       return 'Treble Cone WX';
+    case 'nelson':
+      return 'Port Nelson';
+    case 'envdata':
+      return 'Environment Southland';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }
@@ -244,6 +248,8 @@ export const getWebcamTypeName = (code: string): string => {
       return 'Camera FTP';
     case 'srs':
       return 'Summit Road Society';
+    case 'riviera':
+      return 'Riviera Rentals';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }

@@ -2,7 +2,7 @@ import express, { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { QueryFilter } from 'mongoose';
 
-import { User, Webcam, WebcamAttrs, type WebcamImage } from '@zephyr/shared';
+import { User, Webcam, WebcamAttrs, logger, type WebcamImage } from '@zephyr/shared';
 
 const router = express.Router();
 
@@ -72,6 +72,11 @@ router.post(
     }
 
     const { name, type, coordinates, externalLink, externalId, isDisabled } = req.body;
+
+    logger.info(`Webcam added by ${user.username}: ${name} - ${type} - ${externalId}`, {
+      service: 'admin'
+    });
+
     const webcam = new Webcam({
       name,
       type,
@@ -144,6 +149,10 @@ router.patch(
       return;
     }
 
+    logger.info(`Webcam ${id} patched by ${user.username}: ${webcam.name}`, {
+      service: 'admin'
+    });
+
     if (name !== undefined) {
       webcam.name = name;
     }
@@ -194,6 +203,10 @@ router.delete(
       res.sendStatus(404);
       return;
     }
+
+    logger.info(`Webcam deleted by ${user.username}: ${webcam.name} - ${id}`, {
+      service: 'admin'
+    });
 
     await Webcam.deleteOne({ _id: new ObjectId(id) });
     res.sendStatus(204);
