@@ -36,6 +36,7 @@ function PlaceMedal({ rank }: { rank: number }) {
 export default function DonateDialog() {
   const navigate = useNavigate();
 
+  const bankAccountName = (import.meta.env.VITE_DONATION_BANK_ACCOUNT_NAME ?? 'Zephyr') as string;
   const bankAccount = (import.meta.env.VITE_DONATION_BANK_ACCOUNT ?? '') as string;
 
   const { data: leaderboard, isLoading: boardLoading, error: boardError } = useLeaderboard();
@@ -75,7 +76,7 @@ export default function DonateDialog() {
             You can make a contribution to the following bank account, with your name as the
             reference:
           </p>
-          <p className="text-base font-medium w-full">Zephyr</p>
+          <p className="text-base font-medium w-full">{bankAccountName}</p>
           <div className="flex items-center justify-center gap-2">
             <span className="text-base font-medium">{bankAccount}</span>
             <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handleCopy}>

@@ -244,6 +244,8 @@ export const getWebcamTypeName = (code: string): string => {
       return 'Camera FTP';
     case 'srs':
       return 'Summit Road Society';
+    case 'riviera':
+      return 'Riviera Rentals';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }

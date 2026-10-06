@@ -52,6 +52,7 @@ jobs:
           echo "VITE_EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}" >> .env
           echo "VITE_EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}" >> .env
           echo "VITE_EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}" >> .env
+          echo "VITE_DONATION_BANK_ACCOUNT_NAME=${{ vars.DONATION_BANK_ACCOUNT_NAME }}" >> .env
           echo "VITE_DONATION_BANK_ACCOUNT=${{ vars.DONATION_BANK_ACCOUNT }}" >> .env
           echo "VITE_API_PREFIX=${{ vars.API_PREFIX }}" >> .env
           echo "VITE_FILE_SERVER_PREFIX=${{ vars.FILE_SERVER_PREFIX }}" >> .env
