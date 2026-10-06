@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const clientDir = path.resolve(scriptDir, '..');
@@ -10,6 +10,8 @@ const outputPath = path.join(clientDir, 'public', 'airspace.geojson');
 const EARTH_RADIUS_NM = 3440.069;
 const ARC_STEP_DEGREES = 1;
 const CIRCLE_POINTS = 72;
+// Allow small differences from rounded coordinates, but report inconsistent source arcs.
+const ARC_RADIUS_TOLERANCE_NM = 0.1;
 
 function parseCoordinate(value) {
   const match = value.match(
@@ -80,24 +82,34 @@ function destination(center, distance, bearingDegrees) {
   return [(destinationLongitude * 180) / Math.PI, (destinationLatitude * 180) / Math.PI];
 }
 
-function arcPoints(center, endpoints, direction) {
+export function arcPoints(center, endpoints, direction, onWarning = () => {}) {
   const [start, end] = endpoints;
   const radius = distanceNm(center, start);
+  const radiusDifference = Math.abs(distanceNm(center, end) - radius);
+  if (radiusDifference > ARC_RADIUS_TOLERANCE_NM) {
+    onWarning(`Arc endpoints differ in radius by ${(radiusDifference * 1852).toFixed(0)} m`);
+  }
   const startBearing = bearing(center, start) % 360;
   const endBearing = bearing(center, end) % 360;
   const clockwiseDelta = (endBearing - startBearing + 360) % 360;
-  const delta = direction === '-' ? -(360 - clockwiseDelta) : clockwiseDelta;
+  const delta = direction === '-' ? -((360 - clockwiseDelta) % 360) : clockwiseDelta;
   const steps = Math.max(1, Math.ceil(Math.abs(delta) / ARC_STEP_DEGREES));
 
-  return Array.from({ length: steps + 1 }, (_, index) =>
-    destination(center, radius, startBearing + (delta * index) / steps)
-  );
+  // Use the supplied vertices exactly, including when source radii are inconsistent.
+  return [
+    start,
+    ...Array.from({ length: steps - 1 }, (_, index) =>
+      destination(center, radius, startBearing + (delta * (index + 1)) / steps)
+    ),
+    end
+  ];
 }
 
 function circlePoints(center, radiusNm) {
-  return Array.from({ length: CIRCLE_POINTS + 1 }, (_, index) =>
+  const points = Array.from({ length: CIRCLE_POINTS }, (_, index) =>
     destination(center, radiusNm, (index / CIRCLE_POINTS) * 360)
   );
+  return [...points, points[0]];
 }
 
 function getNzAirspaceType(airspaceClass, name) {
@@ -129,20 +141,33 @@ function getNzAirspaceType(airspaceClass, name) {
   return classMap[airspaceClass] ?? airspaceClass ?? null;
 }
 
-function parseAltitudeFeet(value) {
-  if (!value) return null;
+export function parseAltitude(value) {
+  if (!value) return { feet: null, display: 'Not specified' };
   const normalizedValue = value.trim();
 
-  if (/^SFC(?:\b|\/)/i.test(normalizedValue)) return 0;
+  if (/^SFC$/i.test(normalizedValue)) return { feet: 0, display: 'SFC' };
 
-  const flightLevelMatch = normalizedValue.match(/^FL\s*(\d+)\b/i);
-  if (flightLevelMatch) return Number(flightLevelMatch[1]) * 100;
+  const flightLevelMatch = normalizedValue.match(/^FL\s*(\d+)$/i);
+  if (flightLevelMatch) {
+    const feet = Number(flightLevelMatch[1]) * 100;
+    return {
+      feet,
+      display: `FL ${flightLevelMatch[1]} (${feet.toLocaleString('en-NZ')} ft STD)`
+    };
+  }
 
-  const feetMatch = normalizedValue.match(/^(\d+(?:\.\d+)?)\s*(?:FT)?\b/i);
-  return feetMatch ? Number(feetMatch[1]) : null;
+  const feetMatch = normalizedValue.match(/^(\d+(?:\.\d+)?)\s*(?:FT)?\s*(AMSL|AGL)?$/i);
+  if (feetMatch) {
+    const feet = Number(feetMatch[1]);
+    const reference = feetMatch[2] ? ` ${feetMatch[2].toUpperCase()}` : '';
+    return { feet, display: `${feet.toLocaleString('en-NZ')} ft${reference}` };
+  }
+
+  // Conditional limits and unrecognised units retain the complete source text.
+  return { feet: null, display: normalizedValue };
 }
 
-function parseAirspace(text) {
+export function parseAirspace(text, { onWarning = console.warn } = {}) {
   const features = [];
   let current = null;
 
@@ -150,6 +175,8 @@ function parseAirspace(text) {
     if (!current) return;
     const coordinates = current.coordinates;
     if (coordinates.length < 3) return;
+    const upper = parseAltitude(current.upper);
+    const lower = parseAltitude(current.lower);
     if (
       coordinates[0][0] !== coordinates.at(-1)[0] ||
       coordinates[0][1] !== coordinates.at(-1)[1]
@@ -164,8 +191,10 @@ function parseAirspace(text) {
         openAirClass: current.airspaceClass ?? null,
         upper: current.upper ?? null,
         lower: current.lower ?? null,
-        upperFeet: parseAltitudeFeet(current.upper),
-        lowerFeet: parseAltitudeFeet(current.lower)
+        upperFeet: upper.feet,
+        lowerFeet: lower.feet,
+        upperDisplay: upper.display,
+        lowerDisplay: lower.display
       },
       geometry: { type: 'Polygon', coordinates: [coordinates] }
     });
@@ -190,7 +219,7 @@ function parseAirspace(text) {
     } else if (command === 'AL') {
       current.lower = value;
     } else if (command === 'DP') {
-      current.coordinates.push(parseCoordinate(value));
+      appendPoints(current.coordinates, [parseCoordinate(value)]);
     } else if (command === 'V' && /^X=/i.test(value)) {
       current.center = parseCoordinate(value.slice(2).trim());
     } else if (command === 'V' && /^D=/i.test(value)) {
@@ -198,12 +227,17 @@ function parseAirspace(text) {
     } else if (command === 'DB') {
       if (!current.center)
         throw new Error(`Arc has no center in ${current.name ?? 'unnamed airspace'}`);
-      const points = arcPoints(current.center, parseCoordinatePair(value), current.direction);
-      current.coordinates.push(...points.slice(1));
+      const points = arcPoints(
+        current.center,
+        parseCoordinatePair(value),
+        current.direction,
+        (warning) => onWarning(`${current.name ?? 'Unnamed airspace'}: ${warning}`)
+      );
+      appendPoints(current.coordinates, points);
     } else if (command === 'DC') {
       if (!current.center)
         throw new Error(`Circle has no center in ${current.name ?? 'unnamed airspace'}`);
-      current.coordinates.push(...circlePoints(current.center, Number(value)));
+      appendPoints(current.coordinates, circlePoints(current.center, Number(value)));
     }
   }
 
@@ -211,9 +245,18 @@ function parseAirspace(text) {
   return { type: 'FeatureCollection', features };
 }
 
-const text = await readFile(inputPath, 'utf8');
-const geojson = parseAirspace(text);
-await writeFile(outputPath, `${JSON.stringify(geojson)}\n`);
-console.log(
-  `Wrote ${geojson.features.length} airspace features to ${path.relative(process.cwd(), outputPath)}`
-);
+function appendPoints(coordinates, points) {
+  for (const point of points) {
+    const previous = coordinates.at(-1);
+    if (!previous || previous[0] !== point[0] || previous[1] !== point[1]) coordinates.push(point);
+  }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  const text = await readFile(inputPath, 'utf8');
+  const geojson = parseAirspace(text);
+  await writeFile(outputPath, `${JSON.stringify(geojson)}\n`);
+  console.log(
+    `Wrote ${geojson.features.length} airspace features to ${path.relative(process.cwd(), outputPath)}`
+  );
+}

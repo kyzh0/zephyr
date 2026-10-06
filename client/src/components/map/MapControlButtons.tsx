@@ -23,7 +23,8 @@ import {
   Wind,
   ThermometerIcon,
   LocateOff,
-  Radar
+  Radar,
+  LoaderCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -53,7 +54,7 @@ import {
   getStoredValue
 } from '@/components/map';
 
-import { getButtonStyle, getIconStyle } from '@/lib/utils';
+import { cn, getButtonStyle, getIconStyle } from '@/lib/utils';
 import { useIsMobile } from '@/hooks';
 import { useAppStore, useMapStore } from '@/store';
 
@@ -73,8 +74,9 @@ export function MapControlButtons({
   onSearchSelect,
   onFavouriteSelect,
   onZoomIn,
-  onZoomOut
-}: MapControlHandlers) {
+  onZoomOut,
+  isAirspaceLoading = false
+}: MapControlHandlers & { isAirspaceLoading?: boolean }) {
   const overlay = useMapStore((s) => s.overlay);
   const unit = useMapStore((s) => s.unit);
   const viewMode = useMapStore((s) => s.viewMode);
@@ -617,13 +619,16 @@ export function MapControlButtons({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant="ghost"
+              variant={isAirspaceVisible ? 'secondary' : 'outline'}
               size="sm"
               onClick={toggleAirspace}
               disabled={isHistoricData}
-              className={`${btnClass} bg-background ${isAirspaceVisible ? '*:[svg]:stroke-blue-500' : ''}`}
+              aria-label={isAirspaceVisible ? 'Hide airspace' : 'Show airspace'}
+              aria-pressed={isAirspaceVisible}
+              aria-busy={isAirspaceLoading}
+              className={cn(btnClass, isFlyingMode ? '[&_svg]:size-10!' : '[&_svg]:size-5!')}
             >
-              <Radar className={`${iconClass} opacity-70`} />
+              {isAirspaceLoading ? <LoaderCircle className="animate-spin" /> : <Radar />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>{isAirspaceVisible ? 'Hide' : 'Show'} airspace on map</TooltipContent>
@@ -637,24 +642,6 @@ export function MapControlButtons({
           onHistoryChange={onHistoryChange}
           disabled={viewMode === MAP_VIEW_MODES.SITES}
         />
-      )}
-
-      {isAirspaceVisible && (
-        <div className="fixed inset-x-0 bottom-2 z-100 flex justify-center w-full px-4">
-          <div className="flex items-center gap-1 bg-background px-4 pt-3 pb-2 rounded-lg shadow-lg text-xs">
-            Airspace data is provided without warranty and is not to be construed as constituting
-            part of the official AIP. Always verify current airspace information before flight.
-            Thanks to
-            <a
-              href="https://gliding.co.nz/pilots/pilot-resources/airspace-files/"
-              target="_blank"
-              rel="noreferrer"
-              className="underline hover:text-foreground"
-            >
-              Dave Dennison
-            </a>
-          </div>
-        </div>
       )}
 
       {/* Bottom left - Zoom controls (flying mode only) */}

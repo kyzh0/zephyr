@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import mapboxgl, { type Map, type MapMouseEvent } from 'mapbox-gl';
 
 import { AIRSPACE_CLASSES, type AirspaceGeoJson, type AirspaceProperties } from '@/components/map';
@@ -51,29 +52,38 @@ function setLayerVisibility(map: React.RefObject<Map | null>, visible: boolean):
   const visibility = visible ? 'visible' : 'none';
 
   for (const layerId of [FILL_LAYER_ID, LINE_LAYER_ID]) {
-    if (mapInstance.getLayer(layerId)) {
+    if (
+      mapInstance.getLayer(layerId) &&
+      mapInstance.getLayoutProperty(layerId, 'visibility') !== visibility
+    ) {
       mapInstance.setLayoutProperty(layerId, 'visibility', visibility);
     }
   }
 }
 
-function isAirspaceProperties(value: unknown): value is AirspaceProperties {
-  if (!value || typeof value !== 'object') return false;
-  const properties = value as Record<string, unknown>;
-  return (
+function getAirspaceProperties(value: unknown): AirspaceProperties | null {
+  if (!value || typeof value !== 'object') return null;
+  // Mapbox omits null-valued properties when encoding GeoJSON as vector tiles.
+  const properties: Record<string, unknown> = {
+    openAirClass: null,
+    upper: null,
+    lower: null,
+    upperFeet: null,
+    lowerFeet: null,
+    upperDisplay: null,
+    lowerDisplay: null,
+    ...(value as Record<string, unknown>)
+  };
+  const valid =
     typeof properties.name === 'string' &&
     typeof properties.airspaceClass === 'string' &&
-    ['openAirClass', 'upper', 'lower'].every(
+    ['openAirClass', 'upper', 'lower', 'upperDisplay', 'lowerDisplay'].every(
       (key) => typeof properties[key] === 'string' || properties[key] === null
     ) &&
     ['upperFeet', 'lowerFeet'].every(
       (key) => typeof properties[key] === 'number' || properties[key] === null
-    )
-  );
-}
-
-function formatAltitude(feet: number | null, rawValue: string | null): string {
-  return feet === null ? (rawValue ?? 'Not specified') : `${feet.toLocaleString()} ft`;
+    );
+  return valid ? (properties as unknown as AirspaceProperties) : null;
 }
 
 function createAirspacePopup(airspaces: AirspaceProperties[]): HTMLDivElement {
@@ -92,8 +102,8 @@ function createAirspacePopup(airspaces: AirspaceProperties[]): HTMLDivElement {
       const rows = [
         ['Name', properties.name],
         ['Airspace Class', properties.airspaceClass],
-        ['Lower', formatAltitude(properties.lowerFeet, properties.lower)],
-        ['Upper', formatAltitude(properties.upperFeet, properties.upper)]
+        ['Lower', properties.lowerDisplay ?? properties.lower ?? 'Not specified'],
+        ['Upper', properties.upperDisplay ?? properties.upper ?? 'Not specified']
       ];
 
       rows.forEach(([labelText, value]) => {
@@ -114,124 +124,168 @@ function createAirspacePopup(airspaces: AirspaceProperties[]): HTMLDivElement {
   return content;
 }
 
-export function useAirspaceLayer({ map, isMapLoaded, isVisible }: UseAirspaceLayerOptions): void {
-  const dataRef = useRef<AirspaceGeoJson | null>(null);
-  const isVisibleRef = useRef(isVisible);
-  const popupRef = useRef<mapboxgl.Popup | null>(null);
-  const hasPopupListenerRef = useRef(false);
+interface UseAirspaceLayerResult {
+  isLoading: boolean;
+  error: Error | null;
+  retry: () => void;
+}
+
+export function useAirspaceLayer({
+  map,
+  isMapLoaded,
+  isVisible
+}: UseAirspaceLayerOptions): UseAirspaceLayerResult {
+  const { data, isFetching, error, refetch } = useQuery({
+    queryKey: ['airspace'],
+    queryFn: async ({ signal }): Promise<AirspaceGeoJson> => {
+      const response = await fetch('/airspace.geojson', { signal });
+      if (!response.ok) throw new Error(`Airspace request failed: ${response.status}`);
+      const collection = (await response.json()) as AirspaceGeoJson | null;
+      if (collection?.type !== 'FeatureCollection' || !Array.isArray(collection.features)) {
+        throw new Error('Invalid airspace data');
+      }
+      return collection;
+    },
+    enabled: isMapLoaded && isVisible,
+    staleTime: Infinity,
+    retry: false
+  });
 
   useEffect(() => {
-    isVisibleRef.current = isVisible;
-  }, [isVisible]);
+    if (!isMapLoaded || !map.current || !isVisible || !data) return;
 
-  useEffect(() => {
-    if (!isMapLoaded || !map.current) return;
-
-    let disposed = false;
     const mapInstance = map.current;
+    let popup: mapboxgl.Popup | null = null;
+    let restoring = false;
+    let listenersAttached = false;
 
-    const addLayers = () => {
-      if (disposed || !dataRef.current || !mapInstance.isStyleLoaded()) return;
+    const handleAirspaceClick = (event: MapMouseEvent) => {
+      const airspaces = (event.features ?? [])
+        .map((feature) =>
+          getAirspaceProperties((feature as unknown as { properties?: unknown }).properties)
+        )
+        .filter((properties) => properties !== null)
+        .filter(
+          (properties, index, all) =>
+            all.findIndex(
+              (airspace) =>
+                airspace.name === properties.name &&
+                airspace.airspaceClass === properties.airspaceClass &&
+                airspace.upper === properties.upper &&
+                airspace.lower === properties.lower
+            ) === index
+        );
+      if (airspaces.length === 0) return;
 
-      if (!mapInstance.getSource(SOURCE_ID)) {
-        mapInstance.addSource(SOURCE_ID, {
-          type: 'geojson',
-          data: dataRef.current
-        });
-      }
-
-      if (!mapInstance.getLayer(FILL_LAYER_ID)) {
-        mapInstance.addLayer({
-          id: FILL_LAYER_ID,
-          type: 'fill',
-          source: SOURCE_ID,
-          paint: {
-            'fill-color': AIRSPACE_COLOR_EXPRESSION,
-            'fill-opacity': 0.1
-          }
-        });
-      }
-
-      if (!mapInstance.getLayer(LINE_LAYER_ID)) {
-        mapInstance.addLayer({
-          id: LINE_LAYER_ID,
-          type: 'line',
-          source: SOURCE_ID,
-          paint: {
-            'line-color': AIRSPACE_COLOR_EXPRESSION,
-            'line-width': 1.5,
-            'line-opacity': 0.8
-          }
-        });
-      }
-
-      setLayerVisibility(map, isVisibleRef.current);
-
-      if (!hasPopupListenerRef.current) {
-        const handleAirspaceClick = (event: MapMouseEvent) => {
-          const airspaces = (event.features ?? [])
-            .map((feature) => (feature as unknown as { properties?: unknown }).properties)
-            .filter(isAirspaceProperties)
-            .filter(
-              (properties, index, all) =>
-                all.findIndex(
-                  (airspace) =>
-                    airspace.name === properties.name &&
-                    airspace.airspaceClass === properties.airspaceClass &&
-                    airspace.upper === properties.upper &&
-                    airspace.lower === properties.lower
-                ) === index
-            );
-          if (airspaces.length === 0) return;
-
-          popupRef.current?.remove();
-          popupRef.current = new mapboxgl.Popup({
-            closeButton: true,
-            className: 'airspace-popup',
-            maxWidth: '70vw'
-          })
-            .setLngLat(event.lngLat)
-            .setDOMContent(createAirspacePopup(airspaces))
-            .addTo(mapInstance);
-        };
-
-        mapInstance.on('click', FILL_LAYER_ID, handleAirspaceClick);
-        mapInstance.on('mouseenter', FILL_LAYER_ID, () => {
-          mapInstance.getCanvas().style.cursor = 'pointer';
-        });
-        mapInstance.on('mouseleave', FILL_LAYER_ID, () => {
-          mapInstance.getCanvas().style.cursor = '';
-        });
-        hasPopupListenerRef.current = true;
-      }
+      popup?.remove();
+      popup = new mapboxgl.Popup({
+        closeButton: true,
+        className: 'airspace-popup',
+        maxWidth: '70vw'
+      })
+        .setLngLat(event.lngLat)
+        .setDOMContent(createAirspacePopup(airspaces))
+        .addTo(mapInstance);
     };
-
-    const loadAirspace = async () => {
-      try {
-        if (!dataRef.current) {
-          const response = await fetch('/airspace.geojson');
-          if (!response.ok) throw new Error(`Airspace request failed: ${response.status}`);
-          dataRef.current = (await response.json()) as AirspaceGeoJson;
-        }
-        addLayers();
-      } catch (error) {
-        console.error('Unable to load airspace data', error);
-      }
+    const handleMouseEnter = () => {
+      mapInstance.getCanvas().style.cursor = 'pointer';
     };
-
-    mapInstance.on('style.load', addLayers);
-    void loadAirspace();
-
-    return () => {
-      disposed = true;
-      mapInstance.off('style.load', addLayers);
-      popupRef.current?.remove();
-      popupRef.current = null;
+    const handleMouseLeave = () => {
       mapInstance.getCanvas().style.cursor = '';
     };
-  }, [isMapLoaded, map]);
+    const attachLayerListeners = () => {
+      if (listenersAttached) return;
+      mapInstance.on('click', FILL_LAYER_ID, handleAirspaceClick);
+      mapInstance.on('mouseenter', FILL_LAYER_ID, handleMouseEnter);
+      mapInstance.on('mouseleave', FILL_LAYER_ID, handleMouseLeave);
+      listenersAttached = true;
+    };
 
-  useEffect(() => {
-    setLayerVisibility(map, isVisible);
-  }, [isVisible, map]);
+    const addLayers = (styleJustLoaded = false) => {
+      if (restoring) return;
+      if (
+        mapInstance.getSource(SOURCE_ID) &&
+        mapInstance.getLayer(FILL_LAYER_ID) &&
+        mapInstance.getLayer(LINE_LAYER_ID)
+      ) {
+        setLayerVisibility(map, true);
+        attachLayerListeners();
+        return;
+      }
+      // style.load allows layer additions before the basemap sources finish loading.
+      // For style diffs and initial setup, retry on styledata/idle once loading settles.
+      if (!styleJustLoaded && !mapInstance.isStyleLoaded()) return;
+      restoring = true;
+      try {
+        if (!mapInstance.getSource(SOURCE_ID)) {
+          mapInstance.addSource(SOURCE_ID, {
+            type: 'geojson',
+            data
+          });
+        }
+
+        if (!mapInstance.getLayer(FILL_LAYER_ID)) {
+          mapInstance.addLayer({
+            id: FILL_LAYER_ID,
+            type: 'fill',
+            source: SOURCE_ID,
+            paint: {
+              'fill-color': AIRSPACE_COLOR_EXPRESSION,
+              'fill-opacity': 0.1
+            }
+          });
+        }
+
+        if (!mapInstance.getLayer(LINE_LAYER_ID)) {
+          mapInstance.addLayer({
+            id: LINE_LAYER_ID,
+            type: 'line',
+            source: SOURCE_ID,
+            paint: {
+              'line-color': AIRSPACE_COLOR_EXPRESSION,
+              'line-width': 1.5,
+              'line-opacity': 0.8
+            }
+          });
+        }
+
+        setLayerVisibility(map, true);
+        attachLayerListeners();
+      } finally {
+        restoring = false;
+      }
+    };
+    const handleStyleLoad = () => {
+      popup?.remove();
+      addLayers(true);
+    };
+    const handleStyleData = () => addLayers();
+
+    mapInstance.on('style.load', handleStyleLoad);
+    mapInstance.on('styledata', handleStyleData);
+    mapInstance.on('idle', handleStyleData);
+    addLayers();
+
+    return () => {
+      if (listenersAttached) {
+        mapInstance.off('click', FILL_LAYER_ID, handleAirspaceClick);
+        mapInstance.off('mouseenter', FILL_LAYER_ID, handleMouseEnter);
+        mapInstance.off('mouseleave', FILL_LAYER_ID, handleMouseLeave);
+      }
+      mapInstance.off('style.load', handleStyleLoad);
+      mapInstance.off('styledata', handleStyleData);
+      mapInstance.off('idle', handleStyleData);
+      popup?.remove();
+      setLayerVisibility(map, false);
+      mapInstance.getCanvas().style.cursor = '';
+    };
+  }, [isMapLoaded, map, isVisible, data]);
+
+  return {
+    isLoading: isVisible && (!isMapLoaded || isFetching),
+    error,
+    retry: () => {
+      void refetch();
+    }
+  };
 }

@@ -49,6 +49,8 @@ export interface AirspaceProperties {
   lower: string | null;
   upperFeet: number | null;
   lowerFeet: number | null;
+  upperDisplay: string | null;
+  lowerDisplay: string | null;
 }
 
 export const AIRSPACE_CLASSES = {
