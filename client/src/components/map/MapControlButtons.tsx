@@ -21,7 +21,10 @@ import {
   ZoomIn,
   ZoomOut,
   Wind,
-  ThermometerIcon
+  ThermometerIcon,
+  LocateOff,
+  Radar,
+  LoaderCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -51,7 +54,7 @@ import {
   getStoredValue
 } from '@/components/map';
 
-import { getButtonStyle, getIconStyle } from '@/lib/utils';
+import { cn, getButtonStyle, getIconStyle } from '@/lib/utils';
 import { useIsMobile } from '@/hooks';
 import { useAppStore, useMapStore } from '@/store';
 
@@ -71,8 +74,9 @@ export function MapControlButtons({
   onSearchSelect,
   onFavouriteSelect,
   onZoomIn,
-  onZoomOut
-}: MapControlHandlers) {
+  onZoomOut,
+  isAirspaceLoading = false
+}: MapControlHandlers & { isAirspaceLoading?: boolean }) {
   const overlay = useMapStore((s) => s.overlay);
   const unit = useMapStore((s) => s.unit);
   const viewMode = useMapStore((s) => s.viewMode);
@@ -83,6 +87,8 @@ export function MapControlButtons({
   const minimizeFavourites = useMapStore((s) => s.minimizeFavourites);
   const toggleWebcams = useMapStore((s) => s.toggleWebcams);
   const toggleSoundings = useMapStore((s) => s.toggleSoundings);
+  const isAirspaceVisible = useMapStore((s) => s.isAirspaceVisible);
+  const toggleAirspace = useMapStore((s) => s.toggleAirspace);
   const setUnit = useMapStore((s) => s.setUnit);
   const setViewMode = useMapStore((s) => s.setViewMode);
   const toggleMinimizeRecents = useMapStore((s) => s.toggleMinimizeRecents);
@@ -558,9 +564,11 @@ export function MapControlButtons({
               onClick={() => setIsLocating(true)}
               className={btnClass}
             >
-              <LocateFixed
-                className={`${iconClass} opacity-70 ${isLocating ? 'animate-ping' : ''}`}
-              />
+              {isLocating ? (
+                <LocateOff className={`${iconClass} opacity-70 animate-ping`} />
+              ) : (
+                <LocateFixed className={`${iconClass} opacity-70`} />
+              )}
             </Button>
           </TooltipTrigger>
           <TooltipContent side="left">Find my location</TooltipContent>
@@ -597,7 +605,7 @@ export function MapControlButtons({
               <Layers className={`${iconClass} opacity-70`} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="left">Switch map layer</TooltipContent>
+          <TooltipContent side="left">Switch to satellite</TooltipContent>
         </Tooltip>
         {!isFlyingMode && (
           <FilterDialog
@@ -608,6 +616,23 @@ export function MapControlButtons({
             viewMode={viewMode}
           />
         )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={isAirspaceVisible ? 'secondary' : 'outline'}
+              size="sm"
+              onClick={toggleAirspace}
+              disabled={isHistoricData}
+              aria-label={isAirspaceVisible ? 'Hide airspace' : 'Show airspace'}
+              aria-pressed={isAirspaceVisible}
+              aria-busy={isAirspaceLoading}
+              className={cn(btnClass, isFlyingMode ? '[&_svg]:size-10!' : '[&_svg]:size-5!')}
+            >
+              {isAirspaceLoading ? <LoaderCircle className="animate-spin" /> : <Radar />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{isAirspaceVisible ? 'Hide' : 'Show'} airspace on map</TooltipContent>
+        </Tooltip>
       </div>
 
       {/* History Slider at bottom */}

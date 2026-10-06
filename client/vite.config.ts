@@ -17,7 +17,7 @@ export default defineConfig({
       // Use the existing manifest.json in public/ rather than generating one
       manifest: false,
       injectManifest: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,geojson}'],
         globIgnores: ['**/Admin*.js', '**/ProtectedRoute*.js'],
         maximumFileSizeToCacheInBytes: 3000000 // 3MB
       }

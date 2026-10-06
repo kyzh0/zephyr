@@ -45,6 +45,7 @@ export function useMapControls({
   const setOverlay = useMapStore((s) => s.setOverlay);
   const setViewMode = useMapStore((s) => s.setViewMode);
   const setHistoryOffset = useMapStore((s) => s.setHistoryOffset);
+  const setIsAirspaceVisible = useMapStore((s) => s.setIsAirspaceVisible);
   const setSelectedSiteDirection = useMapStore((s) => s.setSelectedSiteDirection);
 
   const historyFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -69,6 +70,7 @@ export function useMapControls({
 
       if (enteringHistoryMode) {
         setOverlay(null);
+        setIsAirspaceVisible(false);
         setStationMarkersInteractive(false);
       } else if (exitingHistoryMode) {
         setStationMarkersInteractive(true);
@@ -97,6 +99,7 @@ export function useMapControls({
     [
       setHistoryOffset,
       setOverlay,
+      setIsAirspaceVisible,
       setStationMarkersInteractive,
       renderHistoricalData,
       renderCurrentData
