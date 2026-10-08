@@ -7,6 +7,7 @@ import { isTimestampFresh } from '@/lib/utils';
 
 const LOGIN_URL = 'https://weather.shpg.co.nz/';
 const AJAX_URL = 'https://www.envirodata.co.nz/functions/station_get_ajax.php';
+const SOURCE_UTC_OFFSET = '+12:00'; // always GMT+12
 
 type ShpgVariable = {
   value: string;
@@ -49,7 +50,7 @@ async function fetchVariable(
 
   const timestamp = fromZonedTime(
     parse(data.timestamp, 'yyyy-MM-dd HH:mm:ss', new Date()),
-    'Pacific/Auckland'
+    SOURCE_UTC_OFFSET
   );
 
   if (!isTimestampFresh(timestamp)) {
