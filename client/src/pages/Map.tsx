@@ -3,6 +3,9 @@ import { Outlet } from 'react-router-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import SEO from '@/components/SEO';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
 import { MapControlButtons, MAP_OVERLAYS, MAP_VIEW_MODES } from '@/components/map';
 
 import { useMapStore } from '@/store';
@@ -13,7 +16,8 @@ import {
   useWebcamMarkers,
   useSoundingMarkers,
   useSiteMarkers,
-  useLandingMarkers
+  useLandingMarkers,
+  useAirspaceLayer
 } from '@/hooks/map';
 
 export default function Map() {
@@ -22,6 +26,7 @@ export default function Map() {
   const viewMode = useMapStore((s) => s.viewMode);
   const historyOffset = useMapStore((s) => s.historyOffset);
   const stationElevationFilter = useMapStore((s) => s.stationElevationFilter);
+  const isAirspaceVisible = useMapStore((s) => s.isAirspaceVisible);
   const isHistoricData = historyOffset < 0;
 
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -54,6 +59,12 @@ export default function Map() {
     isMapLoaded: isLoaded,
     isVisible: overlay === MAP_OVERLAYS.SOUNDINGS,
     isHistoricData
+  });
+
+  const airspace = useAirspaceLayer({
+    map,
+    isMapLoaded: isLoaded,
+    isVisible: isAirspaceVisible
   });
 
   const { setTransparent: setLandingTransparent } = useLandingMarkers({
@@ -112,14 +123,51 @@ export default function Map() {
         }}
       />
 
-      {/* Red border overlay when in history mode */}
-      {isHistoricData && (
-        <div className="absolute inset-0 border-4 border-red-500 pointer-events-none z-40" />
+      <div className="relative min-h-0 flex-1">
+        {/* Red border overlay when in history mode */}
+        {isHistoricData && (
+          <div className="absolute inset-0 border-4 border-red-500 pointer-events-none z-40" />
+        )}
+
+        <MapControlButtons {...handlers} isAirspaceLoading={airspace.isLoading} />
+        <div ref={mapContainer} className="h-full w-full" />
+      </div>
+
+      {isAirspaceVisible && (
+        <footer className="shrink-0 border-t bg-background px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] text-xs text-muted-foreground">
+          {airspace.isLoading && (
+            <p role="status" className="mb-2">
+              Loading airspace…
+            </p>
+          )}
+          {airspace.error && !airspace.isLoading && (
+            <Alert variant="destructive" className="mb-2">
+              <AlertCircle />
+              <AlertTitle>Airspace unavailable</AlertTitle>
+              <AlertDescription>
+                <p>Airspace could not be loaded. Check your connection and try again.</p>
+                <Button variant="outline" size="sm" onClick={airspace.retry}>
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          <p>
+            Airspace data is provided without warranty and is not to be construed as constituting
+            part of the official AIP. Always verify current airspace information before flight.{' '}
+            Thanks to{' '}
+            <a
+              href="https://gliding.co.nz/pilots/pilot-resources/airspace-files/"
+              target="_blank"
+              rel="noreferrer"
+              className="underline hover:text-foreground"
+            >
+              Dave Dennison
+            </a>
+            .
+          </p>
+        </footer>
       )}
-
-      <MapControlButtons {...handlers} />
-
-      <div ref={mapContainer} className="w-full h-full" />
       <Outlet />
     </div>
   );

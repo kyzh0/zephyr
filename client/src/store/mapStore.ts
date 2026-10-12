@@ -32,6 +32,7 @@ interface MapStore {
   minimizeRecents: boolean;
   minimizeFavourites: boolean;
   isSatellite: boolean;
+  isAirspaceVisible: boolean;
   // Ephemeral session state
   historyOffset: number;
   stationElevationFilter: [number, number];
@@ -40,6 +41,8 @@ interface MapStore {
   setOverlay: (overlay: MapOverlay) => void;
   toggleWebcams: () => void;
   toggleSoundings: () => void;
+  toggleAirspace: () => void;
+  setIsAirspaceVisible: (value: boolean) => void;
   setUnit: (unit: WindUnit) => void;
   setViewMode: (mode: MapViewMode) => void;
   toggleMinimizeRecents: () => void;
@@ -59,6 +62,7 @@ export const useMapStore = create<MapStore>()(
       minimizeRecents: true,
       minimizeFavourites: true,
       isSatellite: false,
+      isAirspaceVisible: false,
       historyOffset: 0,
       stationElevationFilter: [ELEVATION_FILTER_MIN, ELEVATION_FILTER_MAX],
       selectedSiteDirection: null,
@@ -67,6 +71,8 @@ export const useMapStore = create<MapStore>()(
         set({ overlay: get().overlay === MAP_OVERLAYS.WEBCAMS ? null : MAP_OVERLAYS.WEBCAMS }),
       toggleSoundings: () =>
         set({ overlay: get().overlay === MAP_OVERLAYS.SOUNDINGS ? null : MAP_OVERLAYS.SOUNDINGS }),
+      toggleAirspace: () => set({ isAirspaceVisible: !get().isAirspaceVisible }),
+      setIsAirspaceVisible: (isAirspaceVisible) => set({ isAirspaceVisible }),
       setUnit: (unit) => set({ unit }),
       setViewMode: (viewMode) => set({ viewMode }),
       toggleMinimizeRecents: () =>
@@ -87,7 +93,8 @@ export const useMapStore = create<MapStore>()(
         viewMode: state.viewMode,
         minimizeRecents: state.minimizeRecents,
         minimizeFavourites: state.minimizeFavourites,
-        isSatellite: state.isSatellite
+        isSatellite: state.isSatellite,
+        isAirspaceVisible: state.isAirspaceVisible
       }),
       onRehydrateStorage: () => {
         // TO BE REMOVED - OLD LOCALSTORAGE MIGRATION
@@ -107,6 +114,9 @@ export const useMapStore = create<MapStore>()(
           }
           if (typeof hydratedState.isSatellite !== 'boolean') {
             useMapStore.setState({ isSatellite: false });
+          }
+          if (typeof hydratedState.isAirspaceVisible !== 'boolean') {
+            useMapStore.setState({ isAirspaceVisible: false });
           }
           if (typeof hydratedState.minimizeRecents !== 'boolean') {
             useMapStore.setState({ minimizeRecents: true });
