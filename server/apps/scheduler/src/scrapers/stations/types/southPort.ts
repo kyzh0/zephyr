@@ -67,7 +67,7 @@ export default async function scrapeSouthPortData(stations: WithId<StationAttrs>
     }
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
-  } catch (error) {
+  } catch {
     logger.warn('southport error', { service: 'station', type: 'sp' });
     await processScrapedData(station, null, null, null, null, true);
   }

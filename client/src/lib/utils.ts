@@ -250,6 +250,8 @@ export const getWebcamTypeName = (code: string): string => {
       return 'Summit Road Society';
     case 'riviera':
       return 'Riviera Rentals';
+    case 'seeit':
+      return 'seeit.kiwi';
     default:
       return code.charAt(0).toUpperCase() + code.slice(1);
   }

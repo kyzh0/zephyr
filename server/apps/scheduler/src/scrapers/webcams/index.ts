@@ -12,6 +12,7 @@ import scrapeMetserviceData from './types/metservice';
 import scrapeMtHuttData from './types/mtHutt';
 import scrapeRivieraData from './types/riviera';
 import scrapeQueenstownAirportData from './types/queenstownAirport';
+import scrapeSeeitData from './types/seeit';
 import scrapeSnowgrassData from './types/snowgrass';
 import scrapeSrsData from './types/srs';
 import scrapeTaylorsSurfData from './types/taylorsSurf';
@@ -32,6 +33,7 @@ const scrapers = {
   hutt: scrapeMtHuttData,
   qa: scrapeQueenstownAirportData,
   riviera: scrapeRivieraData,
+  seeit: scrapeSeeitData,
   snowgrass: scrapeSnowgrassData,
   srs: scrapeSrsData,
   ts: scrapeTaylorsSurfData,
