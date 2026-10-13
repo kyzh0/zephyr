@@ -1,15 +1,14 @@
-import { fromZonedTime } from 'date-fns-tz';
-import { parse } from 'date-fns';
-
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 import { isTimestampFresh } from '@/lib/utils';
 
-type SouthPortResponse = {
-  lastReading: string; // "yyyy-MM-dd HH:mm:ss"
-  AveSpeed: number; // kt
-  GustSpeed: number; // kt
-  AveDirection: string | number;
+type SouthPortResponse = [SouthPortData];
+
+type SouthPortData = {
+  validTime_Utc: string;
+  speed_kn: number;
+  gust_kn: number;
+  from_deg: number;
 };
 
 export default async function scrapeSouthPortData(stations: WithId<StationAttrs>[]): Promise<void> {
@@ -24,23 +23,41 @@ export default async function scrapeSouthPortData(stations: WithId<StationAttrs>
     let windBearing: number | null = null;
     const temperature: number | null = null;
 
-    const { data } = await httpClient.get<SouthPortResponse>(
-      'https://southportvendor.marketsouth.co.nz/testAPI/getBaconWindData.php?_=1760437457410'
-    );
+    const DAY_MS = 24 * 60 * 60 * 1000;
 
-    if (data?.lastReading) {
-      const time = fromZonedTime(
-        parse(data.lastReading, 'yyyy-MM-dd HH:mm:ss', new Date()),
-        'Pacific/Auckland'
-      );
+    const toUtcString = (date: number) => {
+      const d = new Date(date);
+      d.setUTCSeconds(0, 0);
+      return d.toISOString();
+    };
+
+    const now = Date.now();
+    const fromDate = toUtcString(now - DAY_MS);
+    const toDate = toUtcString(now + DAY_MS);
+
+    const url = new URL(
+      'https://portweather-public.omcinternational.com/api/datasources/proxy/uid/4puRxBBMk//api/data/transformRecordsFromPackets'
+    );
+    url.searchParams.set('sourcePath', 'NZ/Bluff/Wind/Measured/Beacon2');
+    url.searchParams.set('transformer', 'LatestNoTransform');
+    url.searchParams.set('fromDate_Utc', fromDate);
+    url.searchParams.set('toDate_Utc', toDate);
+    url.searchParams.set('qaStatusesString', 'GOOD_DATA');
+
+    const { data } = await httpClient.get<SouthPortResponse>(url.toString(), {
+      headers: {
+        'x-grafana-org-id': '338'
+      }
+    });
+
+    if (data.length) {
+      const d = data[data.length - 1];
+      const time = new Date(d.validTime_Utc);
 
       if (isTimestampFresh(time)) {
-        windAverage = Math.round(data.AveSpeed * 1.852 * 10) / 10; // kt -> km/h
-        windGust = Math.round(data.GustSpeed * 1.852 * 10) / 10;
-        windBearing = Number(data.AveDirection);
-        if (Number.isNaN(windBearing)) {
-          windBearing = null;
-        }
+        windAverage = Math.round(d.speed_kn * 1.852 * 10) / 10; // kt -> km/h
+        windGust = Math.round(d.gust_kn * 1.852 * 10) / 10;
+        windBearing = Number(d.from_deg);
       } else {
         logger.warn('southport stale data', {
           service: 'station',
@@ -50,7 +67,7 @@ export default async function scrapeSouthPortData(stations: WithId<StationAttrs>
     }
 
     await processScrapedData(station, windAverage, windGust, windBearing, temperature);
-  } catch {
+  } catch (error) {
     logger.warn('southport error', { service: 'station', type: 'sp' });
     await processScrapedData(station, null, null, null, null, true);
   }
