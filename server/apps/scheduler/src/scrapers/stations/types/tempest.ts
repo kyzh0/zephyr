@@ -26,7 +26,7 @@ export default async function scrapeTempestData(stations: WithId<StationAttrs>[]
           let temperature: number | null = null;
 
           const { data } = await httpClient.get<TempestResponse>(
-            `https://swd.weatherflow.com/swd/rest/better_forecast?api_key=${process.env.TEMPEST_KEY}&station_id=${station.externalId}&units_temp=c&units_wind=kph`
+            `https://swd.weatherflow.com/swd/rest/better_forecast?api_key=${process.env.TEMPEST_KEY}&station_id=${station.externalId}&units_temp=c&units_wind=kph&token=${process.env.TEMPEST_TOKEN}`
           );
 
           const cc = data.current_conditions;

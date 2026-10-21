@@ -225,6 +225,7 @@ jobs:
             ATTENTIS_KEY=${{ secrets.ATTENTIS_KEY }}
             WUNDERGROUND_KEY=${{ secrets.WUNDERGROUND_KEY }}
             TEMPEST_KEY=${{ secrets.TEMPEST_KEY }}
+            TEMPEST_TOKEN=${{ secrets.TEMPEST_TOKEN }}
             SOFAROCEAN_KEY=${{ secrets.SOFAROCEAN_KEY }}
 
             HOLFUY_KEY=${{ secrets.HOLFUY_KEY }}
