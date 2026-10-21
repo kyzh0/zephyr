@@ -15,6 +15,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { WindyForecastLink } from '@/components/WindyForecastLink';
 import { WebcamPreview } from '@/components/webcam/WebcamPreview';
 import {
   CurrentConditions,
@@ -255,6 +256,7 @@ export default function Station() {
             <TimeSince date={station.lastUpdate} />
             {')'}
           </p>
+          <WindyForecastLink coordinates={station.location.coordinates} variant="link" />
           {station.type !== 'metservice' && (
             <a
               href={station.externalLink}
