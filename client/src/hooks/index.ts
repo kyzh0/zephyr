@@ -1,4 +1,4 @@
-export { useStationData, type TimeRange } from './useStationData';
+export { useStationData, useStationTrend, type TimeRange } from './useStationData';
 export { useIsMobile } from './useIsMobile';
 export { useIsPortrait } from './useIsPortrait';
 export {

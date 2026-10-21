@@ -162,6 +162,7 @@ export default function GridViewDialog() {
                   key={station.data._id}
                   data={station.data}
                   distance={station.distance}
+                  showTrend
                 />
               ))}
             </div>
