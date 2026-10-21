@@ -1,18 +1,16 @@
 import pLimit from 'p-limit';
-import { fromZonedTime } from 'date-fns-tz';
-import { parse } from 'date-fns';
 
 import { httpClient, logger, type WebcamAttrs, type WithId } from '@zephyr/shared';
 import processScrapedData from '../processScrapedData';
 
-function extractMetadata(html: string): Map<string, { url: string; timestamp: string }> {
-  const result = new Map<string, { url: string; timestamp: string }>();
+function extractMetadata(html: string): Map<string, { url: string; updated: Date }> {
+  const result = new Map<string, { url: string; updated: Date }>();
   const regex =
-    /href="(https:\/\/canterburyglidingclub\.nz\/images\/CGCHdCam(\d)_1\.jpg[^"]*)"[\s\S]*?<strong>([^<]+)<\/strong>/g;
+    /href="(https:\/\/canterburyglidingclub\.nz\/images\/CGCHdCam(\d)_1\.jpg\?v=(\d+))"/g;
   let match: RegExpExecArray | null;
   while ((match = regex.exec(html)) !== null) {
-    const [, url, id, timestamp] = match;
-    result.set(id, { url, timestamp: timestamp.trim() });
+    const [, url, id, epoch] = match;
+    result.set(id, { url, updated: new Date(Number(epoch) * 1000) });
   }
   return result;
 }
@@ -40,12 +38,9 @@ export default async function scrapeCgcData(webcams: WithId<WebcamAttrs>[]): Pro
           let base64: string | null = null;
 
           if (entry) {
-            updated = fromZonedTime(
-              parse(entry.timestamp, 'HH:mm EEE dd-MMM-yyyy', new Date()),
-              'Pacific/Auckland'
-            );
+            updated = entry.updated;
 
-            if (updated && updated > new Date(webcam.lastUpdate)) {
+            if (updated > new Date(webcam.lastUpdate)) {
               const response = await httpClient.get<ArrayBuffer>(entry.url, {
                 responseType: 'arraybuffer'
               });
