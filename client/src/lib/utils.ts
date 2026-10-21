@@ -215,6 +215,8 @@ export const getStationTypeName = (code: string): string => {
       return 'Treble Cone WX';
     case 'nelson':
       return 'Port Nelson';
+    case 'tdc':
+      return 'Tasman District Council';
     case 'envdata':
       return 'Environment Southland';
     default:
