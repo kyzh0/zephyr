@@ -37,7 +37,7 @@ export default async function scrapeHarvestData(webcams: WithId<WebcamAttrs>[]):
           }
 
           await processScrapedData(webcam, updated, base64);
-        } catch {
+        } catch (error) {
           logger.warn(`harvest error - ${webcam.externalId}`, {
             service: 'webcam',
             type: 'harvest'
