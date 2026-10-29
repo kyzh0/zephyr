@@ -38,7 +38,9 @@ function storeToken(
   refresh: string | undefined,
   expiresIn: string | undefined
 ): string {
-  if (!token) throw new Error('missing id token in firebase response');
+  if (!token) {
+    throw new Error('missing id token in firebase response');
+  }
 
   idToken = token;
   refreshToken = refresh ?? refreshToken;
@@ -67,7 +69,9 @@ async function refreshIdToken(): Promise<string> {
 }
 
 async function getToken(): Promise<string> {
-  if (idToken && Date.now() < tokenExpiresAt - REFRESH_MARGIN_MS) return idToken;
+  if (idToken && Date.now() < tokenExpiresAt - REFRESH_MARGIN_MS) {
+    return idToken;
+  }
 
   // share one in-flight request between concurrent stations
   pendingToken ??= (async () => {
