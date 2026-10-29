@@ -162,6 +162,11 @@ function extractFreshHarvestValue(resp: HarvestGetDataResponse): number | null {
   return row.data_value ?? null;
 }
 
+// UTC, formatted as "YYYY-MM-DD HH:mm:ss.000"
+function formatHarvestDate(date: Date): string {
+  return `${date.toISOString().slice(0, 19).replace('T', ' ')}.000`;
+}
+
 async function processHarvestValue(
   sid: string,
   configId: string,
@@ -169,21 +174,9 @@ async function processHarvestValue(
   traceId: string,
   cookie?: string
 ): Promise<number | null> {
-  let date = new Date();
-  let utcYear = date.getUTCFullYear();
-  let utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-  let utcDay = date.getUTCDate().toString().padStart(2, '0');
-  let utcHours = date.getUTCHours().toString().padStart(2, '0');
-  let utcMins = date.getUTCMinutes().toString().padStart(2, '0');
-  const dateTo = `${utcYear}-${utcMonth}-${utcDay}T${utcHours}:${utcMins}:00.000`;
-
-  date = new Date(date.getTime() - 40 * 60 * 1000); // last 40 min
-  utcYear = date.getUTCFullYear();
-  utcMonth = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-  utcDay = date.getUTCDate().toString().padStart(2, '0');
-  utcHours = date.getUTCHours().toString().padStart(2, '0');
-  utcMins = date.getUTCMinutes().toString().padStart(2, '0');
-  const dateFrom = `${utcYear}-${utcMonth}-${utcDay}T${utcHours}:${utcMins}:00.000`;
+  const now = new Date();
+  const dateTo = formatHarvestDate(now);
+  const dateFrom = formatHarvestDate(new Date(now.getTime() - 40 * 60 * 1000)); // last 40 min
 
   try {
     const cfg: { headers: Record<string, string> } = {
@@ -207,9 +200,11 @@ async function processHarvestValue(
     );
 
     const points = extractHarvestGraphPoints(data);
-    if (points?.length) {
-      return points[points.length - 1].data_value ?? null;
+    if (!points?.length) {
+      throw new Error('no data points');
     }
+
+    return points[points.length - 1].data_value ?? null;
   } catch {
     logger.warn(`harvest error data value - ${sid} / ${graphId} / ${traceId}`, {
       service: 'station',
