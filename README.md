@@ -119,6 +119,14 @@ $ npm run dev
 $ npm run build
 ```
 
+The airspace overlay uses `client/public/airspace.txt`. After updating that source, run
+`npm run airspace:build` from `client/`, then commit the regenerated
+`public/airspace.geojson`. The converter preserves declared arc endpoints and reports inconsistent
+arc radii with the airspace name for checking against the source. The bundled NZA941 Dunedin
+definition has a large radius inconsistency that requires verification with the data provider.
+Altitude display text is generated alongside numeric feet values; conditional limits retain their
+original text, and surface and flight-level references remain visible.
+
 ## Contribute
 
 Spotted a bug, or got a new feature in mind? Open a new [issue](https://github.com/kyzh0/zephyr/issues), or even better, fork the repo and submit your own pull request! Any help on open issues is appreciated.

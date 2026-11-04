@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier -w .",
     "preview": "vite preview",
-    "sitemap-update": "node scripts/generate-sitemap.mjs"
+    "sitemap-update": "node scripts/generate-sitemap.mjs",
+    "airspace:build": "node scripts/build-airspace.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
