@@ -198,7 +198,8 @@ router.get(
             item.data.push({
               windAverage: d.windAverage,
               windGust: d.windGust,
-              windBearing: d.windBearing
+              windBearing: d.windBearing,
+              temperature: d.temperature
             });
           }
 
@@ -213,6 +214,7 @@ router.get(
         windAverage?: number | null;
         windGust?: number | null;
         windBearing?: number | null;
+        temperature?: number | null;
       }>;
       validBearings: string | null;
     };
@@ -236,12 +238,18 @@ router.get(
         }
       }
 
+      const temps = d.data.map((d1) => d1.temperature).filter((t): t is number => t != null);
+      const temperature = temps.length
+        ? Math.round((temps.reduce((a, b) => a + b, 0) / temps.length) * 10) / 10
+        : null;
+
       return {
         id: d._id,
         windAverage: average,
         windGust: average == null ? null : (maxGust ?? null),
         windBearing: bearing,
-        validBearings: d.validBearings
+        validBearings: d.validBearings,
+        temperature
       };
     });
 
