@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { formatInTimeZone } from 'date-fns-tz';
 
 import type { ExtendedStationData } from '@/components/station';
+import type { StationData } from '@/models/station-data.model';
 
 import { REFRESH_INTERVAL_MS } from '@/lib/utils';
 import { loadStationData } from '@/services/station.service';
@@ -28,6 +29,40 @@ function filterByTimeRange<T extends { time: Date | string }>(data: T[], hours: 
   const hoursNum = parseInt(hours, 10);
   const cutoffTime = Date.now() - hoursNum * 60 * 60 * 1000;
   return data.filter((d) => new Date(d.time).getTime() >= cutoffTime);
+}
+
+export function useStationTrend(
+  station: Station,
+  enabled: boolean
+): {
+  data: StationData[];
+  isLoading: boolean;
+  error: Error | null;
+} {
+  const TREND_DURATION_MS = 1 * 60 * 60 * 1000; // 1 hour
+
+  const isHighResolution = station.isHighResolution ?? false;
+  const dataQuery = useQuery({
+    queryKey: stationKeys.data(station._id, isHighResolution),
+    queryFn: async () => {
+      const items = await loadStationData(station._id, isHighResolution);
+      return items.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+    },
+    enabled: enabled && !station.isOffline,
+    refetchInterval: REFRESH_INTERVAL_MS,
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
+  });
+
+  const data = useMemo(() => {
+    const cutoff = dataQuery.dataUpdatedAt - TREND_DURATION_MS;
+    return (dataQuery.data ?? []).filter((item) => new Date(item.time).getTime() >= cutoff);
+  }, [dataQuery.data, dataQuery.dataUpdatedAt]);
+
+  return {
+    data,
+    isLoading: dataQuery.isLoading,
+    error: dataQuery.error ?? null
+  };
 }
 
 export function useStationData(
