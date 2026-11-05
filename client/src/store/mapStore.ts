@@ -4,9 +4,11 @@ import { persist } from 'zustand/middleware';
 import {
   ELEVATION_FILTER_MIN,
   ELEVATION_FILTER_MAX,
+  MAP_LAYERS,
   MAP_OVERLAYS,
   MAP_VIEW_MODES,
   WIND_UNITS,
+  type MapLayer,
   type MapOverlay,
   type MapViewMode,
   type WindUnit
@@ -14,6 +16,7 @@ import {
 
 const VALID_OVERLAYS = new Set<string>(Object.values(MAP_OVERLAYS));
 const VALID_UNITS = new Set<string>(Object.values(WIND_UNITS));
+const VALID_LAYERS = new Set<string>(Object.values(MAP_LAYERS));
 const VALID_VIEW_MODES = new Set<string>(Object.values(MAP_VIEW_MODES));
 
 const DEPRECATED_KEYS = [
@@ -31,7 +34,7 @@ interface MapStore {
   viewMode: MapViewMode;
   minimizeRecents: boolean;
   minimizeFavourites: boolean;
-  isSatellite: boolean;
+  mapLayer: MapLayer;
   // Ephemeral session state
   historyOffset: number;
   stationElevationFilter: [number, number];
@@ -44,7 +47,7 @@ interface MapStore {
   setViewMode: (mode: MapViewMode) => void;
   toggleMinimizeRecents: () => void;
   toggleMinimizeFavourites: () => void;
-  setIsSatellite: (value: boolean) => void;
+  setMapLayer: (layer: MapLayer) => void;
   setHistoryOffset: (offset: number) => void;
   setStationElevationFilter: (filter: [number, number]) => void;
   setSelectedSiteDirection: (bearing: number | null) => void;
@@ -58,7 +61,7 @@ export const useMapStore = create<MapStore>()(
       viewMode: MAP_VIEW_MODES.STATIONS,
       minimizeRecents: true,
       minimizeFavourites: true,
-      isSatellite: false,
+      mapLayer: MAP_LAYERS.OUTDOORS,
       historyOffset: 0,
       stationElevationFilter: [ELEVATION_FILTER_MIN, ELEVATION_FILTER_MAX],
       selectedSiteDirection: null,
@@ -73,21 +76,30 @@ export const useMapStore = create<MapStore>()(
         set({ minimizeRecents: !get().minimizeRecents, minimizeFavourites: true }),
       toggleMinimizeFavourites: () =>
         set({ minimizeFavourites: !get().minimizeFavourites, minimizeRecents: true }),
-      setIsSatellite: (isSatellite) => set({ isSatellite }),
+      setMapLayer: (mapLayer) => set({ mapLayer }),
       setHistoryOffset: (historyOffset) => set({ historyOffset }),
       setStationElevationFilter: (stationElevationFilter) => set({ stationElevationFilter }),
       setSelectedSiteDirection: (selectedSiteDirection) => set({ selectedSiteDirection })
     }),
     {
       name: 'zephyr-map',
-      version: 1,
+      version: 2,
+      // v1 stored a boolean isSatellite
+      migrate: (persisted, version) => {
+        const state = persisted as Record<string, unknown>;
+        if (version < 2) {
+          state.mapLayer = state.isSatellite === true ? MAP_LAYERS.SATELLITE : MAP_LAYERS.OUTDOORS;
+          delete state.isSatellite;
+        }
+        return state as unknown as MapStore;
+      },
       partialize: (state) => ({
         overlay: state.overlay,
         unit: state.unit,
         viewMode: state.viewMode,
         minimizeRecents: state.minimizeRecents,
         minimizeFavourites: state.minimizeFavourites,
-        isSatellite: state.isSatellite
+        mapLayer: state.mapLayer
       }),
       onRehydrateStorage: () => {
         // TO BE REMOVED - OLD LOCALSTORAGE MIGRATION
@@ -105,8 +117,8 @@ export const useMapStore = create<MapStore>()(
           if (!VALID_VIEW_MODES.has(hydratedState.viewMode)) {
             useMapStore.setState({ viewMode: MAP_VIEW_MODES.STATIONS });
           }
-          if (typeof hydratedState.isSatellite !== 'boolean') {
-            useMapStore.setState({ isSatellite: false });
+          if (!VALID_LAYERS.has(hydratedState.mapLayer)) {
+            useMapStore.setState({ mapLayer: MAP_LAYERS.OUTDOORS });
           }
           if (typeof hydratedState.minimizeRecents !== 'boolean') {
             useMapStore.setState({ minimizeRecents: true });

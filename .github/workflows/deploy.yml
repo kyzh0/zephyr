@@ -49,6 +49,7 @@ jobs:
         run: |
           echo "VITE_MAPBOX_GL_KEY=${{ secrets.MAPBOX_GL_KEY }}" >> .env
           echo "VITE_MAPBOX_GL_KEY_BACKUP=${{ secrets.MAPBOX_GL_KEY_BACKUP }}" >> .env
+          echo "VITE_LINZ_API_KEY=${{ secrets.LINZ_API_KEY }}" >> .env
           echo "VITE_EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}" >> .env
           echo "VITE_EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}" >> .env
           echo "VITE_EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}" >> .env

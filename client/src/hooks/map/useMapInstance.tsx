@@ -4,6 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { getStoredValue, setStoredValue } from '@/components/map';
 import { useMapStore } from '@/store';
+import { MAP_LAYER_STYLES } from '@/lib/map-styles';
 
 mapboxgl.accessToken = (
   Math.random() > 0.5
@@ -40,9 +41,7 @@ export function useMapInstance({ containerRef }: UseMapInstanceOptions): UseMapI
 
     const container = containerRef.current;
 
-    const initialStyle = useMapStore.getState().isSatellite
-      ? 'mapbox://styles/mapbox/satellite-streets-v11'
-      : 'mapbox://styles/mapbox/outdoors-v11';
+    const initialStyle = MAP_LAYER_STYLES[useMapStore.getState().mapLayer];
 
     map.current = new mapboxgl.Map({
       container,

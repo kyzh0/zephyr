@@ -69,6 +69,13 @@ export const MAP_VIEW_MODES = {
 } as const;
 export type MapViewMode = (typeof MAP_VIEW_MODES)[keyof typeof MAP_VIEW_MODES];
 
+export const MAP_LAYERS = {
+  OUTDOORS: 'outdoors',
+  SATELLITE: 'satellite',
+  LINZ: 'linz'
+} as const;
+export type MapLayer = (typeof MAP_LAYERS)[keyof typeof MAP_LAYERS];
+
 export const SPORTS = {
   PARAGLIDING: 'paragliding',
   HANGGLIDING: 'hanggliding',

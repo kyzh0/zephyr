@@ -1,7 +1,10 @@
 import { useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import type { StyleSpecification } from 'mapbox-gl';
 
 import { useMapStore } from '@/store';
+import { MAP_LAYER_CYCLE, MAP_LAYER_STYLES } from '@/lib/map-styles';
 import { MAP_OVERLAYS, MAP_VIEW_MODES } from '@/components/map/map.types';
 import type { MapControlHandlers, SearchResult, Favourite } from '@/components/map/map.types';
 
@@ -18,7 +21,7 @@ function getSnapshotTime(offset: number): Date {
 
 export interface UseMapControlsParams {
   map: React.RefObject<{
-    setStyle: (style: string) => void;
+    setStyle: (style: StyleSpecification | string) => void;
     zoomIn: () => void;
     zoomOut: () => void;
   } | null>;
@@ -51,14 +54,12 @@ export function useMapControls({
 
   const onLayerToggle = useCallback(() => {
     if (!map.current) return;
-    const { isSatellite, setIsSatellite } = useMapStore.getState();
-    const newValue = !isSatellite;
-    setIsSatellite(newValue);
-    map.current.setStyle(
-      newValue
-        ? 'mapbox://styles/mapbox/satellite-streets-v11'
-        : 'mapbox://styles/mapbox/outdoors-v11'
-    );
+    const { mapLayer, setMapLayer } = useMapStore.getState();
+    const current = MAP_LAYER_CYCLE.findIndex((l) => l.layer === mapLayer);
+    const next = MAP_LAYER_CYCLE[(current + 1) % MAP_LAYER_CYCLE.length];
+    setMapLayer(next.layer);
+    map.current.setStyle(MAP_LAYER_STYLES[next.layer]);
+    toast.info(`Map layer: ${next.label}`);
   }, [map]);
 
   const onHistoryChange = useCallback(
