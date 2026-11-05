@@ -56,7 +56,7 @@ export function WindTrendSparkline({ data }: WindTrendSparklineProps) {
   return (
     <svg
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 h-full w-full opacity-75"
+      className="pointer-events-none absolute inset-0 h-full w-full opacity-50"
       preserveAspectRatio="none"
       viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
     >
