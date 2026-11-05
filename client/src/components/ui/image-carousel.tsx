@@ -26,6 +26,10 @@ interface Props {
   alt?: string;
 }
 
+/** Dialog classes for intrinsic mode: horizontal padding and vertical chrome (title, slider, link). */
+export const DIALOG_SIZING_VARS =
+  '[--dialog-pad:1rem] sm:[--dialog-pad:3rem] [--dialog-chrome:9rem] sm:[--dialog-chrome:11rem]';
+
 export function ImageCarousel({
   images,
   initialIndex = 0,
@@ -169,13 +173,14 @@ export function ImageCarousel({
   // dialog pops to its final size in one step.
   if (measuredAR === null) return null;
 
-  const dims: CSSProperties = { width: '100%', aspectRatio: measuredAR };
+  // Width = smaller of available width (portrait) and available height * AR (landscape).
+  const dims: CSSProperties = {
+    width: `min(calc(95vw - var(--dialog-pad)), calc((95dvh - var(--dialog-chrome)) * ${measuredAR}))`,
+    aspectRatio: measuredAR
+  };
 
   return (
-    <div
-      className="flex flex-col gap-2"
-      style={isPortrait ? { width: '100%' } : { width: dims.width }}
-    >
+    <div className="flex flex-col gap-2" style={{ width: dims.width }}>
       <Carousel
         setApi={setApi}
         opts={carouselOpts}

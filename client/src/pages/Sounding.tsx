@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { ImageCarousel } from '@/components/ui/image-carousel';
+import { ImageCarousel, DIALOG_SIZING_VARS } from '@/components/ui/image-carousel';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { ApiError } from '@/services/api-error';
@@ -65,9 +65,7 @@ export default function Sounding() {
         />
       )}
       <DialogContent
-        className={`${
-          isPortrait ? 'w-[95vw]' : 'w-fit'
-        } max-w-[95vw] max-h-[95vh] p-2 sm:p-6 gap-2 flex flex-col focus:outline-none`}
+        className={`w-fit max-w-[95vw] sm:max-w-[95vw] max-h-[95dvh] p-2 sm:p-6 gap-2 flex flex-col focus:outline-none ${DIALOG_SIZING_VARS}`}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
