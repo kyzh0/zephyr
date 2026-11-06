@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { WindyForecastLink } from '@/components/WindyForecastLink';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -152,6 +153,8 @@ export default function Site() {
               </AlertDescription>
             </Alert>
           )}
+
+          <WindyForecastLink coordinates={site.location.coordinates} variant="button" />
 
           {/* Landing */}
           {site.landings && site.landings.length > 0 && (
