@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Bell, Camera, Grid3X3, Wind } from 'lucide-react';
+import { Bell, Camera, Grid3X3, Radar, Wind } from 'lucide-react';
 
 import { useAppStore } from '@/store';
 
@@ -158,6 +158,13 @@ export default function HelpDialog() {
               </svg>
             </div>
             <div className="flex items-center">RASP Skew-T soundings</div>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-4 h-7 sm:h-8">
+            <div className="flex justify-center items-center w-10 shrink-0">
+              <Radar className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div className="flex items-center">Airspace</div>
           </div>
         </div>
 

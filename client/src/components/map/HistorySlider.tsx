@@ -57,7 +57,7 @@ export function HistorySlider({
 
   const snapshotTime = getSnapshotTime(historyOffset);
   return (
-    <div className="fixed inset-x-0 bottom-4 z-100 flex justify-center w-full px-4">
+    <div className="fixed inset-x-0 bottom-2 z-100 flex justify-center w-full px-4">
       <div className="flex items-center gap-2 bg-red-100 border-2 border-red-500 px-4 pt-3 pb-2 rounded-lg shadow-lg">
         <div className="flex flex-col gap-2">
           {/* Slider */}

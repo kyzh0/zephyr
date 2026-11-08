@@ -144,6 +144,20 @@
   padding: 10px !important;
 }
 
+.mapboxgl-popup.airspace-popup .mapboxgl-popup-content {
+  max-width: min(400px, 70vw);
+  max-height: min(480px, 60dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 30px !important;
+}
+.mapboxgl-popup-close-button {
+  top: 5px !important;
+  right: 5px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
 .mapboxgl-popup-tip {
   border-width: 6px !important;
 }
