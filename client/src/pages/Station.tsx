@@ -15,6 +15,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { WindyForecastLink } from '@/components/WindyForecastLink';
 import { WebcamPreview } from '@/components/webcam/WebcamPreview';
 import {
   CurrentConditions,
@@ -248,13 +249,14 @@ export default function Station() {
 
       {/* Footer */}
       {station && (
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex flex-col md:flex-row items-center justify-between pt-2 gap-2">
           <p className="text-xs sm:text-sm text-muted-foreground">
             Updated {formatInTimeZone(new Date(station.lastUpdate), 'Pacific/Auckland', 'HH:mm')}
             {' ('}
             <TimeSince date={station.lastUpdate} />
             {')'}
           </p>
+          <WindyForecastLink coordinates={station.location.coordinates} variant="link" />
           {station.type !== 'metservice' && (
             <a
               href={station.externalLink}

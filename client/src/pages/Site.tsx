@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   AlertCircleIcon,
@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { WindyForecastLink } from '@/components/WindyForecastLink';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -153,6 +154,8 @@ export default function Site() {
             </Alert>
           )}
 
+          <WindyForecastLink coordinates={site.location.coordinates} variant="item" />
+
           {/* Landing */}
           {site.landings && site.landings.length > 0 && (
             <div className="flex flex-wrap gap-2">
@@ -164,10 +167,7 @@ export default function Site() {
                   asChild
                   className="py-2 flex-1 basis-1/3 sm:basis-1/4 min-w-0"
                 >
-                  <a
-                    className="cursor-pointer"
-                    onClick={() => navigate(`/landings/${l.landingId}`)}
-                  >
+                  <Link to={`/landings/${l.landingId}`}>
                     <ItemMedia>
                       <PlaneLanding className="h-4 w-4" />
                     </ItemMedia>
@@ -177,7 +177,7 @@ export default function Site() {
                     <ItemActions>
                       <ChevronRightIcon className="size-4" />
                     </ItemActions>
-                  </a>
+                  </Link>
                 </Item>
               ))}
             </div>
