@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   AlertCircleIcon,
@@ -160,28 +160,13 @@ export default function Site() {
           {site.landings && site.landings.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {site.landings.map((l) => (
-                <Item
-                  key={l.landingId}
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  className="py-2 flex-1 basis-1/3 sm:basis-1/4 min-w-0"
-                >
-                  <a
-                    className="cursor-pointer"
-                    onClick={() => navigate(`/landings/${l.landingId}`)}
-                  >
-                    <ItemMedia>
-                      <PlaneLanding className="h-4 w-4" />
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle>{l.landingName}</ItemTitle>
-                    </ItemContent>
-                    <ItemActions>
-                      <ChevronRightIcon className="size-4" />
-                    </ItemActions>
-                  </a>
-                </Item>
+                <Button key={l.landingId} asChild variant="outline" size="sm" className="w-full">
+                  <Link to={`/landings/${l.landingId}`}>
+                    <PlaneLanding data-icon="inline-start" />
+                    <span className="min-w-0 truncate">{l.landingName}</span>
+                    <ChevronRightIcon data-icon="inline-end" />
+                  </Link>
+                </Button>
               ))}
             </div>
           )}

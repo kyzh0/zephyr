@@ -249,7 +249,7 @@ export default function Station() {
 
       {/* Footer */}
       {station && (
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex flex-col md:flex-row items-center justify-between pt-2 gap-2">
           <p className="text-xs sm:text-sm text-muted-foreground">
             Updated {formatInTimeZone(new Date(station.lastUpdate), 'Pacific/Auckland', 'HH:mm')}
             {' ('}
