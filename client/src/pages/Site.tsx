@@ -154,19 +154,31 @@ export default function Site() {
             </Alert>
           )}
 
-          <WindyForecastLink coordinates={site.location.coordinates} variant="button" />
+          <WindyForecastLink coordinates={site.location.coordinates} variant="item" />
 
           {/* Landing */}
           {site.landings && site.landings.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {site.landings.map((l) => (
-                <Button key={l.landingId} asChild variant="outline" size="sm" className="w-full">
+                <Item
+                  key={l.landingId}
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="py-2 flex-1 basis-1/3 sm:basis-1/4 min-w-0"
+                >
                   <Link to={`/landings/${l.landingId}`}>
-                    <PlaneLanding data-icon="inline-start" />
-                    <span className="min-w-0 truncate">{l.landingName}</span>
-                    <ChevronRightIcon data-icon="inline-end" />
+                    <ItemMedia>
+                      <PlaneLanding className="h-4 w-4" />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{l.landingName}</ItemTitle>
+                    </ItemContent>
+                    <ItemActions>
+                      <ChevronRightIcon className="size-4" />
+                    </ItemActions>
                   </Link>
-                </Button>
+                </Item>
               ))}
             </div>
           )}

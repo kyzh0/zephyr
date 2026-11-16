@@ -1,13 +1,13 @@
-import { ExternalLink } from 'lucide-react';
+import { ChevronRightIcon, ExternalLink } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Item, ItemActions, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
 
 export function WindyForecastLink({
   coordinates,
   variant
 }: {
   coordinates: [number, number];
-  variant: 'link' | 'button';
+  variant: 'link' | 'item';
 }) {
   const [longitude, latitude] = coordinates;
 
@@ -15,17 +15,24 @@ export function WindyForecastLink({
     return null;
   }
 
-  return variant === 'button' ? (
-    <Button asChild variant="outline" className="w-full">
+  return variant === 'item' ? (
+    <Item asChild variant="outline" size="sm" className="w-full py-2">
       <a
         href={`https://www.windy.com/${latitude}/${longitude}/wind`}
         target="_blank"
         rel="noopener noreferrer"
       >
-        <ExternalLink data-icon="inline-start" />
-        View forecast on Windy
+        <ItemMedia>
+          <ExternalLink className="h-4 w-4" />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>View forecast on Windy</ItemTitle>
+        </ItemContent>
+        <ItemActions>
+          <ChevronRightIcon className="size-4" />
+        </ItemActions>
       </a>
-    </Button>
+    </Item>
   ) : (
     <a
       href={`https://www.windy.com/${latitude}/${longitude}/wind`}
