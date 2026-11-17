@@ -38,9 +38,10 @@ export function WindyForecastLink({
       href={`https://www.windy.com/${latitude}/${longitude}/wind`}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-xs sm:text-sm text-muted-foreground hover:underline"
+      title="View forecast on Windy"
+      aria-label="View forecast on Windy"
     >
-      View forecast on Windy
+      <img src="/windy.png" alt="Windy" className="h-4 w-4" />
     </a>
   );
 }
