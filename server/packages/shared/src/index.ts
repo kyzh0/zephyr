@@ -18,5 +18,6 @@ export * from './models/stationDataModel';
 export * from './models/stationModel';
 export * from './models/userModel';
 export * from './models/pushSubscriptionModel';
+export * from './models/pushReadingModel';
 
 export * from './types/mongoose';

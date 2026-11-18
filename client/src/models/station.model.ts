@@ -63,5 +63,6 @@ export const STATION_TYPES = [
   { value: 'wow', label: 'Met Office WOW' },
   { value: 'windguru', label: 'Windguru' },
   { value: 'windy', label: 'Windy' },
-  { value: 'wl', label: 'Weatherlink' }
+  { value: 'wl', label: 'Weatherlink' },
+  { value: 'push', label: 'Push (direct ingest)' }
 ] as const;

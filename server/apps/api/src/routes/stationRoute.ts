@@ -8,6 +8,7 @@ import {
   StationData,
   User,
   calculateWindAverage,
+  generateIngestKey,
   logger
 } from '@zephyr/shared';
 
@@ -134,6 +135,11 @@ router.post(
 
     if (validBearings) {
       station.validBearings = validBearings;
+    }
+
+    // push stations are always aggregated into 2 min buckets
+    if (type === 'push') {
+      station.isHighResolution = true;
     }
 
     if (harvestWindAverageId) {
@@ -343,6 +349,47 @@ router.patch(
     } catch {
       res.status(400).send();
     }
+  }
+);
+
+// generate (or rotate) the ingest key for a push station.
+// the plaintext key is only ever returned here, just the hash is stored.
+router.post(
+  '/:id/ingest-key',
+  async (req: Request<IdParams, unknown, unknown, ApiKeyQuery>, res: Response) => {
+    const { id } = req.params;
+
+    const user = await User.findOne({ key: req.query.key }).lean();
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
+
+    if (!ObjectId.isValid(id)) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const station = await Station.findOne({ _id: new ObjectId(id) }).lean();
+    if (!station) {
+      res.sendStatus(404);
+      return;
+    }
+    if (station.type !== 'push') {
+      res.status(400).send('Station must be saved with type "push" first');
+      return;
+    }
+
+    const { key, hash } = generateIngestKey();
+
+    // deliberately leaves __v alone so an open edit form doesn't conflict
+    await Station.updateOne({ _id: station._id }, { $set: { ingestKeyHash: hash } });
+
+    logger.info(`Ingest key generated for station ${id} by ${user.username}`, {
+      service: 'admin'
+    });
+
+    res.json({ key });
   }
 );
 
