@@ -9,7 +9,7 @@ export default async function scrapeTaylorsSurfData(webcams: WithId<WebcamAttrs>
 
   try {
     const response = await httpClient.get<ArrayBuffer>(
-      'https://stream.webmad.co.nz/shots/taylorssouth2.jpg',
+      'https://stream.webmad.co.nz/shots/taylorssouth.jpg',
       { responseType: 'arraybuffer' }
     );
 
