@@ -5,6 +5,7 @@ import scrapeAucklandCouncilData from './types/aucklandCouncil';
 import scrapeCwuData from './types/cwu';
 import scrapeCentrePortData from './types/centrePort';
 import scrapeEnvdataData from './types/envdata';
+import scrapeEnvirolapseData from './types/envirolapse';
 import scrapeGreaterWellingtonData from './types/greaterWellington';
 import scrapeGuildfordData from './types/guildford';
 import scrapeHarvestData from './types/harvest';
@@ -51,6 +52,7 @@ const scrapers = {
   cwu: scrapeCwuData,
   cp: scrapeCentrePortData,
   envdata: scrapeEnvdataData,
+  envirolapse: scrapeEnvirolapseData,
   gw: scrapeGreaterWellingtonData,
   guildford: scrapeGuildfordData,
   harvest: scrapeHarvestData,

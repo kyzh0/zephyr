@@ -299,6 +299,7 @@ export async function checkForErrors(): Promise<void> {
         'napier',
         'nelson',
         'envdata',
+        'envirolapse',
         'push'
       ];
 
