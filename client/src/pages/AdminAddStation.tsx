@@ -88,7 +88,8 @@ const formSchema = z.discriminatedUnion('type', [
       'wow',
       'windguru',
       'windy',
-      'wp'
+      'wp',
+      'push'
     ])
   })
 ]);

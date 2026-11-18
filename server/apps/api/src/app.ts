@@ -12,6 +12,7 @@ import stationRoute from './routes/stationRoute';
 import donationRoute from './routes/donationRoute';
 import pushRoute from './routes/pushRoute';
 import clientRoute from './routes/clientRoute';
+import ingestRoute from './routes/ingestRoute';
 
 const { NODE_ENV } = process.env;
 if (NODE_ENV !== 'production' && NODE_ENV !== 'staging') {
@@ -40,6 +41,7 @@ app.use('/stations', stationRoute);
 app.use('/donations', donationRoute);
 app.use('/push', pushRoute);
 app.use('/clients', clientRoute);
+app.use('/ingest', ingestRoute);
 
 // proxy for opentopodata elevation lookup
 app.get('/elevation', async (req, res) => {

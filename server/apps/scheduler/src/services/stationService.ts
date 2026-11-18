@@ -298,7 +298,8 @@ export async function checkForErrors(): Promise<void> {
         'shpg',
         'napier',
         'nelson',
-        'envdata'
+        'envdata',
+        'push'
       ];
 
       for (const [key, value] of Object.entries(g)) {

@@ -14,7 +14,8 @@ export default async function processScrapedData(
   windGust: number | null,
   windBearing: number | null,
   temperature: number | null,
-  suppressLog?: boolean
+  suppressLog?: boolean,
+  time?: Date
 ): Promise<void> {
   const data = validateStationData(
     windAverage ?? null,
@@ -25,7 +26,7 @@ export default async function processScrapedData(
 
   // add data
   const d = new StationData({
-    time: getFlooredTime(station.isHighResolution ? 2 : 10),
+    time: time ?? getFlooredTime(station.isHighResolution ? 2 : 10),
     windAverage: data.windAverage ?? null,
     windGust: data.windGust ?? null,
     windBearing: data.windBearing ?? null,

@@ -259,7 +259,7 @@ export default function Station() {
             </p>
             <WindyForecastLink coordinates={station.location.coordinates} variant="link" />
           </div>
-          {station.type !== 'metservice' && (
+          {station.type !== 'metservice' && station.type !== 'push' && (
             <a
               href={station.externalLink}
               target="_blank"

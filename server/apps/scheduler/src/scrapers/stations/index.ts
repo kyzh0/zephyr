@@ -25,6 +25,7 @@ import scrapePortNapierData from './types/portNapier';
 import scrapePortNelsonData from './types/portNelson';
 import scrapePredictWindData from './types/predictWind';
 import scrapePrimePortData from './types/primePort';
+import scrapePushData from './types/push';
 import scrapeShpgData from './types/shpg';
 import scrapeSofarOceanData from './types/sofarOcean';
 import scrapeSouthPortData from './types/southPort';
@@ -70,6 +71,7 @@ const scrapers = {
   po: scrapePortOtagoData,
   pw: scrapePredictWindData,
   prime: scrapePrimePortData,
+  push: scrapePushData,
   sfo: scrapeSofarOceanData,
   shpg: scrapeShpgData,
   sp: scrapeSouthPortData,

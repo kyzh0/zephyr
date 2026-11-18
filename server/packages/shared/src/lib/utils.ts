@@ -1,3 +1,10 @@
+import { createHash } from 'node:crypto';
+
+// ingest keys are stored as sha256 hex digests, never in plaintext
+export function hashIngestKey(key: string): string {
+  return createHash('sha256').update(key).digest('hex');
+}
+
 export function calculateWindAverage(
   readings: { windAverage?: number | null; windBearing?: number | null }[]
 ): { average: number | null; bearing: number | null } {

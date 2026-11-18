@@ -38,6 +38,8 @@ export type StationAttrs = {
   gwTemperatureFieldName?: string;
 
   weatherlinkCookie?: string;
+
+  ingestKeyHash?: string;
 };
 
 export type StationDoc = HydratedDocument<StationAttrs>;
@@ -86,7 +88,10 @@ const stationSchema = new mongoose.Schema<StationAttrs>(
     gwWindBearingFieldName: { type: String },
     gwTemperatureFieldName: { type: String },
 
-    weatherlinkCookie: { type: String }
+    weatherlinkCookie: { type: String },
+
+    // excluded by default so it never leaks through the public station routes
+    ingestKeyHash: { type: String, select: false }
   },
   {
     optimisticConcurrency: true
