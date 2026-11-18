@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Copy, KeyRound, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import {
@@ -17,6 +17,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,7 +40,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
-import { useStation, useUpdateStation, useDeleteStation } from '@/hooks';
+import { useStation, useUpdateStation, useDeleteStation, useGenerateIngestKey } from '@/hooks';
 import type { Station } from '@/models/station.model';
 import { lookupElevation } from '@/lib/utils';
 import { ApiError } from '@/services/api-error';
@@ -255,13 +263,109 @@ export default function AdminEditStation() {
         {isLoading || !station ? (
           <div className="text-muted-foreground">Loading...</div>
         ) : (
-          <StationForm
-            station={station}
-            onSubmit={handleSubmit}
-            isPending={updateMutation.isPending}
-          />
+          <>
+            <StationForm
+              station={station}
+              onSubmit={handleSubmit}
+              isPending={updateMutation.isPending}
+            />
+            {station.type === 'push' && <PushIngestionSection stationId={station._id} />}
+          </>
         )}
       </main>
+    </div>
+  );
+}
+
+function PushIngestionSection({ stationId }: { stationId: string }) {
+  const generateMutation = useGenerateIngestKey();
+  const [key, setKey] = useState<string | null>(null);
+
+  const endpoint = `${import.meta.env.VITE_API_PREFIX}/ingest/stations/${stationId}`;
+
+  function handleGenerate() {
+    generateMutation.mutate(stationId, {
+      onSuccess: setKey,
+      onError: (error) => {
+        const msg = error instanceof ApiError ? error.message : 'Unknown error';
+        toast.error('Failed to generate key: ' + msg);
+      }
+    });
+  }
+
+  function handleCopy() {
+    if (!key) return;
+    navigator.clipboard.writeText(`Endpoint: ${endpoint}\nKey: ${key}`);
+    toast.success('Endpoint and key copied to clipboard');
+  }
+
+  return (
+    <div className="max-w-2xl mt-6 space-y-4 rounded-lg border p-4">
+      <div>
+        <h2 className="text-lg font-medium">Push Ingestion</h2>
+        <p className="text-sm text-muted-foreground">
+          The station owner sends readings to this endpoint using a secret key. Keys are only shown
+          once, generate a new one if it's lost or leaked.
+        </p>
+      </div>
+
+      <Input readOnly value={endpoint} className="font-mono text-xs" />
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button type="button" variant="outline" disabled={generateMutation.isPending}>
+            {generateMutation.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <KeyRound className="h-4 w-4 mr-2" />
+            )}
+            Generate new key
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Generate new ingest key</AlertDialogTitle>
+            <AlertDialogDescription>
+              Any existing key for this station stops working immediately. The station won't receive
+              data until the owner updates their device with the new key.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction type="button" onClick={handleGenerate}>
+              Generate
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={key != null} onOpenChange={(open) => !open && setKey(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New ingest key</DialogTitle>
+            <DialogDescription>
+              Copy this now and send it to the station owner privately. It can't be shown again.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Endpoint</p>
+            <Input readOnly value={endpoint} className="font-mono text-xs" />
+            <p className="text-sm font-medium">Key</p>
+            <Input
+              readOnly
+              value={key ?? ''}
+              className="font-mono text-xs"
+              onFocus={(e) => e.target.select()}
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" onClick={handleCopy}>
+              <Copy className="h-4 w-4 mr-2" />
+              Copy endpoint and key
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

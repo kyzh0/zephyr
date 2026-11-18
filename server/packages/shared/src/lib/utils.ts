@@ -1,8 +1,13 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 
 // ingest keys are stored as sha256 hex digests, never in plaintext
 export function hashIngestKey(key: string): string {
   return createHash('sha256').update(key).digest('hex');
+}
+
+export function generateIngestKey(): { key: string; hash: string } {
+  const key = randomBytes(32).toString('base64url');
+  return { key, hash: hashIngestKey(key) };
 }
 
 export function calculateWindAverage(

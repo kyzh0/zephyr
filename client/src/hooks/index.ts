@@ -30,7 +30,8 @@ export {
   useStations,
   useAddStation,
   useUpdateStation,
-  useDeleteStation
+  useDeleteStation,
+  useGenerateIngestKey
 } from './useStations';
 export {
   donationKeys,

@@ -4,6 +4,7 @@ import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/reac
 import {
   addStation,
   deleteStation,
+  generateIngestKey,
   getStationById,
   listStations,
   patchStation
@@ -86,6 +87,11 @@ export function useUpdateStation() {
       queryClient.invalidateQueries({ queryKey: stationKeys.detail(id) });
     }
   });
+}
+
+// nothing to invalidate, the key hash is never returned by the station queries
+export function useGenerateIngestKey() {
+  return useMutation({ mutationFn: generateIngestKey });
 }
 
 export function useDeleteStation() {

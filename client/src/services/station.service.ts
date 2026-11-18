@@ -73,6 +73,17 @@ export async function patchStation(id: string, updates: Partial<Station>): Promi
   await throwIfNotOk(res);
 }
 
+export async function generateIngestKey(id: string): Promise<string> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_PREFIX}/stations/${id}/ingest-key?${getKeyQueryThrowIfInvalid()}`,
+    {
+      method: 'POST'
+    }
+  );
+  await throwIfNotOk(res);
+  return ((await res.json()) as { key: string }).key;
+}
+
 export async function deleteStation(id: string): Promise<void> {
   const res = await fetch(
     `${import.meta.env.VITE_API_PREFIX}/stations/${id}?${getKeyQueryThrowIfInvalid()}`,

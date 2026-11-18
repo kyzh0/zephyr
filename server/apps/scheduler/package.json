@@ -10,8 +10,7 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "clean": "rm -rf dist",
-    "scrape": "tsx src/scripts/scrape.ts",
-    "ingest-key": "tsx src/scripts/ingestKey.ts"
+    "scrape": "tsx src/scripts/scrape.ts"
   },
   "dependencies": {
     "@google/genai": "^1.45.0",
