@@ -1,3 +1,4 @@
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import pLimit from 'p-limit';
 
 import { httpClient, logger, type StationAttrs, type WithId } from '@zephyr/shared';
@@ -15,6 +16,10 @@ type WindGuruResponse = {
 export default async function scrapeWindGuruData(stations: WithId<StationAttrs>[]): Promise<void> {
   const limit = pLimit(5);
 
+  const proxyAgent = process.env.WINDGURU_PROXY
+    ? new HttpsProxyAgent(process.env.WINDGURU_PROXY)
+    : undefined;
+
   await Promise.allSettled(
     stations.map((station) =>
       limit(async () => {
@@ -29,7 +34,8 @@ export default async function scrapeWindGuruData(stations: WithId<StationAttrs>[
             {
               headers: {
                 Referer: `https://www.windguru.cz/station/${station.externalId}`
-              }
+              },
+              ...(proxyAgent && { httpsAgent: proxyAgent, proxy: false })
             }
           );
 

@@ -230,6 +230,7 @@ jobs:
             HOLFUY_KEY=${{ secrets.HOLFUY_KEY }}
             HARVEST_FENZ_KEY=${{ secrets.HARVEST_FENZ_KEY }}
             WINDGURU_KEY=${{ secrets.WINDGURU_KEY }}
+            WINDGURU_PROXY=${{ secrets.WINDGURU_PROXY }}
             HARVEST_REALJOURNEYS_USERNAME=${{ secrets.HARVEST_REALJOURNEYS_USERNAME }}
             HARVEST_REALJOURNEYS_PASSWORD=${{ secrets.HARVEST_REALJOURNEYS_PASSWORD }}
 
